@@ -61,7 +61,7 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -100,7 +100,7 @@ HYPRE_Int
 HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -109,7 +109,7 @@ HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
    secret = (Secret *) solver;
    hypre_ParaSailsDestroy(secret->obj);
 
-   hypre_TFree(secret,HYPRE_MEMORY_HOST);
+   hypre_TFree(secret, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 #endif
@@ -128,7 +128,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
                             HYPRE_ParVector x      )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -174,7 +174,7 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
                             HYPRE_ParVector x     )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -201,7 +201,7 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
                                HYPRE_Int    nlevels )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -224,7 +224,7 @@ HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
                                HYPRE_Real   filter  )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -241,7 +241,7 @@ HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver,
                                HYPRE_Real * filter  )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -263,7 +263,7 @@ HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
                             HYPRE_Int    sym     )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -284,7 +284,7 @@ HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
                                 HYPRE_Real   loadbal )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -301,7 +301,7 @@ HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver,
                                 HYPRE_Real * loadbal )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -322,7 +322,7 @@ HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
                               HYPRE_Int    reuse   )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -343,7 +343,7 @@ HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
                                 HYPRE_Int    logging )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -371,7 +371,7 @@ HYPRE_Int
 HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -410,7 +410,7 @@ HYPRE_Int
 HYPRE_ParaSailsDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -419,7 +419,7 @@ HYPRE_ParaSailsDestroy( HYPRE_Solver solver )
    secret = (Secret *) solver;
    hypre_ParaSailsDestroy(secret->obj);
 
-   hypre_TFree(secret,HYPRE_MEMORY_HOST);
+   hypre_TFree(secret, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 #endif
@@ -438,7 +438,7 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
                       HYPRE_ParVector x     )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -485,7 +485,7 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
                       HYPRE_ParVector x     )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -512,7 +512,7 @@ HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
                          HYPRE_Int    nlevels )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -536,7 +536,7 @@ HYPRE_ParaSailsSetThresh( HYPRE_Solver solver,
                           HYPRE_Real   thresh )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -553,7 +553,7 @@ HYPRE_ParaSailsGetThresh( HYPRE_Solver solver,
                           HYPRE_Real * thresh )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -576,7 +576,7 @@ HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver,
                            HYPRE_Int    nlevels )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -593,7 +593,7 @@ HYPRE_ParaSailsGetNlevels( HYPRE_Solver solver,
                            HYPRE_Int  * nlevels )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -615,7 +615,7 @@ HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
                          HYPRE_Real   filter  )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -632,7 +632,7 @@ HYPRE_ParaSailsGetFilter(HYPRE_Solver solver,
                          HYPRE_Real * filter  )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -655,7 +655,7 @@ HYPRE_ParaSailsSetSym(HYPRE_Solver solver,
                       HYPRE_Int    sym     )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -672,7 +672,7 @@ HYPRE_ParaSailsGetSym(HYPRE_Solver solver,
                       HYPRE_Int  * sym     )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -693,7 +693,7 @@ HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver,
                           HYPRE_Real   loadbal )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -710,7 +710,7 @@ HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver,
                           HYPRE_Real * loadbal )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -732,7 +732,7 @@ HYPRE_ParaSailsSetReuse(HYPRE_Solver solver,
                         HYPRE_Int    reuse   )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -749,7 +749,7 @@ HYPRE_ParaSailsGetReuse(HYPRE_Solver solver,
                         HYPRE_Int  * reuse   )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -770,7 +770,7 @@ HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
                           HYPRE_Int    logging )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -787,7 +787,7 @@ HYPRE_ParaSailsGetLogging(HYPRE_Solver solver,
                           HYPRE_Int  * logging )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -806,7 +806,7 @@ HYPRE_Int
 HYPRE_ParaSailsBuildIJMatrix(HYPRE_Solver solver, HYPRE_IJMatrix *pij_A)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ParaSails not usable in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails not usable in mixedint mode!");
    return hypre_error_flag;
 #else
 

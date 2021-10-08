@@ -28,7 +28,7 @@ new_format( const char *format,
    HYPRE_Int   copychar;
    HYPRE_Int   foundpercent = 0;
 
-   newformatlen = 2*strlen(format)+1; /* worst case is all %d's to %lld's */
+   newformatlen = 2 * strlen(format) + 1; /* worst case is all %d's to %lld's */
    newformat = hypre_TAlloc(char,  newformatlen, HYPRE_MEMORY_HOST);
 
    nfp = newformat;

@@ -42,7 +42,7 @@ hypre_spgemm_hash_insert_attempt( HYPRE_Int      HashSize,      /* capacity of t
       }
 
       /* try to insert key+1 into slot j */
-      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys+j), -1, key);
+      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 
       if (old == -1 || old == key)
       {
@@ -55,7 +55,7 @@ hypre_spgemm_hash_insert_attempt( HYPRE_Int      HashSize,      /* capacity of t
          /* this slot was open or contained 'key', update value */
          if (!warp_failed)
          {
-            atomicAdd((HYPRE_Complex*)(HashVals+j), val);
+            atomicAdd((HYPRE_Complex*)(HashVals + j), val);
          }
 
          return j;
@@ -123,7 +123,7 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
       HYPRE_Int tmp = 0;
       if (rowB != -1 && threadIdx.x < 2)
       {
-         tmp = read_only_load(ib+rowB+threadIdx.x);
+         tmp = read_only_load(ib + rowB + threadIdx.x);
       }
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
       const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
@@ -251,8 +251,8 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 #pragma unroll
          for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
          {
-            jg[istart_g+k] = -1;
-            ag[istart_g+k] = 0.0;
+            jg[istart_g + k] = -1;
+            ag[istart_g + k] = 0.0;
          }
       }
 
@@ -428,7 +428,7 @@ hypre_spgemm_copy_from_hash_into_C( HYPRE_Int      M,
           jg + istart_g, ag + istart_g, jc + istart_c, ac + istart_c);
 
 #ifdef HYPRE_DEBUG
-      hypre_device_assert(istart_c + j == ic[i+1]);
+      hypre_device_assert(istart_c + j == ic[i + 1]);
 #endif
    }
 }

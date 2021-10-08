@@ -54,7 +54,7 @@ hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector)
 HYPRE_Int
 hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    if (vector)
    {

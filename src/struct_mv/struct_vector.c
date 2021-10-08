@@ -34,7 +34,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    hypre_StructVectorRefCount(vector)       = 1;
 
    /* set defaults */
-   for (i = 0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       hypre_StructVectorNumGhost(vector)[i] = hypre_StructGridNumGhost(grid)[i];
    }
@@ -70,14 +70,14 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
             hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
             if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
             {
-               hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_DEVICE);
+               hypre_TFree(hypre_StructVectorData(vector), HYPRE_MEMORY_DEVICE);
             }
             else
             {
-               hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_HOST);
+               hypre_TFree(hypre_StructVectorData(vector), HYPRE_MEMORY_HOST);
             }
 #else
-            hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_StructVectorData(vector), HYPRE_MEMORY_DEVICE);
 #endif
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
@@ -132,8 +132,8 @@ hypre_StructVectorInitializeShell( hypre_StructVector *vector )
          hypre_CopyBox(box, data_box);
          for (d = 0; d < ndim; d++)
          {
-            hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-            hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
+            hypre_BoxIMinD(data_box, d) -= num_ghost[2 * d];
+            hypre_BoxIMaxD(data_box, d) += num_ghost[2 * d + 1];
          }
       }
 
@@ -199,14 +199,14 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
-      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_DEVICE);
+      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector), HYPRE_MEMORY_DEVICE);
    }
    else
    {
-      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_HOST);
+      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector), HYPRE_MEMORY_HOST);
    }
 #else
-   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector), HYPRE_MEMORY_DEVICE);
 #endif
 
    hypre_StructVectorInitializeData(vector, data);
@@ -407,8 +407,8 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
          if (action > 0)
          {
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
-                                data_box,data_start,data_stride,datai,
-                                dval_box,dval_start,dval_stride,dvali);
+                                data_box, data_start, data_stride, datai,
+                                dval_box, dval_start, dval_stride, dvali);
             {
                datap[datai] += values[dvali];
             }
@@ -417,8 +417,8 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
          else if (action > -1)
          {
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
-                                data_box,data_start,data_stride,datai,
-                                dval_box,dval_start,dval_stride,dvali);
+                                data_box, data_start, data_stride, datai,
+                                dval_box, dval_start, dval_stride, dvali);
             {
                datap[datai] = values[dvali];
             }
@@ -427,8 +427,8 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
          else /* action < 0 */
          {
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
-                                data_box,data_start,data_stride,datai,
-                                dval_box,dval_start,dval_stride,dvali);
+                                data_box, data_start, data_stride, datai,
+                                dval_box, dval_start, dval_stride, dvali);
             {
                values[dvali] = datap[datai];
             }
@@ -586,7 +586,7 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
 
 #define DEVICE_VAR is_device_ptr(datap)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                             data_box,data_start,data_stride,datai);
+                             data_box, data_start, data_stride, datai);
          {
             datap[datai] = 0.0;
          }
@@ -641,8 +641,8 @@ hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
 
    for (d = 0; d < ndim; d++)
    {
-      hypre_StructVectorNumGhost(vector)[2*d]     = num_ghost[2*d];
-      hypre_StructVectorNumGhost(vector)[2*d + 1] = num_ghost[2*d + 1];
+      hypre_StructVectorNumGhost(vector)[2 * d]     = num_ghost[2 * d];
+      hypre_StructVectorNumGhost(vector)[2 * d + 1] = num_ghost[2 * d + 1];
    }
 
    return hypre_error_flag;
@@ -1186,7 +1186,7 @@ hypre_StructVectorRead( MPI_Comm    comm,
 
    /* read grid info */
    hypre_fscanf(file, "\nGrid:\n");
-   hypre_StructGridRead(comm,file,&grid);
+   hypre_StructGridRead(comm, file, &grid);
 
    /*----------------------------------------
     * Initialize the vector
@@ -1248,14 +1248,14 @@ hypre_StructVectorClone(hypre_StructVector *x)
 
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int,  data_space_size, HYPRE_MEMORY_HOST);
 
-   for (i=0; i < data_space_size; i++)
+   for (i = 0; i < data_space_size; i++)
    {
       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
    }
 
    hypre_StructVectorCopy( x, y );
 
-   for (i=0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       hypre_StructVectorNumGhost(y)[i] = hypre_StructVectorNumGhost(x)[i];
    }

@@ -223,8 +223,8 @@ HYPRE_SStructGraphSetFEMSparsity( HYPRE_SStructGraph  graph,
    fem_sparse_j = hypre_TAlloc(HYPRE_Int,  nsparse, HYPRE_MEMORY_HOST);
    for (s = 0; s < nsparse; s++)
    {
-      fem_sparse_i[s] = sparsity[2*s];
-      fem_sparse_j[s] = sparsity[2*s+1];
+      fem_sparse_i[s] = sparsity[2 * s];
+      fem_sparse_j[s] = sparsity[2 * s + 1];
    }
    hypre_SStructGraphFEMPSparseI(graph, part) = fem_sparse_i;
    hypre_SStructGraphFEMPSparseJ(graph, part) = fem_sparse_j;
@@ -499,7 +499,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
                hypre_BoxManGetAllEntries(orig_boxman, &num_entries, &all_entries);
 
-               for (j=0; j< num_entries; j++)
+               for (j = 0; j < num_entries; j++)
                {
                   entry = &all_entries[j];
 
@@ -650,7 +650,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
          hypre_SStructUVEntryToBoxnum(Uventry, i) = to_boxnum;
          hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);
-         hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
+         hypre_SStructUVEntryToProc(Uventry, i) = to_proc;
          hypre_SStructBoxManEntryGetGlobalRank(
             boxman_entry, to_index, &rank, type);
          hypre_SStructUVEntryToRank(Uventry, i) = rank;
@@ -724,8 +724,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          stencil_vars    = hypre_CTAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
          for (iv = 0; iv < nvars; iv++)
          {
-            stencil_offsets[iv] = hypre_CTAlloc(hypre_Index,  fem_nvars*fem_nvars, HYPRE_MEMORY_HOST);
-            stencil_vars[iv]    = hypre_CTAlloc(HYPRE_Int,  fem_nvars*fem_nvars, HYPRE_MEMORY_HOST);
+            stencil_offsets[iv] = hypre_CTAlloc(hypre_Index,  fem_nvars * fem_nvars, HYPRE_MEMORY_HOST);
+            stencil_vars[iv]    = hypre_CTAlloc(HYPRE_Int,  fem_nvars * fem_nvars, HYPRE_MEMORY_HOST);
          }
 
          for (s = 0; s < fem_nsparse; s++)
@@ -802,7 +802,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       j = 1;
       for (i = 1; i < nUventries; i++)
       {
-         if (iUventries[i] > iUventries[i-1])
+         if (iUventries[i] > iUventries[i - 1])
          {
             iUventries[j] = iUventries[i];
             j++;

@@ -70,7 +70,7 @@ lobpcg_solveGEVP(
    n = utilities_FortranMatrixHeight( mtxA );
    lda = utilities_FortranMatrixGlobalHeight( mtxA );
    ldb = utilities_FortranMatrixGlobalHeight( mtxB );
-   lwork = 10*n;
+   lwork = 10 * n;
 
    work = hypre_CTAlloc(HYPRE_Real,  lwork, HYPRE_MEMORY_HOST);
 
@@ -78,7 +78,7 @@ lobpcg_solveGEVP(
              a, &lda, b, &ldb,
              lmd, &work[0], &lwork, &info );
 
-   hypre_TFree( work,HYPRE_MEMORY_HOST);
+   hypre_TFree( work, HYPRE_MEMORY_HOST);
    return info;
 
 }
@@ -129,7 +129,7 @@ lobpcg_MultiVectorImplicitQR(
 
    lobpcg_MultiVectorByMultiVector( x, y, r );
 
-   ierr = lobpcg_chol( r,dpotrf );
+   ierr = lobpcg_chol( r, dpotrf );
 
    if ( ierr != 0 )
    {
@@ -357,11 +357,11 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 
    /* prepare to process eigenvalues history, if user has provided non-NULL as "lambdaHistory_values" a
    rgument */
-   if (lambdaHistory_values!=NULL)
+   if (lambdaHistory_values != NULL)
    {
       lambdaHistory = utilities_FortranMatrixCreate();
       utilities_FortranMatrixWrap(lambdaHistory_values, lambdaHistory_gh, sizeX,
-                                  maxIterations+1, lambdaHistory);
+                                  maxIterations + 1, lambdaHistory);
    }
    else
    {
@@ -373,11 +373,11 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 
    /* prepare to process residuals history, if user has provided non-NULL as "residualNormsHistory_valu
    es" argument */
-   if (residualNormsHistory_values!=NULL)
+   if (residualNormsHistory_values != NULL)
    {
       residualNormsHistory = utilities_FortranMatrixCreate();
       utilities_FortranMatrixWrap(residualNormsHistory_values, residualNormsHistory_gh,
-                                  sizeX, maxIterations+1,residualNormsHistory);
+                                  sizeX, maxIterations + 1, residualNormsHistory);
    }
    else
    {
@@ -388,7 +388,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
    /* had to remove because n is not available in some interfaces */
    n = mv_MultiVectorHeight( blockVectorX );
 
-   if ( n < 5*sizeX )
+   if ( n < 5 * sizeX )
    {
       exitFlag = PROBLEM_SIZE_TOO_SMALL;
       lobpcg_errorMessage( verbosityLevel,
@@ -534,7 +534,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
    }
 
    /* allocate memory for Gram matrices and the Ritz values */
-   sizeX3 = 3*sizeX;
+   sizeX3 = 3 * sizeX;
    utilities_FortranMatrixAllocateData( sizeX3, sizeX3, gramA );
    utilities_FortranMatrixAllocateData( sizeX3, sizeX3, gramB );
    utilities_FortranMatrixAllocateData( sizeX3, 1, lambdaAB );
@@ -579,7 +579,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
                  mv_MultiVectorGetData(blockVectorBX) );
    }
    exitFlag = lobpcg_MultiVectorImplicitQR( blockVectorX, blockVectorBX,
-                                            upperR, blockVectorW,blap_fn.dpotrf );
+                                            upperR, blockVectorW, blap_fn.dpotrf );
    if ( exitFlag )
    {
       lobpcg_errorMessage( verbosityLevel, "Bad initial vectors: orthonormalization failed\n" );
@@ -611,7 +611,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
       utilities_FortranMatrixSymmetrize( gramXBX );
       /*  utilities_FortranMatrixSetToIdentity( gramXBX );*/ /* X may be bad! */
 
-      if ( (exitFlag = lobpcg_solveGEVP( gramXAX, gramXBX, lambda,blap_fn.dsygv)) != 0 )
+      if ( (exitFlag = lobpcg_solveGEVP( gramXAX, gramXBX, lambda, blap_fn.dsygv)) != 0 )
       {
          lobpcg_errorMessage( verbosityLevel,
                               "Bad problem: Rayleigh-Ritz in the initial subspace failed\n" );
@@ -745,7 +745,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
                     mv_MultiVectorGetData(blockVectorBR) );
       }
       exitFlag = lobpcg_MultiVectorImplicitQR( blockVectorR, blockVectorBR,
-                                               upperR, blockVectorW,blap_fn.dpotrf );
+                                               upperR, blockVectorW, blap_fn.dpotrf );
       if ( exitFlag )
       {
          lobpcg_errorMessage( verbosityLevel, "Orthonormalization of residuals failed\n" );
@@ -775,7 +775,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
          utilities_FortranMatrixSelectBlock( gramB, firstP, lastP, firstP, lastP, upperR );
 
          exitFlag = lobpcg_MultiVectorImplicitQR( blockVectorP, blockVectorBP,
-                                                  upperR, blockVectorW,blap_fn.dpotrf );
+                                                  upperR, blockVectorW, blap_fn.dpotrf );
          if ( exitFlag )
          {
             /*
@@ -1077,7 +1077,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
    utilities_FortranMatrixDestroy( residualNorms );
    utilities_FortranMatrixDestroy( residualNormsHistory );
 
-   hypre_TFree( activeMask,HYPRE_MEMORY_HOST);
+   hypre_TFree( activeMask, HYPRE_MEMORY_HOST);
 
    return exitFlag;
 }

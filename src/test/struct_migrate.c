@@ -181,7 +181,7 @@ main( hypre_int argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) > num_procs)
+   if ((P * Q * R) > num_procs)
    {
       if (myid == 0)
       {
@@ -189,7 +189,7 @@ main( hypre_int argc,
       }
       exit(1);
    }
-   else if ((P*Q*R) < num_procs)
+   else if ((P * Q * R) < num_procs)
    {
       if (myid == 0)
       {
@@ -206,7 +206,7 @@ main( hypre_int argc,
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
       hypre_printf("  (ix, iy, iz)    = (%d, %d, %d)\n",
-                   istart[0],istart[1],istart[2]);
+                   istart[0], istart[1], istart[2]);
       hypre_printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
       hypre_printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
       hypre_printf("  dim             = %d\n", dim);
@@ -225,20 +225,20 @@ main( hypre_int argc,
          break;
 
       case 2:
-         nblocks = bx*by;
+         nblocks = bx * by;
          p = myid % P;
-         q = (( myid - p)/P) % Q;
+         q = (( myid - p) / P) % Q;
          break;
 
       case 3:
-         nblocks = bx*by*bz;
+         nblocks = bx * by * bz;
          p = myid % P;
-         q = (( myid - p)/P) % Q;
-         r = ( myid - p - P*q)/( P*Q );
+         q = (( myid - p) / P) % Q;
+         r = ( myid - p - P * q) / ( P * Q );
          break;
    }
 
-   if (myid >= (P*Q*R))
+   if (myid >= (P * Q * R))
    {
       /* My processor has no data on it */
       nblocks = bx = by = bz = 0;
@@ -264,10 +264,10 @@ main( hypre_int argc,
       case 1:
          for (ix = 0; ix < bx; ix++)
          {
-            ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
-            iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
+            ilower[ib][0] = istart[0] + nx * (bx * p + ix);
+            iupper[ib][0] = istart[0] + nx * (bx * p + ix + 1) - 1;
             iupper2[ib][0] = iupper[ib][0];
-            if ( (ix == (bx-1)) && (p < (P-1)) )
+            if ( (ix == (bx - 1)) && (p < (P - 1)) )
             {
                iupper2[ib][0] = iupper[ib][0] + 1;
             }
@@ -278,17 +278,17 @@ main( hypre_int argc,
          for (iy = 0; iy < by; iy++)
             for (ix = 0; ix < bx; ix++)
             {
-               ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
-               iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-               ilower[ib][1] = istart[1]+ ny*(by*q+iy);
-               iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
+               ilower[ib][0] = istart[0] + nx * (bx * p + ix);
+               iupper[ib][0] = istart[0] + nx * (bx * p + ix + 1) - 1;
+               ilower[ib][1] = istart[1] + ny * (by * q + iy);
+               iupper[ib][1] = istart[1] + ny * (by * q + iy + 1) - 1;
                iupper2[ib][0] = iupper[ib][0];
                iupper2[ib][1] = iupper[ib][1];
-               if ( (ix == (bx-1)) && (p < (P-1)) )
+               if ( (ix == (bx - 1)) && (p < (P - 1)) )
                {
                   iupper2[ib][0] = iupper[ib][0] + 1;
                }
-               if ( (iy == (by-1)) && (q < (Q-1)) )
+               if ( (iy == (by - 1)) && (q < (Q - 1)) )
                {
                   iupper2[ib][1] = iupper[ib][1] + 1;
                }
@@ -300,24 +300,24 @@ main( hypre_int argc,
             for (iy = 0; iy < by; iy++)
                for (ix = 0; ix < bx; ix++)
                {
-                  ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
-                  iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-                  ilower[ib][1] = istart[1]+ ny*(by*q+iy);
-                  iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
-                  ilower[ib][2] = istart[2]+ nz*(bz*r+iz);
-                  iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
+                  ilower[ib][0] = istart[0] + nx * (bx * p + ix);
+                  iupper[ib][0] = istart[0] + nx * (bx * p + ix + 1) - 1;
+                  ilower[ib][1] = istart[1] + ny * (by * q + iy);
+                  iupper[ib][1] = istart[1] + ny * (by * q + iy + 1) - 1;
+                  ilower[ib][2] = istart[2] + nz * (bz * r + iz);
+                  iupper[ib][2] = istart[2] + nz * (bz * r + iz + 1) - 1;
                   iupper2[ib][0] = iupper[ib][0];
                   iupper2[ib][1] = iupper[ib][1];
                   iupper2[ib][2] = iupper[ib][2];
-                  if ( (ix == (bx-1)) && (p < (P-1)) )
+                  if ( (ix == (bx - 1)) && (p < (P - 1)) )
                   {
                      iupper2[ib][0] = iupper[ib][0] + 1;
                   }
-                  if ( (iy == (by-1)) && (q < (Q-1)) )
+                  if ( (iy == (by - 1)) && (q < (Q - 1)) )
                   {
                      iupper2[ib][1] = iupper[ib][1] + 1;
                   }
-                  if ( (iz == (bz-1)) && (r < (R-1)) )
+                  if ( (iz == (bz - 1)) && (r < (R - 1)) )
                   {
                      iupper2[ib][2] = iupper[ib][2] + 1;
                   }
@@ -443,7 +443,7 @@ AddValuesVector( hypre_StructGrid   *grid,
 
    gridboxes =  hypre_StructGridBoxes(grid);
 
-   ib=0;
+   ib = 0;
    hypre_ForBoxI(ib, gridboxes)
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
@@ -451,7 +451,7 @@ AddValuesVector( hypre_StructGrid   *grid,
       values   =  hypre_CTAlloc(HYPRE_Real,  volume, HYPRE_MEMORY_DEVICE);
 
 #define DEVICE_VAR is_device_ptr(values)
-      hypre_LoopBegin(volume,i)
+      hypre_LoopBegin(volume, i)
       {
          values[i] = value;
       }

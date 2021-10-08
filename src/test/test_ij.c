@@ -85,7 +85,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 poutdat;
    HYPRE_Int                 debug_flag;
    HYPRE_Int                 ierr = 0;
-   HYPRE_Int                 i,j,k;
+   HYPRE_Int                 i, j, k;
    HYPRE_Int                 indx, rest, tms;
    HYPRE_Int                 max_levels = 25;
    HYPRE_Int                 num_iterations;
@@ -775,7 +775,7 @@ main( HYPRE_Int   argc,
       relax_weight      = hypre_CTAlloc(HYPRE_Real,  max_levels, HYPRE_MEMORY_HOST);
       omega      = hypre_CTAlloc(HYPRE_Real,  max_levels, HYPRE_MEMORY_HOST);
 
-      for (i=0; i < max_levels; i++)
+      for (i = 0; i < max_levels; i++)
       {
          relax_weight[i] = 1.;
          omega[i] = 1.;
@@ -790,7 +790,7 @@ main( HYPRE_Int   argc,
          grid_relax_type[0] = relax_default;
          num_grid_sweeps[0] = num_sweep;
          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<num_sweep; i++)
+         for (i = 0; i < num_sweep; i++)
          {
             grid_relax_points[0][i] = 0;
          }
@@ -798,7 +798,7 @@ main( HYPRE_Int   argc,
          grid_relax_type[1] = relax_default;
          num_grid_sweeps[1] = num_sweep;
          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<num_sweep; i++)
+         for (i = 0; i < num_sweep; i++)
          {
             grid_relax_points[1][i] = 0;
          }
@@ -806,7 +806,7 @@ main( HYPRE_Int   argc,
          grid_relax_type[2] = relax_default;
          num_grid_sweeps[2] = num_sweep;
          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<num_sweep; i++)
+         for (i = 0; i < num_sweep; i++)
          {
             grid_relax_points[2][i] = 0;
          }
@@ -849,12 +849,12 @@ main( HYPRE_Int   argc,
          {
             grid_relax_points[0][i] = 0;
          } */
-         num_grid_sweeps[0] = 2*num_sweep;
-         grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  2*num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<2*num_sweep; i+=2)
+         num_grid_sweeps[0] = 2 * num_sweep;
+         grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  2 * num_sweep, HYPRE_MEMORY_HOST);
+         for (i = 0; i < 2 * num_sweep; i += 2)
          {
             grid_relax_points[0][i] = 1;
-            grid_relax_points[0][i+1] = -1;
+            grid_relax_points[0][i + 1] = -1;
          }
 
          /* down cycle */
@@ -865,13 +865,13 @@ main( HYPRE_Int   argc,
          {
             grid_relax_points[1][i] = 0;
          } */
-         num_grid_sweeps[1] = 2*num_sweep;
+         num_grid_sweeps[1] = 2 * num_sweep;
          grid_relax_type[1] = relax_default;
-         grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  2*num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<2*num_sweep; i+=2)
+         grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  2 * num_sweep, HYPRE_MEMORY_HOST);
+         for (i = 0; i < 2 * num_sweep; i += 2)
          {
             grid_relax_points[1][i] = 1;
-            grid_relax_points[1][i+1] = -1;
+            grid_relax_points[1][i + 1] = -1;
          }
 
          /* up cycle */
@@ -882,13 +882,13 @@ main( HYPRE_Int   argc,
          {
             grid_relax_points[2][i] = 0;
          } */
-         num_grid_sweeps[2] = 2*num_sweep;
+         num_grid_sweeps[2] = 2 * num_sweep;
          grid_relax_type[2] = relax_default;
-         grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  2*num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<2*num_sweep; i+=2)
+         grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  2 * num_sweep, HYPRE_MEMORY_HOST);
+         for (i = 0; i < 2 * num_sweep; i += 2)
          {
             grid_relax_points[2][i] = -1;
-            grid_relax_points[2][i+1] = 1;
+            grid_relax_points[2][i + 1] = 1;
          }
       }
 
@@ -923,7 +923,7 @@ main( HYPRE_Int   argc,
              (solver_id == HYPRE_HYBRID && precond_id == HYPRE_BOOMERAMG))
          {
             relax_weight[0] = atof(argv[arg_index++]);
-            for (i=1; i < max_levels; i++)
+            for (i = 1; i < max_levels; i++)
             {
                relax_weight[i] = relax_weight[0];
             }
@@ -936,7 +936,7 @@ main( HYPRE_Int   argc,
              (solver_id == HYPRE_HYBRID && precond_id == HYPRE_BOOMERAMG))
          {
             omega[0] = atof(argv[arg_index++]);
-            for (i=1; i < max_levels; i++)
+            for (i = 1; i < max_levels; i++)
             {
                omega[i] = omega[0];
             }
@@ -1375,12 +1375,12 @@ main( HYPRE_Int   argc,
          diag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          local_row = 0;
-         for (i=first_local_row; i<= last_local_row; i++)
+         for (i = first_local_row; i <= last_local_row; i++)
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                               &col_inds, &values );
 
-            for (j=0; j < size; j++)
+            for (j = 0; j < size; j++)
             {
                if (col_inds[j] < first_local_row || col_inds[j] > last_local_row)
                {
@@ -1403,7 +1403,7 @@ main( HYPRE_Int   argc,
 
          ierr = HYPRE_IJMatrixInitialize( ij_A );
 
-         for (i=first_local_row; i<= last_local_row; i++)
+         for (i = first_local_row; i <= last_local_row; i++)
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                               &col_inds, &values );
@@ -1431,7 +1431,7 @@ main( HYPRE_Int   argc,
             if (build_matrix_type == 4) { size = 27; }
          }
 
-         for (i=0; i < local_num_rows; i++)
+         for (i = 0; i < local_num_rows; i++)
          {
             row_sizes[i] = size;
          }
@@ -1443,7 +1443,7 @@ main( HYPRE_Int   argc,
          ierr = HYPRE_IJMatrixInitialize( ij_A );
 
          /* Loop through all locally stored rows and insert them into ij_matrix */
-         for (i=first_local_row; i<= last_local_row; i++)
+         for (i = first_local_row; i <= last_local_row; i++)
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                               &col_inds, &values );
@@ -1482,7 +1482,7 @@ main( HYPRE_Int   argc,
    ierr = HYPRE_IJMatrixInitialize( ij_A );
 
    /* Loop through all locally stored rows and insert them into ij_matrix */
-   for (i=first_local_row; i<= last_local_row; i++)
+   for (i = first_local_row; i <= last_local_row; i++)
    {
       ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                         &col_inds, &values );
@@ -1620,8 +1620,8 @@ main( HYPRE_Int   argc,
          HYPRE_IJVectorAddToValues */
 
       HYPRE_ParVectorSetRandomValues(b, 22775);
-      HYPRE_ParVectorInnerProd(b,b,&norm);
-      norm = 1./sqrt(norm);
+      HYPRE_ParVectorInnerProd(b, b, &norm);
+      norm = 1. / sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
       /* Initial guess */
@@ -1671,7 +1671,7 @@ main( HYPRE_Int   argc,
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
-      HYPRE_ParCSRMatrixMatvec(1.,parcsr_A,x,0.,b);
+      HYPRE_ParCSRMatrixMatvec(1., parcsr_A, x, 0., b);
 
       /* Initial guess */
       values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
@@ -1870,7 +1870,7 @@ main( HYPRE_Int   argc,
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_rows; i++)
       {
-         values[i] = hypre_Rand()/dt;
+         values[i] = hypre_Rand() / dt;
       }
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       hypre_TFree(values, HYPRE_MEMORY_HOST);
@@ -1925,19 +1925,19 @@ main( HYPRE_Int   argc,
          {
             hypre_printf (" Number of unknown functions = %d \n", num_functions);
          }
-         rest = first_local_row-((first_local_row/num_functions)*num_functions);
-         indx = num_functions-rest;
+         rest = first_local_row - ((first_local_row / num_functions) * num_functions);
+         indx = num_functions - rest;
          if (rest == 0) { indx = 0; }
          k = num_functions - 1;
-         for (j = indx-1; j > -1; j--)
+         for (j = indx - 1; j > -1; j--)
          {
             dof_func[j] = k--;
          }
-         tms = local_num_vars/num_functions;
-         if (tms*num_functions+indx > local_num_vars) { tms--; }
-         for (j=0; j < tms; j++)
+         tms = local_num_vars / num_functions;
+         if (tms * num_functions + indx > local_num_vars) { tms--; }
+         for (j = 0; j < tms; j++)
          {
-            for (k=0; k < num_functions; k++)
+            for (k = 0; k < num_functions; k++)
             {
                dof_func[indx++] = k;
             }
@@ -1981,7 +1981,7 @@ main( HYPRE_Int   argc,
       HYPRE_ParCSRHybridSetPrintLevel(amg_solver, poutdat);
       HYPRE_ParCSRHybridSetDSCGMaxIter(amg_solver, dscg_max_its );
       HYPRE_ParCSRHybridSetPCGMaxIter(amg_solver, pcg_max_its );
-      HYPRE_ParCSRHybridSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_ParCSRHybridSetCoarsenType(amg_solver, (hybrid * coarsen_type));
       HYPRE_ParCSRHybridSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParCSRHybridSetTruncFactor(amg_solver, trunc_factor);
       HYPRE_ParCSRHybridSetNumGridSweeps(amg_solver, num_grid_sweeps);
@@ -2039,7 +2039,7 @@ main( HYPRE_Int   argc,
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
-      HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid * coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
@@ -2109,7 +2109,7 @@ main( HYPRE_Int   argc,
       grid_relax_type[0] = relax_default;
       hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
       grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-      for (i=0; i<num_sweep; i++)
+      for (i = 0; i < num_sweep; i++)
       {
          grid_relax_points[0][i] = 0;
       }
@@ -2119,7 +2119,7 @@ main( HYPRE_Int   argc,
       grid_relax_type[1] = relax_default;
       hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
       grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-      for (i=0; i<num_sweep; i++)
+      for (i = 0; i < num_sweep; i++)
       {
          grid_relax_points[1][i] = 0;
       }
@@ -2129,7 +2129,7 @@ main( HYPRE_Int   argc,
       grid_relax_type[2] = relax_default;
       hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
       grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-      for (i=0; i<num_sweep; i++)
+      for (i = 0; i < num_sweep; i++)
       {
          grid_relax_points[2][i] = 0;
       }
@@ -2149,7 +2149,7 @@ main( HYPRE_Int   argc,
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
-      HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid * coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
@@ -2374,11 +2374,11 @@ main( HYPRE_Int   argc,
             diag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
             offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
             local_row = 0;
-            for (i=first_local_row; i<= last_local_row; i++)
+            for (i = first_local_row; i <= last_local_row; i++)
             {
                ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, i, &size,
                                                  &col_inds, &values );
-               for (j=0; j < size; j++)
+               for (j = 0; j < size; j++)
                {
                   if (col_inds[j] < first_local_row || col_inds[j] > last_local_row)
                   {
@@ -2401,7 +2401,7 @@ main( HYPRE_Int   argc,
 
             ierr = HYPRE_IJMatrixInitialize( ij_B );
 
-            for (i=first_local_row; i<= last_local_row; i++)
+            for (i = first_local_row; i <= last_local_row; i++)
             {
                ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, i, &size,
                                                  &col_inds, &values );
@@ -2429,7 +2429,7 @@ main( HYPRE_Int   argc,
                if (build_matrix_type == 4) { size = 27; }
             }
 
-            for (i=0; i < local_num_rows; i++)
+            for (i = 0; i < local_num_rows; i++)
             {
                row_sizes[i] = size;
             }
@@ -2441,7 +2441,7 @@ main( HYPRE_Int   argc,
             ierr = HYPRE_IJMatrixInitialize( ij_B );
 
             /* Loop through all locally stored rows and insert them into ij_matrix */
-            for (i=first_local_row; i<= last_local_row; i++)
+            for (i = first_local_row; i <= last_local_row; i++)
             {
                ierr += HYPRE_ParCSRMatrixGetRow( parcsr_B, i, &size,
                                                  &col_inds, &values );
@@ -2487,7 +2487,7 @@ main( HYPRE_Int   argc,
             HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
             HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -2573,7 +2573,7 @@ main( HYPRE_Int   argc,
             grid_relax_type[0] = relax_default;
             hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
             grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-            for (i=0; i<num_sweep; i++)
+            for (i = 0; i < num_sweep; i++)
             {
                grid_relax_points[0][i] = 0;
             }
@@ -2583,7 +2583,7 @@ main( HYPRE_Int   argc,
             grid_relax_type[1] = relax_default;
             hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
             grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-            for (i=0; i<num_sweep; i++)
+            for (i = 0; i < num_sweep; i++)
             {
                grid_relax_points[1][i] = 0;
             }
@@ -2593,7 +2593,7 @@ main( HYPRE_Int   argc,
             grid_relax_type[2] = relax_default;
             hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
             grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-            for (i=0; i<num_sweep; i++)
+            for (i = 0; i < num_sweep; i++)
             {
                grid_relax_points[2][i] = 0;
             }
@@ -2611,7 +2611,7 @@ main( HYPRE_Int   argc,
             HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
             HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -2716,7 +2716,7 @@ main( HYPRE_Int   argc,
             eigenvectors = mv_MultiVectorWrap( interpreter,
                                                hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                            interpreter,
-                                                                           "vectors" ),1);
+                                                                           "vectors" ), 1);
             hypre_assert( eigenvectors != NULL );
             blockSize = mv_MultiVectorWidth( eigenvectors );
          }
@@ -2740,7 +2740,7 @@ main( HYPRE_Int   argc,
             constraints = mv_MultiVectorWrap( interpreter,
                                               hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                           interpreter,
-                                                                          "vectors" ),1);
+                                                                          "vectors" ), 1);
             hypre_assert( constraints != NULL );
          }
 
@@ -2908,7 +2908,7 @@ main( HYPRE_Int   argc,
             HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
             HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3005,7 +3005,7 @@ main( HYPRE_Int   argc,
             grid_relax_type[0] = relax_default;
             hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
             grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-            for (i=0; i<num_sweep; i++)
+            for (i = 0; i < num_sweep; i++)
             {
                grid_relax_points[0][i] = 0;
             }
@@ -3015,7 +3015,7 @@ main( HYPRE_Int   argc,
             grid_relax_type[1] = relax_default;
             hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
             grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-            for (i=0; i<num_sweep; i++)
+            for (i = 0; i < num_sweep; i++)
             {
                grid_relax_points[1][i] = 0;
             }
@@ -3025,7 +3025,7 @@ main( HYPRE_Int   argc,
             grid_relax_type[2] = relax_default;
             hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
             grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-            for (i=0; i<num_sweep; i++)
+            for (i = 0; i < num_sweep; i++)
             {
                grid_relax_points[2][i] = 0;
             }
@@ -3043,7 +3043,7 @@ main( HYPRE_Int   argc,
             HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
             HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
             HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+            HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3134,7 +3134,7 @@ main( HYPRE_Int   argc,
             eigenvectors = mv_MultiVectorWrap( interpreter,
                                                hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                            interpreter,
-                                                                           "vectors" ),1);
+                                                                           "vectors" ), 1);
             hypre_assert( eigenvectors != NULL );
             blockSize = mv_MultiVectorWidth( eigenvectors );
          }
@@ -3158,7 +3158,7 @@ main( HYPRE_Int   argc,
             constraints = mv_MultiVectorWrap( interpreter,
                                               hypre_ParCSRMultiVectorRead(hypre_MPI_COMM_WORLD,
                                                                           interpreter,
-                                                                          "vectors" ),1);
+                                                                          "vectors" ), 1);
             hypre_assert( constraints != NULL );
          }
 
@@ -3341,7 +3341,7 @@ main( HYPRE_Int   argc,
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3418,7 +3418,7 @@ main( HYPRE_Int   argc,
          grid_relax_type[0] = relax_default;
          hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<num_sweep; i++)
+         for (i = 0; i < num_sweep; i++)
          {
             grid_relax_points[0][i] = 0;
          }
@@ -3428,7 +3428,7 @@ main( HYPRE_Int   argc,
          grid_relax_type[1] = relax_default;
          hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<num_sweep; i++)
+         for (i = 0; i < num_sweep; i++)
          {
             grid_relax_points[1][i] = 0;
          }
@@ -3438,7 +3438,7 @@ main( HYPRE_Int   argc,
          grid_relax_type[2] = relax_default;
          hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-         for (i=0; i<num_sweep; i++)
+         for (i = 0; i < num_sweep; i++)
          {
             grid_relax_points[2][i] = 0;
          }
@@ -3456,7 +3456,7 @@ main( HYPRE_Int   argc,
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3554,7 +3554,7 @@ main( HYPRE_Int   argc,
       hypre_ClearTiming();
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
@@ -3616,7 +3616,7 @@ main( HYPRE_Int   argc,
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3722,7 +3722,7 @@ main( HYPRE_Int   argc,
       hypre_ClearTiming();
 
       HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
@@ -3779,7 +3779,7 @@ main( HYPRE_Int   argc,
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3854,7 +3854,7 @@ main( HYPRE_Int   argc,
       hypre_ClearTiming();
 
       HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_CGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_CGNRGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
@@ -3955,7 +3955,7 @@ BuildParFromFile( HYPRE_Int                  argc,
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename,&A);
+   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename, &A);
 
    *A_ptr = A;
 
@@ -4043,7 +4043,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -4067,8 +4067,8 @@ BuildParLaplacian( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -4083,15 +4083,15 @@ BuildParLaplacian( HYPRE_Int                  argc,
    values[0] = 0.;
    if (nx > 1)
    {
-      values[0] += 2.0*cx;
+      values[0] += 2.0 * cx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy;
+      values[0] += 2.0 * cy;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz;
+      values[0] += 2.0 * cz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD,
@@ -4123,7 +4123,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    HYPRE_Int                 P, Q, R;
    HYPRE_Real          cx, cy, cz;
    HYPRE_Real          ax, ay, az;
-   HYPRE_Real          hinx,hiny,hinz;
+   HYPRE_Real          hinx, hiny, hinz;
 
    HYPRE_ParCSRMatrix  A;
 
@@ -4202,7 +4202,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -4228,12 +4228,12 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
-   hinx = 1./(nx+1);
-   hiny = 1./(ny+1);
-   hinz = 1./(nz+1);
+   hinx = 1. / (nx + 1);
+   hiny = 1. / (ny + 1);
+   hinz = 1. / (nz + 1);
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -4241,25 +4241,25 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    values = hypre_CTAlloc(HYPRE_Real,  7, HYPRE_MEMORY_HOST);
 
-   values[1] = -cx/(hinx*hinx);
-   values[2] = -cy/(hiny*hiny);
-   values[3] = -cz/(hinz*hinz);
-   values[4] = -cx/(hinx*hinx) + ax/hinx;
-   values[5] = -cy/(hiny*hiny) + ay/hiny;
-   values[6] = -cz/(hinz*hinz) + az/hinz;
+   values[1] = -cx / (hinx * hinx);
+   values[2] = -cy / (hiny * hiny);
+   values[3] = -cz / (hinz * hinz);
+   values[4] = -cx / (hinx * hinx) + ax / hinx;
+   values[5] = -cy / (hiny * hiny) + ay / hiny;
+   values[6] = -cz / (hinz * hinz) + az / hinz;
 
    values[0] = 0.;
    if (nx > 1)
    {
-      values[0] += 2.0*cx/(hinx*hinx) - 1.*ax/hinx;
+      values[0] += 2.0 * cx / (hinx * hinx) - 1.*ax / hinx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy/(hiny*hiny) - 1.*ay/hiny;
+      values[0] += 2.0 * cy / (hiny * hiny) - 1.*ay / hiny;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz/(hinz*hinz) - 1.*az/hinz;
+      values[0] += 2.0 * cz / (hinz * hinz) - 1.*az / hinz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateDifConv(hypre_MPI_COMM_WORLD,
@@ -4337,22 +4337,22 @@ BuildParFromOneFile2(HYPRE_Int                  argc,
    if (myid == 0 && num_functions > 1)
    {
       HYPRE_CSRMatrixGetNumRows(A_CSR, &num_dofs);
-      num_nodes = num_dofs/num_functions;
-      if (num_dofs != num_functions*num_nodes)
+      num_nodes = num_dofs / num_functions;
+      if (num_dofs != num_functions * num_nodes)
       {
          row_part = NULL;
          col_part = NULL;
       }
       else
       {
-         row_part = hypre_CTAlloc(HYPRE_Int,  numprocs+1, HYPRE_MEMORY_HOST);
+         row_part = hypre_CTAlloc(HYPRE_Int,  numprocs + 1, HYPRE_MEMORY_HOST);
          row_part[0] = 0;
-         size = num_nodes/numprocs;
-         rest = num_nodes-size*numprocs;
-         for (i=0; i < numprocs; i++)
+         size = num_nodes / numprocs;
+         rest = num_nodes - size * numprocs;
+         for (i = 0; i < numprocs; i++)
          {
-            row_part[i+1] = row_part[i]+size*num_functions;
-            if (i < rest) { row_part[i+1] += num_functions; }
+            row_part[i + 1] = row_part[i] + size * num_functions;
+            if (i < rest) { row_part[i + 1] += num_functions; }
          }
          col_part = row_part;
       }
@@ -4455,29 +4455,29 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
 
    }
    HYPRE_ParCSRMatrixGetRowPartitioning(parcsr_A, &partitioning);
-   local_size = partitioning[myid+1]-partitioning[myid];
+   local_size = partitioning[myid + 1] - partitioning[myid];
    dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
 
    if (myid == 0)
    {
-      requests = hypre_CTAlloc(hypre_MPI_Request, num_procs-1, HYPRE_MEMORY_HOST);
-      status = hypre_CTAlloc(hypre_MPI_Status, num_procs-1, HYPRE_MEMORY_HOST);
+      requests = hypre_CTAlloc(hypre_MPI_Request, num_procs - 1, HYPRE_MEMORY_HOST);
+      status = hypre_CTAlloc(hypre_MPI_Status, num_procs - 1, HYPRE_MEMORY_HOST);
       j = 0;
-      for (i=1; i < num_procs; i++)
+      for (i = 1; i < num_procs; i++)
          hypre_MPI_Isend(&dof_func[partitioning[i]],
-                         partitioning[i+1]-partitioning[i],
+                         partitioning[i + 1] - partitioning[i],
                          HYPRE_MPI_INT, i, 0, comm, &requests[j++]);
-      for (i=0; i < local_size; i++)
+      for (i = 0; i < local_size; i++)
       {
          dof_func_local[i] = dof_func[i];
       }
-      hypre_MPI_Waitall(num_procs-1,requests, status);
+      hypre_MPI_Waitall(num_procs - 1, requests, status);
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
       hypre_TFree(status, HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_MPI_Recv(dof_func_local,local_size,HYPRE_MPI_INT,0,0,comm,&status0);
+      hypre_MPI_Recv(dof_func_local, local_size, HYPRE_MPI_INT, 0, 0, comm, &status0);
    }
 
    *dof_func_ptr = dof_func_local;
@@ -4540,7 +4540,7 @@ BuildRhsParFromOneFile2(HYPRE_Int                  argc,
 
       b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);
 
    *b_ptr = b;
 
@@ -4614,7 +4614,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q) != num_procs)
+   if ((P * Q) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -4637,7 +4637,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
 
    /* compute p,q from P,Q and myid */
    p = myid % P;
-   q = ( myid - p)/P;
+   q = ( myid - p) / P;
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -4739,7 +4739,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -4762,8 +4762,8 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -4776,7 +4776,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    {
       values[0] = 8.0;
    }
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
    {
       values[0] = 2.0;
    }
@@ -4873,8 +4873,8 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -4889,15 +4889,15 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
    values[0] = 0.;
    if (nx > 1)
    {
-      values[0] += 2.0*cx;
+      values[0] += 2.0 * cx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy;
+      values[0] += 2.0 * cy;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz;
+      values[0] += 2.0 * cz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD,

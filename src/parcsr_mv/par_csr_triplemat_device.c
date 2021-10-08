@@ -44,11 +44,11 @@ struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
 
       if (option == 1)
       {
-         return col_map[x-num_col];
+         return col_map[x - num_col];
       }
       else
       {
-         return col_map[x-num_col] + num_col;
+         return col_map[x - num_col] + num_col;
       }
    }
 };
@@ -223,7 +223,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    if (hypre_ParCSRMatrixGlobalNumRows(A) != hypre_ParCSRMatrixGlobalNumRows(B) ||
        hypre_ParCSRMatrixNumRows(A)       != hypre_ParCSRMatrixNumRows(B))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
 

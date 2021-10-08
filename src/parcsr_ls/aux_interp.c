@@ -189,13 +189,13 @@ HYPRE_Int hypre_big_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
 /* sort for non-ordered arrays */
 HYPRE_Int hypre_ssort(HYPRE_BigInt *data, HYPRE_Int n)
 {
-   HYPRE_Int i,si;
+   HYPRE_Int i, si;
    HYPRE_Int change = 0;
 
    if (n > 0)
-      for (i = n-1; i > 0; i--)
+      for (i = n - 1; i > 0; i--)
       {
-         si = hypre_index_of_minimum(data,i+1);
+         si = hypre_index_of_minimum(data, i + 1);
          if (i != si)
          {
             hypre_swap_int(data, i, si);
@@ -315,7 +315,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
    hypre_UnorderedBigIntMap col_map_offd_inverse;
-   hypre_UnorderedBigIntMapCreate(&col_map_offd_inverse, 2*num_cols_A_offd, 16*hypre_NumThreads());
+   hypre_UnorderedBigIntMapCreate(&col_map_offd_inverse, 2 * num_cols_A_offd, 16 * hypre_NumThreads());
 
    #pragma omp parallel for HYPRE_SMP_SCHEDULE
    for (i = 0; i < num_cols_A_offd; i++)
@@ -326,7 +326,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    /* Find nodes that will be added to the off diag list */
    HYPRE_Int size_offP = A_ext_i[num_cols_A_offd];
    hypre_UnorderedBigIntSet set;
-   hypre_UnorderedBigIntSetCreate(&set, size_offP, 16*hypre_NumThreads());
+   hypre_UnorderedBigIntSetCreate(&set, size_offP, 16 * hypre_NumThreads());
 
    #pragma omp parallel private(i,j,big_i1)
    {
@@ -335,7 +335,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
       {
          if (CF_marker_offd[i] < 0)
          {
-            for (j = A_ext_i[i]; j < A_ext_i[i+1]; j++)
+            for (j = A_ext_i[i]; j < A_ext_i[i + 1]; j++)
             {
                big_i1 = A_ext_j[j];
                if (big_i1 < col_1 || big_i1 >= col_n)
@@ -354,7 +354,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
                   }
                }
             }
-            for (j = Sop_i[i]; j < Sop_i[i+1]; j++)
+            for (j = Sop_i[i]; j < Sop_i[i + 1]; j++)
             {
                big_i1 = Sop_j[j];
                if (big_i1 < col_1 || big_i1 >= col_n)
@@ -403,7 +403,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    {
       if (CF_marker_offd[i] < 0)
       {
-         for (kk = Sop_i[i]; kk < Sop_i[i+1]; kk++)
+         for (kk = Sop_i[i]; kk < Sop_i[i + 1]; kk++)
          {
             big_k1 = Sop_j[kk];
             if (big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
@@ -413,7 +413,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
                Sop_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
             }
          }
-         for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
+         for (kk = A_ext_i[i]; kk < A_ext_i[i + 1]; kk++)
          {
             big_k1 = A_ext_j[kk];
             if (big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
@@ -436,7 +436,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    HYPRE_Int min;
    HYPRE_Int ifound;
 
-   size_offP = A_ext_i[num_cols_A_offd]+Sop_i[num_cols_A_offd];
+   size_offP = A_ext_i[num_cols_A_offd] + Sop_i[num_cols_A_offd];
    tmp_found = hypre_CTAlloc(HYPRE_BigInt, size_offP, HYPRE_MEMORY_HOST);
 
    /* Find nodes that will be added to the off diag list */
@@ -444,37 +444,37 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    {
       if (CF_marker_offd[i] < 0)
       {
-         for (j = A_ext_i[i]; j < A_ext_i[i+1]; j++)
+         for (j = A_ext_i[i]; j < A_ext_i[i + 1]; j++)
          {
             big_i1 = A_ext_j[j];
             if (big_i1 < col_1 || big_i1 >= col_n)
             {
-               ifound = hypre_BigBinarySearch(col_map_offd,big_i1,num_cols_A_offd);
+               ifound = hypre_BigBinarySearch(col_map_offd, big_i1, num_cols_A_offd);
                if (ifound == -1)
                {
-                  tmp_found[newoff]=big_i1;
+                  tmp_found[newoff] = big_i1;
                   newoff++;
                }
                else
                {
-                  A_ext_j[j] = (HYPRE_BigInt)(-ifound-1);
+                  A_ext_j[j] = (HYPRE_BigInt)(-ifound - 1);
                }
             }
          }
-         for (j = Sop_i[i]; j < Sop_i[i+1]; j++)
+         for (j = Sop_i[i]; j < Sop_i[i + 1]; j++)
          {
             big_i1 = Sop_j[j];
             if (big_i1 < col_1 || big_i1 >= col_n)
             {
-               ifound = hypre_BigBinarySearch(col_map_offd,big_i1,num_cols_A_offd);
+               ifound = hypre_BigBinarySearch(col_map_offd, big_i1, num_cols_A_offd);
                if (ifound == -1)
                {
-                  tmp_found[newoff]=big_i1;
+                  tmp_found[newoff] = big_i1;
                   newoff++;
                }
                else
                {
-                  Sop_j[j] = (HYPRE_BigInt)(-ifound-1);
+                  Sop_j[j] = (HYPRE_BigInt)(-ifound - 1);
                }
             }
          }
@@ -483,10 +483,10 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    /* Put found in monotone increasing order */
    if (newoff > 0)
    {
-      hypre_BigQsort0(tmp_found,0,newoff-1);
+      hypre_BigQsort0(tmp_found, 0, newoff - 1);
       ifound = tmp_found[0];
       min = 1;
-      for (i=1; i < newoff; i++)
+      for (i = 1; i < newoff; i++)
       {
          if (tmp_found[i] > ifound)
          {
@@ -503,12 +503,12 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    {
       if (CF_marker_offd[i] < 0)
       {
-         for (kk = Sop_i[i]; kk < Sop_i[i+1]; kk++)
+         for (kk = Sop_i[i]; kk < Sop_i[i + 1]; kk++)
          {
             big_k1 = Sop_j[kk];
             if (big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
             {
-               got_loc = hypre_BigBinarySearch(tmp_found,big_k1,newoff);
+               got_loc = hypre_BigBinarySearch(tmp_found, big_k1, newoff);
                if (got_loc > -1)
                {
                   loc_col = got_loc + num_cols_A_offd;
@@ -516,12 +516,12 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
                Sop_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
             }
          }
-         for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
+         for (kk = A_ext_i[i]; kk < A_ext_i[i + 1]; kk++)
          {
             big_k1 = A_ext_j[kk];
             if (big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
             {
-               got_loc = hypre_BigBinarySearch(tmp_found,big_k1,newoff);
+               got_loc = hypre_BigBinarySearch(tmp_found, big_k1, newoff);
                loc_col = got_loc + num_cols_A_offd;
                A_ext_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
             }
@@ -603,15 +603,16 @@ HYPRE_Int hypre_exchange_interp_data(
    hypre_exchange_marker(comm_pkg, CF_marker, *CF_marker_offd);
 
    hypre_ParCSRCommHandle *comm_handle_a_idx, *comm_handle_a_data;
-   *A_ext         = hypre_ParCSRMatrixExtractBExt_Overlap(A,A,1,&comm_handle_a_idx,&comm_handle_a_data,
-                                                          CF_marker,*CF_marker_offd,skip_fine_or_same_sign,skip_fine_or_same_sign);
+   *A_ext         = hypre_ParCSRMatrixExtractBExt_Overlap(A, A, 1, &comm_handle_a_idx,
+                                                          &comm_handle_a_data,
+                                                          CF_marker, *CF_marker_offd, skip_fine_or_same_sign, skip_fine_or_same_sign);
    HYPRE_Int *A_ext_i        = hypre_CSRMatrixI(*A_ext);
    HYPRE_BigInt *A_ext_j        = hypre_CSRMatrixBigJ(*A_ext);
    HYPRE_Int  A_ext_rows     = hypre_CSRMatrixNumRows(*A_ext);
 
    hypre_ParCSRCommHandle *comm_handle_s_idx;
-   *Sop           = hypre_ParCSRMatrixExtractBExt_Overlap(S,A,0,&comm_handle_s_idx,NULL,CF_marker,
-                                                          *CF_marker_offd,skip_fine_or_same_sign,0);
+   *Sop           = hypre_ParCSRMatrixExtractBExt_Overlap(S, A, 0, &comm_handle_s_idx, NULL, CF_marker,
+                                                          *CF_marker_offd, skip_fine_or_same_sign, 0);
    HYPRE_Int *Sop_i          = hypre_CSRMatrixI(*Sop);
    HYPRE_BigInt *Sop_j       = hypre_CSRMatrixBigJ(*Sop);
    HYPRE_Int  Soprows        = hypre_CSRMatrixNumRows(*Sop);

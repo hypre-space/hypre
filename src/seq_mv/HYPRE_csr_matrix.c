@@ -30,7 +30,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
    matrix_i[0] = 0;
    for (i = 0; i < num_rows; i++)
    {
-      matrix_i[i+1] = matrix_i[i] + row_sizes[i];
+      matrix_i[i + 1] = matrix_i[i] + row_sizes[i];
    }
 
    matrix = hypre_CSRMatrixCreate(num_rows, num_cols, matrix_i[num_rows]);

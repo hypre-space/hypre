@@ -462,7 +462,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_lane_id()
 {
-   return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE-1);
+   return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE - 1);
 }
 
 /* return the num of blocks in grid */
@@ -563,28 +563,28 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width=HYPRE_WARP_SIZE)
+T __shfl_sync(unsigned mask, T val, hypre_int src_line, hypre_int width = HYPRE_WARP_SIZE)
 {
    return __shfl(val, src_line, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width=HYPRE_WARP_SIZE)
+T __shfl_down_sync(unsigned mask, T val, unsigned delta, hypre_int width = HYPRE_WARP_SIZE)
 {
    return __shfl_down(val, delta, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width=HYPRE_WARP_SIZE)
+T __shfl_xor_sync(unsigned mask, T val, unsigned lanemask, hypre_int width = HYPRE_WARP_SIZE)
 {
    return __shfl_xor(val, lanemask, width);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width=HYPRE_WARP_SIZE)
+T __shfl_up_sync(unsigned mask, T val, unsigned delta, hypre_int width = HYPRE_WARP_SIZE)
 {
    return __shfl_up(val, delta, width);
 }
@@ -627,7 +627,7 @@ static __device__ __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 {
 #pragma unroll
-   for (hypre_int d = 2; d <=HYPRE_WARP_SIZE; d <<= 1)
+   for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)
    {
       T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
       if ( (lane_id & (d - 1)) == (d - 1) )
@@ -636,15 +636,15 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
       }
    }
 
-   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, HYPRE_WARP_SIZE-1);
+   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, HYPRE_WARP_SIZE - 1);
 
-   if (lane_id == HYPRE_WARP_SIZE-1)
+   if (lane_id == HYPRE_WARP_SIZE - 1)
    {
       in = 0;
    }
 
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
 
@@ -668,7 +668,7 @@ static __device__ __forceinline__
 T warp_reduce_sum(T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
@@ -680,7 +680,7 @@ static __device__ __forceinline__
 T warp_allreduce_sum(T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
@@ -692,7 +692,7 @@ static __device__ __forceinline__
 T warp_reduce_max(T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -704,7 +704,7 @@ static __device__ __forceinline__
 T warp_allreduce_max(T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -716,7 +716,7 @@ static __device__ __forceinline__
 T warp_reduce_min(T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -728,7 +728,7 @@ static __device__ __forceinline__
 T warp_allreduce_min(T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
       in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -761,7 +761,7 @@ hypre_int next_power_of_2(hypre_int n)
 }
 
 template<typename T>
-struct absolute_value : public thrust::unary_function<T,T>
+struct absolute_value : public thrust::unary_function<T, T>
 {
    __host__ __device__ T operator()(const T &x) const
    {
@@ -812,7 +812,7 @@ struct TupleComp3
 };
 
 template<typename T>
-struct is_negative : public thrust::unary_function<T,bool>
+struct is_negative : public thrust::unary_function<T, bool>
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -821,7 +821,7 @@ struct is_negative : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
-struct is_positive : public thrust::unary_function<T,bool>
+struct is_positive : public thrust::unary_function<T, bool>
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -830,7 +830,7 @@ struct is_positive : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
-struct is_nonnegative : public thrust::unary_function<T,bool>
+struct is_nonnegative : public thrust::unary_function<T, bool>
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -852,7 +852,7 @@ struct in_range : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
-struct out_of_range : public thrust::unary_function<T,bool>
+struct out_of_range : public thrust::unary_function<T, bool>
 {
    T low, up;
 
@@ -865,7 +865,7 @@ struct out_of_range : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
-struct less_than : public thrust::unary_function<T,bool>
+struct less_than : public thrust::unary_function<T, bool>
 {
    T val;
 
@@ -878,7 +878,7 @@ struct less_than : public thrust::unary_function<T,bool>
 };
 
 template<typename T>
-struct modulo : public thrust::unary_function<T,T>
+struct modulo : public thrust::unary_function<T, T>
 {
    T val;
 
@@ -891,7 +891,7 @@ struct modulo : public thrust::unary_function<T,T>
 };
 
 template<typename T>
-struct equal : public thrust::unary_function<T,bool>
+struct equal : public thrust::unary_function<T, bool>
 {
    T val;
 
@@ -1010,7 +1010,7 @@ template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
 struct HYPRE_double4
 {
-   HYPRE_Real x,y,z,w;
+   HYPRE_Real x, y, z, w;
 
    __host__ __device__
    HYPRE_double4() {}
@@ -1043,7 +1043,7 @@ struct HYPRE_double4
 
 struct HYPRE_double6
 {
-   HYPRE_Real x,y,z,w,u,v;
+   HYPRE_Real x, y, z, w, u, v;
 
    __host__ __device__
    HYPRE_double6() {}
@@ -1084,7 +1084,7 @@ __inline__ __host__ __device__
 HYPRE_Real warpReduceSum(HYPRE_Real val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
-   for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
       val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
    }

@@ -52,8 +52,8 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *A_FC;
    hypre_CSRMatrix    *A_FC_diag, *A_FC_offd;
-   HYPRE_Int          *A_FC_diag_i, *A_FC_diag_j, *A_FC_offd_i, *A_FC_offd_j=NULL;
-   HYPRE_Complex      *A_FC_diag_data, *A_FC_offd_data=NULL;
+   HYPRE_Int          *A_FC_diag_i, *A_FC_diag_j, *A_FC_offd_i, *A_FC_offd_j = NULL;
+   HYPRE_Complex      *A_FC_diag_data, *A_FC_offd_data = NULL;
    HYPRE_Int           num_cols_offd_A_FC;
    HYPRE_BigInt       *col_map_offd_A_FC = NULL;
 
@@ -72,7 +72,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    HYPRE_Int           i, j, jj;
    HYPRE_Int           startc, index;
    HYPRE_Int           cpt, fpt, row;
-   HYPRE_Int          *CF_marker_offd = NULL, *marker_offd=NULL;
+   HYPRE_Int          *CF_marker_offd = NULL, *marker_offd = NULL;
    HYPRE_Int          *int_buf_data = NULL;
    HYPRE_BigInt       *big_convert;
    HYPRE_BigInt       *big_convert_offd = NULL;
@@ -96,32 +96,32 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    fine_to_fine = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    big_convert = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST);
 
-   cpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
-   fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
+   cpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
+   fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel private(i,j,jj,start,stop,row,cpt,fpt,d_count_FC,d_count_FF,o_count_FC,o_count_FF)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
 
-      start = (n_fine/num_threads)*my_thread_num;
-      if (my_thread_num == num_threads-1)
+      start = (n_fine / num_threads) * my_thread_num;
+      if (my_thread_num == num_threads - 1)
       {
          stop = n_fine;
       }
       else
       {
-         stop = (n_fine/num_threads)*(my_thread_num+1);
+         stop = (n_fine / num_threads) * (my_thread_num + 1);
       }
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
-            cpt_array[my_thread_num+1]++;
+            cpt_array[my_thread_num + 1]++;
          }
          else
          {
-            fpt_array[my_thread_num+1]++;
+            fpt_array[my_thread_num + 1]++;
          }
       }
 
@@ -130,10 +130,10 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 #endif
       if (my_thread_num == 0)
       {
-         for (i=1; i < num_threads; i++)
+         for (i = 1; i < num_threads; i++)
          {
-            cpt_array[i+1] += cpt_array[i];
-            fpt_array[i+1] += fpt_array[i];
+            cpt_array[i + 1] += cpt_array[i];
+            fpt_array[i + 1] += fpt_array[i];
          }
       }
 #ifdef HYPRE_USING_OPENMP
@@ -142,7 +142,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
       cpt = cpt_array[my_thread_num];
       fpt = fpt_array[my_thread_num];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
@@ -166,21 +166,21 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          big_Fpts = n_Fpts;
 
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          if (my_id == num_procs - 1)
          {
             total_global_fpts = fpts_starts[1];
             total_global_cpts = cpts_starts[1];
          }
-         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
       }
 #ifdef HYPRE_USING_OPENMP
       #pragma omp barrier
 #endif
 
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
@@ -213,10 +213,10 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
             {
-               int_buf_data[index] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-               big_buf_data[index++] = big_convert[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               int_buf_data[index] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+               big_buf_data[index++] = big_convert[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
             }
          }
 
@@ -233,7 +233,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          {
             if (CF_marker[i] < 0)
             {
-               for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+               for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
                {
                   marker_offd[S_offd_j[j]] = 1;
                }
@@ -244,7 +244,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          num_cols_offd_A_FF = 0;
          if (num_cols_A_offd)
          {
-            for (i=0; i < num_cols_A_offd; i++)
+            for (i = 0; i < num_cols_A_offd; i++)
             {
                if (CF_marker_offd[i] > 0 && marker_offd[i] > 0)
                {
@@ -263,7 +263,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
             cpt = 0;
             fpt = 0;
-            for (i=0; i < num_cols_A_offd; i++)
+            for (i = 0; i < num_cols_A_offd; i++)
             {
                if (CF_marker_offd[i] > 0 && marker_offd[i] > 0)
                {
@@ -276,10 +276,10 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             }
          }
 
-         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
-         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
-         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
-         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
+         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
+         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
+         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -290,13 +290,13 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
       o_count_FC = 0;
       o_count_FF = 0;
       row = fpt_array[my_thread_num];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] < 0)
          {
             row++;
             d_count_FF++; /* account for diagonal element */
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
                if (CF_marker[jj] > 0)
@@ -310,7 +310,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             }
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[row] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jj = S_offd_j[j];
                if (CF_marker_offd[jj] > 0)
@@ -333,10 +333,10 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
       if (my_thread_num == 0)
       {
          HYPRE_Int fpt2;
-         for (i=1; i<num_threads+1; i++)
+         for (i = 1; i < num_threads + 1; i++)
          {
             fpt = fpt_array[i];
-            fpt2 = fpt_array[i-1];
+            fpt2 = fpt_array[i - 1];
 
             if (fpt == fpt2)
             {
@@ -353,14 +353,14 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          d_count_FF = A_FF_diag_i[row];
          o_count_FC = A_FC_offd_i[row];
          o_count_FF = A_FF_offd_i[row];
-         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, memory_location_P);
-         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, memory_location_P);
-         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, memory_location_P);
-         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, memory_location_P);
-         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, memory_location_P);
-         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, memory_location_P);
-         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, memory_location_P);
-         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, memory_location_P);
+         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int, d_count_FF, memory_location_P);
+         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int, d_count_FC, memory_location_P);
+         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int, o_count_FF, memory_location_P);
+         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int, o_count_FC, memory_location_P);
+         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real, d_count_FF, memory_location_P);
+         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real, d_count_FC, memory_location_P);
+         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real, o_count_FF, memory_location_P);
+         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real, o_count_FC, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -371,7 +371,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
       d_count_FF = A_FF_diag_i[row];
       o_count_FC = A_FC_offd_i[row];
       o_count_FF = A_FF_offd_i[row];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] < 0)
          {
@@ -380,9 +380,9 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             jA = A_diag_i[i];
             A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
             A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
-               jA = A_diag_i[i]+1;
+               jA = A_diag_i[i] + 1;
                jS = S_diag_j[j];
                while (A_diag_j[jA] != jS) { jA++; }
                if (CF_marker[S_diag_j[j]] > 0)
@@ -398,7 +398,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             }
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[row] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jA = A_offd_i[i];
                jS = S_offd_j[j];
@@ -526,8 +526,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *A_FC;
    hypre_CSRMatrix    *A_FC_diag, *A_FC_offd;
-   HYPRE_Int          *A_FC_diag_i, *A_FC_diag_j, *A_FC_offd_i, *A_FC_offd_j=NULL;
-   HYPRE_Complex      *A_FC_diag_data, *A_FC_offd_data=NULL;
+   HYPRE_Int          *A_FC_diag_i, *A_FC_diag_j, *A_FC_offd_i, *A_FC_offd_j = NULL;
+   HYPRE_Complex      *A_FC_diag_data, *A_FC_offd_data = NULL;
    HYPRE_Int           num_cols_offd_A_FC;
    HYPRE_BigInt       *col_map_offd_A_FC = NULL;
 
@@ -572,38 +572,38 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    fine_to_fine = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    big_convert = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST);
 
-   cpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
-   fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
-   new_fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
+   cpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
+   fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
+   new_fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel private(i,j,jj,start,stop,row,rowc,cpt,new_fpt,fpt,d_count_FC,d_count_FF,o_count_FC,o_count_FF)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
 
-      start = (n_fine/num_threads)*my_thread_num;
-      if (my_thread_num == num_threads-1)
+      start = (n_fine / num_threads) * my_thread_num;
+      if (my_thread_num == num_threads - 1)
       {
          stop = n_fine;
       }
       else
       {
-         stop = (n_fine/num_threads)*(my_thread_num+1);
+         stop = (n_fine / num_threads) * (my_thread_num + 1);
       }
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
-            cpt_array[my_thread_num+1]++;
+            cpt_array[my_thread_num + 1]++;
          }
          else if (CF_marker[i] == -2)
          {
-            new_fpt_array[my_thread_num+1]++;
-            fpt_array[my_thread_num+1]++;
+            new_fpt_array[my_thread_num + 1]++;
+            fpt_array[my_thread_num + 1]++;
          }
          else
          {
-            fpt_array[my_thread_num+1]++;
+            fpt_array[my_thread_num + 1]++;
          }
       }
 
@@ -612,11 +612,11 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 #endif
       if (my_thread_num == 0)
       {
-         for (i=1; i < num_threads; i++)
+         for (i = 1; i < num_threads; i++)
          {
-            cpt_array[i+1] += cpt_array[i];
-            fpt_array[i+1] += fpt_array[i];
-            new_fpt_array[i+1] += new_fpt_array[i];
+            cpt_array[i + 1] += cpt_array[i];
+            fpt_array[i + 1] += fpt_array[i];
+            new_fpt_array[i + 1] += new_fpt_array[i];
          }
       }
 #ifdef HYPRE_USING_OPENMP
@@ -625,7 +625,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 
       cpt = cpt_array[my_thread_num];
       fpt = fpt_array[my_thread_num];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
@@ -652,8 +652,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
@@ -662,15 +662,15 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             total_global_fpts = fpts_starts[1];
             total_global_cpts = cpts_starts[1];
          }
-         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
       }
 #ifdef HYPRE_USING_OPENMP
       #pragma omp barrier
 #endif
 
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
@@ -703,10 +703,10 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
             {
-               int_buf_data[index] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-               big_buf_data[index++] = big_convert[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               int_buf_data[index] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+               big_buf_data[index++] = big_convert[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
             }
          }
 
@@ -722,7 +722,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          num_cols_offd_A_FF = 0;
          if (num_cols_A_offd)
          {
-            for (i=0; i < num_cols_A_offd; i++)
+            for (i = 0; i < num_cols_A_offd; i++)
             {
                if (CF_marker_offd[i] > 0)
                {
@@ -741,7 +741,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 
             cpt = 0;
             fpt = 0;
-            for (i=0; i < num_cols_A_offd; i++)
+            for (i = 0; i < num_cols_A_offd; i++)
             {
                if (CF_marker_offd[i] > 0)
                {
@@ -754,10 +754,10 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             }
          }
 
-         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, memory_location_P);
-         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
-         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, memory_location_P);
-         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int, n_new_Fpts + 1, memory_location_P);
+         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
+         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int, n_new_Fpts + 1, memory_location_P);
+         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -769,14 +769,14 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
       o_count_FF = 0;
       row = new_fpt_array[my_thread_num];
       rowc = fpt_array[my_thread_num];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] == -2)
          {
             row++;
             rowc++;
             d_count_FF++; /* account for diagonal element */
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
                if (CF_marker[jj] > 0)
@@ -790,7 +790,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             }
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[rowc] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jj = S_offd_j[j];
                if (CF_marker_offd[jj] > 0)
@@ -808,7 +808,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          else if (CF_marker[i] < 0)
          {
             rowc++;
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
                if (CF_marker[jj] > 0)
@@ -817,7 +817,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
                }
             }
             A_FC_diag_i[rowc] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jj = S_offd_j[j];
                if (CF_marker_offd[jj] > 0)
@@ -835,12 +835,12 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
       if (my_thread_num == 0)
       {
          HYPRE_Int fpt2, new_fpt2;
-         for (i=1; i<num_threads+1; i++)
+         for (i = 1; i < num_threads + 1; i++)
          {
             fpt = fpt_array[i];
             new_fpt = new_fpt_array[i];
-            fpt2 = fpt_array[i-1];
-            new_fpt2 = new_fpt_array[i-1];
+            fpt2 = fpt_array[i - 1];
+            new_fpt2 = new_fpt_array[i - 1];
             if (new_fpt != new_fpt2)
             {
                A_FF_diag_i[new_fpt] += A_FF_diag_i[new_fpt2];
@@ -858,14 +858,14 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          d_count_FF = A_FF_diag_i[row];
          o_count_FC = A_FC_offd_i[rowc];
          o_count_FF = A_FF_offd_i[row];
-         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, memory_location_P);
-         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, memory_location_P);
-         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, memory_location_P);
-         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, memory_location_P);
-         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, memory_location_P);
-         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, memory_location_P);
-         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, memory_location_P);
-         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, memory_location_P);
+         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int, d_count_FF, memory_location_P);
+         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int, d_count_FC, memory_location_P);
+         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int, o_count_FF, memory_location_P);
+         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int, o_count_FC, memory_location_P);
+         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real, d_count_FF, memory_location_P);
+         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real, d_count_FC, memory_location_P);
+         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real, o_count_FF, memory_location_P);
+         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real, o_count_FC, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -877,7 +877,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
       d_count_FF = A_FF_diag_i[row];
       o_count_FC = A_FC_offd_i[rowc];
       o_count_FF = A_FF_offd_i[row];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] == -2)
          {
@@ -887,9 +887,9 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             jA = A_diag_i[i];
             A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
             A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
-               jA = A_diag_i[i]+1;
+               jA = A_diag_i[i] + 1;
                jS = S_diag_j[j];
                while (A_diag_j[jA] != jS) { jA++; }
                if (CF_marker[S_diag_j[j]] > 0)
@@ -905,7 +905,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             }
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[rowc] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jA = A_offd_i[i];
                jS = S_offd_j[j];
@@ -928,9 +928,9 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          {
             HYPRE_Int jS, jA;
             rowc++;
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
-               jA = A_diag_i[i]+1;
+               jA = A_diag_i[i] + 1;
                jS = S_diag_j[j];
                while (A_diag_j[jA] != jS) { jA++; }
                if (CF_marker[S_diag_j[j]] > 0)
@@ -940,7 +940,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
                }
             }
             A_FC_diag_i[rowc] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jA = A_offd_i[i];
                jS = S_offd_j[j];
@@ -1065,8 +1065,8 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    HYPRE_Real         *D_lambda;
    hypre_ParCSRMatrix *A_FC;
    hypre_CSRMatrix    *A_FC_diag, *A_FC_offd;
-   HYPRE_Int          *A_FC_diag_i, *A_FC_diag_j, *A_FC_offd_i, *A_FC_offd_j=NULL;
-   HYPRE_Complex      *A_FC_diag_data, *A_FC_offd_data=NULL;
+   HYPRE_Int          *A_FC_diag_i, *A_FC_diag_j, *A_FC_offd_i, *A_FC_offd_j = NULL;
+   HYPRE_Complex      *A_FC_diag_data, *A_FC_offd_data = NULL;
    HYPRE_Int           num_cols_offd_A_FC;
    HYPRE_BigInt       *col_map_offd_A_FC = NULL;
 
@@ -1111,38 +1111,38 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
    fine_to_fine = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    big_convert = hypre_CTAlloc(HYPRE_BigInt, n_fine, HYPRE_MEMORY_HOST);
 
-   cpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
-   fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
-   new_fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads+1, HYPRE_MEMORY_HOST);
+   cpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
+   fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
+   new_fpt_array = hypre_CTAlloc(HYPRE_Int, num_threads + 1, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel private(i,j,jj,start,stop,row,rowc,cpt,new_fpt,fpt,d_count_FC,d_count_FF,o_count_FC,o_count_FF)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
 
-      start = (n_fine/num_threads)*my_thread_num;
-      if (my_thread_num == num_threads-1)
+      start = (n_fine / num_threads) * my_thread_num;
+      if (my_thread_num == num_threads - 1)
       {
          stop = n_fine;
       }
       else
       {
-         stop = (n_fine/num_threads)*(my_thread_num+1);
+         stop = (n_fine / num_threads) * (my_thread_num + 1);
       }
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
-            cpt_array[my_thread_num+1]++;
+            cpt_array[my_thread_num + 1]++;
          }
          else if (CF_marker[i] == -2)
          {
-            new_fpt_array[my_thread_num+1]++;
-            fpt_array[my_thread_num+1]++;
+            new_fpt_array[my_thread_num + 1]++;
+            fpt_array[my_thread_num + 1]++;
          }
          else
          {
-            fpt_array[my_thread_num+1]++;
+            fpt_array[my_thread_num + 1]++;
          }
       }
 
@@ -1151,11 +1151,11 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
 #endif
       if (my_thread_num == 0)
       {
-         for (i=1; i < num_threads; i++)
+         for (i = 1; i < num_threads; i++)
          {
-            cpt_array[i+1] += cpt_array[i];
-            fpt_array[i+1] += fpt_array[i];
-            new_fpt_array[i+1] += new_fpt_array[i];
+            cpt_array[i + 1] += cpt_array[i];
+            fpt_array[i + 1] += fpt_array[i];
+            new_fpt_array[i + 1] += new_fpt_array[i];
          }
       }
 #ifdef HYPRE_USING_OPENMP
@@ -1164,7 +1164,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
 
       cpt = cpt_array[my_thread_num];
       fpt = fpt_array[my_thread_num];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
@@ -1191,8 +1191,8 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
 
          fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          new_fpts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         hypre_MPI_Scan(&big_Fpts, fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts+1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
@@ -1201,15 +1201,15 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             total_global_fpts = fpts_starts[1];
             total_global_cpts = cpts_starts[1];
          }
-         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
       }
 #ifdef HYPRE_USING_OPENMP
       #pragma omp barrier
 #endif
 
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] > 0)
          {
@@ -1242,10 +1242,10 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          for (i = 0; i < num_sends; i++)
          {
             startc = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            for (j = startc; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
             {
-               int_buf_data[index] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-               big_buf_data[index++] = big_convert[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               int_buf_data[index] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+               big_buf_data[index++] = big_convert[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
             }
          }
 
@@ -1261,7 +1261,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          num_cols_offd_A_FF = 0;
          if (num_cols_A_offd)
          {
-            for (i=0; i < num_cols_A_offd; i++)
+            for (i = 0; i < num_cols_A_offd; i++)
             {
                if (CF_marker_offd[i] > 0)
                {
@@ -1280,7 +1280,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
 
             cpt = 0;
             fpt = 0;
-            for (i=0; i < num_cols_A_offd; i++)
+            for (i = 0; i < num_cols_A_offd; i++)
             {
                if (CF_marker_offd[i] > 0)
                {
@@ -1293,10 +1293,10 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             }
          }
 
-         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, memory_location_P);
-         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
-         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int,n_new_Fpts+1, memory_location_P);
-         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int,n_Fpts+1, memory_location_P);
+         A_FF_diag_i = hypre_CTAlloc(HYPRE_Int, n_new_Fpts + 1, memory_location_P);
+         A_FC_diag_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
+         A_FF_offd_i = hypre_CTAlloc(HYPRE_Int, n_new_Fpts + 1, memory_location_P);
+         A_FC_offd_i = hypre_CTAlloc(HYPRE_Int, n_Fpts + 1, memory_location_P);
          D_lambda = hypre_CTAlloc(HYPRE_Real, n_Fpts, memory_location_P);
       }
 
@@ -1309,14 +1309,14 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
       o_count_FF = 0;
       row = new_fpt_array[my_thread_num];
       rowc = fpt_array[my_thread_num];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] == -2)
          {
             row++;
             rowc++;
             d_count_FF++; /* account for diagonal element */
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
                if (CF_marker[jj] > 0)
@@ -1330,7 +1330,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             }
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[rowc] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jj = S_offd_j[j];
                if (CF_marker_offd[jj] > 0)
@@ -1348,7 +1348,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          else if (CF_marker[i] < 0)
          {
             rowc++;
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
                if (CF_marker[jj] > 0)
@@ -1357,7 +1357,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                }
             }
             A_FC_diag_i[rowc] = d_count_FC;
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jj = S_offd_j[j];
                if (CF_marker_offd[jj] > 0)
@@ -1375,12 +1375,12 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
       if (my_thread_num == 0)
       {
          HYPRE_Int fpt2, new_fpt2;
-         for (i=1; i<num_threads+1; i++)
+         for (i = 1; i < num_threads + 1; i++)
          {
             fpt = fpt_array[i];
             new_fpt = new_fpt_array[i];
-            fpt2 = fpt_array[i-1];
-            new_fpt2 = new_fpt_array[i-1];
+            fpt2 = fpt_array[i - 1];
+            new_fpt2 = new_fpt_array[i - 1];
             if (fpt != fpt2)
             {
                A_FC_diag_i[fpt] += A_FC_diag_i[fpt2];
@@ -1398,14 +1398,14 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          d_count_FF = A_FF_diag_i[row];
          o_count_FC = A_FC_offd_i[rowc];
          o_count_FF = A_FF_offd_i[row];
-         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FF, memory_location_P);
-         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int,d_count_FC, memory_location_P);
-         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FF, memory_location_P);
-         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int,o_count_FC, memory_location_P);
-         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FF, memory_location_P);
-         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real,d_count_FC, memory_location_P);
-         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FF, memory_location_P);
-         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real,o_count_FC, memory_location_P);
+         A_FF_diag_j = hypre_CTAlloc(HYPRE_Int, d_count_FF, memory_location_P);
+         A_FC_diag_j = hypre_CTAlloc(HYPRE_Int, d_count_FC, memory_location_P);
+         A_FF_offd_j = hypre_CTAlloc(HYPRE_Int, o_count_FF, memory_location_P);
+         A_FC_offd_j = hypre_CTAlloc(HYPRE_Int, o_count_FC, memory_location_P);
+         A_FF_diag_data = hypre_CTAlloc(HYPRE_Real, d_count_FF, memory_location_P);
+         A_FC_diag_data = hypre_CTAlloc(HYPRE_Real, d_count_FC, memory_location_P);
+         A_FF_offd_data = hypre_CTAlloc(HYPRE_Real, o_count_FF, memory_location_P);
+         A_FC_offd_data = hypre_CTAlloc(HYPRE_Real, o_count_FC, memory_location_P);
       }
 
 #ifdef HYPRE_USING_OPENMP
@@ -1417,7 +1417,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
       d_count_FF = A_FF_diag_i[row];
       o_count_FC = A_FC_offd_i[rowc];
       o_count_FF = A_FF_offd_i[row];
-      for (i=start; i < stop; i++)
+      for (i = start; i < stop; i++)
       {
          if (CF_marker[i] == -2)
          {
@@ -1427,9 +1427,9 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             jA = A_diag_i[i];
             A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
             A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
-               jA = A_diag_i[i]+1;
+               jA = A_diag_i[i] + 1;
                jS = S_diag_j[j];
                while (A_diag_j[jA] != jS) { jA++; }
                if (CF_marker[S_diag_j[j]] > 0)
@@ -1445,7 +1445,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
                }
             }
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jA = A_offd_i[i];
                jS = S_offd_j[j];
@@ -1463,7 +1463,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   A_FF_offd_data[o_count_FF++] = A_offd_data[jA++];
                }
             }
-            if (sum) { D_lambda[rowc] = D_lambda[rowc]/sum; }
+            if (sum) { D_lambda[rowc] = D_lambda[rowc] / sum; }
             rowc++;
             A_FF_diag_i[row] = d_count_FF;
             A_FC_diag_i[rowc] = d_count_FC;
@@ -1474,9 +1474,9 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          {
             HYPRE_Int jS, jA;
             HYPRE_Real sum = 0;
-            for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
             {
-               jA = A_diag_i[i]+1;
+               jA = A_diag_i[i] + 1;
                jS = S_diag_j[j];
                while (A_diag_j[jA] != jS) { jA++; }
                if (CF_marker[S_diag_j[j]] > 0)
@@ -1490,7 +1490,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   D_lambda[rowc] += A_diag_data[jA];
                }
             }
-            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
             {
                jA = A_offd_i[i];
                jS = S_offd_j[j];
@@ -1506,7 +1506,7 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                   D_lambda[rowc] += A_offd_data[jA];
                }
             }
-            if (sum) { D_lambda[rowc] = D_lambda[rowc]/sum; }
+            if (sum) { D_lambda[rowc] = D_lambda[rowc] / sum; }
             rowc++;
             A_FC_diag_i[rowc] = d_count_FC;
             A_FC_offd_i[rowc] = o_count_FC;

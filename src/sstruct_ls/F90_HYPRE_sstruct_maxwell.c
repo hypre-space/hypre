@@ -184,7 +184,7 @@ hypre_F90_IFACE(hypre_sstructmaxwellsetconstant, HYPRE_SSTRUCTMAXWELLSETCONSTANT
 {
    *ierr = (hypre_F90_Int)
            ( HYPRE_SStructMaxwellSetConstantCoef(
-                (HYPRE_SStructSolver ) *solver,
+                (HYPRE_SStructSolver ) * solver,
                 hypre_F90_PassInt (constant_coef)) );
 }
 

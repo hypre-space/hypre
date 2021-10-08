@@ -259,7 +259,7 @@ hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
                                      HYPRE_Int     *edge_bc,
                                      HYPRE_Int     *edge_bc_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= nrows)
    {
@@ -405,13 +405,13 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             for (i = 0; i < ne; i++)
             {
                l1_norm = 0.0;
-               for (j = AdI[i]; j < AdI[i+1]; j++)
+               for (j = AdI[i]; j < AdI[i + 1]; j++)
                   if (AdJ[j] != i)
                   {
                      l1_norm += fabs(AdA[j]);
                   }
                if (AoI)
-                  for (j = AoI[i]; j < AoI[i+1]; j++)
+                  for (j = AoI[i]; j < AoI[i + 1]; j++)
                   {
                      l1_norm += fabs(AoA[j]);
                   }
@@ -464,9 +464,9 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             for (i = 0; i < num_sends; i++)
             {
                start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-               for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+               for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
                {
-                  k = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+                  k = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
                   int_buf_data[index++] = edge_bc[k];
                }
             }
@@ -506,21 +506,21 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             {
                bdr = 0;
                /* A vertex is boundary if it belongs to a boundary edge */
-               for (j = GtdI[i]; j < GtdI[i+1]; j++)
+               for (j = GtdI[i]; j < GtdI[i + 1]; j++)
                   if (edge_bc[GtdJ[j]]) { bdr = 1; break; }
                if (!bdr && GtoI)
-                  for (j = GtoI[i]; j < GtoI[i+1]; j++)
+                  for (j = GtoI[i]; j < GtoI[i + 1]; j++)
                      if (offd_edge_bc[GtoJ[j]]) { bdr = 1; break; }
 
                if (bdr)
                {
-                  for (j = GtdI[i]; j < GtdI[i+1]; j++)
+                  for (j = GtdI[i]; j < GtdI[i + 1]; j++)
                      /* if (!edge_bc[GtdJ[j]]) */
                   {
                      GtdA[j] = 0.0;
                   }
                   if (GtoI)
-                     for (j = GtoI[i]; j < GtoI[i+1]; j++)
+                     for (j = GtoI[i]; j < GtoI[i + 1]; j++)
                         /* if (!offd_edge_bc[GtoJ[j]]) */
                      {
                         GtoA[j] = 0.0;
@@ -748,7 +748,7 @@ void hypre_AMEOperatorB(void *data, void* x, void* y)
    hypre_AMSData *ams_data = ame_data -> precond;
 
    hypre_ParVectorSetConstantValues((hypre_ParVector*)y, 0.0);
-   hypre_AMSSolve(ame_data -> precond, ams_data -> A,(hypre_ParVector*) x,(hypre_ParVector*) y);
+   hypre_AMSSolve(ame_data -> precond, ams_data -> A, (hypre_ParVector*) x, (hypre_ParVector*) y);
 
    hypre_AMEDiscrDivFreeComponent(data, (hypre_ParVector *)y);
 }

@@ -49,7 +49,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int      HashSize,      /* capacity of the
       }
 
       /* try to insert key+1 into slot j */
-      HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys+j), -1, key);
+      HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 
       if (old == -1 || old == key)
       {
@@ -61,7 +61,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int      HashSize,      /* capacity of the
             }
          }
          /* this slot was open or contained 'key', update value */
-         atomicAdd((HYPRE_Complex*)(HashVals+j), val);
+         atomicAdd((HYPRE_Complex*)(HashVals + j), val);
          return j;
       }
    }
@@ -125,7 +125,7 @@ hypre_spgemm_compute_row_numer( HYPRE_Int      rowi,
       HYPRE_Int tmp = 0;
       if (rowB != -1 && threadIdx.x < 2)
       {
-         tmp = read_only_load(ib+rowB+threadIdx.x);
+         tmp = read_only_load(ib + rowB + threadIdx.x);
       }
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
       const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
@@ -271,8 +271,8 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 #pragma unroll
          for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
          {
-            jg[istart_g+k] = -1;
-            ag[istart_g+k] = 0.0;
+            jg[istart_g + k] = -1;
+            ag[istart_g + k] = 0.0;
          }
       }
 
@@ -378,8 +378,8 @@ hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
       HYPRE_Int p = istart_x - istart_c;
       for (HYPRE_Int k = istart_c + lane_id; k < iend_c; k += HYPRE_WARP_SIZE)
       {
-         jc[k] = jx[k+p];
-         ac[k] = ax[k+p];
+         jc[k] = jx[k + p];
+         ac[k] = ax[k + p];
       }
    }
 }
@@ -429,8 +429,8 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 
    if (shmem_maxbytes > 49152)
    {
-      HYPRE_CUDA_CALL( cudaFuncSetAttribute(hypre_spgemm_numeric<num_warps_per_block, shmem_hash_size,
-                                            !exact_rownnz, hash_type>,
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(hypre_spgemm_numeric < num_warps_per_block, shmem_hash_size,
+                                            !exact_rownnz, hash_type >,
                                             cudaFuncAttributeMaxDynamicSharedMemorySize, shmem_maxbytes) );
    }
 #endif
@@ -467,8 +467,8 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 
    hypre_create_ija(m, d_rc, d_ic, &d_jc, &d_c, &nnzC_nume);
 
-   HYPRE_CUDA_LAUNCH ( (hypre_spgemm_numeric<num_warps_per_block, shmem_hash_size, !exact_rownnz,
-                        hash_type>),
+   HYPRE_CUDA_LAUNCH ( (hypre_spgemm_numeric < num_warps_per_block, shmem_hash_size, !exact_rownnz,
+                        hash_type > ),
                        gDim, bDim, /* shmem_size, */
                        m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
                        d_ghash_i, d_ghash_j, d_ghash_a );

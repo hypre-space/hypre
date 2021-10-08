@@ -33,8 +33,8 @@ struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
       const HYPRE_Int local_idx = thrust::get<0>(t);
       const HYPRE_Int cf_marker = thrust::get<1>(t);
       const HYPRE_Int s = cf_marker < 0;
-      const HYPRE_Int m = 1 - 2*s;
-      return m*(local_idx + CF_first[s] + s);
+      const HYPRE_Int m = 1 - 2 * s;
+      return m * (local_idx + CF_first[s] + s);
    }
 };
 
@@ -249,11 +249,11 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    n_local    = hypre_ParCSRMatrixNumRows(A);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
 
-   if (my_id == (num_procs -1))
+   if (my_id == (num_procs - 1))
    {
       nC_global = cpts_starts[1];
    }
-   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
    fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];
@@ -279,11 +279,11 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       f2pts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&nF2_local_big, f2pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f2pts_starts[0] = f2pts_starts[1] - nF2_local_big;
-      if (my_id == (num_procs -1))
+      if (my_id == (num_procs - 1))
       {
          nF2_global = f2pts_starts[1];
       }
-      hypre_MPI_Bcast(&nF2_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+      hypre_MPI_Bcast(&nF2_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
 
    /* map from all points (i.e, F+C) to F/C indices */
@@ -452,8 +452,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          AFF_offd_j );
       col_map_offd_AFF = hypre_TAlloc(HYPRE_BigInt, num_cols_AFF_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = HYPRE_THRUST_CALL( copy_if,
-                                                     thrust::make_transform_iterator(recv_buf, -_1-1),
-                                                     thrust::make_transform_iterator(recv_buf, -_1-1) + num_cols_A_offd,
+                                                     thrust::make_transform_iterator(recv_buf, -_1 - 1),
+                                                     thrust::make_transform_iterator(recv_buf, -_1 - 1) + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AFF,
                                                      thrust::identity<HYPRE_Int>() );
@@ -745,8 +745,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          ACF_offd_j );
       col_map_offd_ACF = hypre_TAlloc(HYPRE_BigInt, num_cols_ACF_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_BigInt *tmp_end_big = HYPRE_THRUST_CALL( copy_if,
-                                                     thrust::make_transform_iterator(recv_buf, -_1-1),
-                                                     thrust::make_transform_iterator(recv_buf, -_1-1) + num_cols_A_offd,
+                                                     thrust::make_transform_iterator(recv_buf, -_1 - 1),
+                                                     thrust::make_transform_iterator(recv_buf, -_1 - 1) + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACF,
                                                      thrust::identity<HYPRE_Int>());
@@ -1062,11 +1062,11 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixDeviceColMapOffd(A) = col_map_offd_A;
    }
 
-   if (my_id == (num_procs -1))
+   if (my_id == (num_procs - 1))
    {
       nC_global = cpts_starts[1];
    }
-   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
    fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];

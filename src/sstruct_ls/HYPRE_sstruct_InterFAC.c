@@ -107,8 +107,8 @@ HYPRE_SStructFACZeroCFSten( HYPRE_SStructMatrix  A,
                             HYPRE_Int            part,
                             HYPRE_Int            rfactors[HYPRE_MAXDIM] )
 {
-   hypre_SStructPMatrix   *Af= hypre_SStructMatrixPMatrix(A, part);
-   hypre_SStructPMatrix   *Ac= hypre_SStructMatrixPMatrix(A, part-1);
+   hypre_SStructPMatrix   *Af = hypre_SStructMatrixPMatrix(A, part);
+   hypre_SStructPMatrix   *Ac = hypre_SStructMatrixPMatrix(A, part - 1);
 
    return ( hypre_FacZeroCFSten(Af, Ac, (hypre_SStructGrid *)grid,
                                 part, rfactors) );
@@ -122,7 +122,7 @@ HYPRE_SStructFACZeroFCSten( HYPRE_SStructMatrix  A,
                             HYPRE_SStructGrid    grid,
                             HYPRE_Int            part )
 {
-   hypre_SStructPMatrix   *Af= hypre_SStructMatrixPMatrix(A, part);
+   hypre_SStructPMatrix   *Af = hypre_SStructMatrixPMatrix(A, part);
 
    return ( hypre_FacZeroFCSten(Af, (hypre_SStructGrid *)grid,
                                 part) );

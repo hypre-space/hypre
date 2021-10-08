@@ -265,7 +265,7 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
                                    HYPRE_Int  *CF_marker_diag)
 {
    /* global_thread_id */
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i >= nrows)
    {
@@ -281,8 +281,8 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
    }
    else
    {
-      if ( read_only_load(&S_diag_i[i+1]) - read_only_load(&S_diag_i[i]) == 0 &&
-           read_only_load(&S_offd_i[i+1]) - read_only_load(&S_offd_i[i]) == 0 )
+      if ( read_only_load(&S_diag_i[i + 1]) - read_only_load(&S_diag_i[i]) == 0 &&
+           read_only_load(&S_offd_i[i + 1]) - read_only_load(&S_offd_i[i]) == 0 )
       {
          CF_marker_i = (CF_init == 3 || CF_init == 4) ? C_PT : SF_PT;
          measure_diag[i] = 0.0;
@@ -373,7 +373,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
                                        HYPRE_Int  *CF_marker_diag,
                                        HYPRE_Int  *CF_marker_offd)
 {
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (warp_id >= graph_diag_size)
    {

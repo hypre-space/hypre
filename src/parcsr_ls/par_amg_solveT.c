@@ -72,11 +72,11 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    hypre_ParVector  *Residual;
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging   = hypre_ParAMGDataLogging(amg_data);
-   if ( amg_logging>1 )
+   if ( amg_logging > 1 )
    {
       Residual = hypre_ParAMGDataResidual(amg_data);
    }
@@ -176,12 +176,12 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
       relative_resid = resid_nrm_init / rhs_norm;
    }
 
-   if (my_id ==0 && (amg_print_level > 1))
+   if (my_id == 0 && (amg_print_level > 1))
    {
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
-      hypre_printf("    Initial    %e                 %e\n",resid_nrm_init,
+      hypre_printf("    Initial    %e                 %e\n", resid_nrm_init,
                    relative_resid);
    }
 
@@ -244,10 +244,10 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((HYPRE_Real) cycle_count)));
+   conv_factor = pow((resid_nrm / resid_nrm_init), (1.0 / ((HYPRE_Real) cycle_count)));
 
 
-   for (j=0; j<hypre_ParAMGDataNumLevels(amg_data); j++)
+   for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
    {
       total_coeffs += num_coeffs[j];
       total_variables += num_variables[j];
@@ -271,13 +271,13 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
       {
          hypre_printf("\n\n==============================================");
          hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-         hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+         hypre_printf("      within the allowed %d V-cycles\n", max_iter);
          hypre_printf("==============================================");
       }
-      hypre_printf("\n\n Average Convergence Factor = %f",conv_factor);
-      hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      hypre_printf("                operator = %f\n",operat_cmplxty);
-      hypre_printf("                   cycle = %f\n\n",cycle_cmplxty);
+      hypre_printf("\n\n Average Convergence Factor = %f", conv_factor);
+      hypre_printf("\n\n     Complexity:    grid = %f\n", grid_cmplxty);
+      hypre_printf("                operator = %f\n", operat_cmplxty);
+      hypre_printf("                   cycle = %f\n\n", cycle_cmplxty);
    }
 
    /*----------------------------------------------------------
@@ -465,16 +465,16 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
           * VERY sloppy approximation to cycle complexity
           *-----------------------------------------------*/
 
-         if (old_version && level < num_levels -1)
+         if (old_version && level < num_levels - 1)
          {
             switch (relax_points)
             {
                case 1:
-                  cycle_op_count += num_coeffs[level+1];
+                  cycle_op_count += num_coeffs[level + 1];
                   break;
 
                case -1:
-                  cycle_op_count += (num_coeffs[level]-num_coeffs[level+1]);
+                  cycle_op_count += (num_coeffs[level] - num_coeffs[level + 1]);
                   break;
             }
          }
@@ -522,7 +522,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
 
       --lev_counter[level];
 
-      if (lev_counter[level] >= 0 && level != num_levels-1)
+      if (lev_counter[level] >= 0 && level != num_levels - 1)
       {
 
          /*---------------------------------------------------------------
@@ -537,7 +537,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
 
          hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
 
-         hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+         hypre_ParVectorCopy(F_array[fine_grid], Vtemp);
          alpha = -1.0;
          beta = 1.0;
          hypre_ParCSRMatrixMatvecT(alpha, A_array[fine_grid], U_array[fine_grid],
@@ -546,15 +546,15 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          alpha = 1.0;
          beta = 0.0;
 
-         hypre_ParCSRMatrixMatvecT(alpha,P_array[fine_grid],Vtemp,
-                                   beta,F_array[coarse_grid]);
+         hypre_ParCSRMatrixMatvecT(alpha, P_array[fine_grid], Vtemp,
+                                   beta, F_array[coarse_grid]);
 
          HYPRE_ANNOTATE_MGLEVEL_END(level);
 
          ++level;
-         lev_counter[level] = hypre_max(lev_counter[level],cycle_type);
+         lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
          cycle_param = 1;
-         if (level == num_levels-1) { cycle_param = 3; }
+         if (level == num_levels - 1) { cycle_param = 3; }
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
       }
@@ -671,13 +671,13 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
 
-         hypre_ParVectorCopy(f,Vtemp);
+         hypre_ParVectorCopy(f, Vtemp);
 
          /*-----------------------------------------------------------------
           * Perform MatvecT Vtemp=f-A^Tu
           *-----------------------------------------------------------------*/
 
-         hypre_ParCSRMatrixMatvecT(-1.0,A, u, 1.0, Vtemp);
+         hypre_ParCSRMatrixMatvecT(-1.0, A, u, 1.0, Vtemp);
          for (i = 0; i < n; i++)
          {
 
@@ -712,7 +712,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
             A_CSR_data = hypre_CSRMatrixData(A_CSR);
             f_vector_data = hypre_VectorData(f_vector);
 
-            A_mat = hypre_CTAlloc(HYPRE_Real,  n_global*n_global, HYPRE_MEMORY_HOST);
+            A_mat = hypre_CTAlloc(HYPRE_Real,  n_global * n_global, HYPRE_MEMORY_HOST);
             b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);
 
             /*---------------------------------------------------------------
@@ -721,10 +721,10 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
 
             for (i = 0; i < n_global; i++)
             {
-               for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
+               for (jj = A_CSR_i[i]; jj < A_CSR_i[i + 1]; jj++)
                {
                   column = A_CSR_j[jj];
-                  A_mat[column*n_global+i] = A_CSR_data[jj];
+                  A_mat[column * n_global + i] = A_CSR_data[jj];
                }
                b_vec[i] = f_vector_data[i];
             }
@@ -733,7 +733,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
 
             for (i = 0; i < n; i++)
             {
-               u_data[i] = b_vec[first_index+i];
+               u_data[i] = b_vec[first_index + i];
             }
 
             hypre_TFree(A_mat, HYPRE_MEMORY_HOST);

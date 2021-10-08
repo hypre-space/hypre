@@ -123,7 +123,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParILUDataNumIterations(ilu_data) = 0;
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -176,7 +176,7 @@ hypre_ILUSolve( void               *ilu_vdata,
          and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
-         ieee_check = resnorm/resnorm; /* INF -> NaN conversion */
+         ieee_check = resnorm / resnorm; /* INF -> NaN conversion */
       }
       if (ieee_check != ieee_check)
       {
@@ -228,7 +228,7 @@ hypre_ILUSolve( void               *ilu_vdata,
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
-      hypre_printf("    Initial    %e                 %e\n",init_resnorm,
+      hypre_printf("    Initial    %e                 %e\n", init_resnorm,
                    rel_resnorm);
    }
 
@@ -365,7 +365,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
    if (iter > 0 && init_resnorm)
    {
-      conv_factor = pow((resnorm/init_resnorm),(1.0/(HYPRE_Real) iter));
+      conv_factor = pow((resnorm / init_resnorm), (1.0 / (HYPRE_Real) iter));
    }
    else
    {
@@ -381,11 +381,11 @@ hypre_ILUSolve( void               *ilu_vdata,
          {
             hypre_printf("\n\n==============================================");
             hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d iterations\n",max_iter);
+            hypre_printf("      within the allowed %d iterations\n", max_iter);
             hypre_printf("==============================================");
          }
-         hypre_printf("\n\n Average Convergence Factor = %f \n",conv_factor);
-         hypre_printf("                operator = %f\n",operat_cmplxty);
+         hypre_printf("\n\n Average Convergence Factor = %f \n", conv_factor);
+         hypre_printf("                operator = %f\n", operat_cmplxty);
       }
    }
 
@@ -464,7 +464,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    for (i = 0 ; i < nLU ; i ++)
    {
       utemp_data[qperm[i]] = ftemp_data[perm[i]];
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
       for (j = k1 ; j < k2 ; j ++)
       {
          utemp_data[qperm[i]] -= L_diag_data[j] * utemp_data[qperm[L_diag_j[j]]];
@@ -476,7 +476,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
     */
    for (i = nLU ; i < n ; i ++)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
       for (j = k1 ; j < k2 ; j ++)
       {
          col = L_diag_j[j];
@@ -502,16 +502,16 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       /* set rhs value */
       for (i = nLU ; i < n ; i ++)
       {
-         rhs_data[i-nLU] = ftemp_data[perm[i]];
+         rhs_data[i - nLU] = ftemp_data[perm[i]];
       }
 
       /* solve */
-      HYPRE_GMRESSolve(schur_solver,(HYPRE_Matrix)S,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
+      HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)S, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
 
       /* copy value back to original */
       for (i = nLU ; i < n ; i ++)
       {
-         utemp_data[qperm[i]] = x_data[i-nLU];
+         utemp_data[qperm[i]] = x_data[i - nLU];
       }
    }
 
@@ -525,7 +525,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       for (i = 0 ; i < nLU ; i ++)
       {
          ftemp_data[perm[i]] = utemp_data[qperm[i]];
-         k1 = u_end[i] ; k2 = U_diag_i[i+1];
+         k1 = u_end[i] ; k2 = U_diag_i[i + 1];
          for (j = k1 ; j < k2 ; j ++)
          {
             col = U_diag_j[j];
@@ -540,7 +540,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 
    /* 5th need to solve UBi*ui = zi */
    /* put result in u_temp upper */
-   for (i = nLU-1 ; i >= 0 ; i --)
+   for (i = nLU - 1 ; i >= 0 ; i --)
    {
       k1 = U_diag_i[i] ; k2 = u_end[i];
       for (j = k1 ; j < k2 ; j ++)
@@ -625,7 +625,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    for (i = 0 ; i < nLU ; i ++)
    {
       utemp_data[perm[i]] = ftemp_data[perm[i]];
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
       for (j = k1 ; j < k2 ; j ++)
       {
          utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
@@ -637,7 +637,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
     */
    for (i = nLU ; i < n ; i ++)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
       for (j = k1 ; j < k2 ; j ++)
       {
          col = L_diag_j[j];
@@ -663,18 +663,18 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       /* set rhs value */
       for (i = nLU ; i < n ; i ++)
       {
-         rhs_data[i-nLU] = ftemp_data[perm[i]];
+         rhs_data[i - nLU] = ftemp_data[perm[i]];
       }
 
       /* Solve Schur system with approx inverse
        * x = S*rhs
        */
-      hypre_NSHSolve(schur_solver,S,rhs,x);
+      hypre_NSHSolve(schur_solver, S, rhs, x);
 
       /* copy value back to original */
       for (i = nLU ; i < n ; i ++)
       {
-         utemp_data[perm[i]] = x_data[i-nLU];
+         utemp_data[perm[i]] = x_data[i - nLU];
       }
    }
 
@@ -688,7 +688,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       for (i = 0 ; i < nLU ; i ++)
       {
          ftemp_data[perm[i]] = utemp_data[perm[i]];
-         k1 = u_end[i] ; k2 = U_diag_i[i+1];
+         k1 = u_end[i] ; k2 = U_diag_i[i + 1];
          for (j = k1 ; j < k2 ; j ++)
          {
             col = U_diag_j[j];
@@ -703,7 +703,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 
    /* 5th need to solve UBi*ui = zi */
    /* put result in u_temp upper */
-   for (i = nLU-1 ; i >= 0 ; i --)
+   for (i = nLU - 1 ; i >= 0 ; i --)
    {
       k1 = U_diag_i[i] ; k2 = u_end[i];
       for (j = k1 ; j < k2 ; j ++)
@@ -774,18 +774,18 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    /* update with remaining (off-diagonal) entries of L */
    for ( i = 0; i < nLU; i++ )
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
-      for (j=k1; j <k2; j++)
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
       }
    }
    /*-------------------- U solve - Backward substitution */
-   for ( i = nLU-1; i >= 0; i-- )
+   for ( i = nLU - 1; i >= 0; i-- )
    {
       /* first update with the remaining (off-diagonal) entries of U */
-      k1 = U_diag_i[i] ; k2 = U_diag_i[i+1];
-      for (j=k1; j <k2; j++)
+      k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[U_diag_j[j]]];
       }
@@ -875,8 +875,8 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 
    /* get total num of send */
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg,0);
-   end = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
+   begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+   end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
 
    /* copy new index into send_buf */
    for (i = begin ; i < end ; i ++)
@@ -886,7 +886,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
        *    permutation at all
        * borrow uext as send buffer .
        */
-      uext[i-begin] = ftemp_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
+      uext[i - begin] = ftemp_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)];
    }
 
    /* main communication */
@@ -896,12 +896,12 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    /* L solve - Forward solve */
    for ( i = 0 ; i < n_total ; i ++)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
       if ( i < n )
       {
          /* diag part */
          utemp_data[perm[i]] = ftemp_data[perm[i]];
-         for (j=k1; j <k2; j++)
+         for (j = k1; j < k2; j++)
          {
             col = L_diag_j[j];
             if ( col < n )
@@ -920,7 +920,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
          /* offd part */
          idx = i - n;
          uext[idx] = fext[idx];
-         for (j=k1; j <k2; j++)
+         for (j = k1; j < k2; j++)
          {
             col = L_diag_j[j];
             if (col < n)
@@ -937,14 +937,14 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    }
 
    /*-------------------- U solve - Backward substitution */
-   for ( i = n_total-1; i >= 0; i-- )
+   for ( i = n_total - 1; i >= 0; i-- )
    {
       /* first update with the remaining (off-diagonal) entries of U */
-      k1 = U_diag_i[i] ; k2 = U_diag_i[i+1];
+      k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
       if ( i < n )
       {
          /* diag part */
-         for (j=k1; j <k2; j++)
+         for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
             if ( col < n )
@@ -964,7 +964,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       {
          /* 2nd part of offd */
          idx = i - n;
-         for (j=k1; j <k2; j++)
+         for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
             if ( col < n )
@@ -1047,7 +1047,7 @@ hypre_ILUSeqVectorPerm(void *vectori, void *vectoro, HYPRE_Int size, HYPRE_Int *
       default:
       {
          printf("Error option in ILUSeqVectorPerm");
-         hypre_assert(1==0);
+         hypre_assert(1 == 0);
       }
    }
    return hypre_error_flag;
@@ -1142,7 +1142,7 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des,
    }
 
    /* apply reverse permutation */
-   HYPRE_THRUST_CALL(scatter,utemp_data, utemp_data + n, perm, ftemp_data);
+   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
    /* Update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
 
@@ -1331,7 +1331,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    /* with tricky initial guess */
    //hypre_Vector *tv = hypre_ParVectorLocalVector(x);
    //HYPRE_Real *tz = hypre_VectorData(tv);
-   HYPRE_GMRESSolve(schur_solver,(HYPRE_Matrix)schur_precond,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
+   HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)schur_precond, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
    /* 4th need to compute zi = xi - LBi^-1*yi
     * put zi in f_temp upper
     * only do this computation when nLU < n
@@ -1367,7 +1367,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    hypre_TMemcpy(utemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* perm back */
-   HYPRE_THRUST_CALL(scatter,utemp_data, utemp_data + n, perm, ftemp_data);
+   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
 
    /* done, now everything are in u_temp, update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
@@ -1561,7 +1561,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          {
             /* if we have a schur complement */
             hypre_ParVectorSetConstantValues(x, 0.0);
-            HYPRE_GMRESSolve(schur_solver,(HYPRE_Matrix)schur_precond,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
+            HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)schur_precond, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
 
             /* u = xtemp + P*x */
             /* -Fx */
@@ -1697,7 +1697,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          }
 
          /* perm back */
-         HYPRE_THRUST_CALL(scatter,xtemp_data, xtemp_data + n, perm, ftemp_data);
+         HYPRE_THRUST_CALL(scatter, xtemp_data, xtemp_data + n, perm, ftemp_data);
 
          /* done, now everything are in u_temp, update solution */
          hypre_ParVectorAxpy(one, ftemp, u);
@@ -1783,7 +1783,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          {
             /* if we have a schur complement */
             hypre_ParVectorSetConstantValues(x, 0.0);
-            HYPRE_GMRESSolve(schur_solver,(HYPRE_Matrix)schur_precond,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
+            HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)schur_precond, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
 
             /* u = xtemp + P*x */
             /* -L^{-1}Fx */
@@ -1883,7 +1883,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          }
 
          /* perm back */
-         HYPRE_THRUST_CALL(scatter,xtemp_data, xtemp_data + n, perm, ftemp_data);
+         HYPRE_THRUST_CALL(scatter, xtemp_data, xtemp_data + n, perm, ftemp_data);
 
          /* done, now everything are in u_temp, update solution */
          hypre_ParVectorAxpy(one, ftemp, u);
@@ -1987,7 +1987,7 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
    for (i = 0 ; i < n ; i ++)
    {
       utemp_data[i] = ftemp_data[perm[i]];
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
       for (j = k1 ; j < k2 ; j ++)
       {
          col = L_diag_j[j];
@@ -1999,10 +1999,10 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
    {
       /* in this case, we don't have a Schur complement */
       /* U solve */
-      for (i = n-1 ; i >= 0 ; i --)
+      for (i = n - 1 ; i >= 0 ; i --)
       {
          ftemp_data[perm[i]] = utemp_data[i];
-         k1 = U_diag_i[i] ; k2 = U_diag_i[i+1];
+         k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
          for (j = k1 ; j < k2 ; j ++)
          {
             col = U_diag_j[j];
@@ -2017,10 +2017,10 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
    }
 
    /* U solve */
-   for (i = n-1 ; i >= 0 ; i --)
+   for (i = n - 1 ; i >= 0 ; i --)
    {
       xtemp_data[perm[i]] = utemp_data[i];
-      k1 = U_diag_i[i] ; k2 = U_diag_i[i+1];
+      k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
       for (j = k1 ; j < k2 ; j ++)
       {
          col = U_diag_j[j];
@@ -2043,7 +2043,7 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
       for (i = 0 ; i < nLU ; i ++)
       {
          ytemp_data[i] = utemp_data[perm[i]];
-         k1 = mL_diag_i[i] ; k2 = mL_diag_i[i+1];
+         k1 = mL_diag_i[i] ; k2 = mL_diag_i[i + 1];
          for (j = k1 ; j < k2 ; j ++)
          {
             col = mL_diag_j[j];
@@ -2066,7 +2066,7 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
 
    /* now the rhs is ready */
    hypre_SeqVectorSetConstantValues(x_local, 0.0);
-   HYPRE_GMRESSolve(schur_solver,(HYPRE_Matrix)schur_precond,(HYPRE_Vector)rhs,(HYPRE_Vector)x);
+   HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)schur_precond, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
 
    if (m > 0)
    {
@@ -2106,15 +2106,15 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
       for (i = 0 ; i < nLU ; i ++)
       {
          ytemp_data[i] = 0.0;
-         k1 = u_end[i] ; k2 = mU_diag_i[i+1];
+         k1 = u_end[i] ; k2 = mU_diag_i[i + 1];
          for (j = k1 ; j < k2 ; j ++)
          {
             col = mU_diag_j[j];
-            ytemp_data[i] -= mU_diag_data[j] * x_data[col-nLU];
+            ytemp_data[i] -= mU_diag_data[j] * x_data[col - nLU];
          }
       }
       /* U solve */
-      for (i = nLU-1 ; i >= 0 ; i --)
+      for (i = nLU - 1 ; i >= 0 ; i --)
       {
          ftemp_data[perm[i]] = ytemp_data[i];
          k1 = mU_diag_i[i] ; k2 = u_end[i];
@@ -2129,7 +2129,7 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
       /* update with I */
       for (i = nLU ; i < n ; i ++)
       {
-         ftemp_data[perm[i]] = x_data[i-nLU];
+         ftemp_data[perm[i]] = x_data[i - nLU];
       }
       hypre_ParVectorAxpy(beta, ftemp, u);
    }
@@ -2199,7 +2199,7 @@ hypre_NSHSolve( void               *nsh_vdata,
    hypre_ParNSHDataNumIterations(nsh_data) = 0;
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -2252,7 +2252,7 @@ hypre_NSHSolve( void               *nsh_vdata,
          and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
-         ieee_check = resnorm/resnorm; /* INF -> NaN conversion */
+         ieee_check = resnorm / resnorm; /* INF -> NaN conversion */
       }
       if (ieee_check != ieee_check)
       {
@@ -2300,7 +2300,7 @@ hypre_NSHSolve( void               *nsh_vdata,
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
-      hypre_printf("    Initial    %e                 %e\n",init_resnorm,
+      hypre_printf("    Initial    %e                 %e\n", init_resnorm,
                    rel_resnorm);
    }
 
@@ -2378,7 +2378,7 @@ hypre_NSHSolve( void               *nsh_vdata,
 
    if (iter > 0 && init_resnorm)
    {
-      conv_factor = pow((resnorm/init_resnorm),(1.0/(HYPRE_Real) iter));
+      conv_factor = pow((resnorm / init_resnorm), (1.0 / (HYPRE_Real) iter));
    }
    else
    {
@@ -2394,11 +2394,11 @@ hypre_NSHSolve( void               *nsh_vdata,
          {
             hypre_printf("\n\n==============================================");
             hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d iterations\n",max_iter);
+            hypre_printf("      within the allowed %d iterations\n", max_iter);
             hypre_printf("==============================================");
          }
-         hypre_printf("\n\n Average Convergence Factor = %f \n",conv_factor);
-         hypre_printf("                operator = %f\n",operat_cmplxty);
+         hypre_printf("\n\n Average Convergence Factor = %f \n", conv_factor);
+         hypre_printf("                operator = %f\n", operat_cmplxty);
       }
    }
    return hypre_error_flag;

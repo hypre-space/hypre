@@ -56,8 +56,8 @@ main( hypre_int argc,
    void               *object;
 
    HYPRE_IJMatrix      ij_A;
-   HYPRE_IJVector      ij_b=NULL;
-   HYPRE_IJVector      ij_x=NULL;
+   HYPRE_IJVector      ij_b = NULL;
+   HYPRE_IJVector      ij_x = NULL;
    HYPRE_IJVector      ij_v;
 
    HYPRE_ParCSRMatrix  parcsr_A;
@@ -351,12 +351,12 @@ main( hypre_int argc,
          diag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  local_num_rows, HYPRE_MEMORY_HOST);
          local_row = 0;
-         for (big_i=first_local_row; big_i<= last_local_row; big_i++)
+         for (big_i = first_local_row; big_i <= last_local_row; big_i++)
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, big_i, &size,
                                               &col_inds, &values );
 
-            for (j=0; j < size; j++)
+            for (j = 0; j < size; j++)
             {
                if (col_inds[j] < first_local_row || col_inds[j] > last_local_row)
                {
@@ -379,7 +379,7 @@ main( hypre_int argc,
 
          ierr = HYPRE_IJMatrixInitialize( ij_A );
 
-         for (big_i=first_local_row; big_i<= last_local_row; big_i++)
+         for (big_i = first_local_row; big_i <= last_local_row; big_i++)
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, big_i, &size,
                                               &col_inds, &values );
@@ -407,7 +407,7 @@ main( hypre_int argc,
             if (build_matrix_type == 4) { size = 27; }
          }
 
-         for (i=0; i < local_num_rows; i++)
+         for (i = 0; i < local_num_rows; i++)
          {
             row_sizes[i] = size;
          }
@@ -419,7 +419,7 @@ main( hypre_int argc,
          ierr = HYPRE_IJMatrixInitialize( ij_A );
 
          /* Loop through all locally stored rows and insert them into ij_matrix */
-         for (big_i=first_local_row; big_i<= last_local_row; big_i++)
+         for (big_i = first_local_row; big_i <= last_local_row; big_i++)
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, big_i, &size,
                                               &col_inds, &values );
@@ -528,14 +528,14 @@ main( hypre_int argc,
       values[i] = (HYPRE_Real)i;
    }
 
-   HYPRE_IJVectorAddToValues(ij_v, local_num_cols/2, NULL, values);
+   HYPRE_IJVectorAddToValues(ij_v, local_num_cols / 2, NULL, values);
 
    HYPRE_IJVectorGetValues(ij_v, local_num_cols, NULL, values);
 
    ierr = 0;
-   for (i = 0; i < local_num_cols/2; i++)
+   for (i = 0; i < local_num_cols / 2; i++)
       if (values[i] != (HYPRE_Real)i + 1.) { ++ierr; }
-   for (i = local_num_cols/2; i < local_num_cols; i++)
+   for (i = local_num_cols / 2; i < local_num_cols; i++)
       if (values[i] != 1.) { ++ierr; }
    if (ierr)
    {
@@ -564,7 +564,7 @@ main( hypre_int argc,
    for (big_i = first_local_col; big_i <= last_local_col; big_i++)
    {
       j = (HYPRE_Int)(big_i - first_local_col);
-      values[j] = (HYPRE_Real)big_i*big_i;
+      values[j] = (HYPRE_Real)big_i * big_i;
    }
 
    HYPRE_IJVectorAddToValues(ij_v, local_num_cols, indices, values);
@@ -577,7 +577,7 @@ main( hypre_int argc,
    for (big_i = first_local_col; big_i <= last_local_col; big_i++)
    {
       j = (HYPRE_Int)(big_i - first_local_col);
-      if (values[j] != (HYPRE_Real)(big_i*big_i + big_i)) { ++ierr; }
+      if (values[j] != (HYPRE_Real)(big_i * big_i + big_i)) { ++ierr; }
    }
 
    if (ierr)
@@ -697,8 +697,8 @@ main( hypre_int argc,
          HYPRE_IJVectorAddToValues */
 
       HYPRE_ParVectorSetRandomValues(b, 22775);
-      HYPRE_ParVectorInnerProd(b,b,&norm);
-      norm = 1./sqrt(norm);
+      HYPRE_ParVectorInnerProd(b, b, &norm);
+      norm = 1. / sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
       /* Initial guess */
@@ -748,7 +748,7 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
-      HYPRE_ParCSRMatrixMatvec(1.,parcsr_A,x,0.,b);
+      HYPRE_ParCSRMatrixMatvec(1., parcsr_A, x, 0., b);
 
       /* Initial guess */
       values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
@@ -880,7 +880,7 @@ BuildParFromFile( HYPRE_Int                  argc,
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename,&A);
+   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename, &A);
 
    *A_ptr = A;
 
@@ -968,7 +968,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -992,8 +992,8 @@ BuildParLaplacian( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1008,15 +1008,15 @@ BuildParLaplacian( HYPRE_Int                  argc,
    values[0] = 0.0;
    if (nx > 1)
    {
-      values[0] += 2.0*cx;
+      values[0] += 2.0 * cx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy;
+      values[0] += 2.0 * cy;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz;
+      values[0] += 2.0 * cz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD,
@@ -1048,7 +1048,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    HYPRE_Int                 P, Q, R;
    HYPRE_Real          cx, cy, cz;
    HYPRE_Real          ax, ay, az;
-   HYPRE_Real          hinx,hiny,hinz;
+   HYPRE_Real          hinx, hiny, hinz;
 
    HYPRE_ParCSRMatrix  A;
 
@@ -1071,9 +1071,9 @@ BuildParDifConv( HYPRE_Int                  argc,
    ny = 10;
    nz = 10;
 
-   hinx = 1.0/(nx+1);
-   hiny = 1.0/(ny+1);
-   hinz = 1.0/(nz+1);
+   hinx = 1.0 / (nx + 1);
+   hiny = 1.0 / (ny + 1);
+   hinz = 1.0 / (nz + 1);
 
    P  = 1;
    Q  = num_procs;
@@ -1131,7 +1131,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1157,8 +1157,8 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1166,25 +1166,25 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    values = hypre_CTAlloc(HYPRE_Real,  7, HYPRE_MEMORY_HOST);
 
-   values[1] = -cx/(hinx*hinx);
-   values[2] = -cy/(hiny*hiny);
-   values[3] = -cz/(hinz*hinz);
-   values[4] = -cx/(hinx*hinx) + ax/hinx;
-   values[5] = -cy/(hiny*hiny) + ay/hiny;
-   values[6] = -cz/(hinz*hinz) + az/hinz;
+   values[1] = -cx / (hinx * hinx);
+   values[2] = -cy / (hiny * hiny);
+   values[3] = -cz / (hinz * hinz);
+   values[4] = -cx / (hinx * hinx) + ax / hinx;
+   values[5] = -cy / (hiny * hiny) + ay / hiny;
+   values[6] = -cz / (hinz * hinz) + az / hinz;
 
    values[0] = 0.0;
    if (nx > 1)
    {
-      values[0] += 2.0*cx/(hinx*hinx) - 1.0*ax/hinx;
+      values[0] += 2.0 * cx / (hinx * hinx) - 1.0 * ax / hinx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy/(hiny*hiny) - 1.0*ay/hiny;
+      values[0] += 2.0 * cy / (hiny * hiny) - 1.0 * ay / hiny;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz/(hinz*hinz) - 1.0*az/hinz;
+      values[0] += 2.0 * cz / (hinz * hinz) - 1.0 * az / hinz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateDifConv(hypre_MPI_COMM_WORLD,
@@ -1275,7 +1275,7 @@ BuildRhsParFromOneFile( HYPRE_Int            argc,
    char           *filename;
 
    HYPRE_ParVector b;
-   HYPRE_Vector    b_CSR=NULL;
+   HYPRE_Vector    b_CSR = NULL;
 
    HYPRE_Int             myid;
 
@@ -1313,7 +1313,7 @@ BuildRhsParFromOneFile( HYPRE_Int            argc,
 
       b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);
 
    *b_ptr = b;
 
@@ -1387,7 +1387,7 @@ BuildParLaplacian9pt( HYPRE_Int            argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q) != num_procs)
+   if ((P * Q) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1410,7 +1410,7 @@ BuildParLaplacian9pt( HYPRE_Int            argc,
 
    /* compute p,q from P,Q and myid */
    p = myid % P;
-   q = ( myid - p)/P;
+   q = ( myid - p) / P;
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1512,7 +1512,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1535,8 +1535,8 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1549,7 +1549,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    {
       values[0] = 8.0;
    }
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
    {
       values[0] = 2.0;
    }

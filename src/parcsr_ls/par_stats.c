@@ -85,7 +85,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int       min_entries;
    HYPRE_Int       max_entries;
 
-   HYPRE_Int       num_procs,my_id;
+   HYPRE_Int       num_procs, my_id;
    HYPRE_Int       num_threads;
 
 
@@ -153,7 +153,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Real add_rlx_wt;
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
    num_threads = hypre_NumThreads();
 
    A_array = hypre_ParAMGDataAArray(amg_data);
@@ -198,13 +198,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    send_buff     = hypre_CTAlloc(HYPRE_Real,  6, HYPRE_MEMORY_HOST);
    gather_buff = hypre_CTAlloc(HYPRE_Real, 6, HYPRE_MEMORY_HOST);
 
-   if (my_id==0)
+   if (my_id == 0)
    {
-      hypre_printf("\n\n Num MPI tasks = %d\n\n",num_procs);
-      hypre_printf(" Num OpenMP threads = %d\n\n",num_threads);
+      hypre_printf("\n\n Num MPI tasks = %d\n\n", num_procs);
+      hypre_printf(" Num OpenMP threads = %d\n\n", num_threads);
       hypre_printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
-      hypre_printf(" Max levels = %d\n",hypre_ParAMGDataMaxLevels(amg_data));
-      hypre_printf(" Num levels = %d\n\n",num_levels);
+      hypre_printf(" Max levels = %d\n", hypre_ParAMGDataMaxLevels(amg_data));
+      hypre_printf(" Num levels = %d\n\n", num_levels);
       hypre_printf(" Strength Threshold = %f\n",
                    hypre_ParAMGDataStrongThreshold(amg_data));
       hypre_printf(" Interpolation Truncation Factor = %f\n",
@@ -399,7 +399,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else if (restri_type >= 3)
       {
          hypre_printf(" Restriction = local approximate ideal restriction (Neumann AIR-%d)\n",
-                      restri_type-3);
+                      restri_type - 3);
       }
 
       if (block_mode)
@@ -482,7 +482,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          A_offd_i = hypre_CSRMatrixI(A_block_offd);
 
          block_size =  hypre_ParCSRBlockMatrixBlockSize(A_block_array[level]);
-         bnnz = block_size*block_size;
+         bnnz = block_size * block_size;
 
          row_starts = hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]);
 
@@ -492,7 +492,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          num_mem[level] = global_nonzeros;
          num_variables[level] = (HYPRE_Real) fine_size;
 
-         sparse = global_nonzeros /((HYPRE_Real) fine_size * (HYPRE_Real) fine_size);
+         sparse = global_nonzeros / ((HYPRE_Real) fine_size * (HYPRE_Real) fine_size);
 
          min_entries = 0;
          max_entries = 0;
@@ -501,16 +501,16 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
          if (hypre_CSRBlockMatrixNumRows(A_block_diag))
          {
-            min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
+            min_entries = (A_diag_i[1] - A_diag_i[0]) + (A_offd_i[1] - A_offd_i[0]);
             for (j = A_diag_i[0]; j < A_diag_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(6, &A_diag_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &A_diag_data[j * bnnz], &tmp_norm, block_size);
                min_rowsum += tmp_norm;
             }
 
             for (j = A_offd_i[0]; j < A_offd_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(6, &A_offd_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &A_offd_data[j * bnnz], &tmp_norm, block_size);
                min_rowsum += tmp_norm;
             }
 
@@ -518,19 +518,19 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
             for (j = 0; j < hypre_CSRBlockMatrixNumRows(A_block_diag); j++)
             {
-               entries = (A_diag_i[j+1]-A_diag_i[j])+(A_offd_i[j+1]-A_offd_i[j]);
+               entries = (A_diag_i[j + 1] - A_diag_i[j]) + (A_offd_i[j + 1] - A_offd_i[j]);
                min_entries = hypre_min(entries, min_entries);
                max_entries = hypre_max(entries, max_entries);
 
                rowsum = 0.0;
-               for (i = A_diag_i[j]; i < A_diag_i[j+1]; i++)
+               for (i = A_diag_i[j]; i < A_diag_i[j + 1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(6, &A_diag_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &A_diag_data[i * bnnz], &tmp_norm, block_size);
                   rowsum += tmp_norm;
                }
-               for (i = A_offd_i[j]; i < A_offd_i[j+1]; i++)
+               for (i = A_offd_i[j]; i < A_offd_i[j + 1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(6, &A_offd_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &A_offd_data[i * bnnz], &tmp_norm, block_size);
                   rowsum += tmp_norm;
                }
                min_rowsum = hypre_min(rowsum, min_rowsum);
@@ -587,7 +587,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
          num_variables[level] = (HYPRE_Real) fine_size;
 
-         sparse = global_nonzeros /((HYPRE_Real) fine_size * (HYPRE_Real) fine_size);
+         sparse = global_nonzeros / ((HYPRE_Real) fine_size * (HYPRE_Real) fine_size);
 
          min_entries = 0;
          max_entries = 0;
@@ -596,7 +596,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
          if (hypre_CSRMatrixNumRows(A_diag))
          {
-            min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
+            min_entries = (A_diag_i[1] - A_diag_i[0]) + (A_offd_i[1] - A_offd_i[0]);
             for (j = A_diag_i[0]; j < A_diag_i[1]; j++)
             {
                min_rowsum += A_diag_data[j];
@@ -610,17 +610,17 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
             for (j = 0; j < hypre_CSRMatrixNumRows(A_diag); j++)
             {
-               entries = (A_diag_i[j+1]-A_diag_i[j])+(A_offd_i[j+1]-A_offd_i[j]);
+               entries = (A_diag_i[j + 1] - A_diag_i[j]) + (A_offd_i[j + 1] - A_offd_i[j]);
                min_entries = hypre_min(entries, min_entries);
                max_entries = hypre_max(entries, max_entries);
 
                rowsum = 0.0;
-               for (i = A_diag_i[j]; i < A_diag_i[j+1]; i++)
+               for (i = A_diag_i[j]; i < A_diag_i[j + 1]; i++)
                {
                   rowsum += A_diag_data[i];
                }
 
-               for (i = A_offd_i[j]; i < A_offd_i[j+1]; i++)
+               for (i = A_offd_i[j]; i < A_offd_i[j + 1]; i++)
                {
                   rowsum += A_offd_data[i];
                }
@@ -642,7 +642,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
 
-      numrows = (HYPRE_Int)(row_starts[1]-row_starts[0]);
+      numrows = (HYPRE_Int)(row_starts[1] - row_starts[0]);
       if (!numrows) /* if we don't have any rows, then don't have this count toward
                        min row sum or min num entries */
       {
@@ -657,7 +657,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       hypre_MPI_Reduce(send_buff, gather_buff, 4, HYPRE_MPI_REAL, hypre_MPI_MAX, 0, comm);
 
-      if (my_id ==0)
+      if (my_id == 0)
       {
          global_min_e = - (HYPRE_Int)gather_buff[0];
          global_max_e = (HYPRE_Int)gather_buff[1];
@@ -699,11 +699,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       }
 
-      hypre_printf("%*s ", (2*ndigits[0] + 21), "entries/row");
+      hypre_printf("%*s ", (2 * ndigits[0] + 21), "entries/row");
       hypre_printf("%10s %10s %19s\n", "min", "max", "row sums");
       hypre_printf("lev %*s x %-*s min  max  avgW", ndigits[0], "rows", ndigits[0], "cols");
       hypre_printf("%11s %11s %9s %11s\n", "weight", "weight", "min", "max");
-      for (i = 0; i < (70 + 2*ndigits[0]); i++) { hypre_printf("%s", "="); }
+      for (i = 0; i < (70 + 2 * ndigits[0]); i++) { hypre_printf("%s", "="); }
       hypre_printf("\n");
    }
 
@@ -711,7 +711,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
-   for (level = 0; level < num_levels-1; level++)
+   for (level = 0; level < num_levels - 1; level++)
    {
 
       if (block_mode)
@@ -749,7 +749,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
             for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[j * bnnz], &tmp_norm, block_size);
                min_weight = hypre_min(min_weight, tmp_norm);
 
                if (tmp_norm != 1.0)
@@ -763,7 +763,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             }
             for (j = P_offd_i[0]; j < P_offd_i[1]; j++)
             {
-               hypre_CSRBlockMatrixBlockNorm(6, &P_offd_data[j*bnnz], &tmp_norm, block_size);
+               hypre_CSRBlockMatrixBlockNorm(6, &P_offd_data[j * bnnz], &tmp_norm, block_size);
                min_weight = hypre_min(min_weight, tmp_norm);
 
                if (tmp_norm != 1.0)
@@ -776,19 +776,19 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
             max_rowsum = min_rowsum;
 
-            min_entries = (P_diag_i[1]-P_diag_i[0])+(P_offd_i[1]-P_offd_i[0]);
+            min_entries = (P_diag_i[1] - P_diag_i[0]) + (P_offd_i[1] - P_offd_i[0]);
             max_entries = 0;
 
             for (j = 0; j < hypre_CSRBlockMatrixNumRows(P_block_diag); j++)
             {
-               entries = (P_diag_i[j+1]-P_diag_i[j])+(P_offd_i[j+1]-P_offd_i[j]);
+               entries = (P_diag_i[j + 1] - P_diag_i[j]) + (P_offd_i[j + 1] - P_offd_i[j]);
                min_entries = hypre_min(entries, min_entries);
                max_entries = hypre_max(entries, max_entries);
 
                rowsum = 0.0;
-               for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
+               for (i = P_diag_i[j]; i < P_diag_i[j + 1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &P_diag_data[i * bnnz], &tmp_norm, block_size);
                   min_weight = hypre_min(min_weight, tmp_norm);
 
                   if (tmp_norm != 1.0)
@@ -799,9 +799,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                   rowsum += tmp_norm;
                }
 
-               for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
+               for (i = P_offd_i[j]; i < P_offd_i[j + 1]; i++)
                {
-                  hypre_CSRBlockMatrixBlockNorm(6, &P_offd_data[i*bnnz], &tmp_norm, block_size);
+                  hypre_CSRBlockMatrixBlockNorm(6, &P_offd_data[i * bnnz], &tmp_norm, block_size);
                   min_weight = hypre_min(min_weight, tmp_norm);
 
                   if (tmp_norm != 1.0)
@@ -886,17 +886,17 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
             max_rowsum = min_rowsum;
 
-            min_entries = (P_diag_i[1]-P_diag_i[0])+(P_offd_i[1]-P_offd_i[0]);
+            min_entries = (P_diag_i[1] - P_diag_i[0]) + (P_offd_i[1] - P_offd_i[0]);
             max_entries = 0;
 
             for (j = 0; j < hypre_CSRMatrixNumRows(P_diag); j++)
             {
-               entries = (P_diag_i[j+1]-P_diag_i[j])+(P_offd_i[j+1]-P_offd_i[j]);
+               entries = (P_diag_i[j + 1] - P_diag_i[j]) + (P_offd_i[j + 1] - P_offd_i[j]);
                min_entries = hypre_min(entries, min_entries);
                max_entries = hypre_max(entries, max_entries);
 
                rowsum = 0.0;
-               for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
+               for (i = P_diag_i[j]; i < P_diag_i[j + 1]; i++)
                {
                   min_weight = hypre_min(min_weight, P_diag_data[i]);
                   if (P_diag_data[i] != 1.0)
@@ -906,7 +906,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                   rowsum += P_diag_data[i];
                }
 
-               for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
+               for (i = P_offd_i[j]; i < P_offd_i[j + 1]; i++)
                {
                   min_weight = hypre_min(min_weight, P_offd_data[i]);
                   if (P_offd_data[i] != 1.0)
@@ -935,7 +935,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
 
-      numrows = row_starts[1]-row_starts[0];
+      numrows = row_starts[1] - row_starts[0];
       if (!numrows) /* if we don't have any rows, then don't have this count toward
                        min row sum or min num entries */
       {
@@ -973,7 +973,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    total_variables = 0;
    operat_cmplxty = 0;
-   for (j=0; j<hypre_ParAMGDataNumLevels(amg_data); j++)
+   for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
    {
       memory_cmplxty +=  num_mem[j] / num_coeffs[0];
       operat_cmplxty +=  num_coeffs[j] / num_coeffs[0];
@@ -987,17 +987,17 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    if (my_id == 0 )
    {
       hypre_printf("\n\n");
-      hypre_printf("     Complexity:    grid = %f\n",grid_cmplxty);
-      hypre_printf("                operator = %f\n",operat_cmplxty);
-      hypre_printf("                memory = %f\n",memory_cmplxty);
+      hypre_printf("     Complexity:    grid = %f\n", grid_cmplxty);
+      hypre_printf("                operator = %f\n", operat_cmplxty);
+      hypre_printf("                memory = %f\n", memory_cmplxty);
       hypre_printf("\n\n");
    }
 
    if (my_id == 0)
    {
       hypre_printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
-      hypre_printf( "  Maximum number of cycles:         %d \n",max_iter);
-      hypre_printf( "  Stopping Tolerance:               %e \n",tol);
+      hypre_printf( "  Maximum number of cycles:         %d \n", max_iter);
+      hypre_printf( "  Stopping Tolerance:               %e \n", tol);
       if (fcycle)
       {
          hypre_printf( "  Full Multigrid. Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
@@ -1010,7 +1010,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       if (additive == 0 || mult_additive == 0 || simple == 0)
       {
          HYPRE_Int add_lvl = add_end;
-         if (add_end == -1) { add_lvl = num_levels-1; }
+         if (add_end == -1) { add_lvl = num_levels - 1; }
          if (additive > -1)
          {
             hypre_printf( "  Additive V-cycle 1st level %d last level %d: \n", additive, add_lvl);
@@ -1025,12 +1025,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                           add_lvl);
          }
          hypre_printf( "  Relaxation Parameters:\n");
-         if (add_lvl == num_levels-1)
+         if (add_lvl == num_levels - 1)
          {
             hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
             hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
                           num_grid_sweeps[1],
-                          num_grid_sweeps[1],(2*num_grid_sweeps[1]));
+                          num_grid_sweeps[1], (2 * num_grid_sweeps[1]));
             hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx,
                           add_rlx);
          }
@@ -1041,7 +1041,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                           num_grid_sweeps[1], num_grid_sweeps[1]);
             hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d\n", add_rlx, add_rlx);
          }
-         if (add_lvl < num_levels -1)
+         if (add_lvl < num_levels - 1)
          {
             hypre_printf( " \n");
             hypre_printf( "Multiplicative portion: \n");
@@ -1075,9 +1075,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else if (additive > 0 || mult_additive > 0 || simple > 0)
       {
          HYPRE_Int add_lvl = add_end;
-         if (add_end == -1) { add_lvl = num_levels-1; }
+         if (add_end == -1) { add_lvl = num_levels - 1; }
          hypre_printf( "  Relaxation Parameters:\n");
-         if (add_lvl < num_levels -1)
+         if (add_lvl < num_levels - 1)
          {
             hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
             hypre_printf( "            Number of sweeps:         %4d   %2d  %4d\n",
@@ -1154,12 +1154,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                           add_lvl);
          }
          hypre_printf( "  Relaxation Parameters:\n");
-         if (add_lvl == num_levels-1)
+         if (add_lvl == num_levels - 1)
          {
             hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
             hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
                           num_grid_sweeps[1],
-                          num_grid_sweeps[1],(2*num_grid_sweeps[1]));
+                          num_grid_sweeps[1], (2 * num_grid_sweeps[1]));
             hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx,
                           add_rlx);
          }
@@ -1197,10 +1197,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
          hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
                        num_grid_sweeps[1],
-                       num_grid_sweeps[2],num_grid_sweeps[3]);
+                       num_grid_sweeps[2], num_grid_sweeps[3]);
          hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
                        grid_relax_type[1],
-                       grid_relax_type[2],grid_relax_type[3]);
+                       grid_relax_type[2], grid_relax_type[3]);
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          if (grid_relax_points && grid_relax_type[1] != 8)
          {
@@ -1267,33 +1267,33 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
       if (smooth_type == 6)
-         for (j=0; j < smooth_num_levels; j++)
+         for (j = 0; j < smooth_num_levels; j++)
             hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
-                          hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
+                          hypre_ParAMGDataSchwarzRlxWeight(amg_data), j);
       if (smooth_type == 7)
-         for (j=0; j < smooth_num_levels; j++)
+         for (j = 0; j < smooth_num_levels; j++)
          {
             hypre_printf( " Pilut smoother level %d\n", j);
          }
       if (smooth_type == 8)
-         for (j=0; j < smooth_num_levels; j++)
+         for (j = 0; j < smooth_num_levels; j++)
          {
             hypre_printf( " ParaSails smoother level %d\n", j);
          }
       if (smooth_type == 9)
-         for (j=0; j < smooth_num_levels; j++)
+         for (j = 0; j < smooth_num_levels; j++)
          {
             hypre_printf( " Euclid smoother level %d\n", j);
          }
-      for (j=0; j < num_levels; j++)
+      for (j = 0; j < num_levels; j++)
          if (relax_weight[j] != 1)
          {
-            hypre_printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+            hypre_printf( " Relaxation Weight %f level %d\n", relax_weight[j], j);
          }
-      for (j=0; j < num_levels; j++)
+      for (j = 0; j < num_levels; j++)
          if (omega[j] != 1)
          {
-            hypre_printf( " Outer relaxation weight %f level %d\n",omega[j],j);
+            hypre_printf( " Outer relaxation weight %f level %d\n", omega[j], j);
          }
    }
 
@@ -1368,8 +1368,8 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
    if (amg_print_level == 1 || amg_print_level == 3)
    {
       hypre_printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
-      hypre_printf( "  Maximum number of cycles:         %d \n",max_iter);
-      hypre_printf( "  Stopping Tolerance:               %e \n",tol);
+      hypre_printf( "  Maximum number of cycles:         %d \n", max_iter);
+      hypre_printf( "  Stopping Tolerance:               %e \n", tol);
       if (fcycle)
       {
          hypre_printf( "  Full Multigrid. Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
@@ -1382,10 +1382,10 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
       hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
       hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
                     num_grid_sweeps[1],
-                    num_grid_sweeps[2],num_grid_sweeps[3]);
+                    num_grid_sweeps[2], num_grid_sweeps[3]);
       hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
                     grid_relax_type[1],
-                    grid_relax_type[2],grid_relax_type[3]);
+                    grid_relax_type[2], grid_relax_type[3]);
       hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
       if (grid_relax_points)
       {
@@ -1451,18 +1451,18 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
          hypre_printf( "\n\n");
       }
       if (smooth_type == 6)
-         for (j=0; j < smooth_num_levels; j++)
+         for (j = 0; j < smooth_num_levels; j++)
             hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
-                          hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
-      for (j=0; j < num_levels; j++)
+                          hypre_ParAMGDataSchwarzRlxWeight(amg_data), j);
+      for (j = 0; j < num_levels; j++)
          if (relax_weight[j] != 1)
          {
-            hypre_printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+            hypre_printf( " Relaxation Weight %f level %d\n", relax_weight[j], j);
          }
-      for (j=0; j < num_levels; j++)
+      for (j = 0; j < num_levels; j++)
          if (omega[j] != 1)
          {
-            hypre_printf( " Outer relaxation weight %f level %d\n",omega[j],j);
+            hypre_printf( " Outer relaxation weight %f level %d\n", omega[j], j);
          }
 
       hypre_printf( " Output flag (print_level): %d \n", amg_print_level);

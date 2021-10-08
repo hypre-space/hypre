@@ -53,9 +53,9 @@ double alpha(double x, double y, double z)
       case 0: /* uniform coefficient */
          return 1.0;
       case 1: /* smooth coefficient */
-         return x*x+exp(y)+sin(z);
+         return x * x + exp(y) + sin(z);
       case 2: /* small outside of an interior cube */
-         if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25) && (fabs(z-0.5) < 0.25))
+         if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25) && (fabs(z - 0.5) < 0.25))
          {
             return 1.0;
          }
@@ -64,7 +64,7 @@ double alpha(double x, double y, double z)
             return 1.0e-6;
          }
       case 3: /* small outside of an interior ball */
-         if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)+(z-0.5)*(z-0.5)) < 0.0625)
+         if (((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5) + (z - 0.5) * (z - 0.5)) < 0.0625)
          {
             return 1.0;
          }
@@ -73,7 +73,7 @@ double alpha(double x, double y, double z)
             return 1.0e-6;
          }
       case 4: /* random coefficient */
-         return ((double)rand()/RAND_MAX);
+         return ((double)rand() / RAND_MAX);
       default:
          return 1.0;
    }
@@ -87,9 +87,9 @@ double beta(double x, double y, double z)
       case 0: /* uniform coefficient */
          return 1.0;
       case 1: /* smooth coefficient */
-         return x*x+exp(y)+sin(z);
+         return x * x + exp(y) + sin(z);
       case 2:/* small outside of interior cube */
-         if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25) && (fabs(z-0.5) < 0.25))
+         if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25) && (fabs(z - 0.5) < 0.25))
          {
             return 1.0;
          }
@@ -98,7 +98,7 @@ double beta(double x, double y, double z)
             return 1.0e-6;
          }
       case 3: /* small outside of an interior ball */
-         if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)+(z-0.5)*(z-0.5)) < 0.0625)
+         if (((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5) + (z - 0.5) * (z - 0.5)) < 0.0625)
          {
             return 1.0;
          }
@@ -107,7 +107,7 @@ double beta(double x, double y, double z)
             return 1.0e-6;
          }
       case 4: /* random coefficient */
-         return ((double)rand()/RAND_MAX);
+         return ((double)rand() / RAND_MAX);
       default:
          return 1.0;
    }
@@ -141,10 +141,10 @@ void ComputeFEMND1(double S[12][12], double F[12],
 {
    int i, j;
 
-   double h2_4 = h*h/4;
+   double h2_4 = h * h / 4;
 
-   double cS1 = alpha(x,y,z)/(6.0*h), cS2 = 2*cS1, cS4 = 2*cS2;
-   double cM1 = beta(x,y,z)*h/36.0,   cM2 = 2*cM1, cM4 = 2*cM2;
+   double cS1 = alpha(x, y, z) / (6.0 * h), cS2 = 2 * cS1, cS4 = 2 * cS2;
+   double cM1 = beta(x, y, z) * h / 36.0,   cM2 = 2 * cM1, cM4 = 2 * cM2;
 
    S[ 0][ 0] =  cS4 + cM4;   S[ 0][ 1] =  cS2;         S[ 0][ 2] = -cS1 + cM2;
    S[ 0][ 3] = -cS2;         S[ 0][ 4] = -cS1 + cM2;   S[ 0][ 5] =  cS1;
@@ -402,18 +402,18 @@ int main (int argc, char *argv[])
 
    /* Figure out the processor grid (N x N x N).  The local problem size is n^3,
       while pi, pj and pk indicate the position in the processor grid. */
-   N  = pow(num_procs,1.0/3.0) + 0.5;
-   if (num_procs != N*N*N)
+   N  = pow(num_procs, 1.0 / 3.0) + 0.5;
+   if (num_procs != N * N * N)
    {
       if (myid == 0) printf("Can't run on %d processors, try %d.\n",
-                               num_procs, N*N*N);
+                               num_procs, N * N * N);
       MPI_Finalize();
       exit(1);
    }
-   h  = 1.0 / (N*n);
-   pk = myid / (N*N);
-   pj = myid/N - pk*N;
-   pi = myid - pj*N - pk*N*N;
+   h  = 1.0 / (N * n);
+   pk = myid / (N * N);
+   pj = myid / N - pk * N;
+   pi = myid - pj * N - pk * N * N;
 
    /* Start timing */
    mytime -= MPI_Wtime();
@@ -432,8 +432,8 @@ int main (int argc, char *argv[])
       /* Set the extents of the grid - each processor sets its grid boxes. */
       {
          HYPRE_Int part = 0;
-         HYPRE_Int ilower[3] = {1 + pi*n, 1 + pj*n, 1 + pk*n};
-         HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         HYPRE_Int ilower[3] = {1 + pi * n, 1 + pj * n, 1 + pk * n};
+         HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
 
          HYPRE_SStructGridSetExtents(node_grid, part, ilower, iupper);
          HYPRE_SStructGridSetExtents(edge_grid, part, ilower, iupper);
@@ -547,8 +547,8 @@ int main (int argc, char *argv[])
                {
                   /* Compute the FEM matrix and r.h.s. for cell (i,j,k) with
                      coefficients evaluated at the cell center. */
-                  index[0] = i + pi*n; index[1] = j + pj*n; index[2] = k + pk*n;
-                  ComputeFEMND1(S,F,(pi*n+i)*h-h/2,(pj*n+j)*h-h/2,(pk*n+k)*h-h/2,h);
+                  index[0] = i + pi * n; index[1] = j + pj * n; index[2] = k + pk * n;
+                  ComputeFEMND1(S, F, (pi * n + i)*h - h / 2, (pj * n + j)*h - h / 2, (pk * n + k)*h - h / 2, h);
 
                   /* Eliminate boundary conditions on x = 0 */
                   if (index[0] == 1)
@@ -593,7 +593,7 @@ int main (int argc, char *argv[])
                      }
                   }
                   /* Eliminate boundary conditions on x = 1 */
-                  if (index[0] == N*n)
+                  if (index[0] == N * n)
                   {
                      int ii, jj, bc_edges[4] = { 1, 10, 5, 9 };
                      for (ii = 0; ii < 4; ii++)
@@ -607,7 +607,7 @@ int main (int argc, char *argv[])
                      }
                   }
                   /* Eliminate boundary conditions on y = 1 */
-                  if (index[1] == N*n)
+                  if (index[1] == N * n)
                   {
                      int ii, jj, bc_edges[4] = { 2, 10, 6, 11 };
                      for (ii = 0; ii < 4; ii++)
@@ -621,7 +621,7 @@ int main (int argc, char *argv[])
                      }
                   }
                   /* Eliminate boundary conditions on z = 1 */
-                  if (index[2] == N*n)
+                  if (index[2] == N * n)
                   {
                      int ii, jj, bc_edges[4] = { 4, 5, 6, 7 };
                      for (ii = 0; ii < 4; ii++)
@@ -661,9 +661,9 @@ int main (int argc, char *argv[])
          HYPRE_Int var = 0; /* the node variable */
 
          /* The discrete gradient stencils connect edge to node variables. */
-         HYPRE_Int Gx_offsets[2][3] = {{-1,0,0},{0,0,0}};  /* x-edge [7]-[6] */
-         HYPRE_Int Gy_offsets[2][3] = {{0,-1,0},{0,0,0}};  /* y-edge [5]-[6] */
-         HYPRE_Int Gz_offsets[2][3] = {{0,0,-1},{0,0,0}};  /* z-edge [2]-[6] */
+         HYPRE_Int Gx_offsets[2][3] = {{-1, 0, 0}, {0, 0, 0}}; /* x-edge [7]-[6] */
+         HYPRE_Int Gy_offsets[2][3] = {{0, -1, 0}, {0, 0, 0}}; /* y-edge [5]-[6] */
+         HYPRE_Int Gz_offsets[2][3] = {{0, 0, -1}, {0, 0, 0}}; /* z-edge [2]-[6] */
 
          HYPRE_SStructStencilCreate(ndim, stencil_size, &G_stencil[0]);
          HYPRE_SStructStencilCreate(ndim, stencil_size, &G_stencil[1]);
@@ -718,24 +718,24 @@ int main (int argc, char *argv[])
          the edges (i.e. one in agreement with the coordinate directions). */
       {
          int i;
-         int nedges = n*(n+1)*(n+1);
+         int nedges = n * (n + 1) * (n + 1);
          double *values;
-         HYPRE_Int stencil_indices[2] = {0,1}; /* the nodes of each edge */
+         HYPRE_Int stencil_indices[2] = {0, 1}; /* the nodes of each edge */
 
-         values = (double*) calloc(2*nedges, sizeof(double));
+         values = (double*) calloc(2 * nedges, sizeof(double));
 
          /* The edge orientation is fixed: from first to second node */
          for (i = 0; i < nedges; i++)
          {
-            values[2*i]   = -1.0;
-            values[2*i+1] =  1.0;
+            values[2 * i]   = -1.0;
+            values[2 * i + 1] =  1.0;
          }
 
          /* Set the values in the discrete gradient x-edges */
          {
             HYPRE_Int var = 0;
-            HYPRE_Int ilower[3] = {1 + pi*n, 0 + pj*n, 0 + pk*n};
-            HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            HYPRE_Int ilower[3] = {1 + pi * n, 0 + pj * n, 0 + pk * n};
+            HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper, var,
                                             stencil_size, stencil_indices,
                                             values);
@@ -743,8 +743,8 @@ int main (int argc, char *argv[])
          /* Set the values in the discrete gradient y-edges */
          {
             HYPRE_Int var = 1;
-            HYPRE_Int ilower[3] = {0 + pi*n, 1 + pj*n, 0 + pk*n};
-            HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            HYPRE_Int ilower[3] = {0 + pi * n, 1 + pj * n, 0 + pk * n};
+            HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper, var,
                                             stencil_size, stencil_indices,
                                             values);
@@ -752,8 +752,8 @@ int main (int argc, char *argv[])
          /* Set the values in the discrete gradient z-edges */
          {
             HYPRE_Int var = 2;
-            HYPRE_Int ilower[3] = {0 + pi*n, 0 + pj*n, 1 + pk*n};
-            HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            HYPRE_Int ilower[3] = {0 + pi * n, 0 + pj * n, 1 + pk * n};
+            HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper, var,
                                             stencil_size, stencil_indices,
                                             values);
@@ -793,11 +793,11 @@ int main (int argc, char *argv[])
          for (j = 0; j <= n; j++)
             for (k = 0; k <= n; k++)
             {
-               index[0] = i + pi*n; index[1] = j + pj*n; index[2] = k + pk*n;
+               index[0] = i + pi * n; index[1] = j + pj * n; index[2] = k + pk * n;
 
-               xval = index[0]*h;
-               yval = index[1]*h;
-               zval = index[2]*h;
+               xval = index[0] * h;
+               yval = index[1] * h;
+               zval = index[2] * h;
 
                HYPRE_SStructVectorSetValues(xcoord, part, index, var, &xval);
                HYPRE_SStructVectorSetValues(ycoord, part, index, var, &yval);
@@ -813,7 +813,7 @@ int main (int argc, char *argv[])
    /* 5. Set up a SStruct Vector for the solution vector x */
    {
       HYPRE_Int part = 0;
-      int nvalues = n*(n+1)*(n+1);
+      int nvalues = n * (n + 1) * (n + 1);
       double *values;
 
       values = (double*) calloc(nvalues, sizeof(double));
@@ -828,22 +828,22 @@ int main (int argc, char *argv[])
       /* Set the values for the initial guess x-edge */
       {
          HYPRE_Int var = 0;
-         HYPRE_Int ilower[3] = {1 + pi*n, 0 + pj*n, 0 + pk*n};
-         HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         HYPRE_Int ilower[3] = {1 + pi * n, 0 + pj * n, 0 + pk * n};
+         HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
       /* Set the values for the initial guess y-edge */
       {
          HYPRE_Int var = 1;
-         HYPRE_Int ilower[3] = {0 + pi*n, 1 + pj*n, 0 + pk*n};
-         HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         HYPRE_Int ilower[3] = {0 + pi * n, 1 + pj * n, 0 + pk * n};
+         HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
       /* Set the values for the initial guess z-edge */
       {
          HYPRE_Int var = 2;
-         HYPRE_Int ilower[3] = {0 + pi*n, 0 + pj*n, 1 + pk*n};
-         HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         HYPRE_Int ilower[3] = {0 + pi * n, 0 + pj * n, 1 + pk * n};
+         HYPRE_Int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
 

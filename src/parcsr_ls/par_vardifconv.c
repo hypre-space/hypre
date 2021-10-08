@@ -47,7 +47,7 @@ GenerateVarDifConv( MPI_Comm         comm,
    HYPRE_Int           local_num_rows;
    HYPRE_BigInt       *col_map_offd;
    HYPRE_Int           row_index;
-   HYPRE_Int           i,j;
+   HYPRE_Int           i, j;
 
    HYPRE_Int           nx_local, ny_local, nz_local;
    HYPRE_Int           num_cols_offd;
@@ -64,59 +64,59 @@ GenerateVarDifConv( MPI_Comm         comm,
    HYPRE_Real          xx, yy, zz;
    HYPRE_Real          afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
-   grid_size = nx*ny*nz;
+   grid_size = nx * ny * nz;
 
-   hypre_GeneratePartitioning(nx,P,&nx_part);
-   hypre_GeneratePartitioning(ny,Q,&ny_part);
-   hypre_GeneratePartitioning(nz,R,&nz_part);
+   hypre_GeneratePartitioning(nx, P, &nx_part);
+   hypre_GeneratePartitioning(ny, Q, &ny_part);
+   hypre_GeneratePartitioning(nz, R, &nz_part);
 
-   nx_local = (HYPRE_Int)(nx_part[p+1] - nx_part[p]);
-   ny_local = (HYPRE_Int)(ny_part[q+1] - ny_part[q]);
-   nz_local = (HYPRE_Int)(nz_part[r+1] - nz_part[r]);
+   nx_local = (HYPRE_Int)(nx_part[p + 1] - nx_part[p]);
+   ny_local = (HYPRE_Int)(ny_part[q + 1] - ny_part[q]);
+   nz_local = (HYPRE_Int)(nz_part[r + 1] - nz_part[r]);
 
-   local_num_rows = nx_local*ny_local*nz_local;
+   local_num_rows = nx_local * ny_local * nz_local;
 
-   global_part[0] = nz_part[r]*nx*ny+(ny_part[q]*nx+nx_part[p]*ny_local)*nz_local;
+   global_part[0] = nz_part[r] * nx * ny + (ny_part[q] * nx + nx_part[p] * ny_local) * nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
 
-   diag_i   = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
-   offd_i   = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   diag_i   = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
+   offd_i   = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
    rhs_data = hypre_CTAlloc(HYPRE_Real, local_num_rows,   HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx,P);
-   Q_busy = hypre_min(ny,Q);
-   R_busy = hypre_min(nz,R);
+   P_busy = hypre_min(nx, P);
+   Q_busy = hypre_min(ny, Q);
+   R_busy = hypre_min(nz, R);
 
    num_cols_offd = 0;
-   if (p) { num_cols_offd += ny_local*nz_local; }
-   if (p < P_busy-1) { num_cols_offd += ny_local*nz_local; }
-   if (q) { num_cols_offd += nx_local*nz_local; }
-   if (q < Q_busy-1) { num_cols_offd += nx_local*nz_local; }
-   if (r) { num_cols_offd += nx_local*ny_local; }
-   if (r < R_busy-1) { num_cols_offd += nx_local*ny_local; }
+   if (p) { num_cols_offd += ny_local * nz_local; }
+   if (p < P_busy - 1) { num_cols_offd += ny_local * nz_local; }
+   if (q) { num_cols_offd += nx_local * nz_local; }
+   if (q < Q_busy - 1) { num_cols_offd += nx_local * nz_local; }
+   if (r) { num_cols_offd += nx_local * ny_local; }
+   if (r < R_busy - 1) { num_cols_offd += nx_local * ny_local; }
 
    if (!local_num_rows) { num_cols_offd = 0; }
 
    col_map_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_offd, HYPRE_MEMORY_HOST);
 
-   hhx = 1.0/(HYPRE_Real)(nx+1);
-   hhy = 1.0/(HYPRE_Real)(ny+1);
-   hhz = 1.0/(HYPRE_Real)(nz+1);
+   hhx = 1.0 / (HYPRE_Real)(nx + 1);
+   hhy = 1.0 / (HYPRE_Real)(ny + 1);
+   hhz = 1.0 / (HYPRE_Real)(nz + 1);
 
    cnt = 1;
    o_cnt = 1;
    diag_i[0] = 0;
    offd_i[0] = 0;
-   for (iz = nz_part[r]; iz < nz_part[r+1]; iz++)
+   for (iz = nz_part[r]; iz < nz_part[r + 1]; iz++)
    {
-      for (iy = ny_part[q];  iy < ny_part[q+1]; iy++)
+      for (iy = ny_part[q];  iy < ny_part[q + 1]; iy++)
       {
-         for (ix = nx_part[p]; ix < nx_part[p+1]; ix++)
+         for (ix = nx_part[p]; ix < nx_part[p + 1]; ix++)
          {
-            diag_i[cnt] = diag_i[cnt-1];
-            offd_i[o_cnt] = offd_i[o_cnt-1];
+            diag_i[cnt] = diag_i[cnt - 1];
+            offd_i[o_cnt] = offd_i[o_cnt - 1];
             diag_i[cnt]++;
             if (iz > nz_part[r])
             {
@@ -151,35 +151,35 @@ GenerateVarDifConv( MPI_Comm         comm,
                   offd_i[o_cnt]++;
                }
             }
-            if (ix+1 < nx_part[p+1])
+            if (ix + 1 < nx_part[p + 1])
             {
                diag_i[cnt]++;
             }
             else
             {
-               if (ix+1 < nx)
+               if (ix + 1 < nx)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (iy+1 < ny_part[q+1])
+            if (iy + 1 < ny_part[q + 1])
             {
                diag_i[cnt]++;
             }
             else
             {
-               if (iy+1 < ny)
+               if (iy + 1 < ny)
                {
                   offd_i[o_cnt]++;
                }
             }
-            if (iz+1 < nz_part[r+1])
+            if (iz + 1 < nz_part[r + 1])
             {
                diag_i[cnt]++;
             }
             else
             {
-               if (iz+1 < nz)
+               if (iz + 1 < nz)
                {
                   offd_i[o_cnt]++;
                }
@@ -203,116 +203,116 @@ GenerateVarDifConv( MPI_Comm         comm,
    row_index = 0;
    cnt = 0;
    o_cnt = 0;
-   for (iz = nz_part[r]; iz < nz_part[r+1]; iz++)
+   for (iz = nz_part[r]; iz < nz_part[r + 1]; iz++)
    {
-      zz = (HYPRE_Real)(iz+1)*hhz;
-      for (iy = ny_part[q];  iy < ny_part[q+1]; iy++)
+      zz = (HYPRE_Real)(iz + 1) * hhz;
+      for (iy = ny_part[q];  iy < ny_part[q + 1]; iy++)
       {
-         yy = (HYPRE_Real)(iy+1)*hhy;
-         for (ix = nx_part[p]; ix < nx_part[p+1]; ix++)
+         yy = (HYPRE_Real)(iy + 1) * hhy;
+         for (ix = nx_part[p]; ix < nx_part[p + 1]; ix++)
          {
-            xx = (HYPRE_Real)(ix+1)*hhx;
-            afp = eps*afun(xx+0.5*hhx,yy,zz)/hhx/hhx;
-            afm = eps*afun(xx-0.5*hhx,yy,zz)/hhx/hhx;
-            bfp = eps*bfun(xx,yy+0.5*hhy,zz)/hhy/hhy;
-            bfm = eps*bfun(xx,yy-0.5*hhy,zz)/hhy/hhy;
-            cfp = eps*cfun(xx,yy,zz+0.5*hhz)/hhz/hhz;
-            cfm = eps*cfun(xx,yy,zz-0.5*hhz)/hhz/hhz;
-            df = dfun(xx,yy,zz)/hhx;
-            ef = efun(xx,yy,zz)/hhy;
-            ff = ffun(xx,yy,zz)/hhz;
-            gf = gfun(xx,yy,zz);
+            xx = (HYPRE_Real)(ix + 1) * hhx;
+            afp = eps * afun(xx + 0.5 * hhx, yy, zz) / hhx / hhx;
+            afm = eps * afun(xx - 0.5 * hhx, yy, zz) / hhx / hhx;
+            bfp = eps * bfun(xx, yy + 0.5 * hhy, zz) / hhy / hhy;
+            bfm = eps * bfun(xx, yy - 0.5 * hhy, zz) / hhy / hhy;
+            cfp = eps * cfun(xx, yy, zz + 0.5 * hhz) / hhz / hhz;
+            cfm = eps * cfun(xx, yy, zz - 0.5 * hhz) / hhz / hhz;
+            df = dfun(xx, yy, zz) / hhx;
+            ef = efun(xx, yy, zz) / hhy;
+            ff = ffun(xx, yy, zz) / hhz;
+            gf = gfun(xx, yy, zz);
             diag_j[cnt] = row_index;
-            diag_data[cnt++] = afp+afm+bfp+bfm+cfp+cfm+gf-df-ef-ff;
-            rhs_data[row_index] = rfun(xx,yy,zz);
-            if (ix == 0) { rhs_data[row_index] += afm*bndfun(0,yy,zz); }
-            if (iy == 0) { rhs_data[row_index] += bfm*bndfun(xx,0,zz); }
-            if (iz == 0) { rhs_data[row_index] += cfm*bndfun(xx,yy,0); }
-            if (ix+1 == nx) { rhs_data[row_index] += (afp-df)*bndfun(1.0,yy,zz); }
-            if (iy+1 == ny) { rhs_data[row_index] += (bfp-ef)*bndfun(xx,1.0,zz); }
-            if (iz+1 == nz) { rhs_data[row_index] += (cfp-ff)*bndfun(xx,yy,1.0); }
+            diag_data[cnt++] = afp + afm + bfp + bfm + cfp + cfm + gf - df - ef - ff;
+            rhs_data[row_index] = rfun(xx, yy, zz);
+            if (ix == 0) { rhs_data[row_index] += afm * bndfun(0, yy, zz); }
+            if (iy == 0) { rhs_data[row_index] += bfm * bndfun(xx, 0, zz); }
+            if (iz == 0) { rhs_data[row_index] += cfm * bndfun(xx, yy, 0); }
+            if (ix + 1 == nx) { rhs_data[row_index] += (afp - df) * bndfun(1.0, yy, zz); }
+            if (iy + 1 == ny) { rhs_data[row_index] += (bfp - ef) * bndfun(xx, 1.0, zz); }
+            if (iz + 1 == nz) { rhs_data[row_index] += (cfp - ff) * bndfun(xx, yy, 1.0); }
             if (iz > nz_part[r])
             {
-               diag_j[cnt] = row_index-nx_local*ny_local;
+               diag_j[cnt] = row_index - nx_local * ny_local;
                diag_data[cnt++] = -cfm;
             }
             else
             {
                if (iz)
                {
-                  big_offd_j[o_cnt] = hypre_map(ix,iy,iz-1,p,q,r-1,nx,ny,
-                                                nx_part,ny_part,nz_part);
+                  big_offd_j[o_cnt] = hypre_map(ix, iy, iz - 1, p, q, r - 1, nx, ny,
+                                                nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = -cfm;
                }
             }
             if (iy > ny_part[q])
             {
-               diag_j[cnt] = row_index-nx_local;
+               diag_j[cnt] = row_index - nx_local;
                diag_data[cnt++] = -bfm;
             }
             else
             {
                if (iy)
                {
-                  big_offd_j[o_cnt] = hypre_map(ix,iy-1,iz,p,q-1,r,nx,ny,
-                                                nx_part,ny_part,nz_part);
+                  big_offd_j[o_cnt] = hypre_map(ix, iy - 1, iz, p, q - 1, r, nx, ny,
+                                                nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = -bfm;
                }
             }
             if (ix > nx_part[p])
             {
-               diag_j[cnt] = row_index-1;
+               diag_j[cnt] = row_index - 1;
                diag_data[cnt++] = -afm;
             }
             else
             {
                if (ix)
                {
-                  big_offd_j[o_cnt] = hypre_map(ix-1,iy,iz,p-1,q,r,nx,ny,
-                                                nx_part,ny_part,nz_part);
+                  big_offd_j[o_cnt] = hypre_map(ix - 1, iy, iz, p - 1, q, r, nx, ny,
+                                                nx_part, ny_part, nz_part);
                   offd_data[o_cnt++] = -afm;
                }
             }
-            if (ix+1 < nx_part[p+1])
+            if (ix + 1 < nx_part[p + 1])
             {
-               diag_j[cnt] = row_index+1;
-               diag_data[cnt++] = -afp+df;
+               diag_j[cnt] = row_index + 1;
+               diag_data[cnt++] = -afp + df;
             }
             else
             {
-               if (ix+1 < nx)
+               if (ix + 1 < nx)
                {
-                  big_offd_j[o_cnt] = hypre_map(ix+1,iy,iz,p+1,q,r,nx,ny,
-                                                nx_part,ny_part,nz_part);
-                  offd_data[o_cnt++] = -afp+df;
+                  big_offd_j[o_cnt] = hypre_map(ix + 1, iy, iz, p + 1, q, r, nx, ny,
+                                                nx_part, ny_part, nz_part);
+                  offd_data[o_cnt++] = -afp + df;
                }
             }
-            if (iy+1 < ny_part[q+1])
+            if (iy + 1 < ny_part[q + 1])
             {
-               diag_j[cnt] = row_index+nx_local;
-               diag_data[cnt++] = -bfp +ef;
+               diag_j[cnt] = row_index + nx_local;
+               diag_data[cnt++] = -bfp + ef;
             }
             else
             {
-               if (iy+1 < ny)
+               if (iy + 1 < ny)
                {
-                  big_offd_j[o_cnt] = hypre_map(ix,iy+1,iz,p,q+1,r,nx,ny,
-                                                nx_part,ny_part,nz_part);
-                  offd_data[o_cnt++] = -bfp+ef;
+                  big_offd_j[o_cnt] = hypre_map(ix, iy + 1, iz, p, q + 1, r, nx, ny,
+                                                nx_part, ny_part, nz_part);
+                  offd_data[o_cnt++] = -bfp + ef;
                }
             }
-            if (iz+1 < nz_part[r+1])
+            if (iz + 1 < nz_part[r + 1])
             {
-               diag_j[cnt] = row_index+nx_local*ny_local;
-               diag_data[cnt++] = -cfp+ff;
+               diag_j[cnt] = row_index + nx_local * ny_local;
+               diag_data[cnt++] = -cfp + ff;
             }
             else
             {
-               if (iz+1 < nz)
+               if (iz + 1 < nz)
                {
-                  big_offd_j[o_cnt] = hypre_map(ix,iy,iz+1,p,q,r+1,nx,ny,
-                                                nx_part,ny_part,nz_part);
-                  offd_data[o_cnt++] = -cfp+ff;
+                  big_offd_j[o_cnt] = hypre_map(ix, iy, iz + 1, p, q, r + 1, nx, ny,
+                                                nx_part, ny_part, nz_part);
+                  offd_data[o_cnt++] = -cfp + ff;
                }
             }
             row_index++;
@@ -322,15 +322,15 @@ GenerateVarDifConv( MPI_Comm         comm,
 
    if (num_procs > 1)
    {
-      for (i=0; i < num_cols_offd; i++)
+      for (i = 0; i < num_cols_offd; i++)
       {
          col_map_offd[i] = big_offd_j[i];
       }
 
-      hypre_BigQsort0(col_map_offd, 0, num_cols_offd-1);
+      hypre_BigQsort0(col_map_offd, 0, num_cols_offd - 1);
 
-      for (i=0; i < num_cols_offd; i++)
-         for (j=0; j < num_cols_offd; j++)
+      for (i = 0; i < num_cols_offd; i++)
+         for (j = 0; j < num_cols_offd; j++)
             if (big_offd_j[i] == col_map_offd[j])
             {
                offd_j[i] = j;

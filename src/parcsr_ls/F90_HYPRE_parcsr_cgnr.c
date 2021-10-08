@@ -194,7 +194,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
                    HYPRE_BoomerAMGSolve,
                    HYPRE_BoomerAMGSolve,
                    HYPRE_BoomerAMGSetup,
-                   (HYPRE_Solver)       *precond_solver ) );
+                   (HYPRE_Solver)       * precond_solver ) );
    }
    if (*precond_id == 3)
    {
@@ -204,7 +204,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
                    HYPRE_ParCSRPilutSolve,
                    HYPRE_ParCSRPilutSolve,
                    HYPRE_ParCSRPilutSetup,
-                   (HYPRE_Solver)       *precond_solver ) );
+                   (HYPRE_Solver)       * precond_solver ) );
    }
    if (*precond_id == 4)
    {
@@ -214,7 +214,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
                    HYPRE_ParCSRParaSailsSolve,
                    HYPRE_ParCSRParaSailsSolve,
                    HYPRE_ParCSRParaSailsSetup,
-                   (HYPRE_Solver)       *precond_solver ) );
+                   (HYPRE_Solver)       * precond_solver ) );
    }
    if (*precond_id == 5)
    {
@@ -224,7 +224,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
                    HYPRE_EuclidSolve,
                    HYPRE_EuclidSolve,
                    HYPRE_EuclidSetup,
-                   (HYPRE_Solver)       *precond_solver ) );
+                   (HYPRE_Solver)       * precond_solver ) );
    }
    else
    {

@@ -20,7 +20,7 @@ __global__ void
 hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr,
                                     HYPRE_Int *row_len, HYPRE_Int *mark)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id < n)
    {
@@ -80,7 +80,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
        * but why? exclusive scan does not need it */
       /* hypre_Memset(row_ptr + nrows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE); */
       hypreDevice_IntegerExclusiveScan(nrows + 1, row_ptr);
-      hypre_TMemcpy(&nelms, row_ptr+nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&nelms, row_ptr + nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
    else
    {
@@ -148,10 +148,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    if (row_indexes)
    {
       HYPRE_Int len, len1;
-      hypre_TMemcpy(&len1, &row_indexes[nrows-1], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&len1, &row_indexes[nrows - 1], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       if (ncols)
       {
-         hypre_TMemcpy(&len, &ncols[nrows-1], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(&len, &ncols[nrows - 1], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       }
       else
       {
@@ -160,7 +160,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       /* this is the *effective* length of cols and values */
       len += len1;
       HYPRE_Int *indicator = hypre_CTAlloc(HYPRE_Int, len, HYPRE_MEMORY_DEVICE);
-      hypreDevice_CsrRowPtrsToIndices_v2(nrows-1, len1, (HYPRE_Int *) row_indexes, indicator);
+      hypreDevice_CsrRowPtrsToIndices_v2(nrows - 1, len1, (HYPRE_Int *) row_indexes, indicator);
       /* mark unwanted elements as -1 */
       dim3 bDim = hypre_GetDefaultCUDABlockDimension();
       dim3 gDim = hypre_GetDefaultCUDAGridDimension(len1, "thread", bDim);
@@ -239,10 +239,10 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /* output X: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0))),
+      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
       make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),
       char(0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
@@ -332,10 +332,10 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0))),
+      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
       make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 
@@ -357,7 +357,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /* remove numrical zeros */
    auto new_end2 = HYPRE_THRUST_CALL( copy_if,
                                       thrust::make_zip_iterator(thrust::make_tuple(I,    J,    A)),
-                                      thrust::make_zip_iterator(thrust::make_tuple(I+Nt, J+Nt, A+Nt)),
+                                      thrust::make_zip_iterator(thrust::make_tuple(I + Nt, J + Nt, A + Nt)),
                                       A,
                                       thrust::make_zip_iterator(thrust::make_tuple(I0, J0, A0)),
                                       thrust::identity<HYPRE_Complex>() );
@@ -383,17 +383,17 @@ hypre_IJMatrixAssembleSortAndRemove(HYPRE_Int N0, HYPRE_BigInt *I0, HYPRE_BigInt
    /* output in X0: 0: keep, 1: remove */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0))),
+      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
       make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 
    auto new_end = HYPRE_THRUST_CALL(
                      remove_if,
                      thrust::make_zip_iterator(thrust::make_tuple(I0,    J0,    A0)),
-                     thrust::make_zip_iterator(thrust::make_tuple(I0+N0, J0+N0, A0+N0)),
+                     thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0, A0 + N0)),
                      X0,
                      thrust::identity<char>());
 
@@ -437,8 +437,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    HYPRE_Complex *stack_data = hypre_AuxParCSRMatrixStackData(aux_matrix);
    char          *stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
 
-   in_range<HYPRE_BigInt> pred(row_start, row_end-1);
-   HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i+nelms, pred);
+   in_range<HYPRE_BigInt> pred(row_start, row_end - 1);
+   HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
    hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
@@ -518,7 +518,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
 #ifdef HYPRE_DEBUG
    /* the stack should only have on-proc elements now */
-   HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i+nelms, pred);
+   HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
    hypre_assert(nelms == tmp);
 #endif
 

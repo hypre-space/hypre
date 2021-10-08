@@ -61,11 +61,11 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* global number of C points and my start position */
-   if (my_id == (num_procs -1))
+   if (my_id == (num_procs - 1))
    {
       total_global_cpts = num_cpts_global[1];
    }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /* get AFF and ACF */
    hypre_ParCSRMatrix *AFF, *ACF, *Dinv, *N, *X, *X2, *Z, *Z2;
@@ -121,7 +121,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *Dinv_diag = hypre_ParCSRMatrixDiag(Dinv);
    HYPRE_THRUST_CALL( copy,
                       thrust::make_counting_iterator(0),
-                      thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag)+1),
+                      thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag) + 1),
                       hypre_CSRMatrixI(Dinv_diag) );
    HYPRE_THRUST_CALL( copy,
                       thrust::make_counting_iterator(0),
@@ -239,7 +239,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /* allocate arrays for R diag */
-   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts+1, HYPRE_MEMORY_DEVICE);
+   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, HYPRE_MEMORY_DEVICE);
    R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
    R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
 
@@ -332,7 +332,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -372,7 +372,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
 }
 
 
-struct setTo1minus1 : public thrust::unary_function<HYPRE_Int,HYPRE_Int>
+struct setTo1minus1 : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
    __host__ __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
    {

@@ -139,7 +139,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          and notify users when they supply bad input. */
       if (resid_nrm != 0.)
       {
-         ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+         ieee_check = resid_nrm / resid_nrm; /* INF -> NaN conversion */
       }
 
       if (ieee_check != ieee_check)
@@ -257,9 +257,9 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       if (amgdd_start_level > 0)
       {
          // Interpolate
-         hypre_ParCSRMatrixMatvec(1.0, P_array[amgdd_start_level-1],
+         hypre_ParCSRMatrixMatvec(1.0, P_array[amgdd_start_level - 1],
                                   U_array[amgdd_start_level], 1.0,
-                                  U_array[amgdd_start_level-1]);
+                                  U_array[amgdd_start_level - 1]);
          // V-cycle back to finest grid
          hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) = amgdd_start_level - 1;
          hypre_ParAMGDataPartialCycleControl(amg_data) = 1;
@@ -340,7 +340,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
       {
          hypre_printf("\n\n==============================================");
          hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-         hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+         hypre_printf("      within the allowed %d V-cycles\n", max_iter);
          hypre_printf("==============================================");
       }
 
@@ -385,7 +385,7 @@ hypre_BoomerAMGDD_ResidualCommunication( hypre_ParAMGDDData *amgdd_data )
    HYPRE_Int              send_buffer_size, recv_buffer_size;
 
    HYPRE_Int              num_levels, amgdd_start_level;
-   HYPRE_Int              level,i;
+   HYPRE_Int              level, i;
 
    // Get info from amg
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
@@ -397,15 +397,15 @@ hypre_BoomerAMGDD_ResidualCommunication( hypre_ParAMGDDData *amgdd_data )
    F_array           = hypre_ParAMGDataFArray(amg_data);
 
    // Restrict residual down to all levels
-   for (level = amgdd_start_level; level < num_levels-1; level++)
+   for (level = amgdd_start_level; level < num_levels - 1; level++)
    {
       if (hypre_ParAMGDataRestriction(amg_data))
       {
-         hypre_ParCSRMatrixMatvec(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
+         hypre_ParCSRMatrixMatvec(1.0, R_array[level], F_array[level], 0.0, F_array[level + 1]);
       }
       else
       {
-         hypre_ParCSRMatrixMatvecT(1.0, R_array[level], F_array[level], 0.0, F_array[level+1]);
+         hypre_ParCSRMatrixMatvecT(1.0, R_array[level], F_array[level], 0.0, F_array[level + 1]);
       }
    }
 

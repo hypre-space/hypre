@@ -179,7 +179,7 @@ typedef struct hypre_SStructGrid_struct
 
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_BigInt            ghstart_rank;  /* GEC0902 start rank including ghosts  */
-   HYPRE_Int               num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */
+   HYPRE_Int               num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
 
 } hypre_SStructGrid;
 

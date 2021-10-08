@@ -38,7 +38,7 @@ hypre_IJMatrixSetLocalSizePETSc(hypre_IJMatrix *matrix,
    else
    {
       hypre_IJMatrixTranslator(matrix) =
-         hypre_AuxParCSRMatrixCreate(local_m,local_n,NULL);
+         hypre_AuxParCSRMatrixCreate(local_m, local_n, NULL);
    }
    return ierr;
 }
@@ -84,7 +84,7 @@ hypre_IJMatrixCreatePETSc(hypre_IJMatrix *matrix)
    }
    else
    {
-      aux_matrix = hypre_AuxParCSRMatrixCreate(-1,-1,NULL);
+      aux_matrix = hypre_AuxParCSRMatrixCreate(-1, -1, NULL);
       local_m = -1;
       local_n = -1;
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
@@ -96,7 +96,7 @@ hypre_IJMatrixCreatePETSc(hypre_IJMatrix *matrix)
    }
    else
    {
-      row_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+      row_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
 
       if (my_id == 0 && local_m == global_m)
       {
@@ -105,8 +105,8 @@ hypre_IJMatrixCreatePETSc(hypre_IJMatrix *matrix)
       else
       {
          HYPRE_BigInt big_local_m = (HYPRE_BigInt) local_m;
-         hypre_MPI_Allgather(&big_local_m,1,HYPRE_MPI_BIG_INT,&row_starts[1],1,
-                             HYPRE_MPI_BIG_INT,comm);
+         hypre_MPI_Allgather(&big_local_m, 1, HYPRE_MPI_BIG_INT, &row_starts[1], 1,
+                             HYPRE_MPI_BIG_INT, comm);
       }
 
    }
@@ -116,7 +116,7 @@ hypre_IJMatrixCreatePETSc(hypre_IJMatrix *matrix)
    }
    else
    {
-      col_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+      col_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
 
       if (my_id == 0 && local_n == global_n)
       {
@@ -125,19 +125,19 @@ hypre_IJMatrixCreatePETSc(hypre_IJMatrix *matrix)
       else
       {
          HYPRE_BigInt big_local_n = (HYPRE_BigInt) local_n;
-         hypre_MPI_Allgather(&big_local_n,1,HYPRE_MPI_BIG_INT,&col_starts[1],1,
-                             HYPRE_MPI_BIG_INT,comm);
+         hypre_MPI_Allgather(&big_local_n, 1, HYPRE_MPI_BIG_INT, &col_starts[1], 1,
+                             HYPRE_MPI_BIG_INT, comm);
       }
    }
 
    if (row_starts && col_starts)
    {
       equal = 1;
-      for (i=0; i < num_procs; i++)
+      for (i = 0; i < num_procs; i++)
       {
-         row_starts[i+1] += row_starts[i];
-         col_starts[i+1] += col_starts[i];
-         if (row_starts[i+1] != col_starts[i+1])
+         row_starts[i + 1] += row_starts[i];
+         col_starts[i + 1] += col_starts[i];
+         if (row_starts[i + 1] != col_starts[i + 1])
          {
             equal = 0;
          }
@@ -220,9 +220,9 @@ hypre_IJMatrixSetDiagRowSizesPETSc(hypre_IJMatrix *matrix,
    local_num_rows = hypre_CSRMatrixNumRows(diag);
    if (!diag_i)
    {
-      diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+      diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
    }
-   for (i = 0; i < local_num_rows+1; i++)
+   for (i = 0; i < local_num_rows + 1; i++)
    {
       diag_i[i] = sizes[i];
    }
@@ -259,9 +259,9 @@ hypre_IJMatrixSetOffDiagRowSizesPETSc(hypre_IJMatrix *matrix,
    local_num_rows = hypre_CSRMatrixNumRows(offd);
    if (!offd_i)
    {
-      offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+      offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows + 1, HYPRE_MEMORY_HOST);
    }
-   for (i = 0; i < local_num_rows+1; i++)
+   for (i = 0; i < local_num_rows + 1; i++)
    {
       offd_i[i] = sizes[i];
    }
@@ -293,10 +293,10 @@ hypre_IJMatrixInitializePETSc(hypre_IJMatrix *matrix)
    MPI_Comm  comm = hypre_IJMatrixContext(matrix);
    HYPRE_BigInt global_num_rows = hypre_IJMatrixM(matrix);
 
-   hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
-   local_nnz = (num_nonzeros/global_num_rows+1)*local_num_rows;
+   local_nnz = (num_nonzeros / global_num_rows + 1) * local_num_rows;
    if (local_num_rows < 0)
       hypre_AuxParCSRMatrixLocalNumRows(aux_matrix) =
          hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(par_matrix));
@@ -326,10 +326,10 @@ hypre_IJMatrixInsertBlockPETSc(hypre_IJMatrix *matrix,
 {
    HYPRE_Int ierr = 0;
    HYPRE_Int i, in;
-   for (i=0; i < m; i++)
+   for (i = 0; i < m; i++)
    {
-      in = i*n;
-      hypre_IJMatrixInsertRowPETSc(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      in = i * n;
+      hypre_IJMatrixInsertRowPETSc(matrix, n, rows[i], &cols[in], &coeffs[in]);
    }
    return ierr;
 }
@@ -352,10 +352,10 @@ hypre_IJMatrixAddToBlockPETSc(hypre_IJMatrix *matrix,
 {
    HYPRE_Int ierr = 0;
    HYPRE_Int i, in;
-   for (i=0; i < m; i++)
+   for (i = 0; i < m; i++)
    {
-      in = i*n;
-      hypre_IJMatrixAddToRowPETSc(matrix,n,rows[i],&cols[in],&coeffs[in]);
+      in = i * n;
+      hypre_IJMatrixAddToRowPETSc(matrix, n, rows[i], &cols[in], &coeffs[in]);
    }
    return ierr;
 }
@@ -419,10 +419,10 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
    col_0 = col_starts[my_id];
-   col_n = col_starts[my_id+1]-1;
+   col_n = col_starts[my_id + 1] - 1;
    need_aux = hypre_AuxParCSRMatrixNeedAux(aux_matrix);
 
-   if (row >= row_starts[my_id] && row < row_starts[my_id+1])
+   if (row >= row_starts[my_id] && row < row_starts[my_id + 1])
    {
       if (need_aux)
       {
@@ -443,7 +443,7 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
             row_space[row_local] = n;
          }
 
-         for (i=0; i < n; i++)
+         for (i = 0; i < n; i++)
          {
             local_j[i] = indices[i];
             local_data[i] = coeffs[i];
@@ -453,7 +453,7 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
             exchange it with first element */
          if (local_j[0] != row_local)
          {
-            for (i=1; i < n; i++)
+            for (i = 1; i < n; i++)
             {
                if (local_j[i] == row_local)
                {
@@ -468,7 +468,7 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
          }
          /* sort data according to column indices, except for first element */
 
-         BigQsort1(local_j,local_data,1,n-1);
+         BigQsort1(local_j, local_data, 1, n - 1);
 
       }
       else /* insert immediately into data into ParCSRMatrix structure */
@@ -483,9 +483,9 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
          offd_data = hypre_CSRMatrixData(offd);
          offd_indx = offd_i[row_local];
          indx_0 = diag_i[row_local];
-         diag_indx = indx_0+1;
+         diag_indx = indx_0 + 1;
 
-         for (i=0; i < n; i++)
+         for (i = 0; i < n; i++)
          {
             if (indices[i] < col_0 || indices[i] > col_n)/* insert into offd */
             {
@@ -503,8 +503,8 @@ hypre_IJMatrixInsertRowPETSc(hypre_IJMatrix *matrix,
                diag_data[diag_indx++] = coeffs[i];
             }
          }
-         BigQsort1(big_offd_j, offd_data, 0, offd_indx-1);
-         qsort1(diag_j, diag_data, 1, diag_indx-1);
+         BigQsort1(big_offd_j, offd_data, 0, offd_indx - 1);
+         qsort1(diag_j, diag_data, 1, diag_indx - 1);
 
          hypre_AuxParCSRMatrixIndxDiag(aux_matrix)[row_local] = diag_indx;
          hypre_AuxParCSRMatrixIndxOffd(aux_matrix)[row_local] = offd_indx;
@@ -575,10 +575,10 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
    col_0 = col_starts[my_id];
-   col_n = col_starts[my_id+1]-1;
+   col_n = col_starts[my_id + 1] - 1;
    need_aux = hypre_AuxParCSRMatrixNeedAux(aux_matrix);
 
-   if (row >= row_starts[my_id] && row < row_starts[my_id+1])
+   if (row >= row_starts[my_id] && row < row_starts[my_id + 1])
    {
       if (need_aux)
       {
@@ -590,7 +590,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
          tmp_j = hypre_CTAlloc(HYPRE_BigInt, n, HYPRE_MEMORY_HOST);
          tmp_data = hypre_CTAlloc(HYPRE_Complex, n, HYPRE_MEMORY_HOST);
          tmp_indx = 0;
-         for (i=0; i < n; i++)
+         for (i = 0; i < n; i++)
          {
             if (indices[i] == row)
             {
@@ -602,10 +602,10 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
                tmp_data[tmp_indx++] = coeffs[i];
             }
          }
-         BigQsort1(tmp_j,tmp_data,0,tmp_indx-1);
+         BigQsort1(tmp_j, tmp_data, 0, tmp_indx - 1);
          indx = 0;
          size = 0;
-         for (i=1; i < row_length[row_local]; i++)
+         for (i = 1; i < row_length[row_local]; i++)
          {
             while (local_j[i] > tmp_j[indx])
             {
@@ -618,7 +618,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
                indx++;
             }
          }
-         size += tmp_indx-indx;
+         size += tmp_indx - indx;
 
          old_size = row_length[row_local];
          row_length[row_local] = size;
@@ -627,7 +627,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
          {
             tmp2_j = hypre_CTAlloc(HYPRE_BigInt, size, HYPRE_MEMORY_HOST);
             tmp2_data = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
-            for (i=0; i < old_size; i++)
+            for (i = 0; i < old_size; i++)
             {
                tmp2_j[i] = local_j[i];
                tmp2_data[i] = local_data[i];
@@ -643,7 +643,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
          indx = 0;
          cnt = row_length[row_local];
 
-         for (i=1; i < old_size; i++)
+         for (i = 1; i < old_size; i++)
          {
             while (local_j[i] > tmp_j[indx])
             {
@@ -656,7 +656,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
                local_data[i] += tmp_data[indx++];
             }
          }
-         for (i=indx; i < tmp_indx; i++)
+         for (i = indx; i < tmp_indx; i++)
          {
             local_j[cnt] = tmp_j[i];
             local_data[cnt++] = tmp_data[i];
@@ -664,7 +664,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
 
          /* sort data according to column indices, except for first element */
 
-         BigQsort1(local_j,local_data,1,n-1);
+         BigQsort1(local_j, local_data, 1, n - 1);
          hypre_TFree(tmp_j, HYPRE_MEMORY_HOST);
          hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
       }
@@ -682,7 +682,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
          offd_data = hypre_CSRMatrixData(offd);
 
          indx_0 = diag_i[row_local];
-         diag_indx = indx_0+1;
+         diag_indx = indx_0 + 1;
 
          tmp_diag_j = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
          tmp_diag_data = hypre_CTAlloc(HYPRE_Complex, n, HYPRE_MEMORY_HOST);
@@ -690,7 +690,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
          tmp_offd_j = hypre_CTAlloc(HYPRE_BigInt, n, HYPRE_MEMORY_HOST);
          tmp_offd_data = hypre_CTAlloc(HYPRE_Complex, n, HYPRE_MEMORY_HOST);
          cnt_offd = 0;
-         for (i=0; i < n; i++)
+         for (i = 0; i < n; i++)
          {
             if (indices[i] < col_0 || indices[i] > col_n)/* insert into offd */
             {
@@ -708,13 +708,13 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
                tmp_diag_data[cnt_diag++] = coeffs[i];
             }
          }
-         qsort1(tmp_diag_j,tmp_diag_data,0,cnt_diag-1);
-         BigQsort1(tmp_offd_j,tmp_offd_data,0,cnt_offd-1);
+         qsort1(tmp_diag_j, tmp_diag_data, 0, cnt_diag - 1);
+         BigQsort1(tmp_offd_j, tmp_offd_data, 0, cnt_offd - 1);
 
          diag_indx = hypre_AuxParCSRMatrixIndxDiag(aux_matrix)[row_local];
          cnt = diag_indx;
          indx = 0;
-         for (i=diag_i[row_local]+1; i < diag_indx; i++)
+         for (i = diag_i[row_local] + 1; i < diag_indx; i++)
          {
             while (diag_j[i] > tmp_diag_j[indx])
             {
@@ -727,7 +727,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
                diag_data[i] += tmp_diag_data[indx++];
             }
          }
-         for (i=indx; i < cnt_diag; i++)
+         for (i = indx; i < cnt_diag; i++)
          {
             diag_j[cnt] = tmp_diag_j[i];
             diag_data[cnt++] = tmp_diag_data[i];
@@ -735,7 +735,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
 
          /* sort data according to column indices, except for first element */
 
-         qsort1(diag_j,diag_data,1,cnt-1);
+         qsort1(diag_j, diag_data, 1, cnt - 1);
          hypre_TFree(tmp_diag_j, HYPRE_MEMORY_HOST);
          hypre_TFree(tmp_diag_data, HYPRE_MEMORY_HOST);
 
@@ -744,7 +744,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
          offd_indx = hypre_AuxParCSRMatrixIndxOffd(aux_matrix)[row_local];
          cnt = offd_indx;
          indx = 0;
-         for (i=offd_i[row_local]+1; i < offd_indx; i++)
+         for (i = offd_i[row_local] + 1; i < offd_indx; i++)
          {
             while (big_offd_j[i] > tmp_offd_j[indx])
             {
@@ -757,7 +757,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
                offd_data[i] += tmp_offd_data[indx++];
             }
          }
-         for (i=indx; i < cnt_offd; i++)
+         for (i = indx; i < cnt_offd; i++)
          {
             big_offd_j[cnt] = tmp_offd_j[i];
             offd_data[cnt++] = tmp_offd_data[i];
@@ -765,7 +765,7 @@ hypre_IJMatrixAddToRowPETSc(hypre_IJMatrix *matrix,
 
          /* sort data according to column indices, except for first element */
 
-         BigQsort1(big_offd_j,offd_data,1,cnt-1);
+         BigQsort1(big_offd_j, offd_data, 1, cnt - 1);
          hypre_TFree(tmp_offd_j, HYPRE_MEMORY_HOST);
          hypre_TFree(tmp_offd_data, HYPRE_MEMORY_HOST);
 
@@ -821,19 +821,19 @@ hypre_IJMatrixAssemblePETSc(hypre_IJMatrix *matrix)
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   num_rows = (HYPRE_Int)(row_starts[my_id+1] - row_starts[my_id]);
+   num_rows = (HYPRE_Int)(row_starts[my_id + 1] - row_starts[my_id]);
    /* move data into ParCSRMatrix if not there already */
    if (need_aux)
    {
       col_0 = col_starts[my_id];
-      col_n = col_starts[my_id+1]-1;
+      col_n = col_starts[my_id + 1] - 1;
       i_diag = 0;
       i_offd = 0;
-      for (i=0; i < num_rows; i++)
+      for (i = 0; i < num_rows; i++)
       {
          local_j = aux_j[i];
          local_data = aux_data[i];
-         for (j=0; j < row_length[i]; j++)
+         for (j = 0; j < row_length[i]; j++)
          {
             if (local_j[j] < col_0 || local_j[j] > col_n)
             {
@@ -854,11 +854,11 @@ hypre_IJMatrixAssemblePETSc(hypre_IJMatrix *matrix)
       offd_data = hypre_CTAlloc(HYPRE_Complex, i_offd, HYPRE_MEMORY_HOST);
       i_diag = 0;
       i_offd = 0;
-      for (i=0; i < num_rows; i++)
+      for (i = 0; i < num_rows; i++)
       {
          local_j = aux_j[i];
          local_data = aux_data[i];
-         for (j=0; j < row_length[i]; j++)
+         for (j = 0; j < row_length[i]; j++)
          {
             if (local_j[j] < col_0 || local_j[j] > col_n)
             {
@@ -884,31 +884,31 @@ hypre_IJMatrixAssemblePETSc(hypre_IJMatrix *matrix)
    /* generate col_map_offd */
    nnz_offd = offd_i[num_rows];
    aux_offd_j = hypre_CTAlloc(HYPRE_BigInt,  nnz_offd, HYPRE_MEMORY_HOST);
-   for (i=0; i < nnz_offd; i++)
+   for (i = 0; i < nnz_offd; i++)
    {
       aux_offd_j[i] = big_offd_j[i];
    }
-   BigQsort0(aux_offd_j,0,nnz_offd-1);
+   BigQsort0(aux_offd_j, 0, nnz_offd - 1);
    num_cols_offd = 1;
    cnt = 0;
-   for (i=0; i < nnz_offd-1; i++)
+   for (i = 0; i < nnz_offd - 1; i++)
    {
-      if (aux_offd_j[i+1] > aux_offd_j[i])
+      if (aux_offd_j[i + 1] > aux_offd_j[i])
       {
          cnt++;
-         aux_offd_j[cnt] = aux_offd_j[i+1];
+         aux_offd_j[cnt] = aux_offd_j[i + 1];
          num_cols_offd++;
       }
    }
    col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_cols_offd; i++)
+   for (i = 0; i < num_cols_offd; i++)
    {
       col_map_offd[i] = aux_offd_j[i];
    }
 
-   for (i=0; i < nnz_offd; i++)
+   for (i = 0; i < nnz_offd; i++)
    {
-      offd_j[i] = hypre_BigBinarySearch(col_map_offd,big_offd_j[i],num_cols_offd);
+      offd_j[i] = hypre_BigBinarySearch(col_map_offd, big_offd_j[i], num_cols_offd);
    }
    hypre_ParCSRMatrixColMapOffd(par_matrix) = col_map_offd;
    hypre_CSRMatrixNumCols(offd) = num_cols_offd;

@@ -30,7 +30,7 @@
 static inline void
 hypre_OutOfMemory(size_t size)
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY,"Out of memory trying to allocate too many bytes\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Out of memory trying to allocate too many bytes\n");
    hypre_assert(0);
    fflush(stdout);
 }
@@ -1107,7 +1107,7 @@ hypre_PrintMemoryTracker()
    hypre_MemoryTracker *tracker = hypre_memory_tracker();
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_sprintf(filename,"HypreMemoryTrack.log.%05d", myid);
+   hypre_sprintf(filename, "HypreMemoryTrack.log.%05d", myid);
    if ((file = fopen(filename, "a")) == NULL)
    {
       fprintf(stderr, "Error: can't open output file %s\n", filename);
@@ -1118,9 +1118,9 @@ hypre_PrintMemoryTracker()
    fprintf(file,
            "     ID        EVENT                 ADDRESS       BYTE         LOCATION                                       FILE(LINE)                                           FUNCTION  |  Memory (   H            P            D            U )\n");
 
-   size_t totl_bytes[hypre_MEMORY_UNIFIED+1] = {0};
-   size_t peak_bytes[hypre_MEMORY_UNIFIED+1] = {0};
-   size_t curr_bytes[hypre_MEMORY_UNIFIED+1] = {0};
+   size_t totl_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
+   size_t peak_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
+   size_t curr_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
 
    for (i = 0; i < tracker->actual_size; i++)
    {
@@ -1145,7 +1145,7 @@ hypre_PrintMemoryTracker()
             continue;
          }
 
-         for (j = i+1; j < tracker->actual_size; j++)
+         for (j = i + 1; j < tracker->actual_size; j++)
          {
             if ( strstr(tracker->data[j]._action, "free") != NULL &&
                  tracker->data[j]._pair == (size_t) -1 &&

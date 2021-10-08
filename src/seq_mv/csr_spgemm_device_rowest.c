@@ -41,8 +41,8 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
       if (i + lane_id < iend)
       {
          HYPRE_Int colA = read_only_load(ja + i + lane_id);
-         HYPRE_Int rowB_start = read_only_load(ib+colA);
-         HYPRE_Int rowB_end   = read_only_load(ib+colA+1);
+         HYPRE_Int rowB_start = read_only_load(ib + colA);
+         HYPRE_Int rowB_end   = read_only_load(ib + colA + 1);
          if (type == 'U' || type == 'B')
          {
             row_nnz_sum += rowB_end - rowB_start;
@@ -278,7 +278,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    T *d_V1, *d_V2, *d_V3;
 
    d_V1 = work;
-   d_V2 = d_V1 + nsamples*N;
+   d_V2 = d_V1 + nsamples * N;
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
@@ -349,13 +349,14 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       /* [optional] first run naive estimate for naive lower and upper bounds,
                     which will be given to Cohen's alg as corrections */
-      char *work_mem = hypre_TAlloc(char, cohen_nsamples*(n+k)*sizeof(float)+2*m*sizeof(HYPRE_Int),
+      char *work_mem = hypre_TAlloc(char,
+                                    cohen_nsamples * (n + k) * sizeof(float) +2 * m * sizeof(HYPRE_Int),
                                     HYPRE_MEMORY_DEVICE);
       char *work_mem_saved = work_mem;
 
       //HYPRE_Int *d_low_upp = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
       HYPRE_Int *d_low_upp = (HYPRE_Int *) work_mem;
-      work_mem += 2*m*sizeof(HYPRE_Int);
+      work_mem += 2 * m * sizeof(HYPRE_Int);
 
       HYPRE_Int *d_low = d_low_upp;
       HYPRE_Int *d_upp = d_low_upp + m;

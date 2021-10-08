@@ -40,7 +40,7 @@ hypre_IntArrayCreate( HYPRE_Int size )
 HYPRE_Int
 hypre_IntArrayDestroy( hypre_IntArray *array )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    if (array)
    {

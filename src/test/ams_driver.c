@@ -22,10 +22,10 @@
 void CheckIfFileExists(char *file)
 {
    FILE *test;
-   if (!(test = fopen(file,"r")))
+   if (!(test = fopen(file, "r")))
    {
       hypre_MPI_Finalize();
-      hypre_printf("Can't find the input file \"%s\"\n",file);
+      hypre_printf("Can't find the input file \"%s\"\n", file);
       exit(1);
    }
    fclose(test);
@@ -35,14 +35,14 @@ void AMSDriverMatrixRead(const char *file, HYPRE_ParCSRMatrix *A)
 {
    FILE *test;
    char file0[100];
-   sprintf(file0,"%s.D.0",file);
-   if (!(test = fopen(file0,"r")))
+   sprintf(file0, "%s.D.0", file);
+   if (!(test = fopen(file0, "r")))
    {
-      sprintf(file0,"%s.00000",file);
-      if (!(test = fopen(file0,"r")))
+      sprintf(file0, "%s.00000", file);
+      if (!(test = fopen(file0, "r")))
       {
          hypre_MPI_Finalize();
-         hypre_printf("Can't find the input file \"%s\"\n",file);
+         hypre_printf("Can't find the input file \"%s\"\n", file);
          exit(1);
       }
       else /* Read in IJ format*/
@@ -67,14 +67,14 @@ void AMSDriverVectorRead(const char *file, HYPRE_ParVector *x)
 {
    FILE *test;
    char file0[100];
-   sprintf(file0,"%s.0",file);
-   if (!(test = fopen(file0,"r")))
+   sprintf(file0, "%s.0", file);
+   if (!(test = fopen(file0, "r")))
    {
-      sprintf(file0,"%s.00000",file);
-      if (!(test = fopen(file0,"r")))
+      sprintf(file0, "%s.00000", file);
+      if (!(test = fopen(file0, "r")))
       {
          hypre_MPI_Finalize();
-         hypre_printf("Can't find the input file \"%s\"\n",file);
+         hypre_printf("Can't find the input file \"%s\"\n", file);
          exit(1);
       }
       else /* Read in IJ format*/
@@ -112,12 +112,12 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_Int blockSize;
    HYPRE_Solver solver, precond;
 
-   HYPRE_ParCSRMatrix A=0, G=0, Aalpha=0, Abeta=0, M=0;
-   HYPRE_ParVector x0=0, b=0;
-   HYPRE_ParVector Gx=0, Gy=0, Gz=0;
-   HYPRE_ParVector x=0, y=0, z=0;
+   HYPRE_ParCSRMatrix A = 0, G = 0, Aalpha = 0, Abeta = 0, M = 0;
+   HYPRE_ParVector x0 = 0, b = 0;
+   HYPRE_ParVector Gx = 0, Gy = 0, Gz = 0;
+   HYPRE_ParVector x = 0, y = 0, z = 0;
 
-   HYPRE_ParVector interior_nodes=0;
+   HYPRE_ParVector interior_nodes = 0;
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -499,13 +499,13 @@ hypre_int main (hypre_int argc, char *argv[])
       /* Vectors Gx, Gy and Gz */
       if (!coordinates)
       {
-         HYPRE_AMSSetEdgeConstantVectors(solver,Gx,Gy,Gz);
+         HYPRE_AMSSetEdgeConstantVectors(solver, Gx, Gy, Gz);
       }
 
       /* Vectors x, y and z */
       if (coordinates)
       {
-         HYPRE_AMSSetCoordinateVectors(solver,x,y,z);
+         HYPRE_AMSSetCoordinateVectors(solver, x, y, z);
       }
 
       /* Poisson matrices */
@@ -622,19 +622,19 @@ hypre_int main (hypre_int argc, char *argv[])
             HYPRE_AMSSetInteriorNodes(precond, interior_nodes);
             HYPRE_AMSSetProjectionFrequency(precond, 5);
          }
-         HYPRE_PCGSetResidualTol(solver,rtol);
+         HYPRE_PCGSetResidualTol(solver, rtol);
          HYPRE_PCGSetRecomputeResidualP(solver, rr);
 
          /* Vectors Gx, Gy and Gz */
          if (!coordinates)
          {
-            HYPRE_AMSSetEdgeConstantVectors(precond,Gx,Gy,Gz);
+            HYPRE_AMSSetEdgeConstantVectors(precond, Gx, Gy, Gz);
          }
 
          /* Vectors x, y and z */
          if (coordinates)
          {
-            HYPRE_AMSSetCoordinateVectors(precond,x,y,z);
+            HYPRE_AMSSetCoordinateVectors(precond, x, y, z);
          }
 
          /* Poisson matrices */
@@ -751,13 +751,13 @@ hypre_int main (hypre_int argc, char *argv[])
       /* Vectors Gx, Gy and Gz */
       if (!coordinates)
       {
-         HYPRE_AMSSetEdgeConstantVectors(precond,Gx,Gy,Gz);
+         HYPRE_AMSSetEdgeConstantVectors(precond, Gx, Gy, Gz);
       }
 
       /* Vectors x, y and z */
       if (coordinates)
       {
-         HYPRE_AMSSetCoordinateVectors(precond,x,y,z);
+         HYPRE_AMSSetCoordinateVectors(precond, x, y, z);
       }
 
       /* Poisson matrices */
@@ -865,7 +865,7 @@ hypre_int main (hypre_int argc, char *argv[])
 
    if (HYPRE_GetError() && !myid)
    {
-      hypre_fprintf(stderr,"hypre_error_flag = %d\n", HYPRE_GetError());
+      hypre_fprintf(stderr, "hypre_error_flag = %d\n", HYPRE_GetError());
    }
 
    return 0;

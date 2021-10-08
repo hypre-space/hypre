@@ -65,7 +65,7 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
 {
    hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
    HYPRE_Int    relax_type = (pfmg_relax_data -> relax_type);
-   HYPRE_Int    constant_coefficient= hypre_StructMatrixConstantCoefficient(A);
+   HYPRE_Int    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
    switch (relax_type)
    {
@@ -116,7 +116,7 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
          break;
    }
 
-   if (relax_type==1)
+   if (relax_type == 1)
    {
       hypre_PointRelaxSetWeight(pfmg_relax_data -> relax_data, jacobi_weight);
    }

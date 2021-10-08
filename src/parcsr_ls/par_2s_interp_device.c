@@ -567,7 +567,7 @@ void hypreCUDAKernel_MMInterpScaleAFF( HYPRE_Int      AFF_nrows,
                                        HYPRE_Int     *F2_to_F,
                                        HYPRE_Real    *rsW )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= AFF_nrows)
    {
@@ -699,7 +699,7 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( HYPRE_Int      AFF_nrows,
                                          HYPRE_Int     *F2_to_F,
                                          HYPRE_Real    *rsW )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= AFF_nrows)
    {

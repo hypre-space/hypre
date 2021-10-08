@@ -40,7 +40,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    hypre_StructGrid      *cgrid;
 
-   HYPRE_Int              vi,vj;
+   HYPRE_Int              vi, vj;
 
    HYPRE_Int              sten_cntr;
 
@@ -86,7 +86,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
                                            sstencil_sizes[vj], HYPRE_MEMORY_HOST);
             for (s = 0; s < sstencil_sizes[vj]; s++)
             {
-               hypre_CopyIndex(shape[s],RAP_shapes[vj][s]);
+               hypre_CopyIndex(shape[s], RAP_shapes[vj][s]);
             }
             hypre_StructMatrixDestroy(RAP_s);
          }
@@ -132,7 +132,7 @@ hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
                          hypre_SStructPMatrix *Ac      )
 {
    HYPRE_Int               nvars;
-   HYPRE_Int               vi,vj;
+   HYPRE_Int               vi, vj;
 
    hypre_StructMatrix    *R_s;
    hypre_StructMatrix    *A_s;

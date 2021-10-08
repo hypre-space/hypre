@@ -70,14 +70,14 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    HYPRE_MemoryLocation memory_location = hypre_ParVectorMemoryLocation(vector);
 
    size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
-   array_data = hypre_CTAlloc(HYPRE_Complex, (n*size), memory_location);
+   array_data = hypre_CTAlloc(HYPRE_Complex, (n * size), memory_location);
    new_vector = hypre_CTAlloc(hypre_ParVector*, n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
       new_vector[i] = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
                                              hypre_ParVectorGlobalSize(vector),
                                              hypre_ParVectorPartitioning(vector) );
-      hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i*size];
+      hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i * size];
       hypre_ParVectorInitialize_v2(new_vector[i], memory_location);
       if (i)
       {
@@ -183,7 +183,7 @@ HYPRE_Int
 hypre_ParKrylovMassInnerProd( void *x,
                               void **y, HYPRE_Int k, HYPRE_Int unroll, void  * result )
 {
-   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x,(hypre_ParVector **) y, k, unroll,
+   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x, (hypre_ParVector **) y, k, unroll,
                                           (HYPRE_Real*)result ) );
 }
 
@@ -272,8 +272,8 @@ HYPRE_Int
 hypre_ParKrylovCommInfo( void   *A, HYPRE_Int *my_id, HYPRE_Int *num_procs)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm ( (hypre_ParCSRMatrix *) A);
-   hypre_MPI_Comm_size(comm,num_procs);
-   hypre_MPI_Comm_rank(comm,my_id);
+   hypre_MPI_Comm_size(comm, num_procs);
+   hypre_MPI_Comm_rank(comm, my_id);
    return 0;
 }
 

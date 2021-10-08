@@ -40,7 +40,7 @@ main( HYPRE_Int   argc,
    hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
 
    partitioning = NULL;
-   vector1 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
+   vector1 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_size, partitioning);
    partitioning = hypre_ParVectorPartitioning(vector1);
    hypre_ParVectorInitialize(vector1);
    local_vector = hypre_ParVectorLocalVector(vector1);
@@ -48,9 +48,9 @@ main( HYPRE_Int   argc,
    local_size = hypre_VectorSize(local_vector);
    first_index = partitioning[my_id];
 
-   for (i=0; i < local_size; i++)
+   for (i = 0; i < local_size; i++)
    {
-      data[i] = first_index+i;
+      data[i] = first_index + i;
    }
    /*
       hypre_ParVectorPrint(vector1, "Vector");
@@ -58,9 +58,9 @@ main( HYPRE_Int   argc,
    local_vector2 = hypre_SeqVectorCreate(global_size);
    hypre_SeqVectorInitialize(local_vector2);
    data2 = hypre_VectorData(local_vector2);
-   for (i=0; i < global_size; i++)
+   for (i = 0; i < global_size; i++)
    {
-      data2[i] = i+1;
+      data2[i] = i + 1;
    }
 
    /*   partitioning = hypre_CTAlloc(HYPRE_Int,4);
@@ -69,7 +69,7 @@ main( HYPRE_Int   argc,
       partitioning[2] = 10;
       partitioning[3] = 20;
    */
-   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);
+   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD, local_vector2, partitioning);
 
    hypre_ParVectorPrint(vector2, "Convert");
 

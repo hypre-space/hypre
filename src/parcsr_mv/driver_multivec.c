@@ -56,10 +56,10 @@ main( HYPRE_Int   argc,
 
    hypre_printf("vecstride=%i idxstride=%i local_size=%i num_vectors=%i",
                 vecstride, idxstride, local_size, num_vectors );
-   for (j=0; j<num_vectors; ++j )
-      for (i=0; i < local_size; i++)
+   for (j = 0; j < num_vectors; ++j )
+      for (i = 0; i < local_size; i++)
       {
-         data[ j*vecstride + i*idxstride ] = (HYPRE_Int)first_index+i + 100*j;
+         data[ j * vecstride + i * idxstride ] = (HYPRE_Int)first_index + i + 100 * j;
       }
 
    hypre_ParVectorPrint(vector1, "Vector");
@@ -69,10 +69,10 @@ main( HYPRE_Int   argc,
    data2 = hypre_VectorData(local_vector2);
    vecstride = hypre_VectorVectorStride(local_vector2);
    idxstride = hypre_VectorIndexStride(local_vector2);
-   for (j=0; j<num_vectors; ++j )
-      for (i=0; i < global_size; i++)
+   for (j = 0; j < num_vectors; ++j )
+      for (i = 0; i < global_size; i++)
       {
-         data2[ j*vecstride + i*idxstride ] = i + 100*j;
+         data2[ j * vecstride + i * idxstride ] = i + 100 * j;
       }
 
    /*   partitioning = hypre_CTAlloc(HYPRE_Int,4);
@@ -81,10 +81,10 @@ main( HYPRE_Int   argc,
       partitioning[2] = 10;
       partitioning[3] = 20;
    */
-   partitioning = hypre_CTAlloc(HYPRE_BigInt, 1+num_procs, HYPRE_MEMORY_HOST);
+   partitioning = hypre_CTAlloc(HYPRE_BigInt, 1 + num_procs, HYPRE_MEMORY_HOST);
    hypre_GeneratePartitioning( global_size, num_procs, &partitioning );
 
-   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);
+   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD, local_vector2, partitioning);
 
    hypre_ParVectorPrint(vector2, "Convert");
 
@@ -112,14 +112,14 @@ main( HYPRE_Int   argc,
     *-----------------------------------------------------------*/
 
    hypre_ParVectorScale(2.0, tmp_vector);
-   hypre_ParVectorPrint(tmp_vector,"Scale");
+   hypre_ParVectorPrint(tmp_vector, "Scale");
 
    /*-----------------------------------------------------------
     * Do an Axpy (2*vector - vector) = vector
     *-----------------------------------------------------------*/
 
    hypre_ParVectorAxpy(-1.0, vector1, tmp_vector);
-   hypre_ParVectorPrint(tmp_vector,"Axpy");
+   hypre_ParVectorPrint(tmp_vector, "Axpy");
 
    /*-----------------------------------------------------------
     * Do an inner product vector* tmp_vector

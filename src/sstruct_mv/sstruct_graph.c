@@ -57,8 +57,8 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
       found = 1;
       for (d = 0; d < ndim; d++)
       {
-         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d)-1)) ||
-              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d)+1)) )
+         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d) - 1)) ||
+              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d) + 1)) )
          {
             /* not in this box */
             found = 0;
@@ -68,9 +68,9 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
       if (found)
       {
          vol = 0;
-         for (d = (ndim-1); d > -1; d--)
+         for (d = (ndim - 1); d > -1; d--)
          {
-            vol = vol*(hypre_BoxSizeD(box, d) + 2) +
+            vol = vol * (hypre_BoxSizeD(box, d) + 2) +
                   (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
          }
          *rank += (HYPRE_BigInt)vol;
@@ -120,10 +120,10 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
 
    /* Should we be checking the neighbor box manager also ?*/
 
-   boxman= hypre_SStructGridBoxManager(grid, part, var);
+   boxman = hypre_SStructGridBoxManager(grid, part, var);
    hypre_BoxManGetEntry(boxman, proc, boxi, &boxman_entry);
 
-   sgrid= hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
+   sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
    box  = hypre_StructGridBox(sgrid, boxi);
 
    /* get the global rank of the endpt corner of box boxi */
@@ -171,13 +171,13 @@ hypre_SStructGraphFindSGridEndpts(hypre_SStructGraph    *graph,
    hypre_BoxArray        *boxes;
    HYPRE_Int              i;
 
-   sgrid= hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
-   boxes= hypre_StructGridBoxes(sgrid);
+   sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
+   boxes = hypre_StructGridBoxes(sgrid);
 
    /* get the endpts using hypre_SStructGraphFindBoxEndpt */
-   for (i= 0; i< hypre_BoxArraySize(boxes); i++)
+   for (i = 0; i < hypre_BoxArraySize(boxes); i++)
    {
-      endpts[i]= hypre_SStructGraphFindBoxEndpt(graph, part, var, proc, endpt, i);
+      endpts[i] = hypre_SStructGraphFindBoxEndpt(graph, part, var, proc, endpt, i);
    }
 
    return hypre_error_flag;

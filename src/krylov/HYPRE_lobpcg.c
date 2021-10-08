@@ -25,8 +25,8 @@
 
 typedef struct
 {
-   HYPRE_Int    (*Precond)(void*,void*,void*,void*);
-   HYPRE_Int    (*PrecondSetup)(void*,void*,void*,void*);
+   HYPRE_Int    (*Precond)(void*, void*, void*, void*);
+   HYPRE_Int    (*PrecondSetup)(void*, void*, void*, void*);
 
 } hypre_LOBPCGPrecond;
 
@@ -154,7 +154,7 @@ hypre_LOBPCGSetup( void *pcg_vdata, void *A, void *b, void *x )
 {
    hypre_LOBPCGData *pcg_data = (hypre_LOBPCGData*)pcg_vdata;
    HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
-   HYPRE_Int  (*precond_setup)(void*,void*,void*,void*) = (pcg_data->precondFunctions).PrecondSetup;
+   HYPRE_Int  (*precond_setup)(void*, void*, void*, void*) = (pcg_data->precondFunctions).PrecondSetup;
    void *precond_data = (pcg_data->precondData);
 
    (pcg_data->A) = A;
@@ -282,8 +282,8 @@ hypre_LOBPCGGetPrecond( void         *pcg_vdata,
 
 HYPRE_Int
 hypre_LOBPCGSetPrecond( void  *pcg_vdata,
-                        HYPRE_Int  (*precond)(void*,void*,void*,void*),
-                        HYPRE_Int  (*precond_setup)(void*,void*,void*,void*),
+                        HYPRE_Int  (*precond)(void*, void*, void*, void*),
+                        HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
                         void  *precond_data )
 {
    hypre_LOBPCGData* pcg_data = (hypre_LOBPCGData*)pcg_vdata;
@@ -310,11 +310,11 @@ hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y )
 {
    hypre_LOBPCGData *data = (hypre_LOBPCGData*)vdata;
    mv_InterfaceInterpreter* ii = data->interpreter;
-   HYPRE_Int (*precond)(void*,void*,void*,void*) = (data->precondFunctions).Precond;
+   HYPRE_Int (*precond)(void*, void*, void*, void*) = (data->precondFunctions).Precond;
 
    if ( precond == NULL )
    {
-      (*(ii->CopyVector))(x,y);
+      (*(ii->CopyVector))(x, y);
       return;
    }
 
@@ -324,7 +324,7 @@ hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y )
    }
    else
    {
-      (*(ii->CopyVector))(x,y);
+      (*(ii->CopyVector))(x, y);
    }
 
    if ( data->T == NULL )
@@ -404,7 +404,7 @@ hypre_LOBPCGSolve( void *vdata,
                    HYPRE_Real* val )
 {
    hypre_LOBPCGData* data = (hypre_LOBPCGData*)vdata;
-   HYPRE_Int (*precond)(void*,void*,void*,void*) = (data->precondFunctions).Precond;
+   HYPRE_Int (*precond)(void*, void*, void*, void*) = (data->precondFunctions).Precond;
    void* opB = data->B;
 
    void (*prec)( void*, void*, void* );

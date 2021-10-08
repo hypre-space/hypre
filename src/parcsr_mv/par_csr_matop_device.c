@@ -83,18 +83,19 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
                  num_rows_send, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    hypre_Memset(d_send_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
-   hypreDevice_GetRowNnz(num_rows_send, d_send_map, A_diag_i, A_offd_i, d_send_i+1);
+   hypreDevice_GetRowNnz(num_rows_send, d_send_map, A_diag_i, A_offd_i, d_send_i + 1);
 
    /* send array send_i out: deviceTohost first and MPI (async)
     * note the shift in recv_i by one */
-   hypre_TMemcpy(send_i, d_send_i+1, HYPRE_Int, num_rows_send, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(send_i, d_send_i + 1, HYPRE_Int, num_rows_send, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
 
-   comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_i, recv_i+1);
+   comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_i, recv_i + 1);
 
    hypreDevice_IntegerInclusiveScan(num_rows_send + 1, d_send_i);
 
    /* total number of nnz to send */
-   hypre_TMemcpy(&num_nnz_send, d_send_i+num_rows_send, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+   hypre_TMemcpy(&num_nnz_send, d_send_i + num_rows_send, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
 
    /* prepare data to send out. overlap with the above commmunication */
@@ -124,8 +125,8 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    send_jstarts[0] = 0;
    for (i = 1; i <= num_sends; i++)
    {
-      send_jstarts[i] = send_jstarts[i-1];
-      for ( j = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i-1);
+      send_jstarts[i] = send_jstarts[i - 1];
+      for ( j = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i - 1);
             j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             j++ )
       {
@@ -141,7 +142,7 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    recv_i[0] = 0;
    for (i = 1; i <= num_rows_recv; i++)
    {
-      recv_i[i] += recv_i[i-1];
+      recv_i[i] += recv_i[i - 1];
    }
    num_nnz_recv = recv_i[num_rows_recv];
 
@@ -187,7 +188,8 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
       comm_handle_a = NULL;
    }
 
-   hypre_TMemcpy(d_recv_i, recv_i, HYPRE_Int, num_rows_recv+1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(d_recv_i, recv_i, HYPRE_Int, num_rows_recv + 1, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_HOST);
 
    /* create A_ext: on device */
    A_ext = hypre_CSRMatrixCreate(num_rows_recv, hypre_ParCSRMatrixGlobalNumCols(A), num_nnz_recv);
@@ -275,12 +277,12 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 
    hypre_Memset(B_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_GetRowNnz(B_nrows, NULL, A_diag_i, A_offd_i, B_i+1);
+   hypreDevice_GetRowNnz(B_nrows, NULL, A_diag_i, A_offd_i, B_i + 1);
 
-   hypreDevice_IntegerInclusiveScan(B_nrows+1, B_i);
+   hypreDevice_IntegerInclusiveScan(B_nrows + 1, B_i);
 
    /* total number of nnz */
-   hypre_TMemcpy(&B_nnz, B_i+B_nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&B_nnz, B_i + B_nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
    B_j = hypre_TAlloc(HYPRE_BigInt,  B_nnz, HYPRE_MEMORY_DEVICE);
    B_a = hypre_TAlloc(HYPRE_Complex, B_nnz, HYPRE_MEMORY_DEVICE);
@@ -361,7 +363,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   jdata_send_map_starts = hypre_TAlloc(HYPRE_Int, num_sends+1, HYPRE_MEMORY_HOST);
+   jdata_send_map_starts = hypre_TAlloc(HYPRE_Int, num_sends + 1, HYPRE_MEMORY_HOST);
 
    /*--------------------------------------------------------------------------
     * B_ext_rownnz contains the number of elements of row j
@@ -385,7 +387,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
                  HYPRE_MEMORY_HOST);
    for (i = 1; i <= B_ext_nrows; i++)
    {
-      B_ext_i_h[i] += B_ext_i_h[i-1];
+      B_ext_i_h[i] += B_ext_i_h[i - 1];
    }
 
    hypre_assert(B_ext_i_h[B_ext_nrows] == B_ext_nnz);
@@ -410,7 +412,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    B_int_i_h[0] = 0;
    for (i = 1; i <= B_int_nrows; i++)
    {
-      B_int_i_h[i] += B_int_i_h[i-1];
+      B_int_i_h[i] += B_int_i_h[i - 1];
    }
 
    B_int_nnz = B_int_i_h[B_int_nrows];
@@ -446,7 +448,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
                                                    HYPRE_MEMORY_DEVICE, B_ext_j_d,
                                                    HYPRE_MEMORY_DEVICE, B_int_j_d );
 
-   hypre_TMemcpy(B_int_i_d, B_int_i_h, HYPRE_Int, B_int_nrows+1, HYPRE_MEMORY_DEVICE,
+   hypre_TMemcpy(B_int_i_d, B_int_i_h, HYPRE_Int, B_int_nrows + 1, HYPRE_MEMORY_DEVICE,
                  HYPRE_MEMORY_HOST);
 
    /* create CSR: on device */
@@ -554,7 +556,7 @@ hypreCUDAKernel_ConcatDiagAndOffd(HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
                                   HYPRE_Int *cols_offd_map,
                                   HYPRE_Int *d_ib,     HYPRE_Int *d_jb,     HYPRE_Complex *d_ab)
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -581,8 +583,8 @@ hypreCUDAKernel_ConcatDiagAndOffd(HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
-      d_jb[p+i] = read_only_load(d_diag_j + i);
-      d_ab[p+i] = read_only_load(d_diag_a + i);
+      d_jb[p + i] = read_only_load(d_diag_j + i);
+      d_ab[p + i] = read_only_load(d_diag_a + i);
    }
 
    /* offd part */
@@ -598,8 +600,8 @@ hypreCUDAKernel_ConcatDiagAndOffd(HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int t = read_only_load(d_offd_j + i);
-      d_jb[p+i] = (cols_offd_map ? read_only_load(&cols_offd_map[t]) : t) + diag_ncol;
-      d_ab[p+i] = read_only_load(d_offd_a + i);
+      d_jb[p + i] = (cols_offd_map ? read_only_load(&cols_offd_map[t]) : t) + diag_ncol;
+      d_ab[p + i] = read_only_load(d_offd_a + i);
    }
 }
 
@@ -1068,7 +1070,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
                                                       HYPRE_Real     *elmt_tols_diag,
                                                       HYPRE_Real     *elmt_tols_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= nrows)
    {
@@ -1209,7 +1211,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
 
    if (type == -1)
    {
-      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<-1>, gDim, bDim,
+      HYPRE_CUDA_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols < -1 >, gDim, bDim,
                          hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
                          hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
                          hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);

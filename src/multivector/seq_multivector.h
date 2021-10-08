@@ -50,7 +50,7 @@ HYPRE_Int hypre_SeqMultivectorDestroy(hypre_Multivector *vector);
 HYPRE_Int hypre_SeqMultivectorInitialize(hypre_Multivector *vector);
 HYPRE_Int hypre_SeqMultivectorSetDataOwner(hypre_Multivector *vector, HYPRE_Int owns_data);
 HYPRE_Int hypre_SeqMultivectorPrint(hypre_Multivector *vector, char *file_name);
-HYPRE_Int hypre_SeqMultivectorSetConstantValues(hypre_Multivector *v,HYPRE_Complex value);
+HYPRE_Int hypre_SeqMultivectorSetConstantValues(hypre_Multivector *v, HYPRE_Complex value);
 HYPRE_Int hypre_SeqMultivectorSetRandomValues(hypre_Multivector *v, HYPRE_Int seed);
 HYPRE_Int hypre_SeqMultivectorCopy(hypre_Multivector *x, hypre_Multivector *y);
 HYPRE_Int hypre_SeqMultivectorScale(HYPRE_Complex alpha, hypre_Multivector *y, HYPRE_Int *mask);

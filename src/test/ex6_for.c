@@ -89,7 +89,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid ==0) { hypre_printf("Must run with 2 processors!\n"); }
+      if (myid == 0) { hypre_printf("Must run with 2 processors!\n"); }
       hypre_MPI_Finalize();
 
       return (0);
@@ -175,7 +175,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #endif
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructGridSetVariables(&grid, &i, &nvars, &vartypes[0]);
@@ -207,7 +207,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          relative offset (in the index space). */
       {
          HYPRE_Int entry;
-         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
          HYPRE_Int var = 0;
 
          /* Assign numerical values to the offsets so that we can
@@ -262,7 +262,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      HYPRE_Int i,j;
+      HYPRE_Int i, j;
       HYPRE_Int part = 0;
       HYPRE_Int var = 0;
 
@@ -327,7 +327,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -364,7 +364,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -403,7 +403,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 

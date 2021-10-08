@@ -93,8 +93,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(A_diag);
    num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(A_offd);
 
-   S_diag_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
-   S_offd_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
+   S_diag_i = hypre_TAlloc(HYPRE_Int, num_variables + 1, memory_location);
+   S_offd_i = hypre_TAlloc(HYPRE_Int, num_variables + 1, memory_location);
    S_temp_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_DEVICE);
    S_temp_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_offd, HYPRE_MEMORY_DEVICE);
 
@@ -260,7 +260,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, row_max = 0.0, row_min = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nr_of_rows)
    {
@@ -459,7 +459,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nr_of_rows)
    {

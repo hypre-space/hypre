@@ -209,7 +209,7 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
                         HYPRE_SStructVector y,
                         HYPRE_SStructVector x      )
 {
-   HYPRE_Int                nparts= hypre_SStructMatrixNParts(A);
+   HYPRE_Int                nparts = hypre_SStructMatrixNParts(A);
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;
@@ -226,7 +226,7 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
       pA = hypre_SStructMatrixPMatrix(A, part);
       px = hypre_SStructVectorPVector(x, part);
       py = hypre_SStructVectorPVector(y, part);
-      nvars= hypre_SStructPMatrixNVars(pA);
+      nvars = hypre_SStructPMatrixNVars(pA);
       for (vi = 0; vi < nvars; vi++)
       {
          sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);

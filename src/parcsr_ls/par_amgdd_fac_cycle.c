@@ -52,23 +52,23 @@ hypre_BoomerAMGDD_FAC_Cycle( void      *amgdd_vdata,
    // Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
    if (num_levels > 1)
    {
-      hypre_BoomerAMGDD_FAC_Restrict(compGrid[level], compGrid[level+1], first_iteration);
+      hypre_BoomerAMGDD_FAC_Restrict(compGrid[level], compGrid[level + 1], first_iteration);
       hypre_AMGDDCompGridVectorSetConstantValues(hypre_AMGDDCompGridS(compGrid[level]), 0.0);
       hypre_AMGDDCompGridVectorSetConstantValues(hypre_AMGDDCompGridT(compGrid[level]), 0.0);
 
       //  Either solve on the coarse level or recurse
-      if (level+1 == num_levels-1)
+      if (level + 1 == num_levels - 1)
       {
-         hypre_BoomerAMGDD_FAC_Relax(amgdd_vdata, num_levels-1, 3);
+         hypre_BoomerAMGDD_FAC_Relax(amgdd_vdata, num_levels - 1, 3);
       }
       else for (i = 0; i < cycle_type; i++)
          {
-            hypre_BoomerAMGDD_FAC_Cycle(amgdd_vdata, level+1, cycle_type, first_iteration);
+            hypre_BoomerAMGDD_FAC_Cycle(amgdd_vdata, level + 1, cycle_type, first_iteration);
             first_iteration = 0;
          }
 
       // Interpolate up and relax
-      hypre_BoomerAMGDD_FAC_Interpolate(compGrid[level], compGrid[level+1]);
+      hypre_BoomerAMGDD_FAC_Interpolate(compGrid[level], compGrid[level + 1]);
    }
 
    hypre_BoomerAMGDD_FAC_Relax(amgdd_vdata, level, 2);
@@ -92,20 +92,20 @@ hypre_BoomerAMGDD_FAC_FCycle( void     *amgdd_vdata,
    {
       for (level = hypre_ParAMGDDDataStartLevel(amgdd_data); level < num_levels - 1; level++)
       {
-         hypre_BoomerAMGDD_FAC_Restrict(compGrid[level], compGrid[level+1], 0);
+         hypre_BoomerAMGDD_FAC_Restrict(compGrid[level], compGrid[level + 1], 0);
          hypre_AMGDDCompGridVectorSetConstantValues(hypre_AMGDDCompGridS(compGrid[level]), 0.0);
          hypre_AMGDDCompGridVectorSetConstantValues(hypre_AMGDDCompGridT(compGrid[level]), 0.0);
       }
    }
 
    //  ... solve on coarsest level ...
-   hypre_BoomerAMGDD_FAC_Relax(amgdd_vdata, num_levels-1, 3);
+   hypre_BoomerAMGDD_FAC_Relax(amgdd_vdata, num_levels - 1, 3);
 
    // ... and work back up to the finest
    for (level = num_levels - 2; level > -1; level--)
    {
       // Interpolate up and relax
-      hypre_BoomerAMGDD_FAC_Interpolate(compGrid[level], compGrid[level+1]);
+      hypre_BoomerAMGDD_FAC_Interpolate(compGrid[level], compGrid[level + 1]);
 
       // V-cycle
       hypre_BoomerAMGDD_FAC_Cycle(amgdd_vdata, level, 1, 0);
@@ -264,7 +264,7 @@ hypre_BoomerAMGDD_FAC_JacobiHost( void      *amgdd_vdata,
       diag = hypre_AMGDDCompGridMatrixOwnedDiag(A);
       for (i = 0; i < hypre_AMGDDCompGridNumOwnedNodes(compGrid); i++)
       {
-         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
             // hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
@@ -277,7 +277,7 @@ hypre_BoomerAMGDD_FAC_JacobiHost( void      *amgdd_vdata,
       diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(A);
       for (i = 0; i < hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid); i++)
       {
-         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
             // hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
@@ -351,7 +351,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( void      *amgdd_vdata,
       diagonal = 0.0;
 
       // Loop over diag entries
-      for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i + 1]; j++)
       {
          if (hypre_CSRMatrixJ(owned_diag)[j] == i)
          {
@@ -365,7 +365,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( void      *amgdd_vdata,
       }
 
       // Loop over offd entries
-      for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i + 1]; j++)
       {
          u_owned_data[i] -= hypre_CSRMatrixData(owned_offd)[j] * u_nonowned_data[ hypre_CSRMatrixJ(
                                                                                      owned_offd)[j] ];
@@ -388,7 +388,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( void      *amgdd_vdata,
       diagonal = 0.0;
 
       // Loop over diag entries
-      for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i + 1]; j++)
       {
          if (hypre_CSRMatrixJ(nonowned_diag)[j] == i)
          {
@@ -402,7 +402,7 @@ hypre_BoomerAMGDD_FAC_GaussSeidel( void      *amgdd_vdata,
       }
 
       // Loop over offd entries
-      for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i + 1]; j++)
       {
          u_nonowned_data[i] -= hypre_CSRMatrixData(nonowned_offd)[j] * u_owned_data[ hypre_CSRMatrixJ(
                                                                                         nonowned_offd)[j] ];
@@ -482,7 +482,7 @@ hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void       *amgdd_vdata,
       diagonal = 0.0;
 
       // Loop over diag entries
-      for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i + 1]; j++)
       {
          if (hypre_CSRMatrixJ(nonowned_diag)[j] == i)
          {
@@ -496,7 +496,7 @@ hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void       *amgdd_vdata,
       }
 
       // Loop over offd entries
-      for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i + 1]; j++)
       {
          u_nonowned_data[i] -= hypre_CSRMatrixData(nonowned_offd)[j] * u_owned_data[ hypre_CSRMatrixJ(
                                                                                         nonowned_offd)[j] ];
@@ -521,7 +521,7 @@ hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void       *amgdd_vdata,
       diagonal = 0.0;
 
       // Loop over diag entries
-      for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i + 1]; j++)
       {
          if (hypre_CSRMatrixJ(owned_diag)[j] == i)
          {
@@ -535,7 +535,7 @@ hypre_BoomerAMGDD_FAC_OrderedGaussSeidel( void       *amgdd_vdata,
       }
 
       // Loop over offd entries
-      for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i+1]; j++)
+      for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i + 1]; j++)
       {
          u_owned_data[i] -= hypre_CSRMatrixData(owned_offd)[j] * u_nonowned_data[ hypre_CSRMatrixJ(
                                                                                      owned_offd)[j] ];
@@ -688,15 +688,15 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiHost( void      *amgdd_vdata,
       if (cf_marker[i] == relax_set)
       {
          res = owned_f[i];
-         for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(owned_diag)[i]; j < hypre_CSRMatrixI(owned_diag)[i + 1]; j++)
          {
             res -= hypre_CSRMatrixData(owned_diag)[j] * owned_tmp[ hypre_CSRMatrixJ(owned_diag)[j] ];
          }
-         for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(owned_offd)[i]; j < hypre_CSRMatrixI(owned_offd)[i + 1]; j++)
          {
             res -= hypre_CSRMatrixData(owned_offd)[j] * nonowned_tmp[ hypre_CSRMatrixJ(owned_offd)[j] ];
          }
-         owned_u[i] += (relax_weight * res)/l1_norms[i];
+         owned_u[i] += (relax_weight * res) / l1_norms[i];
       }
    }
    for (i = 0; i < hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid); i++)
@@ -704,15 +704,15 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiHost( void      *amgdd_vdata,
       if (cf_marker[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] == relax_set)
       {
          res = nonowned_f[i];
-         for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(nonowned_diag)[i]; j < hypre_CSRMatrixI(nonowned_diag)[i + 1]; j++)
          {
             res -= hypre_CSRMatrixData(nonowned_diag)[j] * nonowned_tmp[ hypre_CSRMatrixJ(nonowned_diag)[j] ];
          }
-         for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(nonowned_offd)[i]; j < hypre_CSRMatrixI(nonowned_offd)[i + 1]; j++)
          {
             res -= hypre_CSRMatrixData(nonowned_offd)[j] * owned_tmp[ hypre_CSRMatrixJ(nonowned_offd)[j] ];
          }
-         nonowned_u[i] += (relax_weight * res)/l1_norms[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)];
+         nonowned_u[i] += (relax_weight * res) / l1_norms[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)];
       }
    }
 

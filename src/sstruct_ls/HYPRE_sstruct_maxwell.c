@@ -91,7 +91,7 @@ HYPRE_MaxwellGrad( HYPRE_SStructGrid   grid,
                    HYPRE_ParCSRMatrix *T )
 
 {
-   *T= ( (HYPRE_ParCSRMatrix) hypre_Maxwell_Grad( (hypre_SStructGrid *) grid));
+   *T = ( (HYPRE_ParCSRMatrix) hypre_Maxwell_Grad( (hypre_SStructGrid *) grid));
    return 0;
 }
 

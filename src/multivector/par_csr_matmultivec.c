@@ -96,7 +96,7 @@ hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
     * allocate temporary and send buffers and communication handle
     *--------------------------------------------------------------------*/
 
-   x_buf_data = hypre_CTAlloc(HYPRE_Complex,  num_vec_sends*send_leng, HYPRE_MEMORY_HOST);
+   x_buf_data = hypre_CTAlloc(HYPRE_Complex,  num_vec_sends * send_leng, HYPRE_MEMORY_HOST);
    x_tmp = hypre_SeqMultivectorCreate( num_cols_offd, num_vectors );
    hypre_SeqMultivectorInitialize(x_tmp);
    x_tmp_data = hypre_MultivectorData(x_tmp);
@@ -113,12 +113,12 @@ hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
       for (i = 0; i < num_sends; i++)
       {
          start  = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         endp1  = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1);
+         endp1  = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
          length = endp1 - start;
          for (j = start; j < endp1; j++)
          {
-            index = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
-            x_buf_data[offset+j] = x_local_data[jj*x_size + index];
+            index = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
+            x_buf_data[offset + j] = x_local_data[jj * x_size + index];
          }
       }
       offset += hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
@@ -128,7 +128,7 @@ hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
     * initiate sending data
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_ParCSRCommMultiHandleCreate(1,comm_pkg,x_buf_data,
+   comm_handle = hypre_ParCSRCommMultiHandleCreate(1, comm_pkg, x_buf_data,
                                                    x_tmp_data, num_vec_sends);
 
    hypre_CSRMatrixMatMultivec(alpha, diag, x_local, beta, y_local);
@@ -224,7 +224,7 @@ hypre_ParCSRMatrixMultiMatVecT(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
    * allocate temporary and send buffers and communication handle
    *--------------------------------------------------------------------*/
 
-   y_buf_data = hypre_CTAlloc(HYPRE_Complex,  num_vec_sends*send_leng, HYPRE_MEMORY_HOST);
+   y_buf_data = hypre_CTAlloc(HYPRE_Complex,  num_vec_sends * send_leng, HYPRE_MEMORY_HOST);
    y_tmp = hypre_SeqMultivectorCreate( num_cols_offd, num_vectors );
    hypre_SeqMultivectorInitialize(y_tmp);
    y_tmp_data = hypre_MultivectorData(y_tmp);
@@ -241,12 +241,12 @@ hypre_ParCSRMatrixMultiMatVecT(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
       for (i = 0; i < num_sends; i++)
       {
          start  = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         endp1  = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1);
+         endp1  = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
          length = endp1 - start;
          for (j = start; j < endp1; j++)
          {
-            index = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
-            y_buf_data[offset+j] = y_local_data[jj*y_size + index];
+            index = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
+            y_buf_data[offset + j] = y_local_data[jj * y_size + index];
          }
       }
       offset += hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);

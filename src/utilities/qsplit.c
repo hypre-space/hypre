@@ -28,9 +28,9 @@ HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
    HYPRE_Int done;
 
    first = 0;
-   last = list_length-1;
+   last = list_length - 1;
 
-   if ( (NumberKept < first+1) || (NumberKept > last+1) )
+   if ( (NumberKept < first + 1) || (NumberKept > last + 1) )
    {
       return ( ierr );
    }
@@ -43,7 +43,7 @@ HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
       mid = first;
       abskey = fabs( values[ mid ]);
 
-      for ( j = first+1; j <= last; j ++)
+      for ( j = first + 1; j <= last; j ++)
       {
          if ( fabs( values[ j ]) > abskey )
          {
@@ -66,12 +66,12 @@ HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
       values[ first] = interchange_value;
       indices[ first] = interchange_index;
 
-      if ( mid+1 == NumberKept )
+      if ( mid + 1 == NumberKept )
       {
          done = 1;
          break;
       }
-      if ( mid+1 > NumberKept )
+      if ( mid + 1 > NumberKept )
       {
          last = mid - 1;
       }

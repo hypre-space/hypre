@@ -141,7 +141,7 @@ HYPRE_Int
 HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver  solver,
                              HYPRE_Real relax_weight)
 {
-   return ( hypre_SchwarzSetRelaxWeight((void *) solver,relax_weight));
+   return ( hypre_SchwarzSetRelaxWeight((void *) solver, relax_weight));
 }
 
 /*--------------------------------------------------------------------------

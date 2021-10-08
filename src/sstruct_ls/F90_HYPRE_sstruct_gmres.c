@@ -30,7 +30,7 @@ hypre_F90_IFACE(hypre_sstructgmrescreate, HYPRE_SSTRUCTGMRESCREATE)
 {
    *ierr = (hypre_F90_Int) HYPRE_SStructGMRESCreate(
               hypre_F90_PassComm(comm),
-              hypre_F90_PassObjRef(HYPRE_SStructSolver,solver));
+              hypre_F90_PassObjRef(HYPRE_SStructSolver, solver));
 }
 
 /*--------------------------------------------------------------------------

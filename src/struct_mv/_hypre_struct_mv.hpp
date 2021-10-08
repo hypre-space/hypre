@@ -46,10 +46,10 @@ extern "C++"
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 
@@ -385,10 +385,10 @@ extern "C++"
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 
@@ -769,7 +769,7 @@ extern "C++"
    forall_kernel( LOOP_BODY loop_body,
                   HYPRE_Int length )
    {
-      const HYPRE_Int idx = hypre_cuda_get_grid_thread_id<1,1>();
+      const HYPRE_Int idx = hypre_cuda_get_grid_thread_id<1, 1>();
       /* const HYPRE_Int number_threads = hypre_cuda_get_grid_num_threads<1,1>(); */
 
       if (idx < length)
@@ -814,8 +814,8 @@ extern "C++"
                            REDUCER   reducer,
                            LOOP_BODY loop_body )
    {
-      const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1,1>();
-      const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1,1>();
+      const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+      const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1, 1>();
 
       for (HYPRE_Int idx = thread_id; idx < length; idx += n_threads)
       {
@@ -829,7 +829,7 @@ extern "C++"
    template<typename LOOP_BODY, typename REDUCER>
    void
    ReductionBoxLoopforall( HYPRE_Int  length,
-                           REDUCER   &reducer,
+                           REDUCER   & reducer,
                            LOOP_BODY  loop_body )
    {
       if (length <= 0)

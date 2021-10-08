@@ -82,7 +82,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 
       if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 1)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -108,7 +108,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
       else if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 2)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -133,7 +133,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
       else
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -154,7 +154,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          /* row nnz is exact if no row failed */
          HYPRE_Int rownnz_exact = !HYPRE_THRUST_CALL( any_of,
                                                       d_rc + m,
-                                                      d_rc + 2*m,
+                                                      d_rc + 2 * m,
                                                       thrust::identity<HYPRE_Int>() );
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());

@@ -161,7 +161,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 
    HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
    HYPRE_Complex *d_ac = NULL;
-   HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, 3*nnzA, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, 3 * nnzA, HYPRE_MEMORY_DEVICE);
 
    /* allocate C */
    d_jc = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);

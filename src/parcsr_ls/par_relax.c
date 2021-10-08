@@ -216,7 +216,7 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
          {
             v_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
          }
@@ -260,12 +260,12 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
       if ( (relax_points == 0 || cf_marker[i] == relax_points) && di != zero )
       {
          res = f_data[i];
-         for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+         for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
          {
             ii = A_diag_j[jj];
             res -= A_diag_data[jj] * Vtemp_data[ii];
          }
-         for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+         for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
          {
             ii = A_offd_j[jj];
             res -= A_offd_data[jj] * v_ext_data[ii];
@@ -384,8 +384,8 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                                  HYPRE_MEMORY_HOST);
       v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 
-      status = hypre_CTAlloc(hypre_MPI_Status, num_recvs+num_sends, HYPRE_MEMORY_HOST);
-      requests = hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends, HYPRE_MEMORY_HOST);
+      status = hypre_CTAlloc(hypre_MPI_Status, num_recvs + num_sends, HYPRE_MEMORY_HOST);
+      requests = hypre_CTAlloc(hypre_MPI_Request, num_recvs + num_sends, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------------------
@@ -402,10 +402,10 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
             if (ip == p)
             {
                vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-               vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start;
-               for (j = vec_start; j < vec_start+vec_len; j++)
+               vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               for (j = vec_start; j < vec_start + vec_len; j++)
                {
-                  v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+                  v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
                hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
             }
@@ -420,8 +420,8 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
             for (i = 0; i < num_recvs; i++)
             {
                ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
-               vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
-               vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1) - vec_start;
+               vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
                hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
             }
             hypre_MPI_Waitall(jr, requests, status);
@@ -437,12 +437,12 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
             if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_diag_data[A_diag_i[i]] != zero )
             {
                res = f_data[i];
-               for (jj = A_diag_i[i] + 1; jj < A_diag_i[i+1]; jj++)
+               for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
                {
                   ii = A_diag_j[jj];
                   res -= A_diag_data[jj] * u_data[ii];
                }
-               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
                {
                   ii = A_offd_j[jj];
                   res -= A_offd_data[jj] * v_ext_data[ii];
@@ -513,8 +513,8 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                                  HYPRE_MEMORY_HOST);
       v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 
-      status  = hypre_CTAlloc(hypre_MPI_Status, num_recvs+num_sends, HYPRE_MEMORY_HOST);
-      requests = hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends, HYPRE_MEMORY_HOST);
+      status  = hypre_CTAlloc(hypre_MPI_Status, num_recvs + num_sends, HYPRE_MEMORY_HOST);
+      requests = hypre_CTAlloc(hypre_MPI_Request, num_recvs + num_sends, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------------------
@@ -526,11 +526,11 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
        * If i is of the right type ( C or F or All ) and diagonal is
        * nonzero, relax point i; otherwise, skip it.
        *-----------------------------------------------------------*/
-      if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_offd_i[i+1] - A_offd_i[i] == zero &&
+      if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_offd_i[i + 1] - A_offd_i[i] == zero &&
            A_diag_data[A_diag_i[i]] != zero )
       {
          res = f_data[i];
-         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i+1]; jj++)
+         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
          {
             ii = A_diag_j[jj];
             res -= A_diag_data[jj] * u_data[ii];
@@ -550,10 +550,10 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
             if (ip == p)
             {
                vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-               vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start;
-               for (j = vec_start; j < vec_start+vec_len; j++)
+               vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               for (j = vec_start; j < vec_start + vec_len; j++)
                {
-                  v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+                  v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
                hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
             }
@@ -568,8 +568,8 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
             for (i = 0; i < num_recvs; i++)
             {
                ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
-               vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
-               vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1) - vec_start;
+               vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
                hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
             }
             hypre_MPI_Waitall(jr, requests, status);
@@ -581,16 +581,16 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
              * nonzero, relax point i; otherwise, skip it.
              * Relax only C or F points as determined by relax_points.
              *-----------------------------------------------------------*/
-            if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_offd_i[i+1] - A_offd_i[i] != zero &&
+            if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_offd_i[i + 1] - A_offd_i[i] != zero &&
                  A_diag_data[A_diag_i[i]] != zero)
             {
                res = f_data[i];
-               for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+               for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
                {
                   ii = A_diag_j[jj];
                   res -= A_diag_data[jj] * u_data[ii];
                }
-               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
                {
                   ii = A_offd_j[jj];
                   res -= A_offd_data[jj] * v_ext_data[ii];
@@ -996,9 +996,9 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
          {
-            v_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            v_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
          }
       }
 
@@ -1024,12 +1024,12 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
       if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_diag_data[A_diag_i[i]] != zero )
       {
          res = f_data[i];
-         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i+1]; jj++)
+         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
          {
             ii = A_diag_j[jj];
             res -= A_diag_data[jj] * u_data[ii];
          }
-         for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+         for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
          {
             ii = A_offd_j[jj];
             res -= A_offd_data[jj] * v_ext_data[ii];
@@ -1344,7 +1344,7 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
       A_CSR_data = hypre_CSRMatrixData(A_CSR);
       f_vector_data = hypre_VectorData(f_vector);
 
-      A_mat = hypre_CTAlloc(HYPRE_Real, n_global*n_global, HYPRE_MEMORY_HOST);
+      A_mat = hypre_CTAlloc(HYPRE_Real, n_global * n_global, HYPRE_MEMORY_HOST);
       b_vec = hypre_CTAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_HOST);
 
       /*---------------------------------------------------------------
@@ -1352,10 +1352,10 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
        *---------------------------------------------------------------*/
       for (i = 0; i < n_global; i++)
       {
-         for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
+         for (jj = A_CSR_i[i]; jj < A_CSR_i[i + 1]; jj++)
          {
             column = A_CSR_j[jj];
-            A_mat[i*n_global+column] = A_CSR_data[jj];
+            A_mat[i * n_global + column] = A_CSR_data[jj];
          }
          b_vec[i] = f_vector_data[i];
       }
@@ -1423,7 +1423,7 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
       A_CSR_data = hypre_CSRMatrixData(A_CSR);
       f_vector_data = hypre_VectorData(f_vector);
 
-      A_mat = hypre_CTAlloc(HYPRE_Real,  n_global*n_global, HYPRE_MEMORY_HOST);
+      A_mat = hypre_CTAlloc(HYPRE_Real,  n_global * n_global, HYPRE_MEMORY_HOST);
       b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);
 
       /*---------------------------------------------------------------
@@ -1431,11 +1431,11 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
        *---------------------------------------------------------------*/
       for (i = 0; i < n_global; i++)
       {
-         for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
+         for (jj = A_CSR_i[i]; jj < A_CSR_i[i + 1]; jj++)
          {
             /* need col major */
             column = A_CSR_j[jj];
-            A_mat[i + n_global*column] = A_CSR_data[jj];
+            A_mat[i + n_global * column] = A_CSR_data[jj];
          }
          b_vec[i] = f_vector_data[i];
       }
@@ -1452,7 +1452,7 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
 
       for (i = 0; i < num_rows; i++)
       {
-         u_data[i] = b_vec[first_index+i];
+         u_data[i] = b_vec[first_index + i];
       }
 
       hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
@@ -1523,7 +1523,7 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
          {
             u_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
          }
@@ -1538,19 +1538,19 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
    for (i = 0; i < num_rows; i++)
    {
       res = f_data[i];
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          res -= A_diag_data[j] * u_data[A_diag_j[j]];
       }
 
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          res -= A_offd_data[j] * u_offd_data[A_offd_j[j]];
       }
 
       res /= l1_norms[i];
 
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          u_data[A_diag_j[j]] += omega * res * A_diag_data[j];
       }
@@ -1560,19 +1560,19 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
    for (i = num_rows - 1; i > -1; i--)
    {
       res = f_data[i];
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          res -= A_diag_data[j] * u_data[A_diag_j[j]];
       }
 
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          res -= A_offd_data[j] * u_offd_data[A_offd_j[j]];
       }
 
       res /= l1_norms[i];
 
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          u_data[A_diag_j[j]] += omega * res * A_diag_data[j];
       }
@@ -1634,11 +1634,11 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    {
       // By going from bottom to top, we can update Vtemp in place because
       // we're operating with the strict, lower triangular matrix
-      for (i = num_rows-1; i >=0; i--) /* Run the smoother */
+      for (i = num_rows - 1; i >= 0; i--) /* Run the smoother */
       {
          // spmv for the row first
          HYPRE_Complex res = 0.0;
-         for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+         for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
          {
             ii = A_diag_j[jj];
             if (ii < i)

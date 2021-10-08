@@ -35,7 +35,7 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
    (smsg_data -> jump)             = 0;
    (smsg_data -> relax_type)       = 1;       /* weighted Jacobi */
    (smsg_data -> jacobi_weight)    = 0.0;
-   (smsg_data -> usr_jacobi_weight)= 0;     /* no user Jacobi weight */
+   (smsg_data -> usr_jacobi_weight) = 0;    /* no user Jacobi weight */
    (smsg_data -> num_pre_relax)    = 1;
    (smsg_data -> num_post_relax)   = 1;
    (smsg_data -> num_fine_relax)   = 1;
@@ -255,7 +255,7 @@ hypre_SparseMSGSetJacobiWeight( void  *smsg_vdata,
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
 
    (smsg_data -> jacobi_weight)    = weight;
-   (smsg_data -> usr_jacobi_weight)= 1;
+   (smsg_data -> usr_jacobi_weight) = 1;
 
    return hypre_error_flag;
 }
@@ -381,8 +381,8 @@ hypre_SparseMSGPrintLogging( void *smsg_vdata,
          {
             for (i = 0; i < num_iterations; i++)
             {
-               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+               hypre_printf("Residual norm[%d] = %e   ", i, norms[i]);
+               hypre_printf("Relative residual norm[%d] = %e\n", i, rel_norms[i]);
             }
          }
       }
@@ -417,7 +417,7 @@ hypre_SparseMSGGetFinalRelativeResidualNorm( void   *smsg_vdata,
       }
       else if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {

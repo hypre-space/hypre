@@ -32,7 +32,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                        HYPRE_Int           cdir,
                        HYPRE_Int           rap_type    )
 {
-   hypre_StructMatrix    *RAP=NULL;
+   hypre_StructMatrix    *RAP = NULL;
    hypre_StructStencil   *stencil;
    HYPRE_Int              P_stored_as_transpose = 0;
    HYPRE_Int              constant_coefficient;
@@ -44,11 +44,11 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
       switch (hypre_StructStencilNDim(stencil))
       {
          case 2:
-            RAP = hypre_PFMG2CreateRAPOp(R,A, P, coarse_grid, cdir);
+            RAP = hypre_PFMG2CreateRAPOp(R, A, P, coarse_grid, cdir);
             break;
 
          case 3:
-            RAP = hypre_PFMG3CreateRAPOp(R,A, P, coarse_grid, cdir);
+            RAP = hypre_PFMG3CreateRAPOp(R, A, P, coarse_grid, cdir);
             break;
       }
    }
@@ -58,23 +58,23 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
       switch (hypre_StructStencilNDim(stencil))
       {
          case 2:
-            RAP =  hypre_PFMGCreateCoarseOp5(R,A, P, coarse_grid, cdir);
+            RAP =  hypre_PFMGCreateCoarseOp5(R, A, P, coarse_grid, cdir);
             break;
 
          case 3:
-            RAP =  hypre_PFMGCreateCoarseOp7(R,A, P, coarse_grid, cdir);
+            RAP =  hypre_PFMGCreateCoarseOp7(R, A, P, coarse_grid, cdir);
             break;
       }
    }
    else if (rap_type == 2)
    {
-      RAP = hypre_SemiCreateRAPOp(R,A, P, coarse_grid, cdir,
+      RAP = hypre_SemiCreateRAPOp(R, A, P, coarse_grid, cdir,
                                   P_stored_as_transpose);
    }
 
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient==2 && rap_type==0 )
+   if ( constant_coefficient == 2 && rap_type == 0 )
    {
       /* A has variable diagonal, so, in the Galerkin case, P (and R) is
          entirely variable coefficient.  Thus RAP will be variable coefficient */
@@ -206,23 +206,23 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
    {
       if (constant_coefficient == 0)
       {
-         hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,
-                       hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixData(Ac_tmp), HYPRE_Complex,
+                       hypre_StructMatrixDataSize(Ac_tmp), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       }
       else if (constant_coefficient == 1)
       {
-         hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixDataConst(Ac_tmp),HYPRE_Complex,
-                       hypre_StructMatrixDataConstSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixDataConst(Ac_tmp), HYPRE_Complex,
+                       hypre_StructMatrixDataConstSize(Ac_tmp), HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
       else if (constant_coefficient == 2)
       {
-         hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixDataConst(Ac_tmp),HYPRE_Complex,
-                       hypre_StructMatrixDataConstSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixDataConst(Ac_tmp), HYPRE_Complex,
+                       hypre_StructMatrixDataConstSize(Ac_tmp), HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          hypre_StructStencil *stencil_c       = hypre_StructMatrixStencil(Ac);
          HYPRE_Int stencil_size  = hypre_StructStencilSize(stencil_c);
          HYPRE_Complex       *Acdiag = hypre_StructMatrixDataConst(Ac) + stencil_size;
-         hypre_TMemcpy(Acdiag, hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,
-                       hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(Acdiag, hypre_StructMatrixData(Ac_tmp), HYPRE_Complex,
+                       hypre_StructMatrixDataSize(Ac_tmp), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       }
 
       hypre_HandleStructExecPolicy(hypre_handle()) = data_location_Ac == HYPRE_MEMORY_DEVICE ?

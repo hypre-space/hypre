@@ -267,7 +267,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   hypre_IncFLOPCount(3*hypre_StructVectorGlobalSize(xc));
+   hypre_IncFLOPCount(3 * hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(interp_data -> time_index);
 
    return ierr;

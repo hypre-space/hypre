@@ -120,7 +120,7 @@ hypre_SMGSolve( void               *smg_vdata,
    {
       /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
-      eps = tol*tol;
+      eps = tol * tol;
 
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
@@ -173,7 +173,7 @@ hypre_SMGSolve( void               *smg_vdata,
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
             }
             else
             {
@@ -182,11 +182,11 @@ hypre_SMGSolve( void               *smg_vdata,
          }
 
          /* always do at least 1 V-cycle */
-         if ((r_dot_r/b_dot_b < eps) && (i > 0))
+         if ((r_dot_r / b_dot_b < eps) && (i > 0))
          {
             if (rel_change)
             {
-               if ((e_dot_e/x_dot_x) < eps)
+               if ((e_dot_e / x_dot_x) < eps)
                {
                   break;
                }
@@ -227,7 +227,7 @@ hypre_SMGSolve( void               *smg_vdata,
                               A_l[l], x_l[l], b_l[l], r_l[l]);
 
             /* restrict residual */
-            hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
+            hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l + 1]);
 #if DEBUG
             if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
@@ -235,8 +235,8 @@ hypre_SMGSolve( void               *smg_vdata,
                hypre_StructVectorPrint(filename, x_l[l], 0);
                hypre_sprintf(filename, "zout_rdown.%02d", l);
                hypre_StructVectorPrint(filename, r_l[l], 0);
-               hypre_sprintf(filename, "zout_b.%02d", l+1);
-               hypre_StructVectorPrint(filename, b_l[l+1], 0);
+               hypre_sprintf(filename, "zout_b.%02d", l + 1);
+               hypre_StructVectorPrint(filename, b_l[l + 1], 0);
             }
 #endif
          }
@@ -262,7 +262,7 @@ hypre_SMGSolve( void               *smg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
-            hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l+1], e_l[l]);
+            hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l + 1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
             if (hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)

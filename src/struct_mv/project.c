@@ -47,7 +47,7 @@ hypre_ProjectBox( hypre_Box    *box,
       }
       else
       {
-         kl = (HYPRE_Int) ((hl + (s-1)) / s);
+         kl = (HYPRE_Int) ((hl + (s - 1)) / s);
       }
 
       if ( hu >= 0 )
@@ -56,7 +56,7 @@ hypre_ProjectBox( hypre_Box    *box,
       }
       else
       {
-         ku = (HYPRE_Int) ((hu - (s-1)) / s);
+         ku = (HYPRE_Int) ((hu - (s - 1)) / s);
       }
 
       hypre_BoxIMinD(box, d) = i + kl * s;

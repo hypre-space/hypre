@@ -453,7 +453,7 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
       HYPRE_BoomerAMGSetInterpType(precond, interp_type);
       HYPRE_BoomerAMGSetNumSamples(precond, gsmg_samples);
       HYPRE_BoomerAMGSetTol(precond, pc_tol);
-      HYPRE_BoomerAMGSetCoarsenType(precond, (hybrid*coarsen_type));
+      HYPRE_BoomerAMGSetCoarsenType(precond, (hybrid * coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(precond, measure_type);
       HYPRE_BoomerAMGSetStrongThreshold(precond, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor);
@@ -511,7 +511,7 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
       grid_relax_type[0] = relax_default;
       hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
       grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-      for (i=0; i<num_sweep; i++)
+      for (i = 0; i < num_sweep; i++)
       {
          grid_relax_points[0][i] = 0;
       }
@@ -521,7 +521,7 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
       grid_relax_type[1] = relax_default;
       hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
       grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-      for (i=0; i<num_sweep; i++)
+      for (i = 0; i < num_sweep; i++)
       {
          grid_relax_points[1][i] = 0;
       }
@@ -531,7 +531,7 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
       grid_relax_type[2] = relax_default;
       hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
       grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
-      for (i=0; i<num_sweep; i++)
+      for (i = 0; i < num_sweep; i++)
       {
          grid_relax_points[2][i] = 0;
       }
@@ -548,7 +548,7 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
       HYPRE_BoomerAMGSetInterpType(precond, interp_type);
       HYPRE_BoomerAMGSetNumSamples(precond, gsmg_samples);
       HYPRE_BoomerAMGSetTol(precond, pc_tol);
-      HYPRE_BoomerAMGSetCoarsenType(precond, (hybrid*coarsen_type));
+      HYPRE_BoomerAMGSetCoarsenType(precond, (hybrid * coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(precond, measure_type);
       HYPRE_BoomerAMGSetStrongThreshold(precond, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor);

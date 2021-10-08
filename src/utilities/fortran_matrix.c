@@ -40,10 +40,10 @@ utilities_FortranMatrixAllocateData( HYPRE_BigInt  h, HYPRE_BigInt w,
 
    if ( mtx->value != NULL && mtx->ownsValues )
    {
-      hypre_TFree( mtx->value,HYPRE_MEMORY_HOST);
+      hypre_TFree( mtx->value, HYPRE_MEMORY_HOST);
    }
 
-   mtx->value = hypre_CTAlloc(HYPRE_Real,  h*w, HYPRE_MEMORY_HOST);
+   mtx->value = hypre_CTAlloc(HYPRE_Real,  h * w, HYPRE_MEMORY_HOST);
    hypre_assert ( mtx->value != NULL );
 
    mtx->globalHeight = h;
@@ -63,7 +63,7 @@ utilities_FortranMatrixWrap( HYPRE_Real* v, HYPRE_BigInt gh, HYPRE_BigInt  h, HY
 
    if ( mtx->value != NULL && mtx->ownsValues )
    {
-      hypre_TFree( mtx->value,HYPRE_MEMORY_HOST);
+      hypre_TFree( mtx->value, HYPRE_MEMORY_HOST);
    }
 
    mtx->value = v;
@@ -87,10 +87,10 @@ utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx )
 
    if ( mtx->ownsValues && mtx->value != NULL )
    {
-      hypre_TFree(mtx->value,HYPRE_MEMORY_HOST);
+      hypre_TFree(mtx->value, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(mtx,HYPRE_MEMORY_HOST);
+   hypre_TFree(mtx, HYPRE_MEMORY_HOST);
 }
 
 HYPRE_BigInt
@@ -267,7 +267,7 @@ utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx )
       q += g;
       for ( i = j + 1; i < h; i++, p++, q += g )
       {
-         *p = *q = (*p + *q)*0.5;
+         *p = *q = (*p + *q) * 0.5;
       }
       p += ++jump;
    }
@@ -345,7 +345,7 @@ utilities_FortranMatrixIndexCopy( HYPRE_Int* index,
 
    for ( j = 0, p = dest->value; j < w; j++, p += jp )
    {
-      r = src->value + (index[j]-1)*jr;
+      r = src->value + (index[j] - 1) * jr;
       for ( i = 0, q = r; i < h; i++, p++, q += jq )
       {
          *p = *q;
@@ -660,7 +660,7 @@ utilities_FortranMatrixValue( utilities_FortranMatrix* mtx,
    hypre_assert( 1 <= i && i <= mtx->height );
    hypre_assert( 1 <= j && j <= mtx->width );
 
-   k = i - 1 + (j - 1)*mtx->globalHeight;
+   k = i - 1 + (j - 1) * mtx->globalHeight;
    return mtx->value[k];
 }
 
@@ -676,7 +676,7 @@ utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx,
    hypre_assert( 1 <= i && i <= mtx->height );
    hypre_assert( 1 <= j && j <= mtx->width );
 
-   k = i - 1 + (j - 1)*mtx->globalHeight;
+   k = i - 1 + (j - 1) * mtx->globalHeight;
    return mtx->value + k;
 }
 
@@ -720,7 +720,7 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
 
    if ( block->value != NULL && block->ownsValues )
    {
-      hypre_TFree( block->value,HYPRE_MEMORY_HOST);
+      hypre_TFree( block->value, HYPRE_MEMORY_HOST);
    }
 
    block->globalHeight = mtx->globalHeight;
@@ -733,7 +733,7 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
    }
    block->height = iTo - iFrom + 1;
    block->width = jTo - jFrom + 1;
-   block->value = mtx->value + iFrom - 1 + (jFrom - 1)*mtx->globalHeight;
+   block->value = mtx->value + iFrom - 1 + (jFrom - 1) * mtx->globalHeight;
    block->ownsValues = 0;
 }
 
@@ -766,7 +766,7 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u )
    for ( i = 0; i < n; i++, pii += jd, pd++ )
    {
       v = *pd = *pii;
-      *pii = 1.0/v;
+      *pii = 1.0 / v;
    }
 
    pii -= jd;
@@ -785,11 +785,11 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u )
          {
             v -= (*pik) * (*pkj);
          }
-         *pij = v/(*pd);
+         *pij = v / (*pd);
       }
    }
 
-   hypre_TFree( diag,HYPRE_MEMORY_HOST);
+   hypre_TFree( diag, HYPRE_MEMORY_HOST);
 
 }
 
@@ -803,7 +803,7 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
 
    hypre_assert( mtx != NULL );
 
-   if ( !(fp = fopen(fileName,"w")) )
+   if ( !(fp = fopen(fileName, "w")) )
    {
       return 1;
    }
@@ -811,8 +811,8 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
    h = mtx->height;
    w = mtx->width;
 
-   hypre_fprintf(fp,"%ld\n",h);
-   hypre_fprintf(fp,"%ld\n",w);
+   hypre_fprintf(fp, "%ld\n", h);
+   hypre_fprintf(fp, "%ld\n", w);
 
    jump = mtx->globalHeight - h;
 
@@ -820,7 +820,7 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
    {
       for ( i = 0; i < h; i++, p++ )
       {
-         hypre_fprintf(fp,"%.14e\n",*p);
+         hypre_fprintf(fp, "%.14e\n", *p);
       }
       p += jump;
    }

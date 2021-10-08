@@ -67,20 +67,20 @@ hypre_FacZeroCData( void                 *fac_vdata,
    hypre_BoxInit(&scaled_box, ndim);
    hypre_BoxInit(&intersect_box, ndim);
 
-   for (level= max_level; level> 0; level--)
+   for (level = max_level; level > 0; level--)
    {
       level_pmatrix = hypre_SStructMatrixPMatrix(fac_data -> A_level[level], part_crse);
 
       grid          = (fac_data -> grid_level[level]);
-      refine_factors= &(fac_data -> refine_factors[level]);
+      refine_factors = &(fac_data -> refine_factors[level]);
 
-      p_cgrid= hypre_SStructGridPGrid(grid, part_crse);
+      p_cgrid = hypre_SStructGridPGrid(grid, part_crse);
       nvars  = hypre_SStructPGridNVars(p_cgrid);
 
-      for (var= 0; var< nvars; var++)
+      for (var = 0; var < nvars; var++)
       {
          stencils    =  hypre_SStructPMatrixSStencil(level_pmatrix, var, var);
-         stencil_size=  hypre_StructStencilSize(stencils);
+         stencil_size =  hypre_StructStencilSize(stencils);
 
          /*---------------------------------------------------------------------
           * For each variable, find the underlying boxes for each coarse box.
@@ -91,14 +91,14 @@ hypre_FacZeroCData( void                 *fac_vdata,
 
          hypre_ForBoxI(ci, cgrid_boxes)
          {
-            cgrid_box= hypre_BoxArrayBox(cgrid_boxes, ci);
+            cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
             hypre_ClearIndex(temp_index);
             hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMin(&scaled_box));
-            for (i= 0; i< ndim; i++)
+            for (i = 0; i < ndim; i++)
             {
-               temp_index[i]= (*refine_factors)[i]-1;
+               temp_index[i] = (*refine_factors)[i] - 1;
             }
             hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMax(&scaled_box));
@@ -107,19 +107,19 @@ hypre_FacZeroCData( void                 *fac_vdata,
                                   hypre_BoxIMax(&scaled_box), &boxman_entries,
                                   &nboxman_entries);
 
-            for (i= 0; i< nboxman_entries; i++)
+            for (i = 0; i < nboxman_entries; i++)
             {
                hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
                hypre_BoxSetExtents(&intersect_box, ilower, iupper);
                hypre_IntersectBoxes(&intersect_box, &scaled_box, &intersect_box);
 
                /* adjust the box so that it is divisible by refine_factors */
-               for (j= 0; j< ndim; j++)
+               for (j = 0; j < ndim; j++)
                {
-                  rem= hypre_BoxIMin(&intersect_box)[j]%(*refine_factors)[j];
+                  rem = hypre_BoxIMin(&intersect_box)[j] % (*refine_factors)[j];
                   if (rem)
                   {
-                     hypre_BoxIMin(&intersect_box)[j]+=(*refine_factors)[j] - rem;
+                     hypre_BoxIMin(&intersect_box)[j] += (*refine_factors)[j] - rem;
                   }
                }
 
@@ -129,15 +129,15 @@ hypre_FacZeroCData( void                 *fac_vdata,
                hypre_StructMapFineToCoarse(hypre_BoxIMax(&intersect_box), temp_index,
                                            *refine_factors, hypre_BoxIMax(&intersect_box));
 
-               intersect_size= hypre_BoxVolume(&intersect_box);
+               intersect_size = hypre_BoxVolume(&intersect_box);
                if (intersect_size > 0)
                {
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                  values= hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
+                  values = hypre_CTAlloc(HYPRE_Real,  intersect_size, HYPRE_MEMORY_HOST);
 
-                  for (j= 0; j< stencil_size; j++)
+                  for (j = 0; j < stencil_size; j++)
                   {
                      HYPRE_SStructMatrixSetBoxValues(fac_data -> A_level[level],
                                                      part_crse,
@@ -146,7 +146,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
                                                      var, 1, &j, values);
 
                      HYPRE_SStructMatrixSetBoxValues(A,
-                                                     level_to_part[level-1],
+                                                     level_to_part[level - 1],
                                                      hypre_BoxIMin(&intersect_box),
                                                      hypre_BoxIMax(&intersect_box),
                                                      var, 1, &j, values);

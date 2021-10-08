@@ -35,7 +35,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    HYPRE_Int                 print_usage;
    HYPRE_Int                 build_matrix_arg_index;
    HYPRE_Int                 solver_id;
-   HYPRE_Int                 ierr,i,j;
+   HYPRE_Int                 ierr, i, j;
    HYPRE_Int                 num_iterations;
 
    HYPRE_ParCSRMatrix  parcsr_A;
@@ -161,38 +161,38 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
 
    HYPRE_LinSysCore H(hypre_MPI_COMM_WORLD);
    HYPRE_Int numLocalEqns = last_local_row - first_local_row + 1;
-   H.createMatricesAndVectors(M,first_local_row+1,numLocalEqns);
+   H.createMatricesAndVectors(M, first_local_row + 1, numLocalEqns);
 
    HYPRE_Int index;
    HYPRE_Int *rowLengths = new HYPRE_Int[numLocalEqns];
    HYPRE_Int **colIndices = new HYPRE_Int*[numLocalEqns];
 
    local_row = 0;
-   for (i=first_local_row; i<= last_local_row; i++)
+   for (i = first_local_row; i <= last_local_row; i++)
    {
-      ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A,i,&size,&col_ind,&values );
+      ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A, i, &size, &col_ind, &values );
       rowLengths[local_row] = size;
       colIndices[local_row] = new HYPRE_Int[size];
-      for (j=0; j<size; j++) { colIndices[local_row][j] = col_ind[j] + 1; }
+      for (j = 0; j < size; j++) { colIndices[local_row][j] = col_ind[j] + 1; }
       local_row++;
-      HYPRE_ParCSRMatrixRestoreRow(parcsr_A,i,&size,&col_ind,&values);
+      HYPRE_ParCSRMatrixRestoreRow(parcsr_A, i, &size, &col_ind, &values);
    }
    H.allocateMatrix(colIndices, rowLengths);
    delete [] rowLengths;
-   for (i=0; i< numLocalEqns; i++) { delete [] colIndices[i]; }
+   for (i = 0; i < numLocalEqns; i++) { delete [] colIndices[i]; }
    delete [] colIndices;
 
    HYPRE_Int *newColInd;
 
-   for (i=first_local_row; i<= last_local_row; i++)
+   for (i = first_local_row; i <= last_local_row; i++)
    {
-      ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A,i,&size,&col_ind,&values );
+      ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A, i, &size, &col_ind, &values );
       newColInd = new HYPRE_Int[size];
-      for (j=0; j<size; j++) { newColInd[j] = col_ind[j] + 1; }
-      H.sumIntoSystemMatrix(i+1,size,(const HYPRE_Real*)values,
+      for (j = 0; j < size; j++) { newColInd[j] = col_ind[j] + 1; }
+      H.sumIntoSystemMatrix(i + 1, size, (const HYPRE_Real*)values,
                             (const HYPRE_Int*)newColInd);
       delete [] newColInd;
-      ierr += HYPRE_ParCSRMatrixRestoreRow(parcsr_A,i,&size,&col_ind,&values);
+      ierr += HYPRE_ParCSRMatrixRestoreRow(parcsr_A, i, &size, &col_ind, &values);
    }
    H.matrixLoadComplete();
    HYPRE_ParCSRMatrixDestroy(parcsr_A);
@@ -201,13 +201,13 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-   HYPRE_Real ddata=1.0;
+   HYPRE_Real ddata = 1.0;
    HYPRE_Int  status;
 
-   for (i=first_local_row; i<= last_local_row; i++)
+   for (i = first_local_row; i <= last_local_row; i++)
    {
       index = i + 1;
-      H.sumIntoRHSVector(1,(const HYPRE_Real*) &ddata, (const HYPRE_Int*) &index);
+      H.sumIntoRHSVector(1, (const HYPRE_Real*) &ddata, (const HYPRE_Int*) &index);
    }
 
    hypre_EndTiming(time_index);
@@ -419,7 +419,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -442,8 +442,8 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -456,7 +456,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    {
       values[0] = 8.0;
    }
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
    {
       values[0] = 2.0;
    }

@@ -55,7 +55,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
                                            HYPRE_Int variant, HYPRE_Int level)
 {
 
-   HYPRE_Int  i,j, k;
+   HYPRE_Int  i, j, k;
 
    HYPRE_Int  one_i = 1;
    HYPRE_Int  info;
@@ -121,22 +121,22 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    HYPRE_Int   adjust_2D[] = {1, -1};
    HYPRE_Int  *adjust_list;
 
-   if (variant ==1 && num_functions > 1)
+   if (variant == 1 && num_functions > 1)
    {
       /* First add new entries to P with value 0.0 corresponding to weights from
          other unknowns on the same grid point */
       /* Loop through each row */
 
-      new_nnz = P_diag_size*num_functions; /* this is an over-estimate */
+      new_nnz = P_diag_size * num_functions; /* this is an over-estimate */
       P_diag_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz, HYPRE_MEMORY_HOST);
       P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz, HYPRE_MEMORY_HOST);
 
 
-      if (num_functions ==2)
+      if (num_functions == 2)
       {
          adjust_list = adjust_2D;
       }
-      else if (num_functions ==3)
+      else if (num_functions == 3)
       {
          adjust_list = adjust_3D;
       }
@@ -144,7 +144,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
       j_pos = 0;
       orig_start = 0;
       /* loop through rows */
-      for (i=0; i < num_rows_P; i++)
+      for (i = 0; i < num_rows_P; i++)
       {
          fcn_num = (HYPRE_Int) fmod(i, num_functions);
          if (fcn_num != dof_func[i])
@@ -153,19 +153,19 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          }
 
          /* loop through elements */
-         num_elements = P_diag_i[i+1] - orig_start;
+         num_elements = P_diag_i[i + 1] - orig_start;
 
          /* add zeros corrresponding to other unknowns */
          if (num_elements > 1)
          {
-            for (j=0; j < num_elements; j++)
+            for (j = 0; j < num_elements; j++)
             {
-               P_diag_j_new[j_pos] = P_diag_j[orig_start+j];
-               P_diag_data_new[j_pos++] = P_diag_data[orig_start+j];
+               P_diag_j_new[j_pos] = P_diag_j[orig_start + j];
+               P_diag_data_new[j_pos++] = P_diag_data[orig_start + j];
 
-               for (k=0; k < num_functions-1; k++)
+               for (k = 0; k < num_functions - 1; k++)
                {
-                  P_diag_j_new[j_pos] = P_diag_j[orig_start+j]+ ADJUST(fcn_num,k);
+                  P_diag_j_new[j_pos] = P_diag_j[orig_start + j] + ADJUST(fcn_num, k);
                   P_diag_data_new[j_pos++] = 0.0;
                }
             }
@@ -175,17 +175,17 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
             P_diag_j_new[j_pos] = P_diag_j[orig_start];
             P_diag_data_new[j_pos++] = P_diag_data[orig_start];
          }
-         orig_start = P_diag_i[i+1];
+         orig_start = P_diag_i[i + 1];
          if (num_elements > 1)
          {
-            P_diag_i[i+1] =  P_diag_i[i] + num_elements*num_functions;
+            P_diag_i[i + 1] =  P_diag_i[i] + num_elements * num_functions;
          }
          else
          {
-            P_diag_i[i+1] = P_diag_i[i] + num_elements;
+            P_diag_i[i + 1] = P_diag_i[i] + num_elements;
          }
 
-         if (j_pos != P_diag_i[i+1]) { printf("Problem!\n"); }
+         if (j_pos != P_diag_i[i + 1]) { printf("Problem!\n"); }
 
 
       }/* end loop through rows */
@@ -232,9 +232,9 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    {
       char new_file[80];
 
-      for (i=0; i < num_smooth_vecs; i++)
+      for (i = 0; i < num_smooth_vecs; i++)
       {
-         sprintf(new_file,"%s.%d.level.%d","smoothvec", i, level );
+         sprintf(new_file, "%s.%d.level.%d", "smoothvec", i, level );
          hypre_ParVectorPrint(smooth_vecs[i], new_file);
       }
    }
@@ -267,13 +267,13 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    /* allocate */
    alpha = hypre_CTAlloc(HYPRE_Real,  num_smooth_vecs, HYPRE_MEMORY_HOST);
    piv = hypre_CTAlloc(HYPRE_Int,  num_smooth_vecs, HYPRE_MEMORY_HOST);
-   B_s = hypre_CTAlloc(HYPRE_Real,  num_smooth_vecs*num_smooth_vecs, HYPRE_MEMORY_HOST);
+   B_s = hypre_CTAlloc(HYPRE_Real,  num_smooth_vecs * num_smooth_vecs, HYPRE_MEMORY_HOST);
 
    /*estimate the max number of weights per row (coarse points only have one weight)*/
-   k_alloc = (num_nonzeros - coarse_points)/(num_rows_P - coarse_points);
+   k_alloc = (num_nonzeros - coarse_points) / (num_rows_P - coarse_points);
    k_alloc += 5;
 
-   Beta = hypre_CTAlloc(HYPRE_Real,  k_alloc*num_smooth_vecs, HYPRE_MEMORY_HOST);
+   Beta = hypre_CTAlloc(HYPRE_Real,  k_alloc * num_smooth_vecs, HYPRE_MEMORY_HOST);
    w = hypre_CTAlloc(HYPRE_Real,  k_alloc, HYPRE_MEMORY_HOST);
    w_old = hypre_CTAlloc(HYPRE_Real,  k_alloc, HYPRE_MEMORY_HOST);
 
@@ -282,10 +282,10 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    if (num_procs > 1)
    {
 
-      smooth_vec_offd =  hypre_CTAlloc(HYPRE_Real,  num_cols_P_offd*num_smooth_vecs, HYPRE_MEMORY_HOST);
+      smooth_vec_offd =  hypre_CTAlloc(HYPRE_Real,  num_cols_P_offd * num_smooth_vecs, HYPRE_MEMORY_HOST);
 
       /* for now, do a seperate comm for each smooth vector */
-      for (k = 0; k< num_smooth_vecs; k++)
+      for (k = 0; k < num_smooth_vecs; k++)
       {
 
          vector = smooth_vecs[k];
@@ -295,15 +295,15 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          dbl_buf_data = hypre_CTAlloc(HYPRE_Real,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                    num_sends), HYPRE_MEMORY_HOST);
          /* point into smooth_vec_offd */
-         offd_vec_data =  smooth_vec_offd + k*num_cols_P_offd;
+         offd_vec_data =  smooth_vec_offd + k * num_cols_P_offd;
 
          index = 0;
          for (i = 0; i < num_sends; i++)
          {
             start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
                dbl_buf_data[index++]
-                  = vec_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+                  = vec_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
          }
 
          comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, dbl_buf_data,
@@ -317,7 +317,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
    /* now off-proc smooth vec data is in smoothvec_offd */
 
    /* Loop through each row */
-   for (i=0; i < num_rows_P; i++)
+   for (i = 0; i < num_rows_P; i++)
    {
 
       /* only need to modify rows belonging to fine points */
@@ -326,8 +326,8 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          continue;
       }
 
-      num_coarse_diag = P_diag_i[i+1] - P_diag_i[i];
-      num_coarse_offd =  P_offd_i[i+1] - P_offd_i[i];
+      num_coarse_diag = P_diag_i[i + 1] - P_diag_i[i];
+      num_coarse_offd =  P_offd_i[i + 1] - P_offd_i[i];
 
       k_size = num_coarse_diag + num_coarse_offd;
 
@@ -355,24 +355,24 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
       {
          k_alloc = k_size + 2;
 
-         Beta = hypre_TReAlloc(Beta,  HYPRE_Real,  k_alloc*num_smooth_vecs, HYPRE_MEMORY_HOST);
+         Beta = hypre_TReAlloc(Beta,  HYPRE_Real,  k_alloc * num_smooth_vecs, HYPRE_MEMORY_HOST);
          w = hypre_TReAlloc(w,  HYPRE_Real,  k_alloc, HYPRE_MEMORY_HOST);
          w_old = hypre_TReAlloc(w_old,  HYPRE_Real,  k_alloc, HYPRE_MEMORY_HOST);
       }
 
       /* put current weights into w*/
       counter = 0;
-      for (j=P_diag_i[i]; j <  P_diag_i[i+1]; j++)
+      for (j = P_diag_i[i]; j <  P_diag_i[i + 1]; j++)
       {
          w[counter++] = P_diag_data[j];
       }
-      for (j=P_offd_i[i]; j <  P_offd_i[i+1]; j++)
+      for (j = P_offd_i[i]; j <  P_offd_i[i + 1]; j++)
       {
          w[counter++] = P_offd_data[j];
       }
 
       /* copy w to w_old */
-      for (j=0; j< k_size; j++)
+      for (j = 0; j < k_size; j++)
       {
          w_old[j] = w[j];
       }
@@ -385,12 +385,12 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
       /* Note - for using BLAS/LAPACK - need to store Beta in
        * column-major order */
 
-      for (j = 0; j< num_smooth_vecs; j++)
+      for (j = 0; j < num_smooth_vecs; j++)
       {
          vector = smooth_vecs[j];
          vec_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
          /* point into smooth_vec_offd */
-         offd_vec_data = smooth_vec_offd + j*num_cols_P_offd;
+         offd_vec_data = smooth_vec_offd + j * num_cols_P_offd;
 
          alpha[j] = vec_data[i];
 
@@ -399,18 +399,18 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          /* on processor */
          counter = 0;
 
-         for (k = P_diag_i[i]; k <  P_diag_i[i+1]; k++)
+         for (k = P_diag_i[i]; k <  P_diag_i[i + 1]; k++)
          {
             coarse_index = P_diag_j[k];
             /*Beta(j, counter) */
-            Beta[counter*num_smooth_vecs + j] = vec_data[coarse_index];
+            Beta[counter * num_smooth_vecs + j] = vec_data[coarse_index];
             counter++;
          }
          /* off-processor */
-         for (k = P_offd_i[i]; k <  P_offd_i[i+1]; k++)
+         for (k = P_offd_i[i]; k <  P_offd_i[i + 1]; k++)
          {
             coarse_index = P_offd_j[k];
-            Beta[counter*num_smooth_vecs + j] = offd_vec_data[coarse_index];
+            Beta[counter * num_smooth_vecs + j] = offd_vec_data[coarse_index];
             counter++;
 
          }
@@ -421,13 +421,13 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
 
       /* first B_s <- (1-delta)*I_s */
       tmp_double = 1.0 - delta;
-      for (j = 0; j < num_smooth_vecs*num_smooth_vecs; j++)
+      for (j = 0; j < num_smooth_vecs * num_smooth_vecs; j++)
       {
          B_s[j] = 0.0;
       }
       for (j = 0; j < num_smooth_vecs; j++)
       {
-         B_s[j*num_smooth_vecs + j] = tmp_double;
+         B_s[j * num_smooth_vecs + j] = tmp_double;
       }
 
       /* now  B_s <-delta*Beta*Beta^T + B_s */
@@ -465,11 +465,11 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
 
       /* now update the weights in P*/
       counter = 0;
-      for (j=P_diag_i[i]; j <  P_diag_i[i+1]; j++)
+      for (j = P_diag_i[i]; j <  P_diag_i[i + 1]; j++)
       {
          P_diag_data[j] = w[counter++];
       }
-      for (j=P_offd_i[i]; j <  P_offd_i[i+1]; j++)
+      for (j = P_offd_i[i]; j <  P_offd_i[i + 1]; j++)
       {
          P_offd_data[j] = w[counter++];
       }
@@ -517,13 +517,13 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          num_cols_P_offd = 0;
          P_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
 
-         for (i=0; i < num_cols_A_offd; i++)
+         for (i = 0; i < num_cols_A_offd; i++)
          {
             P_marker[i] = 0;
          }
 
          num_cols_P_offd = 0;
-         for (i=0; i < P_offd_size; i++)
+         for (i = 0; i < P_offd_size; i++)
          {
             index = P_offd_j[i];
             if (!P_marker[index])
@@ -537,12 +537,12 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
          tmp_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
 
          index = 0;
-         for (i=0; i < num_cols_P_offd; i++)
+         for (i = 0; i < num_cols_P_offd; i++)
          {
-            while (P_marker[index]==0) { index++; }
+            while (P_marker[index] == 0) { index++; }
             tmp_map_offd[i] = index++;
          }
-         for (i=0; i < P_offd_size; i++)
+         for (i = 0; i < P_offd_size; i++)
             P_offd_j[i] = hypre_BinarySearch(tmp_map_offd,
                                              P_offd_j[i],
                                              num_cols_P_offd);

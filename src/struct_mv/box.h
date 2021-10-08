@@ -614,8 +614,8 @@ dbox1, start1, stride1, i1,
       /* set i and hypre__n */
       hypre_BoxLoopSet(i, j, k);
       /* set i1 */
-      i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;
-      i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;
+      i1 = hypre__i1start + i * hypre__sx1 + j * hypre__sy1 + k * hypre__sz1;
+      i2 = hypre__i2start + i * hypre__sx2 + j * hypre__sy2 + k * hypre__sz2;
       for (k = 0; k < hypre__nz; k++)
       {
          for (j = 0; j < hypre__ny; j++)
@@ -627,11 +627,11 @@ dbox1, start1, stride1, i1,
                i1 += hypre__sx1;
                i2 += hypre__sx2;
             }
-            i1 += hypre__sy1 - hypre__nx*hypre__sx1;
-            i2 += hypre__sy2 - hypre__nx*hypre__sx2;
+            i1 += hypre__sy1 - hypre__nx * hypre__sx1;
+            i2 += hypre__sy2 - hypre__nx * hypre__sx2;
          }
-         i1 += hypre__sz1 - hypre__ny*hypre__sy1;
-         i2 += hypre__sz2 - hypre__ny*hypre__sy2;
+         i1 += hypre__sz1 - hypre__ny * hypre__sy1;
+         i2 += hypre__sz2 - hypre__ny * hypre__sy2;
       }
    }
 }

@@ -216,7 +216,7 @@ hypre_BigHash( HYPRE_BigInt input )
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
    h64 ^= k1;
-   h64 = HYPRE_XXH_rotl64(h64, 27)*HYPRE_XXH_PRIME64_1 + HYPRE_XXH_PRIME64_4;
+   h64 = HYPRE_XXH_rotl64(h64, 27) * HYPRE_XXH_PRIME64_1 + HYPRE_XXH_PRIME64_4;
 
    h64 ^= h64 >> 33;
    h64 *= HYPRE_XXH_PRIME64_2;
@@ -244,8 +244,8 @@ hypre_BigHash(HYPRE_Int input)
    // 1665863975 is added to input so that
    // only -1073741824 gives HYPRE_HOPSCOTCH_HASH_EMPTY.
    // Hence, we're fine as long as key is non-negative.
-   h32 += (input + 1665863975)*HYPRE_XXH_PRIME32_3;
-   h32 = HYPRE_XXH_rotl32(h32, 17)*HYPRE_XXH_PRIME32_4;
+   h32 += (input + 1665863975) * HYPRE_XXH_PRIME32_3;
+   h32 = HYPRE_XXH_rotl32(h32, 17) * HYPRE_XXH_PRIME32_4;
 
    h32 ^= h32 >> 15;
    h32 *= HYPRE_XXH_PRIME32_2;
@@ -270,7 +270,7 @@ hypre_Hash(HYPRE_Int input)
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
    h64 ^= k1;
-   h64 = HYPRE_XXH_rotl64(h64, 27)*HYPRE_XXH_PRIME64_1 + HYPRE_XXH_PRIME64_4;
+   h64 = HYPRE_XXH_rotl64(h64, 27) * HYPRE_XXH_PRIME64_1 + HYPRE_XXH_PRIME64_4;
 
    h64 ^= h64 >> 33;
    h64 *= HYPRE_XXH_PRIME64_2;
@@ -298,8 +298,8 @@ hypre_Hash(HYPRE_Int input)
    // 1665863975 is added to input so that
    // only -1073741824 gives HYPRE_HOPSCOTCH_HASH_EMPTY.
    // Hence, we're fine as long as key is non-negative.
-   h32 += (input + 1665863975)*HYPRE_XXH_PRIME32_3;
-   h32 = HYPRE_XXH_rotl32(h32, 17)*HYPRE_XXH_PRIME32_4;
+   h32 += (input + 1665863975) * HYPRE_XXH_PRIME32_3;
+   h32 = HYPRE_XXH_rotl32(h32, 17) * HYPRE_XXH_PRIME32_4;
 
    h32 ^= h32 >> 15;
    h32 *= HYPRE_XXH_PRIME32_2;
@@ -688,7 +688,7 @@ hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
 #endif
 
    HYPRE_Int i;
-   for (i = 0; i< HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i)
+   for (i = 0; i < HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i)
    {
       if (hash == s->hash[bucket + i] && key == s->key[bucket + i])
       {
@@ -752,7 +752,7 @@ hypre_UnorderedBigIntSetContains( hypre_UnorderedBigIntSet *s,
 #endif
 
    HYPRE_Int i;
-   for (i = 0; i< HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i)
+   for (i = 0; i < HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i)
    {
       if (hash == s->hash[bucket + i] && key == s->key[bucket + i])
       {
@@ -818,7 +818,7 @@ hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
 
    hypre_HopscotchBucket *currBucket = &(m->table[hash & m->bucketMask]);
    HYPRE_Int i;
-   for (i = 0; i< HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i, ++currBucket)
+   for (i = 0; i < HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i, ++currBucket)
    {
       if (hash == currBucket->hash && key == currBucket->key)
       {
@@ -881,7 +881,7 @@ HYPRE_Int hypre_UnorderedBigIntMapGet( hypre_UnorderedBigIntMap *m,
 
    hypre_BigHopscotchBucket *currBucket = &(m->table[hash & m->bucketMask]);
    HYPRE_Int i;
-   for (i = 0; i< HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i, ++currBucket)
+   for (i = 0; i < HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i, ++currBucket)
    {
       if (hash == currBucket->hash && key == currBucket->key)
       {
@@ -976,7 +976,7 @@ hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
    hypre_HopscotchSegment  *segment = &s->segments[hash & s->segmentMask];
    omp_set_lock(&segment->lock);
 #endif
-   HYPRE_Int bucket = hash&s->bucketMask;
+   HYPRE_Int bucket = hash & s->bucketMask;
 
    //CHECK IF ALREADY CONTAIN ................
    hypre_uint hopInfo = s->hopInfo[bucket];
@@ -1036,7 +1036,7 @@ hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
    }
 
    //NEED TO RESIZE ..........................
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR - RESIZE is not implemented\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - RESIZE is not implemented\n");
    /*fprintf(stderr, "ERROR - RESIZE is not implemented\n");*/
    exit(1);
    return;
@@ -1058,7 +1058,7 @@ hypre_UnorderedBigIntSetPut( hypre_UnorderedBigIntSet *s,
    hypre_HopscotchSegment  *segment = &s->segments[hash & s->segmentMask];
    omp_set_lock(&segment->lock);
 #endif
-   HYPRE_Int bucket = (HYPRE_Int)(hash&s->bucketMask);
+   HYPRE_Int bucket = (HYPRE_Int)(hash & s->bucketMask);
 
    //CHECK IF ALREADY CONTAIN ................
    hypre_uint hopInfo = s->hopInfo[bucket];
@@ -1118,7 +1118,7 @@ hypre_UnorderedBigIntSetPut( hypre_UnorderedBigIntSet *s,
    }
 
    //NEED TO RESIZE ..........................
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR - RESIZE is not implemented\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - RESIZE is not implemented\n");
    /*fprintf(stderr, "ERROR - RESIZE is not implemented\n");*/
    exit(1);
    return;
@@ -1200,7 +1200,7 @@ hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m,
    }
 
    //NEED TO RESIZE ..........................
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR - RESIZE is not implemented\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - RESIZE is not implemented\n");
    /*fprintf(stderr, "ERROR - RESIZE is not implemented\n");*/
    exit(1);
    return HYPRE_HOPSCOTCH_HASH_EMPTY;
@@ -1282,7 +1282,7 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
    }
 
    //NEED TO RESIZE ..........................
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR - RESIZE is not implemented\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - RESIZE is not implemented\n");
    /*fprintf(stderr, "ERROR - RESIZE is not implemented\n");*/
    exit(1);
    return HYPRE_HOPSCOTCH_HASH_EMPTY;

@@ -25,7 +25,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 solver_id;
    HYPRE_Int                 ioutdat;
    HYPRE_Int                 debug_flag;
-   HYPRE_Int                 ierr,i;
+   HYPRE_Int                 ierr, i;
    HYPRE_Int                 max_levels = 25;
    HYPRE_Int                 num_iterations;
    HYPRE_Real          norm;
@@ -240,7 +240,7 @@ main( HYPRE_Int   argc,
    grid_relax_points = hypre_CTAlloc(HYPRE_Int *, 4, HYPRE_MEMORY_HOST);
    relax_weight = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
 
-   for (i=0; i < max_levels; i++)
+   for (i = 0; i < max_levels; i++)
    {
       relax_weight[i] = 0.0;
    }
@@ -317,7 +317,7 @@ main( HYPRE_Int   argc,
       {
          arg_index++;
          relax_weight[0] = atof(argv[arg_index++]);
-         for (i=1; i < max_levels; i++)
+         for (i = 1; i < max_levels; i++)
          {
             relax_weight[i] = relax_weight[0];
          }
@@ -477,11 +477,11 @@ main( HYPRE_Int   argc,
       hypre_printf("Rhs from file not yet implemented.  Defaults to b=0\n");
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning,&b);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning, &b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetConstantValues(b, 0.0);
 
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning,&x);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning, &x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);
    }
@@ -491,7 +491,7 @@ main( HYPRE_Int   argc,
 
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning,&x);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning, &x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 0.0);
    }
@@ -500,14 +500,14 @@ main( HYPRE_Int   argc,
 
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning,&b);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning, &b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetRandomValues(b, 22775);
-      HYPRE_ParVectorInnerProd(b,b,&norm);
-      norm = 1.0/sqrt(norm);
+      HYPRE_ParVectorInnerProd(b, b, &norm);
+      norm = 1.0 / sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning,&x);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning, &x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 0.0);
    }
@@ -516,13 +516,13 @@ main( HYPRE_Int   argc,
 
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning,&x);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning, &x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);
 
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning,&b);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning, &b);
       HYPRE_ParVectorInitialize(b);
-      HYPRE_ParCSRMatrixMatvec(1.0,A,x,0.0,b);
+      HYPRE_ParCSRMatrixMatvec(1.0, A, x, 0.0, b);
 
       HYPRE_ParVectorSetConstantValues(x, 0.0);
    }
@@ -530,11 +530,11 @@ main( HYPRE_Int   argc,
    {
       HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning);
       HYPRE_ParCSRMatrixGetDims(A, &global_m, &global_n);
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning,&b);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_m, partitioning, &b);
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetConstantValues(b, 0.0);
 
-      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning,&x);
+      HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning, &x);
       HYPRE_ParVectorInitialize(x);
       HYPRE_ParVectorSetConstantValues(x, 1.0);
    }
@@ -548,7 +548,7 @@ main( HYPRE_Int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver);
-      HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid * coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
@@ -603,7 +603,7 @@ main( HYPRE_Int   argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&pcg_precond);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
@@ -687,7 +687,7 @@ main( HYPRE_Int   argc,
          /* use BoomerAMG as preconditioner */
 
          HYPRE_BoomerAMGCreate(&pcg_precond);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
@@ -756,7 +756,7 @@ main( HYPRE_Int   argc,
       hypre_ClearTiming();
 
       HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
 
       if (solver_id == 3)
@@ -795,7 +795,7 @@ main( HYPRE_Int   argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&pcg_precond);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid * coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
@@ -844,7 +844,7 @@ main( HYPRE_Int   argc,
       hypre_ClearTiming();
 
       HYPRE_ParCSRCGNRGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
       HYPRE_ParCSRCGNRDestroy(pcg_solver);
 
       if (solver_id == 5)
@@ -1024,7 +1024,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1048,8 +1048,8 @@ BuildParLaplacian( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1064,15 +1064,15 @@ BuildParLaplacian( HYPRE_Int                  argc,
    values[0] = 0.0;
    if (nx > 1)
    {
-      values[0] += 2.0*cx;
+      values[0] += 2.0 * cx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy;
+      values[0] += 2.0 * cy;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz;
+      values[0] += 2.0 * cz;
    }
 
    A = (HYPRE_ParCSRMatrix)
@@ -1104,7 +1104,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    HYPRE_Int                 P, Q, R;
    HYPRE_Real          cx, cy, cz;
    HYPRE_Real          ax, ay, az;
-   HYPRE_Real          hinx,hiny,hinz;
+   HYPRE_Real          hinx, hiny, hinz;
 
    HYPRE_ParCSRMatrix  A;
 
@@ -1127,9 +1127,9 @@ BuildParDifConv( HYPRE_Int                  argc,
    ny = 10;
    nz = 10;
 
-   hinx = 1.0/(nx+1);
-   hiny = 1.0/(ny+1);
-   hinz = 1.0/(nz+1);
+   hinx = 1.0 / (nx + 1);
+   hiny = 1.0 / (ny + 1);
+   hinz = 1.0 / (nz + 1);
 
    P  = 1;
    Q  = num_procs;
@@ -1187,7 +1187,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1213,8 +1213,8 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1222,25 +1222,25 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    values = hypre_CTAlloc(HYPRE_Real,  7, HYPRE_MEMORY_HOST);
 
-   values[1] = -cx/(hinx*hinx);
-   values[2] = -cy/(hiny*hiny);
-   values[3] = -cz/(hinz*hinz);
-   values[4] = -cx/(hinx*hinx) + ax/hinx;
-   values[5] = -cy/(hiny*hiny) + ay/hiny;
-   values[6] = -cz/(hinz*hinz) + az/hinz;
+   values[1] = -cx / (hinx * hinx);
+   values[2] = -cy / (hiny * hiny);
+   values[3] = -cz / (hinz * hinz);
+   values[4] = -cx / (hinx * hinx) + ax / hinx;
+   values[5] = -cy / (hiny * hiny) + ay / hiny;
+   values[6] = -cz / (hinz * hinz) + az / hinz;
 
    values[0] = 0.0;
    if (nx > 1)
    {
-      values[0] += 2.0*cx/(hinx*hinx) - 1.0*ax/hinx;
+      values[0] += 2.0 * cx / (hinx * hinx) - 1.0 * ax / hinx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy/(hiny*hiny) - 1.0*ay/hiny;
+      values[0] += 2.0 * cy / (hiny * hiny) - 1.0 * ay / hiny;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz/(hinz*hinz) - 1.0*az/hinz;
+      values[0] += 2.0 * cz / (hinz * hinz) - 1.0 * az / hinz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateDifConv(hypre_MPI_COMM_WORLD,
@@ -1445,7 +1445,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q) != num_procs)
+   if ((P * Q) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1468,7 +1468,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
 
    /* compute p,q from P,Q and myid */
    p = myid % P;
-   q = ( myid - p)/P;
+   q = ( myid - p) / P;
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1570,7 +1570,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -1593,8 +1593,8 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1607,7 +1607,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    {
       values[0] = 8.0;
    }
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
    {
       values[0] = 2.0;
    }

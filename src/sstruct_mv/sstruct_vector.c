@@ -341,7 +341,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
 
    hypre_Index            varoffset;
-   HYPRE_Int              num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int              num_ghost[2 * HYPRE_MAXDIM];
    hypre_StructGrid      *sgrid;
    HYPRE_Int              var, d;
 
@@ -359,7 +359,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
          hypre_SStructVariableGetOffset(vartypes[var], ndim, varoffset);
          for (d = 0; d < ndim; d++)
          {
-            num_ghost[2*d]   = num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
+            num_ghost[2 * d]   = num_ghost[2 * d + 1] = hypre_IndexD(varoffset, d);
          }
 
          hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
@@ -642,7 +642,7 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
             {
-               pardata[pari+bi] = yp[yi];
+               pardata[pari + bi] = yp[yi];
             }
             hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
@@ -728,7 +728,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
                {
-                  yp[yi] = pardata[pari+bi];
+                  yp[yi] = pardata[pari + bi];
                }
                hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
@@ -764,7 +764,7 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
    pdatasize = 0;
    pdataindices = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
 
-   for (var =0; var < nvars; var++)
+   for (var = 0; var < nvars; var++)
    {
       svector = hypre_SStructPVectorSVector(pvector, var);
       hypre_StructVectorInitializeShell(svector);
@@ -778,7 +778,7 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
     * for this part                                                  */
 
    hypre_SStructPVectorDataIndices(pvector) = pdataindices;
-   hypre_SStructPVectorDataSize(pvector) = pdatasize+nucvars ;
+   hypre_SStructPVectorDataSize(pvector) = pdatasize + nucvars ;
 
    hypre_SStructPVectorAccumulated(pvector) = 0;
 
@@ -822,21 +822,21 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
 HYPRE_Int
 hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
 {
-   HYPRE_Int              nparts= hypre_SStructVectorNParts(vector);
+   HYPRE_Int              nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructPVector  *pvector;
    hypre_StructVector    *svector;
 
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
 
-   for (part= 0; part< nparts; part++)
+   for (part = 0; part < nparts; part++)
    {
-      pvector= hypre_SStructVectorPVector(vector, part);
+      pvector = hypre_SStructVectorPVector(vector, part);
       nvars  = hypre_SStructPVectorNVars(pvector);
 
-      for (var= 0; var< nvars; var++)
+      for (var = 0; var < nvars; var++)
       {
-         svector= hypre_SStructPVectorSVector(pvector, var);
+         svector = hypre_SStructPVectorSVector(pvector, var);
          hypre_StructVectorClearGhostValues(svector);
       }
    }

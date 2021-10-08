@@ -172,7 +172,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    hypre_ForBoxI(i, boxes)
    {
       cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-      hypre_BoxArraySetSize(cbox_array, 2*ndim);
+      hypre_BoxArraySetSize(cbox_array, 2 * ndim);
 
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), rembox);
       cbox_array_size = 0;

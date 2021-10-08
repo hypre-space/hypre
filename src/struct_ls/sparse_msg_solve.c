@@ -113,7 +113,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
    {
       /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_array[0], b_array[0]);
-      eps = tol*tol;
+      eps = tol * tol;
 
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
@@ -166,7 +166,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
             }
             else
             {
@@ -181,11 +181,11 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 #endif
 
          /* always do at least 1 V-cycle */
-         if ((r_dot_r/b_dot_b < eps) && (i > 0))
+         if ((r_dot_r / b_dot_b < eps) && (i > 0))
          {
             if (rel_change)
             {
-               if ((e_dot_e/x_dot_x) < eps)
+               if ((e_dot_e / x_dot_x) < eps)
                {
                   break;
                }
@@ -226,7 +226,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 
                   if (restrict_count[fi] > 1)
                   {
-                     hypre_StructScale((1.0/restrict_count[fi]), b_array[fi]);
+                     hypre_StructScale((1.0 / restrict_count[fi]), b_array[fi]);
                   }
 
                   if (l > jump)
@@ -245,10 +245,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                                                1.0, r_array[fi]);
                   }
 
-                  if ((lx+1) < num_grids[0])
+                  if ((lx + 1) < num_grids[0])
                   {
                      /* restrict to ((lx+1), ly, lz) */
-                     hypre_SparseMSGMapIndex((lx+1), ly, lz, num_grids, ci);
+                     hypre_SparseMSGMapIndex((lx + 1), ly, lz, num_grids, ci);
                      if (grid_on[ci])
                      {
                         if (restrict_count[ci])
@@ -267,10 +267,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                         restrict_count[ci]++;
                      }
                   }
-                  if ((ly+1) < num_grids[1])
+                  if ((ly + 1) < num_grids[1])
                   {
                      /* restrict to (lx, (ly+1), lz) */
-                     hypre_SparseMSGMapIndex(lx, (ly+1), lz, num_grids, ci);
+                     hypre_SparseMSGMapIndex(lx, (ly + 1), lz, num_grids, ci);
                      if (grid_on[ci])
                      {
                         if (restrict_count[ci])
@@ -289,10 +289,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                         restrict_count[ci]++;
                      }
                   }
-                  if ((lz+1) < num_grids[2])
+                  if ((lz + 1) < num_grids[2])
                   {
                      /* restrict to (lx, ly, (lz+1)) */
-                     hypre_SparseMSGMapIndex(lx, ly, (lz+1), num_grids, ci);
+                     hypre_SparseMSGMapIndex(lx, ly, (lz + 1), num_grids, ci);
                      if (grid_on[ci])
                      {
                         if (restrict_count[ci])
@@ -331,7 +331,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 
          if (restrict_count[fi] > 1)
          {
-            hypre_StructScale((1.0/restrict_count[fi]), b_array[fi]);
+            hypre_StructScale((1.0 / restrict_count[fi]), b_array[fi]);
          }
 
          hypre_PFMGRelaxSetZeroGuess(relax_array[fi], 1);
@@ -373,10 +373,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                   {
                      hypre_StructVectorSetConstantValues(x_array[fi], 0.0);
                   }
-                  if ((lx+1) < num_grids[0])
+                  if ((lx + 1) < num_grids[0])
                   {
                      /* interpolate from ((lx+1), ly, lz) */
-                     hypre_SparseMSGMapIndex((lx+1), ly, lz, num_grids, ci);
+                     hypre_SparseMSGMapIndex((lx + 1), ly, lz, num_grids, ci);
                      if (grid_on[ci])
                      {
                         hypre_SparseMSGInterp(interpx_array[fi],
@@ -387,10 +387,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                         hypre_StructAxpy(1.0, e_array[fi], x_array[fi]);
                      }
                   }
-                  if ((ly+1) < num_grids[1])
+                  if ((ly + 1) < num_grids[1])
                   {
                      /* interpolate from (lx, (ly+1), lz) */
-                     hypre_SparseMSGMapIndex(lx, (ly+1), lz, num_grids, ci);
+                     hypre_SparseMSGMapIndex(lx, (ly + 1), lz, num_grids, ci);
                      if (grid_on[ci])
                      {
                         hypre_SparseMSGInterp(interpy_array[fi],
@@ -401,10 +401,10 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                         hypre_StructAxpy(1.0, e_array[fi], x_array[fi]);
                      }
                   }
-                  if ((lz+1) < num_grids[2])
+                  if ((lz + 1) < num_grids[2])
                   {
                      /* interpolate from (lx, ly, (lz+1)) */
-                     hypre_SparseMSGMapIndex(lx, ly, (lz+1), num_grids, ci);
+                     hypre_SparseMSGMapIndex(lx, ly, (lz + 1), num_grids, ci);
                      if (grid_on[ci])
                      {
                         hypre_SparseMSGInterp(interpz_array[fi],

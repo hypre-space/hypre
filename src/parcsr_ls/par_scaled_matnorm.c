@@ -61,7 +61,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    /* generate dinvsqrt */
    for (i = 0; i < num_rows; i++)
    {
-      dis_data[i] = 1.0/sqrt(fabs(diag_data[diag_i[i]]));
+      dis_data[i] = 1.0 / sqrt(fabs(diag_data[diag_i[i]]));
    }
 
    /*---------------------------------------------------------------------
@@ -82,33 +82,33 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    for (i = 0; i < num_sends; i++)
    {
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
          d_buf_data[index++]
-            = dis_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            = dis_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
    }
 
    comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, d_buf_data,
                                                dis_ext_data);
 
-   for (i=0; i < num_rows; i++)
+   for (i = 0; i < num_rows; i++)
    {
-      for (j=diag_i[i]; j < diag_i[i+1]; j++)
+      for (j = diag_i[i]; j < diag_i[i + 1]; j++)
       {
-         sum_data[i] += fabs(diag_data[j])*dis_data[i]*dis_data[diag_j[j]];
+         sum_data[i] += fabs(diag_data[j]) * dis_data[i] * dis_data[diag_j[j]];
       }
    }
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
-   for (i=0; i < num_rows; i++)
+   for (i = 0; i < num_rows; i++)
    {
-      for (j=offd_i[i]; j < offd_i[i+1]; j++)
+      for (j = offd_i[i]; j < offd_i[i + 1]; j++)
       {
-         sum_data[i] += fabs(offd_data[j])*dis_data[i]*dis_ext_data[offd_j[j]];
+         sum_data[i] += fabs(offd_data[j]) * dis_data[i] * dis_ext_data[offd_j[j]];
       }
    }
 
    max_row_sum = 0;
-   for (i=0; i < num_rows; i++)
+   for (i = 0; i < num_rows; i++)
    {
       if (max_row_sum < sum_data[i])
       {

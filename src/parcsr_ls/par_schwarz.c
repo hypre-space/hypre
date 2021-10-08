@@ -386,7 +386,7 @@ hypre_SchwarzReScale( void *data, HYPRE_Int size, HYPRE_Real value)
    hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
 
    scale = hypre_SchwarzDataScale(schwarz_data);
-   for (i=0; i < size; i++)
+   for (i = 0; i < size; i++)
    {
       scale[i] *= value;
    }

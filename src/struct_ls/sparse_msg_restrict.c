@@ -84,9 +84,9 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
 
    (restrict_data -> R) = hypre_StructMatrixRef(R);
    (restrict_data -> compute_pkg) = compute_pkg;
-   hypre_CopyIndex(cindex,(restrict_data -> cindex));
-   hypre_CopyIndex(stride,(restrict_data -> stride));
-   hypre_CopyIndex(strideR,(restrict_data -> strideR));
+   hypre_CopyIndex(cindex, (restrict_data -> cindex));
+   hypre_CopyIndex(stride, (restrict_data -> stride));
+   hypre_CopyIndex(strideR, (restrict_data -> strideR));
 
    return ierr;
 }
@@ -238,7 +238,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   hypre_IncFLOPCount(4*hypre_StructVectorGlobalSize(rc));
+   hypre_IncFLOPCount(4 * hypre_StructVectorGlobalSize(rc));
    hypre_EndTiming(restrict_data -> time_index);
 
    return ierr;

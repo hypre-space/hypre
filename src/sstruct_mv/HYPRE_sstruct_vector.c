@@ -131,7 +131,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    HYPRE_Int               datasize;
    HYPRE_Int               nvars ;
    HYPRE_Int               nparts = hypre_SStructVectorNParts(vector) ;
-   HYPRE_Int               var,part  ;
+   HYPRE_Int               var, part  ;
    HYPRE_Complex          *data ;
    HYPRE_Complex          *pdata ;
    HYPRE_Complex          *sdata  ;
@@ -166,7 +166,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    for (part = 0; part < nparts; part++)
    {
-      pvector = hypre_SStructVectorPVector(vector,part);
+      pvector = hypre_SStructVectorPVector(vector, part);
       pdataindices = hypre_SStructPVectorDataIndices(pvector);
       /* shift-num   = dataindices[part]; */
       pdata = data + dataindices[part];

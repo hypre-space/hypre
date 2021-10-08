@@ -82,7 +82,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    amg_print_level  = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
@@ -181,7 +181,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          and notify users when they supply bad input. */
       if (resid_nrm != 0.)
       {
-         ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+         ieee_check = resid_nrm / resid_nrm; /* INF -> NaN conversion */
       }
 
       if (ieee_check != ieee_check)
@@ -331,7 +331,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (cycle_count > 0 && resid_nrm_init)
    {
-      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(HYPRE_Real) cycle_count));
+      conv_factor = pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
    }
    else
    {
@@ -366,7 +366,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
 
 
-      for (j=0; j<hypre_ParAMGDataNumLevels(amg_data); j++)
+      for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
       {
          total_coeffs += num_coeffs[j];
          total_variables += num_variables[j];
@@ -390,13 +390,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          {
             hypre_printf("\n\n==============================================");
             hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+            hypre_printf("      within the allowed %d V-cycles\n", max_iter);
             hypre_printf("==============================================");
          }
-         hypre_printf("\n\n Average Convergence Factor = %f",conv_factor);
-         hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-         hypre_printf("                operator = %f\n",operat_cmplxty);
-         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
+         hypre_printf("\n\n Average Convergence Factor = %f", conv_factor);
+         hypre_printf("\n\n     Complexity:    grid = %f\n", grid_cmplxty);
+         hypre_printf("                operator = %f\n", operat_cmplxty);
+         hypre_printf("                   cycle = %f\n\n\n\n", cycle_cmplxty);
       }
 
       hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);

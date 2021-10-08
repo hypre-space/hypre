@@ -40,39 +40,39 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    HYPRE_Int              stencil_size;
    HYPRE_Int              abs_stencil;
 
-   HYPRE_Int              ndim= hypre_StructStencilNDim(stencils);
+   HYPRE_Int              ndim = hypre_StructStencilNDim(stencils);
    HYPRE_Int              i, j;
 
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(neg_index);
-   for (i= 0; i< ndim; i++)
+   for (i = 0; i < ndim; i++)
    {
-      neg_index[i]= -1;
+      neg_index[i] = -1;
    }
    hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
 
    stencil_size       = hypre_StructStencilSize(stencils);
-   stencil_box_extents= hypre_BoxArrayCreate(stencil_size, ndim);
+   stencil_box_extents = hypre_BoxArrayCreate(stencil_size, ndim);
    union_boxes        = hypre_BoxArrayCreate(0, ndim);
 
-   for (i= 0; i< stencil_size; i++)
+   for (i = 0; i < stencil_size; i++)
    {
       hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape);
       AbsStencilShape(stencil_shape, abs_stencil);
 
       if (abs_stencil)  /* only do if not the centre stencil */
       {
-         cfine_box= hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape, rfactors,
-                                     ndim);
+         cfine_box = hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape, rfactors,
+                                      ndim);
 
          if ( hypre_BoxVolume(cfine_box) )
          {
             hypre_AppendBox(cfine_box, union_boxes);
             hypre_CopyBox(cfine_box, hypre_BoxArrayBox(stencil_box_extents, i));
-            for (j= 0; j< ndim; j++)
+            for (j = 0; j < ndim; j++)
             {
-               hypre_BoxIMin(cfine_box)[j]-=  cstart[j];
-               hypre_BoxIMax(cfine_box)[j]-=  cstart[j];
+               hypre_BoxIMin(cfine_box)[j] -=  cstart[j];
+               hypre_BoxIMax(cfine_box)[j] -=  cstart[j];
             }
             hypre_CopyBox(cfine_box, hypre_BoxArrayBox(stencil_box_extents, i));
          }
@@ -109,13 +109,13 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    }
    hypre_BoxArrayDestroy(union_boxes);
 
-   for (i= stencil_size; i< hypre_BoxArraySize(stencil_box_extents); i++)
+   for (i = stencil_size; i < hypre_BoxArraySize(stencil_box_extents); i++)
    {
-      box= hypre_BoxArrayBox(stencil_box_extents, i);
-      for (j= 0; j< ndim; j++)
+      box = hypre_BoxArrayBox(stencil_box_extents, i);
+      for (j = 0; j < ndim; j++)
       {
-         hypre_BoxIMin(box)[j]-=  cstart[j];
-         hypre_BoxIMax(box)[j]-=  cstart[j];
+         hypre_BoxIMin(box)[j] -=  cstart[j];
+         hypre_BoxIMax(box)[j] -=  cstart[j];
       }
    }
 
@@ -138,31 +138,31 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    HYPRE_Int              stencil_size;
    HYPRE_Int              abs_stencil;
 
-   HYPRE_Int              ndim= hypre_StructStencilNDim(stencils);
+   HYPRE_Int              ndim = hypre_StructStencilNDim(stencils);
 
    HYPRE_Int              i;
-   HYPRE_Int              ierr= 0;
+   HYPRE_Int              ierr = 0;
 
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(neg_index);
-   for (i= 0; i< ndim; i++)
+   for (i = 0; i < ndim; i++)
    {
-      neg_index[i]= -1;
+      neg_index[i] = -1;
    }
 
    stencil_size       = hypre_StructStencilSize(stencils);
-   stencil_box_extents= hypre_BoxArrayCreate(stencil_size, ndim);
+   stencil_box_extents = hypre_BoxArrayCreate(stencil_size, ndim);
    union_boxes        = hypre_BoxArrayCreate(0, ndim);
 
-   for (i= 0; i< stencil_size; i++)
+   for (i = 0; i < stencil_size; i++)
    {
       hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape);
       AbsStencilShape(stencil_shape, abs_stencil);
 
       if (abs_stencil)  /* only do if not the centre stencil */
       {
-         cfine_box= hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape,
-                                     rfactors, ndim);
+         cfine_box = hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape,
+                                      rfactors, ndim);
 
          if ( hypre_BoxVolume(cfine_box) )
          {

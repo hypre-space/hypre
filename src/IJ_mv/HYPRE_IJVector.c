@@ -40,7 +40,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   if (jlower > jupper+1 || jlower < 0)
+   if (jlower > jupper + 1 || jlower < 0)
    {
       hypre_error_in_arg(2);
       hypre_TFree(vec, HYPRE_MEMORY_HOST);
@@ -56,17 +56,17 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       as the global first row index */
 
    /* proc 0 has the first row  */
-   if (my_id==0)
+   if (my_id == 0)
    {
       row0 = jlower;
    }
    hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_BIG_INT, 0, comm);
    /* proc (num_procs-1) has the last row  */
-   if (my_id == (num_procs-1))
+   if (my_id == (num_procs - 1))
    {
       rowN = jupper;
    }
-   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
@@ -78,7 +78,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorAssumedPart(vec)     = NULL;
    hypre_IJVectorPrintLevel(vec)      = 0;
    hypre_IJVectorPartitioning(vec)[0] = jlower;
-   hypre_IJVectorPartitioning(vec)[1] = jupper+1;
+   hypre_IJVectorPartitioning(vec)[1] = jupper + 1;
 
    *vector = (HYPRE_IJVector) vec;
 
@@ -486,7 +486,7 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
    }
 
    *jlower = hypre_IJVectorPartitioning(vec)[0];
-   *jupper = hypre_IJVectorPartitioning(vec)[1]-1;
+   *jupper = hypre_IJVectorPartitioning(vec)[1] - 1;
 
    return hypre_error_flag;
 }
@@ -532,7 +532,7 @@ HYPRE_IJVectorRead( const char     *filename,
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   hypre_sprintf(new_filename,"%s.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "r")) == NULL)
    {
@@ -602,7 +602,7 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    comm = hypre_IJVectorComm(vector);
    hypre_MPI_Comm_rank(comm, &myid);
 
-   hypre_sprintf(new_filename,"%s.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "w")) == NULL)
    {
@@ -636,7 +636,7 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
 
    for (j = jlower; j <= jupper; j++)
    {
-      hypre_fprintf(file, "%b %.14e\n", j, values[j-jlower]);
+      hypre_fprintf(file, "%b %.14e\n", j, values[j - jlower]);
    }
 
    hypre_TFree(d_values, memory_location);

@@ -280,7 +280,7 @@ HYPRE_PrintDeviceInfo()
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
    HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
    hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
@@ -290,7 +290,7 @@ HYPRE_PrintDeviceInfo()
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
    HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
    hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
 #endif
 
 #if defined(HYPRE_USING_HIP)
@@ -300,7 +300,7 @@ HYPRE_PrintDeviceInfo()
    HYPRE_HIP_CALL( hipGetDevice(&dev) );
    HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
    hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
 #endif
 
    return hypre_error_flag;

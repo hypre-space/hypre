@@ -63,13 +63,13 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    dim = hypre_StructGridNDim(grid);
    for (j = 0; j < dim; j++)
    {
-      num_ghost[2*j]   = 1;
-      num_ghost[2*j+1] = 1;
+      num_ghost[2 * j]   = 1;
+      num_ghost[2 * j + 1] = 1;
    }
    if (P_stored_as_transpose)
    {
-      num_ghost[2*cdir]   = 2;
-      num_ghost[2*cdir+1] = 2;
+      num_ghost[2 * cdir]   = 2;
+      num_ghost[2 * cdir + 1] = 2;
    }
 
    /* comm_info <-- From fine grid grown by num_ghost */

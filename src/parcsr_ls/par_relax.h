@@ -45,13 +45,13 @@ hypre_HybridGaussSeidelNS( HYPRE_Int     *A_diag_i,
             HYPRE_Int jj;
             HYPRE_Complex res = f_data[i];
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                res -= A_diag_data[jj] * u_data[ii];
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -77,13 +77,13 @@ hypre_HybridGaussSeidelNS( HYPRE_Int     *A_diag_i,
             HYPRE_Int jj;
             HYPRE_Complex res = f_data[i];
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                res -= A_diag_data[jj] * u_data[ii];
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -147,7 +147,7 @@ hypre_HybridGaussSeidelNSThreads( HYPRE_Int     *A_diag_i,
             HYPRE_Int jj;
             HYPRE_Complex res = f_data[i];
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                if (ii >= ns && ii < ne)
@@ -160,7 +160,7 @@ hypre_HybridGaussSeidelNSThreads( HYPRE_Int     *A_diag_i,
                }
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -186,7 +186,7 @@ hypre_HybridGaussSeidelNSThreads( HYPRE_Int     *A_diag_i,
             HYPRE_Int jj;
             HYPRE_Complex res = f_data[i];
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                if (ii >= ns && ii < ne)
@@ -199,7 +199,7 @@ hypre_HybridGaussSeidelNSThreads( HYPRE_Int     *A_diag_i,
                }
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -262,14 +262,14 @@ hypre_HybridGaussSeidel( HYPRE_Int     *A_diag_i,
             HYPRE_Complex res0 = 0.0;
             HYPRE_Complex res2 = 0.0;
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                res0 -= A_diag_data[jj] * u_data[ii];
                res2 += A_diag_data[jj] * v_tmp_data[ii];
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -298,14 +298,14 @@ hypre_HybridGaussSeidel( HYPRE_Int     *A_diag_i,
             HYPRE_Complex res0 = 0.0;
             HYPRE_Complex res2 = 0.0;
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                res0 -= A_diag_data[jj] * u_data[ii];
                res2 += A_diag_data[jj] * v_tmp_data[ii];
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -372,7 +372,7 @@ hypre_HybridGaussSeidelThreads( HYPRE_Int     *A_diag_i,
             HYPRE_Complex res0 = 0.0;
             HYPRE_Complex res2 = 0.0;
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                if (ii >= ns && ii < ne)
@@ -386,7 +386,7 @@ hypre_HybridGaussSeidelThreads( HYPRE_Int     *A_diag_i,
                }
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -415,7 +415,7 @@ hypre_HybridGaussSeidelThreads( HYPRE_Int     *A_diag_i,
             HYPRE_Complex res0 = 0.0;
             HYPRE_Complex res2 = 0.0;
 
-            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i+1]; jj++)
+            for (jj = A_diag_i[i] + Skip_diag; jj < A_diag_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_diag_j[jj];
                if (ii >= ns && ii < ne)
@@ -429,7 +429,7 @@ hypre_HybridGaussSeidelThreads( HYPRE_Int     *A_diag_i,
                }
             }
 
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                const HYPRE_Int ii = A_offd_j[jj];
                res -= A_offd_data[jj] * v_ext_data[ii];
@@ -487,13 +487,13 @@ hypre_HybridGaussSeidelOrderedNS( HYPRE_Int     *A_diag_i,
          HYPRE_Int jj;
          HYPRE_Complex res = f_data[i];
 
-         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i+1]; jj++)
+         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
          {
             const HYPRE_Int ii = A_diag_j[jj];
             res -= A_diag_data[jj] * u_data[ii];
          }
 
-         for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+         for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
          {
             const HYPRE_Int ii = A_offd_j[jj];
             res -= A_offd_data[jj] * v_ext_data[ii];

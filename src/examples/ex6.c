@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid ==0) { printf("Must run with 2 processors!\n"); }
+      if (myid == 0) { printf("Must run with 2 processors!\n"); }
       MPI_Finalize();
 
       return (0);
@@ -168,7 +168,7 @@ int main (int argc, char *argv[])
          int nvars = 1;
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
          {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
          }
@@ -187,7 +187,7 @@ int main (int argc, char *argv[])
          relative offset (in the index space). */
       {
          int entry;
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
          int var = 0;
 
          /* Assign numerical values to the offsets so that we can
@@ -228,7 +228,7 @@ int main (int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      int i,j;
+      int i, j;
       int part = 0;
       int var = 0;
 
@@ -264,7 +264,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
             /* double values[30]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(30*sizeof(double));
+            double *values = (double *) malloc(30 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -299,7 +299,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
             /* double values[60]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(60*sizeof(double));
+            double *values = (double *) malloc(60 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -312,7 +312,7 @@ int main (int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -334,7 +334,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
             /* double values[80]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(80*sizeof(double));
+            double *values = (double *) malloc(80 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -347,7 +347,7 @@ int main (int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -365,7 +365,7 @@ int main (int argc, char *argv[])
       {
          int maxnvalues = 6;
          /* double values[6]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(6*sizeof(double));
+         double *values = (double *) malloc(6 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
          {
@@ -439,7 +439,7 @@ int main (int argc, char *argv[])
       {
          int maxnvalues = 4;
          /* double values[4]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(4*sizeof(double));
+         double *values = (double *) malloc(4 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
          {
@@ -522,7 +522,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 6;  /* 6 grid points */
             /* double values[6]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(6*sizeof(double));
+            double *values = (double *) malloc(6 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
             {
@@ -546,7 +546,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 12; /* 12 grid points */
             /* double values[12]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(12*sizeof(double));
+            double *values = (double *) malloc(12 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
             {
@@ -572,7 +572,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 16; /* 16 grid points */
             /* double values[16]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(16*sizeof(double));
+            double *values = (double *) malloc(16 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
             {

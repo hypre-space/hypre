@@ -31,7 +31,7 @@ main( HYPRE_Int   argc,
    HYPRE_BigInt      global_num_rows;
    HYPRE_BigInt      global_num_cols;
    HYPRE_BigInt      first_index;
-   HYPRE_Int      i, ierr=0;
+   HYPRE_Int      i, ierr = 0;
    HYPRE_Complex  *data, *data2;
    HYPRE_BigInt      *row_starts, *col_starts;
    char     file_name[80];
@@ -67,13 +67,13 @@ main( HYPRE_Int   argc,
 
    matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
 
-   hypre_sprintf(file_name,"matrix1.%d",my_id);
+   hypre_sprintf(file_name, "matrix1.%d", my_id);
 
    if (matrix1) { hypre_CSRMatrixPrint(matrix1, file_name); }
 
-   hypre_ParCSRMatrixPrint(par_matrix,"matrix");
+   hypre_ParCSRMatrixPrint(par_matrix, "matrix");
 
-   par_matrix = hypre_ParCSRMatrixRead(hypre_MPI_COMM_WORLD,"matrix");
+   par_matrix = hypre_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "matrix");
 
    global_num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    hypre_printf(" global_num_cols %d\n", global_num_cols);
@@ -81,39 +81,39 @@ main( HYPRE_Int   argc,
 
    col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
    first_index = col_starts[my_id];
-   local_size = (HYPRE_Int)(col_starts[my_id+1] - first_index);
+   local_size = (HYPRE_Int)(col_starts[my_id + 1] - first_index);
 
-   x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_cols,col_starts);
+   x = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_cols, col_starts);
    hypre_ParVectorInitialize(x);
    x_local = hypre_ParVectorLocalVector(x);
    data = hypre_VectorData(x_local);
 
-   for (i=0; i < local_size; i++)
+   for (i = 0; i < local_size; i++)
    {
-      data[i] = (HYPRE_Int)first_index+i+1;
+      data[i] = (HYPRE_Int)first_index + i + 1;
    }
-   x2 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_cols,col_starts);
+   x2 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_cols, col_starts);
    hypre_ParVectorInitialize(x2);
-   hypre_ParVectorSetConstantValues(x2,2.0);
+   hypre_ParVectorSetConstantValues(x2, 2.0);
 
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    first_index = row_starts[my_id];
-   local_size = (HYPRE_Int)(row_starts[my_id+1] - first_index);
-   y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_rows,row_starts);
+   local_size = (HYPRE_Int)(row_starts[my_id + 1] - first_index);
+   y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_rows, row_starts);
    hypre_ParVectorInitialize(y);
    y_local = hypre_ParVectorLocalVector(y);
 
-   y2 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_num_rows,row_starts);
+   y2 = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_rows, row_starts);
    hypre_ParVectorInitialize(y2);
    y2_local = hypre_ParVectorLocalVector(y2);
    data2 = hypre_VectorData(y2_local);
 
-   for (i=0; i < local_size; i++)
+   for (i = 0; i < local_size; i++)
    {
-      data2[i] = (HYPRE_Int)first_index+i+1;
+      data2[i] = (HYPRE_Int)first_index + i + 1;
    }
 
-   hypre_ParVectorSetConstantValues(y,1.0);
+   hypre_ParVectorSetConstantValues(y, 1.0);
    hypre_printf(" initialized vectors\n");
 
    hypre_MatvecCommPkgCreate(par_matrix);

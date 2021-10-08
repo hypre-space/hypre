@@ -57,10 +57,10 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
     *  which rows do I have that others are assumed responsible for?
     *  (at most two ranges - maybe none)
     *-----------------------------------------------------------*/
-   contact_row_start[0]=0;
-   contact_row_end[0]=0;
-   contact_row_start[1]=0;
-   contact_row_end[1]=0;
+   contact_row_start[0] = 0;
+   contact_row_end[0] = 0;
+   contact_row_start[1] = 0;
+   contact_row_end[1] = 0;
    contact_ranges = 0;
 
    if (row_start <= row_end )
@@ -86,12 +86,12 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
          {
             if (contact_ranges) /* already found one range */
             {
-               contact_row_start[1] = part->row_end +1;
+               contact_row_start[1] = part->row_end + 1;
                contact_row_end[1] = row_end;
             }
             else
             {
-               contact_row_start[0] =  part->row_end +1;
+               contact_row_start[0] =  part->row_end + 1;
                contact_row_end[0] = row_end;
             }
             contact_ranges++;
@@ -108,10 +108,10 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
 
    contact_list_length = 0;
    contact_list_storage = 5;
-   contact_list = hypre_TAlloc(HYPRE_BigInt,  contact_list_storage*3,
+   contact_list = hypre_TAlloc(HYPRE_BigInt,  contact_list_storage * 3,
                                HYPRE_MEMORY_HOST); /*each contact needs 3 ints */
 
-   for (i=0; i<contact_ranges; i++)
+   for (i = 0; i < contact_ranges; i++)
    {
 
       /*get start and end row owners */
@@ -127,7 +127,7 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
          {
             /*allocate more space*/
             contact_list_storage += 5;
-            contact_list = hypre_TReAlloc(contact_list,  HYPRE_BigInt,  (contact_list_storage*3),
+            contact_list = hypre_TReAlloc(contact_list,  HYPRE_BigInt,  (contact_list_storage * 3),
                                           HYPRE_MEMORY_HOST);
          }
          CONTACT(contact_list_length, 0) = (HYPRE_BigInt) owner_start;   /*proc #*/
@@ -158,7 +158,7 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
             {
                /*allocate more space*/
                contact_list_storage += 5;
-               contact_list = hypre_TReAlloc(contact_list,  HYPRE_BigInt,  (contact_list_storage*3),
+               contact_list = hypre_TReAlloc(contact_list,  HYPRE_BigInt,  (contact_list_storage * 3),
                                              HYPRE_MEMORY_HOST);
             }
 
@@ -176,9 +176,9 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
    statuses = hypre_CTAlloc(hypre_MPI_Status,  contact_list_length, HYPRE_MEMORY_HOST);
 
    /*send out messages */
-   for (i=0; i< contact_list_length; i++)
+   for (i = 0; i < contact_list_length; i++)
    {
-      hypre_MPI_Isend(&CONTACT(i,1),2, HYPRE_MPI_BIG_INT, CONTACT(i,0), flag1,
+      hypre_MPI_Isend(&CONTACT(i, 1), 2, HYPRE_MPI_BIG_INT, CONTACT(i, 0), flag1,
                       comm, &requests[i]);
       /*hypre_MPI_COMM_WORLD, &requests[i]);*/
    }
@@ -212,7 +212,7 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
          /* check for locate rows on the low end of the local range */
          /*locate_row_start[0] = part->row_start;*/
          /*locate_ranges++;*/
-         locate_row_count += (row_start-1) - part->row_start + 1;
+         locate_row_count += (row_start - 1) - part->row_start + 1;
       }
       if (row_end < part->row_end) /* check the high end */
       {
@@ -264,9 +264,9 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
                       flag1, comm, &status0);
       /*flag1 , hypre_MPI_COMM_WORLD, &status0);*/
 
-      if (part->length==part->storage_length)
+      if (part->length == part->storage_length)
       {
-         part->storage_length+=10;
+         part->storage_length += 10;
          part->proc_list = hypre_TReAlloc(part->proc_list,  HYPRE_Int,  part->storage_length,
                                           HYPRE_MEMORY_HOST);
          part->row_start_list = hypre_TReAlloc(part->row_start_list,  HYPRE_BigInt,  part->storage_length,
@@ -279,22 +279,22 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
       part->row_end_list[part->length] = tmp_range[1];
 
       part->proc_list[part->length] = status0.hypre_MPI_SOURCE;
-      rows_found += tmp_range[1]- tmp_range[0] + 1;
+      rows_found += tmp_range[1] - tmp_range[0] + 1;
 
       part->length++;
    }
 
    /*In case the partition of the assumed partition is longish,
      we would like to know the sorted order */
-   si= hypre_CTAlloc(HYPRE_Int,  part->length, HYPRE_MEMORY_HOST);
+   si = hypre_CTAlloc(HYPRE_Int,  part->length, HYPRE_MEMORY_HOST);
    sortme = hypre_CTAlloc(HYPRE_BigInt,  part->length, HYPRE_MEMORY_HOST);
 
-   for (i=0; i<part->length; i++)
+   for (i = 0; i < part->length; i++)
    {
       si[i] = i;
       sortme[i] = part->row_start_list[i];
    }
-   hypre_BigQsortbi( sortme, si, 0, (part->length)-1);
+   hypre_BigQsortbi( sortme, si, 0, (part->length) - 1);
    part->sort_index = si;
 
    /*free the requests */
@@ -357,7 +357,7 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 {
    HYPRE_BigInt global_num_cols;
    /* HYPRE_Int myid; */
-   HYPRE_BigInt  row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_BigInt  row_start = 0, row_end = 0, col_start = 0, col_end = 0;
 
    MPI_Comm   comm;
 
@@ -426,16 +426,16 @@ hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm, HYPRE_BigInt row,
       errors make this difficult!!!!! */
 
    size = global_num_rows / (HYPRE_BigInt)num_procs;
-   extra = global_num_rows - size*(HYPRE_BigInt)num_procs;
-   switch_row = global_first_row + (size + 1)*extra;
+   extra = global_num_rows - size * (HYPRE_BigInt)num_procs;
+   switch_row = global_first_row + (size + 1) * extra;
 
    if (row >= switch_row)
    {
-      *proc_id = (HYPRE_Int)(extra + (row - switch_row)/size);
+      *proc_id = (HYPRE_Int)(extra + (row - switch_row) / size);
    }
    else
    {
-      *proc_id = (HYPRE_Int)((row - global_first_row)/(size+1));
+      *proc_id = (HYPRE_Int)((row - global_first_row) / (size + 1));
    }
 
 
@@ -466,14 +466,14 @@ hypre_GetAssumedPartitionRowRange( MPI_Comm comm, HYPRE_Int proc_id, HYPRE_BigIn
        rounding errors makes this difficult! */
 
    size = global_num_rows / (HYPRE_BigInt)num_procs;
-   extra = (HYPRE_Int)(global_num_rows - size*(HYPRE_BigInt)num_procs);
+   extra = (HYPRE_Int)(global_num_rows - size * (HYPRE_BigInt)num_procs);
 
-   *row_start = global_first_row + size*(HYPRE_BigInt)proc_id;
+   *row_start = global_first_row + size * (HYPRE_BigInt)proc_id;
    *row_start += (HYPRE_BigInt) hypre_min(proc_id, extra);
 
 
-   *row_end =  global_first_row + size*(HYPRE_BigInt)(proc_id+1);
-   *row_end += (HYPRE_BigInt)hypre_min(proc_id+1, extra);
+   *row_end =  global_first_row + size * (HYPRE_BigInt)(proc_id + 1);
+   *row_end += (HYPRE_BigInt)hypre_min(proc_id + 1, extra);
    *row_end = *row_end - 1;
 
 
@@ -497,7 +497,7 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
 {
    HYPRE_BigInt global_num;
    HYPRE_Int myid;
-   HYPRE_BigInt  start=0, end=0;
+   HYPRE_BigInt  start = 0, end = 0;
 
    MPI_Comm   comm;
 

@@ -26,8 +26,8 @@ main( HYPRE_Int   argc,
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD,&num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    row_starts = NULL;
    col_starts = NULL;
 
@@ -44,7 +44,7 @@ main( HYPRE_Int   argc,
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, Bs, col_starts,
                                      row_starts);
-   C = hypre_ParMatmul(B,A);
+   C = hypre_ParMatmul(B, A);
    hypre_ParCSRMatrixPrint(B, "echo_B" );
    hypre_ParCSRMatrixPrint(A, "echo_A" );
    hypre_ParCSRMatrixPrint(C, "result");

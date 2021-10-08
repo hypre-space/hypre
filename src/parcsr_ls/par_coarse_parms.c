@@ -75,7 +75,7 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm          comm,
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    for (i = 0; i < local_num_variables; i++)
    {

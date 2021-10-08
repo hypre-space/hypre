@@ -296,7 +296,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                                  hypre_CommInfo       **comm_info_ptr )
 {
    HYPRE_Int              ndim = hypre_StructGridNDim(grid);
-   HYPRE_Int              i,j,k, d, m, s, si;
+   HYPRE_Int              i, j, k, d, m, s, si;
 
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
@@ -499,8 +499,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       hypre_CopyBox(box, extend_box);
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(extend_box, d) -= hypre_max(grow[d][0],grow[d][1]);
-         hypre_BoxIMaxD(extend_box, d) += hypre_max(grow[d][0],grow[d][1]);
+         hypre_BoxIMinD(extend_box, d) -= hypre_max(grow[d][0], grow[d][1]);
+         hypre_BoxIMaxD(extend_box, d) += hypre_max(grow[d][0], grow[d][1]);
       }
 
       /*------------------------------------------------
@@ -805,8 +805,8 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    box = hypre_BoxCreate(ndim);
    for (d = 0; d < ndim; d++)
    {
-      hypre_BoxIMinD(box, d) = -(num_ghost[2*d]   ? 1 : 0);
-      hypre_BoxIMaxD(box, d) =  (num_ghost[2*d+1] ? 1 : 0);
+      hypre_BoxIMinD(box, d) = -(num_ghost[2 * d]   ? 1 : 0);
+      hypre_BoxIMaxD(box, d) =  (num_ghost[2 * d + 1] ? 1 : 0);
    }
 
    size = 0;
@@ -817,14 +817,14 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
       zypre_BoxLoopGetIndex(ii);
       for (d = 0; d < ndim; d++)
       {
-         i = ii[d]+start[d];
+         i = ii[d] + start[d];
          if (i < 0)
          {
-            stencil_shape[size][d] = -num_ghost[2*d];
+            stencil_shape[size][d] = -num_ghost[2 * d];
          }
          else if (i > 0)
          {
-            stencil_shape[size][d] =  num_ghost[2*d+1];
+            stencil_shape[size][d] =  num_ghost[2 * d + 1];
          }
       }
       size++;

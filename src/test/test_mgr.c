@@ -61,7 +61,7 @@ main( hypre_int argc,
    HYPRE_Int                 poutdat;
    HYPRE_Int                 debug_flag;
    HYPRE_Int                 ierr = 0;
-   HYPRE_Int                 i,j;
+   HYPRE_Int                 i, j;
    HYPRE_Int                 max_levels = 25;
    HYPRE_Int                 num_iterations;
    HYPRE_Real          final_res_norm;
@@ -81,7 +81,7 @@ main( hypre_int argc,
    HYPRE_Solver        aux_precond = NULL, aux_solver = NULL;
    HYPRE_Solver        amg_solver = NULL;
    HYPRE_Solver        pcg_solver = NULL;
-   HYPRE_Solver        pcg_precond=NULL, pcg_precond_gotten = NULL;
+   HYPRE_Solver        pcg_precond = NULL, pcg_precond_gotten = NULL;
 
    HYPRE_Int           num_procs, myid;
 
@@ -111,7 +111,7 @@ main( hypre_int argc,
    HYPRE_Int mgr_non_c_to_f = 1;
    HYPRE_Int P_max_elmts = 0;
 
-   HYPRE_Int     *mgr_frelax_num_functions= NULL;
+   HYPRE_Int     *mgr_frelax_num_functions = NULL;
    HYPRE_BigInt  *mgr_idx_array = NULL;
    HYPRE_Int     *mgr_point_marker_array = NULL;
    HYPRE_Int     *mgr_num_cindexes = NULL;
@@ -398,7 +398,7 @@ main( hypre_int argc,
       mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt, mgr_num_reserved_nodes,
                                                   HYPRE_MEMORY_HOST);
       FILE* ifp;
-      ifp = fopen(indexList,"r");
+      ifp = fopen(indexList, "r");
       if (ifp == NULL)
       {
          fprintf(stderr, "Can't open input file for index list!\n");
@@ -422,9 +422,9 @@ main( hypre_int argc,
       mgr_idx_array = hypre_CTAlloc(HYPRE_BigInt, mgr_bsize, HYPRE_MEMORY_HOST);
       FILE *ifp;
       char fname[80];
-      hypre_sprintf(fname, "%s.%05i", argv[build_block_cf_arg_index],myid);
+      hypre_sprintf(fname, "%s.%05i", argv[build_block_cf_arg_index], myid);
       hypre_printf("Reading block CF indices from %s \n", fname);
-      ifp = fopen(fname,"r");
+      ifp = fopen(fname, "r");
       if (ifp == NULL)
       {
          fprintf(stderr, "Can't open input file for block CF indices!\n");
@@ -443,7 +443,7 @@ main( hypre_int argc,
       char fname[80];
       hypre_sprintf(fname, "%s.%05i", argv[build_marker_array_arg_index], myid);
       hypre_printf("Reading marker array from %s \n", fname);
-      ifp = fopen(fname,"r");
+      ifp = fopen(fname, "r");
       if (ifp == NULL)
       {
          fprintf(stderr, "Can't open input file for block CF indices!\n");
@@ -518,7 +518,7 @@ main( hypre_int argc,
       }
       else
       {
-         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes);
       }
       /* set reserved coarse nodes */
       if (mgr_num_reserved_nodes) { HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes); }
@@ -629,7 +629,7 @@ main( hypre_int argc,
       }
 
       HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
       // free memory for flex FlexGMRES
       if (pcg_solver) { HYPRE_ParCSRFlexGMRESDestroy(pcg_solver); }
@@ -767,7 +767,7 @@ main( hypre_int argc,
       }
       else
       {
-         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes);
       }
       /* set reserved coarse nodes */
       if (mgr_num_reserved_nodes) { HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes); }
@@ -826,7 +826,7 @@ main( hypre_int argc,
       use_block_cf = 0;
       mgr_non_c_to_f = 0;
 
-      HYPRE_Int flow_size = 2*(mgr_idx_array[2] - mgr_idx_array[1]);
+      HYPRE_Int flow_size = 2 * (mgr_idx_array[2] - mgr_idx_array[1]);
       HYPRE_Int *flow_size_array = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
       hypre_MPI_Allgather(&flow_size, 1, HYPRE_MPI_INT, flow_size_array, 1, HYPRE_MPI_INT,
                           hypre_MPI_COMM_WORLD);
@@ -838,7 +838,7 @@ main( hypre_int argc,
       }
       HYPRE_Int *mgr_flow_idx_array = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
       mgr_flow_idx_array[0] = flow_ibegin;
-      mgr_flow_idx_array[1] = flow_ibegin + flow_size_array[myid]/2;
+      mgr_flow_idx_array[1] = flow_ibegin + flow_size_array[myid] / 2;
 
       /* set MGR data by block */
       if (use_block_cf)
@@ -848,7 +848,8 @@ main( hypre_int argc,
       }
       else
       {
-         HYPRE_MGRSetCpointsByBlock( mgr_solver_flow, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+         HYPRE_MGRSetCpointsByBlock( mgr_solver_flow, mgr_bsize, mgr_nlevels, mgr_num_cindexes,
+                                     mgr_cindexes);
       }
       /* set reserved coarse nodes */
       if (mgr_num_reserved_nodes) { HYPRE_MGRSetReservedCoarseNodes(mgr_solver_flow, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes); }
@@ -950,7 +951,7 @@ main( hypre_int argc,
       }
 
       HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
       //HYPRE_FlexGMRESGetPrecondLogData(pcg_solver, &cg_conv_factor);
       //hypre_printf("Average coarse grid convergence factor: %1.6f\n", cg_conv_factor);
 
@@ -1014,7 +1015,7 @@ main( hypre_int argc,
       }
       else
       {
-         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes, mgr_cindexes);
       }
 
       /* set reserved coarse nodes */
@@ -1109,7 +1110,7 @@ main( hypre_int argc,
 
       if (mgr_cindexes)
       {
-         for ( i=0; i<mgr_nlevels; i++)
+         for ( i = 0; i < mgr_nlevels; i++)
          {
             if (mgr_cindexes[i])
             {
@@ -1182,7 +1183,7 @@ main( hypre_int argc,
       }
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
       // free memory for flex GMRES
       HYPRE_ParCSRGMRESDestroy(pcg_solver);

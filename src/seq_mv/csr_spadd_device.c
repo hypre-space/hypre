@@ -66,7 +66,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    /* some trick here for memory alignment. maybe not worth it at all */
    HYPRE_Int align = 32;
    HYPRE_Int nnzT2 = (nnzT + align - 1) / align * align;
-   char *work_mem = hypre_TAlloc(char, (4*sizeof(HYPRE_Int)+2*sizeof(HYPRE_Complex))*nnzT2,
+   char *work_mem = hypre_TAlloc(char, (4 * sizeof(HYPRE_Int) + 2 * sizeof(HYPRE_Complex)) * nnzT2,
                                  HYPRE_MEMORY_DEVICE);
    char *work_mem_saved = work_mem;
 
@@ -140,8 +140,8 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    d_at_cp = (HYPRE_Complex *) work_mem;
    work_mem += sizeof(HYPRE_Complex) * nnzT2;
 
-   hypre_assert( (size_t) (work_mem - work_mem_saved) == (4*sizeof(HYPRE_Int)+2*sizeof(
-                                                             HYPRE_Complex))*((size_t)nnzT2) );
+   hypre_assert( (size_t) (work_mem - work_mem_saved) == (4 * sizeof(HYPRE_Int) + 2 * sizeof(
+                                                             HYPRE_Complex)) * ((size_t)nnzT2) );
 
    /* sort: lexicographical order (row, col): hypreDevice_StableSortByTupleKey */
    hypreDevice_StableSortByTupleKey(nnzT, d_it, d_jt, d_at, 0);

@@ -20,7 +20,7 @@ typedef struct hypre_BoxManEntry_struct
 
    HYPRE_Int proc; /* This is a two-part unique id: (proc, id) */
    HYPRE_Int id;
-   HYPRE_Int num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int num_ghost[2 * HYPRE_MAXDIM];
 
    HYPRE_Int position; /* This indicates the location of the entry in the the
                         * box manager entries array and is used for pairing with
@@ -122,7 +122,7 @@ typedef struct
                                    unique (regardless of proc id) */
 
    /* Ghost stuff  */
-   HYPRE_Int           num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int           num_ghost[2 * HYPRE_MAXDIM];
 
 } hypre_BoxManager;
 

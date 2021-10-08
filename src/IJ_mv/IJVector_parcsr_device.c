@@ -50,7 +50,7 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    HYPRE_BigInt  vec_start, vec_stop;
    vec_start = IJpartitioning[0];
-   vec_stop  = IJpartitioning[1]-1;
+   vec_stop  = IJpartitioning[1] - 1;
    HYPRE_Int nrows = vec_stop - vec_start + 1;
    const char SorA = action[0] == 's' ? 1 : 0;
 
@@ -139,7 +139,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    HYPRE_BigInt  vec_start, vec_stop;
    vec_start = IJpartitioning[0];
-   vec_stop  = IJpartitioning[1]-1;
+   vec_stop  = IJpartitioning[1] - 1;
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
 
@@ -159,7 +159,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    char          *stack_sora = hypre_AuxParVectorStackSorA(aux_vector);
 
    in_range<HYPRE_BigInt> pred(vec_start, vec_stop);
-   HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i+nelms, pred);
+   HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
    hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
@@ -233,7 +233,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 
 #ifdef HYPRE_DEBUG
    /* the stack should only have on-proc elements now */
-   HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i+nelms, pred);
+   HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
    hypre_assert(nelms == tmp);
 #endif
 
@@ -290,10 +290,10 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0
    /* output X: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)+N0),  /* key begin */
+      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
       make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),     /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),          /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) +N0),          /* output value begin */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),        /* input value begin */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),         /* output value begin */
       char(0),                                                                  /* init */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
@@ -333,10 +333,10 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)+N0), /* key begin */
+      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
       make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),    /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),         /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0)+N0),         /* output value begin */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),       /* input value begin */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),       /* output value begin */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
@@ -378,7 +378,7 @@ __global__ void
 hypreCUDAKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt *map,
                                     HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i >= n)
    {
@@ -387,11 +387,11 @@ hypreCUDAKernel_IJVectorAssemblePar(HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt 
 
    if (SorA[i])
    {
-      y[map[i]-offset] = x[i];
+      y[map[i] - offset] = x[i];
    }
    else
    {
-      y[map[i]-offset] += x[i];
+      y[map[i] - offset] += x[i];
    }
 }
 

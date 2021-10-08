@@ -40,7 +40,7 @@ hypre_SStructScale( HYPRE_Complex        alpha,
 {
    HYPRE_Int nparts = hypre_SStructVectorNParts(y);
    HYPRE_Int part;
-   HYPRE_Int y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int y_object_type = hypre_SStructVectorObjectType(y);
 
    if (y_object_type == HYPRE_SSTRUCT)
    {

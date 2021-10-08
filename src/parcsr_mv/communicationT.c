@@ -27,16 +27,16 @@ void hypre_RowsWithColumn_original
    *rowmin = num_rows;
    *rowmax = -1;
 
-   for ( i=0; i<num_rows; ++i )
+   for ( i = 0; i < num_rows; ++i )
    {
       /* global number: row = i + firstRowIndex;*/
-      for ( j=mat_i[i]; j<mat_i[i+1]; ++j )
+      for ( j = mat_i[i]; j < mat_i[i + 1]; ++j )
       {
-         if ( (HYPRE_BigInt)mat_j[j]+firstColDiag==column )
+         if ( (HYPRE_BigInt)mat_j[j] + firstColDiag == column )
          {
             /* row i (local row number) has column mat_j[j] (local column number) */
-            *rowmin = i<*rowmin ? i : *rowmin;
-            *rowmax = i>*rowmax ? i : *rowmax;
+            *rowmin = i < *rowmin ? i : *rowmin;
+            *rowmax = i > *rowmax ? i : *rowmax;
             break;
          }
       }
@@ -45,16 +45,16 @@ void hypre_RowsWithColumn_original
    mat_j = hypre_CSRMatrixJ(offd);
    num_rows = hypre_CSRMatrixNumRows(offd);
    colMapOffd = hypre_ParCSRMatrixColMapOffd(A);
-   for ( i=0; i<num_rows; ++i )
+   for ( i = 0; i < num_rows; ++i )
    {
       /* global number: row = i + firstRowIndex;*/
-      for ( j=mat_i[i]; j<mat_i[i+1]; ++j )
+      for ( j = mat_i[i]; j < mat_i[i + 1]; ++j )
       {
-         if ( colMapOffd[ mat_j[j] ]==column )
+         if ( colMapOffd[ mat_j[j] ] == column )
          {
             /* row i (local row number) has column mat_j[j] (local column number) */
-            *rowmin = i<*rowmin ? i : *rowmin;
-            *rowmax = i>*rowmax ? i : *rowmax;
+            *rowmin = i < *rowmin ? i : *rowmin;
+            *rowmax = i > *rowmax ? i : *rowmax;
             break;
          }
       }
@@ -89,30 +89,30 @@ void hypre_RowsWithColumn
    *rowmin = num_rows_diag;
    *rowmax = -1;
 
-   for ( i=0; i<num_rows_diag; ++i )
+   for ( i = 0; i < num_rows_diag; ++i )
    {
       /* global number: row = i + firstRowIndex;*/
-      for ( j=mat_i_diag[i]; j<mat_i_diag[i+1]; ++j )
+      for ( j = mat_i_diag[i]; j < mat_i_diag[i + 1]; ++j )
       {
-         if ( (HYPRE_BigInt)mat_j_diag[j]+firstColDiag==column )
+         if ( (HYPRE_BigInt)mat_j_diag[j] + firstColDiag == column )
          {
             /* row i (local row number) has column mat_j[j] (local column number) */
-            *rowmin = i<*rowmin ? i : *rowmin;
-            *rowmax = i>*rowmax ? i : *rowmax;
+            *rowmin = i < *rowmin ? i : *rowmin;
+            *rowmax = i > *rowmax ? i : *rowmax;
             break;
          }
       }
    }
-   for ( i=0; i<num_rows_diag; ++i )
+   for ( i = 0; i < num_rows_diag; ++i )
    {
       /* global number: row = i + firstRowIndex;*/
-      for ( j=mat_i_offd[i]; j<mat_i_offd[i+1]; ++j )
+      for ( j = mat_i_offd[i]; j < mat_i_offd[i + 1]; ++j )
       {
-         if ( colMapOffd[ mat_j_offd[j] ]==column )
+         if ( colMapOffd[ mat_j_offd[j] ] == column )
          {
             /* row i (local row number) has column mat_j[j] (local column number) */
-            *rowmin = i<*rowmin ? i : *rowmin;
-            *rowmax = i>*rowmax ? i : *rowmax;
+            *rowmin = i < *rowmin ? i : *rowmin;
+            *rowmax = i > *rowmax ? i : *rowmax;
             break;
          }
       }
@@ -231,7 +231,7 @@ hypre_MatTCommPkgCreate_core (
       arrays don't mean quite the same thing as for A*B.
    */
 
-   num_recvs=num_procs-1;
+   num_recvs = num_procs - 1;
    local_info = num_procs + num_cols_offd + num_cols_diag;
 
    hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm);
@@ -242,37 +242,38 @@ hypre_MatTCommPkgCreate_core (
     * indices of elements (in this order)
     * ---------------------------------------------------------------------*/
 
-   displs = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
+   displs = hypre_CTAlloc(HYPRE_Int,  num_procs + 1, HYPRE_MEMORY_HOST);
    displs[0] = 0;
-   for (i=1; i < num_procs+1; i++)
+   for (i = 1; i < num_procs + 1; i++)
    {
-      displs[i] = displs[i-1]+info[i-1];
+      displs[i] = displs[i - 1] + info[i - 1];
    }
    recv_buf = hypre_CTAlloc(HYPRE_BigInt,  displs[num_procs], HYPRE_MEMORY_HOST);
    tmp = hypre_CTAlloc(HYPRE_BigInt,  local_info, HYPRE_MEMORY_HOST);
 
    j = 0;
-   for (i=0; i < num_procs; i++)
+   for (i = 0; i < num_procs; i++)
    {
       j2 = j++;
       tmp[j2] = 0;
-      for (k=0; k < num_cols_offd; k++)
+      for (k = 0; k < num_cols_offd; k++)
          if (col_map_offd[k] >= col_starts[i] &&
-             col_map_offd[k] < col_starts[i+1])
+             col_map_offd[k] < col_starts[i + 1])
          {
             tmp[j++] = col_map_offd[k];
             ++(tmp[j2]);
          };
-      for (k=0; k < num_cols_diag; k++)
-         if ( (HYPRE_BigInt)k+first_col_diag >= col_starts[i] &&
-              (HYPRE_BigInt)k+first_col_diag < col_starts[i+1] )
+      for (k = 0; k < num_cols_diag; k++)
+         if ( (HYPRE_BigInt)k + first_col_diag >= col_starts[i] &&
+              (HYPRE_BigInt)k + first_col_diag < col_starts[i + 1] )
          {
             tmp[j++] = (HYPRE_BigInt)k + first_col_diag;
             ++(tmp[j2]);
          }
    }
 
-   hypre_MPI_Allgatherv(tmp,local_info,HYPRE_MPI_BIG_INT,recv_buf,info,displs,HYPRE_MPI_INT,comm);
+   hypre_MPI_Allgatherv(tmp, local_info, HYPRE_MPI_BIG_INT, recv_buf, info, displs, HYPRE_MPI_INT,
+                        comm);
 
 
    /* ----------------------------------------------------------------------
@@ -293,31 +294,31 @@ hypre_MatTCommPkgCreate_core (
         because it has a nonzero on a _column_ needed by p.
    */
    num_sends = num_procs;   /* may turn out to be less, but we can't know yet */
-   num_elmts = (num_procs-1)*num_rows_diag;
+   num_elmts = (num_procs - 1) * num_rows_diag;
    /* ... a crude upper bound; should try to do better even if more comm required */
    send_procs = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
-   send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
+   send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends + 1, HYPRE_MEMORY_HOST);
    send_map_elmts = hypre_CTAlloc(HYPRE_Int,  num_elmts, HYPRE_MEMORY_HOST);
    row_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag, HYPRE_MEMORY_HOST);
 
    index = 0;
    index2 = 0;
    send_map_starts[0] = 0;
-   for (i=0; i < num_procs; i++)
+   for (i = 0; i < num_procs; i++)
    {
-      send_map_starts[index+1] = send_map_starts[index];
+      send_map_starts[index + 1] = send_map_starts[index];
       j = displs[i];
       pmatch = 0;
-      for ( ir=0; ir<num_rows_diag; ++ir ) { row_marker[ir] = 0; }
-      while ( j < displs[i+1])
+      for ( ir = 0; ir < num_rows_diag; ++ir ) { row_marker[ir] = 0; }
+      while ( j < displs[i + 1])
       {
          num_elmts = recv_buf[j++];  /* no. of columns proc. i wants */
-         for ( k=0; k<num_elmts; k++ )
+         for ( k = 0; k < num_elmts; k++ )
          {
             col = recv_buf[j++]; /* a global column no. at proc. i */
-            for ( kc=0; kc<num_cols_offd; kc++ )
+            for ( kc = 0; kc < num_cols_offd; kc++ )
             {
-               if ( col_map_offd[kc]==col && i!=my_id )
+               if ( col_map_offd[kc] == col && i != my_id )
                {
                   /* this processor has the same column as proc. i (but is different) */
                   pmatch = 1;
@@ -332,12 +333,12 @@ hypre_MatTCommPkgCreate_core (
                                         firstColDiag, colMapOffd,
                                         mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
                                       );
-                  for ( ir=rowmin; ir<=rowmax; ++ir )
+                  for ( ir = rowmin; ir <= rowmax; ++ir )
                   {
-                     if ( row_marker[ir]==0 )
+                     if ( row_marker[ir] == 0 )
                      {
                         row_marker[ir] = 1;
-                        ++send_map_starts[index+1];
+                        ++send_map_starts[index + 1];
                         send_map_elmts[index2++] = ir;
                      }
                   }
@@ -357,9 +358,9 @@ hypre_MatTCommPkgCreate_core (
                            }
                         }
             */
-            for ( kc=row_starts[my_id]; kc<row_starts[my_id+1]; kc++ )
+            for ( kc = row_starts[my_id]; kc < row_starts[my_id + 1]; kc++ )
             {
-               if ( kc==col && i!=my_id )
+               if ( kc == col && i != my_id )
                {
                   /* this processor has the same column as proc. i (but is different) */
                   pmatch = 1;
@@ -373,12 +374,12 @@ hypre_MatTCommPkgCreate_core (
                                         firstColDiag, colMapOffd,
                                         mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
                                       );
-                  for ( ir=rowmin; ir<=rowmax; ++ir )
+                  for ( ir = rowmin; ir <= rowmax; ++ir )
                   {
-                     if ( row_marker[ir]==0 )
+                     if ( row_marker[ir] == 0 )
                      {
                         row_marker[ir] = 1;
-                        ++send_map_starts[index+1];
+                        ++send_map_starts[index + 1];
                         send_map_elmts[index2++] = ir;
                      }
                   }
@@ -392,11 +393,11 @@ hypre_MatTCommPkgCreate_core (
 
    /* Compute receive arrays recv_procs, recv_vec_starts ... */
    recv_procs = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
-   recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
+   recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs + 1, HYPRE_MEMORY_HOST);
    j2 = 0;
-   for (i=0; i < num_procs; i++)
+   for (i = 0; i < num_procs; i++)
    {
-      if ( i!=my_id ) { recv_procs[j2] = i; j2++; };
+      if ( i != my_id ) { recv_procs[j2] = i; j2++; };
    };
 
    /* Compute recv_vec_starts.
@@ -417,62 +418,62 @@ hypre_MatTCommPkgCreate_core (
         may be much slower than Allgather or may be a bit faster depending on
         implementations
    */
-   send_buf = hypre_CTAlloc( HYPRE_Int,  3*num_sends, HYPRE_MEMORY_HOST);
+   send_buf = hypre_CTAlloc( HYPRE_Int,  3 * num_sends, HYPRE_MEMORY_HOST);
    all_num_sends3 = hypre_CTAlloc( HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
 
    /* scatter-gather num_sends, to set up the size for the main comm. step */
-   i = 3*num_sends;
+   i = 3 * num_sends;
    hypre_MPI_Allgather( &i, 1, HYPRE_MPI_INT, all_num_sends3, 1, HYPRE_MPI_INT, comm );
    displs[0] = 0;
-   for ( p=0; p<num_procs; ++p )
+   for ( p = 0; p < num_procs; ++p )
    {
-      displs[p+1] = displs[p] + all_num_sends3[p];
+      displs[p + 1] = displs[p] + all_num_sends3[p];
    };
    recv_sz_buf = hypre_CTAlloc( HYPRE_Int,  displs[num_procs], HYPRE_MEMORY_HOST);
 
    /* scatter-gather size of row info to send, and proc. to send to */
    index = 0;
-   for ( i=0; i<num_sends; ++i )
+   for ( i = 0; i < num_sends; ++i )
    {
       send_buf[index++] = send_procs[i];   /* processor to send to */
       send_buf[index++] = my_id;
-      send_buf[index++] = send_map_starts[i+1] - send_map_starts[i];
+      send_buf[index++] = send_map_starts[i + 1] - send_map_starts[i];
       /* ... sizes of info to send */
    };
 
-   hypre_MPI_Allgatherv( send_buf, 3*num_sends, HYPRE_MPI_INT,
+   hypre_MPI_Allgatherv( send_buf, 3 * num_sends, HYPRE_MPI_INT,
                          recv_sz_buf, all_num_sends3, displs, HYPRE_MPI_INT, comm);
 
    recv_vec_starts[0] = 0;
    j2 = 0;  j = 0;
-   for ( i=0; i<displs[num_procs]; i=i+3 )
+   for ( i = 0; i < displs[num_procs]; i = i + 3 )
    {
       j = i;
-      if ( recv_sz_buf[j++]==my_id )
+      if ( recv_sz_buf[j++] == my_id )
       {
          recv_procs[j2] = recv_sz_buf[j++];
-         recv_vec_starts[j2+1] = recv_vec_starts[j2] + recv_sz_buf[j++];
+         recv_vec_starts[j2 + 1] = recv_vec_starts[j2] + recv_sz_buf[j++];
          j2++;
       }
    }
    num_recvs = j2;
 
 #if 0
-   hypre_printf("num_procs=%i send_map_starts (%i):",num_procs,num_sends+1);
-   for ( i=0; i<=num_sends; ++i ) { hypre_printf(" %i", send_map_starts[i] ); }
-   hypre_printf("  send_procs (%i):",num_sends);
-   for ( i=0; i<num_sends; ++i ) { hypre_printf(" %i", send_procs[i] ); }
+   hypre_printf("num_procs=%i send_map_starts (%i):", num_procs, num_sends + 1);
+   for ( i = 0; i <= num_sends; ++i ) { hypre_printf(" %i", send_map_starts[i] ); }
+   hypre_printf("  send_procs (%i):", num_sends);
+   for ( i = 0; i < num_sends; ++i ) { hypre_printf(" %i", send_procs[i] ); }
    hypre_printf("\n");
    hypre_printf("my_id=%i num_sends=%i send_buf[0,1,2]=%i %i %i",
                 my_id, num_sends, send_buf[0], send_buf[1], send_buf[2] );
    hypre_printf(" all_num_sends3[0,1]=%i %i\n", all_num_sends3[0], all_num_sends3[1] );
    hypre_printf("my_id=%i rcv_sz_buf (%i):", my_id, displs[num_procs] );
-   for ( i=0; i<displs[num_procs]; ++i ) { hypre_printf(" %i", recv_sz_buf[i] ); }
+   for ( i = 0; i < displs[num_procs]; ++i ) { hypre_printf(" %i", recv_sz_buf[i] ); }
    hypre_printf("\n");
-   hypre_printf("my_id=%i recv_vec_starts (%i):",my_id,num_recvs+1);
-   for ( i=0; i<=num_recvs; ++i ) { hypre_printf(" %i", recv_vec_starts[i] ); }
-   hypre_printf("  recv_procs (%i):",num_recvs);
-   for ( i=0; i<num_recvs; ++i ) { hypre_printf(" %i", recv_procs[i] ); }
+   hypre_printf("my_id=%i recv_vec_starts (%i):", my_id, num_recvs + 1);
+   for ( i = 0; i <= num_recvs; ++i ) { hypre_printf(" %i", recv_vec_starts[i] ); }
+   hypre_printf("  recv_procs (%i):", num_recvs);
+   for ( i = 0; i < num_recvs; ++i ) { hypre_printf(" %i", recv_procs[i] ); }
    hypre_printf("\n");
    hypre_printf("my_id=%i num_recvs=%i recv_sz_buf[0,1,2]=%i %i %i\n",
                 my_id, num_recvs, recv_sz_buf[0], recv_sz_buf[1], recv_sz_buf[2] );

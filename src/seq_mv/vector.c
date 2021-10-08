@@ -59,7 +59,7 @@ hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
 HYPRE_Int
 hypre_SeqVectorDestroy( hypre_Vector *vector )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    if (vector)
    {
@@ -96,7 +96,7 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_
     * when being used, and freed */
    if ( !hypre_VectorData(vector) )
    {
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size, memory_location);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
    }
 
    if ( multivec_storage_method == 0 )
@@ -135,7 +135,7 @@ HYPRE_Int
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
                              HYPRE_Int     owns_data   )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int    ierr = 0;
 
    hypre_VectorOwnsData(vector) = owns_data;
 
@@ -226,14 +226,14 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
       hypre_fprintf(fp, "%d vectors of size %d\n", num_vectors, size );
    }
 
-   if ( num_vectors>1 )
+   if ( num_vectors > 1 )
    {
-      for ( j=0; j<num_vectors; ++j )
+      for ( j = 0; j < num_vectors; ++j )
       {
          hypre_fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            value = data[ j*vecstride + i*idxstride ];
+            value = data[ j * vecstride + i * idxstride ];
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(fp, "%.14e , %.14e\n",
                           hypre_creal(value), hypre_cimag(value));
@@ -731,7 +731,7 @@ HYPRE_Complex hypre_SeqVectorSumElts( hypre_Vector *vector )
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
-   for ( i=0; i<size; ++i ) { sum += data[i]; }
+   for ( i = 0; i < size; ++i ) { sum += data[i]; }
 
    return sum;
 }

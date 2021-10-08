@@ -40,8 +40,8 @@ typedef struct
    hypre_ParVector    **F_fine_array;
    hypre_ParVector    **U_fine_array;
    HYPRE_Solver **aff_solver;
-   HYPRE_Int   (*fine_grid_solver_setup)(void*,void*,void*,void*);
-   HYPRE_Int   (*fine_grid_solver_solve)(void*,void*,void*,void*);
+   HYPRE_Int   (*fine_grid_solver_setup)(void*, void*, void*, void*);
+   HYPRE_Int   (*fine_grid_solver_solve)(void*, void*, void*, void*);
 
    HYPRE_Real   max_row_sum;
    HYPRE_Int    num_interp_sweeps;
@@ -69,8 +69,8 @@ typedef struct
    HYPRE_Int     num_relax_sweeps;
 
    HYPRE_Solver coarse_grid_solver;
-   HYPRE_Int     (*coarse_grid_solver_setup)(void*,void*,void*,void*);
-   HYPRE_Int     (*coarse_grid_solver_solve)(void*,void*,void*,void*);
+   HYPRE_Int     (*coarse_grid_solver_setup)(void*, void*, void*, void*);
+   HYPRE_Int     (*coarse_grid_solver_solve)(void*, void*, void*, void*);
 
    HYPRE_Int     use_default_cgrid_solver;
    HYPRE_Int     use_default_fsolver;

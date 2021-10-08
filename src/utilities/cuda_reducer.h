@@ -17,7 +17,7 @@ template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
 struct HYPRE_double4
 {
-   HYPRE_Real x,y,z,w;
+   HYPRE_Real x, y, z, w;
 
    __host__ __device__
    HYPRE_double4() {}
@@ -50,7 +50,7 @@ struct HYPRE_double4
 
 struct HYPRE_double6
 {
-   HYPRE_Real x,y,z,w,u,v;
+   HYPRE_Real x, y, z, w, u, v;
 
    __host__ __device__
    HYPRE_double6() {}
@@ -91,7 +91,7 @@ __inline__ __host__ __device__
 HYPRE_Real warpReduceSum(HYPRE_Real val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
-   for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
       val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
    }

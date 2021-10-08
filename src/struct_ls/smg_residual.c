@@ -246,7 +246,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
                {
-                  rp[ri] -= Ap[Ai] * xp[xi+xp_off];
+                  rp[ri] -= Ap[Ai] * xp[xi + xp_off];
                }
                hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR

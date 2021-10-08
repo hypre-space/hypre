@@ -34,11 +34,11 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
    HYPRE_Int    x_size = hypre_MultivectorSize(x);
    HYPRE_Int    y_size = hypre_MultivectorSize(y);
    HYPRE_Int    num_vectors = hypre_MultivectorNumVectors(x);
-   HYPRE_Int    *x_active_ind= x->active_indices;
-   HYPRE_Int    *y_active_ind= y->active_indices;
+   HYPRE_Int    *x_active_ind = x->active_indices;
+   HYPRE_Int    *y_active_ind = y->active_indices;
    HYPRE_Int    num_active_vectors = x->num_active_vectors;
    HYPRE_Int    i, j, jj, m, ierr = 0, optimize;
-   HYPRE_Complex temp, tempx, xpar=0.7, *xptr, *yptr;
+   HYPRE_Complex temp, tempx, xpar = 0.7, *xptr, *yptr;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -70,7 +70,7 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_rows*num_vectors; i++) { y_data[i] *= beta; }
+      for (i = 0; i < num_rows * num_vectors; i++) { y_data[i] *= beta; }
 
       return ierr;
    }
@@ -88,14 +88,14 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-         for (i = 0; i < num_rows*num_vectors; i++) { y_data[i] = 0.0; }
+         for (i = 0; i < num_rows * num_vectors; i++) { y_data[i] = 0.0; }
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-         for (i = 0; i < num_rows*num_vectors; i++) { y_data[i] *= temp; }
+         for (i = 0; i < num_rows * num_vectors; i++) { y_data[i] *= temp; }
       }
    }
 
@@ -103,12 +103,12 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
     * y += A*x
     *-----------------------------------------------------------------*/
 
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
    {
       for (i = 0; i < num_rows; i++)
       {
          temp = y_data[i];
-         for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+         for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
          {
             temp += A_data[jj] * x_data[A_j[jj]];
          }
@@ -121,15 +121,15 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
       {
          for (i = 0; i < num_rows; i++)
          {
-            for (j=0; j<num_active_vectors; ++j)
+            for (j = 0; j < num_active_vectors; ++j)
             {
-               xptr = x_data[x_active_ind[j]*x_size];
-               temp = y_data[y_active_ind[j]*y_size+i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               xptr = x_data[x_active_ind[j] * x_size];
+               temp = y_data[y_active_ind[j] * y_size + i];
+               for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
                {
                   temp += A_data[jj] * xptr[A_j[jj]];
                }
-               y_data[y_active_ind[j]*y_size+i] = temp;
+               y_data[y_active_ind[j]*y_size + i] = temp;
             }
          }
       }
@@ -137,15 +137,15 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
       {
          for (i = 0; i < num_rows; i++)
          {
-            for (j=0; j<num_vectors; ++j)
+            for (j = 0; j < num_vectors; ++j)
             {
-               xptr = x_data[j*x_size];
-               temp = y_data[j*y_size+i];
-               for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+               xptr = x_data[j * x_size];
+               temp = y_data[j * y_size + i];
+               for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
                {
                   temp += A_data[jj] * xptr[A_j[jj]];
                }
-               y_data[j*y_size+i] = temp;
+               y_data[j * y_size + i] = temp;
             }
          }
          /* different version
@@ -173,7 +173,7 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_rows*num_vectors; i++)
+      for (i = 0; i < num_rows * num_vectors; i++)
       {
          y_data[i] *= alpha;
       }
@@ -204,8 +204,8 @@ hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
    HYPRE_Int    x_size = hypre_MultivectorSize(x);
    HYPRE_Int    y_size = hypre_MultivectorSize(y);
    HYPRE_Int    num_vectors = hypre_MultivectorNumVectors(x);
-   HYPRE_Int    *x_active_ind= x->active_indices;
-   HYPRE_Int    *y_active_ind= y->active_indices;
+   HYPRE_Int    *x_active_ind = x->active_indices;
+   HYPRE_Int    *y_active_ind = y->active_indices;
    HYPRE_Int    num_active_vectors = x->num_active_vectors;
    HYPRE_Complex temp;
    HYPRE_Int    i, jv, jj, size, ierr = 0;
@@ -235,7 +235,7 @@ hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_cols*num_vectors; i++) { y_data[i] *= beta; }
+      for (i = 0; i < num_cols * num_vectors; i++) { y_data[i] *= beta; }
       return ierr;
    }
 
@@ -252,14 +252,14 @@ hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-         for (i = 0; i < num_cols*num_vectors; i++) { y_data[i] = 0.0; }
+         for (i = 0; i < num_cols * num_vectors; i++) { y_data[i] = 0.0; }
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
          #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-         for (i = 0; i < num_cols*num_vectors; i++) { y_data[i] *= temp; }
+         for (i = 0; i < num_cols * num_vectors; i++) { y_data[i] *= temp; }
       }
    }
 
@@ -267,11 +267,11 @@ hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
     * y += A^T*x
     *-----------------------------------------------------------------*/
 
-   if ( num_vectors==1 )
+   if ( num_vectors == 1 )
    {
       for (i = 0; i < num_rows; i++)
       {
-         for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+         for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
          {
             y_data[A_j[jj]] += A_data[jj] * x_data[i];
          }
@@ -279,11 +279,11 @@ hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
    }
    else
    {
-      for ( jv=0; jv<num_vectors; ++jv )
+      for ( jv = 0; jv < num_vectors; ++jv )
       {
-         for (jj = A_i[i]; jj < A_i[i+1]; jj++)
+         for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
          {
-            y_data[A_j[jj]+jv*y_size] += A_data[jj] * x_data[i+jv*x_size];
+            y_data[A_j[jj] + jv * y_size] += A_data[jj] * x_data[i + jv * x_size];
          }
       }
    }
@@ -297,7 +297,7 @@ hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_cols*num_vectors; i++)
+      for (i = 0; i < num_cols * num_vectors; i++)
       {
          y_data[i] *= alpha;
       }

@@ -56,11 +56,11 @@ hypre_CSRMatrixMatvecOMPOffload( HYPRE_Int        trans,
    {
       HYPRE_Complex tempx = 0.0;
       HYPRE_Int j;
-      for (j = A_i[i]; j < A_i[i+1]; j++)
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
       {
          tempx += A_data[j] * x_data[A_j[j]];
       }
-      y_data[i] = alpha*tempx + beta*y_data[i];
+      y_data[i] = alpha * tempx + beta * y_data[i];
    }
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */

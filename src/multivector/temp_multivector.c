@@ -84,7 +84,7 @@ static hypre_ulongint next = 1;
 static HYPRE_Int myrand(void)
 {
    next = next * 1103515245 + 12345;
-   return ((unsigned)(next/65536) % 32768);
+   return ((unsigned)(next / 65536) % 32768);
 }
 
 static void mysrand(unsigned seed)
@@ -142,7 +142,7 @@ mv_TempMultiVectorCreateCopy( void* src_, HYPRE_Int copyValues )
    if ( copyValues )
       for ( i = 0; i < n; i++ )
       {
-         (dest->interpreter->CopyVector)(src->vector[i],dest->vector[i]);
+         (dest->interpreter->CopyVector)(src->vector[i], dest->vector[i]);
       }
 
    return dest;
@@ -166,13 +166,13 @@ mv_TempMultiVectorDestroy( void* x_ )
       {
          (x->interpreter->DestroyVector)(x->vector[i]);
       }
-      hypre_TFree(x->vector,HYPRE_MEMORY_HOST);
+      hypre_TFree(x->vector, HYPRE_MEMORY_HOST);
    }
    if ( x->mask && x->ownsMask )
    {
-      hypre_TFree(x->mask,HYPRE_MEMORY_HOST);
+      hypre_TFree(x->mask, HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(x,HYPRE_MEMORY_HOST);
+   hypre_TFree(x, HYPRE_MEMORY_HOST);
 }
 
 HYPRE_Int
@@ -247,7 +247,7 @@ mv_TempMultiVectorSetRandom( void* x_, HYPRE_Int seed )
    {
       if ( x->mask == NULL || (x->mask)[i] )
       {
-         seed=myrand();
+         seed = myrand();
          (x->interpreter->SetRandomValues)(x->vector[i], seed);
       }
    }
@@ -281,11 +281,11 @@ mv_TempMultiVectorCopy( void* src_, void* dest_ )
 
    for ( i = 0; i < ms; i++ )
    {
-      (src->interpreter->CopyVector)(ps[i],pd[i]);
+      (src->interpreter->CopyVector)(ps[i], pd[i]);
    }
 
-   hypre_TFree(ps,HYPRE_MEMORY_HOST);
-   hypre_TFree(pd,HYPRE_MEMORY_HOST);
+   hypre_TFree(ps, HYPRE_MEMORY_HOST);
+   hypre_TFree(pd, HYPRE_MEMORY_HOST);
 }
 
 void
@@ -316,11 +316,11 @@ mv_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ )
 
    for ( i = 0; i < mx; i++ )
    {
-      (x->interpreter->Axpy)(a,px[i],py[i]);
+      (x->interpreter->Axpy)(a, px[i], py[i]);
    }
 
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
 }
 
 void
@@ -360,13 +360,13 @@ mv_TempMultiVectorByMultiVector( void* x_, void* y_,
    {
       for ( ix = 0; ix < mx; ix++, p++ )
       {
-         *p = (x->interpreter->InnerProd)(px[ix],py[iy]);
+         *p = (x->interpreter->InnerProd)(px[ix], py[iy]);
       }
       p += jxy;
    }
 
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
 
 }
 
@@ -405,12 +405,12 @@ mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
 
    for ( i = 0; i < m; i++ )
    {
-      *(diag+index[i]-1) = (x->interpreter->InnerProd)(px[i],py[i]);
+      *(diag + index[i] - 1) = (x->interpreter->InnerProd)(px[i], py[i]);
    }
 
-   hypre_TFree(index,HYPRE_MEMORY_HOST);
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
+   hypre_TFree(index, HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
 
 }
 
@@ -452,13 +452,13 @@ mv_TempMultiVectorByMatrix( void* x_,
       (x->interpreter->ClearVector)( py[j] );
       for ( i = 0; i < mx; i++, p++ )
       {
-         (x->interpreter->Axpy)(*p,px[i],py[j]);
+         (x->interpreter->Axpy)(*p, px[i], py[j]);
       }
       p += jump;
    }
 
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
 }
 
 void
@@ -498,13 +498,13 @@ mv_TempMultiVectorXapy( void* x_,
    {
       for ( i = 0; i < mx; i++, p++ )
       {
-         (x->interpreter->Axpy)(*p,px[i],py[j]);
+         (x->interpreter->Axpy)(*p, px[i], py[j]);
       }
       p += jump;
    }
 
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
 }
 
 void
@@ -550,12 +550,12 @@ mv_TempMultiVectorByDiagonal( void* x_,
    for ( j = 0; j < my; j++ )
    {
       (x->interpreter->ClearVector)(py[j]);
-      (x->interpreter->Axpy)(diag[index[j]-1],px[j],py[j]);
+      (x->interpreter->Axpy)(diag[index[j] - 1], px[j], py[j]);
    }
 
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
-   hypre_TFree( index,HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
+   hypre_TFree( index, HYPRE_MEMORY_HOST);
 }
 
 void
@@ -596,6 +596,6 @@ mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
       f( par, (void*)px[i], (void*)py[i] );
    }
 
-   hypre_TFree(px,HYPRE_MEMORY_HOST);
-   hypre_TFree(py,HYPRE_MEMORY_HOST);
+   hypre_TFree(px, HYPRE_MEMORY_HOST);
+   hypre_TFree(py, HYPRE_MEMORY_HOST);
 }

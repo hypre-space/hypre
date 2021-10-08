@@ -631,8 +631,8 @@ dbox1, start1, stride1, i1,
       /* set i and hypre__n */
       hypre_BoxLoopSet(i, j, k);
       /* set i1 */
-      i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;
-      i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;
+      i1 = hypre__i1start + i * hypre__sx1 + j * hypre__sy1 + k * hypre__sz1;
+      i2 = hypre__i2start + i * hypre__sx2 + j * hypre__sy2 + k * hypre__sz2;
       for (k = 0; k < hypre__nz; k++)
       {
          for (j = 0; j < hypre__ny; j++)
@@ -644,11 +644,11 @@ dbox1, start1, stride1, i1,
                i1 += hypre__sx1;
                i2 += hypre__sx2;
             }
-            i1 += hypre__sy1 - hypre__nx*hypre__sx1;
-            i2 += hypre__sy2 - hypre__nx*hypre__sx2;
+            i1 += hypre__sy1 - hypre__nx * hypre__sx1;
+            i2 += hypre__sy2 - hypre__nx * hypre__sx2;
          }
-         i1 += hypre__sz1 - hypre__ny*hypre__sy1;
-         i2 += hypre__sz2 - hypre__ny*hypre__sy2;
+         i1 += hypre__sz1 - hypre__ny * hypre__sy1;
+         i2 += hypre__sz2 - hypre__ny * hypre__sy2;
       }
    }
 }
@@ -791,7 +791,7 @@ typedef struct hypre_BoxManEntry_struct
 
    HYPRE_Int proc; /* This is a two-part unique id: (proc, id) */
    HYPRE_Int id;
-   HYPRE_Int num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int num_ghost[2 * HYPRE_MAXDIM];
 
    HYPRE_Int position; /* This indicates the location of the entry in the the
                         * box manager entries array and is used for pairing with
@@ -893,7 +893,7 @@ typedef struct
                                    unique (regardless of proc id) */
 
    /* Ghost stuff  */
-   HYPRE_Int           num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int           num_ghost[2 * HYPRE_MAXDIM];
 
 } hypre_BoxManager;
 
@@ -1006,7 +1006,7 @@ typedef struct hypre_StructGrid_struct
 
 
    HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
-   HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */
+   HYPRE_Int            num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1149,7 +1149,7 @@ typedef struct hypre_CommEntryType_struct
    HYPRE_Int  offset;                       /* offset for the data */
    HYPRE_Int  dim;                          /* dimension of the communication */
    HYPRE_Int  length_array[HYPRE_MAXDIM];   /* last dim has length num_values */
-   HYPRE_Int  stride_array[HYPRE_MAXDIM+1];
+   HYPRE_Int  stride_array[HYPRE_MAXDIM + 1];
    HYPRE_Int *order;                        /* order of last dim values */
 
 } hypre_CommEntryType;
@@ -1475,7 +1475,7 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
 
    HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 
@@ -1564,7 +1564,7 @@ typedef struct hypre_StructVector_struct
                                           is the starting index of vector
                                           data corresponding to box b. */
 
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
 
@@ -2662,10 +2662,10 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)                               \

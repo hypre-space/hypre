@@ -48,7 +48,7 @@ HYPRE_Int myBuildParLaplacian27pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_
                                    HYPRE_ParCSRMatrix *A_ptr, HYPRE_Int parmprint );
 
 
-void stats_mo(HYPRE_Real*, HYPRE_Int, HYPRE_Real *,HYPRE_Real *);
+void stats_mo(HYPRE_Real*, HYPRE_Int, HYPRE_Real *, HYPRE_Real *);
 
 /*==========================================================================*/
 
@@ -78,8 +78,8 @@ main( HYPRE_Int   argc,
 
    HYPRE_Int        num_procs, myid;
    HYPRE_Int        verbose = 0, build_matrix_type = 1;
-   HYPRE_Int        index, matrix_arg_index, commpkg_flag=3;
-   HYPRE_Int        i, k, ierr=0;
+   HYPRE_Int        index, matrix_arg_index, commpkg_flag = 3;
+   HYPRE_Int        i, k, ierr = 0;
    HYPRE_Int        row_start, row_end;
    HYPRE_Int        col_start, col_end, global_num_rows;
    HYPRE_Int       *row_part, *col_part;
@@ -205,7 +205,7 @@ main( HYPRE_Int   argc,
      *-----------------------------------------------------------*/
 
 
-   if (build_matrix_type ==1) /*read in a csr matrix from one file */
+   if (build_matrix_type == 1) /*read in a csr matrix from one file */
    {
       if (matrix_arg_index < argc)
       {
@@ -229,14 +229,14 @@ main( HYPRE_Int   argc,
 
       if (myid == 0) { hypre_CSRMatrixDestroy(A_CSR); }
    }
-   else if (build_matrix_type ==2)
+   else if (build_matrix_type == 2)
    {
 
       myBuildParLaplacian(argc, argv, matrix_arg_index,  &A_temp, !noparmprint);
       parcsr_A = (hypre_ParCSRMatrix *) A_temp;
 
    }
-   else if (build_matrix_type ==4)
+   else if (build_matrix_type == 4)
    {
       myBuildParLaplacian27pt(argc, argv, matrix_arg_index, &A_temp, !noparmprint);
       parcsr_A = (hypre_ParCSRMatrix *) A_temp;
@@ -270,8 +270,8 @@ main( HYPRE_Int   argc,
       R  = 1;
 
       p = myid % P;
-      q = (( myid - p)/P) % Q;
-      r = ( myid - p - P*q)/( P*Q );
+      q = (( myid - p) / P) % Q;
+      r = ( myid - p - P * q) / ( P * Q );
 
       A_temp_small = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD, nx, ny, nz,
                                                             P, Q, R, p, q, r, values);
@@ -306,7 +306,7 @@ main( HYPRE_Int   argc,
    else
    {
 
-      loop +=1;
+      loop += 1;
       if (loop < 2) { loop = 2; }
    }
 
@@ -319,7 +319,7 @@ main( HYPRE_Int   argc,
 
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
-   if (commpkg_flag == 1 || commpkg_flag ==3 )
+   if (commpkg_flag == 1 || commpkg_flag == 3 )
    {
 
       /*-----------------------------------------------------------
@@ -331,10 +331,10 @@ main( HYPRE_Int   argc,
       if (!myid) { hypre_printf("********************************************************\n" ); }
 
       /*do loop times*/
-      for (i=0; i< loop; i++)
+      for (i = 0; i < loop; i++)
       {
          loop_times[i] = 0.0;
-         for (k=0; k< loop2; k++)
+         for (k = 0; k < loop2; k++)
          {
 
             hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -342,13 +342,13 @@ main( HYPRE_Int   argc,
             start_time = hypre_MPI_Wtime();
 
 #if mpip_on
-            if (i==(loop-1)) { hypre_MPI_Pcontrol(1); }
+            if (i == (loop - 1)) { hypre_MPI_Pcontrol(1); }
 #endif
 
             hypre_NewCommPkgCreate(parcsr_A);
 
 #if mpip_on
-            if (i==(loop-1)) { hypre_MPI_Pcontrol(0); }
+            if (i == (loop - 1)) { hypre_MPI_Pcontrol(0); }
 #endif
 
             end_time = hypre_MPI_Wtime();
@@ -360,7 +360,7 @@ main( HYPRE_Int   argc,
 
             loop_times[i] += total_time;
 
-            if (  !((i+1)== loop  &&  (k+1) == loop2)) { hypre_NewCommPkgDestroy(parcsr_A); }
+            if (  !((i + 1) == loop  &&  (k + 1) == loop2)) { hypre_NewCommPkgDestroy(parcsr_A); }
 
          }/*end of loop2 */
 
@@ -377,10 +377,10 @@ main( HYPRE_Int   argc,
          stats_mo(loop_times, loop, &T_avg, &T_std);
 
          if (!myid) { hypre_printf(" NewCommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg); }
-         if (!myid) { hypre_printf("                    STD. for %d  runs     =  %f\n", loop-1, T_std); }
+         if (!myid) { hypre_printf("                    STD. for %d  runs     =  %f\n", loop - 1, T_std); }
          if (!myid) { hypre_printf("                    (Note: avg./std. timings exclude run 0.)\n"); }
          if (!myid) { hypre_printf("********************************************************\n" ); }
-         for (i=0; i< loop; i++)
+         for (i = 0; i < loop; i++)
          {
             if (!myid) { hypre_printf("      run %d  =  %f sec.\n", i, loop_times[i]); }
          }
@@ -429,28 +429,28 @@ main( HYPRE_Int   argc,
                       hypre_ParCSRCommPkgNumRecvs(comm_pkg)  );
 
 #if mydebug
-         for (i=0; i < hypre_ParCSRCommPkgNumRecvs(comm_pkg); i++)
+         for (i = 0; i < hypre_ParCSRCommPkgNumRecvs(comm_pkg); i++)
          {
             hypre_printf("myid = %d, recv proc = %d, vec_starts = [%d : %d]\n",
                          myid,  hypre_ParCSRCommPkgRecvProcs(comm_pkg)[i],
                          hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i],
-                         hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i+1]-1);
+                         hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i + 1] - 1);
          }
 #endif
          hypre_printf("myid = %d, num_sends = %d\n", myid,
                       hypre_ParCSRCommPkgNumSends(comm_pkg)  );
 
 #if mydebug
-         for (i=0; i <hypre_ParCSRCommPkgNumSends(comm_pkg) ; i++)
+         for (i = 0; i < hypre_ParCSRCommPkgNumSends(comm_pkg) ; i++)
          {
-            tmp_int =  hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i+1] -
+            tmp_int =  hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i + 1] -
                        hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i];
             index = hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i];
-            for (j=0; j< tmp_int; j++)
+            for (j = 0; j < tmp_int; j++)
             {
-               hypre_printf("myid = %d, send proc = %d, send element = %d\n",myid,
+               hypre_printf("myid = %d, send proc = %d, send element = %d\n", myid,
                             hypre_ParCSRCommPkgSendProcs(comm_pkg)[i],
-                            hypre_ParCSRCommPkgSendMapElmts(comm_pkg)[index+j]);
+                            hypre_ParCSRCommPkgSendMapElmts(comm_pkg)[index + j]);
             }
          }
 #endif
@@ -508,11 +508,11 @@ main( HYPRE_Int   argc,
 
       if (!myid) { hypre_printf("********************************************************\n" ); }
       /*do loop times*/
-      for (i=0; i< loop; i++)
+      for (i = 0; i < loop; i++)
       {
 
          loop_times[i] = 0.0;
-         for (k=0; k< loop2; k++)
+         for (k = 0; k < loop2; k++)
          {
 
 
@@ -542,7 +542,7 @@ main( HYPRE_Int   argc,
             loop_times[i] += total_time;
 
 
-            if (  !((i+1)== loop  &&  (k+1) == loop2)) { hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkg(parcsr_A)); }
+            if (  !((i + 1) == loop  &&  (k + 1) == loop2)) { hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkg(parcsr_A)); }
 
          }/* end of loop 2*/
 
@@ -555,10 +555,10 @@ main( HYPRE_Int   argc,
 
          stats_mo(loop_times, loop, &T_avg, &T_std);
          if (!myid) { hypre_printf("Current CommPkgCreate:  AVG. wall clock time =  %f seconds\n", T_avg); }
-         if (!myid) { hypre_printf("                        STD. for %d  runs     =  %f\n", loop-1, T_std); }
+         if (!myid) { hypre_printf("                        STD. for %d  runs     =  %f\n", loop - 1, T_std); }
          if (!myid) { hypre_printf("                        (Note: avg./std. timings exclude run 0.)\n"); }
          if (!myid) { hypre_printf("********************************************************\n" ); }
-         for (i=0; i< loop; i++)
+         for (i = 0; i < loop; i++)
          {
             if (!myid) { hypre_printf("      run %d  =  %f sec.\n", i, loop_times[i]); }
          }
@@ -605,12 +605,12 @@ main( HYPRE_Int   argc,
                       hypre_ParCSRCommPkgNumRecvs(comm_pkg)  );
 
 #if mydebug
-         for (i=0; i < hypre_ParCSRCommPkgNumRecvs(comm_pkg); i++)
+         for (i = 0; i < hypre_ParCSRCommPkgNumRecvs(comm_pkg); i++)
          {
             hypre_printf("myid = %d, std - recv proc = %d, vec_starts = [%d : %d]\n",
                          myid,  hypre_ParCSRCommPkgRecvProcs(comm_pkg)[i],
                          hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i],
-                         hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i+1]-1);
+                         hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i + 1] - 1);
          }
 #endif
          hypre_printf("myid = %d, std - num_sends = %d\n", myid,
@@ -618,16 +618,16 @@ main( HYPRE_Int   argc,
 
 
 #if mydebug
-         for (i=0; i <hypre_ParCSRCommPkgNumSends(comm_pkg) ; i++)
+         for (i = 0; i < hypre_ParCSRCommPkgNumSends(comm_pkg) ; i++)
          {
-            tmp_int =  hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i+1] -
+            tmp_int =  hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i + 1] -
                        hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i];
             index = hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i];
-            for (j=0; j< tmp_int; j++)
+            for (j = 0; j < tmp_int; j++)
             {
-               hypre_printf("myid = %d, std - send proc = %d, send element = %d\n",myid,
+               hypre_printf("myid = %d, std - send proc = %d, send element = %d\n", myid,
                             hypre_ParCSRCommPkgSendProcs(comm_pkg)[i],
-                            hypre_ParCSRCommPkgSendMapElmts(comm_pkg)[index+j]);
+                            hypre_ParCSRCommPkgSendMapElmts(comm_pkg)[index + j]);
             }
          }
 #endif
@@ -645,7 +645,7 @@ main( HYPRE_Int   argc,
          row_starts = hypre_ParCSRMatrixRowStarts(parcsr_A);
 
 
-         y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_rows,row_starts);
+         y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_rows, row_starts);
          hypre_ParVectorInitialize(y);
          hypre_ParVectorSetConstantValues(y, 0.0);
 
@@ -727,26 +727,26 @@ main( HYPRE_Int   argc,
  *     throw away 1st timing
  *------------------------------------*/
 
-void stats_mo(HYPRE_Real array[], HYPRE_Int n, HYPRE_Real *Tavg,HYPRE_Real *Tstd)
+void stats_mo(HYPRE_Real array[], HYPRE_Int n, HYPRE_Real *Tavg, HYPRE_Real *Tstd)
 {
 
    HYPRE_Int i;
-   HYPRE_Real atmp, tmp=0.0;
+   HYPRE_Real atmp, tmp = 0.0;
    HYPRE_Real avg = 0.0, std;
 
 
-   for (i=1; i<n; i++)
+   for (i = 1; i < n; i++)
    {
       atmp = array[i];
       avg += atmp;
-      tmp += atmp*atmp;
+      tmp += atmp * atmp;
    }
 
-   n = n-1;
-   avg = avg/(HYPRE_Real) n;
-   tmp = tmp/(HYPRE_Real) n;
+   n = n - 1;
+   avg = avg / (HYPRE_Real) n;
+   tmp = tmp / (HYPRE_Real) n;
 
-   tmp = fabs(tmp - avg*avg);
+   tmp = fabs(tmp - avg * avg);
    std = sqrt(tmp);
 
    *Tavg = avg;
@@ -827,7 +827,7 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -850,8 +850,8 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -864,7 +864,7 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
    {
       values[0] = 8.0;
    }
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
    {
       values[0] = 2.0;
    }
@@ -963,7 +963,7 @@ myBuildParLaplacian( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -987,8 +987,8 @@ myBuildParLaplacian( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -1003,15 +1003,15 @@ myBuildParLaplacian( HYPRE_Int                  argc,
    values[0] = 0.;
    if (nx > 1)
    {
-      values[0] += 2.0*cx;
+      values[0] += 2.0 * cx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy;
+      values[0] += 2.0 * cy;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz;
+      values[0] += 2.0 * cz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD, nx, ny, nz,

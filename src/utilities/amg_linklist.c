@@ -125,7 +125,7 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
    }
    while (list_ptr != NULL);
 
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"No such list!\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No such list!\n");
 
    return ;
 }
@@ -144,7 +144,7 @@ hypre_LinkList hypre_create_elt( HYPRE_Int Item )
     */
    if ( (new_elt_ptr = hypre_TAlloc(hypre_ListElement, 1, HYPRE_MEMORY_HOST)) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"\n create_elt: malloc failed \n\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "\n create_elt: malloc failed \n\n");
    }
    else
       /* new_elt_ptr = hypre_CTAlloc(hypre_LinkList, 1); */

@@ -194,7 +194,7 @@ hypre_F90_IFACE(hypre_sstructvectorgetboxvalues, HYPRE_SSTRUCTVECTORGETBOXVALUES
 {
    *ierr = (hypre_F90_Int)
            (HYPRE_SStructVectorGetBoxValues(
-               (HYPRE_SStructVector ) *vector,
+               (HYPRE_SStructVector ) * vector,
                hypre_F90_PassInt (part),
                hypre_F90_PassIntArray (ilower),
                hypre_F90_PassIntArray (iupper),

@@ -58,7 +58,7 @@ HYPRE_Int HYPRE_BlockTridiagSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
  * HYPRE_BlockTridiagSetIndexSet
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver,HYPRE_Int n, HYPRE_Int *inds)
+HYPRE_Int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver, HYPRE_Int n, HYPRE_Int *inds)
 {
    return (hypre_BlockTridiagSetIndexSet((void *) solver, n, inds));
 }
@@ -67,7 +67,7 @@ HYPRE_Int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver,HYPRE_Int n, HYPRE_I
  * HYPRE_BlockTridiagSetAMGStrengthThreshold
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver,HYPRE_Real thresh)
+HYPRE_Int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver, HYPRE_Real thresh)
 {
    return (hypre_BlockTridiagSetAMGStrengthThreshold((void *) solver, thresh));
 }
@@ -78,7 +78,7 @@ HYPRE_Int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver,HYPRE_Re
 
 HYPRE_Int HYPRE_BlockTridiagSetAMGNumSweeps(HYPRE_Solver solver, HYPRE_Int num_sweeps)
 {
-   return (hypre_BlockTridiagSetAMGNumSweeps((void *) solver,num_sweeps));
+   return (hypre_BlockTridiagSetAMGNumSweeps((void *) solver, num_sweeps));
 }
 
 /*--------------------------------------------------------------------------

@@ -166,18 +166,18 @@ int main (int argc, char *argv[])
       size for the interior nodes is indicated by n (n x n).
       pi and pj indicate position in the processor grid. */
    N  = sqrt(num_procs);
-   h  = 1.0 / (N*n+1); /* note that when calculating h we must
+   h  = 1.0 / (N * n + 1); /* note that when calculating h we must
                           remember to count the boundary nodes */
-   h2 = h*h;
+   h2 = h * h;
    pj = myid / N;
-   pi = myid - pj*N;
+   pi = myid - pj * N;
 
    /* Figure out the extents of each processor's piece of the grid. */
-   ilower[0] = pi*n;
-   ilower[1] = pj*n;
+   ilower[0] = pi * n;
+   ilower[1] = pj * n;
 
-   iupper[0] = ilower[0] + n-1;
-   iupper[1] = ilower[1] + n-1;
+   iupper[0] = ilower[0] + n - 1;
+   iupper[1] = ilower[1] + n - 1;
 
    /* 1. Set up a grid - we have one part and two variables */
    {
@@ -201,7 +201,7 @@ int main (int argc, char *argv[])
             HYPRE_SSTRUCT_VARIABLE_CELL
          };
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
          {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
          }
@@ -221,14 +221,14 @@ int main (int argc, char *argv[])
 
       /* Stencil object for variable u (labeled as variable 0) */
       {
-         int offsets[6][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}, {0,0}};
+         int offsets[6][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}, {0, 0}};
          stencil_size = 6;
 
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_u);
 
          /* The first 5 entries are for the u-u connections */
          var = 0; /* connect to variable 0 */
-         for (entry = 0; entry < stencil_size-1 ; entry++)
+         for (entry = 0; entry < stencil_size - 1 ; entry++)
          {
             HYPRE_SStructStencilSetEntry(stencil_u, entry, offsets[entry], var);
          }
@@ -241,7 +241,7 @@ int main (int argc, char *argv[])
 
       /* Stencil object for variable v  (variable 1) */
       {
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
          stencil_size = 5;
 
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_v);
@@ -328,7 +328,7 @@ int main (int argc, char *argv[])
 
          /*  First the u-u connections */
          nentries = 5;
-         nvalues = nentries*n*n;
+         nvalues = nentries * n * n;
          u_values = (double*) calloc(nvalues, sizeof(double));
 
          for (i = 0; i < nvalues; i += nentries)
@@ -336,7 +336,7 @@ int main (int argc, char *argv[])
             u_values[i] = 4.0;
             for (j = 1; j < nentries; j++)
             {
-               u_values[i+j] = -1.0;
+               u_values[i + j] = -1.0;
             }
          }
 
@@ -347,7 +347,7 @@ int main (int argc, char *argv[])
 
          /* Next the u-v connections */
          nentries = 1;
-         nvalues = nentries*n*n;
+         nvalues = nentries * n * n;
          u_values = (double*) calloc(nvalues, sizeof(double));
 
          for (i = 0; i < nvalues; i++)
@@ -372,7 +372,7 @@ int main (int argc, char *argv[])
 
          /* the v-v connections */
          nentries = 5;
-         nvalues = nentries*n*n;
+         nvalues = nentries * n * n;
          v_values = (double*) calloc(nvalues, sizeof(double));
 
          for (i = 0; i < nvalues; i += nentries)
@@ -380,7 +380,7 @@ int main (int argc, char *argv[])
             v_values[i] = 4.0;
             for (j = 1; j < nentries; j++)
             {
-               v_values[i+j] = -1.0;
+               v_values[i + j] = -1.0;
             }
          }
 
@@ -401,7 +401,7 @@ int main (int argc, char *argv[])
       int bc_ilower[2];
       int bc_iupper[2];
       int nentries = 1;
-      int nvalues  = nentries*n; /*  number of stencil entries times the length
+      int nvalues  = nentries * n; /*  number of stencil entries times the length
                                      of one side of my grid box */
       int var;
       double *values;
@@ -419,10 +419,10 @@ int main (int argc, char *argv[])
       if (pj == 0)
       {
          /* Bottom row of grid points */
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          stencil_indices[0] = 3;
@@ -439,13 +439,13 @@ int main (int argc, char *argv[])
                                          stencil_indices, values);
       }
 
-      if (pj == N-1)
+      if (pj == N - 1)
       {
          /* upper row of grid points */
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n + n-1;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n + n - 1;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          stencil_indices[0] = 4;
@@ -466,11 +466,11 @@ int main (int argc, char *argv[])
       if (pi == 0)
       {
          /* Left row of grid points */
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          stencil_indices[0] = 1;
 
@@ -486,14 +486,14 @@ int main (int argc, char *argv[])
                                          stencil_indices, values);
       }
 
-      if (pi == N-1)
+      if (pi == N - 1)
       {
          /* Right row of grid points */
-         bc_ilower[0] = pi*n + n-1;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n + n - 1;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          stencil_indices[0] = 2;
 
@@ -518,7 +518,7 @@ int main (int argc, char *argv[])
 
    /* 5. Set up SStruct Vectors for b and x */
    {
-      int    nvalues = n*n;
+      int    nvalues = n * n;
       double *values;
       int part = 0;
       int var;
@@ -587,7 +587,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorGetObject(x, (void **) &par_x);
       }
 
-      if (solver_id ==0 ) /* GMRES with SysPFMG - the default*/
+      if (solver_id == 0 ) /* GMRES with SysPFMG - the default*/
       {
          HYPRE_SStructGMRESCreate(MPI_COMM_WORLD, &solver);
 
@@ -719,7 +719,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-         if (myid ==0) { printf("\n ERROR: Invalid solver id specified.\n"); }
+         if (myid == 0) { printf("\n ERROR: Invalid solver id specified.\n"); }
       }
 
       /* Gather the solution vector.  This needs to be done if:
@@ -738,7 +738,7 @@ int main (int argc, char *argv[])
          char filename[255];
 
          int k, part = 0, var;
-         int nvalues = n*n;
+         int nvalues = n * n;
          double *values = (double*) calloc(nvalues, sizeof(double));
 
          /* save local solution for variable u */
@@ -759,7 +759,7 @@ int main (int argc, char *argv[])
          for (j = 0; j < n; j++)
             for (i = 0; i < n; i++)
             {
-               fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+               fprintf(file, "%06d %.14e\n", pj * N * n * n + pi * n + j * N * n + i, values[k++]);
             }
 
          fflush(file);
@@ -783,7 +783,7 @@ int main (int argc, char *argv[])
          for (j = 0; j < n; j++)
             for (i = 0; i < n; i++)
             {
-               fprintf(file, "%06d %.14e\n", pj*N*n*n+pi*n+j*N*n+i, values[k++]);
+               fprintf(file, "%06d %.14e\n", pj * N * n * n + pi * n + j * N * n + i, values[k++]);
             }
 
          fflush(file);
@@ -794,7 +794,7 @@ int main (int argc, char *argv[])
          /* save global finite element mesh */
          if (myid == 0)
          {
-            GLVis_PrintGlobalSquareMesh("vis/ex9.mesh", N*n-1);
+            GLVis_PrintGlobalSquareMesh("vis/ex9.mesh", N * n - 1);
          }
 #endif
       }

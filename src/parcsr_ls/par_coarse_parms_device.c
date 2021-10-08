@@ -77,7 +77,7 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    local_coarse_size = HYPRE_THRUST_CALL( count_if,
                                           hypre_IntArrayData(CF_marker),

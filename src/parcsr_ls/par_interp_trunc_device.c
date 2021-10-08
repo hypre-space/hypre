@@ -19,7 +19,7 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
                                   HYPRE_Real *P_a)
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -126,7 +126,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    HYPRE_Int       *P_i         = hypre_TAlloc(HYPRE_Int,  nnz_P,   HYPRE_MEMORY_DEVICE);
    HYPRE_Int       *P_j         = hypre_TAlloc(HYPRE_Int,  nnz_P,   HYPRE_MEMORY_DEVICE);
    HYPRE_Real      *P_a         = hypre_TAlloc(HYPRE_Real, nnz_P,   HYPRE_MEMORY_DEVICE);
-   HYPRE_Int       *P_rowptr    = hypre_TAlloc(HYPRE_Int,  nrows+1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int       *P_rowptr    = hypre_TAlloc(HYPRE_Int,  nrows + 1, HYPRE_MEMORY_DEVICE);
    HYPRE_Int       *tmp_rowid   = hypre_TAlloc(HYPRE_Int,  nnz_P,   HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int        new_nnz_diag = 0, new_nnz_offd = 0;
@@ -171,7 +171,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
                         thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
-                        thrust::make_zip_iterator(thrust::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
+                        thrust::make_zip_iterator(thrust::make_tuple(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P)),
                         P_j,
                         thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_diag_j,  P_diag_a)),
                         is_nonnegative<HYPRE_Int>() );
@@ -189,7 +189,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
                         thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
-                        thrust::make_zip_iterator(thrust::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
+                        thrust::make_zip_iterator(thrust::make_tuple(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P)),
                         P_j,
                         thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_offd_j,  P_offd_a)),
                         pred );

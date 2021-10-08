@@ -47,7 +47,7 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    hypre_ClearIndex(index);
    hypre_MPI_Comm_rank(comm, &myproc);
 
-   sendinfo_data= hypre_CTAlloc(hypre_SStructSendInfoData,  1, HYPRE_MEMORY_HOST);
+   sendinfo_data = hypre_CTAlloc(hypre_SStructSendInfoData,  1, HYPRE_MEMORY_HOST);
 
    /*------------------------------------------------------------------------
     * Create the structured sendbox patterns.
@@ -61,13 +61,14 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    intersect_box = hypre_BoxCreate(ndim);
    grid_boxes   = hypre_StructGridBoxes(fgrid);
 
-   send_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
-   send_processes= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
-   send_remote_boxnums= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
+   send_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
+   send_processes = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
+   send_remote_boxnums = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes),
+                                       HYPRE_MEMORY_HOST);
 
    hypre_ForBoxI(i, grid_boxes)
    {
-      grid_box= hypre_BoxArrayBox(grid_boxes, i);
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
 
       /*---------------------------------------------------------------------
        * Find the boxarray that must be sent. BoxManIntersect returns
@@ -83,8 +84,8 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
       hypre_BoxManIntersect(cboxman, hypre_BoxIMin(&cbox), hypre_BoxIMax(&cbox),
                             &boxman_entries, &nboxman_entries);
 
-      cnt= 0;
-      for (j= 0; j< nboxman_entries; j++)
+      cnt = 0;
+      for (j = 0; j < nboxman_entries; j++)
       {
          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
          if (proc != myproc)
@@ -93,10 +94,10 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
          }
       }
       send_processes[i]     = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
-      send_remote_boxnums[i]= hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
+      send_remote_boxnums[i] = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
 
-      cnt= 0;
-      for (j= 0; j< nboxman_entries; j++)
+      cnt = 0;
+      for (j = 0; j < nboxman_entries; j++)
       {
          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
 
@@ -123,7 +124,7 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    (sendinfo_data -> size)               = hypre_BoxArraySize(grid_boxes);
    (sendinfo_data -> send_boxes)         = send_boxes;
    (sendinfo_data -> send_procs)         = send_processes;
-   (sendinfo_data -> send_remote_boxnums)= send_remote_boxnums;
+   (sendinfo_data -> send_remote_boxnums) = send_remote_boxnums;
 
    return sendinfo_data;
 }
@@ -144,7 +145,7 @@ hypre_SStructSendInfoDataDestroy(hypre_SStructSendInfoData *sendinfo_data)
          hypre_BoxArrayArrayDestroy( (sendinfo_data -> send_boxes) );
       }
 
-      for (i= 0; i< (sendinfo_data -> size); i++)
+      for (i = 0; i < (sendinfo_data -> size); i++)
       {
          if (sendinfo_data -> send_procs[i])
          {

@@ -196,7 +196,7 @@ hypre_PCGSetup( void *pcg_vdata,
    hypre_PCGData *pcg_data =  (hypre_PCGData *)pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
    HYPRE_Int            max_iter         = (pcg_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*,void*,void*,void*) = (pcg_functions -> precond_setup);
+   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
    void          *precond_data     = (pcg_data -> precond_data);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -239,7 +239,7 @@ hypre_PCGSetup( void *pcg_vdata,
     * Allocate space for log info
     *-----------------------------------------------------*/
 
-   if ( (pcg_data->logging)>0  || (pcg_data->print_level)>0 )
+   if ( (pcg_data->logging) > 0  || (pcg_data->print_level) > 0 )
    {
       if ( (pcg_data -> norms) != NULL )
       {
@@ -307,7 +307,7 @@ hypre_PCGSolve( void *pcg_vdata,
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
    void           *matvec_data  = (pcg_data -> matvec_data);
-   HYPRE_Int     (*precond)(void*,void*,void*,void*)   = (pcg_functions -> precond);
+   HYPRE_Int     (*precond)(void*, void*, void*, void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
    HYPRE_Int       print_level  = (pcg_data -> print_level);
    HYPRE_Int       logging      = (pcg_data -> logging);
@@ -338,7 +338,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
    (pcg_data -> converged) = 0;
 
-   (*(pcg_functions->CommInfo))(A,&my_id,&num_procs);
+   (*(pcg_functions->CommInfo))(A, &my_id, &num_procs);
 
    /*-----------------------------------------------------------------------
     * With relative change convergence test on, it is possible to attempt
@@ -360,7 +360,7 @@ hypre_PCGSolve( void *pcg_vdata,
       bi_prod = (*(pcg_functions->InnerProd))(b, b);
       if (print_level > 1 && my_id == 0)
       {
-         hypre_printf("<b,b>: %e\n",bi_prod);
+         hypre_printf("<b,b>: %e\n", bi_prod);
       }
    }
    else
@@ -371,13 +371,13 @@ hypre_PCGSolve( void *pcg_vdata,
       bi_prod = (*(pcg_functions->InnerProd))(p, b);
       if (print_level > 1 && my_id == 0)
       {
-         hypre_printf("<C*b,b>: %e\n",bi_prod);
+         hypre_printf("<C*b,b>: %e\n", bi_prod);
       }
    };
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (bi_prod != 0.) { ieee_check = bi_prod/bi_prod; } /* INF -> NaN conversion */
+   if (bi_prod != 0.) { ieee_check = bi_prod / bi_prod; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -399,17 +399,17 @@ hypre_PCGSolve( void *pcg_vdata,
       return hypre_error_flag;
    }
 
-   eps = r_tol*r_tol; /* note: this may be re-assigned below */
+   eps = r_tol * r_tol; /* note: this may be re-assigned below */
    if ( bi_prod > 0.0 )
    {
-      if ( stop_crit && !rel_change && atolf<=0 )  /* pure absolute tolerance */
+      if ( stop_crit && !rel_change && atolf <= 0 ) /* pure absolute tolerance */
       {
          eps = eps / bi_prod;
          /* Note: this section is obsolete.  Aside from backwards comatability
             concerns, we could delete the stop_crit parameter and related code,
             using tol & atolf instead. */
       }
-      else if ( atolf>0 )  /* mixed relative and absolute tolerance */
+      else if ( atolf > 0 ) /* mixed relative and absolute tolerance */
       {
          bi_prod += atolf;
       }
@@ -420,7 +420,7 @@ hypre_PCGSolve( void *pcg_vdata,
              note: default for a_tol is 0.0, so relative residual criteria is used unless
              user specifies a_tol, or sets r_tol = 0.0, which means absolute
              tol only is checked  */
-         eps = hypre_max(r_tol*r_tol, a_tol*a_tol/bi_prod);
+         eps = hypre_max(r_tol * r_tol, a_tol * a_tol / bi_prod);
 
       }
    }
@@ -428,7 +428,7 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* Set x equal to zero and return */
       (*(pcg_functions->CopyVector))(b, x);
-      if (logging>0 || print_level>0)
+      if (logging > 0 || print_level > 0)
       {
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
@@ -451,11 +451,11 @@ hypre_PCGSolve( void *pcg_vdata,
    precond(precond_data, A, r, p);
 
    /* gamma = <r,p> */
-   gamma = (*(pcg_functions->InnerProd))(r,p);
+   gamma = (*(pcg_functions->InnerProd))(r, p);
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (gamma != 0.) { ieee_check = gamma/gamma; } /* INF -> NaN conversion */
+   if (gamma != 0.) { ieee_check = gamma / gamma; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -478,25 +478,25 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    /* Set initial residual norm */
-   if ( logging>0 || print_level > 0 || cf_tol > 0.0 )
+   if ( logging > 0 || print_level > 0 || cf_tol > 0.0 )
    {
       if (two_norm)
       {
-         i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
+         i_prod_0 = (*(pcg_functions->InnerProd))(r, r);
       }
       else
       {
          i_prod_0 = gamma;
       }
 
-      if ( logging>0 || print_level>0 ) { norms[0] = sqrt(i_prod_0); }
+      if ( logging > 0 || print_level > 0 ) { norms[0] = sqrt(i_prod_0); }
    }
-   if ( print_level > 1 && my_id==0 )
+   if ( print_level > 1 && my_id == 0 )
    {
       hypre_printf("\n\n");
       if (two_norm)
       {
-         if ( stop_crit && !rel_change && atolf==0 )  /* pure absolute tolerance */
+         if ( stop_crit && !rel_change && atolf == 0 ) /* pure absolute tolerance */
          {
             hypre_printf("Iters       ||r||_2     conv.rate\n");
             hypre_printf("-----    ------------   ---------\n");
@@ -515,7 +515,7 @@ hypre_PCGSolve( void *pcg_vdata,
       /* hypre_printf("% 5d    %e\n", i, norms[i]); */
    }
 
-   while ((i+1) <= max_iter)
+   while ((i + 1) <= max_iter)
    {
       /*--------------------------------------------------------------------
        * the core CG calculations...
@@ -526,24 +526,24 @@ hypre_PCGSolve( void *pcg_vdata,
          r = b - A x (instead of using the recursive definition). Note that this
          is potentially expensive and can lead to degraded convergence (since it
          essentially a "restarted CG"). */
-      recompute_true_residual = recompute_residual_p && !(i%recompute_residual_p);
+      recompute_true_residual = recompute_residual_p && !(i % recompute_residual_p);
 
       /* s = A*p */
       (*(pcg_functions->Matvec))(matvec_data, 1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
       sdotp = (*(pcg_functions->InnerProd))(s, p);
-      if ( sdotp==0.0 )
+      if ( sdotp == 0.0 )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Zero sdotp value in PCG");
-         if (i==1) { i_prod=i_prod_0; }
+         if (i == 1) { i_prod = i_prod_0; }
          break;
       }
       alpha = gamma / sdotp;
       if (! (alpha > HYPRE_REAL_MIN) )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal alpha value in PCG");
-         if (i==1) { i_prod=i_prod_0; }
+         if (i == 1) { i_prod = i_prod_0; }
          break;
       }
 
@@ -571,8 +571,8 @@ hypre_PCGSolve( void *pcg_vdata,
       if (rtol && two_norm)
       {
          /* use that r_new-r_old = alpha * s */
-         HYPRE_Real drob2 = alpha*alpha*(*(pcg_functions->InnerProd))(s,s)/bi_prod;
-         if ( drob2 < rtol*rtol )
+         HYPRE_Real drob2 = alpha * alpha * (*(pcg_functions->InnerProd))(s, s) / bi_prod;
+         if ( drob2 < rtol * rtol )
          {
             if (print_level > 1 && my_id == 0)
             {
@@ -593,8 +593,8 @@ hypre_PCGSolve( void *pcg_vdata,
       if (rtol && !two_norm)
       {
          /* use that ||r_new-r_old||_C^2 = (r_new ,C r_new) + (r_old, C r_old) */
-         HYPRE_Real r2ob2 = (gamma + gamma_old)/bi_prod;
-         if ( r2ob2 < rtol*rtol)
+         HYPRE_Real r2ob2 = (gamma + gamma_old) / bi_prod;
+         if ( r2ob2 < rtol * rtol)
          {
             if (print_level > 1 && my_id == 0)
             {
@@ -607,7 +607,7 @@ hypre_PCGSolve( void *pcg_vdata,
       /* set i_prod for convergence test */
       if (two_norm)
       {
-         i_prod = (*(pcg_functions->InnerProd))(r,r);
+         i_prod = (*(pcg_functions->InnerProd))(r, r);
       }
       else
       {
@@ -620,37 +620,37 @@ hypre_PCGSolve( void *pcg_vdata,
 #if 0
       if (two_norm)
          hypre_printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-                      i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+                      i, sqrt(i_prod), (bi_prod ? sqrt(i_prod / bi_prod) : 0));
       else
          hypre_printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-                      i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
+                      i, sqrt(i_prod), (bi_prod ? sqrt(i_prod / bi_prod) : 0));
 #endif
 
       /* print norm info */
-      if ( logging>0 || print_level>0 )
+      if ( logging > 0 || print_level > 0 )
       {
          norms[i]     = sqrt(i_prod);
-         rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
+         rel_norms[i] = bi_prod ? sqrt(i_prod / bi_prod) : 0;
       }
-      if ( print_level > 1 && my_id==0 )
+      if ( print_level > 1 && my_id == 0 )
       {
          if (two_norm)
          {
-            if ( stop_crit && !rel_change && atolf==0 )    /* pure absolute tolerance */
+            if ( stop_crit && !rel_change && atolf == 0 )  /* pure absolute tolerance */
             {
                hypre_printf("% 5d    %e    %f\n", i, norms[i],
-                            norms[i]/norms[i-1] );
+                            norms[i] / norms[i - 1] );
             }
             else
             {
                hypre_printf("% 5d    %e    %f    %e\n", i, norms[i],
-                            norms[i]/norms[i-1], rel_norms[i] );
+                            norms[i] / norms[i - 1], rel_norms[i] );
             }
          }
          else
          {
             hypre_printf("% 5d    %e    %f    %e\n", i, norms[i],
-                         norms[i]/norms[i-1], rel_norms[i] );
+                         norms[i] / norms[i - 1], rel_norms[i] );
          }
       }
 
@@ -676,7 +676,7 @@ hypre_PCGSolve( void *pcg_vdata,
          /* set i_prod for convergence test */
          if (two_norm)
          {
-            i_prod = (*(pcg_functions->InnerProd))(r,r);
+            i_prod = (*(pcg_functions->InnerProd))(r, r);
          }
          else
          {
@@ -692,9 +692,9 @@ hypre_PCGSolve( void *pcg_vdata,
          /* At user request, don't treat this as converged unless x didn't change
             much in the last iteration. */
       {
-         pi_prod = (*(pcg_functions->InnerProd))(p,p);
-         xi_prod = (*(pcg_functions->InnerProd))(x,x);
-         ratio = alpha*alpha*pi_prod/xi_prod;
+         pi_prod = (*(pcg_functions->InnerProd))(p, p);
+         xi_prod = (*(pcg_functions->InnerProd))(x, x);
+         ratio = alpha * alpha * pi_prod / xi_prod;
          if (ratio >= eps) { tentatively_converged = 0; }
       }
       if ( tentatively_converged )
@@ -737,7 +737,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
             break;
          }
-         cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i) );
+         cf_ave_1 = pow( i_prod / i_prod_0, 1.0 / (2.0 * i) );
 
          weight   = fabs(cf_ave_1 - cf_ave_0);
          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
@@ -772,12 +772,12 @@ hypre_PCGSolve( void *pcg_vdata,
     * Finish up with some outputs.
     *--------------------------------------------------------------------*/
 
-   if ( print_level > 1 && my_id==0 )
+   if ( print_level > 1 && my_id == 0 )
    {
       hypre_printf("\n\n");
    }
 
-   if (i >= max_iter && (i_prod/bi_prod) >= eps && eps > 0 && hybrid != -1)
+   if (i >= max_iter && (i_prod / bi_prod) >= eps && eps > 0 && hybrid != -1)
    {
       hypre_error_w_msg(HYPRE_ERROR_CONV, "Reached max iterations in PCG before convergence");
    }
@@ -785,7 +785,7 @@ hypre_PCGSolve( void *pcg_vdata,
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
    {
-      (pcg_data -> rel_residual_norm) = sqrt(i_prod/bi_prod);
+      (pcg_data -> rel_residual_norm) = sqrt(i_prod / bi_prod);
    }
    else /* actually, we'll never get here... */
    {
@@ -1113,8 +1113,8 @@ hypre_PCGGetPrecond( void         *pcg_vdata,
 
 HYPRE_Int
 hypre_PCGSetPrecond( void  *pcg_vdata,
-                     HYPRE_Int  (*precond)(void*,void*,void*,void*),
-                     HYPRE_Int  (*precond_setup)(void*,void*,void*,void*),
+                     HYPRE_Int  (*precond)(void*, void*, void*, void*),
+                     HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
                      void  *precond_data )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;

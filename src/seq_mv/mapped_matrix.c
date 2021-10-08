@@ -35,7 +35,7 @@ hypre_MappedMatrixCreate(  )
 HYPRE_Int
 hypre_MappedMatrixDestroy( hypre_MappedMatrix *matrix )
 {
-   HYPRE_Int  ierr=0;
+   HYPRE_Int  ierr = 0;
 
    if (matrix)
    {
@@ -56,7 +56,7 @@ hypre_MappedMatrixDestroy( hypre_MappedMatrix *matrix )
 HYPRE_Int
 hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
 {
-   HYPRE_Int  ierr=0;
+   HYPRE_Int  ierr = 0;
 
    if (matrix)
    {
@@ -74,7 +74,7 @@ hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
 HYPRE_Int
 hypre_MappedMatrixInitialize( hypre_MappedMatrix *matrix )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int    ierr = 0;
 
    return ierr;
 }
@@ -87,7 +87,7 @@ hypre_MappedMatrixInitialize( hypre_MappedMatrix *matrix )
 HYPRE_Int
 hypre_MappedMatrixAssemble( hypre_MappedMatrix *matrix )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int    ierr = 0;
 
    if ( matrix == NULL )
    {
@@ -130,7 +130,7 @@ hypre_MappedMatrixPrint(hypre_MappedMatrix *matrix  )
 HYPRE_Int
 hypre_MappedMatrixGetColIndex(hypre_MappedMatrix *matrix, HYPRE_Int j  )
 {
-   return ( hypre_MappedMatrixColIndex(matrix,j) );
+   return ( hypre_MappedMatrixColIndex(matrix, j) );
 }
 
 /*--------------------------------------------------------------------------
@@ -150,7 +150,7 @@ hypre_MappedMatrixGetMatrix(hypre_MappedMatrix *matrix )
 HYPRE_Int
 hypre_MappedMatrixSetMatrix(hypre_MappedMatrix *matrix, void *matrix_data  )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    hypre_MappedMatrixMatrix(matrix) = matrix_data;
 
@@ -165,7 +165,7 @@ HYPRE_Int
 hypre_MappedMatrixSetColMap(hypre_MappedMatrix *matrix,
                             HYPRE_Int (*ColMap)(HYPRE_Int, void *)  )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    hypre_MappedMatrixColMap(matrix) = ColMap;
 
@@ -180,7 +180,7 @@ HYPRE_Int
 hypre_MappedMatrixSetMapData(hypre_MappedMatrix *matrix,
                              void *map_data )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    hypre_MappedMatrixMapData(matrix) = map_data;
 

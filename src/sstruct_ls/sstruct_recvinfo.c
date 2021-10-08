@@ -44,11 +44,11 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    hypre_BoxInit(&boxman_entry_box, ndim);
 
    hypre_ClearIndex(index1);
-   hypre_SetIndex3(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);
+   hypre_SetIndex3(index2, rfactor[0] - 1, rfactor[1] - 1, rfactor[2] - 1);
 
    hypre_MPI_Comm_rank(comm, &myproc);
 
-   recvinfo_data= hypre_CTAlloc(hypre_SStructRecvInfoData,  1, HYPRE_MEMORY_HOST);
+   recvinfo_data = hypre_CTAlloc(hypre_SStructRecvInfoData,  1, HYPRE_MEMORY_HOST);
 
    /*------------------------------------------------------------------------
     * Create the structured recvbox patterns.
@@ -62,12 +62,12 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    intersect_box = hypre_BoxCreate(ndim);
    grid_boxes   = hypre_StructGridBoxes(cgrid);
 
-   recv_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
-   recv_processes= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
+   recv_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
+   recv_processes = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(grid_boxes), HYPRE_MEMORY_HOST);
 
    hypre_ForBoxI(i, grid_boxes)
    {
-      grid_box= hypre_BoxArrayBox(grid_boxes, i);
+      grid_box = hypre_BoxArrayBox(grid_boxes, i);
 
       hypre_SStructIndexScaleC_F(hypre_BoxIMin(grid_box), index1,
                                  rfactor, hypre_BoxIMin(&fbox));
@@ -77,8 +77,8 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
       hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&fbox), hypre_BoxIMax(&fbox),
                             &boxman_entries, &nboxman_entries);
 
-      cnt= 0;
-      for (j= 0; j< nboxman_entries; j++)
+      cnt = 0;
+      for (j = 0; j < nboxman_entries; j++)
       {
          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
          if (proc != myproc)
@@ -88,8 +88,8 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
       }
       recv_processes[i]     = hypre_CTAlloc(HYPRE_Int,  cnt, HYPRE_MEMORY_HOST);
 
-      cnt= 0;
-      for (j= 0; j< nboxman_entries; j++)
+      cnt = 0;
+      for (j = 0; j < nboxman_entries; j++)
       {
          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
 
@@ -100,7 +100,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
 
          if (proc != myproc)
          {
-            recv_processes[i][cnt]= proc;
+            recv_processes[i][cnt] = proc;
             hypre_SStructIndexScaleF_C(hypre_BoxIMin(&boxman_entry_box), index1,
                                        rfactor, hypre_BoxIMin(&boxman_entry_box));
             hypre_SStructIndexScaleF_C(hypre_BoxIMax(&boxman_entry_box), index1,
@@ -116,8 +116,8 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    hypre_BoxDestroy(intersect_box);
 
    (recvinfo_data -> size)      = hypre_BoxArraySize(grid_boxes);
-   (recvinfo_data -> recv_boxes)= recv_boxes;
-   (recvinfo_data -> recv_procs)= recv_processes;
+   (recvinfo_data -> recv_boxes) = recv_boxes;
+   (recvinfo_data -> recv_procs) = recv_processes;
 
    return recvinfo_data;
 }
@@ -138,7 +138,7 @@ hypre_SStructRecvInfoDataDestroy(hypre_SStructRecvInfoData *recvinfo_data)
          hypre_BoxArrayArrayDestroy( (recvinfo_data -> recv_boxes) );
       }
 
-      for (i= 0; i< (recvinfo_data -> size); i++)
+      for (i = 0; i < (recvinfo_data -> size); i++)
       {
          if (recvinfo_data -> recv_procs[i])
          {

@@ -24,8 +24,8 @@ main( HYPRE_Int   argc,
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD,&num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    row_starts = NULL;
    col_starts = NULL;
 

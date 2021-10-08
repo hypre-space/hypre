@@ -79,7 +79,7 @@ hypre_InitializeTiming( const char *name )
 
    if (new_name)
    {
-      for (i = 0; i < hypre_global_timing_ref(threadid,size); i++)
+      for (i = 0; i < hypre_global_timing_ref(threadid, size); i++)
       {
          if (hypre_TimingNumRegs(i) == 0)
          {
@@ -105,17 +105,17 @@ hypre_InitializeTiming( const char *name )
          old_num_regs  = (hypre_global_timing_ref(threadid, num_regs));
 
          (hypre_global_timing_ref(threadid, wall_time)) =
-            hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, cpu_time))  =
-            hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, flops))     =
-            hypre_CTAlloc(HYPRE_Real,  (time_index+1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, name))      =
-            hypre_CTAlloc(char *,  (time_index+1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(char *,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, state))     =
-            hypre_CTAlloc(HYPRE_Int,     (time_index+1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Int,     (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, num_regs))  =
-            hypre_CTAlloc(HYPRE_Int,     (time_index+1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(HYPRE_Int,     (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, size)) ++;
 
          for (i = 0; i < time_index; i++)
@@ -283,7 +283,7 @@ hypre_ClearTiming( )
       return ierr;
    }
 
-   for (i = 0; i < (hypre_global_timing_ref(threadid,size)); i++)
+   for (i = 0; i < (hypre_global_timing_ref(threadid, size)); i++)
    {
       hypre_TimingWallTime(i) = 0.0;
       hypre_TimingCPUTime(i)  = 0.0;

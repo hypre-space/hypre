@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid ==0) { printf("Must run with 2 processors!\n"); }
+      if (myid == 0) { printf("Must run with 2 processors!\n"); }
       MPI_Finalize();
 
       return (0);
@@ -170,7 +170,7 @@ int main (int argc, char *argv[])
          int nvars = 1;
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
          {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
          }
@@ -189,16 +189,16 @@ int main (int argc, char *argv[])
             int nbor_part = 1;
             /* Cells just outside of the boundary of part 0 in
                its coordinates */
-            int b_ilower[2] = {0,1}, b_iupper[2] = {0,2};
+            int b_ilower[2] = {0, 1}, b_iupper[2] = {0, 2};
             /* The same cells in part 1's coordinates.  Since we use the same
                index space across all parts, the coordinates coincide. */
-            int nbor_ilower[2] = {0,1}, nbor_iupper[2] = {0,2};
+            int nbor_ilower[2] = {0, 1}, nbor_iupper[2] = {0, 2};
             /* These parts have the same orientation, so no
                rotation is necessary */
-            int index_map[2] = {0,1};
+            int index_map[2] = {0, 1};
             /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
+            int index_dir[2] = {1, 1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
@@ -211,16 +211,16 @@ int main (int argc, char *argv[])
             int nbor_part = 0;
             /* Cells just outside of the boundary of part 1 in
                its coordinates */
-            int b_ilower[2] = {-1,1}, b_iupper[2] = {-1,2};
+            int b_ilower[2] = {-1, 1}, b_iupper[2] = {-1, 2};
             /* The same cells in part 0's coordinates.  Since we use the same
                index space across all parts, the coordinates coincide. */
-            int nbor_ilower[2] = {-1,1}, nbor_iupper[2] = {-1,2};
+            int nbor_ilower[2] = {-1, 1}, nbor_iupper[2] = {-1, 2};
             /* These parts have the same orientation, so no
                rotation is necessary */
-            int index_map[2] = {0,1};
+            int index_map[2] = {0, 1};
             /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
+            int index_dir[2] = {1, 1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
@@ -233,16 +233,16 @@ int main (int argc, char *argv[])
             int nbor_part = 2;
             /* Cells just outside of the boundary of part 1 in
                its coordinates */
-            int b_ilower[2] = {3,1}, b_iupper[2] = {3,4};
+            int b_ilower[2] = {3, 1}, b_iupper[2] = {3, 4};
             /* The same cells in part 2's coordinates.  Since we use the same
                index space across all parts, the coordinates coincide. */
-            int nbor_ilower[2] = {3,1}, nbor_iupper[2] = {3,4};
+            int nbor_ilower[2] = {3, 1}, nbor_iupper[2] = {3, 4};
             /* These parts have the same orientation, so no
                rotation is necessary */
-            int index_map[2] = {0,1};
+            int index_map[2] = {0, 1};
             /* These parts map increasing values to increasing values
                for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
+            int index_dir[2] = {1, 1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
@@ -257,16 +257,16 @@ int main (int argc, char *argv[])
             int nbor_part = 1;
             /* Cells just outside of the boundary of part 2 in
                its coordinates */
-            int b_ilower[2] = {2,1}, b_iupper[2] = {2,4};
+            int b_ilower[2] = {2, 1}, b_iupper[2] = {2, 4};
             /* The same cells in part 1's coordinates.  Since we use the same
                index space across all parts, the coordinates coincide. */
-            int nbor_ilower[2] = {2,1}, nbor_iupper[2] = {2,4};
+            int nbor_ilower[2] = {2, 1}, nbor_iupper[2] = {2, 4};
             /* These parts have the same orientation, so no
                rotation is necessary */
-            int index_map[2] = {0,1};
+            int index_map[2] = {0, 1};
             /* These parts map increasing values to increasing values
               for both variables (note: if decreasing maps to increasing, use -1)*/
-            int index_dir[2] = {1,1};
+            int index_dir[2] = {1, 1};
 
             HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                              nbor_part, nbor_ilower, nbor_iupper,
@@ -286,7 +286,7 @@ int main (int argc, char *argv[])
 
       /* the 5-pt stencil in 2D */
       {
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
          int stencil_size = 5;
 
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_5pt);
@@ -299,8 +299,8 @@ int main (int argc, char *argv[])
 
       /* the 9-pt stencil in 2D */
       {
-         int offsets[9][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1},
-            {-1,-1}, {1,-1}, {1,1}, {-1,1}
+         int offsets[9][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1},
+            {-1, -1}, {1, -1}, {1, 1}, {-1, 1}
          };
          int stencil_size = 9;
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_9pt);
@@ -346,7 +346,7 @@ int main (int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      int i,j;
+      int i, j;
       int part;
       int var = 0;
 
@@ -382,7 +382,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
             /* double values[30]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(30*sizeof(double));
+            double *values = (double *) malloc(30 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -397,7 +397,7 @@ int main (int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -418,7 +418,7 @@ int main (int argc, char *argv[])
             int nentries = 9;
             int nvalues  = 108; /* 12 grid points, each with 5 stencil entries */
             /* double values[108]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(108*sizeof(double));
+            double *values = (double *) malloc(108 * sizeof(double));
 
             int stencil_indices[9];
             for (j = 0; j < nentries; j++)
@@ -428,10 +428,10 @@ int main (int argc, char *argv[])
 
             for (i = 0; i < nvalues; i += nentries)
             {
-               values[i] = 8./3.;
+               values[i] = 8. / 3.;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1./3.;
+                  values[i + j] = -1. / 3.;
                }
             }
 
@@ -454,7 +454,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
             /* double values[80]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(80*sizeof(double));
+            double *values = (double *) malloc(80 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -467,7 +467,7 @@ int main (int argc, char *argv[])
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
                {
-                  values[i+j] = -1.0;
+                  values[i + j] = -1.0;
                }
             }
 
@@ -487,18 +487,18 @@ int main (int argc, char *argv[])
          int nentries = 6;
          int nvalues  = 24; /* 4 grid points, each with 6 stencil entries */
          /* double values[24]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(24*sizeof(double));
+         double *values = (double *) malloc(24 * sizeof(double));
 
          part = 1;
 
          for (i = 0; i < nvalues; i += nentries)
          {
-            values[i]   = 10./3.;
-            values[i+1] = -1.;
-            values[i+2] = -2./3.;
-            values[i+3] = -2./3.;
-            values[i+4] = 0.0;
-            values[i+5] = 0.0;
+            values[i]   = 10. / 3.;
+            values[i + 1] = -1.;
+            values[i + 2] = -2. / 3.;
+            values[i + 3] = -2. / 3.;
+            values[i + 4] = 0.0;
+            values[i + 5] = 0.0;
          }
 
          {
@@ -506,7 +506,7 @@ int main (int argc, char *argv[])
             int ilower[2] = { 2, 1};
             int iupper[2] = { 2, 4};
 
-            int stencil_indices[6] = {0,2,3,4,6,7};
+            int stencil_indices[6] = {0, 2, 3, 4, 6, 7};
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, nentries,
@@ -518,7 +518,7 @@ int main (int argc, char *argv[])
             int ilower[2] = { 0, 1};
             int iupper[2] = { 0, 4};
 
-            int stencil_indices[6] = {0,1,3,4,5,8};
+            int stencil_indices[6] = {0, 1, 3, 4, 5, 8};
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, nentries,
@@ -534,7 +534,7 @@ int main (int argc, char *argv[])
       {
          int maxnvalues = 9;
          /* double values[9]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(9*sizeof(double));
+         double *values = (double *) malloc(9 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
          {
@@ -586,7 +586,7 @@ int main (int argc, char *argv[])
             int ilower[2] = { 0, 1};
             int iupper[2] = { 2, 1};
 
-            int stencil_indices[3] = {3,5,6};
+            int stencil_indices[3] = {3, 5, 6};
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, 3,
@@ -599,7 +599,7 @@ int main (int argc, char *argv[])
             int ilower[2] = { 0, 3};
             int iupper[2] = { 0, 4};
 
-            int stencil_indices[3] = {1,5,8};
+            int stencil_indices[3] = {1, 5, 8};
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, 3,
@@ -611,7 +611,7 @@ int main (int argc, char *argv[])
             int ilower[2] = { 0, 4};
             int iupper[2] = { 2, 4};
 
-            int stencil_indices[3] = {4,7,8};
+            int stencil_indices[3] = {4, 7, 8};
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, 3,
@@ -624,7 +624,7 @@ int main (int argc, char *argv[])
       {
          int maxnvalues = 4;
          /* double values[4]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(4*sizeof(double));
+         double *values = (double *) malloc(4 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
          {
@@ -706,7 +706,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 6;  /* 6 grid points */
             /* double values[6]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(6*sizeof(double));
+            double *values = (double *) malloc(6 * sizeof(double));
 
             part = 0;
 
@@ -732,7 +732,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 12; /* 12 grid points */
             /* double values[12]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(12*sizeof(double));
+            double *values = (double *) malloc(12 * sizeof(double));
 
             part = 1;
 
@@ -760,7 +760,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 16; /* 16 grid points */
             /* double values[16]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(16*sizeof(double));
+            double *values = (double *) malloc(16 * sizeof(double));
 
             part = 2;
 

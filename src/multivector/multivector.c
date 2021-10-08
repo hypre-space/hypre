@@ -24,7 +24,7 @@ struct mv_MultiVector
 void *
 mv_MultiVectorGetData (mv_MultiVectorPtr x)
 {
-   hypre_assert (x!=NULL);
+   hypre_assert (x != NULL);
    return x->data;
 }
 
@@ -96,7 +96,7 @@ mv_MultiVectorDestroy( mv_MultiVectorPtr v)
    {
       (v->interpreter->DestroyMultiVector)( v->data );
    }
-   hypre_TFree( v,HYPRE_MEMORY_HOST);
+   hypre_TFree( v, HYPRE_MEMORY_HOST);
 }
 
 void

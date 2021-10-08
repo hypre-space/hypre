@@ -138,22 +138,22 @@ int main (int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n < num_procs) { n = sqrt(num_procs) + 1; }
-   N = n*n; /* global number of rows */
-   h = 1.0/(n+1); /* mesh size*/
-   h2 = h*h;
+   if (n * n < num_procs) { n = sqrt(num_procs) + 1; }
+   N = n * n; /* global number of rows */
+   h = 1.0 / (n + 1); /* mesh size*/
+   h2 = h * h;
 
    /* Each processor knows only of its own rows - the range is denoted by ilower
       and upper.  Here we partition the rows. We account for the fact that
       N may not divide evenly by the number of processors. */
-   local_size = N/num_procs;
-   extra = N - local_size*num_procs;
+   local_size = N / num_procs;
+   extra = N - local_size * num_procs;
 
-   ilower = local_size*myid;
+   ilower = local_size * myid;
    ilower += my_min(myid, extra);
 
-   iupper = local_size*(myid+1);
-   iupper += my_min(myid+1, extra);
+   iupper = local_size * (myid + 1);
+   iupper += my_min(myid + 1, extra);
    iupper = iupper - 1;
 
    /* How many rows do I have? */
@@ -189,17 +189,17 @@ int main (int argc, char *argv[])
          nnz = 0;
 
          /* The left identity block:position i-n */
-         if ((i-n)>=0)
+         if ((i - n) >= 0)
          {
-            cols[nnz] = i-n;
+            cols[nnz] = i - n;
             values[nnz] = -1.0;
             nnz++;
          }
 
          /* The left -1: position i-1 */
-         if (i%n)
+         if (i % n)
          {
-            cols[nnz] = i-1;
+            cols[nnz] = i - 1;
             values[nnz] = -1.0;
             nnz++;
          }
@@ -210,17 +210,17 @@ int main (int argc, char *argv[])
          nnz++;
 
          /* The right -1: position i+1 */
-         if ((i+1)%n)
+         if ((i + 1) % n)
          {
-            cols[nnz] = i+1;
+            cols[nnz] = i + 1;
             values[nnz] = -1.0;
             nnz++;
          }
 
          /* The right identity block:position i+n */
-         if ((i+n)< N)
+         if ((i + n) < N)
          {
-            cols[nnz] = i+n;
+            cols[nnz] = i + n;
             values[nnz] = -1.0;
             nnz++;
          }
@@ -252,11 +252,11 @@ int main (int argc, char *argv[])
 
 
    /* Create the rhs and solution */
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&b);
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &b);
    HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(b);
 
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&x);
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &x);
    HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(x);
 
@@ -269,7 +269,7 @@ int main (int argc, char *argv[])
       x_values = (double*) calloc(local_size, sizeof(double));
       rows = (HYPRE_Int*) calloc(local_size, sizeof(HYPRE_Int));
 
-      for (i=0; i<local_size; i++)
+      for (i = 0; i < local_size; i++)
       {
          rhs_values[i] = h2;
          x_values[i] = 0.0;
@@ -550,7 +550,7 @@ int main (int argc, char *argv[])
    }
    else
    {
-      if (myid ==0) { printf("Invalid solver id specified.\n"); }
+      if (myid == 0) { printf("Invalid solver id specified.\n"); }
    }
 
    /* Clean up */

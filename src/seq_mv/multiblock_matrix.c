@@ -34,11 +34,11 @@ hypre_MultiblockMatrixCreate( )
 HYPRE_Int
 hypre_MultiblockMatrixDestroy( hypre_MultiblockMatrix *matrix )
 {
-   HYPRE_Int  ierr=0, i;
+   HYPRE_Int  ierr = 0, i;
 
    if (matrix)
    {
-      for (i=0; i < hypre_MultiblockMatrixNumSubmatrices(matrix); i++)
+      for (i = 0; i < hypre_MultiblockMatrixNumSubmatrices(matrix); i++)
       {
          hypre_TFree(hypre_MultiblockMatrixSubmatrix(matrix, i), HYPRE_MEMORY_HOST);
       }
@@ -59,7 +59,7 @@ hypre_MultiblockMatrixDestroy( hypre_MultiblockMatrix *matrix )
 HYPRE_Int
 hypre_MultiblockMatrixLimitedDestroy( hypre_MultiblockMatrix *matrix )
 {
-   HYPRE_Int  ierr=0;
+   HYPRE_Int  ierr = 0;
 
    if (matrix)
    {
@@ -80,7 +80,7 @@ hypre_MultiblockMatrixLimitedDestroy( hypre_MultiblockMatrix *matrix )
 HYPRE_Int
 hypre_MultiblockMatrixInitialize( hypre_MultiblockMatrix *matrix )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int    ierr = 0;
 
    if ( hypre_MultiblockMatrixNumSubmatrices(matrix) <= 0 )
    {
@@ -104,7 +104,7 @@ hypre_MultiblockMatrixInitialize( hypre_MultiblockMatrix *matrix )
 HYPRE_Int
 hypre_MultiblockMatrixAssemble( hypre_MultiblockMatrix *matrix )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int    ierr = 0;
 
    return (ierr);
 }
@@ -144,13 +144,13 @@ hypre_MultiblockMatrixSetSubmatrixType(hypre_MultiblockMatrix *matrix,
 {
    HYPRE_Int ierr = 0;
 
-   if ( (j<0) ||
+   if ( (j < 0) ||
         (j >= hypre_MultiblockMatrixNumSubmatrices(matrix)) )
    {
       return (-1);
    }
 
-   hypre_MultiblockMatrixSubmatrixType(matrix,j) = type;
+   hypre_MultiblockMatrixSubmatrixType(matrix, j) = type;
 
    return ( ierr );
 }
@@ -166,13 +166,13 @@ hypre_MultiblockMatrixSetSubmatrix(hypre_MultiblockMatrix *matrix,
 {
    HYPRE_Int ierr = 0;
 
-   if ( (j<0) ||
+   if ( (j < 0) ||
         (j >= hypre_MultiblockMatrixNumSubmatrices(matrix)) )
    {
       return (-1);
    }
 
-   hypre_MultiblockMatrixSubmatrix(matrix,j) = submatrix;
+   hypre_MultiblockMatrixSubmatrix(matrix, j) = submatrix;
 
    return ( ierr );
 }

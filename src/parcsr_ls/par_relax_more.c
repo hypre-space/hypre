@@ -59,7 +59,7 @@ hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax 
    {
       HYPRE_Real a_ii = 0.0, r_i = 0.0, lower, upper;
 
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          if (A_diag_j[j] == i)
          {
@@ -71,7 +71,7 @@ hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax 
          }
       }
 
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          r_i += hypre_abs(A_offd_data[j]);
       }
@@ -145,12 +145,12 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
    HYPRE_Int ierr = 0;
    if (exec == HYPRE_EXEC_HOST)
    {
-      ierr = hypre_ParCSRMaxEigEstimateHost(A,scale,max_eig,min_eig);
+      ierr = hypre_ParCSRMaxEigEstimateHost(A, scale, max_eig, min_eig);
    }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    else
    {
-      ierr = hypre_ParCSRMaxEigEstimateDevice(A,scale,max_eig,min_eig);
+      ierr = hypre_ParCSRMaxEigEstimateDevice(A, scale, max_eig, min_eig);
    }
 #endif
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -270,16 +270,16 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
    u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
 
    /* make room for tri-diag matrix */
-   tridiag = hypre_CTAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
-   trioffd = hypre_CTAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
-   for (i=0; i < max_iter + 1; i++)
+   tridiag = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+   trioffd = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+   for (i = 0; i < max_iter + 1; i++)
    {
       tridiag[i] = 0;
       trioffd[i] = 0;
    }
 
    /* set residual to random */
-   hypre_ParVectorSetRandomValues(r,1);
+   hypre_ParVectorSetRandomValues(r, 1);
 
    if (scale)
    {
@@ -288,11 +288,11 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
    else
    {
       /* set ds to 1 */
-      hypre_ParVectorSetConstantValues(ds,1.0);
+      hypre_ParVectorSetConstantValues(ds, 1.0);
    }
 
    /* gamma = <r,Cr> */
-   gamma = hypre_ParVectorInnerProd(r,p);
+   gamma = hypre_ParVectorInnerProd(r, p);
 
    /* for the initial filling of the tridiag matrix */
    beta = 1.0;
@@ -306,9 +306,9 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
 
       /*gamma = <r,Cr> */
       gamma_old = gamma;
-      gamma = hypre_ParVectorInnerProd(r,s);
+      gamma = hypre_ParVectorInnerProd(r, s);
 
-      if (i==0)
+      if (i == 0)
       {
          beta = 1.0;
          /* p_0 = C*r */
@@ -323,9 +323,9 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
 #ifdef HYPRE_USING_OPENMP
          #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
-         for (j=0; j < local_size; j++)
+         for (j = 0; j < local_size; j++)
          {
-            p_data[j] = s_data[j] + beta*p_data[j];
+            p_data[j] = s_data[j] + beta * p_data[j];
          }
       }
 
@@ -349,19 +349,19 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
       }
 
       /* <s,p> */
-      sdotp =  hypre_ParVectorInnerProd(s,p);
+      sdotp =  hypre_ParVectorInnerProd(s, p);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma/sdotp;
+      alpha = gamma / sdotp;
 
       /* get tridiagonal matrix */
-      alphainv = 1.0/alpha;
+      alphainv = 1.0 / alpha;
 
-      tridiag[i+1] = alphainv;
+      tridiag[i + 1] = alphainv;
       tridiag[i] *= beta;
       tridiag[i] += alphainv;
 
-      trioffd[i+1] = alphainv;
+      trioffd[i + 1] = alphainv;
       trioffd[i] *= sqrt(beta);
 
       /* x = x + alpha*p */
@@ -374,9 +374,9 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
    }
 
    /* eispack routine - eigenvalues return in tridiag and ordered*/
-   hypre_LINPACKcgtql1(&i,tridiag,trioffd,&err);
+   hypre_LINPACKcgtql1(&i, tridiag, trioffd, &err);
 
-   lambda_max = tridiag[i-1];
+   lambda_max = tridiag[i - 1];
    lambda_min = tridiag[0];
    /* hypre_printf("linpack max eig est = %g\n", lambda_max);*/
    /* hypre_printf("linpack min eig est = %g\n", lambda_min);*/
@@ -483,7 +483,7 @@ hypre_ParCSRRelax_CG( HYPRE_Solver        solver,
       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
       HYPRE_PCGGetNumIterations(solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      if (myid ==0)
+      if (myid == 0)
       {
          hypre_printf("            -----CG PCG Iterations = %d\n", num_iterations);
          hypre_printf("            -----CG PCG Final Relative Residual Norm = %e\n", final_res_norm);
@@ -506,22 +506,22 @@ hypre_ParCSRRelax_CG( HYPRE_Solver        solver,
 */
 
 HYPRE_Int
-hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
+hypre_LINPACKcgtql1(HYPRE_Int *n, HYPRE_Real *d, HYPRE_Real *e, HYPRE_Int *ierr)
 {
    /* System generated locals */
-   HYPRE_Int  i__1,i__2;
-   HYPRE_Real d__1,d__2,c_b10 = 1.0;
+   HYPRE_Int  i__1, i__2;
+   HYPRE_Real d__1, d__2, c_b10 = 1.0;
 
    /* Local variables */
-   HYPRE_Real c,f,g,h;
-   HYPRE_Int  i,j,l,m;
-   HYPRE_Real p,r,s,c2,c3 = 0.0;
-   HYPRE_Int  l1,l2;
+   HYPRE_Real c, f, g, h;
+   HYPRE_Int  i, j, l, m;
+   HYPRE_Real p, r, s, c2, c3 = 0.0;
+   HYPRE_Int  l1, l2;
    HYPRE_Real s2 = 0.0;
    HYPRE_Int  ii;
-   HYPRE_Real dl1,el1;
+   HYPRE_Real dl1, el1;
    HYPRE_Int  mml;
-   HYPRE_Real tst1,tst2;
+   HYPRE_Real tst1, tst2;
 
    /*     THIS SUBROUTINE IS A TRANSLATION OF THE ALGOL PROCEDURE TQL1, */
    /*     NUM. MATH. 11, 293-306(1968) BY BOWDLER, MARTIN, REINSCH, AND */
@@ -589,7 +589,7 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
    for (l = 1; l <= i__1; ++l)
    {
       j = 0;
-      h = (d__1 = d[l],fabs(d__1)) + (d__2 = e[l],fabs(d__2));
+      h = (d__1 = d[l], fabs(d__1)) + (d__2 = e[l], fabs(d__2));
       if (tst1 < h)
       {
          tst1 = h;
@@ -598,7 +598,7 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
       i__2 = *n;
       for (m = l; m <= i__2; ++m)
       {
-         tst2 = tst1 + (d__1 = e[m],fabs(d__1));
+         tst2 = tst1 + (d__1 = e[m], fabs(d__1));
          if (tst2 == tst1)
          {
             goto L120;
@@ -622,11 +622,11 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
       l2 = l1 + 1;
       g = d[l];
       p = (d[l1] - g) / (e[l] * 2.);
-      r = hypre_LINPACKcgpthy(&p,&c_b10);
+      r = hypre_LINPACKcgpthy(&p, &c_b10);
       ds = 1.0;
       if (p < 0.0) { ds = -1.0; }
-      d[l] = e[l] / (p + ds*r);
-      d[l1] = e[l] * (p + ds*r);
+      d[l] = e[l] / (p + ds * r);
+      d[l1] = e[l] * (p + ds * r);
       dl1 = d[l1];
       h = g - d[l];
       if (l2 > *n)
@@ -659,7 +659,7 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
          i = m - ii;
          g = c * e[i];
          h = c * p;
-         r = hypre_LINPACKcgpthy(&p,&e[i]);
+         r = hypre_LINPACKcgpthy(&p, &e[i]);
          e[i + 1] = s * r;
          s = e[i] / r;
          c = p / r;
@@ -670,7 +670,7 @@ hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
       p = -s * s2 * c3 * el1 * e[l] / dl1;
       e[l] = s * p;
       d[l] = c * p;
-      tst2 = tst1 + (d__1 = e[l],fabs(d__1));
+      tst2 = tst1 + (d__1 = e[l], fabs(d__1));
       if (tst2 > tst1)
       {
          goto L130;
@@ -711,28 +711,28 @@ L1001:
 } /* cgtql1_ */
 
 HYPRE_Real
-hypre_LINPACKcgpthy(HYPRE_Real *a,HYPRE_Real *b)
+hypre_LINPACKcgpthy(HYPRE_Real *a, HYPRE_Real *b)
 {
    /* System generated locals */
-   HYPRE_Real ret_val,d__1,d__2,d__3;
+   HYPRE_Real ret_val, d__1, d__2, d__3;
 
    /* Local variables */
-   HYPRE_Real p,r,s,t,u;
+   HYPRE_Real p, r, s, t, u;
 
    /*     FINDS DSQRT(A**2+B**2) WITHOUT OVERFLOW OR DESTRUCTIVE UNDERFLOW */
 
 
    /* Computing MAX */
-   d__1 = fabs(*a),d__2 = fabs(*b);
-   p = hypre_max(d__1,d__2);
+   d__1 = fabs(*a), d__2 = fabs(*b);
+   p = hypre_max(d__1, d__2);
    if (!p)
    {
       goto L20;
    }
    /* Computing MIN */
-   d__2 = fabs(*a),d__3 = fabs(*b);
+   d__2 = fabs(*a), d__3 = fabs(*b);
    /* Computing 2nd power */
-   d__1 = hypre_min(d__2,d__3) / p;
+   d__1 = hypre_min(d__2, d__3) / p;
    r = d__1 * d__1;
 L10:
    t = r + 4.;

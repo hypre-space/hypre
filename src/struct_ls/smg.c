@@ -92,9 +92,9 @@ hypre_SMGDestroy( void *smg_vdata )
          hypre_StructVectorDestroy(smg_data -> x_l[0]);
          for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
-            hypre_StructGridDestroy(smg_data -> grid_l[l+1]);
-            hypre_StructGridDestroy(smg_data -> PT_grid_l[l+1]);
-            hypre_StructMatrixDestroy(smg_data -> A_l[l+1]);
+            hypre_StructGridDestroy(smg_data -> grid_l[l + 1]);
+            hypre_StructGridDestroy(smg_data -> PT_grid_l[l + 1]);
+            hypre_StructMatrixDestroy(smg_data -> A_l[l + 1]);
             if (smg_data -> PT_l[l] == smg_data -> R_l[l])
             {
                hypre_StructMatrixDestroy(smg_data -> PT_l[l]);
@@ -104,10 +104,10 @@ hypre_SMGDestroy( void *smg_vdata )
                hypre_StructMatrixDestroy(smg_data -> PT_l[l]);
                hypre_StructMatrixDestroy(smg_data -> R_l[l]);
             }
-            hypre_StructVectorDestroy(smg_data -> b_l[l+1]);
-            hypre_StructVectorDestroy(smg_data -> x_l[l+1]);
-            hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
-            hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
+            hypre_StructVectorDestroy(smg_data -> b_l[l + 1]);
+            hypre_StructVectorDestroy(smg_data -> x_l[l + 1]);
+            hypre_StructVectorDestroy(smg_data -> tb_l[l + 1]);
+            hypre_StructVectorDestroy(smg_data -> tx_l[l + 1]);
          }
          hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
          hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
@@ -265,7 +265,7 @@ hypre_SMGSetNumPreRelax( void *smg_vdata,
 {
    hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
 
-   (smg_data -> num_pre_relax) = hypre_max(num_pre_relax,1);
+   (smg_data -> num_pre_relax) = hypre_max(num_pre_relax, 1);
 
    return hypre_error_flag;
 }
@@ -416,8 +416,8 @@ hypre_SMGPrintLogging( void *smg_vdata,
          {
             for (i = 0; i < num_iterations; i++)
             {
-               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+               hypre_printf("Residual norm[%d] = %e   ", i, norms[i]);
+               hypre_printf("Relative residual norm[%d] = %e\n", i, rel_norms[i]);
             }
          }
       }
@@ -444,7 +444,7 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
    {
       if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {

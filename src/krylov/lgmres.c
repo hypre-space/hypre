@@ -123,7 +123,7 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
    if (lgmres_data)
    {
       hypre_LGMRESFunctions *lgmres_functions = lgmres_data->functions;
-      if ( (lgmres_data->logging>0) || (lgmres_data->print_level) > 0 )
+      if ( (lgmres_data->logging > 0) || (lgmres_data->print_level) > 0 )
       {
          if ( (lgmres_data -> norms) != NULL )
          {
@@ -152,7 +152,7 @@ hypre_LGMRESDestroy( void *lgmres_vdata )
 
       if ( (lgmres_data -> p) != NULL )
       {
-         for (i = 0; i < (lgmres_data -> k_dim+1); i++)
+         for (i = 0; i < (lgmres_data -> k_dim + 1); i++)
          {
             if ( (lgmres_data -> p)[i] != NULL )
             {
@@ -227,7 +227,7 @@ hypre_LGMRESSetup( void *lgmres_vdata,
 
    HYPRE_Int            k_dim            = (lgmres_data -> k_dim);
    HYPRE_Int            max_iter         = (lgmres_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*,void*,void*,void*) = (lgmres_functions->precond_setup);
+   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (lgmres_functions->precond_setup);
    void          *precond_data     = (lgmres_data -> precond_data);
 
    HYPRE_Int            rel_change       = (lgmres_data -> rel_change);
@@ -247,7 +247,7 @@ hypre_LGMRESSetup( void *lgmres_vdata,
 
    if ((lgmres_data -> p) == NULL)
    {
-      (lgmres_data -> p) = (void**)(*(lgmres_functions->CreateVectorArray))(k_dim+1,x);
+      (lgmres_data -> p) = (void**)(*(lgmres_functions->CreateVectorArray))(k_dim + 1, x);
    }
    if ((lgmres_data -> r) == NULL)
    {
@@ -269,16 +269,17 @@ hypre_LGMRESSetup( void *lgmres_vdata,
    /* lgmres mod */
    if ((lgmres_data -> aug_vecs) == NULL)
    {
-      (lgmres_data -> aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim+1,
+      (lgmres_data -> aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim + 1,
                                                                                    x);   /* one extra */
    }
    if ((lgmres_data -> a_aug_vecs) == NULL)
    {
-      (lgmres_data -> a_aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim,x);
+      (lgmres_data -> a_aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim, x);
    }
    if ((lgmres_data -> aug_order) == NULL)
    {
-      (lgmres_data -> aug_order) = hypre_CTAllocF(HYPRE_Int,aug_dim,lgmres_functions, HYPRE_MEMORY_HOST);
+      (lgmres_data -> aug_order) = hypre_CTAllocF(HYPRE_Int, aug_dim, lgmres_functions,
+                                                  HYPRE_MEMORY_HOST);
    }
    /*---*/
 
@@ -294,11 +295,11 @@ hypre_LGMRESSetup( void *lgmres_vdata,
     * Allocate space for log info
     *-----------------------------------------------------*/
 
-   if ( (lgmres_data->logging)>0 || (lgmres_data->print_level) > 0 )
+   if ( (lgmres_data->logging) > 0 || (lgmres_data->print_level) > 0 )
    {
       if ((lgmres_data -> norms) == NULL)
       {
-         (lgmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1,lgmres_functions,
+         (lgmres_data -> norms) = hypre_CTAllocF(HYPRE_Real, max_iter + 1, lgmres_functions,
                                                  HYPRE_MEMORY_HOST);
       }
    }
@@ -349,13 +350,13 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    void          **a_aug_vecs     = (lgmres_data ->a_aug_vecs);
    HYPRE_Int            *aug_order      = (lgmres_data->aug_order);
    HYPRE_Int             aug_dim        = (lgmres_data -> aug_dim);
-   HYPRE_Int             approx_constant=  (lgmres_data ->approx_constant);
+   HYPRE_Int             approx_constant =  (lgmres_data ->approx_constant);
    HYPRE_Int             it_arnoldi, aug_ct, it_total, ii, order, it_aug;
    HYPRE_Int             spot = 0;
    HYPRE_Real      tmp_norm, r_norm_last;
    /*---*/
 
-   HYPRE_Int              (*precond)(void*,void*,void*,void*)   = (lgmres_functions -> precond);
+   HYPRE_Int              (*precond)(void*, void*, void*, void*)   = (lgmres_functions -> precond);
    HYPRE_Int               *precond_data = (HYPRE_Int*)(lgmres_data -> precond_data);
 
    HYPRE_Int             print_level    = (lgmres_data -> print_level);
@@ -389,8 +390,8 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
     * this. Perhaps it should be set to something non-zero (but small).
     *-----------------------------------------------------------------------*/
 
-   (*(lgmres_functions->CommInfo))(A,&my_id,&num_procs);
-   if ( logging>0 || print_level>0 )
+   (*(lgmres_functions->CommInfo))(A, &my_id, &num_procs);
+   if ( logging > 0 || print_level > 0 )
    {
       norms          = (lgmres_data -> norms);
       /* not used yet      log_file_name  = (lgmres_data -> log_file_name);*/
@@ -398,27 +399,27 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    }
 
    /* initialize work arrays  - lgmres includes aug_dim*/
-   rs = hypre_CTAllocF(HYPRE_Real,k_dim+1+aug_dim,lgmres_functions, HYPRE_MEMORY_HOST);
-   c = hypre_CTAllocF(HYPRE_Real,k_dim+aug_dim,lgmres_functions, HYPRE_MEMORY_HOST);
-   s = hypre_CTAllocF(HYPRE_Real,k_dim+aug_dim,lgmres_functions, HYPRE_MEMORY_HOST);
+   rs = hypre_CTAllocF(HYPRE_Real, k_dim + 1 + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+   c = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
+   s = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
 
    /* lgmres mod. - need non-modified hessenberg to avoid aug_dim matvecs */
-   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+aug_dim+1,lgmres_functions, HYPRE_MEMORY_HOST);
-   for (i=0; i < k_dim+aug_dim+1; i++)
+   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + aug_dim + 1, lgmres_functions, HYPRE_MEMORY_HOST);
+   for (i = 0; i < k_dim + aug_dim + 1; i++)
    {
-      hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim+aug_dim,lgmres_functions, HYPRE_MEMORY_HOST);
+      hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim + aug_dim, lgmres_functions, HYPRE_MEMORY_HOST);
    }
 
-   (*(lgmres_functions->CopyVector))(b,p[0]);
+   (*(lgmres_functions->CopyVector))(b, p[0]);
 
    /* compute initial residual */
-   (*(lgmres_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, p[0]);
+   (*(lgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
-   b_norm = sqrt((*(lgmres_functions->InnerProd))(b,b));
+   b_norm = sqrt((*(lgmres_functions->InnerProd))(b, b));
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (b_norm != 0.) { ieee_check = b_norm/b_norm; } /* INF -> NaN conversion */
+   if (b_norm != 0.) { ieee_check = b_norm / b_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -440,12 +441,12 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       return hypre_error_flag;
    }
 
-   r_norm = sqrt((*(lgmres_functions->InnerProd))(p[0],p[0]));
+   r_norm = sqrt((*(lgmres_functions->InnerProd))(p[0], p[0]));
    r_norm_0 = r_norm;
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (r_norm != 0.) { ieee_check = r_norm/r_norm; } /* INF -> NaN conversion */
+   if (r_norm != 0.) { ieee_check = r_norm / r_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -467,10 +468,10 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       return hypre_error_flag;
    }
 
-   if ( logging>0 || print_level > 0)
+   if ( logging > 0 || print_level > 0)
    {
       norms[0] = r_norm;
-      if ( print_level>1 && my_id == 0 )
+      if ( print_level > 1 && my_id == 0 )
       {
          hypre_printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
@@ -486,12 +487,12 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    if (b_norm > 0.0)
    {
       /* convergence criterion |r_i|/|b| <= accuracy if |b| > 0 */
-      den_norm= b_norm;
+      den_norm = b_norm;
    }
    else
    {
       /* convergence criterion |r_i|/|r0| <= accuracy if |b| = 0 */
-      den_norm= r_norm;
+      den_norm = r_norm;
    };
 
    /* convergence criteria: |r_i| <= max( a_tol, r_tol * den_norm)
@@ -500,12 +501,12 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
              user specifies a_tol, or sets r_tol = 0.0, which means absolute
              tol only is checked  */
 
-   epsilon = hypre_max(a_tol,r_tol*den_norm);
+   epsilon = hypre_max(a_tol, r_tol * den_norm);
 
    /* so now our stop criteria is |r_i| <= epsilon */
 
 
-   if ( print_level>1 && my_id == 0 )
+   if ( print_level > 1 && my_id == 0 )
    {
       if (b_norm > 0.0)
       {
@@ -527,7 +528,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
 
 
    /*lgmres initialization */
-   for (ii=0; ii<aug_dim; ii++)
+   for (ii = 0; ii < aug_dim; ii++)
    {
       aug_order[ii] = 0;
    }
@@ -543,15 +544,15 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       rs[0] = r_norm;
       if (r_norm == 0.0)
       {
-         hypre_TFreeF(c,lgmres_functions);
-         hypre_TFreeF(s,lgmres_functions);
-         hypre_TFreeF(rs,lgmres_functions);
-         for (i=0; i < k_dim+aug_dim+1; i++)
+         hypre_TFreeF(c, lgmres_functions);
+         hypre_TFreeF(s, lgmres_functions);
+         hypre_TFreeF(rs, lgmres_functions);
+         for (i = 0; i < k_dim + aug_dim + 1; i++)
          {
-            hypre_TFreeF(hh[i],lgmres_functions);
+            hypre_TFreeF(hh[i], lgmres_functions);
          }
 
-         hypre_TFreeF(hh,lgmres_functions);
+         hypre_TFreeF(hh, lgmres_functions);
          HYPRE_ANNOTATE_FUNC_END;
 
          return hypre_error_flag;
@@ -561,19 +562,19 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          should print the final norm and exit */
       if (r_norm <= epsilon && iter >= min_iter)
       {
-         (*(lgmres_functions->CopyVector))(b,r);
-         (*(lgmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-         r_norm = sqrt((*(lgmres_functions->InnerProd))(r,r));
+         (*(lgmres_functions->CopyVector))(b, r);
+         (*(lgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+         r_norm = sqrt((*(lgmres_functions->InnerProd))(r, r));
          if (r_norm  <= epsilon)
          {
-            if ( print_level>1 && my_id == 0)
+            if ( print_level > 1 && my_id == 0)
             {
                hypre_printf("\n\n");
                hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
             }
             break;
          }
-         else if ( print_level>0 && my_id == 0)
+         else if ( print_level > 0 && my_id == 0)
          {
             hypre_printf("false convergence 1\n");
          }
@@ -583,7 +584,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       t = 1.0 / r_norm;
       r_norm_last = r_norm;
 
-      (*(lgmres_functions->ScaleVector))(t,p[0]);
+      (*(lgmres_functions->ScaleVector))(t, p[0]);
       i = 0;
 
       /* lgmres mod: determine number of arnoldi steps to take */
@@ -613,7 +614,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          if ( i <= it_arnoldi)
          {
             /* Arnoldi */
-            precond(precond_data, A, p[i-1], r);
+            precond(precond_data, A, p[i - 1], r);
             (*(lgmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
          }
          else
@@ -621,7 +622,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
             /*lgmres aug step */
             it_aug ++;
             order = i - it_arnoldi - 1; /* which aug step (note i starts at 1) - aug order number at 0*/
-            for (ii=0; ii<aug_dim; ii++)
+            for (ii = 0; ii < aug_dim; ii++)
             {
                if (aug_order[ii] == order)
                {
@@ -630,7 +631,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
                }
             }
             /* copy a_aug_vecs[spot] to p[i] */
-            (*(lgmres_functions->CopyVector))(a_aug_vecs[spot],p[i]);
+            (*(lgmres_functions->CopyVector))(a_aug_vecs[spot], p[i]);
 
             /*note: an alternate implementation choice would be to only save the AUGVECS and
               not A_AUGVEC and then apply the PC here to the augvec */
@@ -638,17 +639,17 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          /*---*/
 
          /* modified Gram_Schmidt */
-         for (j=0; j < i; j++)
+         for (j = 0; j < i; j++)
          {
-            hh[j][i-1] = (*(lgmres_functions->InnerProd))(p[j],p[i]);
-            (*(lgmres_functions->Axpy))(-hh[j][i-1],p[j],p[i]);
+            hh[j][i - 1] = (*(lgmres_functions->InnerProd))(p[j], p[i]);
+            (*(lgmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
          }
-         t = sqrt((*(lgmres_functions->InnerProd))(p[i],p[i]));
-         hh[i][i-1] = t;
+         t = sqrt((*(lgmres_functions->InnerProd))(p[i], p[i]));
+         hh[i][i - 1] = t;
          if (t != 0.0)
          {
-            t = 1.0/t;
-            (*(lgmres_functions->ScaleVector))(t,p[i]);
+            t = 1.0 / t;
+            (*(lgmres_functions->ScaleVector))(t, p[i]);
          }
 
 
@@ -656,43 +657,43 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
             update factorization of hh */
          for (j = 1; j < i; j++)
          {
-            t = hh[j-1][i-1];
-            hh[j-1][i-1] = s[j-1]*hh[j][i-1] + c[j-1]*t;
-            hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
+            t = hh[j - 1][i - 1];
+            hh[j - 1][i - 1] = s[j - 1] * hh[j][i - 1] + c[j - 1] * t;
+            hh[j][i - 1] = -s[j - 1] * t + c[j - 1] * hh[j][i - 1];
          }
-         t= hh[i][i-1]*hh[i][i-1];
-         t+= hh[i-1][i-1]*hh[i-1][i-1];
+         t = hh[i][i - 1] * hh[i][i - 1];
+         t += hh[i - 1][i - 1] * hh[i - 1][i - 1];
          gamma = sqrt(t);
          if (gamma == 0.0) { gamma = epsmac; }
-         c[i-1] = hh[i-1][i-1]/gamma;
-         s[i-1] = hh[i][i-1]/gamma;
-         rs[i] = -hh[i][i-1]*rs[i-1];
-         rs[i]/=  gamma;
-         rs[i-1] = c[i-1]*rs[i-1];
+         c[i - 1] = hh[i - 1][i - 1] / gamma;
+         s[i - 1] = hh[i][i - 1] / gamma;
+         rs[i] = -hh[i][i - 1] * rs[i - 1];
+         rs[i] /=  gamma;
+         rs[i - 1] = c[i - 1] * rs[i - 1];
          /* determine residual norm */
-         hh[i-1][i-1] = s[i-1]*hh[i][i-1] + c[i-1]*hh[i-1][i-1];
+         hh[i - 1][i - 1] = s[i - 1] * hh[i][i - 1] + c[i - 1] * hh[i - 1][i - 1];
          r_norm = fabs(rs[i]);
 
          /* print ? */
-         if ( print_level>0 )
+         if ( print_level > 0 )
          {
             norms[iter] = r_norm;
-            if ( print_level>1 && my_id == 0 )
+            if ( print_level > 1 && my_id == 0 )
             {
                if (b_norm > 0.0)
                   hypre_printf("% 5d    %e    %f   %e\n", iter,
-                               norms[iter],norms[iter]/norms[iter-1],
-                               norms[iter]/b_norm);
+                               norms[iter], norms[iter] / norms[iter - 1],
+                               norms[iter] / b_norm);
                else
                   hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
-                               norms[iter]/norms[iter-1]);
+                               norms[iter] / norms[iter - 1]);
             }
          }
          /*convergence factor tolerance */
          if (cf_tol > 0.0)
          {
             cf_ave_0 = cf_ave_1;
-            cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+            cf_ave_1 = pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
 
             weight   = fabs(cf_ave_1 - cf_ave_0);
             weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
@@ -720,16 +721,16 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
 
       if (break_value) { break; }
 
-      rs[i-1] = rs[i-1]/hh[i-1][i-1];
-      for (k = i-2; k >= 0; k--)
+      rs[i - 1] = rs[i - 1] / hh[i - 1][i - 1];
+      for (k = i - 2; k >= 0; k--)
       {
          t = 0.0;
-         for (j = k+1; j < i; j++)
+         for (j = k + 1; j < i; j++)
          {
-            t -= hh[k][j]*rs[j];
+            t -= hh[k][j] * rs[j];
          }
-         t+= rs[k];
-         rs[k] = t/hh[k][k];
+         t += rs[k];
+         rs[k] = t / hh[k][k];
       }
       /* form linear combination of p's to get solution */
       /* put the new aug_vector in aug_vecs[aug_dim]  - a temp position*/
@@ -744,17 +745,17 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
 
       if (!it_aug)
       {
-         (*(lgmres_functions->CopyVector))(p[i-1],w);
-         (*(lgmres_functions->ScaleVector))(rs[i-1],w);
-         for (j = i-2; j >=0; j--)
+         (*(lgmres_functions->CopyVector))(p[i - 1], w);
+         (*(lgmres_functions->ScaleVector))(rs[i - 1], w);
+         for (j = i - 2; j >= 0; j--)
          {
             (*(lgmres_functions->Axpy))(rs[j], p[j], w);
          }
       }
       else /* need some of the augvecs */
       {
-         (*(lgmres_functions->CopyVector))(p[0],w);
-         (*(lgmres_functions->ScaleVector))(rs[0],w);
+         (*(lgmres_functions->CopyVector))(p[0], w);
+         (*(lgmres_functions->ScaleVector))(rs[0], w);
 
          /* reg. arnoldi directions */
          for (j = 1; j < it_arnoldi; j++) /*first one already done */
@@ -763,9 +764,9 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          }
 
          /* augment directions */
-         for (ii=0; ii<it_aug; ii++)
+         for (ii = 0; ii < it_aug; ii++)
          {
-            for (j=0; j<aug_dim; j++)
+            for (j = 0; j < aug_dim; j++)
             {
                if (aug_order[j] == ii)
                {
@@ -774,33 +775,33 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
                             * duplicates before aug_ct = aug_dim */
                }
             }
-            (*(lgmres_functions->Axpy))(rs[it_arnoldi+ii], aug_vecs[spot], w);
+            (*(lgmres_functions->Axpy))(rs[it_arnoldi + ii], aug_vecs[spot], w);
          }
       }
 
 
       /* grab the new aug vector before the prec*/
-      (*(lgmres_functions->CopyVector))(w,aug_vecs[aug_dim]);
+      (*(lgmres_functions->CopyVector))(w, aug_vecs[aug_dim]);
 
       (*(lgmres_functions->ClearVector))(r);
       /* find correction (in r) (un-wind precond.)*/
       precond(precond_data, A, w, r);
 
       /* update current solution x (in x) */
-      (*(lgmres_functions->Axpy))(1.0,r,x);
+      (*(lgmres_functions->Axpy))(1.0, r, x);
 
 
       /* check for convergence by evaluating the actual residual */
       if (r_norm <= epsilon && iter >= min_iter)
       {
          /* calculate actual residual norm*/
-         (*(lgmres_functions->CopyVector))(b,r);
-         (*(lgmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-         r_norm = sqrt( (*(lgmres_functions->InnerProd))(r,r) );
+         (*(lgmres_functions->CopyVector))(b, r);
+         (*(lgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+         r_norm = sqrt( (*(lgmres_functions->InnerProd))(r, r) );
 
          if (r_norm <= epsilon)
          {
-            if ( print_level>1 && my_id == 0 )
+            if ( print_level > 1 && my_id == 0 )
             {
                hypre_printf("\n\n");
                hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -810,11 +811,11 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          }
          else /* conv. has not occurred, according to true residual */
          {
-            if ( print_level>0 && my_id == 0)
+            if ( print_level > 0 && my_id == 0)
             {
                hypre_printf("false convergence 2\n");
             }
-            (*(lgmres_functions->CopyVector))(r,p[0]);
+            (*(lgmres_functions->CopyVector))(r, p[0]);
             i = 0;
          }
       } /* end of convergence check */
@@ -822,26 +823,26 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       /* compute residual vector and continue loop */
 
       /* copy r0 (not scaled) to w*/
-      (*(lgmres_functions->CopyVector))(p[0],w);
-      (*(lgmres_functions->ScaleVector))(r_norm_last,w);
+      (*(lgmres_functions->CopyVector))(p[0], w);
+      (*(lgmres_functions->ScaleVector))(r_norm_last, w);
 
 
-      for (j=i ; j > 0; j--)
+      for (j = i ; j > 0; j--)
       {
-         rs[j-1] = -s[j-1]*rs[j];
-         rs[j] = c[j-1]*rs[j];
+         rs[j - 1] = -s[j - 1] * rs[j];
+         rs[j] = c[j - 1] * rs[j];
       }
 
-      if (i) { (*(lgmres_functions->Axpy))(rs[i]-1.0,p[i],p[i]); }
-      for (j=i-1 ; j > 0; j--)
+      if (i) { (*(lgmres_functions->Axpy))(rs[i] - 1.0, p[i], p[i]); }
+      for (j = i - 1 ; j > 0; j--)
       {
-         (*(lgmres_functions->Axpy))(rs[j],p[j],p[i]);
+         (*(lgmres_functions->Axpy))(rs[j], p[j], p[i]);
       }
 
       if (i)
       {
-         (*(lgmres_functions->Axpy))(rs[0]-1.0,p[0],p[0]);
-         (*(lgmres_functions->Axpy))(1.0,p[i],p[0]);
+         (*(lgmres_functions->Axpy))(rs[0] - 1.0, p[0], p[0]);
+         (*(lgmres_functions->Axpy))(1.0, p[i], p[0]);
       }
 
       /* lgmres mod */
@@ -863,9 +864,9 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          else
          {
             /* truncate - already have aug_dim number of vectors*/
-            for (ii=0; ii<aug_dim; ii++)
+            for (ii = 0; ii < aug_dim; ii++)
             {
-               if (aug_order[ii] == (aug_dim-1))
+               if (aug_order[ii] == (aug_dim - 1))
                {
                   spot = ii;
                }
@@ -876,11 +877,11 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          /*need to normalize */
          tmp_norm = sqrt((*(lgmres_functions->InnerProd))(aug_vecs[spot], aug_vecs[spot]));
 
-         tmp_norm = 1.0/tmp_norm;
-         (*(lgmres_functions->ScaleVector))(tmp_norm,aug_vecs[spot]);
+         tmp_norm = 1.0 / tmp_norm;
+         (*(lgmres_functions->ScaleVector))(tmp_norm, aug_vecs[spot]);
 
          /*set new aug vector to order 0  - move all others back one */
-         for (ii=0; ii < aug_dim; ii++)
+         for (ii = 0; ii < aug_dim; ii++)
          {
             aug_order[ii]++;
          }
@@ -891,7 +892,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          /* A*augvec = V*H*y  = r0-rm   (r0 is in w and rm is in p[0])*/
          (*(lgmres_functions->CopyVector))( w, a_aug_vecs[spot]);
          (*(lgmres_functions->ScaleVector))(- 1.0, a_aug_vecs[spot]); /* -r0*/
-         (*(lgmres_functions->Axpy))(1.0, p[0],a_aug_vecs[spot]); /* rm - r0 */
+         (*(lgmres_functions->Axpy))(1.0, p[0], a_aug_vecs[spot]); /* rm - r0 */
          (*(lgmres_functions->ScaleVector))(-tmp_norm, a_aug_vecs[spot]); /* r0-rm /norm */
 
       }
@@ -899,7 +900,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    } /* END of iteration while loop */
 
 
-   if ( print_level>1 && my_id == 0 )
+   if ( print_level > 1 && my_id == 0 )
    {
       hypre_printf("\n\n");
    }
@@ -907,7 +908,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    (lgmres_data -> num_iterations) = iter;
    if (b_norm > 0.0)
    {
-      (lgmres_data -> rel_residual_norm) = r_norm/b_norm;
+      (lgmres_data -> rel_residual_norm) = r_norm / b_norm;
    }
    if (b_norm == 0.0)
    {
@@ -917,15 +918,15 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    if (iter >= max_iter && r_norm > epsilon && epsilon > 0) { hypre_error(HYPRE_ERROR_CONV); }
 
 
-   hypre_TFreeF(c,lgmres_functions);
-   hypre_TFreeF(s,lgmres_functions);
-   hypre_TFreeF(rs,lgmres_functions);
+   hypre_TFreeF(c, lgmres_functions);
+   hypre_TFreeF(s, lgmres_functions);
+   hypre_TFreeF(rs, lgmres_functions);
 
-   for (i=0; i < k_dim+1+aug_dim; i++)
+   for (i = 0; i < k_dim + 1 + aug_dim; i++)
    {
-      hypre_TFreeF(hh[i],lgmres_functions);
+      hypre_TFreeF(hh[i], lgmres_functions);
    }
-   hypre_TFreeF(hh,lgmres_functions);
+   hypre_TFreeF(hh, lgmres_functions);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -972,14 +973,14 @@ hypre_LGMRESSetAugDim( void   *lgmres_vdata,
 
    if (aug_dim < 0) { aug_dim = 0; } /* must be positive */
 
-   if (aug_dim > (lgmres_data -> k_dim) -1) /* must be be <= (restart size-1) */
+   if (aug_dim > (lgmres_data -> k_dim) - 1) /* must be be <= (restart size-1) */
    {
-      while (aug_dim > (lgmres_data -> k_dim) -1)
+      while (aug_dim > (lgmres_data -> k_dim) - 1)
       {
          aug_dim--;
       }
 
-      aug_dim = (((0)<(aug_dim)) ? (aug_dim) : (0));
+      aug_dim = (((0) < (aug_dim)) ? (aug_dim) : (0));
 
    }
    (lgmres_data -> aug_dim) = aug_dim;
@@ -1173,8 +1174,8 @@ hypre_LGMRESGetStopCrit( void   *lgmres_vdata,
 
 HYPRE_Int
 hypre_LGMRESSetPrecond( void  *lgmres_vdata,
-                        HYPRE_Int  (*precond)(void*,void*,void*,void*),
-                        HYPRE_Int  (*precond_setup)(void*,void*,void*,void*),
+                        HYPRE_Int  (*precond)(void*, void*, void*, void*),
+                        HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
                         void  *precond_data )
 {
    hypre_LGMRESData *lgmres_data = (hypre_LGMRESData *)lgmres_vdata;

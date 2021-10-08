@@ -12,10 +12,10 @@
 
 template<typename T>
 struct tuple_plus : public
-   thrust::binary_function<thrust::tuple<T,T>, thrust::tuple<T,T>, thrust::tuple<T,T> >
+   thrust::binary_function<thrust::tuple<T, T>, thrust::tuple<T, T>, thrust::tuple<T, T> >
 {
    __host__ __device__
-   thrust::tuple<T,T> operator()( const thrust::tuple<T,T> & x1, const thrust::tuple<T,T> & x2)
+   thrust::tuple<T, T> operator()( const thrust::tuple<T, T> & x1, const thrust::tuple<T, T> & x2)
    {
       return thrust::make_tuple( thrust::get<0>(x1) + thrust::get<0>(x2),
                                  thrust::get<1>(x1) + thrust::get<1>(x2) );
@@ -24,10 +24,10 @@ struct tuple_plus : public
 
 template<typename T>
 struct tuple_minus : public
-   thrust::binary_function<thrust::tuple<T,T>, thrust::tuple<T,T>, thrust::tuple<T,T> >
+   thrust::binary_function<thrust::tuple<T, T>, thrust::tuple<T, T>, thrust::tuple<T, T> >
 {
    __host__ __device__
-   thrust::tuple<T,T> operator()( const thrust::tuple<T,T> & x1, const thrust::tuple<T,T> & x2)
+   thrust::tuple<T, T> operator()( const thrust::tuple<T, T> & x1, const thrust::tuple<T, T> & x2)
    {
       return thrust::make_tuple( thrust::get<0>(x1) - thrust::get<0>(x2),
                                  thrust::get<1>(x1) - thrust::get<1>(x2) );
@@ -35,7 +35,7 @@ struct tuple_minus : public
 };
 
 struct local_equal_plus_constant : public
-   thrust::binary_function<HYPRE_BigInt,HYPRE_BigInt,HYPRE_BigInt>
+   thrust::binary_function<HYPRE_BigInt, HYPRE_BigInt, HYPRE_BigInt>
 {
    HYPRE_BigInt _value;
 
@@ -210,7 +210,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       {
          total_global_cpts = num_cpts_global[1];
       }
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {
@@ -400,7 +400,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       if (num_passes > 9)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC," Warning!!! too many passes! out of range!\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Warning!!! too many passes! out of range!\n");
          break;
       }
 
@@ -470,20 +470,20 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       for (i = 1; i < num_passes - 1; i++)
       {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         hypre_GpuProfilingPushRange(std::string("MultipassPiDevice Loop"+std::to_string(i)).c_str());
+         hypre_GpuProfilingPushRange(std::string("MultipassPiDevice Loop" + std::to_string(i)).c_str());
 #endif
 
          hypre_ParCSRMatrix *Q;
-         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
+         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i - 1]);
 
-         hypre_GenerateMultipassPiDevice(A, S, c_pts_starts, &pass_order[pass_starts[i+1]],
+         hypre_GenerateMultipassPiDevice(A, S, c_pts_starts, &pass_order[pass_starts[i + 1]],
                                          pass_marker, pass_marker_offd,
-                                         pass_starts[i+2] - pass_starts[i+1], i+1, row_sums, &Q);
+                                         pass_starts[i + 2] - pass_starts[i + 1], i + 1, row_sums, &Q);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPopRange();
 #endif
-         Pi[i] = hypre_ParCSRMatMat(Q, Pi[i-1]);
+         Pi[i] = hypre_ParCSRMatMat(Q, Pi[i - 1]);
 
          hypre_ParCSRMatrixDestroy(Q);
       }
@@ -493,13 +493,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       for (i = 1; i < num_passes - 1; i++)
       {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         hypre_GpuProfilingPushRange(std::string("MultiPiDevice Loop"+std::to_string(i)).c_str());
+         hypre_GpuProfilingPushRange(std::string("MultiPiDevice Loop" + std::to_string(i)).c_str());
 #endif
-         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i-1]);
+         HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i - 1]);
 
-         hypre_GenerateMultiPiDevice(A, S, Pi[i-1], c_pts_starts, &pass_order[pass_starts[i+1]],
+         hypre_GenerateMultiPiDevice(A, S, Pi[i - 1], c_pts_starts, &pass_order[pass_starts[i + 1]],
                                      pass_marker, pass_marker_offd,
-                                     pass_starts[i+2] - pass_starts[i+1], i+1,
+                                     pass_starts[i + 2] - pass_starts[i + 1], i + 1,
                                      num_functions, dof_func, dof_func_offd, &Pi[i] );
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -646,7 +646,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       HYPRE_BigInt *big_P_offd_j = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
 
-      for (p = 0; p < num_passes-1; p++)
+      for (p = 0; p < num_passes - 1; p++)
       {
          HYPRE_BigInt *col_map_offd_Pi = hypre_ParCSRMatrixDeviceColMapOffd(Pi[p]);
 
@@ -715,7 +715,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
-   for (i = 0; i < num_passes-1; i++)
+   for (i = 0; i < num_passes - 1; i++)
    {
       hypre_ParCSRMatrixDestroy(Pi[i]);
    }
@@ -826,8 +826,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
          total_global_fpts = f_pts_starts[1];
          total_global_cpts = c_pts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {
@@ -1077,8 +1077,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
          total_global_fpts = f_pts_starts[1];
          total_global_cpts = c_pts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {
@@ -1136,8 +1136,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(big_buf_data, HYPRE_MEMORY_DEVICE);
    }
 
-   Q_diag_i = hypre_TAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
-   Q_offd_i = hypre_TAlloc(HYPRE_Int, num_points+1, HYPRE_MEMORY_DEVICE);
+   Q_diag_i = hypre_TAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
+   Q_offd_i = hypre_TAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
 
    /* generate Q_diag_i and Q_offd_i */
    {
@@ -1332,7 +1332,7 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int      nrows,
                                              HYPRE_Int     *dof_func_offd,
                                              HYPRE_Complex *row_sums )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= nrows || read_only_load(&CF_marker[row_i]) >= 0)
    {
@@ -1424,7 +1424,7 @@ void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
                                       HYPRE_Complex *Pi_offd_data,
                                       HYPRE_Complex *w_row_sum )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= num_points)
    {
@@ -1557,7 +1557,7 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
     }
    */
 
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= num_points)
    {
@@ -1658,7 +1658,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( HYPRE_Int      num_points,
                                                HYPRE_Complex *P_offd_data,
                                                HYPRE_Complex *row_sums )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= num_points)
    {
@@ -1812,7 +1812,7 @@ void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int   start,
                                                HYPRE_Int  *P_offd_j,
                                                HYPRE_Real *P_offd_data )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= stop - start)
    {
@@ -1894,7 +1894,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
                                                HYPRE_Int     *dof_func,
                                                HYPRE_Int     *dof_func_offd )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= num_points)
    {
@@ -2083,7 +2083,7 @@ void hypreCUDAKernel_pass_order_count( HYPRE_Int  num_points,
                                        HYPRE_Int *S_offd_j,
                                        HYPRE_Int *diag_shifts )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= num_points)
    {
@@ -2179,7 +2179,7 @@ void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int     start,
                                             HYPRE_BigInt *col_map_offd_Pi,
                                             HYPRE_BigInt *big_P_offd_j )
 {
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>() + start;
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>() + start;
 
    if (i >= stop)
    {

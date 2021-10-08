@@ -39,9 +39,9 @@ void hypre_CudaCompileFlagCheck()
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);
-   hypre_int cuda_arch_actual = props.major*100 + props.minor*10;
+   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
    hypre_int cuda_arch_compile = -1;
-   dim3 gDim(1,1,1), bDim(1,1,1);
+   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
 
    hypre_int *cuda_arch_compile_d = NULL;
    //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
@@ -124,7 +124,7 @@ hypreCUDAKernel_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *
                           HYPRE_Int *d_offd_ia,
                           HYPRE_Int *d_rownnz)
 {
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id < nrows)
    {
@@ -139,8 +139,8 @@ hypreCUDAKernel_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *
          i = global_thread_id;
       }
 
-      d_rownnz[global_thread_id] = read_only_load(&d_diag_ia[i+1]) - read_only_load(&d_diag_ia[i]) +
-                                   read_only_load(&d_offd_ia[i+1]) - read_only_load(&d_offd_ia[i]);
+      d_rownnz[global_thread_id] = read_only_load(&d_diag_ia[i + 1]) - read_only_load(&d_diag_ia[i]) +
+                                   read_only_load(&d_offd_ia[i + 1]) - read_only_load(&d_offd_ia[i]);
    }
 }
 
@@ -181,7 +181,7 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
                                HYPRE_BigInt  *d_jb,
                                HYPRE_Complex *d_ab)
 {
-   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1,1>();
+   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (global_warp_id >= nrows)
    {
@@ -216,10 +216,10 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
-      d_jb[p+i] = read_only_load(d_diag_j + i) + first_col;
+      d_jb[p + i] = read_only_load(d_diag_j + i) + first_col;
       if (d_ab)
       {
-         d_ab[p+i] = read_only_load(d_diag_a + i);
+         d_ab[p + i] = read_only_load(d_diag_a + i);
       }
    }
 
@@ -242,16 +242,16 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
    {
       if (d_col_map_offd_A)
       {
-         d_jb[p+i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
+         d_jb[p + i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
       }
       else
       {
-         d_jb[p+i] = -1 - read_only_load(d_offd_j + i);
+         d_jb[p + i] = -1 - read_only_load(d_offd_j + i);
       }
 
       if (d_ab)
       {
-         d_ab[p+i] = read_only_load(d_offd_a + i);
+         d_ab[p + i] = read_only_load(d_offd_a + i);
       }
    }
 }
@@ -402,7 +402,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                       thrust::counting_iterator<HYPRE_Int>(nrows),
                       d_row_ptr,
                       thrust::make_transform_iterator( thrust::make_zip_iterator(thrust::make_tuple(d_row_ptr,
-                                                                                                    d_row_ptr+1)),
+                                                                                                    d_row_ptr + 1)),
                                                        hypre_empty_row_functor() ),
                       d_row_ind );
 
@@ -446,12 +446,12 @@ template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HY
 HYPRE_Int*
 hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)
 {
-   HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
 
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows+1),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
 
    return d_row_ptr;
@@ -464,7 +464,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows+1),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
 
    return hypre_error_flag;
@@ -483,7 +483,7 @@ hypreCUDAKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HY
 __global__ void
 hypreCUDAKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id < n)
    {
@@ -568,7 +568,7 @@ template <typename T>
 __global__ void
 hypreCUDAKernel_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id < n)
    {
@@ -605,7 +605,7 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HY
 __global__ void
 hypreCUDAKernel_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
@@ -635,7 +635,7 @@ __global__ void
 hypreCUDAKernel_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
                              HYPRE_Int *marker, HYPRE_Int marker_val)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
@@ -669,7 +669,7 @@ __global__ void
 hypreCUDAKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                 HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
@@ -708,13 +708,13 @@ __global__ void
 hypreCUDAKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                  HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
       HYPRE_Complex t = x[i] / A_data[A_i[i]];
       y[i] = t;
-      z[i] += beta*t;
+      z[i] += beta * t;
    }
 }
 
@@ -744,7 +744,7 @@ hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
                                      const HYPRE_BigInt* __restrict__ src,
                                      HYPRE_Int                  size)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < size)
    {
@@ -783,11 +783,11 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
    }
    else if (opt == 1)
    {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1,T2>());
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1, T2>());
    }
    else if (opt == 2)
    {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1,T2>());
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1, T2>());
    }
 
    return hypre_error_flag;
@@ -820,7 +820,7 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
    }
    else if (opt == 2)
    {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals, TupleComp3<T1,T2>());
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, begin_vals, TupleComp3<T1, T2>());
    }
 
    return hypre_error_flag;
@@ -1212,7 +1212,7 @@ hypre_CudaDataCreate()
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubBinGrowth(data)      = 8u;
    hypre_CudaDataCubMinBin(data)         = 1u;
-   hypre_CudaDataCubMaxBin(data)         = (hypre_uint) -1;
+   hypre_CudaDataCubMaxBin(data)         = (hypre_uint) - 1;
    hypre_CudaDataCubMaxCachedBytes(data) = (size_t) -1;
    hypre_CudaDataCubDevAllocator(data)   = NULL;
    hypre_CudaDataCubUvmAllocator(data)   = NULL;

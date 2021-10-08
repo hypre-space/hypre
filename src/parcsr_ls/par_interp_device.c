@@ -117,13 +117,13 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
-   if (my_id == (num_procs -1))
+   if (my_id == (num_procs - 1))
    {
       total_global_cpts = num_cpts_global[1];
    }
-   hypre_MPI_Bcast( &total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   hypre_MPI_Bcast( &total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {
@@ -168,9 +168,9 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
          {
-            int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
          }
       }
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_HOST, int_buf_data,
@@ -191,8 +191,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    /* 3. Figure out the size of the interpolation matrix, P, i.e., compute P_diag_i and P_offd_i */
    /*    Also, compute fine_to_coarse array: When i is a coarse point, fine_to_coarse[i] will hold a  */
    /*    corresponding coarse point index in the range 0..n_coarse-1 */
-   P_diag_i = hypre_TAlloc(HYPRE_Int, n_fine+1, memory_location);
-   P_offd_i = hypre_TAlloc(HYPRE_Int, n_fine+1, memory_location);
+   P_diag_i = hypre_TAlloc(HYPRE_Int, n_fine + 1, memory_location);
+   P_offd_i = hypre_TAlloc(HYPRE_Int, n_fine + 1, memory_location);
 
    dim3 bDim = hypre_GetDefaultCUDABlockDimension();
    dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
@@ -203,8 +203,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                       dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
 
    /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_diag_i);
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_offd_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
 
    fine_to_coarse_d = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* The scan will make fine_to_coarse[i] for i a coarse point hold a
@@ -419,7 +419,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -561,7 +561,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
    */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -768,7 +768,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
             P_diag_data[j] *= -alfa; */
       if (j < q_diag_P)
       {
-         P_diag_data[j] *= (P_diag_data[j] > 0.0) * (alfa-beta) - alfa;
+         P_diag_data[j] *= (P_diag_data[j] > 0.0) * (alfa - beta) - alfa;
       }
    }
 
@@ -781,7 +781,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
             P_offd_data[indp] *= -alfa; */
       if (j < q_offd_P)
       {
-         P_offd_data[j] *= (P_offd_data[j] > 0.0) * (alfa-beta) - alfa;
+         P_offd_data[j] *= (P_offd_data[j] > 0.0) * (alfa - beta) - alfa;
       }
    }
 }
@@ -833,7 +833,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
    */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -1095,11 +1095,11 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *offd_compress_marker;
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    my_first_cpt = num_cpts_global[0];
-   if (my_id == (num_procs -1)) { total_global_cpts = num_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /* fine to coarse mapping */
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1148,8 +1148,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
     *  and find the most strongly influencing C-pt for each F-pt
     *-----------------------------------------------------------------------*/
 
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
 
    diag_compress_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    offd_compress_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1169,7 +1169,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Send and receive fine_to_coarse info.
     *-----------------------------------------------------------------------*/
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd,HYPRE_MEMORY_DEVICE);
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
    big_int_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                     HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( gather,
@@ -1194,8 +1194,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    /* scan P_diag_i (which has number of nonzeros in each row) to get row indices */
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_diag_i);
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_offd_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
 
    /* get the number of nonzeros and allocate column index and data arrays */
    hypre_TMemcpy(&nnz_diag, &P_diag_i[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
@@ -1376,7 +1376,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {

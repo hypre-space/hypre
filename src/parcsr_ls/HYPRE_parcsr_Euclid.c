@@ -90,7 +90,7 @@ HYPRE_EuclidCreate( MPI_Comm comm,
                     HYPRE_Solver *solver )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -149,7 +149,7 @@ HYPRE_Int
 HYPRE_EuclidDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -268,7 +268,7 @@ HYPRE_EuclidSetup( HYPRE_Solver solver,
                    HYPRE_ParVector x   )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -281,7 +281,7 @@ HYPRE_EuclidSetup( HYPRE_Solver solver,
    for testing!
 {
    HYPRE_Int ierr;
-   HYPRE_Int m,n,rs,re,cs,ce;
+   HYPRE_Int m, n, rs, re, cs, ce;
 
    HYPRE_DistributedMatrix mat;
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
@@ -320,7 +320,7 @@ HYPRE_EuclidSolve( HYPRE_Solver solver,
                    HYPRE_ParVector xx  )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -348,7 +348,7 @@ HYPRE_EuclidSetParams(HYPRE_Solver solver,
                       char *argv[] )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
    START_FUNC_DH
@@ -372,7 +372,7 @@ HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
                               char *filename )
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
@@ -387,13 +387,13 @@ HYPRE_EuclidSetLevel(HYPRE_Solver solver,
                      HYPRE_Int level)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_level[8];
    START_FUNC_DH
-   hypre_sprintf(str_level,"%d",level);
+   hypre_sprintf(str_level, "%d", level);
    Parser_dhInsert(parser_dh, "-level", str_level); HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
 #endif
@@ -404,13 +404,13 @@ HYPRE_EuclidSetBJ(HYPRE_Solver solver,
                   HYPRE_Int bj)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_bj[8];
    START_FUNC_DH
-   hypre_sprintf(str_bj,"%d",bj);
+   hypre_sprintf(str_bj, "%d", bj);
    Parser_dhInsert(parser_dh, "-bj", str_bj); HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
 #endif
@@ -421,13 +421,13 @@ HYPRE_EuclidSetStats(HYPRE_Solver solver,
                      HYPRE_Int eu_stats)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_eu_stats[8];
    START_FUNC_DH
-   hypre_sprintf(str_eu_stats,"%d",eu_stats);
+   hypre_sprintf(str_eu_stats, "%d", eu_stats);
    Parser_dhInsert(parser_dh, "-eu_stats", str_eu_stats); HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
 #endif
@@ -438,13 +438,13 @@ HYPRE_EuclidSetMem(HYPRE_Solver solver,
                    HYPRE_Int eu_mem)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_eu_mem[8];
    START_FUNC_DH
-   hypre_sprintf(str_eu_mem,"%d",eu_mem);
+   hypre_sprintf(str_eu_mem, "%d", eu_mem);
    Parser_dhInsert(parser_dh, "-eu_mem", str_eu_mem); HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
 #endif
@@ -455,13 +455,13 @@ HYPRE_EuclidSetSparseA(HYPRE_Solver solver,
                        HYPRE_Real sparse_A)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_sparse_A[256];
    START_FUNC_DH
-   hypre_sprintf(str_sparse_A,"%f",sparse_A);
+   hypre_sprintf(str_sparse_A, "%f", sparse_A);
    Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A);
    HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
@@ -473,13 +473,13 @@ HYPRE_EuclidSetRowScale(HYPRE_Solver solver,
                         HYPRE_Int row_scale)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_row_scale[8];
    START_FUNC_DH
-   hypre_sprintf(str_row_scale,"%d",row_scale);
+   hypre_sprintf(str_row_scale, "%d", row_scale);
    Parser_dhInsert(parser_dh, "-rowScale", str_row_scale);
    HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
@@ -491,13 +491,13 @@ HYPRE_EuclidSetILUT(HYPRE_Solver solver,
                     HYPRE_Real ilut)
 {
 #ifdef HYPRE_MIXEDINT
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
 
    char str_ilut[256];
    START_FUNC_DH
-   hypre_sprintf(str_ilut,"%f",ilut);
+   hypre_sprintf(str_ilut, "%f", ilut);
    Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
    END_FUNC_VAL(0)
 #endif

@@ -887,14 +887,14 @@ HYPRE_Int
 HYPRE_BoomerAMGSetSmoothNumLevels( HYPRE_Solver  solver,
                                    HYPRE_Int       smooth_num_levels  )
 {
-   return ( hypre_BoomerAMGSetSmoothNumLevels((void *)solver,smooth_num_levels ));
+   return ( hypre_BoomerAMGSetSmoothNumLevels((void *)solver, smooth_num_levels ));
 }
 
 HYPRE_Int
 HYPRE_BoomerAMGGetSmoothNumLevels( HYPRE_Solver  solver,
                                    HYPRE_Int     * smooth_num_levels  )
 {
-   return ( hypre_BoomerAMGGetSmoothNumLevels((void *)solver,smooth_num_levels ));
+   return ( hypre_BoomerAMGGetSmoothNumLevels((void *)solver, smooth_num_levels ));
 }
 
 /*--------------------------------------------------------------------------
@@ -905,14 +905,14 @@ HYPRE_Int
 HYPRE_BoomerAMGSetSmoothNumSweeps( HYPRE_Solver  solver,
                                    HYPRE_Int       smooth_num_sweeps  )
 {
-   return ( hypre_BoomerAMGSetSmoothNumSweeps((void *)solver,smooth_num_sweeps ));
+   return ( hypre_BoomerAMGSetSmoothNumSweeps((void *)solver, smooth_num_sweeps ));
 }
 
 HYPRE_Int
 HYPRE_BoomerAMGGetSmoothNumSweeps( HYPRE_Solver  solver,
                                    HYPRE_Int     * smooth_num_sweeps  )
 {
-   return ( hypre_BoomerAMGGetSmoothNumSweeps((void *)solver,smooth_num_sweeps ));
+   return ( hypre_BoomerAMGGetSmoothNumSweeps((void *)solver, smooth_num_sweeps ));
 }
 
 /*--------------------------------------------------------------------------

@@ -41,7 +41,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    hypre_CSRMatrix *A_local;
    HYPRE_Int num_rows;
    HYPRE_Int num_procs, my_id;
-   HYPRE_Int pcols=1, prows=1;
+   HYPRE_Int pcols = 1, prows = 1;
    HYPRE_BigInt *big_rowptr = NULL;
    hypre_DSLUData *dslu_data = NULL;
 
@@ -63,8 +63,8 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
       HYPRE_Int *rowptr = NULL;
       HYPRE_Int  i;
       rowptr = hypre_CSRMatrixI(A_local);
-      big_rowptr = hypre_CTAlloc(HYPRE_BigInt, (num_rows+1), HYPRE_MEMORY_HOST);
-      for (i=0; i<(num_rows+1); i++)
+      big_rowptr = hypre_CTAlloc(HYPRE_BigInt, (num_rows + 1), HYPRE_MEMORY_HOST);
+      for (i = 0; i < (num_rows + 1); i++)
       {
          big_rowptr[i] = (HYPRE_BigInt)rowptr[i];
       }
@@ -73,12 +73,12 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    big_rowptr = hypre_CSRMatrixI(A_local);
 #endif
    dCreate_CompRowLoc_Matrix_dist(
-      &(dslu_data->A_dslu),global_num_rows,global_num_rows,
+      &(dslu_data->A_dslu), global_num_rows, global_num_rows,
       hypre_CSRMatrixNumNonzeros(A_local),
       num_rows,
       hypre_ParCSRMatrixFirstRowIndex(A),
       hypre_CSRMatrixData(A_local),
-      hypre_CSRMatrixBigJ(A_local),big_rowptr,
+      hypre_CSRMatrixBigJ(A_local), big_rowptr,
       SLU_NR_loc, SLU_D, SLU_GE);
 
    /* DOK: SuperLU frees assigned data, so set them to null before
@@ -92,13 +92,13 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    hypre_CSRMatrixDestroy(A_local);
 
    /*Create process grid */
-   while (prows*pcols <= num_procs) { ++prows; }
+   while (prows * pcols <= num_procs) { ++prows; }
    --prows;
-   pcols = num_procs/prows;
-   while (prows*pcols != num_procs)
+   pcols = num_procs / prows;
+   while (prows * pcols != num_procs)
    {
       prows -= 1;
-      pcols = num_procs/prows;
+      pcols = num_procs / prows;
    }
    //hypre_printf(" prows %d pcols %d\n", prows, pcols);
 
@@ -142,7 +142,7 @@ HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector 
    HYPRE_Int size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int nrhs = 1;
 
-   hypre_ParVectorCopy(b,x);
+   hypre_ParVectorCopy(b, x);
 
    pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu),
            &(dslu_data->dslu_ScalePermstruct), B, size, nrhs,

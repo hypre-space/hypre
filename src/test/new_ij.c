@@ -105,7 +105,7 @@ main( hypre_int argc,
    HYPRE_Int                 poutdat;
    HYPRE_Int                 debug_flag;
    HYPRE_Int                 ierr = 0;
-   HYPRE_Int                 i,j;
+   HYPRE_Int                 i, j;
    HYPRE_Int                 max_levels = 25;
    HYPRE_Int                 num_iterations;
    HYPRE_Int                 pcg_num_its, dscg_num_its;
@@ -130,7 +130,7 @@ main( hypre_int argc,
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
-   HYPRE_Solver        pcg_precond=NULL, pcg_precond_gotten;
+   HYPRE_Solver        pcg_precond = NULL, pcg_precond_gotten;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 local_row;
@@ -207,7 +207,7 @@ main( hypre_int argc,
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
-   HYPRE_Int    rap2=0;
+   HYPRE_Int    rap2 = 0;
    HYPRE_Int    keepTranspose = 0;
    HYPRE_Real   relax_wt;
    HYPRE_Real   relax_wt_level;
@@ -305,7 +305,7 @@ main( hypre_int argc,
    ioutdat = 3;
    poutdat = 1;
 
-   hypre_sprintf (plot_file_name,"AMGgrids.CF.dat");
+   hypre_sprintf (plot_file_name, "AMGgrids.CF.dat");
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -1132,7 +1132,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-plot_file_name") == 0 )
       {
          arg_index++;
-         hypre_sprintf (plot_file_name,"%s",argv[arg_index++]);
+         hypre_sprintf (plot_file_name, "%s", argv[arg_index++]);
       }
       else
       {
@@ -1497,7 +1497,7 @@ main( hypre_int argc,
       num_rows = local_num_rows;
       if (off_proc)
       {
-         if (myid != num_procs-1) { num_rows++; }
+         if (myid != num_procs - 1) { num_rows++; }
          if (myid) { num_rows++; }
       }
       /* The following shows how to build an IJMatrix if one has only an
@@ -1519,7 +1519,7 @@ main( hypre_int argc,
             if (build_matrix_type == 4) { size = 27; }
          }
          row_sizes = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
-         for (i=0; i < num_rows; i++)
+         for (i = 0; i < num_rows; i++)
          {
             row_sizes[i] = size;
          }
@@ -1528,23 +1528,23 @@ main( hypre_int argc,
       if (build_matrix_type == 2) { mx_size = 7; }
       if (build_matrix_type == 3) { mx_size = 9; }
       if (build_matrix_type == 4) { mx_size = 27; }
-      col_nums = hypre_CTAlloc(HYPRE_Int,  mx_size*num_rows, HYPRE_MEMORY_HOST);
-      data = hypre_CTAlloc(HYPRE_Real,  mx_size*num_rows, HYPRE_MEMORY_HOST);
+      col_nums = hypre_CTAlloc(HYPRE_Int,  mx_size * num_rows, HYPRE_MEMORY_HOST);
+      data = hypre_CTAlloc(HYPRE_Real,  mx_size * num_rows, HYPRE_MEMORY_HOST);
       i_indx = 0;
       j_indx = 0;
       if (off_proc && myid)
       {
          num_cols[i_indx] = 2;
-         row_nums[i_indx++] = first_local_row-1;
-         col_nums[j_indx] = first_local_row-1;
+         row_nums[i_indx++] = first_local_row - 1;
+         col_nums[j_indx] = first_local_row - 1;
          data[j_indx++] = 6.;
-         col_nums[j_indx] = first_local_row-2;
+         col_nums[j_indx] = first_local_row - 2;
          data[j_indx++] = -1;
       }
-      for (i=0; i < local_num_rows; i++)
+      for (i = 0; i < local_num_rows; i++)
       {
-         row_nums[i_indx] = first_local_row +i;
-         ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, first_local_row+i, &size,
+         row_nums[i_indx] = first_local_row + i;
+         ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, first_local_row + i, &size,
                                            &col_inds, &values);
          num_cols[i_indx++] = size;
          for (j = 0; j < size; j++)
@@ -1564,16 +1564,16 @@ main( hypre_int argc,
             }
          }
          local_row++;
-         ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, first_local_row+i, &size,
+         ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, first_local_row + i, &size,
                                                &col_inds, &values );
       }
-      if (off_proc && myid != num_procs-1)
+      if (off_proc && myid != num_procs - 1)
       {
          num_cols[i_indx] = 2;
-         row_nums[i_indx++] = last_local_row+1;
-         col_nums[j_indx] = last_local_row+2;
+         row_nums[i_indx++] = last_local_row + 1;
+         col_nums[j_indx] = last_local_row + 2;
          data[j_indx++] = -1.;
-         col_nums[j_indx] = last_local_row+1;
+         col_nums[j_indx] = last_local_row + 1;
          data[j_indx++] = 6;
       }
 
@@ -1604,7 +1604,7 @@ main( hypre_int argc,
       else
       {
          j_indx = 0;
-         for (i=0; i < num_rows; i++)
+         for (i = 0; i < num_rows; i++)
          {
             if (add)
                ierr += HYPRE_IJMatrixAddToValues( ij_A, 1, &num_cols[i], &row_nums[i],
@@ -1657,7 +1657,7 @@ main( hypre_int argc,
 
       if (dt < dt_inf)
       {
-         val = 1./dt;
+         val = 1. / dt;
       }
       else
       {
@@ -1712,9 +1712,9 @@ main( hypre_int argc,
       /* RHS */
       interp_vecs = hypre_CTAlloc(HYPRE_ParVector, num_interp_vecs, HYPRE_MEMORY_HOST);
       ij_rbm = hypre_CTAlloc(HYPRE_IJVector, num_interp_vecs, HYPRE_MEMORY_HOST);
-      for (i=0; i < num_interp_vecs; i++)
+      for (i = 0; i < num_interp_vecs; i++)
       {
-         hypre_sprintf(new_file_name, "%s.%d", argv[build_rbm_index],i);
+         hypre_sprintf(new_file_name, "%s.%d", argv[build_rbm_index], i);
          ierr = HYPRE_IJVectorRead( new_file_name, hypre_MPI_COMM_WORLD,
                                     HYPRE_PARCSR, &ij_rbm[i] );
          ierr = HYPRE_IJVectorGetObject( ij_rbm[i], &object );
@@ -1888,8 +1888,8 @@ main( hypre_int argc,
          HYPRE_IJVectorSetValues or HYPRE_IJVectorAddToValues */
 
       HYPRE_ParVectorSetRandomValues(b, 22775);
-      HYPRE_ParVectorInnerProd(b,b,&norm);
-      norm = 1./sqrt(norm);
+      HYPRE_ParVectorInnerProd(b, b, &norm);
+      norm = 1. / sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
       /* Initial guess */
@@ -1939,7 +1939,7 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
-      HYPRE_ParCSRMatrixMatvec(1.,parcsr_A,x,0.,b);
+      HYPRE_ParCSRMatrixMatvec(1., parcsr_A, x, 0., b);
 
       /* Initial guess */
       values = hypre_CTAlloc(HYPRE_Real,  local_num_cols, HYPRE_MEMORY_HOST);
@@ -2142,7 +2142,7 @@ main( hypre_int argc,
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_rows; i++)
       {
-         values[i] = hypre_Rand()/dt;
+         values[i] = hypre_Rand() / dt;
       }
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       hypre_TFree(values, HYPRE_MEMORY_HOST);
@@ -2408,8 +2408,8 @@ main( hypre_int argc,
       /*HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);*/
       if (nongalerk_tol)
       {
-         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
-         for (i=0; i < nongalerk_num_tol-1; i++)
+         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol - 1]);
+         for (i = 0; i < nongalerk_num_tol - 1; i++)
          {
             HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
          }
@@ -2572,8 +2572,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
       if (nongalerk_tol)
       {
-         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
-         for (i=0; i < nongalerk_num_tol-1; i++)
+         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol - 1]);
+         for (i = 0; i < nongalerk_num_tol - 1; i++)
          {
             HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
          }
@@ -2702,11 +2702,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -2746,8 +2746,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -2867,11 +2867,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -2910,8 +2910,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -3096,11 +3096,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -3140,8 +3140,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -3251,11 +3251,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -3295,8 +3295,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -3375,7 +3375,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
@@ -3483,11 +3483,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -3527,8 +3527,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -3581,7 +3581,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
       HYPRE_LGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_LGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_LGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
       HYPRE_ParCSRLGMRESDestroy(pcg_solver);
 
@@ -3668,11 +3668,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -3712,8 +3712,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -3773,7 +3773,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
       HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
       HYPRE_ParCSRFlexGMRESDestroy(pcg_solver);
 
@@ -3858,11 +3858,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -3903,8 +3903,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -3998,7 +3998,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
       HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
@@ -4092,11 +4092,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
          {
-            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level, level_w);
          }
          if (level_ow > -1)
          {
-            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond, outer_wt_level, level_ow);
          }
          HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
@@ -4129,8 +4129,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
          if (nongalerk_tol)
          {
-            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
-            for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol - 1]);
+            for (i = 0; i < nongalerk_num_tol - 1; i++)
             {
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
             }
@@ -4185,7 +4185,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
       HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_CGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_CGNRGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
@@ -4216,7 +4216,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    /* RDF: Why is this here? */
-   if (!(build_rhs_type ==1 || build_rhs_type ==7))
+   if (!(build_rhs_type == 1 || build_rhs_type == 7))
    {
       HYPRE_IJVectorGetObjectType(ij_b, &j);
    }
@@ -4234,7 +4234,7 @@ main( hypre_int argc,
    else { HYPRE_ParCSRMatrixDestroy(parcsr_A); }
 
    /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
-   if (build_rhs_type ==1 || build_rhs_type ==7)
+   if (build_rhs_type == 1 || build_rhs_type == 7)
    {
       HYPRE_ParVectorDestroy(b);
    }
@@ -4247,7 +4247,7 @@ main( hypre_int argc,
 
    if (build_rbm)
    {
-      for (i=0; i< num_interp_vecs; i++)
+      for (i = 0; i < num_interp_vecs; i++)
       {
          HYPRE_IJVectorDestroy(ij_rbm[i]);
       }
@@ -4315,7 +4315,7 @@ BuildParFromFile( HYPRE_Int                  argc,
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename,&A);
+   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename, &A);
 
    *A_ptr = A;
 
@@ -4375,7 +4375,7 @@ BuildParRhsFromFile( HYPRE_Int                  argc,
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, filename,&b);
+   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, filename, &b);
 
    *b_ptr = b;
 
@@ -4501,7 +4501,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -4525,8 +4525,8 @@ BuildParLaplacian( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -4541,15 +4541,15 @@ BuildParLaplacian( HYPRE_Int                  argc,
    values[0] = 0.;
    if (nx > 1)
    {
-      values[0] += 2.0*cx;
+      values[0] += 2.0 * cx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy;
+      values[0] += 2.0 * cy;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz;
+      values[0] += 2.0 * cz;
    }
 
    if (num_fun == 1)
@@ -4557,46 +4557,46 @@ BuildParLaplacian( HYPRE_Int                  argc,
                                                  nx, ny, nz, P, Q, R, p, q, r, values);
    else
    {
-      mtrx = hypre_CTAlloc(HYPRE_Real,  num_fun*num_fun, HYPRE_MEMORY_HOST);
+      mtrx = hypre_CTAlloc(HYPRE_Real,  num_fun * num_fun, HYPRE_MEMORY_HOST);
 
       if (num_fun == 2)
       {
-         if (sys_opt ==1) /* identity  */
+         if (sys_opt == 1) /* identity  */
          {
             mtrx[0] = 1.0;
             mtrx[1] = 0.0;
             mtrx[2] = 0.0;
             mtrx[3] = 1.0;
          }
-         else if (sys_opt ==2)
+         else if (sys_opt == 2)
          {
             mtrx[0] = 1.0;
             mtrx[1] = 0.0;
             mtrx[2] = 0.0;
             mtrx[3] = 20.0;
          }
-         else if (sys_opt ==3) /* similar to barry's talk - ex1 */
+         else if (sys_opt == 3) /* similar to barry's talk - ex1 */
          {
             mtrx[0] = 1.0;
             mtrx[1] = 2.0;
             mtrx[2] = 2.0;
             mtrx[3] = 1.0;
          }
-         else if (sys_opt ==4) /* can use with vcoef to get barry's ex*/
+         else if (sys_opt == 4) /* can use with vcoef to get barry's ex*/
          {
             mtrx[0] = 1.0;
             mtrx[1] = 1.0;
             mtrx[2] = 1.0;
             mtrx[3] = 1.0;
          }
-         else if (sys_opt ==5) /* barry's talk - ex1 */
+         else if (sys_opt == 5) /* barry's talk - ex1 */
          {
             mtrx[0] = 1.0;
             mtrx[1] = 1.1;
             mtrx[2] = 1.1;
             mtrx[3] = 1.0;
          }
-         else if (sys_opt ==6) /*  */
+         else if (sys_opt == 6) /*  */
          {
             mtrx[0] = 1.1;
             mtrx[1] = 1.0;
@@ -4614,7 +4614,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
       }
       else if (num_fun == 3)
       {
-         if (sys_opt ==1)
+         if (sys_opt == 1)
          {
             mtrx[0] = 1.0;
             mtrx[1] = 0.0;
@@ -4626,7 +4626,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
             mtrx[7] = 0.0;
             mtrx[8] = 1.0;
          }
-         else if (sys_opt ==2)
+         else if (sys_opt == 2)
          {
             mtrx[0] = 1.0;
             mtrx[1] = 0.0;
@@ -4636,9 +4636,9 @@ BuildParLaplacian( HYPRE_Int                  argc,
             mtrx[5] = 0.0;
             mtrx[6] = 0.0;
             mtrx[7] = 0.0;
-            mtrx[8] =.01;
+            mtrx[8] = .01;
          }
-         else if (sys_opt ==3)
+         else if (sys_opt == 3)
          {
             mtrx[0] = 1.01;
             mtrx[1] = 1;
@@ -4650,7 +4650,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
             mtrx[7] = 1;
             mtrx[8] = 1.01;
          }
-         else if (sys_opt ==4) /* barry ex4 */
+         else if (sys_opt == 4) /* barry ex4 */
          {
             mtrx[0] = 3;
             mtrx[1] = 1;
@@ -4711,7 +4711,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
 
          HYPRE_Real *mtrx_values;
 
-         mtrx_values = hypre_CTAlloc(HYPRE_Real,  num_fun*num_fun*4, HYPRE_MEMORY_HOST);
+         mtrx_values = hypre_CTAlloc(HYPRE_Real,  num_fun * num_fun * 4, HYPRE_MEMORY_HOST);
 
          if (num_fun == 2)
          {
@@ -4751,13 +4751,13 @@ BuildParLaplacian( HYPRE_Int                  argc,
             {
 
                /* mtrx[0] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 0, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep * 1.0, 1.0, 1.0, 0, mtrx_values);
 
                /* mtrx[1] */
                SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
 
                /* mtrx[2] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 2, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep * 1.0, 1.0, 1.0, 2, mtrx_values);
 
                /* mtrx[3] */
                SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
@@ -4767,16 +4767,16 @@ BuildParLaplacian( HYPRE_Int                  argc,
                HYPRE_Real ep2 = ep;
 
                /* mtrx[0] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 0, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep * 1.0, 1.0, 1.0, 0, mtrx_values);
 
                /* mtrx[1] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep*1.0, 1.0, 1, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep * 1.0, 1.0, 1, mtrx_values);
 
                /* mtrx[2] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 2, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep * 1.0, 1.0, 1.0, 2, mtrx_values);
 
                /* mtrx[3] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep2*1.0, 1.0, 3, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep2 * 1.0, 1.0, 3, mtrx_values);
             }
             else if (vcoef_opt == 5) /* use with default sys_opt  - */
             {
@@ -4785,16 +4785,16 @@ BuildParLaplacian( HYPRE_Int                  argc,
                beta = 10;
 
                /* mtrx[0] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, alp*1.0, 1.0, 1.0, 0, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, alp * 1.0, 1.0, 1.0, 0, mtrx_values);
 
                /* mtrx[1] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta*1.0, 1.0, 1, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta * 1.0, 1.0, 1, mtrx_values);
 
                /* mtrx[2] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, alp*1.0, 1.0, 1.0, 2, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, alp * 1.0, 1.0, 1.0, 2, mtrx_values);
 
                /* mtrx[3] */
-               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta*1.0, 1.0, 3, mtrx_values);
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta * 1.0, 1.0, 3, mtrx_values);
             }
             else  /* = 0 */
             {
@@ -4883,7 +4883,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    HYPRE_Int                 P, Q, R;
    HYPRE_Real          cx, cy, cz;
    HYPRE_Real          ax, ay, az;
-   HYPRE_Real          hinx,hiny,hinz;
+   HYPRE_Real          hinx, hiny, hinz;
 
    HYPRE_ParCSRMatrix  A;
 
@@ -4962,7 +4962,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -4988,12 +4988,12 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
-   hinx = 1./(nx+1);
-   hiny = 1./(ny+1);
-   hinz = 1./(nz+1);
+   hinx = 1. / (nx + 1);
+   hiny = 1. / (ny + 1);
+   hinz = 1. / (nz + 1);
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -5001,25 +5001,25 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    values = hypre_CTAlloc(HYPRE_Real,  7, HYPRE_MEMORY_HOST);
 
-   values[1] = -cx/(hinx*hinx);
-   values[2] = -cy/(hiny*hiny);
-   values[3] = -cz/(hinz*hinz);
-   values[4] = -cx/(hinx*hinx) + ax/hinx;
-   values[5] = -cy/(hiny*hiny) + ay/hiny;
-   values[6] = -cz/(hinz*hinz) + az/hinz;
+   values[1] = -cx / (hinx * hinx);
+   values[2] = -cy / (hiny * hiny);
+   values[3] = -cz / (hinz * hinz);
+   values[4] = -cx / (hinx * hinx) + ax / hinx;
+   values[5] = -cy / (hiny * hiny) + ay / hiny;
+   values[6] = -cz / (hinz * hinz) + az / hinz;
 
    values[0] = 0.;
    if (nx > 1)
    {
-      values[0] += 2.0*cx/(hinx*hinx) - 1.*ax/hinx;
+      values[0] += 2.0 * cx / (hinx * hinx) - 1.*ax / hinx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy/(hiny*hiny) - 1.*ay/hiny;
+      values[0] += 2.0 * cy / (hiny * hiny) - 1.*ay / hiny;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz/(hinz*hinz) - 1.*az/hinz;
+      values[0] += 2.0 * cz / (hinz * hinz) - 1.*az / hinz;
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateDifConv(hypre_MPI_COMM_WORLD,
@@ -5097,22 +5097,22 @@ BuildParFromOneFile( HYPRE_Int                  argc,
    if (myid == 0 && num_functions > 1)
    {
       HYPRE_CSRMatrixGetNumRows(A_CSR, &num_dofs);
-      num_nodes = num_dofs/num_functions;
-      if (num_dofs != num_functions*num_nodes)
+      num_nodes = num_dofs / num_functions;
+      if (num_dofs != num_functions * num_nodes)
       {
          row_part = NULL;
          col_part = NULL;
       }
       else
       {
-         row_part = hypre_CTAlloc(HYPRE_Int,  numprocs+1, HYPRE_MEMORY_HOST);
+         row_part = hypre_CTAlloc(HYPRE_Int,  numprocs + 1, HYPRE_MEMORY_HOST);
          row_part[0] = 0;
-         size = num_nodes/numprocs;
-         rest = num_nodes-size*numprocs;
-         for (i=0; i < numprocs; i++)
+         size = num_nodes / numprocs;
+         rest = num_nodes - size * numprocs;
+         for (i = 0; i < numprocs; i++)
          {
-            row_part[i+1] = row_part[i]+size*num_functions;
-            if (i < rest) { row_part[i+1] += num_functions; }
+            row_part[i + 1] = row_part[i] + size * num_functions;
+            if (i < rest) { row_part[i + 1] += num_functions; }
          }
          col_part = row_part;
       }
@@ -5215,29 +5215,29 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
 
    }
    HYPRE_ParCSRMatrixGetRowPartitioning(parcsr_A, &partitioning);
-   local_size = partitioning[myid+1]-partitioning[myid];
+   local_size = partitioning[myid + 1] - partitioning[myid];
    dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
 
    if (myid == 0)
    {
-      requests = hypre_CTAlloc(hypre_MPI_Request, num_procs-1, HYPRE_MEMORY_HOST);
-      status = hypre_CTAlloc(hypre_MPI_Status, num_procs-1, HYPRE_MEMORY_HOST);
+      requests = hypre_CTAlloc(hypre_MPI_Request, num_procs - 1, HYPRE_MEMORY_HOST);
+      status = hypre_CTAlloc(hypre_MPI_Status, num_procs - 1, HYPRE_MEMORY_HOST);
       j = 0;
-      for (i=1; i < num_procs; i++)
+      for (i = 1; i < num_procs; i++)
          hypre_MPI_Isend(&dof_func[partitioning[i]],
-                         partitioning[i+1]-partitioning[i],
+                         partitioning[i + 1] - partitioning[i],
                          HYPRE_MPI_INT, i, 0, comm, &requests[j++]);
-      for (i=0; i < local_size; i++)
+      for (i = 0; i < local_size; i++)
       {
          dof_func_local[i] = dof_func[i];
       }
-      hypre_MPI_Waitall(num_procs-1,requests, status);
+      hypre_MPI_Waitall(num_procs - 1, requests, status);
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
       hypre_TFree(status, HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_MPI_Recv(dof_func_local,local_size,HYPRE_MPI_INT,0,0,comm,&status0);
+      hypre_MPI_Recv(dof_func_local, local_size, HYPRE_MPI_INT, 0, 0, comm, &status0);
    }
 
    *dof_func_ptr = dof_func_local;
@@ -5262,7 +5262,7 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
    char           *filename;
 
    HYPRE_ParVector b;
-   HYPRE_Vector    b_CSR=NULL;
+   HYPRE_Vector    b_CSR = NULL;
 
    HYPRE_Int             myid;
 
@@ -5300,7 +5300,7 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
 
       b_CSR = HYPRE_VectorRead(filename);
    }
-   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning,&b);
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);
 
    *b_ptr = b;
 
@@ -5374,7 +5374,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q) != num_procs)
+   if ((P * Q) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -5397,7 +5397,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
 
    /* compute p,q from P,Q and myid */
    p = myid % P;
-   q = ( myid - p)/P;
+   q = ( myid - p) / P;
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -5499,7 +5499,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -5522,8 +5522,8 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -5536,7 +5536,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    {
       values[0] = 8.0;
    }
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
    {
       values[0] = 2.0;
    }
@@ -5628,7 +5628,7 @@ BuildParRotate7pt( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q) != num_procs)
+   if ((P * Q) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -5641,7 +5641,7 @@ BuildParRotate7pt( HYPRE_Int                  argc,
    if (myid == 0)
    {
       hypre_printf("  Rotate 7pt:\n");
-      hypre_printf("    alpha = %f, eps = %f\n", alpha,eps);
+      hypre_printf("    alpha = %f, eps = %f\n", alpha, eps);
       hypre_printf("    (nx, ny) = (%d, %d)\n", nx, ny);
       hypre_printf("    (Px, Py) = (%d, %d)\n", P,  Q);
    }
@@ -5652,7 +5652,7 @@ BuildParRotate7pt( HYPRE_Int                  argc,
 
    /* compute p,q from P,Q and myid */
    p = myid % P;
-   q = ( myid - p)/P;
+   q = ( myid - p) / P;
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -5746,7 +5746,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) != num_procs)
+   if ((P * Q * R) != num_procs)
    {
       hypre_printf("Error: Invalid number of processors or processor topology \n");
       exit(1);
@@ -5769,8 +5769,8 @@ BuildParVarDifConv( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix
@@ -5794,24 +5794,24 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE
 {
 
 
-   HYPRE_Int sz = num_fun*num_fun;
+   HYPRE_Int sz = num_fun * num_fun;
 
-   values[1*sz + mtx_entry] = -vcx;
-   values[2*sz + mtx_entry] = -vcy;
-   values[3*sz + mtx_entry] = -vcz;
-   values[0*sz + mtx_entry] = 0.0;
+   values[1 * sz + mtx_entry] = -vcx;
+   values[2 * sz + mtx_entry] = -vcy;
+   values[3 * sz + mtx_entry] = -vcz;
+   values[0 * sz + mtx_entry] = 0.0;
 
    if (nx > 1)
    {
-      values[0*sz + mtx_entry] += 2.0*vcx;
+      values[0 * sz + mtx_entry] += 2.0 * vcx;
    }
    if (ny > 1)
    {
-      values[0*sz + mtx_entry] += 2.0*vcy;
+      values[0 * sz + mtx_entry] += 2.0 * vcy;
    }
    if (nz > 1)
    {
-      values[0*sz + mtx_entry] += 2.0*vcz;
+      values[0 * sz + mtx_entry] += 2.0 * vcz;
    }
 
    return 0;
@@ -5885,24 +5885,24 @@ BuildParCoordinates( HYPRE_Int                  argc,
 
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
 
    /*-----------------------------------------------------------
     * Generate the coordinates
     *-----------------------------------------------------------*/
 
    coorddim = 3;
-   if (nx<2) { coorddim--; }
-   if (ny<2) { coorddim--; }
-   if (nz<2) { coorddim--; }
+   if (nx < 2) { coorddim--; }
+   if (ny < 2) { coorddim--; }
+   if (nz < 2) { coorddim--; }
 
-   if (coorddim>0)
+   if (coorddim > 0)
       coordinates = GenerateCoordinates (hypre_MPI_COMM_WORLD,
                                          nx, ny, nz, P, Q, R, p, q, r, coorddim);
    else
    {
-      coordinates=NULL;
+      coordinates = NULL;
    }
 
    *coorddim_ptr = coorddim;

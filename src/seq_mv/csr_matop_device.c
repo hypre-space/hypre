@@ -135,7 +135,7 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! Incompatible matrix dimensions!\n");
 
       return NULL;
    }
@@ -166,7 +166,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
    if (ncols_A != nrows_B)
    {
       hypre_printf("Warning! incompatible matrix dimensions!\n");
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! incompatible matrix dimensions!\n");
 
       return NULL;
    }
@@ -560,7 +560,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
 
    if (ncols_A != ncols_B)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! incompatible matrix dimensions!\n");
 
       return NULL;
    }
@@ -628,7 +628,7 @@ hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
                                   HYPRE_Int     *ja,
                                   HYPRE_Complex *aa )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -695,10 +695,10 @@ hypreCUDAKernel_CSRCheckDiagFirst( HYPRE_Int  nrows,
                                    HYPRE_Int *ja,
                                    HYPRE_Int *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
    if (row < nrows)
    {
-      result[row] = (ia[row+1] > ia[row]) && (ja[ia[row]] != row);
+      result[row] = (ia[row + 1] > ia[row]) && (ja[ia[row]] != row);
    }
 }
 
@@ -738,7 +738,7 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
                                             HYPRE_Real     tol,
                                             HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -836,7 +836,7 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
                                             HYPRE_Real     tol,
                                             HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -1021,7 +1021,7 @@ hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
                            HYPRE_Complex  scal,
                            HYPRE_Int      set)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row_i >= nrows)
    {
@@ -1129,7 +1129,7 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
                                 HYPRE_Complex *d,
                                 HYPRE_Int      type)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -1286,7 +1286,7 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
 /* this predicate compares first and second element in a tuple in absolute value */
 /* first is assumed to be complex, second to be real > 0 */
 struct cabsfirst_greaterthan_second_pred : public
-   thrust::unary_function<thrust::tuple<HYPRE_Complex, HYPRE_Real>,bool>
+   thrust::unary_function<thrust::tuple<HYPRE_Complex, HYPRE_Real>, bool>
 {
    __host__ __device__
    bool operator()(const thrust::tuple<HYPRE_Complex, HYPRE_Real>& t) const
@@ -1395,7 +1395,7 @@ hypreCUDAKernel_CSRMatrixIntersectPattern(HYPRE_Int  n,
                                           HYPRE_Int *mark,
                                           HYPRE_Int  diag_option)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i >= n)
    {

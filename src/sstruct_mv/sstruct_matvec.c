@@ -280,8 +280,8 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    hypre_ParVector          *pary;
 
    HYPRE_Int                 part;
-   HYPRE_Int                 x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int                 A_object_type= hypre_SStructMatrixObjectType(A);
+   HYPRE_Int                 x_object_type = hypre_SStructVectorObjectType(x);
+   HYPRE_Int                 A_object_type = hypre_SStructMatrixObjectType(A);
 
    if (x_object_type != A_object_type)
    {

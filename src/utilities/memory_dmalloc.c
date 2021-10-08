@@ -85,7 +85,7 @@ hypre_CAllocDML( HYPRE_Int   count,
                  HYPRE_Int   line    )
 {
    char *ptr;
-   HYPRE_Int   size = count*elt_size;
+   HYPRE_Int   size = count * elt_size;
 
    if (size > 0)
    {

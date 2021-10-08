@@ -28,7 +28,7 @@ hypre_FACCreate( MPI_Comm  comm )
    (fac_data -> max_levels)       = 0;
    (fac_data -> relax_type)       = 2; /*  1 Jacobi; 2 Gauss-Seidel */
    (fac_data -> jacobi_weight)    = 0.0;
-   (fac_data -> usr_jacobi_weight)= 0;
+   (fac_data -> usr_jacobi_weight) = 0;
    (fac_data -> num_pre_smooth)   = 1;
    (fac_data -> num_post_smooth)  = 1;
    (fac_data -> csolver_type)     = 1;
@@ -55,7 +55,7 @@ hypre_FACDestroy2(void *fac_vdata)
 
       HYPRE_SStructGraphDestroy(hypre_SStructMatrixGraph((fac_data -> A_rap)));
       HYPRE_SStructMatrixDestroy((fac_data -> A_rap));
-      for (level= 0; level<= (fac_data -> max_levels); level++)
+      for (level = 0; level <= (fac_data -> max_levels); level++)
       {
          HYPRE_SStructMatrixDestroy( (fac_data -> A_level[level]) );
          HYPRE_SStructVectorDestroy( (fac_data -> x_level[level]) );
@@ -155,14 +155,14 @@ hypre_FACSetPLevels( void *fac_vdata,
    HYPRE_Int      ierr       = 0;
    HYPRE_Int      i;
 
-   fac_plevels= hypre_CTAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
+   fac_plevels = hypre_CTAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
 
-   for (i= 0; i< nparts; i++)
+   for (i = 0; i < nparts; i++)
    {
-      fac_plevels[i]= plevels[i];
+      fac_plevels[i] = plevels[i];
    }
 
-   (fac_data -> plevels)=  fac_plevels;
+   (fac_data -> plevels) =  fac_plevels;
 
    return ierr;
 }
@@ -180,14 +180,14 @@ hypre_FACSetPRefinements( void         *fac_vdata,
    HYPRE_Int      ierr       = 0;
    HYPRE_Int      i;
 
-   fac_prefinements= hypre_TAlloc(hypre_Index,  nparts, HYPRE_MEMORY_HOST);
+   fac_prefinements = hypre_TAlloc(hypre_Index,  nparts, HYPRE_MEMORY_HOST);
 
-   for (i= 0; i< nparts; i++)
+   for (i = 0; i < nparts; i++)
    {
       hypre_CopyIndex( prefinements[i], fac_prefinements[i] );
    }
 
-   (fac_data -> prefinements)=  fac_prefinements;
+   (fac_data -> prefinements) =  fac_prefinements;
 
    return ierr;
 }
@@ -202,7 +202,7 @@ hypre_FACSetMaxLevels( void *fac_vdata,
    hypre_FACData *fac_data = (hypre_FACData *)fac_vdata;
    HYPRE_Int          ierr = 0;
 
-   (fac_data -> max_levels) = nparts-1;
+   (fac_data -> max_levels) = nparts - 1;
 
    return ierr;
 }
@@ -281,7 +281,7 @@ hypre_FACSetJacobiWeight( void  *fac_vdata,
    hypre_FACData *fac_data = (hypre_FACData *)fac_vdata;
 
    (fac_data -> jacobi_weight)    = weight;
-   (fac_data -> usr_jacobi_weight)= 1;
+   (fac_data -> usr_jacobi_weight) = 1;
 
    return hypre_error_flag;
 }
@@ -388,8 +388,8 @@ hypre_FACPrintLogging( void *fac_vdata,
       {
          for (i = 0; i < num_iterations; i++)
          {
-            hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-            hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+            hypre_printf("Residual norm[%d] = %e   ", i, norms[i]);
+            hypre_printf("Relative residual norm[%d] = %e\n", i, rel_norms[i]);
          }
       }
    }
@@ -423,7 +423,7 @@ hypre_FACGetFinalRelativeResidualNorm( void   *fac_vdata,
       }
       else if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {
