@@ -7,4 +7,3 @@
 # Apply code formatting
 ( cd $(git rev-parse --show-toplevel)/src; ./config/astyle-apply.sh . )
 
-

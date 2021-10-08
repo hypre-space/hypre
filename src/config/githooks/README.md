@@ -9,7 +9,7 @@ This directory contains recommended git hooks for hypre:
 
 ### The hooks (currently only one)
 
-* `pre-commit` is a hook that is applied before each commit which runs `astyle`
+* `pre-commit` is a hook that is applied before each commit that runs `astyle`
 to format code according to hypre coding style guidelines.
 
 ### Setup
