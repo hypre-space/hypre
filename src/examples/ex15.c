@@ -576,7 +576,10 @@ int main (int argc, char *argv[])
                   /* Compute the FEM matrix and r.h.s. for cell (i,j,k) with
                      coefficients evaluated at the cell center. */
                   index[0] = i + pi * n; index[1] = j + pj * n; index[2] = k + pk * n;
-                  ComputeFEMND1(S, F, (pi * n + i)*h - h / 2, (pj * n + j)*h - h / 2, (pk * n + k)*h - h / 2, h);
+                  ComputeFEMND1(S, F,
+                                (pi* n + i)*h - h / 2,
+                                (pj* n + j)*h - h / 2,
+                                (pk* n + k)*h - h / 2, h);
 
                   /* Eliminate boundary conditions on x = 0 */
                   if (index[0] == 1)
