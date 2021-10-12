@@ -113,8 +113,8 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A,
   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(P)) = HYPRE_MEMORY_DEVICE;
   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(P)) = HYPRE_MEMORY_DEVICE;
 
-  hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-  hypre_ParCSRMatrixOwnsColStarts(P) = 0;
+  //hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
+  //hypre_ParCSRMatrixOwnsColStarts(P) = 0;
 
   hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P))    = P_diag_i;
   hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(P))    = P_diag_j;

@@ -201,7 +201,7 @@ struct XC_pred : public thrust::unary_function<Tuple, bool>
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
-                                           HYPRE_Int           *CF_marker_host,
+                                           HYPRE_Int           *CF_marker,
                                            HYPRE_BigInt        *cpts_starts,
                                            hypre_ParCSRMatrix  *S,
                                            hypre_ParCSRMatrix **AFC_ptr,
@@ -239,7 +239,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt       *fpts_starts, *row_starts, *f2pts_starts = NULL;
    HYPRE_BigInt        nF_global, nC_global, nF2_global = 0;
    HYPRE_BigInt        F_first, C_first;
-   HYPRE_Int          *CF_marker;
    /* work arrays */
    HYPRE_Int          *map2FC, *map2F2 = NULL, *itmp, *A_diag_ii, *A_offd_ii, *offd_mark;
    HYPRE_BigInt       *send_buf, *recv_buf;
@@ -264,12 +263,9 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    nF_local = n_local - nC_local;
    nF_global = hypre_ParCSRMatrixGlobalNumRows(A) - nC_global;
 
-   CF_marker  = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    map2FC     = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    itmp       = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    recv_buf   = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-
-   hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    if (option == 2)
    {
@@ -468,9 +464,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      AFF_diag_nnz,
                                      AFF_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(AFF) = 1;
-      hypre_ParCSRMatrixOwnsColStarts(AFF) = option == 1 ? 0 : 1;
-
       AFF_diag = hypre_ParCSRMatrixDiag(AFF);
       hypre_CSRMatrixData(AFF_diag) = AFF_diag_a;
       hypre_CSRMatrixI(AFF_diag)    = AFF_diag_i;
@@ -616,9 +609,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      AFC_diag_nnz,
                                      AFC_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(AFC) = AFF_ptr ? 0 : 1;
-      hypre_ParCSRMatrixOwnsColStarts(AFC) = 0;
-
       AFC_diag = hypre_ParCSRMatrixDiag(AFC);
       hypre_CSRMatrixData(AFC_diag) = AFC_diag_a;
       hypre_CSRMatrixI(AFC_diag)    = AFC_diag_i;
@@ -763,9 +753,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      num_cols_ACF_offd,
                                      ACF_diag_nnz,
                                      ACF_offd_nnz);
-
-      hypre_ParCSRMatrixOwnsRowStarts(ACF) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ACF) = (AFF_ptr || AFC_ptr) ? 0 : 1;
 
       ACF_diag = hypre_ParCSRMatrixDiag(ACF);
       hypre_CSRMatrixData(ACF_diag) = ACF_diag_a;
@@ -913,9 +900,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                      ACC_diag_nnz,
                                      ACC_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(ACC) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ACC) = 0;
-
       ACC_diag = hypre_ParCSRMatrixDiag(ACC);
       hypre_CSRMatrixData(ACC_diag) = ACC_diag_a;
       hypre_CSRMatrixI(ACC_diag)    = ACC_diag_i;
@@ -944,7 +928,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    hypre_TFree(A_diag_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(A_offd_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
    hypre_TFree(map2FC,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(map2F2,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(recv_buf,  HYPRE_MEMORY_DEVICE);
@@ -954,49 +937,61 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
-                                      HYPRE_Int           *CF_marker_host,
+                                      HYPRE_Int           *CF_marker,
                                       HYPRE_BigInt        *cpts_starts,
                                       hypre_ParCSRMatrix  *S,
                                       hypre_ParCSRMatrix **AFC_ptr,
                                       hypre_ParCSRMatrix **AFF_ptr )
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker_host, cpts_starts, S, AFC_ptr, AFF_ptr, NULL, NULL, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr, NULL, NULL, 1);
 }
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFC3Device( hypre_ParCSRMatrix  *A,
-                                       HYPRE_Int           *CF_marker_host,
+                                       HYPRE_Int           *CF_marker,
                                        HYPRE_BigInt        *cpts_starts,
                                        hypre_ParCSRMatrix  *S,
                                        hypre_ParCSRMatrix **AFC_ptr,
                                        hypre_ParCSRMatrix **AFF_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker_host, cpts_starts, S, AFC_ptr, AFF_ptr, NULL, NULL, 2);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr, NULL, NULL, 2);
 }
 
 HYPRE_Int
+hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      HYPRE_BigInt        *cpts_starts,
+                                      hypre_ParCSRMatrix  *S,
+                                      hypre_ParCSRMatrix **ACF_ptr,
+                                      hypre_ParCSRMatrix **AFF_ptr )
+{
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, AFF_ptr, ACF_ptr, NULL, 1);
+}
+
+
+HYPRE_Int
 hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix  *A,
-                                    HYPRE_Int           *CF_marker_host,
+                                    HYPRE_Int           *CF_marker,
                                     HYPRE_BigInt        *cpts_starts,
                                     hypre_ParCSRMatrix  *S,
                                     hypre_ParCSRMatrix **ACF_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker_host, cpts_starts, S, NULL, NULL, ACF_ptr, NULL, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, ACF_ptr, NULL, 1);
 }
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
-                                    HYPRE_Int           *CF_marker_host,
+                                    HYPRE_Int           *CF_marker,
                                     HYPRE_BigInt        *cpts_starts,
                                     hypre_ParCSRMatrix  *S,
                                     hypre_ParCSRMatrix **ACC_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker_host, cpts_starts, S, NULL, NULL, NULL, ACC_ptr, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, NULL, ACC_ptr, 1);
 }
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
-                                      HYPRE_Int           *CF_marker_host,
+                                      HYPRE_Int           *CF_marker,
                                       HYPRE_BigInt        *cpts_starts,
                                       hypre_ParCSRMatrix  *S,
                                       hypre_ParCSRMatrix **ACX_ptr,
@@ -1032,7 +1027,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt       *fpts_starts, *row_starts;
    HYPRE_BigInt        /*nF_global,*/ nC_global;
    HYPRE_BigInt        F_first, C_first;
-   HYPRE_Int          *CF_marker;
    /* work arrays */
    HYPRE_Int          *map2FC, *itmp, *A_diag_ii, *A_offd_ii, *offd_mark;
    HYPRE_BigInt       *send_buf, *recv_buf;
@@ -1067,12 +1061,9 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    nF_global = hypre_ParCSRMatrixGlobalNumRows(A) - nC_global;
    */
 
-   CF_marker  = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    map2FC     = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    itmp       = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    recv_buf   = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-
-   hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
    /* map from all points (i.e, F+C) to F/C indices */
    HYPRE_THRUST_CALL( exclusive_scan,
@@ -1236,9 +1227,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                      ACX_diag_nnz,
                                      ACX_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(ACX) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ACX) = 0;
-
       ACX_diag = hypre_ParCSRMatrixDiag(ACX);
       hypre_CSRMatrixData(ACX_diag) = ACX_diag_a;
       hypre_CSRMatrixI(ACX_diag)    = ACX_diag_i;
@@ -1373,9 +1361,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                      AXC_diag_nnz,
                                      AXC_offd_nnz);
 
-      hypre_ParCSRMatrixOwnsRowStarts(AXC) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(AXC) = 0;
-
       AXC_diag = hypre_ParCSRMatrixDiag(AXC);
       hypre_CSRMatrixData(AXC_diag) = AXC_diag_a;
       hypre_CSRMatrixI(AXC_diag)    = AXC_diag_i;
@@ -1404,7 +1389,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(A_diag_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(A_offd_ii, HYPRE_MEMORY_DEVICE);
    hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
    hypre_TFree(map2FC,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(recv_buf,  HYPRE_MEMORY_DEVICE);
 

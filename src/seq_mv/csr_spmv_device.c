@@ -102,7 +102,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
 #endif
       T sum = 0.0;
 #if VERSION == 1
-#pragma unroll(1)
+#pragma unroll 1
       for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
       {
          if (p < q)
@@ -115,7 +115,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
          }
       }
 #elif VERSION == 2
-#pragma unroll(1)
+#pragma unroll 1
       for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
          if (p < q)
@@ -124,7 +124,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
          }
       }
 #else
-#pragma unroll(1)
+#pragma unroll 1
       for (p += group_lane;  p < q; p += K)
       {
          SPMV_ADD_SUM(p)

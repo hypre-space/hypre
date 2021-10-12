@@ -21,11 +21,13 @@ set(SRCS
   F90_HYPRE_general.c
   fortran_matrix.c
   ap.c
+  log.c
   complex.c
   cuda_utils.c
   error.c
   general.c
   handle.c
+  int_array.c
   hopscotch_hash.c
   memory.c
   merge_sort.c
@@ -54,6 +56,7 @@ if (HYPRE_USING_CUDA)
     HYPRE_handle.c
     cuda_utils.c
     handle.c
+    int_array.c
     general.c
     memory.c
     omp_device.c

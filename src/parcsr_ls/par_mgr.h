@@ -32,7 +32,7 @@ typedef struct
   hypre_ParCSRMatrix **P_array;
   hypre_ParCSRMatrix **RT_array;
   hypre_ParCSRMatrix *RAP;
-  HYPRE_Int **CF_marker_array;
+  hypre_IntArray    **CF_marker_array;
   HYPRE_Int **coarse_indices_lvls;
   hypre_ParVector    **F_array;
   hypre_ParVector    **U_array;

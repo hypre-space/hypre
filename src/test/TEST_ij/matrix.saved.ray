@@ -1,14 +1,14 @@
 # Output file: matrix.out.0
 BoomerAMG Iterations = 25
-Final Relative Residual Norm = 5.339520e-09
+Final Relative Residual Norm = 5.900046e-09
 
 # Output file: matrix.out.1
 BoomerAMG Iterations = 25
-Final Relative Residual Norm = 5.339520e-09
+Final Relative Residual Norm = 5.900046e-09
 
 # Output file: matrix.out.2
 BoomerAMG Iterations = 25
-Final Relative Residual Norm = 5.339520e-09
+Final Relative Residual Norm = 5.900046e-09
 
 # Output file: matrix.out.3
 BoomerAMG Iterations = 1
@@ -43,8 +43,8 @@ Iterations = 5
 Final Relative Residual Norm = 3.515462e-01
 
 # Output file: matrix.out.11
-BoomerAMG Iterations = 13
-Final Relative Residual Norm = 7.052920e-09
+BoomerAMG Iterations = 14
+Final Relative Residual Norm = 3.055519e-09
 
 # Output file: matrix.out.12
 Iterations = 5

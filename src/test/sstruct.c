@@ -2812,8 +2812,18 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print driver parameters TODO
     *-----------------------------------------------------------*/
+
    if (myid == 0)
    {
+#ifdef HYPRE_DEVELOP_STRING
+#ifdef HYPRE_DEVELOP_BRANCH
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (main development branch %s)\n\n",
+         HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
+#else
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch)\n\n",
+         HYPRE_DEVELOP_STRING);
+#endif
+#endif
    }
 
    /*-----------------------------------------------------------
@@ -4973,7 +4983,6 @@ main( hypre_int argc,
       hypre_ParVector *par_x2 =
          hypre_ParVectorCreate(hypre_ParVectorComm(par_x), hypre_ParVectorGlobalSize(par_x),
                                hypre_ParVectorPartitioning(par_x));
-      hypre_ParVectorOwnsPartitioning(par_x2) = 0;
       hypre_ParVectorInitialize(par_x2);
       hypre_ParVectorCopy(par_x, par_x2);
 
@@ -5992,4 +6001,3 @@ main( hypre_int argc,
 
    return (0);
 }
-
