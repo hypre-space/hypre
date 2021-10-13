@@ -439,7 +439,7 @@ hypre_spgemm_copy_into_C( HYPRE_Int      M,
 }
 
 /* SpGeMM with Rownnz Estimates */
-template <HYPRE_Int shmem_hash_size, HYPRE_Int ATTEMPT>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT>
 HYPRE_Int
 hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
                                     HYPRE_Int      *rf_ind,
@@ -486,34 +486,39 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
    HYPRE_Int     *d_ghash_i = NULL;
    HYPRE_Int     *d_ghash_j = NULL;
    HYPRE_Complex *d_ghash_a = NULL;
+   HYPRE_Int      ghash_size;
 
-   hypre_SpGemmCreateGlobalHashTable(m, rf_ind, num_act_warps, d_rc, shmem_hash_size, &d_ghash_i,
-                                     &d_ghash_j, &d_ghash_a, NULL);
+   hypre_SpGemmCreateGlobalHashTable(m, rf_ind, num_act_warps, d_rc, SHMEM_HASH_SIZE, &d_ghash_i,
+                                     &d_ghash_j, &d_ghash_a, &ghash_size);
+
+   hypre_printf("ghash size %d\n", ghash_size);
 
    /* allocate tmp C */
    *d_ic_out = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 
-   hypre_assert(shmem_hash_size == HYPRE_SPGEMM_NUMER_HASH_SIZE);
+   hypre_assert(SHMEM_HASH_SIZE == HYPRE_SPGEMM_NUMER_HASH_SIZE);
 
    /* in ATTEMPT 1, allocate ija with slightly larger size than in d_rc (raise to power to 2), type == 2
     * in ATTEMPT 2, allocate ija with size in d_rc, type == 1 */
-   hypre_create_ija(3 - ATTEMPT, m, rf_ind, d_rc, *d_ic_out, d_jc_out, d_c_out, NULL);
+   HYPRE_Int ija_size;
+   hypre_create_ija(3 - ATTEMPT, SHMEM_HASH_SIZE, m, rf_ind, d_rc, *d_ic_out, d_jc_out, d_c_out, &ija_size);
+   hypre_printf("ATTEMPT %d: ija_size %d\n", ATTEMPT, ija_size);
 
    if (hash_type == 'L')
    {
-      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, SHMEM_HASH_SIZE, ATTEMPT, 'L'>), gDim, bDim,
                           m, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ghash_i, d_ghash_j, d_ghash_a,
                           *d_ic_out, *d_jc_out, *d_c_out, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
-      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, SHMEM_HASH_SIZE, ATTEMPT, 'Q'>), gDim, bDim,
                           m, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ghash_i, d_ghash_j, d_ghash_a,
                           *d_ic_out, *d_jc_out, *d_c_out, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
-      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, SHMEM_HASH_SIZE, ATTEMPT, 'D'>), gDim, bDim,
                           m, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ghash_i, d_ghash_j, d_ghash_a,
                           *d_ic_out, *d_jc_out, *d_c_out, d_rc, d_rf );
    }
@@ -554,7 +559,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    hypre_GpuProfilingPushRange("CSRSpGemmNumerE");
 #endif
 
-   const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_NUMER_HASH_SIZE;
+   const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
 
    /* a binary array to indicate if row nnz counting is failed for a row */
    HYPRE_Int     *d_rf = d_rc + m;
@@ -563,14 +568,14 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    HYPRE_Complex *d_c1 = NULL, *d_c2 = NULL;
 
    /* attempt 1 */
-   hypre_spgemm_numerical_with_rowest<shmem_hash_size, 1>
+   hypre_spgemm_numerical_with_rowest<SHMEM_HASH_SIZE, 1>
       (m, NULL, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_rf, &d_ic1, &d_jc1, &d_c1);
 
    HYPRE_Int num_failed_rows = hypreDevice_IntegerReduceSum(m, d_rf);
 
    if (num_failed_rows)
    {
-      //hypre_printf("[%s, %d]: num of failed rows %d (out of %d,  ratio %.2e)\n", __FILE__, __LINE__, num_failed_rows, m, num_failed_rows / (m + 0.0) );
+      hypre_printf("[%s, %d]: num of failed rows %d (out of %d,  ratio %.2e)\n", __FILE__, __LINE__, num_failed_rows, m, num_failed_rows / (m + 0.0) );
 
       HYPRE_Int *rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
@@ -585,7 +590,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
       hypre_assert(new_end - rf_ind == num_failed_rows);
 
       /* attempt 2 */
-      hypre_spgemm_numerical_with_rowest<shmem_hash_size, 2>
+      hypre_spgemm_numerical_with_rowest<SHMEM_HASH_SIZE, 2>
          (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, NULL, &d_ic2, &d_jc2, &d_c2);
 
       HYPRE_THRUST_CALL( scatter,
@@ -605,7 +610,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    HYPRE_Int      nnzC;
 
    /* d_rc has (exact) row nnz now */
-   hypre_create_ija(1, m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
+   hypre_create_ija(1, SHMEM_HASH_SIZE, m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
    const HYPRE_Int num_warps_per_block = 16;
    dim3 bDim(4, 8, num_warps_per_block);

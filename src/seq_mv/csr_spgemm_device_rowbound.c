@@ -57,7 +57,7 @@ template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
-                                HYPRE_Int  lane_id,
+                                HYPRE_Int  warp_lane_id,
                                 HYPRE_Int *ia,
                                 HYPRE_Int *ja,
                                 HYPRE_Int *ib,
@@ -71,9 +71,9 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
    /* load the start and end position of row i of A */
    HYPRE_Int j = 0;
 
-   if (lane_id < 2)
+   if (warp_lane_id < 2)
    {
-      j = read_only_load(ia + rowi + lane_id);
+      j = read_only_load(ia + rowi + warp_lane_id);
    }
    const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
    const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
@@ -91,7 +91,7 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
       }
 
 #if 0
-      //const HYPRE_Int ymask = get_mask<4>(lane_id);
+      //const HYPRE_Int ymask = get_mask<4>(warp_lane_id);
       // TODO: need to confirm the behavior of __ballot_sync, leave it here for now
       //const HYPRE_Int num_valid_rows = __popc(__ballot_sync(ymask, valid_i));
       //for (HYPRE_Int j = 0; j < num_valid_rows; j++)
@@ -136,7 +136,7 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
    return num_new_insert;
 }
 
-template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
+template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
 __global__ void
 hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                        HYPRE_Int *rind,
@@ -149,30 +149,31 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                        HYPRE_Int *rc,
                        HYPRE_Int *rf)
 {
-   volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
-   /* warp id inside the block */
-   volatile const HYPRE_Int warp_id = get_warp_id();
-   /* warp id in the grid */
-   volatile const HYPRE_Int grid_warp_id = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
+   /* number of groups in the grid */
+   volatile const HYPRE_Int grid_num_groups = get_num_groups() * gridDim.x;
+   /* group id inside the block */
+   volatile const HYPRE_Int group_id = get_group_id();
+   /* group id in the grid */
+   volatile const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups() + group_id;
+   /* lane id inside the group */
+   volatile const HYPRE_Int lane_id = get_lane_id();
    /* lane id inside the warp */
-   volatile HYPRE_Int lane_id = get_lane_id();
+   volatile const HYPRE_Int warp_lane_id = get_warp_lane_id();
    /* shared memory hash table */
-   __shared__ volatile HYPRE_Int s_HashKeys[NUM_WARPS_PER_BLOCK * SHMEM_HASH_SIZE];
-   /* shared memory hash table for this warp */
-   volatile HYPRE_Int *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
+   __shared__ volatile HYPRE_Int s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
+   /* shared memory hash table for this group */
+   volatile HYPRE_Int *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
 
-   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
-   hypre_device_assert(NUM_WARPS_PER_BLOCK     <= HYPRE_WARP_SIZE);
+   hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 
-   for (HYPRE_Int i = grid_warp_id; i < M; i += num_warps)
+   for (HYPRE_Int i = grid_group_id; i < M; i += grid_num_groups)
    {
       HYPRE_Int ii, jsum;
       hypre_int failed = 0;
 
       if (ATTEMPT == 2)
       {
-         if (lane_id == 0)
+         if (warp_lane_id == 0)
          {
             ii = read_only_load(&rind[i]);
          }
@@ -188,9 +189,9 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
       if (ig)
       {
-         if (lane_id < 2)
+         if (warp_lane_id < 2)
          {
-            istart_g = read_only_load(ig + grid_warp_id + lane_id);
+            istart_g = read_only_load(ig + grid_group_id + warp_lane_id);
          }
          iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, istart_g, 1);
          istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, istart_g, 0);
@@ -199,26 +200,26 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
            (must be power of 2 and >= the actual size of the row of C - shmem hash size) */
          ghash_size = iend_g - istart_g;
 
-         /* initialize warp's global memory hash table */
+         /* initialize group's global memory hash table */
 #pragma unroll
-         for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
+         for (HYPRE_Int k = lane_id; k < ghash_size; k += GROUP_SIZE)
          {
             jg[istart_g + k] = -1;
          }
       }
 
-      /* initialize warp's shared memory hash table */
+      /* initialize group's shared memory hash table */
 #pragma unroll
-      for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += HYPRE_WARP_SIZE)
+      for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
       {
-         warp_s_HashKeys[k] = -1;
+         group_s_HashKeys[k] = -1;
       }
 
-      __syncwarp();
+      group_sync<GROUP_SIZE>();
 
       /* work with two hash tables */
-      jsum = hypre_spgemm_compute_row_symbl<HashType>(ii, lane_id, ia, ja, ib, jb,
-                                                      SHMEM_HASH_SIZE, warp_s_HashKeys,
+      jsum = hypre_spgemm_compute_row_symbl<HashType>(ii, warp_lane_id, ia, ja, ib, jb,
+                                                      SHMEM_HASH_SIZE, group_s_HashKeys,
                                                       ghash_size, jg + istart_g, failed);
 
 #if defined(HYPRE_DEBUG)
@@ -229,12 +230,12 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 #endif
 
       /* num of nonzeros of this row (an upper bound) */
-      jsum = warp_reduce_sum(jsum);
+      jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(jsum);
 
       /* if this row failed */
       if (ATTEMPT == 1)
       {
-         failed = warp_reduce_sum(failed);
+         failed = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(failed);
       }
 
       if (lane_id == 0)
@@ -249,7 +250,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    }
 }
 
-template <HYPRE_Int shmem_hash_size, HYPRE_Int ATTEMPT>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, HYPRE_Int ATTEMPT>
 void
 hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
                             HYPRE_Int *rf_ind, /* ATTEMPT = 2, input: row indices (length of m) */
@@ -269,35 +270,61 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int num_warps_per_block = 16;
-   const HYPRE_Int BDIMX               =  2;
+   const HYPRE_Int num_warps_per_block   = 16;
+   const HYPRE_Int BDIMX                 =  2;
 #elif defined(HYPRE_USING_HIP)
-   const HYPRE_Int num_warps_per_block = 16;
-   const HYPRE_Int BDIMX               =  4;
+   const HYPRE_Int num_warps_per_block   = 16;
+   const HYPRE_Int BDIMX                 =  4;
 #endif
-   const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
+   const HYPRE_Int BDIMY                 = GROUP_SIZE / BDIMX;
+   const HYPRE_Int num_threads_per_block = num_warps_per_block * HYPRE_WARP_SIZE;
+   const HYPRE_Int num_groups_per_block  = num_threads_per_block / GROUP_SIZE;
 
-   /* CUDA kernel configurations */
-   dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
-   hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
-   // for cases where one WARP works on a row
-   HYPRE_Int num_warps = hypre_min(m, HYPRE_MAX_NUM_WARPS);
-   dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
-   // number of active warps
-   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, m);
+   /* CUDA kernel configurations: bDim.z is the number of groups in block */
+   dim3 bDim(BDIMX, BDIMY, num_groups_per_block);
+   hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
+   // total number of threads used: a group works on a row
+   HYPRE_Int num_threads = hypre_min((size_t) m * GROUP_SIZE, HYPRE_MAX_NUM_WARPS * HYPRE_WARP_SIZE);
+   // grid dimension (number of blocks)
+   dim3 gDim( (num_threads + num_threads_per_block - 1) / num_threads_per_block );
+   // number of active groups
+   HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
    const char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
+
+   if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
+   {
+      hypre_printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
+      exit(0);
+   }
 
    /* ---------------------------------------------------------------------------
     * build hash table (no values)
     * ---------------------------------------------------------------------------*/
    HYPRE_Int *d_ghash_i = NULL, *d_ghash_j = NULL;
+   HYPRE_Int  ghash_size = 0;
 
    if (in_rc)
    {
-      hypre_SpGemmCreateGlobalHashTable(m, rf_ind, num_act_warps, d_rc, shmem_hash_size,
-                                        &d_ghash_i, &d_ghash_j, NULL, NULL);
+      hypre_SpGemmCreateGlobalHashTable(m, rf_ind, num_act_groups, d_rc, SHMEM_HASH_SIZE,
+                                        &d_ghash_i, &d_ghash_j, NULL, &ghash_size);
+
+      hypre_printf("%s[%d]: ghash size %d\n", __func__, __LINE__, ghash_size);
    }
+
+   /*
+   if (in_rc)
+   {
+      int *result = HYPRE_THRUST_CALL(max_element, d_rc, d_rc + m);
+      int *result2 = HYPRE_THRUST_CALL(min_element, d_rc, d_rc + m);
+      int t, t2;
+      hypre_TMemcpy(&t, result, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&t2, result2, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      printf("min = %d, max = %d\n", t2, t);
+   }
+   */
+
+   printf("%s[%d]: SHMEM_HASH_SIZE %d, ghash %p\n", __func__, __LINE__, SHMEM_HASH_SIZE, d_ghash_i);
 
    /* ---------------------------------------------------------------------------
     * symbolic multiplication:
@@ -305,23 +332,18 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>), gDim, bDim,
-                         m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT, 'L'>), gDim, bDim,
+                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT, 'Q'>), gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT, 'D'>), gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
-   else
-   {
-      hypre_printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
-      exit(0);
    }
 
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
@@ -332,6 +354,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
 #endif
 }
 
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int
 hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int  k,
@@ -342,15 +365,13 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_jb,
                                        HYPRE_Int  in_rc,
                                        HYPRE_Int *d_rc,
-                                       HYPRE_Int *d_rf)
+                                       HYPRE_Int *d_rf )
 {
 #ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmRowUpperbound");
 #endif
 
-   const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
-
-   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
+   hypre_spgemm_rownnz_attempt<SHMEM_HASH_SIZE, GROUP_SIZE, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
 
 #ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();
@@ -359,6 +380,14 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
+//template HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
+
+template HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
+
+//template HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound<4*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 4*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
+
+
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int
 hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  k,
@@ -374,12 +403,10 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    hypre_GpuProfilingPushRange("CSRSpGemmRowNNZ");
 #endif
 
-   const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
-
    /* a binary array to indicate if row nnz counting is failed for a row */
    HYPRE_Int *d_rf  = d_rc + m;
 
-   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
+   hypre_spgemm_rownnz_attempt<SHMEM_HASH_SIZE, GROUP_SIZE, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
 
    /* row nnz is exact if no row failed */
    HYPRE_Int num_failed_rows = hypreDevice_IntegerReduceSum(m, d_rf);
@@ -400,7 +427,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
       hypre_assert(new_end - rf_ind == num_failed_rows);
 
-      hypre_spgemm_rownnz_attempt<shmem_hash_size, 2> (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, 1, d_rc, NULL);
+      hypre_spgemm_rownnz_attempt<SHMEM_HASH_SIZE, GROUP_SIZE, 2> (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, 1, d_rc, NULL);
 
       hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
    }
@@ -411,6 +438,12 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
    return hypre_error_flag;
 }
+
+template HYPRE_Int hypreDevice_CSRSpGemmRownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
+
+template HYPRE_Int hypreDevice_CSRSpGemmRownnz<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
+
+//template HYPRE_Int hypreDevice_CSRSpGemmRownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, 4*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 

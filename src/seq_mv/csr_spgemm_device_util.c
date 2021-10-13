@@ -10,21 +10,25 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-template <HYPRE_Int shash_size>
 struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
-  __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
-  {
-     return next_power_of_2(x - shash_size) + x;
-  }
+   HYPRE_Int SHMEM_HASH_SIZE;
+
+   row_size(HYPRE_Int SHMEM_HASH_SIZE_) { SHMEM_HASH_SIZE = SHMEM_HASH_SIZE_; }
+
+   __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
+   {
+      return next_power_of_2(x - SHMEM_HASH_SIZE) + x;
+   }
 };
 
 /* Assume d_c is of length m and contains the size of each row
  *        d_i has size (m+1) on entry
  * type = 1: generate (i,j,a) with d_c
- * type = 2: generate (i,j,a) with row_size(d_c) see above */
+ * type = 2: generate (i,j,a) with row_size(d_c) see above (over allocation) */
 void
 hypre_create_ija( HYPRE_Int       type,
+                  HYPRE_Int       SHMEM_HASH_SIZE,
                   HYPRE_Int       m,
                   HYPRE_Int      *row_id,        /* length of m, row indices; if null, it is [0,1,2,3,...] */
                   HYPRE_Int      *d_c,           /* d_c[row_id[i]] is the size of ith row */
@@ -49,8 +53,8 @@ hypre_create_ija( HYPRE_Int       type,
       else if (2 == type)
       {
          HYPRE_THRUST_CALL( inclusive_scan,
-                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()),
-                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()) + m,
+                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)),
+                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)) + m,
                             d_i + 1 );
       }
    }
@@ -66,8 +70,8 @@ hypre_create_ija( HYPRE_Int       type,
       else if (2 == type)
       {
          HYPRE_THRUST_CALL( inclusive_scan,
-                            thrust::make_transform_iterator(d_c, row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()),
-                            thrust::make_transform_iterator(d_c, row_size<HYPRE_SPGEMM_NUMER_HASH_SIZE>()) + m,
+                            thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)),
+                            thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)) + m,
                             d_i + 1 );
       }
    }
