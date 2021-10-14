@@ -380,7 +380,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-//template HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
+template HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
 
 template HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc, HYPRE_Int *d_rf);
 

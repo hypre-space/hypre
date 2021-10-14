@@ -85,7 +85,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmRownnz<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE>
+         hypreDevice_CSRSpGemmRownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>
             (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
@@ -96,7 +96,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound<4*HYPRE_SPGEMM_NUMER_HASH_SIZE, 4*HYPRE_WARP_SIZE>
+         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE>
             (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
@@ -151,7 +151,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmRownnzUpperbound<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE>
+         hypreDevice_CSRSpGemmRownnzUpperbound<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>
             (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, d_rc + m);
 
          /* row nnz is exact if no row failed */
@@ -168,7 +168,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound<4*HYPRE_SPGEMM_NUMER_HASH_SIZE, 4*HYPRE_WARP_SIZE>
+         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE>
             (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, rownnz_exact, &d_ic, &d_jc, &d_c, &nnzC);
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
