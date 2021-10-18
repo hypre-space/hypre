@@ -14,60 +14,67 @@
 #ifndef hypre_STRUCT_MATMULT_CORE_HEADER
 #define hypre_STRUCT_MATMULT_CORE_HEADER
 
-#define HYPRE_SMMCORE_1T(e, i, k) \
-   a[e[k]][i[k]].mptr[Mi] +=      \
-   a[e[k]][i[k]].cprod*           \
-   a[e[k]][i[k]].tptrs[0][gi]*    \
-   a[e[k]][i[k]].tptrs[1][gi]*    \
-   a[e[k]][i[k]].tptrs[2][gi];
+#define HYPRE_SMMCORE_1T(i, k) \
+   a[i[k]].mptr[Mi] +=         \
+   a[i[k]].cprod*              \
+   a[i[k]].tptrs[0][gi]*       \
+   a[i[k]].tptrs[1][gi]*       \
+   a[i[k]].tptrs[2][gi];
 
-#define HYPRE_SMMCORE_1TB(e, i, o, k)                                 \
-   a[e[k]][i[k]].mptr[Mi] +=                                          \
-   a[e[k]][i[k]].cprod*                                               \
-   a[e[k]][i[k]].tptrs[o[k][0]][gi]*                                  \
-   a[e[k]][i[k]].tptrs[o[k][1]][gi]*                                  \
-   ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
+#define HYPRE_SMMCORE_1TB(i, o, k)                              \
+   a[i[k]].mptr[Mi] +=                                          \
+   a[i[k]].cprod*                                               \
+   a[i[k]].tptrs[o[k][0]][gi]*                                  \
+   a[i[k]].tptrs[o[k][1]][gi]*                                  \
+   ((((HYPRE_Int) a[i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
 
-#define HYPRE_SMMCORE_1TBB(e, i, o, k)                                \
-   a[e[k]][i[k]].mptr[Mi] +=                                          \
-   a[e[k]][i[k]].cprod*                                               \
-   a[e[k]][i[k]].tptrs[o[k][0]][gi]*                                  \
-   ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][1]][gi]) >> o[k][1]) & 1)* \
-   ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
+#define HYPRE_SMMCORE_1TBB(i, o, k)                             \
+   a[i[k]].mptr[Mi] +=                                          \
+   a[i[k]].cprod*                                               \
+   a[i[k]].tptrs[o[k][0]][gi]*                                  \
+   ((((HYPRE_Int) a[i[k]].tptrs[o[k][1]][gi]) >> o[k][1]) & 1)* \
+   ((((HYPRE_Int) a[i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
 
-#define HYPRE_SMMCORE_1TBBB(e, i, k)                       \
-    a[e[k]][i[k]].mptr[Mi] +=                              \
-    a[e[k]][i[k]].cprod*                                   \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[0][gi]) >> 0) & 1)* \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[1][gi]) >> 1) & 1)* \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[2][gi]) >> 2) & 1);
+#define HYPRE_SMMCORE_1TBBB(i, k)                    \
+    a[i[k]].mptr[Mi] +=                              \
+    a[i[k]].cprod*                                   \
+    ((((HYPRE_Int) a[i[k]].tptrs[0][gi]) >> 0) & 1)* \
+    ((((HYPRE_Int) a[i[k]].tptrs[1][gi]) >> 1) & 1)* \
+    ((((HYPRE_Int) a[i[k]].tptrs[2][gi]) >> 2) & 1);
 
-#define HYPRE_SMMCORE_2T(e, i, o, k)    \
-    a[e[k]][i[k]].mptr[Mi] +=           \
-    a[e[k]][i[k]].cprod*                \
-    a[e[k]][i[k]].tptrs[o[k][0]][gi]*   \
-    a[e[k]][i[k]].tptrs[o[k][1]][gi]*   \
-    a[e[k]][i[k]].tptrs[o[k][2]][hi];
+#define HYPRE_SMMCORE_2T(i, o, k) \
+    a[i[k]].mptr[Mi] +=           \
+    a[i[k]].cprod*                \
+    a[i[k]].tptrs[o[k][0]][gi]*   \
+    a[i[k]].tptrs[o[k][1]][gi]*   \
+    a[i[k]].tptrs[o[k][2]][hi];
 
-#define HYPRE_SMMCORE_2TB(e, i, o, k)                                  \
-    a[e[k]][i[k]].mptr[Mi] +=                                          \
-    a[e[k]][i[k]].cprod*                                               \
-    a[e[k]][i[k]].tptrs[o[k][0]][gi]*                                  \
-    a[e[k]][i[k]].tptrs[o[k][1]][hi]*                                  \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
+#define HYPRE_SMMCORE_2T_V2(c, i, k) \
+    a[i[k]].mptr[Mi] +=              \
+    cprod[k]*                        \
+    a[i[k]].tptrs[0][gi]*            \
+    a[i[k]].tptrs[2][gi]*            \
+    a[i[k]].tptrs[1][hi];
 
-#define HYPRE_SMMCORE_2ETB(e, i, o, k)                                 \
-    a[e[k]][i[k]].mptr[Mi] +=                                          \
-    a[e[k]][i[k]].cprod*                                               \
-    a[e[k]][i[k]].tptrs[o[k][0]][hi]*                                  \
-    a[e[k]][i[k]].tptrs[o[k][1]][hi]*                                  \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
+#define HYPRE_SMMCORE_2TB(i, o, k)                               \
+    a[i[k]].mptr[Mi] +=                                          \
+    a[i[k]].cprod*                                               \
+    a[i[k]].tptrs[o[k][0]][gi]*                                  \
+    a[i[k]].tptrs[o[k][1]][hi]*                                  \
+    ((((HYPRE_Int) a[i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
 
-#define HYPRE_SMMCORE_2TBB(e, i, o, k)                                 \
-    a[e[k]][i[k]].mptr[Mi] +=                                          \
-    a[e[k]][i[k]].cprod*                                               \
-    a[e[k]][i[k]].tptrs[o[k][0]][hi]*                                  \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][1]][gi]) >> o[k][1]) & 1)* \
-    ((((HYPRE_Int) a[e[k]][i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
+#define HYPRE_SMMCORE_2ETB(i, o, k)                              \
+    a[i[k]].mptr[Mi] +=                                          \
+    a[i[k]].cprod*                                               \
+    a[i[k]].tptrs[o[k][0]][hi]*                                  \
+    a[i[k]].tptrs[o[k][1]][hi]*                                  \
+    ((((HYPRE_Int) a[i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
+
+#define HYPRE_SMMCORE_2TBB(i, o, k)                              \
+    a[i[k]].mptr[Mi] +=                                          \
+    a[i[k]].cprod*                                               \
+    a[i[k]].tptrs[o[k][0]][hi]*                                  \
+    ((((HYPRE_Int) a[i[k]].tptrs[o[k][1]][gi]) >> o[k][1]) & 1)* \
+    ((((HYPRE_Int) a[i[k]].tptrs[o[k][2]][gi]) >> o[k][2]) & 1);
 
 #endif
