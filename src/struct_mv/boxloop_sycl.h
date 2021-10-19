@@ -395,10 +395,11 @@ else                                                            \
 /* Plain parallel_for loop */
 #define hypre_LoopBegin(size, idx)                                                                    \
 {                                                                                                     \
-   BoxLoopforall(size, [=] (sycl::nd_item<1> item)                                                    \
+   HYPRE_Int hypre__tot = size;                                                                       \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
-      if (idx < size)                                                                                 \
+      if (idx < hypre__tot)                                                                           \
       {                                                                                               \
 
 #define hypre_LoopEnd()                                                                               \
