@@ -26,12 +26,13 @@
 /* product term used to compute the variable stencil entries in M */
 typedef struct hypre_StructMatmulthelper_struct
 {
-   hypre_StTerm    terms[MAXTERMS]; /* stencil info for each term */
-   HYPRE_Int       mentry;          /* stencil entry for M */
-   HYPRE_Complex   cprod;           /* product of the constant terms */
-   HYPRE_Int       types[MAXTERMS]; /* types of computations to do for each term */
-   HYPRE_Complex  *tptrs[MAXTERMS]; /* pointers to matrix data for each term */
-   HYPRE_Complex  *mptr;            /* pointer to matrix data for M */
+   hypre_StTerm    terms[MAXTERMS];   /* stencil info for each term */
+   HYPRE_Int       mentry;            /* stencil entry for M */
+   HYPRE_Complex   cprod;             /* product of the constant terms */
+   HYPRE_Int       types[MAXTERMS];   /* types of computations to do for each term */
+   HYPRE_Complex  *tptrs[MAXTERMS];   /* pointers to matrix data for each term */
+   HYPRE_Int       offsets[MAXTERMS]; /* */
+   HYPRE_Complex  *mptr;              /* pointer to matrix data for M */
 } hypre_StructMatmultHelper;
 
 /*--------------------------------------------------------------------------

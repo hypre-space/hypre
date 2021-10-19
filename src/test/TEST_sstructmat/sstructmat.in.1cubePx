@@ -1,0 +1,45 @@
+############################################################
+
+# GridCreate: ndim nparts
+GridCreate: 3 1
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (0- 0- 0-) (1+ 1+ 1+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+GridSetVariables: 0 1 [0]
+
+############################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [3]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0  0] 0  1.0
+StencilSetEntry: 0  1 [-1  0  0] 0  0.5
+StencilSetEntry: 0  2 [ 1  0  0] 0  0.5
+
+############################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+
+############################################################
+
+# MatrixSetDomainStride: part stride[ndim]
+MatrixSetDomainStride: 0 [2 1 1]
+
+# MatrixSetRangeStride: part stride[ndim]
+MatrixSetRangeStride: 0 [1 1 1]
+
+# MatrixSetConstantEntries: part nentries entries(nentries)
+MatrixSetConstantEntries: 0 1 [0]
+
+############################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+############################################################
