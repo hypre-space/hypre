@@ -26,6 +26,8 @@
 
       program ex12f
 
+      use iso_c_binding
+
       implicit none
 
       include 'mpif.h'
@@ -56,7 +58,10 @@
 
       double precision tol
 
-      double precision values(100)
+      double precision, pointer :: values(:)
+      type(c_ptr) :: p_values
+
+      integer stat
 
 !     This comes from 'sstruct_mv/HYPRE_sstruct_mv.h'
       integer    HYPRE_SSTRUCT_VARIABLE_NODE
@@ -73,7 +78,10 @@
 
       character*32  matfile
 
-      !$omp target enter data map(alloc:values)
+      integer device_malloc_managed
+      stat = device_malloc_managed(100*8, p_values)
+
+      call c_f_pointer(p_values, values, [100])
 
 !     We only have one part and one variable
       nparts = 1
@@ -248,11 +256,8 @@
          enddo
       enddo
 
-      !$omp target update to(values)
-      !$omp target data use_device_ptr(values)
       call HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
      +     var, nentries, stencil_indices, values, ierr)
-      !$omp end target data
 
 !     Set the coefficients reaching outside of the boundary to 0.  Note
 !     that both ilower *and* iupper may be different from those in ex1.
@@ -285,11 +290,8 @@
          iupper(1) = -2
          iupper(2) =  2
          stencil_indices(1) = 4
-         !$omp target update to(values)
-         !$omp target data use_device_ptr(values)
          call HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
      +        var, 1, stencil_indices, values, ierr)
-         !$omp end target data
 
       else if (myid .eq. 1) then
 
@@ -324,11 +326,8 @@
          iupper(1) = -1
          iupper(2) =  4
          stencil_indices(1) = 1
-         !$omp target update to(values)
-         !$omp target data use_device_ptr(values)
          call HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
      +        var, 1, stencil_indices, values, ierr)
-         !$omp end target data
 
       endif
 
@@ -383,19 +382,13 @@
          do i = 1, 20
             values(i) = 1.0
          enddo
-         !$omp target update to(values)
-         !$omp target data use_device_ptr(values)
          call HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
      +        var, values, ierr)
-         !$omp end target data
          do i = 1, 20
             values(i) = 0.0
          enddo
-         !$omp target update to(values)
-         !$omp target data use_device_ptr(values)
          call HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
      +        var, values, ierr)
-         !$omp end target data
 
       endif
 
@@ -502,6 +495,8 @@
 
 !     Finalize MPI
       call MPI_Finalize(ierr)
+
+      call device_free(p_values)
 
       stop
       end
