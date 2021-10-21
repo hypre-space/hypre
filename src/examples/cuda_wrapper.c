@@ -2,14 +2,20 @@
 #include <stdio.h>
 #include <HYPRE_config.h>
 
-typedef size_t devptr_t;
-
 #if defined(HYPRE_EXAMPLE_USING_CUDA)
 
 #include <cuda_runtime.h>
 
+typedef size_t devptr_t;
+
+/* this depends on Fortran name mangling */
+#if 0
+#define CUDA_MALLOC_MANAGED  device_malloc_managed_
+#define CUDA_FREE            device_free_
+#else
 #define CUDA_MALLOC_MANAGED  device_malloc_managed
 #define CUDA_FREE            device_free
+#endif
 
 int CUDA_MALLOC_MANAGED (const int *nbytes, devptr_t *devicePtr)
 {
