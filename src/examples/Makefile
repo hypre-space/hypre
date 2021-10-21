@@ -101,6 +101,8 @@ all: $(ALLPROGS)
 
 default: all
 
+gpu: all
+
 bigint: $(BIGINTPROGS)
 
 fortran: $(FORTRANPROGS)
