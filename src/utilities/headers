@@ -106,8 +106,8 @@ cat >> $INTERNAL_HEADER <<@
 
 @
 
-cat hypre_sycl_utils.hpp         >> $INTERNAL_HEADER
-cat hypre_sycl_reducer.hpp       >> $INTERNAL_HEADER
+cat sycl_utils.hpp         >> $INTERNAL_HEADER
+cat sycl_reducer.hpp       >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
 

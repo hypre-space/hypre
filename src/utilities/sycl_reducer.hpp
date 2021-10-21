@@ -163,7 +163,7 @@ T blockReduceSum(T val, sycl::nd_item<1>& item, T* shared)
 }
 
 template<typename T>
-void OneWorkgroupReduceKernel(sycl::nd_item<1>& item, T *shared, T *arr, HYPRE_Int N)
+void OneWorkgroupReduceKernel(T *arr, HYPRE_Int N, sycl::nd_item<1>& item, T *shared)
 {
    size_t threadIdx_x = item.get_local_id(0);
 
@@ -243,11 +243,11 @@ struct ReduceSum
       hypre_HandleSyclComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) {
 
 	  sycl::accessor<T, 1, sycl::access_mode::read_write,
-			     sycl::target::local> shared_acc(HYPRE_SUBGROUP_SIZE, cgh);
+			 sycl::target::local> shared_acc(HYPRE_SUBGROUP_SIZE, cgh);
 
 	  cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim),
 			   [=] (sycl::nd_item<1> item) {
-			     OneWorkgroupReduceKernel(item, shared_acc.get_pointer(), d_buf, num_workgroups);
+			     OneWorkgroupReduceKernel(d_buf, num_workgroups, item, shared_acc.get_pointer());
 			   });
 	});
 

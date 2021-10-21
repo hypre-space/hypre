@@ -22,6 +22,11 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
                       HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out,
                       HYPRE_Int  *nnzC)
 {
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real        t1, t2;
+   HYPRE_Real        ta, tb;
+#endif
+
    /* trivial case */
    if (nnza == 0 || nnzb == 0)
    {
@@ -33,9 +38,13 @@ hypreDevice_CSRSpGemm(HYPRE_Int   m,        HYPRE_Int   k,        HYPRE_Int     
       return hypre_error_flag;
    }
 
-// #ifdef HYPRE_PROFILE
-//    hypre_profile_times[HYPRE_TIMER_ID_SPMM] -= hypre_MPI_Wtime();
-// #endif
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM] -= hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   ta = hypre_MPI_Wtime();
+#endif
 
    /* use ONEMKLSPARSE */
    if (hypre_HandleSpgemmUseOnemklsparse(hypre_handle()))
