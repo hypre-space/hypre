@@ -80,6 +80,7 @@ set(SRCS
   par_jacobi_interp.c
   par_krylov_func.c
   par_mod_lr_interp.c
+  par_mod_multi_interp.c
   par_multi_interp.c
   par_laplace_27pt.c
   par_laplace_9pt.c
@@ -130,6 +131,7 @@ set(SRCS
   par_amgdd_fac_cycle_device.c
   par_2s_interp_device.c
   par_relax_device.c
+  par_mod_multi_interp_device.c
 )
 
 if (HYPRE_USING_DSUPERLU)
@@ -156,6 +158,7 @@ if (HYPRE_USING_CUDA)
     par_interp_trunc_device.c
     par_lr_interp_device.c
     par_lr_restr_device.c
+    par_mod_multi_interp_device.c
     par_strength_device.c
     par_strength2nd_device.c
     par_relax_more_device.c

@@ -73,3 +73,9 @@ PCG Solve wall clock time = 0.261864 seconds
 # Output file: benchmark_ij.out.25
 PCG Setup wall clock time = 0.574478 seconds
 PCG Solve wall clock time = 0.268362 seconds
+# Output file: benchmark_ij.out.26
+PCG Setup wall clock time = 2.101331 seconds
+PCG Solve wall clock time = 1.054930 seconds
+# Output file: benchmark_ij.out.27
+PCG Setup wall clock time = 2.310642 seconds
+PCG Solve wall clock time = 0.703656 seconds

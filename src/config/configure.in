@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.22.1])
-m4_define([M4_HYPRE_NUMBER],  [22201])
-m4_define([M4_HYPRE_DATE],    [2021/08/20])
+m4_define([M4_HYPRE_VERSION], [2.23.0])
+m4_define([M4_HYPRE_NUMBER],  [22300])
+m4_define([M4_HYPRE_DATE],    [2021/10/01])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -104,6 +104,27 @@ AC_SUBST(HYPRE_TIME)
 AC_SUBST(HYPRE_BUGS)
 
 AC_SUBST(HYPRE_SRCDIR)
+
+AC_CHECK_FILE([$HYPRE_SRCDIR/../.git],
+  [
+  develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
+  develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
+  develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+  develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
+  AS_IF([test -n "$develop_string"],
+    [
+    AC_DEFINE_UNQUOTED(HYPRE_DEVELOP_STRING, ["$develop_string"], [Develop branch string])
+    AC_DEFINE_UNQUOTED(HYPRE_DEVELOP_NUMBER, [$develop_number],   [Develop branch commit number])
+    AS_IF([test "x$develop_branch" = "xmaster"],
+      [AC_DEFINE_UNQUOTED(HYPRE_DEVELOP_BRANCH, ["$develop_branch"], [Main development branch?])],
+      [AC_MSG_NOTICE([NOTE: On branch $develop_branch, not the main development branch])]
+    )
+    ],
+    [AC_MSG_NOTICE([NOTE: Could not describe development branch])]
+  )
+  ],
+  [AC_MSG_NOTICE([NOTE: Could not find .git directory])]
+)
 
 dnl *********************************************************************
 dnl * Clear variables defined by AC_INIT to avoid name conflicts with
@@ -2356,7 +2377,7 @@ fi
 
 if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"]
 then
-   if test "x$hypre_using_cuda_streams" = "xyes"]
+   if test "x$hypre_using_cuda_streams" = "xyes"
    then
       AC_DEFINE([HYPRE_USING_CUDA_STREAMS],1,[Define to 1 if using CUDA streams])
    fi
