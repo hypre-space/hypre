@@ -16,6 +16,8 @@ LINK_CXX  = ${CXX}
 LINK_FC   = ${F77}
 LINK_CUF  = ${CUF}
 
+XL_DIR=$(dir $(shell which xlc))..
+
 HYPRE_DIR = ../hypre
 
 ########################################################################
@@ -23,18 +25,22 @@ HYPRE_DIR = ../hypre
 ########################################################################
 ifeq ($(use_cuda), 1)
    CUDA_INCL = -I${CUDA_HOME}/include
-   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++
+   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
    CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
    NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
    COPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
    FOPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
 endif
 
+ifeq ($(use_cuf), 1)
+   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+endif
+
 ########################################################################
 # Device OMP
 ########################################################################
 ifeq ($(use_domp), 1)
-   DOMP_LIBS = -lstdc++
+   DOMP_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
    COPTS_DOMP = -DHYPRE_EXAMPLE_USING_DEVICE_OMP
    FOPTS_DOMP = -qoffload -W@,-v -qsmp=omp -qinfo=omperrtrace -DHYPRE_EXAMPLE_USING_DEVICE_OMP
    LOPTS_DOMP = -qoffload -W@,-v -qsmp=omp
