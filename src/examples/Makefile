@@ -10,9 +10,11 @@ CC        = mpicc
 F77       = mpif77
 CXX       = mpicxx
 F90       = mpif90
+CUF       = mpixlcuf
 LINK_CC   = ${CC}
 LINK_CXX  = ${CXX}
 LINK_FC   = ${F77}
+LINK_CUF  = ${CUF}
 
 HYPRE_DIR = ../hypre
 
@@ -49,6 +51,7 @@ FOPTS = -g $(FOPTS_CUDA) $(FOPTS_DOMP)
 CFLAGS = $(COPTS) $(CINCLUDES) $(CDEFS)
 FINCLUDES = $(CINCLUDES)
 FFLAGS = $(FOPTS) $(FINCLUDES)
+CUFFLAGS = -qcuda
 CXXOPTS = $(COPTS) -Wno-deprecated
 CXXINCLUDES = $(CINCLUDES) -I..
 CXXDEFS = $(CDEFS)
@@ -73,12 +76,14 @@ LFLAGS90 =
 ########################################################################
 # Rules for compiling the source files
 ########################################################################
-.SUFFIXES: .c .f .cxx
+.SUFFIXES: .c .f .cuf .cxx
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:
 	$(F77) $(FFLAGS) -c $<
+.cuf.o:
+	$(CUF) $(FFLAGS) $(CUFFLAGS) -c $<
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
@@ -147,8 +152,13 @@ ifeq ($(use_cuda), 1)
 ex5f: ex5f_cptr.o cuda_wrapper.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
 else
+ifeq ($(use_cuf), 1)
+ex5f: ex5cuf.o
+	$(LINK_CUF) -o $@ $^ $(LFLAGS77)
+else
 ex5f: ex5f.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+endif
 endif
 
 ########################################################################
@@ -200,8 +210,13 @@ ifeq ($(use_cuda), 1)
 ex12f: ex12f_cptr.o cuda_wrapper.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
 else
+ifeq ($(use_cuf), 1)
+ex12f: ex12cuf.o
+	$(LINK_CUF) -o $@ $^ $(LFLAGS77)
+else
 ex12f: ex12f.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+endif
 endif
 
 ########################################################################
