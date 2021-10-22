@@ -232,7 +232,7 @@ struct hypre_DeviceData
    hypre_device_allocator            device_allocator;
 #endif
 #if defined(HYPRE_USING_SYCL)
-   sycl::device                      device;
+   sycl::device*                     device;
 #else
    HYPRE_Int                         device;
 #endif
