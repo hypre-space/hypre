@@ -9,12 +9,11 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_SYCL)
-// WM: TODO: verify
 sycl::range<1> hypre_GetDefaultCUDABlockDimension()
 {
   // 256 - max work group size for Gen9
-  // 512 - max work group size for ATS
-  sycl::range<1> wgDim(64);
+  // 1024 - max work group size for ATS
+  sycl::range<1> wgDim(1024);
   return wgDim;
 }
 
