@@ -60,7 +60,6 @@
       integer, pointer :: tmpi(:)
 
       integer(c_int) :: stat
-      integer(c_size_t) :: size
 
       integer num_iterations
       double precision final_res_norm, tol
@@ -83,17 +82,15 @@
       type(c_ptr) :: p_cols
       type(c_ptr) :: p_tmpi
 
-      size = MAX_LOCAL_SIZE * 8
-      stat = cudaMallocManaged(p_rhs_values, size, cudaMemAttachGlobal)
-      stat = cudaMallocManaged(p_x_values, size, cudaMemAttachGlobal)
-      size = 5 * 8
-      stat = cudaMallocManaged(p_values, size, cudaMemAttachGlobal)
-      size = MAX_LOCAL_SIZE * 4
-      stat = cudaMallocManaged(p_rows, size, cudaMemAttachGlobal)
-      size = 5 * 4
-      stat = cudaMallocManaged(p_cols, size, cudaMemAttachGlobal)
-      size = 2 * 4
-      stat = cudaMallocManaged(p_tmpi, size, cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_rhs_values, MAX_LOCAL_SIZE * 8_8,
+     1   cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_x_values, MAX_LOCAL_SIZE * 8_8,
+     1   cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_values, 5 * 8_8, cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_rows, MAX_LOCAL_SIZE * 4_8,
+     1   cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_cols, 5 * 4_8, cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_tmpi, 2 * 4_8, cudaMemAttachGlobal)
 
       call c_f_pointer(p_rhs_values, rhs_values, [MAX_LOCAL_SIZE])
       call c_f_pointer(p_x_values, x_values, [MAX_LOCAL_SIZE])

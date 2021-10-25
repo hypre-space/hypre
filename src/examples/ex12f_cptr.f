@@ -63,7 +63,6 @@
       type(c_ptr) :: p_values
 
       integer(c_int) :: stat
-      integer(c_size_t) :: size
 
 !     This comes from 'sstruct_mv/HYPRE_sstruct_mv.h'
       integer    HYPRE_SSTRUCT_VARIABLE_NODE
@@ -80,8 +79,7 @@
 
       character*32  matfile
 
-      size = 100 * 8
-      stat = cudaMallocManaged(p_values, size, cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_values, 100 * 8_8, cudaMemAttachGlobal)
 
       call c_f_pointer(p_values, values, [100])
 
