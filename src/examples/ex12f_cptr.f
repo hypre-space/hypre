@@ -27,6 +27,7 @@
       program ex12f
 
       use iso_c_binding
+      use cudaf
 
       implicit none
 
@@ -61,7 +62,8 @@
       double precision, pointer :: values(:)
       type(c_ptr) :: p_values
 
-      integer stat
+      integer(c_int) :: stat
+      integer(c_size_t) :: size
 
 !     This comes from 'sstruct_mv/HYPRE_sstruct_mv.h'
       integer    HYPRE_SSTRUCT_VARIABLE_NODE
@@ -78,8 +80,8 @@
 
       character*32  matfile
 
-      integer device_malloc_managed
-      stat = device_malloc_managed(100*8, p_values)
+      size = 100 * 8
+      stat = cudaMallocManaged(p_values, size, cudaMemAttachGlobal)
 
       call c_f_pointer(p_values, values, [100])
 
@@ -496,7 +498,7 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      call device_free(p_values)
+      stat = cudaFree(p_values)
 
       stop
       end

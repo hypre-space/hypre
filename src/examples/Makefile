@@ -88,6 +88,8 @@ LFLAGS90 =
 	$(CC) $(CFLAGS) -c $<
 .f.o:
 	$(F77) $(FFLAGS) -c $<
+.f.mod:
+	$(F77) $(FFLAGS) -c $<
 .cuf.o:
 	$(CUF) $(FFLAGS) $(CUFFLAGS) -c $<
 .cxx.o:
@@ -157,7 +159,9 @@ ex5big: ex5big.o
 # Example 5 Fortran 77
 ########################################################################
 ifeq ($(use_cuda), 1)
-ex5f: ex5f_cptr.o cuda_wrapper.o
+ex5f_cptr.o : ex5f_cptr.f cudaf.mod
+	$(F77) $(FFLAGS) -c $<
+ex5f: ex5f_cptr.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
 else
 ifeq ($(use_cuf), 1)
@@ -215,7 +219,9 @@ ex12: ex12.o
 # Example 12 Fortran 77
 ########################################################################
 ifeq ($(use_cuda), 1)
-ex12f: ex12f_cptr.o cuda_wrapper.o
+ex12f_cptr.o : ex12f_cptr.f cudaf.mod
+	$(F77) $(FFLAGS) -c $<
+ex12f: ex12f_cptr.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
 else
 ifeq ($(use_cuf), 1)
@@ -284,7 +290,7 @@ clean:
 	rm -f $(FORTRANPROGS:=.o)
 	rm -f $(MAXDIMPROGS:=.o)
 	rm -f $(COMPLEXPROGS:=.o)
-	rm -f cuda_wrapper.o ex*.o
+	rm -f cudaf.o cudaf.mod ex*.o
 	cd vis; make clean
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)

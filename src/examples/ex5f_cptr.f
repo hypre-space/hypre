@@ -34,6 +34,7 @@
       program ex5f
 
       use iso_c_binding
+      use cudaf
 
       implicit none
 
@@ -58,7 +59,9 @@
       integer, pointer :: cols(:)
       integer, pointer :: tmpi(:)
 
-      integer stat
+      integer(c_int) :: stat
+      integer(c_size_t) :: size
+
       integer num_iterations
       double precision final_res_norm, tol
 
@@ -80,13 +83,17 @@
       type(c_ptr) :: p_cols
       type(c_ptr) :: p_tmpi
 
-      integer device_malloc_managed
-      stat = device_malloc_managed(MAX_LOCAL_SIZE*8, p_rhs_values)
-      stat = device_malloc_managed(MAX_LOCAL_SIZE*8, p_x_values)
-      stat = device_malloc_managed(5*8, p_values)
-      stat = device_malloc_managed(MAX_LOCAL_SIZE*4, p_rows)
-      stat = device_malloc_managed(5*4, p_cols)
-      stat = device_malloc_managed(2*4, p_tmpi)
+      size = MAX_LOCAL_SIZE * 8
+      stat = cudaMallocManaged(p_rhs_values, size, cudaMemAttachGlobal)
+      stat = cudaMallocManaged(p_x_values, size, cudaMemAttachGlobal)
+      size = 5 * 8
+      stat = cudaMallocManaged(p_values, size, cudaMemAttachGlobal)
+      size = MAX_LOCAL_SIZE * 4
+      stat = cudaMallocManaged(p_rows, size, cudaMemAttachGlobal)
+      size = 5 * 4
+      stat = cudaMallocManaged(p_cols, size, cudaMemAttachGlobal)
+      size = 2 * 4
+      stat = cudaMallocManaged(p_tmpi, size, cudaMemAttachGlobal)
 
       call c_f_pointer(p_rhs_values, rhs_values, [MAX_LOCAL_SIZE])
       call c_f_pointer(p_x_values, x_values, [MAX_LOCAL_SIZE])
@@ -496,12 +503,12 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      call device_free(p_rhs_values)
-      call device_free(p_x_values)
-      call device_free(p_rows)
-      call device_free(p_cols)
-      call device_free(p_tmpi)
-      call device_free(p_values)
+      stat = cudaFree(p_rhs_values)
+      stat = cudaFree(p_x_values)
+      stat = cudaFree(p_rows)
+      stat = cudaFree(p_cols)
+      stat = cudaFree(p_tmpi)
+      stat = cudaFree(p_values)
 
       stop
       end
