@@ -10,9 +10,11 @@
       module cudaf
          ! Interface to CUDA Runtime API
 
-         integer, parameter :: cudaMemAttachGlobal = 1
-         integer, parameter :: cudaMemAttachHost = 2
-         integer, parameter :: cudaMemAttachSingle = 4
+         use iso_c_binding
+
+         integer(c_int), parameter :: cudaMemAttachGlobal = 1
+         integer(c_int), parameter :: cudaMemAttachHost = 2
+         integer(c_int), parameter :: cudaMemAttachSingle = 4
 
          !include "cudaDeviceProp.fh"
 
@@ -35,6 +37,5 @@
             end function cudaFree
 
          end interface
-
       end module cudaf
 
