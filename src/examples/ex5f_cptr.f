@@ -33,7 +33,8 @@
 
       program ex5f
 
-      use iso_c_binding
+      use, intrinsic :: iso_c_binding
+      use, intrinsic :: iso_fortran_env, only: int64
       use cudaf
 
       implicit none
@@ -41,8 +42,7 @@
       include 'mpif.h'
       include 'HYPREf.h'
 
-      integer    MAX_LOCAL_SIZE
-      parameter  (MAX_LOCAL_SIZE=123000)
+      integer, parameter :: MAX_LOCAL_SIZE = 123000
 
       integer    ierr
       integer    num_procs, myid
@@ -59,7 +59,7 @@
       integer, pointer :: cols(:)
       integer, pointer :: tmpi(:)
 
-      integer(c_int) :: stat
+      integer :: stat
 
       integer num_iterations
       double precision final_res_norm, tol
@@ -82,15 +82,15 @@
       type(c_ptr) :: p_cols
       type(c_ptr) :: p_tmpi
 
-      stat = cudaMallocManaged(p_rhs_values, MAX_LOCAL_SIZE * 8_8,
-     1   cudaMemAttachGlobal)
-      stat = cudaMallocManaged(p_x_values, MAX_LOCAL_SIZE * 8_8,
-     1   cudaMemAttachGlobal)
-      stat = cudaMallocManaged(p_values, 5 * 8_8, cudaMemAttachGlobal)
-      stat = cudaMallocManaged(p_rows, MAX_LOCAL_SIZE * 4_8,
-     1   cudaMemAttachGlobal)
-      stat = cudaMallocManaged(p_cols, 5 * 4_8, cudaMemAttachGlobal)
-      stat = cudaMallocManaged(p_tmpi, 2 * 4_8, cudaMemAttachGlobal)
+      stat = device_malloc_managed(int(MAX_LOCAL_SIZE * 8, int64),
+     1                             p_rhs_values)
+      stat = device_malloc_managed(int(MAX_LOCAL_SIZE * 8, int64),
+     1                             p_x_values)
+      stat = device_malloc_managed(int(5 * 8, int64), p_values)
+      stat = device_malloc_managed(int(MAX_LOCAL_SIZE * 4, int64),
+     1                             p_rows)
+      stat = device_malloc_managed(int(5 * 4, int64), p_cols)
+      stat = device_malloc_managed(int(2 * 4, int64), p_tmpi)
 
       call c_f_pointer(p_rhs_values, rhs_values, [MAX_LOCAL_SIZE])
       call c_f_pointer(p_x_values, x_values, [MAX_LOCAL_SIZE])
@@ -500,12 +500,12 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      stat = cudaFree(p_rhs_values)
-      stat = cudaFree(p_x_values)
-      stat = cudaFree(p_rows)
-      stat = cudaFree(p_cols)
-      stat = cudaFree(p_tmpi)
-      stat = cudaFree(p_values)
+      stat = device_free(p_rhs_values)
+      stat = device_free(p_x_values)
+      stat = device_free(p_rows)
+      stat = device_free(p_cols)
+      stat = device_free(p_tmpi)
+      stat = device_free(p_values)
 
       stop
       end

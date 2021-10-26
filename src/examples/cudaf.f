@@ -10,7 +10,9 @@
       module cudaf
          ! Interface to CUDA Runtime API
 
-         use iso_c_binding
+         use, intrinsic :: iso_c_binding, only: c_int
+
+         implicit none
 
          integer(c_int), parameter :: cudaMemAttachGlobal = 1
          integer(c_int), parameter :: cudaMemAttachHost = 2
@@ -37,5 +39,26 @@
             end function cudaFree
 
          end interface
-      end module cudaf
 
+         contains
+
+         ! wrapper functions
+
+         integer function
+     1           device_malloc_managed(nbytes, dPtr) result(stat)
+            use, intrinsic :: iso_c_binding, only: c_size_t, c_ptr
+            use, intrinsic :: iso_fortran_env, only: int64
+            integer(int64), intent(in) :: nbytes
+            type(c_ptr), intent(inout) :: dPtr
+            stat = cudaMallocManaged(dPtr, int(nbytes,c_size_t),
+     1                               cudaMemAttachGlobal)
+         end function device_malloc_managed
+         !
+         integer function
+     1           device_free(dPtr) result(stat)
+            use, intrinsic :: iso_c_binding, only: c_ptr
+            type(c_ptr), intent(inout) :: dPtr
+            stat = cudaFree(dPtr)
+         end function device_free
+
+      end module cudaf
