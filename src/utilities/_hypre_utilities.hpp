@@ -78,6 +78,7 @@ struct hypre_device_allocator
 #include <curand.h>
 #include <cublas_v2.h>
 #include <cusparse.h>
+#include <cusolverSp.h>
 
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
@@ -355,6 +356,9 @@ using dim3 = sycl::range<1>;
 #define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
 #define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
+#define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
+#define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
+#define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
 #elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
 /* ... */
 #else /* Double */
@@ -387,6 +391,9 @@ using dim3 = sycl::range<1>;
 #define hypre_rocsparse_csrgemm_buffer_size    rocsparse_dcsrgemm_buffer_size
 #define hypre_rocsparse_csrgemm                rocsparse_dcsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
+#define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
+#define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
+#define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
 #endif
 
 
@@ -403,6 +410,14 @@ using dim3 = sycl::range<1>;
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
       printf("CUSPARSE ERROR (code = %d, %s) at %s:%d\n",                                    \
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
+#define HYPRE_CUSOLVER_CALL(call) do {                                                       \
+   cusolverStatus_t err = call;                                                              \
+   if (CUSOLVER_STATUS_SUCCESS != err) {                                                     \
+      printf("CUSOLVER ERROR (code = %d) at %s:%d\n",                                        \
+            err, __FILE__, __LINE__);                                                        \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
@@ -482,6 +497,10 @@ struct hypre_DeviceData
 
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER)
+   cusolverSpHandle_t                cusolverSp_handle;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -584,6 +603,10 @@ cublasHandle_t      hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
+#if defined(HYPRE_USING_CUSOLVER)
+cusolverSpHandle_t  hypre_DeviceDataCusolverSpHandle(hypre_DeviceData *data);
+#endif
+
 #if defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
@@ -605,22 +628,31 @@ struct hypre_CsrsvData
 #if defined(HYPRE_USING_CUSPARSE)
    csrsv2Info_t info_L;
    csrsv2Info_t info_U;
+   cusparseSolvePolicy_t solve_policy;
+   /* place holder */
+   char analysis_policy;
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info info_L;
    rocsparse_mat_info info_U;
+   rocsparse_solve_policy solve_policy;
+   rocsparse_analysis_policy analysis_policy;
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    /* WM: todo - placeholders */
    char info_L;
    char info_U;
+   char analysis_policy;
+   char solve_policy;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
 };
 
-#define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
-#define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
-#define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
-#define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
+#define hypre_CsrsvDataInfoL(data)          ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)          ((data) -> info_U)
+#define hypre_CsrsvDataBufferSize(data)     ((data) -> BufferSize)
+#define hypre_CsrsvDataBuffer(data)         ((data) -> Buffer)
+#define hypre_CsrsvDataSolvePolicy(data)    ((data) -> solve_policy)
+#define hypre_CsrsvDataAnalysisPolicy(data) ((data) -> analysis_policy)
 
 struct hypre_GpuMatData
 {
@@ -639,7 +671,7 @@ struct hypre_GpuMatData
 #endif
 };
 
-#define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
+#define hypre_GpuMatDataMatDescr(data)    ((data) -> mat_descr)
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
 #define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)

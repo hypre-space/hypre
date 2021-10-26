@@ -175,6 +175,9 @@
 /* Define to 1 if using device async malloc */
 #undef HYPRE_USING_DEVICE_MALLOC_ASYNC
 
+/* Define to 1 if using cuSOLVER */
+#undef HYPRE_USING_CUSOLVER
+
 /* Define to 1 if using device memory without UM */
 #undef HYPRE_USING_DEVICE_MEMORY
 
