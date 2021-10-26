@@ -29,7 +29,7 @@ ifeq ($(use_cuda), 1)
    CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
    NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
    COPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
-   FOPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
+   FOPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA -qsuppress=cmpmsg
 endif
 
 ifeq ($(use_cuf), 1)
@@ -161,7 +161,7 @@ ex5big: ex5big.o
 ifeq ($(use_cuda), 1)
 ex5f_cptr.o : ex5f_cptr.f cudaf.mod
 	$(F77) $(FFLAGS) -c $<
-ex5f: ex5f_cptr.o
+ex5f: ex5f_cptr.o cudaf.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
 else
 ifeq ($(use_cuf), 1)
@@ -221,7 +221,7 @@ ex12: ex12.o
 ifeq ($(use_cuda), 1)
 ex12f_cptr.o : ex12f_cptr.f cudaf.mod
 	$(F77) $(FFLAGS) -c $<
-ex12f: ex12f_cptr.o
+ex12f: ex12f_cptr.o cudaf.o
 	$(LINK_FC) -o $@ $^ $(LFLAGS77)
 else
 ifeq ($(use_cuf), 1)
