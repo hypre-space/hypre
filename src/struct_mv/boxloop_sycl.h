@@ -101,7 +101,7 @@ ReductionBoxLoopforall( LOOP_BODY  loop_body,
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
          {
             sycl::accessor sum_acc(sum_buf, cgh, sycl::read_write);
-            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ONEAPI::reduction(sum_acc, sycl::ONEAPI::plus<>()), loop_body);
+            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ext::oneapi::reduction(sum_acc, std::plus<>()), loop_body);
          }).wait_and_throw();
    }
 }
