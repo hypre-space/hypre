@@ -3371,6 +3371,11 @@ void *hypre_ParILURAPSchurGMRESMatvecCreateH(void *ilu_vdata, void *x);
 HYPRE_Int hypre_ParILURAPSchurGMRESMatvecH(void *matvec_data, HYPRE_Complex alpha, void *ilu_vdata,
                                            void *x, HYPRE_Complex beta, void *y);
 HYPRE_Int hypre_ParILURAPSchurGMRESMatvecDestroyH(void *matvec_data );
+HYPRE_Int hypre_ILULocalRCMBuildG(hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
+                                  HYPRE_Int **permp, HYPRE_Int **qpermp, hypre_CSRMatrix **G);
+HYPRE_Int hypre_ILULocalRCMBuildFinalPerm(HYPRE_Int start, HYPRE_Int end,
+                                          HYPRE_Int * G_perm, HYPRE_Int *perm, HYPRE_Int *qperm,
+                                          HYPRE_Int **permp, HYPRE_Int **qpermp);
 HYPRE_Int hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, HYPRE_Int **permp,
                              HYPRE_Int **qpermp, HYPRE_Int sym);
 HYPRE_Int hypre_ILULocalRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker,

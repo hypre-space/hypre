@@ -10,6 +10,198 @@
 #include "seq_mv.hpp"
 
 /*********************************************************************************/
+/*                   hypre_ILUSolveDeviceLU                                      */
+/*********************************************************************************/
+/* Incomplete LU solve (GPU)
+ * L, D and U factors only have local scope (no off-diagonal processor terms)
+ * so apart from the residual calculation (which uses A), the solves with the
+ * L and U factors are local.
+*/
+
+HYPRE_Int
+hypre_ILUSolveDeviceLU(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
+                       hypre_GpuMatData * matU_des, hypre_CsrsvData * matLU_csrsvdata,
+                       hypre_CSRMatrix *matLU_d, hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm,
+                       HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp)
+{
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_ILUSolveCusparseLU(A, matL_des, matU_des, matLU_csrsvdata,
+                            matLU_d, f,  u, perm, n, ftemp, utemp);
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+   hypre_ILUSolveRocsparseLU(A, matL_des, matU_des, matLU_csrsvdata,
+                             matLU_d, f,  u, perm, n, ftemp, utemp);
+#endif
+   return hypre_error_flag;
+}
+
+#if defined(HYPRE_USING_CUSPARSE)
+
+/* Incomplete LU solve (GPU)
+ * L, D and U factors only have local scope (no off-diagonal processor terms)
+ * so apart from the residual calculation (which uses A), the solves with the
+ * L and U factors are local.
+*/
+
+HYPRE_Int
+hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
+                         hypre_GpuMatData * matU_des, hypre_CsrsvData * matLU_csrsvdata,
+                         hypre_CSRMatrix *matLU_d,
+                         hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm,
+                         HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp)
+{
+   /* Only solve when we have stuffs to be solved */
+   if (n == 0)
+   {
+      return hypre_error_flag;
+   }
+
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(comm, &my_id);
+
+   /* ILU data */
+   HYPRE_Real              *LU_data             = hypre_CSRMatrixData(matLU_d);
+   HYPRE_Int               *LU_i                = hypre_CSRMatrixI(matLU_d);
+   HYPRE_Int               *LU_j                = hypre_CSRMatrixJ(matLU_d);
+   HYPRE_Int               nnz                  = hypre_CSRMatrixNumNonzeros(matLU_d);
+
+   hypre_Vector            *utemp_local         = hypre_ParVectorLocalVector(utemp);
+   HYPRE_Real              *utemp_data          = hypre_VectorData(utemp_local);
+
+   hypre_Vector            *ftemp_local         = hypre_ParVectorLocalVector(ftemp);
+   HYPRE_Real              *ftemp_data          = hypre_VectorData(ftemp_local);
+
+   HYPRE_Real              alpha;
+   HYPRE_Real              beta;
+   //HYPRE_Int               i, j, k1, k2;
+
+   /* begin */
+   alpha = -1.0;
+   beta = 1.0;
+
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+
+   /* Initialize Utemp to zero.
+    * This is necessary for correctness, when we use optimized
+    * vector operations in the case where sizeof(L, D or U) < sizeof(A)
+   */
+   //hypre_ParVectorSetConstantValues( utemp, 0.);
+   /* compute residual */
+   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
+
+   /* apply permutation */
+   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+
+   /* L solve - Forward solve */
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+												   n, nnz, &beta, hypre_GpuMatDataMatDescr(matL_des),
+												   LU_data, LU_i, LU_j, hypre_CsrsvDataInfoL(matLU_csrsvdata),
+												   utemp_data, ftemp_data,
+												   hypre_CsrsvDataSolvePolicy(matLU_csrsvdata),
+												   hypre_CsrsvDataBuffer(matLU_csrsvdata) ));
+
+   /* U solve - Backward substitution */
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+												   n, nnz, &beta, hypre_GpuMatDataMatDescr(matU_des),
+												   LU_data, LU_i, LU_j, hypre_CsrsvDataInfoU(matLU_csrsvdata),
+												   ftemp_data, utemp_data,
+												   hypre_CsrsvDataSolvePolicy(matLU_csrsvdata),
+												   hypre_CsrsvDataBuffer(matLU_csrsvdata) ));
+
+   /* apply reverse permutation */
+   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   /* Update solution */
+   hypre_ParVectorAxpy(beta, ftemp, u);
+
+
+   return hypre_error_flag;
+}
+
+#endif
+
+#if defined(HYPRE_USING_ROCSPARSE)
+
+HYPRE_Int
+hypre_ILUSolveRocsparseLU(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
+                          hypre_GpuMatData * matU_des, hypre_CsrsvData * matLU_csrsvdata,
+                          hypre_CSRMatrix *matLU_d,
+                          hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm,
+                          HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp)
+{
+   /* Only solve when we have stuffs to be solved */
+   if (n == 0)
+   {
+      return hypre_error_flag;
+   }
+
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(comm, &my_id);
+
+   /* ILU data */
+   HYPRE_Real              *LU_data             = hypre_CSRMatrixData(matLU_d);
+   HYPRE_Int               *LU_i                = hypre_CSRMatrixI(matLU_d);
+   HYPRE_Int               *LU_j                = hypre_CSRMatrixJ(matLU_d);
+   HYPRE_Int               nnz                  = hypre_CSRMatrixNumNonzeros(matLU_d);
+
+   hypre_Vector            *utemp_local         = hypre_ParVectorLocalVector(utemp);
+   HYPRE_Real              *utemp_data          = hypre_VectorData(utemp_local);
+
+   hypre_Vector            *ftemp_local         = hypre_ParVectorLocalVector(ftemp);
+   HYPRE_Real              *ftemp_data          = hypre_VectorData(ftemp_local);
+
+   HYPRE_Real              alpha;
+   HYPRE_Real              beta;
+   //HYPRE_Int               i, j, k1, k2;
+
+   /* begin */
+   alpha = -1.0;
+   beta = 1.0;
+
+   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
+
+   /* Initialize Utemp to zero.
+    * This is necessary for correctness, when we use optimized
+    * vector operations in the case where sizeof(L, D or U) < sizeof(A)
+   */
+   //hypre_ParVectorSetConstantValues( utemp, 0.);
+   /* compute residual */
+   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
+
+   /* apply permutation */
+   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+
+   /* L solve - Forward solve */
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none, n, nnz,
+													 &beta, hypre_GpuMatDataMatDescr(matL_des),
+													 LU_data, LU_i, LU_j, hypre_CsrsvDataInfoL(matLU_csrsvdata),
+													 utemp_data, ftemp_data,
+													 hypre_CsrsvDataSolvePolicy(matLU_csrsvdata),
+													 hypre_CsrsvDataBuffer(matLU_csrsvdata) ));
+
+   /* U solve - Backward substitution */
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none, n, nnz,
+													 &beta, hypre_GpuMatDataMatDescr(matU_des),
+													 LU_data, LU_i, LU_j, hypre_CsrsvDataInfoU(matLU_csrsvdata),
+													 ftemp_data, utemp_data,
+													 hypre_CsrsvDataSolvePolicy(matLU_csrsvdata),
+													 hypre_CsrsvDataBuffer(matLU_csrsvdata) ));
+
+   /* apply reverse permutation */
+   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   /* Update solution */
+   hypre_ParVectorAxpy(beta, ftemp, u);
+
+
+   return hypre_error_flag;
+}
+
+#endif
+
+
+/*********************************************************************************/
 /*                   hypre_ILUSolveDeviceLUIter                                  */
 /*********************************************************************************/
 /* Incomplete LU solve (GPU) using Jacobi iterative approach
@@ -18,7 +210,7 @@
  * L and U factors are local.
 */
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
 HYPRE_Int
 hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local,
@@ -50,6 +242,7 @@ hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
 
    return hypre_error_flag;
 }
+
 HYPRE_Int
 hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local,
                           hypre_Vector *output_local, hypre_Vector *diag_diag, HYPRE_Int upper_jacobi_iters)
@@ -69,14 +262,13 @@ hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
    hypreDevice_zeqxmydd(num_rows, input_data, 0.0, work_data, output_data, diag_diag_data);
 
    /* Do the remaining iterations */
-   for ( kk = 1; kk < upper_jacobi_iters; ++kk )
-   {
+   for( kk = 1; kk < upper_jacobi_iters; ++kk ) {
 
-      /* apply SpMV */
-      hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, 2);
+       /* apply SpMV */
+       hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, 2);
 
-      /* transform */
-      hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_diag_data);
+       /* transform */
+       hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_diag_data);
    }
 
    return hypre_error_flag;
@@ -167,5 +359,4 @@ hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
 
    return hypre_error_flag;
 }
-
 #endif

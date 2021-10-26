@@ -130,6 +130,14 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    }
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
+#if defined(HYPRE_USING_CUSOLVER)
+   if (data->cusolverSp_handle)
+   {
+      HYPRE_CUSOLVER_CALL( cusolverSpDestroy(data->cusolverSp_handle) );
+   }
+#endif // #if defined(HYPRE_USING_CUSOLVER)
+
+
 #if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
@@ -2581,6 +2589,49 @@ hypreDevice_zeqxmydd(HYPRE_Int      n,
    return hypre_error_flag;
 }
 
+/*****************************************************************
+           Pauls Changes for IterTriSolve Branch
+ ******************************************************************/
+
+__global__ void
+hypreGPUKernel_fused_vecop(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex alpha, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d)
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+     HYPRE_Complex yy = y[i];
+     HYPRE_Complex xx = z[i] + alpha*yy;
+     x[i] = xx;
+     z[i] = (xx + beta * yy)*d[i];
+   }
+}
+
+/*
+ */
+HYPRE_Int
+hypreDevice_fused_vecop(HYPRE_Int n, HYPRE_Complex alpha, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_fused_vecop, gDim, bDim, n, alpha, x, beta, y, z, d);
+
+   return hypre_error_flag;
+}
+
+
+/*****************************************************************
+           End Pauls Changes for IterTriSolve Branch
+ ******************************************************************/
+
+
 /*--------------------------------------------------------------------
  * hypreGPUKernel_BigToSmallCopy
  *--------------------------------------------------------------------*/
@@ -2731,6 +2782,27 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
    return handle;
 }
 #endif // defined(HYPRE_USING_CUSPARSE)
+
+
+#if defined(HYPRE_USING_CUSOLVER)
+cusolverSpHandle_t
+hypre_DeviceDataCusolverSpHandle(hypre_DeviceData *data)
+{
+   if (data->cusolverSp_handle)
+   {
+      return data->cusolverSp_handle;
+   }
+
+   cusolverSpHandle_t handle;
+   HYPRE_CUSOLVER_CALL( cusolverSpCreate(&handle) );
+
+   HYPRE_CUSOLVER_CALL( cusolverSpSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+
+   data->cusolverSp_handle = handle;
+
+   return handle;
+}
+#endif // defined(HYPRE_USING_CUSOLVER)
 
 
 #if defined(HYPRE_USING_ROCSPARSE)
