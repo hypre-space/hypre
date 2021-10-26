@@ -17,7 +17,7 @@
 #ifdef HYPRE_UNROLL_MAXDEPTH
 #undef HYPRE_UNROLL_MAXDEPTH
 #endif
-#define HYPRE_UNROLL_MAXDEPTH 8
+#define HYPRE_UNROLL_MAXDEPTH 33
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCreate
@@ -986,7 +986,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_Index            tdstart;
 
    /* Work pointers */
-   HYPRE_Complex       ***dptrs;
+   HYPRE_Complex        **dptrs;
 
    /* Indices */
    HYPRE_Int              entry, Mentry;
@@ -1010,16 +1010,12 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    loop_box = hypre_BoxCreate(ndim);
 
    /* Allocate dptrs */
-   dptrs = hypre_TAlloc(HYPRE_Complex **, nmatrices+1, HYPRE_MEMORY_HOST);
-   for (m = 0; m < nmatrices; m++)
+   dptrs = hypre_TAlloc(HYPRE_Complex *, nterms, HYPRE_MEMORY_HOST);
+   for (t = 0; t < nterms; t++)
    {
-      matrix = matrices[m];
-      stencil = hypre_StructMatrixStencil(matrix);
-      stencil_size = hypre_StructStencilSize(stencil);
-
-      dptrs[m] = hypre_TAlloc(HYPRE_Complex *, stencil_size, HYPRE_MEMORY_HOST);
+      m = terms[t];
+      dptrs[t] = hypre_StructMatrixData(matrices[m]);
    }
-   dptrs[nmatrices] = hypre_TAlloc(HYPRE_Complex *, 1, HYPRE_MEMORY_HOST);
 
    /* Set Mstride */
    hypre_StructMatrixGetDataMapStride(M, &stride);
@@ -1098,14 +1094,16 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
                      hypre_BoxIndexRank(fdbox, tdstart);
-                  a[i].offsets[t] = hypre_BoxIndexRank(fdbox, tdstart);
+                  a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
+                     hypre_BoxIndexRank(fdbox, tdstart);
                   break;
 
                case 1: /* variable coefficient on coarse data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
                      hypre_BoxIndexRank(cdbox, tdstart);
-                  a[i].offsets[t] = hypre_BoxIndexRank(cdbox, tdstart);
+                  a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
+                     hypre_BoxIndexRank(cdbox, tdstart);
                   break;
 
                case 2: /* constant coefficient - point to bit mask */
@@ -1118,26 +1116,10 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                      hypre_BoxIndexRank(fdbox, tdstart);
-                  a[i].offsets[t] = hypre_BoxIndexRank(fdbox, tdstart);
+                  a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
+                     hypre_BoxIndexRank(fdbox, tdstart);
                   break;
             }
-         }
-
-         /* Set dptrs */
-         for (m = 0; m < nmatrices; m++)
-         {
-            matrix = matrices[m];
-            stencil = hypre_StructMatrixStencil(matrix);
-            stencil_size = hypre_StructStencilSize(stencil);
-
-            for (e = 0; e < stencil_size; e++)
-            {
-               dptrs[m][e] = hypre_StructMatrixBoxData(matrix, b, e);
-            }
-         }
-         if (mask)
-         {
-            dptrs[nmatrices][0] = hypre_StructVectorBoxData(mask, b);
          }
       } /* end loop over a entries */
 
@@ -1230,7 +1212,7 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper *a,
                                         hypre_Index  Mdstart,
                                         hypre_Index  Mdstride,
                                         HYPRE_Int   *terms,
-                                        HYPRE_Complex ***dptrs )
+                                        HYPRE_Complex **dptrs )
 {
    HYPRE_Int     *ncomp;
    HYPRE_Int    **indices;
@@ -2593,7 +2575,7 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                        hypre_Index  Mdstart,
                                        hypre_Index  Mdstride,
                                        HYPRE_Int   *terms,
-                                       HYPRE_Complex ***dptrs )
+                                       HYPRE_Complex **dptrs )
 {
    HYPRE_Int    k, depth;
 
