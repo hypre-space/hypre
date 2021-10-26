@@ -17,7 +17,7 @@
 #ifdef HYPRE_UNROLL_MAXDEPTH
 #undef HYPRE_UNROLL_MAXDEPTH
 #endif
-#define HYPRE_UNROLL_MAXDEPTH 33
+#define HYPRE_UNROLL_MAXDEPTH 8
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCreate
