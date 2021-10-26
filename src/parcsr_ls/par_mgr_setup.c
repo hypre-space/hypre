@@ -90,8 +90,8 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Int (*coarse_grid_solver_setup)(void*,void*,void*,void*) = (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_setup);
   HYPRE_Int (*coarse_grid_solver_solve)(void*,void*,void*,void*) = (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_solve);
 
-  HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
-  HYPRE_Int    global_smooth_iters = (mgr_data -> global_smooth_iters);
+  HYPRE_Int    *level_smooth_type =  (mgr_data -> level_smooth_type);
+  HYPRE_Int    *level_smooth_iters = (mgr_data -> level_smooth_iters);
 
   HYPRE_Int    reserved_coarse_size = (mgr_data -> reserved_coarse_size);
 
@@ -432,39 +432,6 @@ hypre_MGRSetup( void               *mgr_vdata,
     mgr_data -> n_block = n;
     mgr_data -> left_size = 0;
   }
-  //wall_time = time_getWallclockSeconds();
-  if (global_smooth_iters > 0)
-  {
-    if (global_smooth_type == 0)
-    {
-      if (set_c_points_method == 0)
-      {
-        hypre_blockRelax_setup(A,block_size,reserved_coarse_size,&(mgr_data -> diaginv));
-      }
-      else
-      {
-        hypre_blockRelax_setup(A,1,reserved_coarse_size,&(mgr_data -> diaginv));
-      }
-    }
-    else if (global_smooth_type == 8)
-    {
-      HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
-      HYPRE_EuclidSetLevel(mgr_data -> global_smoother, 0);
-      HYPRE_EuclidSetBJ(mgr_data -> global_smoother, 1);
-      HYPRE_EuclidSetup(mgr_data -> global_smoother, A, f, u);
-    }
-    else if (global_smooth_type == 16)
-    {
-      HYPRE_ILUCreate(&(mgr_data -> global_smoother));
-      HYPRE_ILUSetType(mgr_data -> global_smoother, 0);
-      HYPRE_ILUSetLevelOfFill(mgr_data -> global_smoother, 0);
-      HYPRE_ILUSetMaxIter(mgr_data -> global_smoother, global_smooth_iters);
-      HYPRE_ILUSetTol(mgr_data -> global_smoother, 0.0);
-      HYPRE_ILUSetup(mgr_data -> global_smoother, A, f, u);
-    }
-  }
-  //wall_time = time_getWallclockSeconds() - wall_time;
-  //hypre_printf("Proc = %d     Global smoother setup: %f\n", my_id, wall_time);
 
   /* clear old l1_norm data, if created */
   if((mgr_data -> l1_norms))
@@ -729,6 +696,16 @@ hypre_MGRSetup( void               *mgr_vdata,
   if (A_ff_array == NULL)
     A_ff_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
 
+  if (mgr_data -> diaginv!= NULL)
+  {
+    hypre_TFree((mgr_data -> diaginv), HYPRE_MEMORY_HOST);
+    (mgr_data -> diaginv) = NULL;
+  }
+  else
+  {
+    (mgr_data -> diaginv) = hypre_CTAlloc(HYPRE_Real*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  }
+
   /* set solution and rhs pointers */
   F_array[0] = f;
   U_array[0] = u;
@@ -753,7 +730,39 @@ hypre_MGRSetup( void               *mgr_vdata,
 
     /* initialize A_array */
     A_array[lev] = RAP_ptr;
-        nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
+    nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
+
+    //wall_time = time_getWallclockSeconds();
+    if (level_smooth_iters[lev] > 0)
+    {
+      HYPRE_Int level_blk_size = lev == 0 ? block_size : block_num_coarse_indexes[lev-1];
+      if (level_smooth_type[lev] == 0)
+      {
+        hypre_blockRelax_setup(A_array[lev], 1, reserved_coarse_size, (mgr_data -> diaginv)[lev]);
+      }
+      else if (level_smooth_type[lev] == 1)
+      {
+        hypre_blockRelax_setup(A_array[lev], level_blk_size, reserved_coarse_size, (mgr_data -> diaginv)[lev]);
+      }
+      else if (level_smooth_type[lev] == 8)
+      {
+        HYPRE_EuclidCreate(comm, (mgr_data -> level_smoother)[lev]);
+        HYPRE_EuclidSetLevel((mgr_data -> level_smoother)[lev], 0);
+        HYPRE_EuclidSetBJ((mgr_data -> level_smoother)[lev], 1);
+        HYPRE_EuclidSetup((mgr_data -> level_smoother)[lev], A_array[lev], NULL, NULL);
+      }
+      else if (level_smooth_type[lev] == 16)
+      {
+        HYPRE_ILUCreate((mgr_data -> level_smoother)[lev]);
+        HYPRE_ILUSetType((mgr_data -> level_smoother)[lev], 0);
+        HYPRE_ILUSetLevelOfFill((mgr_data -> level_smoother)[lev], 0);
+        HYPRE_ILUSetMaxIter((mgr_data -> level_smoother)[lev], level_smooth_iters);
+        HYPRE_ILUSetTol((mgr_data -> level_smoother)[lev], 0.0);
+        HYPRE_ILUSetup((mgr_data -> level_smoother)[lev], A_array[lev], NULL, NULL);
+      }
+    }
+    //wall_time = time_getWallclockSeconds() - wall_time;
+    //hypre_printf("Proc = %d     Global smoother setup: %f\n", my_id, wall_time);
 
     /* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
     hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);

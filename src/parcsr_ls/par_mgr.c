@@ -73,7 +73,7 @@ hypre_MGRCreate()
   (mgr_data -> coarse_grid_solver_setup) = NULL;
   (mgr_data -> coarse_grid_solver_solve) = NULL;
 
-  (mgr_data -> global_smoother) = NULL;
+  //(mgr_data -> global_smoother) = NULL;
 
   (mgr_data -> use_default_cgrid_solver) = 1;
   (mgr_data -> fsolver_mode) = -1; // set to -1 to avoid printing when not used
@@ -99,8 +99,8 @@ hypre_MGRCreate()
   (mgr_data -> reserved_Cpoint_local_indexes) = NULL;
 
   (mgr_data -> diaginv) = NULL;
-  (mgr_data -> global_smooth_iters) = 1;
-  (mgr_data -> global_smooth_type) = 0;
+  //(mgr_data -> global_smooth_iters) = 1;
+  //(mgr_data -> global_smooth_type) = 0;
 
   (mgr_data -> set_non_Cpoints_to_F) = 0;
   (mgr_data -> idx_array) = NULL;
@@ -395,18 +395,37 @@ hypre_MGRDestroy( void *data )
   /* coarse level matrix - RAP */
   if ((mgr_data -> RAP))
     hypre_ParCSRMatrixDestroy((mgr_data -> RAP));
-  if ((mgr_data -> diaginv))
-    hypre_TFree((mgr_data -> diaginv), HYPRE_MEMORY_HOST);
-  if ((mgr_data -> global_smoother))
+  if ((mgr_data -> diaginv) != NULL)
   {
-    if (mgr_data -> global_smooth_type == 8)
+    for (i=0; i<num_coarse_levels; i++)
     {
-      HYPRE_EuclidDestroy((mgr_data -> global_smoother));
+      if ((mgr_data -> diaginv)[i] != NULL)
+      {
+        hypre_TFree((mgr_data -> diaginv)[i], HYPRE_MEMORY_HOST);
+      }
     }
-    else if (mgr_data -> global_smooth_type == 16)
+    hypre_TFree((mgr_data -> diaginv), HYPRE_MEMORY_HOST);
+    (mgr_data -> diaginv) = NULL;
+  }
+
+  if ((mgr_data -> level_smoother) != NULL)
+  {
+    for (i=0; i<num_coarse_levels; i++)
     {
-      HYPRE_ILUDestroy((mgr_data -> global_smoother));
+      if ((mgr_data -> level_smooth_iters)[i] > 0)
+      {
+        if ((mgr_data -> level_smooth_type)[i] == 8)
+        {
+          HYPRE_EuclidDestroy(*(mgr_data -> level_smoother)[i]);
+        }
+        else if ((mgr_data -> level_smooth_type)[i] == 16)
+        {
+          HYPRE_ILUDestroy(*(mgr_data -> level_smoother)[i]);
+        }
+      }
     }
+    hypre_TFree(mgr_data -> level_smoother, HYPRE_MEMORY_HOST);
+    (mgr_data -> level_smoother) = NULL;
   }
   /* mgr data */
   hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
@@ -4579,16 +4598,93 @@ HYPRE_Int
 hypre_MGRSetMaxGlobalsmoothIters( void *mgr_vdata, HYPRE_Int max_iter )
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  (mgr_data -> global_smooth_iters) = max_iter;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if ((mgr_data -> level_smooth_iters) != NULL)
+  {
+    hypre_TFree((mgr_data -> level_smooth_iters), HYPRE_MEMORY_HOST);
+    (mgr_data -> level_smooth_iters) = NULL;
+  }
+  HYPRE_Int *level_smooth_iters = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  level_smooth_iters[0] = max_iter;
+  (mgr_data -> level_smooth_iters) = level_smooth_iters;
   return hypre_error_flag;
 }
 
 /* Set global smoothing type for mgr solver */
 HYPRE_Int
-hypre_MGRSetGlobalsmoothType( void *mgr_vdata, HYPRE_Int iter_type )
+hypre_MGRSetGlobalsmoothType( void *mgr_vdata, HYPRE_Int gsmooth_type )
 {
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  (mgr_data -> global_smooth_type) = iter_type;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if ((mgr_data -> level_smooth_type) != NULL)
+  {
+    hypre_TFree((mgr_data -> level_smooth_type), HYPRE_MEMORY_HOST);
+    (mgr_data -> level_smooth_type) = NULL;
+  }
+  HYPRE_Int *level_smooth_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  level_smooth_type[0] = gsmooth_type;
+  (mgr_data -> level_smooth_type) = level_smooth_type;
+  return hypre_error_flag;
+}
+
+/* Set global smoothing type for mgr solver */
+HYPRE_Int
+hypre_MGRSetLevelSmoothType( void *mgr_vdata, HYPRE_Int *gsmooth_type )
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int i;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if ((mgr_data -> level_smooth_type) != NULL)
+  {
+    hypre_TFree((mgr_data -> level_smooth_type), HYPRE_MEMORY_HOST);
+    (mgr_data -> level_smooth_type) = NULL;
+  }
+  HYPRE_Int *level_smooth_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  if (gsmooth_type != NULL)
+  {
+    for (i=0; i < max_num_coarse_levels; i++)
+    {
+      level_smooth_type[i] = gsmooth_type[i];
+    }
+  }
+  else
+  {
+    for (i=0; i < max_num_coarse_levels; i++)
+    {
+      level_smooth_type[i] = 0;
+    }
+  }
+  (mgr_data -> level_smooth_type) = level_smooth_type;
+  return hypre_error_flag;  
+}
+
+HYPRE_Int
+hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *gsmooth_iters )
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int i;
+  HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+  if ((mgr_data -> level_smooth_iters) != NULL)
+  {
+    hypre_TFree((mgr_data -> level_smooth_iters), HYPRE_MEMORY_HOST);
+    (mgr_data -> level_smooth_iters) = NULL;
+  }
+  HYPRE_Int *level_smooth_iters = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+  if (gsmooth_iters != NULL)
+  {
+    for (i=0; i < max_num_coarse_levels; i++)
+    {
+      level_smooth_iters[i] = gsmooth_iters[i];
+    }
+  }
+  else
+  {
+    for (i=0; i < max_num_coarse_levels; i++)
+    {
+      level_smooth_iters[i] = 0;
+    }
+  }
+  (mgr_data -> level_smooth_iters) = level_smooth_iters;
   return hypre_error_flag;
 }
 
@@ -5348,8 +5444,11 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
   hypre_printf("Number of relax sweeps: %d\n", (mgr_data -> num_relax_sweeps));
   hypre_printf("Number of interpolation sweeps: %d\n", (mgr_data -> num_interp_sweeps));
   hypre_printf("Number of restriction sweeps: %d\n", (mgr_data -> num_restrict_sweeps));
-  hypre_printf("Global smoother type: %d\n", (mgr_data ->global_smooth_type));
-  hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data ->global_smooth_iters));
+  if (mgr_data -> level_smooth_type != NULL)
+  {
+    hypre_printf("Global smoother type: %d\n", (mgr_data -> level_smooth_type)[0]);
+    hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data -> level_smooth_iters)[0]);
+  }
   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
   hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
