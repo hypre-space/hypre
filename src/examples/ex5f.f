@@ -70,13 +70,6 @@
       integer*8  solver
       integer*8  precond
 
-      !$omp target enter data map(alloc:rhs_values)
-      !$omp target enter data map(alloc:x_values)
-      !$omp target enter data map(alloc:rows)
-      !$omp target enter data map(alloc:cols)
-      !$omp target enter data map(alloc:values)
-      !$omp target enter data map(alloc:tmp)
-
 !-----------------------------------------------------------------------
 !     Initialize MPI
 !-----------------------------------------------------------------------
@@ -92,6 +85,15 @@
       call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)
 
       call HYPRE_SetSpGemmUseCusparse(0, ierr)
+
+!   Call omp target after HYPRE_Init()
+
+      !$omp target enter data map(alloc:rhs_values)
+      !$omp target enter data map(alloc:x_values)
+      !$omp target enter data map(alloc:rows)
+      !$omp target enter data map(alloc:cols)
+      !$omp target enter data map(alloc:values)
+      !$omp target enter data map(alloc:tmp)
 
 !   Default problem parameters
       n = 33

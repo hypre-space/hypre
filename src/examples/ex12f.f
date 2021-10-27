@@ -73,8 +73,6 @@
 
       character*32  matfile
 
-      !$omp target enter data map(alloc:values)
-
 !     We only have one part and one variable
       nparts = 1
       nvars  = 1
@@ -108,6 +106,8 @@
             stop
          endif
       endif
+
+      !$omp target enter data map(alloc:values)
 
 !-----------------------------------------------------------------------
 !     1. Set up the grid.  Here we use only one part.  Each processor
