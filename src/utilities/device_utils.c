@@ -11,10 +11,8 @@
 #if defined(HYPRE_USING_SYCL)
 sycl::range<1> hypre_GetDefaultCUDABlockDimension()
 {
-  // 256 - max work group size for Gen9
-  // 1024 - max work group size for ATS
-  sycl::range<1> wgDim(1024);
-  return wgDim;
+   sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   return wgDim;
 }
 
 // WM: TODO: verify
@@ -967,7 +965,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
             catch (sycl::exception const& ex)
             {
                std::cout << "Caught asynchronous SYCL exception:" << std::endl
-               << ex.what() << ", OpenCL code: " << ex.get_cl_code() << std::endl;
+               << ex.what() << ", OpenCL code: " << ex.code() << std::endl;
             }
          }
       };
@@ -1232,7 +1230,8 @@ hypre_DeviceDataCreate()
 
 #if defined(HYPRE_USING_SYCL)
    /* WM: does the default selector get a GPU if available? Having trouble with getting the device on frank, so temporarily just passing the default selector */
-   hypre_DeviceDataDevice(data)            = sycl::device(sycl::default_selector{});
+   hypre_DeviceDataDevice(data)                 = sycl::device(sycl::default_selector{});
+   hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data).get_info<sycl::info::device::max_work_group_size>();
 #else
    hypre_DeviceDataDevice(data)            = 0;
 #endif
