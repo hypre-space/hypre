@@ -474,6 +474,7 @@ main( hypre_int argc,
 #endif
    HYPRE_Real box_sum1 = 0.0, box_sum2 = 0.0;
 
+#undef HYPRE_BOX_REDUCTION
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_BOX_REDUCTION map(tofrom:reducer) reduction(+:reducer)
 #else
@@ -489,6 +490,7 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+      reducer = 0.0;
 #define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop1ReductionBegin(3, loop_size,
                                    x1_data_box, start, unit_stride, xi1,
@@ -502,13 +504,12 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   reducer = 0.0;
-
    /* Time BoxLoop2Reduction */
    time_index = hypre_InitializeTiming("BoxLoopReduction2");
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+      reducer = 0.0;
 #define DEVICE_VAR is_device_ptr(d_xp1,d_xp2)
       hypre_BoxLoop2ReductionBegin(3, loop_size,
                                    x1_data_box, start, unit_stride, xi1,
