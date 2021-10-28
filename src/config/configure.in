@@ -509,6 +509,16 @@ dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
 dnl * Need to change to a new approach that always defines variable to some value
 
 dnl *********************************************************************
+dnl * Determine if user provided LD flags
+dnl *********************************************************************
+if test "x$LDFLAGS" = "x"
+then
+   hypre_user_chose_ldflags=no
+else
+   hypre_user_chose_ldflags=yes
+fi
+
+dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
 dnl *********************************************************************
 if test "x$CC" = "x"
@@ -1445,16 +1455,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC])
       else
-         AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc])
       else
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc])
       fi
    fi
 
@@ -1470,16 +1480,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       else
-         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       fi
    fi
 
@@ -1495,16 +1505,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 pgfortran f77])
+         AC_CHECK_PROGS(FC, [xlf_r ifort ifx gfortran g77 g95 pgf77 pgfortran f77])
       else
-         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 pgfortran  f77])
+         AC_CHECK_PROGS(FC, [xlf ifort ifx gfortran g77 g95 pgf77 pgfortran f77])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77 mpipgifort])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpiifx mpif77 mpipgf77 mpipgifort])
       else
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77 mpipgifort])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpiifx mpif77 mpipgf77 mpipgifort])
       fi
    fi
 
@@ -1538,16 +1548,16 @@ then
       then
          if test "$hypre_using_mpi" = "no"
          then
-            AC_CHECK_PROGS(CUCC, [clang++-gpu])
+            AC_CHECK_PROGS(CUCC, [clang++-gpu icpx])
          else
-            AC_CHECK_PROGS(CUCC, [mpiclang++-gpu])
+            AC_CHECK_PROGS(CUCC, [mpiclang++-gpu mpiicpx])
          fi
       else
          if test "$hypre_using_mpi" = "no"
          then
-            AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu])
+            AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu icx])
          else
-            AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu])
+            AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu mpiicx])
          fi
       fi
    fi
@@ -2050,7 +2060,7 @@ then
    then
       CXXFLAGS="${CXXFLAGS} -std=c++${hypre_cxxstd}"
 
-      if [test "$CXX" = "mpiclang++" || test "$CXX" = "mpiclang++-gpu" || test "$CXX" = "clang++" || test "$CXX" = "clang++-gpu"]
+      if [test "$CXX" = "mpiclang++" || test "$CXX" = "mpiclang++-gpu" || test "$CXX" = "clang++" || test "$CXX" = "clang++-gpu" || test "$CXX" = "icpx" || test "$CXX" = "mpiicpx"]
       then
          CXXFLAGS="${CXXFLAGS} -x c++"
       fi
@@ -2351,6 +2361,18 @@ then
          # dnl this is too old
          #CUFLAGS+=" -fopenmp-nonaliased-maps"
       dnl fi
+      if [test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"]
+      then
+         CUFLAGS+="-qopenmp -fopenmp-targets=spir64"
+      fi
+   fi
+
+   if test "$hypre_user_chose_ldflags" = "no"
+   then
+      if [test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"]
+      then
+         LDFLAGS+="-qopenmp -fopenmp-targets=spir64"
+      fi
    fi
 
    if test "$hypre_using_debug" = "yes"

@@ -52,6 +52,10 @@ main( hypre_int argc,
 
    HYPRE_Init();
 
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -463,6 +467,10 @@ main( hypre_int argc,
    hypre_TFree(d_xp2, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_xp3, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_xp4, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::finalize ();
+#endif
 
    HYPRE_Finalize();
 
