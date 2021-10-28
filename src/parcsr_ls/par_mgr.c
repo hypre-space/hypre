@@ -416,11 +416,11 @@ hypre_MGRDestroy( void *data )
       {
         if ((mgr_data -> level_smooth_type)[i] == 8)
         {
-          HYPRE_EuclidDestroy(*(mgr_data -> level_smoother)[i]);
+          HYPRE_EuclidDestroy((mgr_data -> level_smoother)[i]);
         }
         else if ((mgr_data -> level_smooth_type)[i] == 16)
         {
-          HYPRE_ILUDestroy(*(mgr_data -> level_smoother)[i]);
+          HYPRE_ILUDestroy((mgr_data -> level_smoother)[i]);
         }
       }
     }

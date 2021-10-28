@@ -64,7 +64,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int  set_c_points_method = (mgr_data -> set_c_points_method);
 
    //HYPRE_Int    blk_size  = (mgr_data -> block_size);
-   HYPRE_Real    *diaginv = (mgr_data -> diaginv);
+   //HYPRE_Real    *diaginv = (mgr_data -> diaginv);
    HYPRE_Int      n_block = (mgr_data -> n_block);
    HYPRE_Int    left_size = (mgr_data -> left_size);
 
@@ -687,17 +687,17 @@ hypre_MGRCycle( void               *mgr_vdata,
                for (i = 0; i < lvl_smth_iters; i++)
                {
                   // compute residual
-                  hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+                  hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level], U_array[level], beta, F_array[level], Vtemp);
                   // solve
-                  HYPRE_EuclidSolve( (mgr_data -> level_smoother)[level],A_array[0],Vtemp,Utemp);
+                  HYPRE_EuclidSolve( (mgr_data -> level_smoother)[level],A_array[level],Vtemp,Utemp);
                   // update solution
-                  hypre_ParVectorAxpy(beta, Utemp, U_array[0]);
+                  hypre_ParVectorAxpy(beta, Utemp, U_array[level]);
                }
             }
             else if (lvl_smth_type == 16) // HYPRE ILU
             {
                // solve
-               HYPRE_ILUSolve((mgr_data -> level_smoother)[level], A_array[0], F_array[0], U_array[0]);
+               HYPRE_ILUSolve((mgr_data -> level_smoother)[level], A_array[level], F_array[level], U_array[level]);
             }
             //      hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
             //      resnorm_gsmooth = hypre_ParVectorInnerProd(Vtemp, Vtemp);
