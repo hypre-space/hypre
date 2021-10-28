@@ -101,18 +101,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int nDevices=0;
-   sycl::platform platform(sycl::gpu_selector{});
-   auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-   for (int i = 0; i < gpu_devices.size(); i++) {
-     if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) {
-       auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
-       nDevices += subDevicesDomainNuma.size();
-     }
-     else {
-       nDevices++;
-     }
-   }
-
+   hypre_GetDeviceCount(&nDevices);
    if (device_id > nDevices) {
      hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
    }
@@ -137,7 +126,9 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
        local_nDevices++;
      }
    }
-#elif defined(HYPRE_USING_GPU)
+#endif
+
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
       hypre_HandleDevice(hypre_handle_) = device_id;
