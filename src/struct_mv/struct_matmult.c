@@ -1586,7 +1586,7 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper *a,
                                       cdbox, cdstart, cdstride,
                                       Mdbox, Mdstart, Mdstride);
 
-#if 0
+#if 1
    hypre_StructMatmultCompute_core_2t(a, ncomp[6], indices[6],
                                       order[6], ndim, loop_size,
                                       cdbox, cdstart, cdstride,
