@@ -17,7 +17,7 @@
 #ifdef HYPRE_UNROLL_MAXDEPTH
 #undef HYPRE_UNROLL_MAXDEPTH
 #endif
-#define HYPRE_UNROLL_MAXDEPTH 8
+#define HYPRE_UNROLL_MAXDEPTH 1
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCreate
@@ -1586,7 +1586,7 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper *a,
                                       cdbox, cdstart, cdstride,
                                       Mdbox, Mdstart, Mdstride);
 
-#if 1
+#if 0
    hypre_StructMatmultCompute_core_2t(a, ncomp[6], indices[6],
                                       order[6], ndim, loop_size,
                                       cdbox, cdstart, cdstride,
@@ -2586,10 +2586,18 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   HYPRE_Real cprod[1024];
+   hypre_StructMatmultHelper *ak;
+   HYPRE_Real cprod[512], cprodk;
+   HYPRE_Int  o0[512], o0k;
+   HYPRE_Int  o1[512], o1k;
+   HYPRE_Int  o2[512], o2k;
+
    for (k = 0; k < ncomponents; k++)
    {
       cprod[k] = a[indices[k]].cprod;
+      o0[k] = a[indices[k]].offsets[0];
+      o1[k] = a[indices[k]].offsets[1];
+      o2[k] = a[indices[k]].offsets[2];
    }
 
    for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
@@ -2604,44 +2612,39 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 27);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 28);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 29);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 30);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 31);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 32);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 27);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 28);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 29);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 30);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 31);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 32);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2652,43 +2655,38 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 27);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 28);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 29);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 30);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 31);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 27);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 28);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 29);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 30);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 31);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2699,42 +2697,37 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 27);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 28);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 29);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 30);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 27);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 28);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 29);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 30);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2745,41 +2738,36 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 27);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 28);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 29);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 27);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 28);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 29);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2790,40 +2778,35 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 27);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 28);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 27);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 28);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2834,39 +2817,34 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 27);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 27);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2877,38 +2855,33 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 26);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 26);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2919,37 +2892,32 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 25);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 25);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -2960,36 +2928,31 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 24);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 24);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3000,35 +2963,30 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 23);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 23);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3039,34 +2997,29 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 22);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 22);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3077,33 +3030,28 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 21);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 21);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3114,32 +3062,27 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 20);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 20);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3150,31 +3093,26 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 19);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 19);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3185,30 +3123,25 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 18);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 18);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3219,29 +3152,24 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 17);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 17);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3252,28 +3180,23 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 16);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 16);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3284,27 +3207,22 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 15);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 15);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3315,26 +3233,21 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 14);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 14);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3345,25 +3258,20 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 13);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 13);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3374,24 +3282,19 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 12);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 12);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3402,23 +3305,18 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 11);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 11);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3429,22 +3327,17 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 10);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 10);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3455,21 +3348,16 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 9);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 9);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3480,20 +3368,15 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 8);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 8);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3504,19 +3387,14 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 7);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 7);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3527,18 +3405,13 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 6);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 6);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3549,17 +3422,12 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 5);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 5);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3570,16 +3438,11 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 4);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 4);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3590,15 +3453,10 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 3);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 3);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3609,14 +3467,9 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 2);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 2);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
@@ -3627,29 +3480,25 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
-               HYPRE_SMMCORE_2T_V2(cprod, k + 1);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 1);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;
 
          case 1:
+#if 0
+            ak = &a[k];
+            cprodk = cprod[k];
+            o0k = o0[k]; o1k = o1[k]; o2k = o2[k];
+#endif
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               hypre_StructMatmultHelper *aptr;
-               HYPRE_Int                  e0, e1, e2;
-               HYPRE_Int                  m0, m1, m2;
-               HYPRE_Int                  o0, o1, o2;
-
-               HYPRE_SMMCORE_2T_V2(cprod, k + 0);
+              HYPRE_SMMCORE_2T_V2(cprod, o0, o1, o2, k + 0);
+               //HYPRE_SMMCORE_2T_V2B(ak, cprodk, o0k, o1k, o2k);
             }
             hypre_BoxLoop3End(Mi,gi,hi);
             break;

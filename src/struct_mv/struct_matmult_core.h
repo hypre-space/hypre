@@ -49,15 +49,17 @@
     a[i[k]].tptrs[o[k][1]][gi]*   \
     a[i[k]].tptrs[o[k][2]][hi];
 
-#define HYPRE_SMMCORE_2T_V2(c, k)      \
-    aptr = &a[k];                    \
-    o0 = aptr->offsets[0];           \
-    o1 = aptr->offsets[1];           \
-    o2 = aptr->offsets[2];           \
-    aptr->mptr[Mi] += c[k]* \
-                      dptrs[0][o0 + gi]* \
-                      dptrs[2][o2 + gi]* \
-                      dptrs[1][o1 + hi];
+#define HYPRE_SMMCORE_2T_V2(c, o0, o1, o2, k)     \
+    a[k].mptr[Mi] += c[k]* \
+                     dptrs[0][o0[k] + gi]* \
+                     dptrs[2][o2[k] + gi]* \
+                     dptrs[1][o1[k] + hi];
+
+#define HYPRE_SMMCORE_2T_V2B(ak, ck, o0k, o1k, o2k)       \
+    ak->mptr[Mi] += ck* \
+                   dptrs[0][o0k + gi]* \
+                   dptrs[2][o2k + gi]* \
+                   dptrs[1][o1k + hi];
 
 #define HYPRE_SMMCORE_2TB(i, o, k)                               \
     a[i[k]].mptr[Mi] +=                                          \
