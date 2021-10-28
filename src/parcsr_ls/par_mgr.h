@@ -91,12 +91,14 @@ typedef struct
   hypre_ParVector   *Ftemp;
 
   HYPRE_Real          *diaginv;
+  HYPRE_Real          **diag_inv_array;
   hypre_ParCSRMatrix  *A_ff_inv;
   HYPRE_Int           n_block;
   HYPRE_Int           left_size;
   HYPRE_Int           global_smooth_iters;
   HYPRE_Int           global_smooth_type;
   HYPRE_Solver global_smoother;
+  HYPRE_Int           *blk_size;
   /*
    Number of points that remain part of the coarse grid throughout the hierarchy.
    For example, number of well equations

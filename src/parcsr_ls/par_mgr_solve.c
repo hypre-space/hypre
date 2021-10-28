@@ -71,7 +71,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int    global_smooth_iters      =  (mgr_data -> global_smooth_iters);
    HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
 
-//   HYPRE_Real   wall_time = 0.0;
+   //HYPRE_Real   wall_time = 0.0;
 
    HYPRE_Int    i;
 
@@ -223,7 +223,7 @@ hypre_MGRSolve( void               *mgr_vdata,
             {
                if (set_c_points_method == 0)
                {
-                  hypre_blockRelax_solve(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,global_smooth_type,diaginv,Vtemp);
+                  hypre_blockRelax_solve(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,global_smooth_type+1,diaginv,Vtemp);
                }
                else
                {
@@ -628,13 +628,16 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Real    beta;
 
    HYPRE_Int           *Frelax_method = (mgr_data -> Frelax_method);
+   HYPRE_Int           *interp_type = (mgr_data -> interp_type);
    hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);
+   HYPRE_Real          **diag_inv_array = (mgr_data -> diag_inv_array);
+   HYPRE_Int           *blk_size = (mgr_data -> blk_size);
 
    HYPRE_Int      *restrict_type = (mgr_data -> restrict_type);
    HYPRE_Int      use_air = 0;
    HYPRE_Int      my_id;
 
-//   HYPRE_Real     wall_time;
+   //HYPRE_Real     wall_time;
 
    /* Initialize */
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -689,11 +692,30 @@ hypre_MGRCycle( void               *mgr_vdata,
          /* Relax solution - F-relaxation */
          relax_points = -1;
 
-         //wall_time = time_getWallclockSeconds() - wall_time;
+         //wall_time = time_getWallclockSeconds();
          if (Frelax_method[level] == 0)
          { /* (single level) relaxation for A_ff */
+            /*
+            if (interp_type[level] == 12)
+            {
+<<<<<<< HEAD
+=======
+              for (i = 0; i < nsweeps; i++)
+              {
+                // Block Jacobi
+                hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+                hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
+
+                hypre_block_jacobi_solve(A_ff_array[fine_grid], F_fine_array[coarse_grid], U_fine_array[coarse_grid], blk_size[fine_grid], 0, diag_inv_array[fine_grid], Vtemp);
+                hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+              }
+            }
+            else
+            {
+            */
             if (relax_type == 18)
             {
+>>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
 #if defined(HYPRE_USING_CUDA)
                for(i=0; i<nsweeps; i++)
                {
@@ -731,6 +753,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                         relax_type,relax_points,relax_weight,omega,NULL, U_array[fine_grid], Vtemp, Ztemp);
                }
             }
+            //}
          }
          else if (Frelax_method[level] == 1)
          {
@@ -830,7 +853,15 @@ hypre_MGRCycle( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], Vtemp, 0.0, F_fine_array[coarse_grid]);
 #else
+<<<<<<< HEAD
            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
+=======
+           //BUG: hypre_MGRAddVectorR does not check 
+           //     if the size of Vtemp is appropriate.
+           //     This will crash when using full AMG for
+           //     F-relaxation for level > 0.
+           hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, hypre_ParVectorActualLocalSize(F_array[fine_grid]), 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
+>>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
 #endif
            hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
            // Do F-relaxation using AMG
@@ -855,6 +886,7 @@ hypre_MGRCycle( void               *mgr_vdata,
          //wall_time = time_getWallclockSeconds() - wall_time;
          //if (my_id == 0) hypre_printf("F-relaxation solve level %d: %f\n", coarse_grid, wall_time);
 
+         //wall_time = time_getWallclockSeconds();
          // Update residual and compute coarse-grid rhs
          alpha = -1.0;
          beta = 1.0;
@@ -876,8 +908,15 @@ hypre_MGRCycle( void               *mgr_vdata,
          }
          else
          {
-            hypre_ParCSRMatrixMatvecT(alpha,RT_array[fine_grid],Vtemp,
-                  beta,F_array[coarse_grid]);
+            if (restrict_type[level] > 0)
+            {
+               hypre_ParCSRMatrixMatvecT(alpha,RT_array[fine_grid],Vtemp,
+                     beta,F_array[coarse_grid]);
+            }
+            else
+            {
+               hypre_MGRAddVectorR(CF_marker[fine_grid], CMRK, hypre_ParVectorActualLocalSize(F_array[fine_grid]), 1.0, Vtemp, 0.0, &(F_array[coarse_grid]));
+            }
          }
          // initialize coarse grid solution array
          hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
@@ -885,19 +924,28 @@ hypre_MGRCycle( void               *mgr_vdata,
          ++level;
 
          if (level == num_coarse_levels) cycle_type = 3;
+         //wall_time = time_getWallclockSeconds() - wall_time;
+         //if (my_id == 0) hypre_printf("Solve restrict time: %f\n", wall_time);
       } // end cycle_type == 1
       else if(level != 0)
       {
          /* Interpolate */
-
+         //wall_time = time_getWallclockSeconds();
          fine_grid = level - 1;
          coarse_grid = level;
          alpha = 1.0;
          beta = 1.0;
 
-         hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
-               U_array[coarse_grid],
-               beta, U_array[fine_grid]);
+         if (interp_type[fine_grid] > 0)
+         {
+            hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
+                  U_array[coarse_grid],
+                  beta, U_array[fine_grid]);
+         }
+         else
+         {
+            hypre_MGRAddVectorP(CF_marker[fine_grid], CMRK, 1.0, U_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+         }
 
          /* post relaxation sweeps */
          /*
@@ -919,6 +967,8 @@ hypre_MGRCycle( void               *mgr_vdata,
          }
 
          --level;
+         //wall_time = time_getWallclockSeconds() - wall_time;
+         //if (my_id == 0) hypre_printf("Solve interp time: %f\n", wall_time);
       } // end interpolate
       else
       {
