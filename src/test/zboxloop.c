@@ -20,8 +20,6 @@
  * Test driver to time new boxloops and compare to the old ones
  *--------------------------------------------------------------------------*/
 
-#define DEVICE_VAR
-
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -39,6 +37,7 @@ main( hypre_int argc,
    //HYPRE_Int         xi1, xi2, xi3, xi4;
    HYPRE_Int         xi1;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
+   HYPRE_Real       *d_xp1, *d_xp2, *d_xp3, *d_xp4;
    hypre_Index       loop_size, start, unit_stride, index;
 
    /*-----------------------------------------------------------
@@ -50,6 +49,8 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   HYPRE_Init();
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -64,6 +65,8 @@ main( hypre_int argc,
    P  = num_procs;
    Q  = 1;
    R  = 1;
+
+   reps = -1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -91,6 +94,11 @@ main( hypre_int argc,
       {
          arg_index++;
          dim = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-reps") == 0 )
+      {
+         arg_index++;
+         reps = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -162,12 +170,20 @@ main( hypre_int argc,
    hypre_CopyBox(x1_data_box, x4_data_box);
 
    size = (nx+2)*(ny+2)*(nz+2);
-   xp1 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
-   xp2 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
-   xp3 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
-   xp4 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp1 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+   xp2 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+   xp3 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+   xp4 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
 
-   reps = 1000000000/(nx*ny*nz+1000);
+   d_xp1 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+   d_xp2 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+   d_xp3 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+   d_xp4 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+
+   if (reps < 0)
+   {
+      reps = 1000000000/(nx*ny*nz+1000);
+   }
 
    /*-----------------------------------------------------------
     * Print driver parameters
@@ -230,7 +246,7 @@ main( hypre_int argc,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
-    * Time old boxloops
+    * Time old boxloops [Device]
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop0 */
@@ -239,12 +255,14 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       xi1 = 0;
+#define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop0Begin(3, loop_size);
       {
-         xp1[xi1] += xp1[xi1];
+         d_xp1[xi1] += d_xp1[xi1];
          //xi1++;
       }
       hypre_BoxLoop0End();
+#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -253,12 +271,14 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+#define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop1Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1);
       {
-         xp1[xi1] += xp1[xi1];
+         d_xp1[xi1] += d_xp1[xi1];
       }
       hypre_BoxLoop1End(xi1);
+#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -267,13 +287,15 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+#define DEVICE_VAR is_device_ptr(d_xp1,d_xp2)
       hypre_BoxLoop2Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
       {
-         xp1[xi1] += xp1[xi1] + xp2[xi2];
+         d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2];
       }
       hypre_BoxLoop2End(xi1, xi2);
+#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -282,14 +304,16 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+#define DEVICE_VAR is_device_ptr(d_xp1,d_xp2,d_xp3)
       hypre_BoxLoop3Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
       {
-         xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3];
+         d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2] + d_xp3[xi3];
       }
       hypre_BoxLoop3End(xi1, xi2, xi3);
+#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -298,24 +322,26 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+#define DEVICE_VAR is_device_ptr(d_xp1,d_xp2,d_xp3,d_xp4)
       hypre_BoxLoop4Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
       {
-         xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3] + xp4[xi4];
+         d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2] + d_xp3[xi3] + d_xp4[xi4];
       }
       hypre_BoxLoop4End(xi1, xi2, xi3, xi4);
+#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("Old BoxLoop times", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("Old BoxLoop times [DEVICE]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
-    * Time new boxloops
+    * Time new boxloops [Host]
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop0 */
@@ -415,7 +441,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoop times", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("New BoxLoop times [HOST]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
@@ -427,10 +453,18 @@ main( hypre_int argc,
    hypre_BoxDestroy(x2_data_box);
    hypre_BoxDestroy(x3_data_box);
    hypre_BoxDestroy(x4_data_box);
+
    hypre_TFree(xp1, HYPRE_MEMORY_HOST);
    hypre_TFree(xp2, HYPRE_MEMORY_HOST);
    hypre_TFree(xp3, HYPRE_MEMORY_HOST);
    hypre_TFree(xp4, HYPRE_MEMORY_HOST);
+
+   hypre_TFree(d_xp1, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_xp2, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_xp3, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_xp4, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

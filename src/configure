@@ -4910,6 +4910,21 @@ then
    as_fn_error $? "--with-hip and --with-device-openmp are mutually exclusive" "$LINENO" 5
 fi
 
+if test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-cuda and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-hip and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_device_openmp" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-device-openmp and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
 
 if test "$hypre_user_chose_cudacompilers" = "no"
 then
@@ -9315,7 +9330,7 @@ then
 $as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
 
 else
-   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"
+   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h

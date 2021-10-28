@@ -233,6 +233,7 @@ struct hypre_DeviceData
 #endif
 #if defined(HYPRE_USING_SYCL)
    sycl::device*                     device;
+   HYPRE_Int                         device_max_work_group_size;
 #else
    HYPRE_Int                         device;
 #endif
@@ -264,6 +265,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataCubDevAllocator(data)                ((data) -> cub_dev_allocator)
 #define hypre_DeviceDataCubUvmAllocator(data)                ((data) -> cub_uvm_allocator)
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
+#define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
 #define hypre_DeviceDataComputeStreamNum(data)               ((data) -> compute_stream_num)
 #define hypre_DeviceDataReduceBuffer(data)                   ((data) -> reduce_buffer)
 #define hypre_DeviceDataStructCommRecvBuffer(data)           ((data) -> struct_comm_recv_buffer)

@@ -9,13 +9,10 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_SYCL)
-// WM: TODO: verify
 sycl::range<1> hypre_GetDefaultCUDABlockDimension()
 {
-  // 256 - max work group size for Gen9
-  // 512 - max work group size for ATS
-  sycl::range<1> wgDim(64);
-  return wgDim;
+   sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   return wgDim;
 }
 
 // WM: TODO: verify
@@ -1234,6 +1231,7 @@ hypre_DeviceDataCreate()
 #if defined(HYPRE_USING_SYCL)
    /* WM: does the default selector get a GPU if available? Having trouble with getting the device on frank, so temporarily just passing the default selector */
    hypre_DeviceDataDevice(data)            = nullptr;
+   hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data).get_info<sycl::info::device::max_work_group_size>();
 #else
    hypre_DeviceDataDevice(data)            = 0;
 #endif
