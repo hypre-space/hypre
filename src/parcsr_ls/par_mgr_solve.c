@@ -698,8 +698,6 @@ hypre_MGRCycle( void               *mgr_vdata,
             /*
             if (interp_type[level] == 12)
             {
-<<<<<<< HEAD
-=======
               for (i = 0; i < nsweeps; i++)
               {
                 // Block Jacobi
@@ -715,7 +713,6 @@ hypre_MGRCycle( void               *mgr_vdata,
             */
             if (relax_type == 18)
             {
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
 #if defined(HYPRE_USING_CUDA)
                for(i=0; i<nsweeps; i++)
                {
@@ -853,15 +850,7 @@ hypre_MGRCycle( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], Vtemp, 0.0, F_fine_array[coarse_grid]);
 #else
-<<<<<<< HEAD
            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
-=======
-           //BUG: hypre_MGRAddVectorR does not check 
-           //     if the size of Vtemp is appropriate.
-           //     This will crash when using full AMG for
-           //     F-relaxation for level > 0.
-           hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, hypre_ParVectorActualLocalSize(F_array[fine_grid]), 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
 #endif
            hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
            // Do F-relaxation using AMG

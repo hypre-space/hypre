@@ -801,7 +801,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     fout = fopen(fname,"w");
     for (i=0; i < nloc; i++)
     {
-      fprintf(fout, "%d %d\n", i, CF_marker_array[lev][i]);
+      fprintf(fout, "%d %d\n", i, CF_marker[i]);
     }
     fclose(fout);
     */
@@ -837,12 +837,12 @@ hypre_MGRSetup( void               *mgr_vdata,
       if (use_non_galerkin_cg[lev] != 0)  
       {
         wall_time = time_getWallclockSeconds();
-        hypre_MGRBuildBlockJacobiWp(A_array[lev], block_jacobi_bsize, CF_marker_array[lev], NULL, debug_flag, &Wp);
+        hypre_MGRBuildBlockJacobiWp(A_array[lev], block_jacobi_bsize, CF_marker, NULL, debug_flag, &Wp);
         wall_time = time_getWallclockSeconds() - wall_time;
         if (my_id == 0) hypre_printf("Lev = %d, interp type = %d, proc = %d     Build Wp: %f\n", lev, interp_type[lev], my_id, wall_time);
       }
       wall_time = time_getWallclockSeconds();
-      hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], Wp, coarse_pnts_global, 1, dof_func_buff,
+      hypre_MGRBuildInterp(A_array[lev], CF_marker, Wp, coarse_pnts_global, 1, dof_func_buff_data,
                                 debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
       wall_time = time_getWallclockSeconds() - wall_time;
       if (my_id == 0) hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
@@ -862,24 +862,24 @@ hypre_MGRSetup( void               *mgr_vdata,
     {
       HYPRE_Real *diag_inv=NULL;
       HYPRE_Int inv_size;
-      hypre_ParCSRMatrixGetBlockDiagInv(A_array[lev], block_jacobi_bsize, -1, CF_marker_array[lev], &inv_size, &diag_inv);
+      hypre_ParCSRMatrixGetBlockDiagInv(A_array[lev], block_jacobi_bsize, -1, CF_marker, &inv_size, &diag_inv);
       diag_inv_array[lev] = diag_inv;
       blk_size[lev] = block_jacobi_bsize;
-      hypre_MGRBuildAff(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
+      hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
 
       F_fine_array[lev+1] =
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
                      hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
                      hypre_ParCSRMatrixRowStarts(A_ff_ptr));
       hypre_ParVectorInitialize(F_fine_array[lev+1]);
-      hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
+      //hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
 
       U_fine_array[lev+1] =
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
                      hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
                      hypre_ParCSRMatrixRowStarts(A_ff_ptr));
       hypre_ParVectorInitialize(U_fine_array[lev+1]);
-      hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
+      //hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
       A_ff_array[lev] = A_ff_ptr;
     }
 
@@ -941,25 +941,12 @@ hypre_MGRSetup( void               *mgr_vdata,
     }
     else
     {
-<<<<<<< HEAD
-      //wall_time = time_getWallclockSeconds();
-      hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
-            debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
-            restrict_type[lev], num_restrict_sweeps);
-      //wall_time = time_getWallclockSeconds() - wall_time;
-      //hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time);
-
-      RT_array[lev] = RT;
-
-      //wall_time = time_getWallclockSeconds();
-=======
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
       /* Compute RAP for next level */
       if (use_non_galerkin_cg[lev] != 0)
       {
         if (restrict_type[lev] > 0)
         {
-          hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
+          hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
                 debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
                 restrict_type[lev], num_restrict_sweeps);
           RT_array[lev] = RT;
@@ -967,15 +954,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 
         wall_time = time_getWallclockSeconds();
         HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev-1]) - block_num_coarse_indexes[lev];
-<<<<<<< HEAD
-        hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, block_num_f_points,
-          /* ordering */set_c_points_method, /* method (approx. inverse or not) */ 0, max_elmts, /* keep_stencil */ 0, CF_marker, &RAP_ptr);
-=======
         hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], Wp, RT, block_num_f_points,
-          /* ordering */set_c_points_method, /* method (approx. inverse or not) */ 0, max_elmts, /* keep_stencil */ 1, CF_marker_array[lev], &RAP_ptr);
-        hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
-        if (interp_type[lev] > 0) hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
-        if (restrict_type[lev] > 0) hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
+          /* ordering */set_c_points_method, /* method (approx. inverse or not) */ 0, max_elmts, /* keep_stencil */ 1, CF_marker, &RAP_ptr);
+        //hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
+        //if (interp_type[lev] > 0) hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
+        //if (restrict_type[lev] > 0) hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
 
         if (interp_type[lev] == 12)
         {
@@ -986,12 +969,11 @@ hypre_MGRSetup( void               *mgr_vdata,
         }
         wall_time = time_getWallclockSeconds() - wall_time;
         if (my_id == 0) hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %1.8f\n", lev, my_id, wall_time);
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
       }
       else
       {
         wall_time = time_getWallclockSeconds();
-        hypre_MGRBuildRestrict(A_array[lev], CF_marker_array[lev], coarse_pnts_global, 1, dof_func_buff,
+        hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
               debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
               restrict_type[lev], num_restrict_sweeps);
         RT_array[lev] = RT;
@@ -1010,9 +992,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
     if (truncate_cg_threshold > 0.0)
     {
-<<<<<<< HEAD
-      hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, 0);
-=======
       wall_time = time_getWallclockSeconds();
       // truncate the coarse grid
       if (exec == HYPRE_EXEC_HOST)
@@ -1027,7 +1006,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   #endif
       wall_time = time_getWallclockSeconds() - wall_time;
       if (my_id == 0) hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
     }
     //char fname[256];
     //sprintf(fname, "RAP_%d", lev);
@@ -1101,10 +1079,6 @@ hypre_MGRSetup( void               *mgr_vdata,
         hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
 #endif
         hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
-<<<<<<< HEAD
-=======
-        hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 3);
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
 
         fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
 

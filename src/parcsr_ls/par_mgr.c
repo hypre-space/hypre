@@ -994,9 +994,9 @@ hypre_MGRBuildPFromWp( hypre_ParCSRMatrix   *A,
   hypre_CSRMatrixData(P_offd) = P_offd_data;
   hypre_CSRMatrixI(P_offd) = P_offd_i;
   hypre_CSRMatrixJ(P_offd) = P_offd_j;
-  hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-  hypre_ParCSRMatrixOwnsColStarts(Wp) = 0;
-  hypre_ParCSRMatrixOwnsColStarts(P) = 1;
+  //hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
+  //hypre_ParCSRMatrixOwnsColStarts(Wp) = 0;
+  //hypre_ParCSRMatrixOwnsColStarts(P) = 1;
 
   hypre_ParCSRMatrixDeviceColMapOffd(P) = hypre_ParCSRMatrixDeviceColMapOffd(Wp);
   hypre_ParCSRMatrixColMapOffd(P)       = hypre_ParCSRMatrixColMapOffd(Wp);
@@ -1060,8 +1060,8 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A,
   hypre_TFree(f_marker, HYPRE_MEMORY_HOST);
 
   Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
-  hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
-  hypre_ParCSRMatrixOwnsColStarts(Wp) = 1;
+  //hypre_ParCSRMatrixOwnsColStarts(A_FC) = 0;
+  //hypre_ParCSRMatrixOwnsColStarts(Wp) = 1;
 
   *Wp_ptr = Wp;
   
@@ -2522,8 +2522,8 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix    *A_CF,
   hypre_CSRMatrixI(A_CF_new_diag) = A_CF_diag_i_new;
   hypre_CSRMatrixJ(A_CF_new_diag) = A_CF_diag_j_new;
 
-  hypre_ParCSRMatrixOwnsRowStarts(A_CF_new) = 0;
-  hypre_ParCSRMatrixOwnsColStarts(A_CF_new) = 0;
+  //hypre_ParCSRMatrixOwnsRowStarts(A_CF_new) = 0;
+  //hypre_ParCSRMatrixOwnsColStarts(A_CF_new) = 0;
 
   *A_CF_new_ptr = A_CF_new;
 
@@ -6544,12 +6544,6 @@ hypre_MGRAddVectorR ( hypre_IntArray *CF_marker,
 
   //HYPRE_Int       n = hypre_ParVectorActualLocalSize(*toVector);
   HYPRE_Int       n = hypre_IntArraySize(CF_marker);
-
-<<<<<<< HEAD
-  //HYPRE_Int       n = hypre_min(size, hypre_ParVectorActualLocalSize(fromVector));
-=======
-  HYPRE_Int       n = hypre_min(size, hypre_ParVectorActualLocalSize(fromVector));
->>>>>>> ca82bed7e (WIP: add CPR approach and fast small block inverse.)
   HYPRE_Int       i, j;
 
   j = 0;
