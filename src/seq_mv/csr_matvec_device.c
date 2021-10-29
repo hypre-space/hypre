@@ -169,7 +169,11 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                                    &beta,
                                                    vecY,
                                                    data_type,
+#if CUSPARSE_SPMV_CSR_ALG2 >= 11200
                                                    CUSPARSE_SPMV_CSR_ALG2,
+#else
+                                                   CUSPARSE_CSRMV_ALG2,
+#endif
                                                    &bufferSize) );
 
       dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
@@ -185,7 +189,11 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      &beta,
                                      vecY,
                                      data_type,
+#if CUSPARSE_SPMV_CSR_ALG2 >= 11200
                                      CUSPARSE_SPMV_CSR_ALG2,
+#else
+                                     CUSPARSE_CSRMV_ALG2,
+#endif
                                      dBuffer) );
 
    hypre_SyncCudaComputeStream(hypre_handle());
