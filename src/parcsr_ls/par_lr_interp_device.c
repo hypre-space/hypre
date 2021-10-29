@@ -66,8 +66,8 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_alpha) in the notes, only for F-pts */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(A_nr_of_rows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
                       gDim, bDim,
@@ -109,7 +109,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    /* 5. Form matrix ~{A_FF}, (return twAFF in AFF data structure ) */
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_GpuProfilingPushRange("Compute interp matrix");
-   gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc,
                       gDim, bDim,
                       W_nr_of_rows,
@@ -252,8 +252,8 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_alpha) in the notes, only for F-pts */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(A_nr_of_rows, "warp",   bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp",   bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
                       gDim, bDim,
@@ -329,7 +329,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       AFF_diag_data_old );
 
    hypre_GpuProfilingPushRange("Compute interp matrix");
-   gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_twiaff_w,
                       gDim, bDim,
                       W_nr_of_rows,
@@ -477,8 +477,8 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* row sum of A-weak + Diag(A), i.e., (D_gamma + D_FF) in the notes, only for F-pts */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(A_nr_of_rows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
                       gDim, bDim,
@@ -522,7 +522,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    dlam = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
    dtmp = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPushRange("Compute D_tmp");
-   gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
                       gDim, bDim,
                       W_nr_of_rows,
@@ -562,7 +562,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* 5. Form matrix ~{A_FF}, (return twAFF in AFF data structure ) */
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_GpuProfilingPushRange("Compute interp matrix");
-   gDim = hypre_GetDefaultCUDAGridDimension(W_nr_of_rows, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc_epe,
                       gDim, bDim,
                       W_nr_of_rows,

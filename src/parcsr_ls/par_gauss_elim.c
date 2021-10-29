@@ -418,7 +418,7 @@ hypreCUDAKernel_dgemv(HYPRE_Int   m,
 HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x, HYPRE_Real *y)
 {
    dim3 bDim(BLOCK_SIZE, 1, 1);
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(m, "thread", bDim);
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(m, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
 

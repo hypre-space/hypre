@@ -466,9 +466,9 @@ hypre_int hypre_cuda_get_grid_warp_id(sycl::nd_item<dim>& item)
 }
 
 /* device_utils.c */
-sycl::range<1> hypre_GetDefaultCUDABlockDimension();
+sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
 
-sycl::range<1> hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, sycl::range<1> bDim );
+sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, sycl::range<1> bDim );
 
 #endif // #if defined(HYPRE_USING_SYCL)
 
@@ -1049,9 +1049,9 @@ struct print_functor
 };
 
 /* device_utils.c */
-dim3 hypre_GetDefaultCUDABlockDimension();
+dim3 hypre_GetDefaultDeviceBlockDimension();
 
-dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 

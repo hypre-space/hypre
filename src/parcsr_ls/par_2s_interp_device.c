@@ -89,8 +89,8 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    /* weak row sum and diagonal, i.e., DF2F2 + Dgamma */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_local, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(A_nr_local, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
@@ -142,7 +142,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    /* add to rsW those in AF2F that correspond to Dbeta == 0
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
-   gDim = hypre_GetDefaultCUDAGridDimension(AF2F_nr_local, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
                       gDim, bDim,
@@ -304,8 +304,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_assert(AFC_nr_local == hypre_ParCSRMatrixNumRows(As_FF));
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(AFC_nr_local, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(AFC_nr_local, "warp", bDim);
 
    /* Generate D_lambda in the paper: D_beta + (row sum of AFF without diagonal elements / row_nnz) */
    /* Generate D_tmp, i.e., D_mu / D_lambda */
@@ -364,7 +364,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* weak row sum and diagonal, i.e., DFF + Dgamma */
    rsWA = hypre_TAlloc(HYPRE_Complex, A_nr_local, HYPRE_MEMORY_DEVICE);
 
-   gDim = hypre_GetDefaultCUDAGridDimension(A_nr_local, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
@@ -415,7 +415,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    /* add to rsW those in AFF that correspond to lam == 0
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
-   gDim = hypre_GetDefaultCUDAGridDimension(AF2F_nr_local, "warp", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
                       gDim, bDim,

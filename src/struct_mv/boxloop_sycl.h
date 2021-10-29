@@ -58,8 +58,8 @@ BoxLoopforall( HYPRE_Int length,
    else if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
-      const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
          {
@@ -95,8 +95,8 @@ ReductionBoxLoopforall( LOOP_BODY  loop_body,
    {
       /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
       /* NOTE: in the cuda version, there is further manipulation of bDim and gDim that I don't include here */
-      const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
          {

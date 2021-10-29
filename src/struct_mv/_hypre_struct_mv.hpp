@@ -794,8 +794,8 @@ BoxLoopforall( HYPRE_Int length,
    }
    else if (exec_policy == HYPRE_EXEC_DEVICE)
    {
-      const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      const dim3 gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+      const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      const dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
    }
@@ -845,8 +845,8 @@ ReductionBoxLoopforall( HYPRE_Int  length,
    }
    else if (exec_policy == HYPRE_EXEC_DEVICE)
    {
-      const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+      const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       /* Note: we assume gDim cannot exceed 1024
        *       and bDim < WARP * WARP
@@ -1210,8 +1210,8 @@ BoxLoopforall( HYPRE_Int length,
    else if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
-      const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
          {
@@ -1247,8 +1247,8 @@ ReductionBoxLoopforall( LOOP_BODY  loop_body,
    {
       /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
       /* NOTE: in the cuda version, there is further manipulation of bDim and gDim that I don't include here */
-      const sycl::range<1> bDim = hypre_GetDefaultCUDABlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
+      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
          {
