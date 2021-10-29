@@ -65,7 +65,6 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij.c\
- simple.c\
  ij_assembly.c\
  sstruct.c\
  struct.c\

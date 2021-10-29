@@ -965,7 +965,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
             catch (sycl::exception const& ex)
             {
                std::cout << "Caught asynchronous SYCL exception:" << std::endl
-               << ex.what() << ", OpenCL code: " << ex.code() << std::endl;
+               << ex.what() << ", OpenCL code: " << ex.get_cl_code() << std::endl;
             }
          }
       };
