@@ -90,15 +90,16 @@ typedef struct
   hypre_ParVector   *Utemp;
   hypre_ParVector   *Ftemp;
 
-  HYPRE_Real          *diaginv;
-  HYPRE_Real          **diag_inv_array;
+  HYPRE_Real          **level_diaginv;
+  HYPRE_Real          **frelax_diaginv;
   hypre_ParCSRMatrix  *A_ff_inv;
   HYPRE_Int           n_block;
   HYPRE_Int           left_size;
-  HYPRE_Int           global_smooth_iters;
-  HYPRE_Int           global_smooth_type;
-  HYPRE_Solver global_smoother;
   HYPRE_Int           *blk_size;
+  HYPRE_Int           *level_smooth_iters;
+  HYPRE_Int           *level_smooth_type;
+  HYPRE_Solver        *level_smoother;
+
   /*
    Number of points that remain part of the coarse grid throughout the hierarchy.
    For example, number of well equations
@@ -140,6 +141,25 @@ typedef struct
   HYPRE_Real  cg_convergence_factor;
 
 } hypre_ParMGRData;
+
+typedef struct
+{
+  HYPRE_Int relax_type;
+  HYPRE_Int relax_nsweeps;
+
+  hypre_ParCSRMatrix *A;
+  hypre_ParVector    *b;
+
+  // for hypre's smoother options
+  HYPRE_Int *CF_marker;
+
+  // for block Jacobi/GS option
+  HYPRE_Complex *diaginv;
+
+  // for ILU option
+  HYPRE_Solver frelax_solver;
+  
+} hypre_MGRRelaxData;
 
 
 #define FMRK  -1
