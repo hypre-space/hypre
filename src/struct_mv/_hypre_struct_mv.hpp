@@ -1224,7 +1224,7 @@ template<typename LOOP_BODY>
 void
 ReductionBoxLoopforall( LOOP_BODY  loop_body,
                         HYPRE_Int length,
-                        sycl::buffer<HYPRE_Real> sum_buf )
+                        HYPRE_Real *hypre_sycl_sum )
 {
    if (length <= 0)
    {
@@ -1252,8 +1252,7 @@ ReductionBoxLoopforall( LOOP_BODY  loop_body,
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
          {
-            sycl::accessor sum_acc(sum_buf, cgh, sycl::read_write);
-            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::ext::oneapi::reduction(sum_acc, std::plus<>()), loop_body);
+            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::reduction(hypre_sycl_sum, std::plus<>()), loop_body);
          }).wait_and_throw();
    }
 }
@@ -1506,7 +1505,8 @@ else                                                            \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
-   sycl::buffer<HYPRE_Real> sum_buf(&sum_var, 1);                                                     \
+   HYPRE_Real *hypre_sycl_sum = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
+   hypre_TMemcpy(hypre_sycl_sum, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
    ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &sum)                                     \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
@@ -1517,7 +1517,8 @@ else                                                            \
 
 #define hypre_newBoxLoop1ReductionEnd(i1, sum_var)                                                    \
       }                                                                                               \
-   }, hypre__tot, sum_buf);                                                                           \
+   }, hypre__tot, hypre_sycl_sum);                                                                    \
+   hypre_TMemcpy(&sum_var, hypre_sycl_sum, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
 }
 
 /* Reduction BoxLoop2 */
@@ -1529,7 +1530,8 @@ else                                                            \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                             \
-   sycl::buffer<HYPRE_Real> sum_buf(&sum_var, 1);                                                     \
+   HYPRE_Real *hypre_sycl_sum = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
+   hypre_TMemcpy(hypre_sycl_sum, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
    ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &sum)                                     \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
@@ -1541,7 +1543,8 @@ else                                                            \
 
 #define hypre_newBoxLoop2ReductionEnd(i1, i2, sum_var)                                                \
       }                                                                                               \
-   }, hypre__tot, sum_buf);                                                                           \
+   }, hypre__tot, hypre_sycl_sum);                                                                    \
+   hypre_TMemcpy(&sum_var, hypre_sycl_sum, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
 }
 
 /* Plain parallel_for loop */
@@ -1556,7 +1559,7 @@ else                                                            \
 
 #define hypre_LoopEnd()                                                                               \
       }                                                                                               \
-   });                                                                                          \
+   });                                                                                                \
 }
 
 
