@@ -30,6 +30,10 @@
 #include "umpire/interface/umpire.h"
 #endif
 
+#if defined(HYPRE_USING_CUDA)
+#include <cuda_profiler_api.h>
+#endif
+
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
@@ -83,8 +87,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 }
 #endif
 
-#define SECOND_TIME     0
-#define AMG_SECOND_TIME 1
+#define SECOND_TIME 1
 
 hypre_int
 main( hypre_int argc,
@@ -3312,9 +3315,7 @@ main( hypre_int argc,
    hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));
 
    /* save the initial guess for the 2nd time */
-#if SECOND_TIME
    x0_save = hypre_ParVectorCloneDeep_v2(x, hypre_ParVectorMemoryLocation(x));
-#endif
 
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver
@@ -3548,6 +3549,7 @@ main( hypre_int argc,
       /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
       //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, poutdat);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
@@ -3659,8 +3661,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
-      //cudaProfilerStart();
-
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("AMG-Setup-1");
 #endif
@@ -3700,7 +3700,6 @@ main( hypre_int argc,
       hypre_GpuProfilingPushRange("AMG-Solve-1");
 #endif
 
-      //cudaProfilerStart();
       if (solver_id == 0)
       {
          HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
@@ -3709,7 +3708,6 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
       }
-      //cudaProfilerStop();
 
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPopRange();
@@ -3750,18 +3748,17 @@ main( hypre_int argc,
          hypre_printf("\n");
       }
 
-#if AMG_SECOND_TIME
+#if SECOND_TIME
       /* run a second time [for timings, to check for memory leaks] */
       //HYPRE_ParVectorSetRandomValues(x, 775);
       hypre_ParVectorCopy(x0_save, x);
 
-      HYPRE_Real tt, maxtt = 0.0, tset = 0.0, tsol = 0.0;
-
-      tt = hypre_MPI_Wtime();
-
-#if HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA)
       cudaProfilerStart();
 #endif
+
+      time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
+      hypre_BeginTiming(time_index);
 
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("AMG-Setup-2");
@@ -3784,16 +3781,13 @@ main( hypre_int argc,
       hypre_SyncCudaDevice(hypre_handle());
 #endif
 
-      tt = hypre_MPI_Wtime() - tt;
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
 
-      hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
-
-      if (myid == 0)
-      {
-         tset = maxtt;
-      }
-
-      tt = hypre_MPI_Wtime();
+      time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
+      hypre_BeginTiming(time_index);
 
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("AMG-Solve-2");
@@ -3816,21 +3810,15 @@ main( hypre_int argc,
       hypre_SyncCudaDevice(hypre_handle());
 #endif
 
-#if HYPRE_USING_CUDA
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+#if defined(HYPRE_USING_CUDA)
       cudaProfilerStop();
 #endif
-
-      tt = hypre_MPI_Wtime() - tt;
-
-      hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
-
-      if (myid == 0)
-      {
-         tsol = maxtt;
-         hypre_printf("AMG Setup time %.2f (s)\n", tset);
-         hypre_printf("AMG Solve time %.2f (s)\n", tsol);
-      }
-#endif // #if AMG_SECOND_TIME
+#endif // #if SECOND_TIME
 
       if (solver_id == 0)
       {
@@ -4424,6 +4412,7 @@ main( hypre_int argc,
       else
          if (myid == 0)
             hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
+
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("PCG-Setup-1");
 #endif
@@ -4458,16 +4447,29 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
+
+#if defined(HYPRE_USING_CUDA)
+      cudaProfilerStart();
+#endif
+
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
+
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("PCG-Setup-2");
 #endif
+
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
+
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPopRange();
 #endif
+
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
+#endif
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -4475,19 +4477,31 @@ main( hypre_int argc,
 
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
+
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("PCG-Solve-2");
 #endif
+
       HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
+
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPopRange();
 #endif
+
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncCudaDevice(hypre_handle());
+#endif
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+
+#if defined(HYPRE_USING_CUDA)
+      cudaProfilerStop();
 #endif
+#endif // #if SECOND_TIME
 
       HYPRE_ParCSRPCGDestroy(pcg_solver);
 
