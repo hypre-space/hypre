@@ -82,7 +82,9 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 #ifdef __cplusplus
 }
 #endif
-#define SECOND_TIME 0
+
+#define SECOND_TIME     0
+#define AMG_SECOND_TIME 1
 
 hypre_int
 main( hypre_int argc,
@@ -3739,14 +3741,18 @@ main( hypre_int argc,
          hypre_printf("\n");
       }
 
-#if SECOND_TIME
-      /* run a second time to check for memory leaks */
+#if AMG_SECOND_TIME
+      /* run a second time [for timings, to check for memory leaks] */
       //HYPRE_ParVectorSetRandomValues(x, 775);
       hypre_ParVectorCopy(x0_save, x);
 
       HYPRE_Real tt, maxtt = 0.0, tset = 0.0, tsol = 0.0;
 
       tt = hypre_MPI_Wtime();
+
+#if HYPRE_USING_CUDA
+      cudaProfilerStart();
+#endif
 
 #if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("AMG-Setup-2");
@@ -3801,6 +3807,10 @@ main( hypre_int argc,
       hypre_SyncCudaDevice(hypre_handle());
 #endif
 
+#if HYPRE_USING_CUDA
+      cudaProfilerStop();
+#endif
+
       tt = hypre_MPI_Wtime() - tt;
 
       hypre_MPI_Reduce(&tt, &maxtt, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hypre_MPI_COMM_WORLD);
@@ -3811,9 +3821,7 @@ main( hypre_int argc,
          hypre_printf("AMG Setup time %.2f (s)\n", tset);
          hypre_printf("AMG Solve time %.2f (s)\n", tsol);
       }
-#endif // SECOND_TIME
-
-      //cudaProfilerStop();
+#endif // #if AMG_SECOND_TIME
 
       if (solver_id == 0)
       {
