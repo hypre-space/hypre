@@ -85,13 +85,9 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_BigInt     total_global_cpts;
    HYPRE_Int        num_cols_P_offd = 0;
 
-   HYPRE_Int        i;
-   HYPRE_Int        j;
-   HYPRE_Int        start;
    HYPRE_Int        my_id;
    HYPRE_Int        num_procs;
    HYPRE_Int        num_sends;
-   HYPRE_Int        index;
    HYPRE_Int       *int_buf_data;
 
    HYPRE_Real       wall_time;  /* for debugging instrumentation  */
