@@ -24,10 +24,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                       hypre_ParVector  **F_array,
                       hypre_ParVector  **U_array   )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("AMGCycle");
-#endif
-
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    HYPRE_Solver *smoother;
@@ -115,6 +111,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("AMGCycle");
+#endif
 
    /* Acquire data and allocate storage */
    A_array           = hypre_ParAMGDataAArray(amg_data);
@@ -369,15 +368,27 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       if (cycle_param == 3 && seq_cg)
       {
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPushRange("Coarse solve");
+#endif
          hypre_seqAMGCycle(amg_data, level, F_array, U_array);
          HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPopRange();
+#endif
       }
 #ifdef HYPRE_USING_DSUPERLU
       else if (cycle_param == 3 && hypre_ParAMGDataDSLUSolver(amg_data) != NULL)
       {
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPushRange("Coarse solve");
+#endif
          hypre_SLUDistSolve(hypre_ParAMGDataDSLUSolver(amg_data), Aux_F, Aux_U);
          HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPopRange();
+#endif
       }
 #endif
       else
@@ -386,6 +397,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          * Do the relaxation num_sweep times
          *-----------------------------------------------------------------*/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPushRange("Relaxation");
+#endif
          for (jj = 0; jj < cg_num_sweep; jj++)
          {
             if (smooth_num_levels > level && smooth_type > 9)
@@ -592,6 +606,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
                   hypre_GpuProfilingPopRange();
                   hypre_GpuProfilingPopRange();
+                  hypre_GpuProfilingPopRange();
 #endif
                   return(Solve_err_flag);
                }
@@ -620,6 +635,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             }
          }
          HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPopRange();
+#endif
       }
 
       /*------------------------------------------------------------------
@@ -647,6 +665,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          beta = 1.0;
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPushRange("Residual");
+#endif
          if (block_mode)
          {
             hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
@@ -660,11 +681,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                beta, F_array[fine_grid], Vtemp);
          }
          HYPRE_ANNOTATE_REGION_END("%s", "Residual");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPopRange();
+#endif
 
          alpha = 1.0;
          beta = 0.0;
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPushRange("Restriction");
+#endif
          if (block_mode)
          {
             hypre_ParCSRBlockMatrixMatvecT(alpha, R_block_array[fine_grid], Vtemp,
@@ -687,6 +714,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
          HYPRE_ANNOTATE_MGLEVEL_END(level);
 #if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();
 #endif
 
@@ -720,6 +748,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          beta = 1.0;
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+#if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPushRange("Interpolation");
+#endif
          if (block_mode)
          {
             hypre_ParCSRBlockMatrixMatvec(alpha, P_block_array[fine_grid],
@@ -737,6 +768,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(level);
 #if defined(HYPRE_USING_NVTX)
+         hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();
 #endif
 
