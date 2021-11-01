@@ -598,7 +598,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       }
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_WITH_GPU_AWARE_MPI)
    hypre_ForceSyncCudaComputeStream(hypre_handle());
 #endif
 

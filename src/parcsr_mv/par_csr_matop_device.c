@@ -169,6 +169,10 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommPkgRecvProcs    (comm_pkg_j) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = recv_jstarts;
 
+#ifdef HYPRE_WITH_GPU_AWARE_MPI
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+#endif
+
    /* init communication */
    /* ja */
    comm_handle_j = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_j,
@@ -411,7 +415,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
 
    B_int_nnz = B_int_i_h[B_int_nrows];
 
-   B_int_j_d = hypre_TAlloc(HYPRE_BigInt,  B_int_nnz, HYPRE_MEMORY_DEVICE);
+   B_int_j_d = hypre_TAlloc(HYPRE_BigInt, B_int_nnz, HYPRE_MEMORY_DEVICE);
    if (want_data)
    {
       B_int_a_d = hypre_TAlloc(HYPRE_Complex, B_int_nnz, HYPRE_MEMORY_DEVICE);
