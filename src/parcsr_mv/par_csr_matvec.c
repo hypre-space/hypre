@@ -268,7 +268,15 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK]   += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+#endif
+
+   /* when using GPUs, start local matvec first in order to overlap with communication */
+#if defined(HYPRE_USING_GPU)
+   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
+#endif
+
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
 
@@ -292,8 +300,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
+#if !defined(HYPRE_USING_GPU)
    /* overlapped local computation */
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
@@ -588,6 +598,23 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+#endif
+
+   /* when using GPUs, start local matvec first in order to overlap with communication */
+#if defined(HYPRE_USING_GPU)
+   if (diagT)
+   {
+      // diagT is optional. Used only if it's present.
+      hypre_CSRMatrixMatvec(alpha, diagT, x_local, beta, y_local);
+   }
+   else
+   {
+      hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+   }
+#endif
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
@@ -612,6 +639,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
+#if !defined(HYPRE_USING_GPU)
    /* overlapped local computation */
    if (diagT)
    {
@@ -622,6 +650,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
    }
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
