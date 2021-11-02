@@ -3546,6 +3546,7 @@ main( hypre_int argc,
       /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
       //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, poutdat);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
