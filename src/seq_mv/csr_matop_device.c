@@ -102,6 +102,8 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
    HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
 #endif
 
+   hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
+
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
 

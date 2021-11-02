@@ -514,7 +514,8 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    else
    {
       offd = hypre_CSRMatrixCreate(local_num_rows, 0, 0);
-      hypre_CSRMatrixInitialize(offd);
+      hypre_CSRMatrixInitialize_v2(offd, 0, HYPRE_MEMORY_HOST);
+
    }
 
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);

@@ -316,6 +316,7 @@ struct hypre_GpuMatData
 {
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseMatDescr_t    mat_descr;
+   char                 *spmv_buffer;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -324,8 +325,9 @@ struct hypre_GpuMatData
 #endif
 };
 
-#define hypre_GpuMatDataMatDecsr(data) ((data) -> mat_descr)
-#define hypre_GpuMatDataMatInfo(data)  ((data) -> mat_info)
+#define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
+#define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
 #endif //#if defined(HYPRE_USING_GPU)
 

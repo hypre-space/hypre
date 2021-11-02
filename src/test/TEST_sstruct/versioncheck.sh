@@ -12,19 +12,20 @@ TNAME=`basename $0 .sh`
 
 grep "Using HYPRE_DEVELOP_STRING" ${TNAME}.out.1 > ${TNAME}.testdata
 
+echo -n > ${TNAME}.testdatacheck
 if [ -d ../../../.git ]; then
-  DEVSTRING=`git describe --match 'v*' --long --abbrev=9`
+  DEVSTRING=`git describe --match 'v*' --long --abbrev=9 2>/dev/null`
   DEVNUMBER=`echo $DEVSTRING | awk -F- '{print $2}'`
   DEVBRANCH=`git rev-parse --abbrev-ref HEAD`
-  if [ "$DEVBRANCH" != "master" ]; then
-    echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (not main development branch)" \
-     > ${TNAME}.testdatacheck
-  else
-    echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (main development branch $DEVBRANCH)" \
-     > ${TNAME}.testdatacheck
+  if [ -n "$DEVSTRING" ]; then
+    if [ "$DEVBRANCH" != "master" ]; then
+      echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (not main development branch)" \
+       > ${TNAME}.testdatacheck
+    else
+      echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (main development branch $DEVBRANCH)" \
+       > ${TNAME}.testdatacheck
+    fi
   fi
-else
-  echo -n > ${TNAME}.testdatacheck
 fi
 diff ${TNAME}.testdata ${TNAME}.testdatacheck >&2
 
