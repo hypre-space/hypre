@@ -114,8 +114,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   HYPRE_Int *mgr_coarse_grid_method = (mgr_data -> mgr_coarse_grid_method);
 
-  hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
-
   HYPRE_Int use_air = 0;
   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( memory_location );
@@ -896,14 +894,13 @@ hypre_MGRSetup( void               *mgr_vdata,
                      hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
                      hypre_ParCSRMatrixRowStarts(A_ff_ptr));
       hypre_ParVectorInitialize(F_fine_array[lev+1]);
-      //hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
 
       U_fine_array[lev+1] =
       hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
                      hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
                      hypre_ParCSRMatrixRowStarts(A_ff_ptr));
       hypre_ParVectorInitialize(U_fine_array[lev+1]);
-      //hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
+
       A_ff_array[lev] = A_ff_ptr;
     }
 
@@ -983,9 +980,6 @@ hypre_MGRSetup( void               *mgr_vdata,
         HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev-1]) - block_num_coarse_indexes[lev];
         hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], Wp, RT, block_num_f_points,
           /* ordering */set_c_points_method, /* method (approx. inverse or not) */ mgr_coarse_grid_method[lev], max_elmts, CF_marker, &RAP_ptr);
-        //hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
-        //if (interp_type[lev] > 0) hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
-        //if (restrict_type[lev] > 0) hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
 
         if (interp_type[lev] == 12)
         {
@@ -1251,6 +1245,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     /* check if last level */
     wall_time_lev = time_getWallclockSeconds() - wall_time_lev;
     if (my_id == 0) hypre_printf("Lev = %d, proc = %d     Setup time: %f\n", lev, my_id, wall_time_lev);
+
     if(last_level) break;
   }
 
@@ -1292,10 +1287,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   /* setup coarse grid solver */
   wall_time = time_getWallclockSeconds();
-  //if (((hypre_ParAMGData*)(mgr_data -> coarse_grid_solver))->A_array == NULL)
-  //{
-    coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
-  //}
+  coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
   wall_time = time_getWallclockSeconds() - wall_time;
   if (my_id == 0) hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
 

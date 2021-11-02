@@ -92,7 +92,6 @@ typedef struct
 
   HYPRE_Real          **level_diaginv;
   HYPRE_Real          **frelax_diaginv;
-  hypre_ParCSRMatrix  *A_ff_inv;
   HYPRE_Int           n_block;
   HYPRE_Int           left_size;
   HYPRE_Int           *blk_size;
