@@ -69,7 +69,7 @@ typedef struct
   HYPRE_Int     cg_print_level;
   HYPRE_Int     max_iter;
   HYPRE_Int     relax_order;
-  HYPRE_Int     num_relax_sweeps;
+  HYPRE_Int     *num_relax_sweeps;
 
   HYPRE_Solver coarse_grid_solver;
   HYPRE_Int     (*coarse_grid_solver_setup)(void*,void*,void*,void*);
@@ -116,7 +116,7 @@ typedef struct
   HYPRE_Int *Frelax_num_functions;
 
   /* Non-Galerkin coarse grid */
-  HYPRE_Int *use_non_galerkin_cg;
+  HYPRE_Int *mgr_coarse_grid_method;
 
   /* V-cycle F relaxation method */
   hypre_ParAMGData    **FrelaxVcycleData;
