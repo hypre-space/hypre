@@ -14,7 +14,6 @@ CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
@@ -23,7 +22,6 @@ C_COMPILE_FLAGS = \
 
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
@@ -33,7 +31,6 @@ CXX_COMPILE_FLAGS = \
 
 F77_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
 
