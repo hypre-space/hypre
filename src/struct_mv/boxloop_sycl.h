@@ -40,69 +40,36 @@ void
 BoxLoopforall( HYPRE_Int length,
                LOOP_BODY loop_body)
 {
-   /* HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle()); */
-   /* WM: TODO: uncomment above and remove below */
-   HYPRE_ExecutionPolicy exec_policy = HYPRE_EXEC_DEVICE;
-
-   if (exec_policy == HYPRE_EXEC_HOST)
+   if (length <= 0)
    {
-/* WM: todo - is this really necessary, even? */
-/* #ifdef HYPRE_USING_OPENMP */
-/* #pragma omp parallel for HYPRE_SMP_SCHEDULE */
-/* #endif */
-/*       for (HYPRE_Int idx = 0; idx < length; idx++) */
-/*       { */
-/*          loop_body(idx); */
-/*       } */
+      return;
    }
-   else if (exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
-      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+   const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
-         {
-            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), loop_body);
-         }).wait_and_throw();
-   }
+   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
+      {
+         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), loop_body);
+      }).wait_and_throw();
 }
 
 template<typename LOOP_BODY>
 void
 ReductionBoxLoopforall( LOOP_BODY  loop_body,
                         HYPRE_Int length,
-                        HYPRE_Real *hypre_sycl_sum )
+                        HYPRE_Real *shared_sum_var )
 {
    if (length <= 0)
    {
       return;
    }
+   const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
-   /* HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle()); */
-   /* WM: TODO: uncomment above and remove below */
-   HYPRE_ExecutionPolicy exec_policy = HYPRE_EXEC_DEVICE;
-
-   if (exec_policy == HYPRE_EXEC_HOST)
-   {
-      /* WM: todo - is this really necessary, even? */
-      /* for (HYPRE_Int idx = 0; idx < length; idx++) */
-      /* { */
-      /*    loop_body(idx, reducer); */
-      /* } */
-   }
-   else if (exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      /* WM: question - is it better in sycl to launch parallel_for with blocks in this way as we do for cuda? */
-      /* NOTE: in the cuda version, there is further manipulation of bDim and gDim that I don't include here */
-      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
-
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
-         {
-            cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::reduction(hypre_sycl_sum, std::plus<>()), loop_body);
-         }).wait_and_throw();
-   }
+   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
+      {
+         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::reduction(shared_sum_var, std::plus<>()), loop_body);
+      }).wait_and_throw();
 }
 
 #ifdef __cplusplus
@@ -224,6 +191,21 @@ else                                                            \
 /*********************************************************************
  * Boxloops
  *********************************************************************/
+
+/* BoxLoop 0 */
+#define hypre_newBoxLoop0Begin(ndim, loop_size)                                                       \
+{                                                                                                     \
+   hypre_newBoxLoopInit(ndim, loop_size);                                                             \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   {                                                                                                  \
+      HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
+      if (idx < hypre__tot)                                                                           \
+      {                                                                                               \
+
+#define hypre_newBoxLoop0End()                                                                        \
+      }                                                                                               \
+   });                                                                                                \
+}
 
 /* BoxLoop 1 */
 #define hypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)                           \
@@ -353,9 +335,9 @@ else                                                            \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
-   HYPRE_Real *hypre_sycl_sum = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
-   hypre_TMemcpy(hypre_sycl_sum, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
-   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &sum)                                     \
+   HYPRE_Real *shared_sum_var = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
+   hypre_TMemcpy(shared_sum_var, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
+   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &hypre_sycl_sum)                          \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -365,8 +347,8 @@ else                                                            \
 
 #define hypre_newBoxLoop1ReductionEnd(i1, sum_var)                                                    \
       }                                                                                               \
-   }, hypre__tot, hypre_sycl_sum);                                                                    \
-   hypre_TMemcpy(&sum_var, hypre_sycl_sum, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
+   }, hypre__tot, shared_sum_var);                                                                    \
+   hypre_TMemcpy(&sum_var, shared_sum_var, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
 }
 
 /* Reduction BoxLoop2 */
@@ -378,9 +360,9 @@ else                                                            \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                             \
-   HYPRE_Real *hypre_sycl_sum = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
-   hypre_TMemcpy(hypre_sycl_sum, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
-   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &sum)                                     \
+   HYPRE_Real *shared_sum_var = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
+   hypre_TMemcpy(shared_sum_var, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
+   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &hypre_sycl_sum)                          \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -391,8 +373,8 @@ else                                                            \
 
 #define hypre_newBoxLoop2ReductionEnd(i1, i2, sum_var)                                                \
       }                                                                                               \
-   }, hypre__tot, hypre_sycl_sum);                                                                    \
-   hypre_TMemcpy(&sum_var, hypre_sycl_sum, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
+   }, hypre__tot, shared_sum_var);                                                                    \
+   hypre_TMemcpy(&sum_var, shared_sum_var, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
 }
 
 /* Plain parallel_for loop */
@@ -417,6 +399,8 @@ else                                                            \
 
 #define hypre_BoxLoopBlock()       0
 
+#define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
+#define hypre_BoxLoop0End        hypre_newBoxLoop0End
 #define hypre_BoxLoop1Begin      hypre_newBoxLoop1Begin
 #define hypre_BoxLoop1End        hypre_newBoxLoop1End
 #define hypre_BoxLoop2Begin      hypre_newBoxLoop2Begin
