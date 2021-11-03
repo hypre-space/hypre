@@ -1530,11 +1530,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_THRUST_CALL( transform,
-                               G_diag_I,
-                               G_diag_I + G_diag_nrows + 1,
-                               Pi_diag_I,
-                               dim * _1 );
+            hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, Pi_diag_I, dim );
 
             dim3 bDim = hypre_GetDefaultCUDABlockDimension();
             dim3 gDim = hypre_GetDefaultCUDAGridDimension(G_diag_nnz, "thread", bDim);
@@ -1594,11 +1590,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          {
             if (G_offd_ncols)
             {
-               HYPRE_THRUST_CALL( transform,
-                                  G_offd_I,
-                                  G_offd_I + G_offd_nrows + 1,
-                                  Pi_offd_I,
-                                  dim * _1 );
+               hypreDevice_IntScalen( G_offd_I, G_offd_nrows + 1, Pi_offd_I, dim );
             }
 
             dim3 bDim = hypre_GetDefaultCUDABlockDimension();
@@ -2376,11 +2368,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_THRUST_CALL( transform,
-                               G_diag_I,
-                               G_diag_I + G_diag_nrows + 1,
-                               GPi_diag_I,
-                               dim * _1 );
+            hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, GPi_diag_I, dim );
 
             dim3 bDim = hypre_GetDefaultCUDABlockDimension();
             dim3 gDim = hypre_GetDefaultCUDAGridDimension(G_diag_nnz, "thread", bDim);
@@ -2441,11 +2429,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
          {
             if (G_offd_ncols)
             {
-               HYPRE_THRUST_CALL( transform,
-                                  G_offd_I,
-                                  G_offd_I + G_offd_nrows + 1,
-                                  GPi_offd_I,
-                                  dim * _1 );
+               hypreDevice_IntScalen( G_offd_I, G_offd_nrows + 1, GPi_offd_I, dim );
             }
 
             dim3 bDim = hypre_GetDefaultCUDABlockDimension();

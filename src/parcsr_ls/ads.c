@@ -567,11 +567,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_THRUST_CALL( transform,
-                               F2V_diag_I,
-                               F2V_diag_I + F2V_diag_nrows + 1,
-                               Pi_diag_I,
-                               3 * _1 );
+            hypreDevice_IntScalen( F2V_diag_I, F2V_diag_nrows + 1, Pi_diag_I, 3);
 
             dim3 bDim = hypre_GetDefaultCUDABlockDimension();
             dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nnz, "thread", bDim);
@@ -628,11 +624,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          {
             if (F2V_offd_ncols)
             {
-               HYPRE_THRUST_CALL( transform,
-                                  F2V_offd_I,
-                                  F2V_offd_I + F2V_offd_nrows + 1,
-                                  Pi_offd_I,
-                                  3 * _1 );
+               hypreDevice_IntScalen( F2V_offd_I, F2V_offd_nrows + 1, Pi_offd_I, 3 );
             }
 
             dim3 bDim = hypre_GetDefaultCUDABlockDimension();

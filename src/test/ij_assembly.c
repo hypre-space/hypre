@@ -925,7 +925,7 @@ test_SetSet(MPI_Comm             comm,
    else
    {
       hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
-      hypreDevice_Scalen(new_coefs, num_nonzeros, 2.0);
+      hypreDevice_ComplexScalen(new_coefs, num_nonzeros, new_coefs, 2.0);
    }
 #endif
 
@@ -1051,7 +1051,7 @@ test_AddSet(MPI_Comm             comm,
    else
    {
       hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
-      hypreDevice_Scalen(new_coefs, num_nonzeros, 2.0);
+      hypreDevice_ComplexScalen(new_coefs, num_nonzeros, new_coefs, 2.0);
    }
 #endif
 

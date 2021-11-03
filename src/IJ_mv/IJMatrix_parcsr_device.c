@@ -125,7 +125,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix) = stack_elmts_max_new;
    }
 
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, nelms, SorA);
+   hypreDevice_CharFilln(stack_sora + stack_elmts_current, nelms, SorA);
 
    if (ncols)
    {
@@ -633,7 +633,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
             hypre_TMemcpy(diag_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Complex,
                           diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-            HYPRE_THRUST_CALL(fill_n, diag_sora_new, diag_nnz_existed, 0);
+            hypreDevice_CharFilln(diag_sora_new, diag_nnz_existed, 0);
 
             hypre_IJMatrixAssembleSortAndReduce2(diag_nnz_existed + diag_nnz_new, diag_i_new, diag_j_new, diag_sora_new, diag_a_new,
                                                  &nnz_new, &tmp_i, &tmp_j, &tmp_a, 2);
@@ -682,7 +682,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
             hypre_TMemcpy(offd_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix)), HYPRE_Complex,
                           offd_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-            HYPRE_THRUST_CALL(fill_n, offd_sora_new, offd_nnz_existed, 0);
+            hypreDevice_CharFilln(offd_sora_new, offd_nnz_existed, 0);
 
             hypre_IJMatrixAssembleSortAndReduce2(offd_nnz_existed + offd_nnz_new, offd_i_new, offd_j_new, offd_sora_new, offd_a_new,
                                                  &nnz_new, &tmp_i, &tmp_j, &tmp_a, 0);
@@ -746,8 +746,8 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
    HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
    HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-   HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
-   HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+   hypreDevice_ComplexFilln( diag_data, nnz_diag, value );
+   hypreDevice_ComplexFilln( offd_data, nnz_offd, value );
 
    return hypre_error_flag;
 }

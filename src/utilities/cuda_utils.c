@@ -324,28 +324,106 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
    return hypre_error_flag;
 }
 
-HYPRE_Int
-hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+template<typename T>
+__global__ void
+hypreCUDAKernel_scalen(T *x, size_t n, T *y, T v)
 {
-   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_x, v * _1 );
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      y[i] = x[i] * v;
+   }
+}
+
+template<typename T>
+HYPRE_Int
+hypreDevice_Scalen(T *d_x, size_t n, T *d_y, T v)
+{
+#if 0
+   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_y, v * _1 );
+#else
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_scalen, gDim, bDim, d_x, n, d_y, v );
+#endif
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v)
 {
+   return hypreDevice_Scalen(d_x, n, d_y, v);
+}
+
+HYPRE_Int
+hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex v)
+{
+   return hypreDevice_Scalen(d_x, n, d_y, v);
+}
+
+template<typename T>
+__global__ void
+hypreCUDAKernel_filln(T *x, size_t n, T v)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      x[i] = v;
+   }
+}
+
+template<typename T>
+HYPRE_Int
+hypreDevice_Filln(T *d_x, size_t n, T v)
+{
+#if 0
    HYPRE_THRUST_CALL( fill_n, d_x, n, v);
+#else
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_filln, gDim, bDim, d_x, n, v );
+#endif
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+{
+   return hypreDevice_Filln(d_x, n, v);
+}
+
+HYPRE_Int
+hypreDevice_CharFilln(char *d_x, size_t n, char v)
+{
+   return hypreDevice_Filln(d_x, n, v);
+}
+
+HYPRE_Int
+hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v)
+{
+   return hypreDevice_Filln(d_x, n, v);
 }
 
 HYPRE_Int
 hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
 {
-   HYPRE_THRUST_CALL( fill_n, d_x, n, v);
-
-   return hypre_error_flag;
+   return hypreDevice_Filln(d_x, n, v);
 }
 
 struct hypre_empty_row_functor
@@ -626,7 +704,7 @@ hypreCUDAKernel_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HY
       if (marker[i] == marker_val)
       {
          y[i] += x[i] / a[i];
-      }         
+      }
    }
 }
 

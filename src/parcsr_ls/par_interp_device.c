@@ -289,7 +289,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
       num_cols_P_offd = new_end - P_colids;
 
-      HYPRE_THRUST_CALL(fill_n, P_marker, num_cols_A_offd, 0);
+      hypreDevice_IntFilln(P_marker, num_cols_A_offd, 0);
       hypreDevice_ScatterConstant(P_marker, num_cols_P_offd, P_colids, 1);
 
       /* Because P's columns correspond to P_marker[i]=1 (and =0 otherwise), the scan below will return  */
@@ -1161,14 +1161,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    P_offd_data = hypre_TAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
 
    /* set data values to 1.0 */
-   HYPRE_THRUST_CALL( fill_n,
-                      P_diag_data,
-                      nnz_diag,
-                      1.0 );
-   HYPRE_THRUST_CALL( fill_n,
-                      P_offd_data,
-                      nnz_offd,
-                      1.0 );
+   hypreDevice_ComplexFilln( P_diag_data, nnz_diag, 1.0 );
+   hypreDevice_ComplexFilln( P_offd_data, nnz_offd, 1.0 );
 
    /* compress temporary column indices */
    P_diag_j_temp_compressed = hypre_TAlloc(HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE);
@@ -1219,10 +1213,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    /* also get an inverse mapping from A offd indices to P offd indices */
    /* offd_map_A_to_P[ A offd idx ] = -1 if not a P idx, else P offd idx */
    HYPRE_Int *offd_map_A_to_P = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( fill_n,
-                      offd_map_A_to_P,
-                      num_cols_A_offd,
-                      -1 );
+   hypreDevice_IntFilln( offd_map_A_to_P, num_cols_A_offd, -1 );
+
    HYPRE_THRUST_CALL( scatter,
                       thrust::make_counting_iterator(0),
                       thrust::make_counting_iterator(num_cols_P_offd),
