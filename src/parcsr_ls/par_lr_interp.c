@@ -5283,22 +5283,21 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    hypre_GpuProfilingPushRange("ExtInterp");
 #endif
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_BoomerAMGBuildExtInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
-                                               debug_flag,trunc_factor,max_elmts,P_ptr);
-   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_BoomerAMGBuildExtInterpDevice(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
                                                  debug_flag,trunc_factor,max_elmts,P_ptr);
    }
+   else
 #endif
+   {
+      ierr = hypre_BoomerAMGBuildExtInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
+                                               debug_flag,trunc_factor,max_elmts,P_ptr);
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -5325,22 +5324,21 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
    hypre_GpuProfilingPushRange("ExtPIInterp");
 #endif
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_BoomerAMGBuildExtPIInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
-                                                 debug_flag, trunc_factor, max_elmts, P_ptr);
-   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_BoomerAMGBuildExtPIInterpDevice(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
                                                    debug_flag, trunc_factor, max_elmts, P_ptr);
    }
+   else
 #endif
+   {
+      ierr = hypre_BoomerAMGBuildExtPIInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
+                                                 debug_flag, trunc_factor, max_elmts, P_ptr);
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
