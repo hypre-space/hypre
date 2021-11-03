@@ -312,6 +312,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                   HYPRE_MemoryLocation recv_memory_location,
                                   void                *recv_data_in )
 {
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleCreate_v2");
+#endif
+
    HYPRE_Int                  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    HYPRE_Int                  num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    MPI_Comm                   comm      = hypre_ParCSRCommPkgComm(comm_pkg);
@@ -580,16 +584,25 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    hypre_ParCSRCommHandleNumRequests(comm_handle)        = num_requests;
    hypre_ParCSRCommHandleRequests(comm_handle)           = requests;
 
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPopRange();
+#endif
+
    return ( comm_handle );
 }
 
 HYPRE_Int
 hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
+
    if ( comm_handle == NULL )
    {
       return hypre_error_flag;
    }
+
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleDestroy");
+#endif
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
@@ -637,6 +650,10 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 }
