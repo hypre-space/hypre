@@ -87,7 +87,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 }
 #endif
 
-#define SECOND_TIME 1
+#define SECOND_TIME 0
 
 hypre_int
 main( hypre_int argc,
