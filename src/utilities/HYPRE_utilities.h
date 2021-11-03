@@ -57,6 +57,9 @@ typedef int HYPRE_Int;
 
 #include <float.h>
 
+/* Include multiprecision header */
+#include "multiprecision.h"
+
 #if defined(HYPRE_SINGLE)
 typedef float HYPRE_Real;
 #define HYPRE_REAL_MAX FLT_MAX
@@ -90,6 +93,11 @@ typedef double _Complex HYPRE_Complex;
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
+
+/* This allows us to consistently avoid 'float, double and longdouble' throughout hypre */
+typedef double            hypre_double;
+typedef float            hypre_float;
+typedef long double            hypre_long_double;
 
 /*--------------------------------------------------------------------------
  * Sequential MPI stuff
