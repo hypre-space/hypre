@@ -173,7 +173,7 @@ hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
-hypre_using_cublas=no
+hypre_using_cublas=yes
 hypre_using_curand=yes
 hypre_using_device_pool=no
 hypre_using_umpire=no
@@ -434,13 +434,13 @@ AS_HELP_STRING([--enable-device-memory-pool],
 
 AC_ARG_ENABLE(cublas,
 AS_HELP_STRING([--enable-cublas],
-               [Use cuBLAS (default is NO).]),
+               [Use cuBLAS (default is YES).]),
 [case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=yes ;;
  esac],
-[hypre_using_cublas=no]
+[hypre_using_cublas=yes]
 )
 
 AC_ARG_ENABLE(curand,
