@@ -49,7 +49,7 @@ typedef struct
    HYPRE_Int            *sorted_j;        /* some cusparse routines require sorted CSR */
    HYPRE_Complex        *sorted_data;
    hypre_CsrsvData      *csrsv_data;
-   hypre_GpuMatData      *mat_data;
+   hypre_GpuMatData     *mat_data;
 #endif
 } hypre_CSRMatrix;
 
