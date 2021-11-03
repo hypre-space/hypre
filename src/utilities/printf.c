@@ -140,6 +140,8 @@ hypre_printf( const char *format, ...)
    free_format(newformat);
    va_end(ap);
 
+   fflush(stdout);
+
    return ierr;
 }
 
