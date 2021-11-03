@@ -242,9 +242,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       hypre_CurandUniform(num_rows_diag, urand, 0, 0, 0, 0);
    }
 
-   thrust::plus<HYPRE_Real> op;
-   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
-                     urand, measure_array, op);
+   hypreDevice_ComplexAxpyn(measure_array, num_rows_diag, urand, measure_array, 1.0);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
 

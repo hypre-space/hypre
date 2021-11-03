@@ -1687,6 +1687,8 @@ HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v
 HYPRE_Int hypreDevice_CharFilln(char *d_x, size_t n, char v);
 HYPRE_Int hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
 HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex v);
+HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex *d_z, HYPRE_Complex a);
+HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z, HYPRE_Int a);
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);

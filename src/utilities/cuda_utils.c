@@ -326,6 +326,51 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 
 template<typename T>
 __global__ void
+hypreCUDAKernel_axpyn(T *x, size_t n, T *y, T *z, T a)
+{
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+
+   if (i < n)
+   {
+      z[i] = a * x[i] + y[i];
+   }
+}
+
+template<typename T>
+HYPRE_Int
+hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
+{
+#if 0
+   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_y, d_z, a * _1 + _2 );
+#else
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+
+   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_axpyn, gDim, bDim, d_x, n, d_y, d_z, a );
+#endif
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex *d_z, HYPRE_Complex a)
+{
+   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+}
+
+HYPRE_Int
+hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z, HYPRE_Int a)
+{
+   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+}
+
+template<typename T>
+__global__ void
 hypreCUDAKernel_scalen(T *x, size_t n, T *y, T v)
 {
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();

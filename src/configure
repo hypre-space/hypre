@@ -1510,7 +1510,7 @@ Optional Features:
   --enable-cusparse       Use cuSPARSE (default is YES).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
-  --enable-cublas         Use cuBLAS (default is YES).
+  --enable-cublas         Use cuBLAS (default is NO).
   --enable-curand         Use cuRAND (default is YES).
   --enable-rocsparse      Use rocSPARSE (default is YES).
   --enable-rocblas        Use rocBLAS (default is NO).
@@ -2783,7 +2783,7 @@ hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
-hypre_using_cublas=yes
+hypre_using_cublas=no
 hypre_using_curand=yes
 hypre_using_device_pool=no
 hypre_using_umpire=no
@@ -3150,10 +3150,10 @@ if test "${enable_cublas+set}" = set; then :
   enableval=$enable_cublas; case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=yes ;;
+    *)   hypre_using_cublas=no ;;
  esac
 else
-  hypre_using_cublas=yes
+  hypre_using_cublas=no
 
 fi
 
