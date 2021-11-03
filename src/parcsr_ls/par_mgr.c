@@ -5157,7 +5157,7 @@ hypre_MGRBuildAff( hypre_ParCSRMatrix   *A,
  * same as the 'point_type'
  *********************************************************************************/
 HYPRE_Int
-hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker,
+hypre_MGRAddVectorP ( hypre_IntArray *CF_marker,
         HYPRE_Int        point_type,
         HYPRE_Real       a,
         hypre_ParVector  *fromVector,
@@ -5168,13 +5168,15 @@ hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker,
   HYPRE_Real      *fromVectorData  = hypre_VectorData(fromVectorLocal);
   hypre_Vector    *toVectorLocal   = hypre_ParVectorLocalVector(*toVector);
   HYPRE_Real      *toVectorData    = hypre_VectorData(toVectorLocal);
+  HYPRE_Int       *CF_marker_data = hypre_IntArrayData(CF_marker);
 
-  HYPRE_Int       n = hypre_ParVectorActualLocalSize(*toVector);
+  //HYPRE_Int       n = hypre_ParVectorActualLocalSize(*toVector);
+  HYPRE_Int       n = hypre_IntArraySize(CF_marker);
   HYPRE_Int       i, j;
 
   j = 0;
   for (i = 0; i < n; i++) {
-    if (CF_marker[i] == point_type) {
+    if (CF_marker_data[i] == point_type) {
       toVectorData[i] = b * toVectorData[i] + a * fromVectorData[j];
       j++;
     }
@@ -5190,28 +5192,29 @@ hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker,
  * same as the 'point_type' to the 'toVector'
  *************************************************************************************/
 HYPRE_Int
-hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker,
+hypre_MGRAddVectorR ( hypre_IntArray *CF_marker,
         HYPRE_Int        point_type,
-        HYPRE_Int        size,
         HYPRE_Real       a,
         hypre_ParVector  *fromVector,
-        HYPRE_Real       b,
+        HYPRE_Real       b,   
         hypre_ParVector  **toVector )
 {
   hypre_Vector    *fromVectorLocal = hypre_ParVectorLocalVector(fromVector);
   HYPRE_Real      *fromVectorData  = hypre_VectorData(fromVectorLocal);
   hypre_Vector    *toVectorLocal   = hypre_ParVectorLocalVector(*toVector);
   HYPRE_Real      *toVectorData    = hypre_VectorData(toVectorLocal);
+  HYPRE_Int       *CF_marker_data = hypre_IntArrayData(CF_marker);
 
-  HYPRE_Int       n = hypre_min(size, hypre_ParVectorActualLocalSize(fromVector));
+  //HYPRE_Int       n = hypre_ParVectorActualLocalSize(*toVector);
+  HYPRE_Int       n = hypre_IntArraySize(CF_marker);
   HYPRE_Int       i, j;
 
   j = 0;
   for (i = 0; i < n; i++) {
-    if (CF_marker[i] == point_type) {
+    if (CF_marker_data[i] == point_type) {
       toVectorData[j] = b * toVectorData[j] + a * fromVectorData[i];
-      j++;
-    }
+      j++; 
+    }    
   }
   return 0;
 }
