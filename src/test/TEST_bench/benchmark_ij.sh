@@ -74,7 +74,7 @@ case $HOST in
       ;;
    ray*)
       SavePerfExt="saved.ray"
-      rtol=0.10
+      rtol=0.15
       ;;
    *) SavePerfExt=""
       ;;
