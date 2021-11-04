@@ -297,8 +297,6 @@ if (HYPRE_WITH_SYCL)
 
   # Set CXX compiler to dpcpp
   set(CMAKE_CXX_COMPILER "dpcpp")
-  # WM: try with/without the line below
-  # set(CMAKE_LINKER "dpcpp")
 
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")

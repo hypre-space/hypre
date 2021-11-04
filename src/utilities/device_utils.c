@@ -1228,7 +1228,6 @@ hypre_DeviceDataCreate()
    hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: does the default selector get a GPU if available? Having trouble with getting the device on frank, so temporarily just passing the default selector */
    hypre_DeviceDataDevice(data)                 = sycl::device(sycl::default_selector{});
    hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data).get_info<sycl::info::device::max_work_group_size>();
 #else
