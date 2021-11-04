@@ -14,7 +14,6 @@ CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
@@ -23,7 +22,6 @@ C_COMPILE_FLAGS = \
 
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
@@ -33,15 +31,18 @@ CXX_COMPILE_FLAGS = \
 
 F77_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
 
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
-# WM: had to add the absolute path to libHYPRE.a for successful compilation on frank
-LIBFLAGS = ${LDFLAGS} ${LIBS} ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+# WM: currently have to add the absolute path to libHYPRE.a when building sycl code
+ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
+	LIBFLAGS = ${LDFLAGS} ${LIBS} ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else
+	LIBFLAGS = ${LDFLAGS} ${LIBS}
+endif
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib

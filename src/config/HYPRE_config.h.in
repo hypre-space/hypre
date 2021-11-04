@@ -196,9 +196,6 @@
 /* HIP being used */
 #undef HYPRE_USING_HIP
 
-/* SYCL being used */
-#undef HYPRE_USING_SYCL
-
 /* Define to 1 if using host memory only */
 #undef HYPRE_USING_HOST_MEMORY
 
@@ -220,6 +217,15 @@
 /* NVTX being used */
 #undef HYPRE_USING_NVTX
 
+/* onemkl::BLAS being used */
+#undef HYPRE_USING_ONEMKLBLAS
+
+/* onemkl::rng being used */
+#undef HYPRE_USING_ONEMKLRAND
+
+/* onemkl::SPARSE being used */
+#undef HYPRE_USING_ONEMKLSPARSE
+
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 
@@ -240,6 +246,9 @@
 
 /* Define to 1 if using AMD rocTX profiling */
 #undef HYPRE_USING_ROCTX
+
+/* SYCL being used */
+#undef HYPRE_USING_SYCL
 
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE

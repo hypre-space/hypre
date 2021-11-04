@@ -110,23 +110,8 @@ struct hypre_device_allocator
 
 #elif defined(HYPRE_USING_SYCL)
 
-/* WM: todo - if the include for CL/sycl.hpp is inside extern "C++" {}, I get problems with sycl reductions... totally strange, but true */
+/* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
-/* WM: todo - include below as necessary */
-/* #include <oneapi/dpl/execution> */
-/* #include <oneapi/dpl/algorithm> */
-/* #include <oneapi/dpl/iterator> */
-/* #include <oneapi/dpl/functional> */
-
-/* #include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if */
-
-/* #include <algorithm> */
-/* #include <numeric> */
-/* #include <functional> */
-/* #include <iterator> */
-
-/* #include <oneapi/mkl.hpp> */
-/* #include <oneapi/mkl/rng/device.hpp> */
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -285,7 +270,6 @@ struct hypre_DeviceData
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   /* WM: question - what is the device_allocator? */
    hypre_device_allocator            device_allocator;
 #endif
 #if defined(HYPRE_USING_SYCL)
@@ -395,6 +379,7 @@ struct hypre_GpuMatData
 {
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseMatDescr_t    mat_descr;
+   char                 *spmv_buffer;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -403,129 +388,18 @@ struct hypre_GpuMatData
 #endif
 };
 
-#define hypre_GpuMatDataMatDecsr(data) ((data) -> mat_descr)
-#define hypre_GpuMatDataMatInfo(data)  ((data) -> mat_info)
+#define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
+#define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
 #endif //#if defined(HYPRE_USING_GPU)
 
-/* WM: todo - is this how I want to integrate the functionality below? Do I really need all this? */
-/* NOTE: It doesn't line up that nicely with the cuda/hip implementation since you need to pass item agrs */
 #if defined(HYPRE_USING_SYCL)
-/* return the number of work-items in current work-group */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_num_threads(sycl::nd_item<dim>& item)
-{
-  return item.get_group().get_local_linear_range();
-}
-
-/* return the flattened or linearlized work-item id in current work-group (not global)*/
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_thread_id(sycl::nd_item<dim>& item)
-{
-  return item.get_local_linear_id();
-}
-
-/* return the number of sub-groups in current work-group */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_num_warps(sycl::nd_item<dim>& item)
-{
-  return item.get_sub_group().get_group_range().get(0);
-}
-
-/* return the sub_group id in work-group */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_warp_id(sycl::nd_item<dim>& item)
-{
-  return item.get_sub_group().get_group_linear_id();
-}
-
-/* return the work-item lane id in a sub_group */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_lane_id(sycl::nd_item<dim>& item)
-{
-  return hypre_cuda_get_thread_id<dim>(item) & (item.get_sub_group().get_local_range().get(0)-1);
-}
-
-/* return the num of work_groups in nd_range */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_num_blocks(sycl::nd_item<dim>& item)
-{
-  // return item.get_group().get_group_linear_range(); // API available in SYCL 2020
-
-  switch (dim)
-  {
-  case 1:
-    return (item.get_group_range(0));
-  case 2:
-    return (item.get_group_range(0) * item.get_group_range(1));
-  case 3:
-    return (item.get_group_range(0) * item.get_group_range(1) * item.get_group_range(2));
-  }
-
-  return -1;
-}
-
-/* return the flattened or linearlized work-group id in nd_range */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_block_id(sycl::nd_item<dim>& item)
-{
-  return item.get_group_linear_id();
-}
-
-/* return the number of work-items in global iteration space*/
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_grid_num_threads(sycl::nd_item<dim>& item)
-{
-  switch (dim)
-  {
-  case 1:
-    return (item.get_global_range(0));
-  case 2:
-    return (item.get_global_range(0) * item.get_global_range(1));
-  case 3:
-    return (item.get_global_range(0) * item.get_global_range(1) * item.get_global_range(2));
-  }
-
-  return -1;
-}
-
-/* return the flattened work-item id in global iteration space */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_grid_thread_id(sycl::nd_item<dim>& item)
-{
-  return item.get_global_linear_id();
-}
-
-/* return the number of sub-groups in global iteration space */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_grid_num_warps(sycl::nd_item<dim>& item)
-{
-  return hypre_cuda_get_num_blocks<dim>(item) * hypre_cuda_get_num_warps<dim>(item);
-}
-
-/* return the flattened sub-group id in global iteration space */
-template <hypre_int dim>
-static __inline__ __attribute__((always_inline))
-hypre_int hypre_cuda_get_grid_warp_id(sycl::nd_item<dim>& item)
-{
-  return hypre_cuda_get_block_id<dim>(item) * hypre_cuda_get_num_warps<dim>(item) +
-    hypre_cuda_get_warp_id<dim>(item);
-}
 
 /* device_utils.c */
-sycl::range<1> hypre_GetDefaultCUDABlockDimension();
+sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
 
-sycl::range<1> hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, sycl::range<1> bDim );
+sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, sycl::range<1> bDim );
 
 #endif // #if defined(HYPRE_USING_SYCL)
 
@@ -570,8 +444,6 @@ using namespace thrust::placeholders;
 #define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
 #define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
-#elif defined(HYPRE_USING_SYCL)
-/* WM: todo? used below in HYPRE_CUDA_LAUNCH2 */
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
@@ -797,13 +669,19 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 
-// __any was technically deprecated in CUDA 7 so we don't bother
-// with this overload for CUDA, just for HIP.
+// __any and __ballot were technically deprecated in CUDA 7 so we don't bother
+// with these overloads for CUDA, just for HIP.
 #if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
   return __any(predicate);
+}
+
+static __device__ __forceinline__
+hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
+{
+  return __ballot(predicate);
 }
 #endif
 
@@ -1106,9 +984,9 @@ struct print_functor
 };
 
 /* device_utils.c */
-dim3 hypre_GetDefaultCUDABlockDimension();
+dim3 hypre_GetDefaultDeviceBlockDimension();
 
-dim3 hypre_GetDefaultCUDAGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 

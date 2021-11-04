@@ -465,8 +465,8 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-            dim3 gDim = hypre_GetDefaultCUDAGridDimension(nv, "warp", bDim);
+            dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+            dim3 gDim = hypre_GetDefaultDeviceGridDimension(nv, "warp", bDim);
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GtEliminateBoundary, gDim, bDim,
                                nv, GtdI, GtdJ, GtdA, GtoI, GtoJ, GtoA, edge_bc, offd_edge_bc );
          }

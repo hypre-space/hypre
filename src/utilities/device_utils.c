@@ -9,14 +9,13 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_SYCL)
-sycl::range<1> hypre_GetDefaultCUDABlockDimension()
+sycl::range<1> hypre_GetDefaultDeviceBlockDimension()
 {
    sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
    return wgDim;
 }
 
-// WM: TODO: verify
-sycl::range<1> hypre_GetDefaultCUDAGridDimension(HYPRE_Int n,
+sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
                                                  const char *granularity,
                                                  sycl::range<1> wgDim)
 {
@@ -110,7 +109,7 @@ void hypre_CudaCompileFlagCheck()
 }
 
 dim3
-hypre_GetDefaultCUDABlockDimension()
+hypre_GetDefaultDeviceBlockDimension()
 {
    dim3 bDim(512, 1, 1);
 
@@ -118,7 +117,7 @@ hypre_GetDefaultCUDABlockDimension()
 }
 
 dim3
-hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
+hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
                                    const char *granularity,
                                    dim3 bDim )
 {
@@ -182,8 +181,8 @@ HYPRE_Int
 hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia, HYPRE_Int *d_offd_ia,
                       HYPRE_Int *d_rownnz)
 {
-   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "thread", bDim);
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
 
    /* trivial case */
    if (nrows <= 0)
@@ -321,8 +320,8 @@ hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
 
    hypre_assert(!(nrows > 1 && d_ib == NULL));
 
-   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
    /*
    if (job == 2)
@@ -570,8 +569,8 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 
       hypre_assert(reduced_n == new_end.second - reduced_y);
 
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(reduced_n, "thread", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
                          reduced_n, x, reduced_map, reduced_y );
@@ -613,8 +612,8 @@ hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
 
@@ -645,8 +644,8 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
 
@@ -677,8 +676,8 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
 
@@ -714,8 +713,8 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
 
@@ -747,8 +746,8 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
 
@@ -771,8 +770,8 @@ hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
 HYPRE_Int
 hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size)
 {
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(size, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
 
@@ -1231,6 +1230,7 @@ hypre_DeviceDataCreate()
 #if defined(HYPRE_USING_SYCL)
    /* WM: does the default selector get a GPU if available? Having trouble with getting the device on frank, so temporarily just passing the default selector */
    hypre_DeviceDataDevice(data)            = nullptr;
+
    hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data).get_info<sycl::info::device::max_work_group_size>();
 #else
    hypre_DeviceDataDevice(data)            = 0;
