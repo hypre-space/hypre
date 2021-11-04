@@ -450,9 +450,9 @@ HYPRE_Int hypre_SparseMSGSetupRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix
 /* sparse_msg_solve.c */
 HYPRE_Int hypre_SparseMSGSolve ( void *smsg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

@@ -264,6 +264,7 @@ struct hypre_GpuMatData
 {
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseMatDescr_t    mat_descr;
+   char                 *spmv_buffer;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -272,8 +273,9 @@ struct hypre_GpuMatData
 #endif
 };
 
-#define hypre_GpuMatDataMatDecsr(data) ((data) -> mat_descr)
-#define hypre_GpuMatDataMatInfo(data)  ((data) -> mat_info)
+#define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
+#define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
+#define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
 #endif //#if defined(HYPRE_USING_GPU)
 
@@ -543,13 +545,19 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 
-// __any was technically deprecated in CUDA 7 so we don't bother
-// with this overload for CUDA, just for HIP.
+// __any and __ballot were technically deprecated in CUDA 7 so we don't bother
+// with these overloads for CUDA, just for HIP.
 #if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
   return __any(predicate);
+}
+
+static __device__ __forceinline__
+hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
+{
+  return __ballot(predicate);
 }
 #endif
 

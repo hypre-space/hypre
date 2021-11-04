@@ -114,6 +114,7 @@ main( hypre_int argc,
    HYPRE_Int           recompute_res = 0;   /* What should be the default here? */
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
+   HYPRE_Int           poutusr = 0; /* if user selects pout */
    HYPRE_Int           debug_flag;
    HYPRE_Int           ierr = 0;
    HYPRE_Int           i,j;
@@ -1514,6 +1515,7 @@ main( hypre_int argc,
       {
          arg_index++;
          poutdat  = atoi(argv[arg_index++]);
+         poutusr = 1;
       }
       else if ( strcmp(argv[arg_index], "-var") == 0 )
       {
@@ -2194,6 +2196,15 @@ main( hypre_int argc,
 
    if (myid == 0)
    {
+#ifdef HYPRE_DEVELOP_STRING
+#ifdef HYPRE_DEVELOP_BRANCH
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (main development branch %s)\n\n",
+         HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
+#else
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch)\n\n",
+         HYPRE_DEVELOP_STRING);
+#endif
+#endif
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
@@ -3535,7 +3546,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
       /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, poutusr ? poutdat : 3);
       //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
