@@ -697,7 +697,7 @@ void hypreSYCLKernel_compute_weak_rowsums( sycl::nd_item<1>& item,
    sycl::group<1> grp = item.get_group();
 
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -781,7 +781,7 @@ void hypreSYCLKernel_compute_aff_afc( sycl::nd_item<1>& item,
    sycl::group<1> grp = item.get_group();
 
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -1028,7 +1028,7 @@ void hypreSYCLKernel_compute_twiaff_w( sycl::nd_item<1>& item,
    sycl::group<1> grp = item.get_group();
 
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -1205,7 +1205,7 @@ void hypreSYCLKernel_compute_aff_afc_epe( sycl::nd_item<1>& item,
 {
    sycl::group<1> grp = item.get_group();
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)
@@ -1334,7 +1334,7 @@ void hypreSYCLKernel_compute_dlam_dtmp( sycl::nd_item<1>& item,
                                         HYPRE_Complex *dtmp )
 {
   sycl::group<1> grp = item.get_group();
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
   HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
   HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);

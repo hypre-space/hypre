@@ -80,7 +80,7 @@ struct HYPRE_double6
 __inline__ __attribute__((always_inline))
 HYPRE_Real warpReduceSum(HYPRE_Real val, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
   
   for (HYPRE_Int offset = SG.get_local_range().get(0) / 2;
        offset > 0; offset /= 2)
@@ -92,7 +92,7 @@ HYPRE_Real warpReduceSum(HYPRE_Real val, sycl::nd_item<1>& item)
 
 __inline__ __attribute__((always_inline))
 HYPRE_double4 warpReduceSum(HYPRE_double4 val, sycl::nd_item<1>& item) {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
 
   for (HYPRE_Int offset = SG.get_local_range().get(0) / 2;
        offset > 0; offset /= 2)
@@ -107,7 +107,7 @@ HYPRE_double4 warpReduceSum(HYPRE_double4 val, sycl::nd_item<1>& item) {
 
 __inline__ __attribute__((always_inline))
 HYPRE_double6 warpReduceSum(HYPRE_double6 val, sycl::nd_item<1>& item) {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
 
   for (HYPRE_Int offset = SG.get_local_range().get(0) / 2;
        offset > 0; offset /= 2)

@@ -76,7 +76,7 @@ hypre_csr_v_k_shuffle(sycl::nd_item<1>& item,
     *------------------------------------------------------------*/
 
    sycl::group<1> grp = item.get_group();
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    const HYPRE_Int grid_ngroups = item.get_group_range(0) * (SPMV_BLOCKDIM / K);

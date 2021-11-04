@@ -243,7 +243,7 @@ void hypre_BoomerAMGCreateS_rowcount( sycl::nd_item<1>& item,
 
    HYPRE_Int row = hypre_sycl_get_global_subgroup_id<1>(item);
    sycl::group<1> grp = item.get_group();
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    if (row >= nr_of_rows)

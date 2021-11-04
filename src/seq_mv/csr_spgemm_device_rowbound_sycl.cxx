@@ -74,7 +74,7 @@ HYPRE_Int csr_spmm_compute_row_symbl(
     volatile HYPRE_Int *s_HashKeys, HYPRE_Int g_HashSize, HYPRE_Int *g_HashKeys,
     char &failed, sycl::nd_item<3>& item)
 {
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int threadIdx_x = item.get_local_id(2);
    HYPRE_Int threadIdx_y = item.get_local_id(1);
    HYPRE_Int blockDim_y = item.get_local_range().get(1);
@@ -148,7 +148,7 @@ void csr_spmm_symbolic(HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 		       sycl::nd_item<3>& item,
                        volatile HYPRE_Int *s_HashKeys) // shared
 {
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
    HYPRE_Int blockDim_x = item.get_local_range().get(2);
    HYPRE_Int blockDim_y = item.get_local_range().get(1);

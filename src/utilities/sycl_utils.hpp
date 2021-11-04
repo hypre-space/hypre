@@ -444,7 +444,7 @@ template <typename T>
 static __inline__ __attribute__((always_inline))
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
   hypre_int hypre_warp_size = SG.get_local_range().get(0);
 #pragma unroll
   for (hypre_int d = 2; d <=hypre_warp_size; d <<= 1)
@@ -486,7 +486,7 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<1>& item)
 template <typename T> static __inline__ __attribute__((always_inline))
 T warp_reduce_sum(T in, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
   //sycl::ext::oneapi::reduce(SG, in, std::plus<T>());
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
@@ -499,7 +499,7 @@ T warp_reduce_sum(T in, sycl::nd_item<1>& item)
 template <typename T> static __inline__ __attribute__((always_inline))
 T warp_allreduce_sum(T in, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
   //sycl::ext::oneapi::reduce(SG, in, std::bit_xor<T>());
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
@@ -512,7 +512,7 @@ T warp_allreduce_sum(T in, sycl::nd_item<1>& item)
 template <typename T> static __inline__ __attribute__((always_inline))
 T warp_reduce_max(T in, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
   {
@@ -524,7 +524,7 @@ T warp_reduce_max(T in, sycl::nd_item<1>& item)
 template <typename T> static __inline__ __attribute__((always_inline))
 T warp_allreduce_max(T in, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
   {
@@ -536,7 +536,7 @@ T warp_allreduce_max(T in, sycl::nd_item<1>& item)
 template <typename T> static __inline__ __attribute__((always_inline))
 T warp_reduce_min(T in, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
   {
@@ -548,7 +548,7 @@ T warp_reduce_min(T in, sycl::nd_item<1>& item)
 template <typename T> static __inline__ __attribute__((always_inline))
 T warp_allreduce_min(T in, sycl::nd_item<1>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::ONEAPI::sub_group SG = item.get_sub_group();
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
   {

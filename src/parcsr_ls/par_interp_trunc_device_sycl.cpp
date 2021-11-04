@@ -20,7 +20,7 @@ hypreSYCLKernel_InterpTruncation( sycl::nd_item<1>& item,
                                   HYPRE_Real *P_a)
 {
    sycl::group<1> grp = item.get_group();
-   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+   sycl::ONEAPI::sub_group SG = item.get_sub_group();
    HYPRE_Int sub_group_size = SG.get_local_range().get(0);
 
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
