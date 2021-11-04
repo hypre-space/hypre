@@ -1512,7 +1512,9 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    {
       if ( !hypre_HandleSpTransUseCusparse(hypre_handle()) )
       {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+#endif
       }
       else
       {
