@@ -964,14 +964,14 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
             catch (sycl::exception const& ex)
             {
                std::cout << "Caught asynchronous SYCL exception:" << std::endl
-               << ex.what() << ", OpenCL code: " << ex.get_cl_code() << std::endl;
+               << ex.what() << ", SYCL code: " << ex.code() << std::endl;
             }
          }
       };
 
-      sycl::device   syclDev   = data->device;
-      sycl::context  syclctxt  = sycl::context(syclDev, sycl_asynchandler);
-      stream = new sycl::queue(syclctxt, syclDev, sycl::property_list{sycl::property::queue::in_order{}});
+      sycl::device*  syclDev   = data->device;
+      sycl::context  syclctxt  = sycl::context(*syclDev, sycl_asynchandler);
+      stream = new sycl::queue(syclctxt, *syclDev, sycl::property_list{sycl::property::queue::in_order{}});
       data->streams[i] = stream;
    }
 #endif
@@ -1019,7 +1019,7 @@ sycl::queue*
 hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 {
    return hypre_DeviceDataStream(data,
-                                   hypre_DeviceDataComputeStreamNum(data));
+				 hypre_DeviceDataComputeStreamNum(data));
 }
 
 #if defined(HYPRE_USING_CURAND)
@@ -1228,7 +1228,9 @@ hypre_DeviceDataCreate()
    hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_SYCL)
-   hypre_DeviceDataDevice(data)                 = sycl::device(sycl::default_selector{});
+   /* WM: does the default selector get a GPU if available? Having trouble with getting the device on frank, so temporarily just passing the default selector */
+   hypre_DeviceDataDevice(data)            = nullptr;
+
    hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data).get_info<sycl::info::device::max_work_group_size>();
 #else
    hypre_DeviceDataDevice(data)            = 0;
@@ -1486,6 +1488,7 @@ hypre_bind_device( HYPRE_Int myid,
 
    /* get number of devices on this node */
    hypre_GetDeviceCount(&nDevices);
+   /* TODO: ABB might need to look into this since nDevices are overwritten by 1 */
    nDevices = 1;
 
    /* set device */
