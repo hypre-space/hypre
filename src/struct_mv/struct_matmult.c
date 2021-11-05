@@ -1592,12 +1592,37 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper *a,
                                       cdbox, cdstart, cdstride,
                                       fdbox, fdstart, fdstride,
                                       Mdbox, Mdstart, Mdstride);
-#else
+#elif 0
    hypre_StructMatmultCompute_core_2t_v2(a, ncomp[6], indices[6],
                                          ndim, loop_size,
                                          cdbox, cdstart, cdstride,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride, terms, dptrs);
+#elif 0
+   hypre_StructMatmultCompute_core_2t_v3a(a, ncomp[6], indices[6],
+                                          ndim, loop_size,
+                                          cdbox, cdstart, cdstride,
+                                          fdbox, fdstart, fdstride,
+                                          Mdbox, Mdstart, Mdstride, dptrs);
+#elif 0
+   hypre_StructMatmultCompute_core_2t_v3b(a, ncomp[6], indices[6],
+                                          ndim, loop_size,
+                                          cdbox, cdstart, cdstride,
+                                          fdbox, fdstart, fdstride,
+                                          Mdbox, Mdstart, Mdstride, dptrs);
+
+#elif 0
+   hypre_StructMatmultCompute_core_2t_v4(a, ncomp[6], indices[6],
+                                         ndim, loop_size,
+                                         cdbox, cdstart, cdstride,
+                                         fdbox, fdstart, fdstride,
+                                         Mdbox, Mdstart, Mdstride, dptrs);
+#else
+   hypre_StructMatmultCompute_core_2t_v5(a, ncomp[6], indices[6],
+                                         ndim, loop_size,
+                                         cdbox, cdstart, cdstride,
+                                         fdbox, fdstart, fdstride,
+                                         Mdbox, Mdstart, Mdstride, dptrs);
 #endif
 
    hypre_StructMatmultCompute_core_2tb(a, ncomp[7], indices[7],
@@ -3504,6 +3529,507 @@ hypre_StructMatmultCompute_core_2t_v2( hypre_StructMatmultHelper *a,
             break;
       }
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/* Test with hacked version that approximates master with "+=" sign */
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v3a( hypre_StructMatmultHelper *a,
+                                        HYPRE_Int    ncomponents,
+                                        HYPRE_Int   *indices,
+                                        HYPRE_Int    ndim,
+                                        hypre_Index  loop_size,
+                                        hypre_Box   *gdbox,
+                                        hypre_Index  gdstart,
+                                        hypre_Index  gdstride,
+                                        hypre_Box   *hdbox,
+                                        hypre_Index  hdstart,
+                                        hypre_Index  hdstride,
+                                        hypre_Box   *Mdbox,
+                                        hypre_Index  Mdstart,
+                                        hypre_Index  Mdstride,
+                                        HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[0].mptr[Mi]  += a[0].cprod*dptrs0[o0[0] + gi]*dptrs2[o2[0] + gi]*dptrs1[o1[0] + hi] +
+                        a[1].cprod*dptrs0[o0[1] + gi]*dptrs2[o2[1] + gi]*dptrs1[o1[1] + hi] +
+                        a[2].cprod*dptrs0[o0[2] + gi]*dptrs2[o2[2] + gi]*dptrs1[o1[2] + hi] +
+                        a[3].cprod*dptrs0[o0[3] + gi]*dptrs2[o2[3] + gi]*dptrs1[o1[3] + hi] +
+                        a[4].cprod*dptrs0[o0[4] + gi]*dptrs2[o2[4] + gi]*dptrs1[o1[4] + hi] +
+                        a[5].cprod*dptrs0[o0[5] + gi]*dptrs2[o2[5] + gi]*dptrs1[o1[5] + hi] +
+                        a[6].cprod*dptrs0[o0[6] + gi]*dptrs2[o2[6] + gi]*dptrs1[o1[6] + hi];
+
+      a[7].mptr[Mi]  += a[7].cprod*dptrs0[o0[7] + gi]*dptrs2[o2[7] + gi]*dptrs1[o1[7] + hi] +
+                        a[8].cprod*dptrs0[o0[8] + gi]*dptrs2[o2[8] + gi]*dptrs1[o1[8] + hi] +
+                        a[9].cprod*dptrs0[o0[9] + gi]*dptrs2[o2[9] + gi]*dptrs1[o1[9] + hi];
+
+      a[10].mptr[Mi] += a[10].cprod*dptrs0[o0[10] + gi]*dptrs2[o2[10] + gi]*dptrs1[o1[10] + hi] +
+                        a[11].cprod*dptrs0[o0[11] + gi]*dptrs2[o2[11] + gi]*dptrs1[o1[11] + hi] +
+                        a[12].cprod*dptrs0[o0[12] + gi]*dptrs2[o2[12] + gi]*dptrs1[o1[12] + hi];
+
+      a[13].mptr[Mi] += a[13].cprod*dptrs0[o0[13] + gi]*dptrs2[o2[13] + gi]*dptrs1[o1[13] + hi] +
+                        a[14].cprod*dptrs0[o0[14] + gi]*dptrs2[o2[14] + gi]*dptrs1[o1[14] + hi] +
+                        a[15].cprod*dptrs0[o0[15] + gi]*dptrs2[o2[15] + gi]*dptrs1[o1[15] + hi];
+
+      a[16].mptr[Mi] += a[16].cprod*dptrs0[o0[16] + gi]*dptrs2[o2[16] + gi]*dptrs1[o1[16] + hi] +
+                        a[17].cprod*dptrs0[o0[17] + gi]*dptrs2[o2[17] + gi]*dptrs1[o1[17] + hi] +
+                        a[18].cprod*dptrs0[o0[18] + gi]*dptrs2[o2[18] + gi]*dptrs1[o1[18] + hi];
+
+      a[19].mptr[Mi] += a[19].cprod*dptrs0[o0[19] + gi]*dptrs2[o2[19] + gi]*dptrs1[o1[19] + hi] +
+                        a[20].cprod*dptrs0[o0[20] + gi]*dptrs2[o2[20] + gi]*dptrs1[o1[20] + hi] +
+                        a[21].cprod*dptrs0[o0[21] + gi]*dptrs2[o2[21] + gi]*dptrs1[o1[21] + hi];
+
+      a[22].mptr[Mi] += a[22].cprod*dptrs0[o0[22] + gi]*dptrs2[o2[22] + gi]*dptrs1[o1[22] + hi] +
+                        a[23].cprod*dptrs0[o0[23] + gi]*dptrs2[o2[23] + gi]*dptrs1[o1[23] + hi] +
+                        a[24].cprod*dptrs0[o0[24] + gi]*dptrs2[o2[24] + gi]*dptrs1[o1[24] + hi];
+
+      a[25].mptr[Mi] += a[25].cprod*dptrs0[o0[25] + gi]*dptrs2[o2[25] + gi]*dptrs1[o1[25] + hi];
+
+      a[26].mptr[Mi] += a[26].cprod*dptrs0[o0[26] + gi]*dptrs2[o2[26] + gi]*dptrs1[o1[26] + hi];
+
+      a[27].mptr[Mi] += a[27].cprod*dptrs0[o0[27] + gi]*dptrs2[o2[27] + gi]*dptrs1[o1[27] + hi];
+
+      a[28].mptr[Mi] += a[28].cprod*dptrs0[o0[28] + gi]*dptrs2[o2[28] + gi]*dptrs1[o1[28] + hi];
+
+      a[29].mptr[Mi] += a[29].cprod*dptrs0[o0[29] + gi]*dptrs2[o2[29] + gi]*dptrs1[o1[29] + hi];
+
+      a[30].mptr[Mi] += a[30].cprod*dptrs0[o0[30] + gi]*dptrs2[o2[30] + gi]*dptrs1[o1[30] + hi];
+
+      a[31].mptr[Mi] += a[31].cprod*dptrs0[o0[31] + gi]*dptrs2[o2[31] + gi]*dptrs1[o1[31] + hi];
+
+      a[32].mptr[Mi] += a[32].cprod*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/* Test with hacked version that approximates master without "+=" sign */
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v3b( hypre_StructMatmultHelper *a,
+                                        HYPRE_Int    ncomponents,
+                                        HYPRE_Int   *indices,
+                                        HYPRE_Int    ndim,
+                                        hypre_Index  loop_size,
+                                        hypre_Box   *gdbox,
+                                        hypre_Index  gdstart,
+                                        hypre_Index  gdstride,
+                                        hypre_Box   *hdbox,
+                                        hypre_Index  hdstart,
+                                        hypre_Index  hdstride,
+                                        hypre_Box   *Mdbox,
+                                        hypre_Index  Mdstart,
+                                        hypre_Index  Mdstride,
+                                        HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[0].mptr[Mi]  = a[0].cprod*dptrs0[o0[0] + gi]*dptrs2[o2[0] + gi]*dptrs1[o1[0] + hi] +
+                       a[1].cprod*dptrs0[o0[1] + gi]*dptrs2[o2[1] + gi]*dptrs1[o1[1] + hi] +
+                       a[2].cprod*dptrs0[o0[2] + gi]*dptrs2[o2[2] + gi]*dptrs1[o1[2] + hi] +
+                       a[3].cprod*dptrs0[o0[3] + gi]*dptrs2[o2[3] + gi]*dptrs1[o1[3] + hi] +
+                       a[4].cprod*dptrs0[o0[4] + gi]*dptrs2[o2[4] + gi]*dptrs1[o1[4] + hi] +
+                       a[5].cprod*dptrs0[o0[5] + gi]*dptrs2[o2[5] + gi]*dptrs1[o1[5] + hi] +
+                       a[6].cprod*dptrs0[o0[6] + gi]*dptrs2[o2[6] + gi]*dptrs1[o1[6] + hi];
+
+      a[7].mptr[Mi]  = a[7].cprod*dptrs0[o0[7] + gi]*dptrs2[o2[7] + gi]*dptrs1[o1[7] + hi] +
+                       a[8].cprod*dptrs0[o0[8] + gi]*dptrs2[o2[8] + gi]*dptrs1[o1[8] + hi] +
+                       a[9].cprod*dptrs0[o0[9] + gi]*dptrs2[o2[9] + gi]*dptrs1[o1[9] + hi];
+
+      a[10].mptr[Mi] = a[10].cprod*dptrs0[o0[10] + gi]*dptrs2[o2[10] + gi]*dptrs1[o1[10] + hi] +
+                       a[11].cprod*dptrs0[o0[11] + gi]*dptrs2[o2[11] + gi]*dptrs1[o1[11] + hi] +
+                       a[12].cprod*dptrs0[o0[12] + gi]*dptrs2[o2[12] + gi]*dptrs1[o1[12] + hi];
+
+      a[13].mptr[Mi] = a[13].cprod*dptrs0[o0[13] + gi]*dptrs2[o2[13] + gi]*dptrs1[o1[13] + hi] +
+                       a[14].cprod*dptrs0[o0[14] + gi]*dptrs2[o2[14] + gi]*dptrs1[o1[14] + hi] +
+                       a[15].cprod*dptrs0[o0[15] + gi]*dptrs2[o2[15] + gi]*dptrs1[o1[15] + hi];
+
+      a[16].mptr[Mi] = a[16].cprod*dptrs0[o0[16] + gi]*dptrs2[o2[16] + gi]*dptrs1[o1[16] + hi] +
+                       a[17].cprod*dptrs0[o0[17] + gi]*dptrs2[o2[17] + gi]*dptrs1[o1[17] + hi] +
+                       a[18].cprod*dptrs0[o0[18] + gi]*dptrs2[o2[18] + gi]*dptrs1[o1[18] + hi];
+
+      a[19].mptr[Mi] = a[19].cprod*dptrs0[o0[19] + gi]*dptrs2[o2[19] + gi]*dptrs1[o1[19] + hi] +
+                       a[20].cprod*dptrs0[o0[20] + gi]*dptrs2[o2[20] + gi]*dptrs1[o1[20] + hi] +
+                       a[21].cprod*dptrs0[o0[21] + gi]*dptrs2[o2[21] + gi]*dptrs1[o1[21] + hi];
+
+      a[22].mptr[Mi] = a[22].cprod*dptrs0[o0[22] + gi]*dptrs2[o2[22] + gi]*dptrs1[o1[22] + hi] +
+                       a[23].cprod*dptrs0[o0[23] + gi]*dptrs2[o2[23] + gi]*dptrs1[o1[23] + hi] +
+                       a[24].cprod*dptrs0[o0[24] + gi]*dptrs2[o2[24] + gi]*dptrs1[o1[24] + hi];
+
+      a[25].mptr[Mi] = a[25].cprod*dptrs0[o0[25] + gi]*dptrs2[o2[25] + gi]*dptrs1[o1[25] + hi];
+
+      a[26].mptr[Mi] = a[26].cprod*dptrs0[o0[26] + gi]*dptrs2[o2[26] + gi]*dptrs1[o1[26] + hi];
+
+      a[27].mptr[Mi] = a[27].cprod*dptrs0[o0[27] + gi]*dptrs2[o2[27] + gi]*dptrs1[o1[27] + hi];
+
+      a[28].mptr[Mi] = a[28].cprod*dptrs0[o0[28] + gi]*dptrs2[o2[28] + gi]*dptrs1[o1[28] + hi];
+
+      a[29].mptr[Mi] = a[29].cprod*dptrs0[o0[29] + gi]*dptrs2[o2[29] + gi]*dptrs1[o1[29] + hi];
+
+      a[30].mptr[Mi] = a[30].cprod*dptrs0[o0[30] + gi]*dptrs2[o2[30] + gi]*dptrs1[o1[30] + hi];
+
+      a[31].mptr[Mi] = a[31].cprod*dptrs0[o0[31] + gi]*dptrs2[o2[31] + gi]*dptrs1[o1[31] + hi];
+
+      a[32].mptr[Mi] = a[32].cprod*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/* Test with hacked version that approximates master with "+=" sign and simplifies
+   terms that are equal to one */
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v4( hypre_StructMatmultHelper *a,
+                                       HYPRE_Int    ncomponents,
+                                       HYPRE_Int   *indices,
+                                       HYPRE_Int    ndim,
+                                       hypre_Index  loop_size,
+                                       hypre_Box   *gdbox,
+                                       hypre_Index  gdstart,
+                                       hypre_Index  gdstride,
+                                       hypre_Box   *hdbox,
+                                       hypre_Index  hdstart,
+                                       hypre_Index  hdstride,
+                                       hypre_Box   *Mdbox,
+                                       hypre_Index  Mdstart,
+                                       hypre_Index  Mdstride,
+                                       HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   const HYPRE_Complex *dptrs0_0 = dptrs0 + o0[0];
+   const HYPRE_Complex *dptrs0_1 = dptrs0 + o0[2];
+   const HYPRE_Complex *dptrs0_2 = dptrs0 + o0[7];
+   const HYPRE_Complex *dptrs0_3 = dptrs0 + o0[10];
+
+   const HYPRE_Complex *dptrs1_0 = dptrs1 + o1[0];
+   const HYPRE_Complex *dptrs1_1 = dptrs1 + o1[1];
+   const HYPRE_Complex *dptrs1_2 = dptrs1 + o1[2];
+
+   const HYPRE_Complex *dptrs2_0 = dptrs2 + o2[0];
+   const HYPRE_Complex *dptrs2_1 = dptrs2 + o2[2];
+
+   HYPRE_Complex *mptrs_1 = a[7].mptr;
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      mptrs_1[Mi]  = dptrs0_2[gi]*      dptrs2_0[gi]      *dptrs1_0[hi] +
+                     dptrs0_2[gi]                         *dptrs1_1[hi] +
+                                        dptrs2_0[gi]      *dptrs1[o1[9] + hi];
+
+      a[10].mptr[Mi] = dptrs0_3[gi]*      dptrs2_1[gi]        *dptrs1_2[hi] +
+                       dptrs0_3[gi]                           *dptrs1[o1[11] + hi] +
+                                          dptrs2_1[gi]        *dptrs1[o1[12] + hi];
+
+      a[13].mptr[Mi] = dptrs0[o0[13] + gi]*dptrs2_0[gi]       *dptrs1[o1[13] + hi] +
+                       dptrs0[o0[14] + gi]*dptrs2_1[gi]       *dptrs1[o1[14] + hi] +
+                                                               dptrs1[o1[15] + hi];
+
+      a[16].mptr[Mi] = dptrs0[o0[16] + gi]*dptrs2_0[gi]       *dptrs1[o1[16] + hi] +
+                       dptrs0[o0[17] + gi]*dptrs2_1[gi]       *dptrs1[o1[17] + hi] +
+                                                               dptrs1[o1[18] + hi];
+
+      a[19].mptr[Mi] = dptrs0[o0[19] + gi]*dptrs2_0[gi]       *dptrs1[o1[19] + hi] +
+                       dptrs0[o0[20] + gi]*dptrs2_1[gi]       *dptrs1[o1[20] + hi] +
+                                                               dptrs1[o1[21] + hi];
+
+      a[22].mptr[Mi] = dptrs0[o0[22] + gi]*dptrs2_0[gi]       *dptrs1[o1[22] + hi] +
+                       dptrs0[o0[23] + gi]*dptrs2_1[gi]       *dptrs1[o1[23] + hi] +
+                                                               dptrs1[o1[24] + hi];
+
+      a[25].mptr[Mi] = dptrs0[o0[25] + gi]*dptrs2_0[gi]       *dptrs1[o1[25] + hi];
+
+      a[26].mptr[Mi] = dptrs0[o0[26] + gi]*dptrs2_0[gi]       *dptrs1[o1[26] + hi];
+
+      a[27].mptr[Mi] = dptrs0[o0[27] + gi]*dptrs2_0[gi]       *dptrs1[o1[27] + hi];
+
+      a[28].mptr[Mi] = dptrs0[o0[28] + gi]*dptrs2_0[gi]       *dptrs1[o1[28] + hi];
+
+      a[29].mptr[Mi] = dptrs0[o0[29] + gi]*dptrs2_1[gi]       *dptrs1[o1[29] + hi];
+
+      a[30].mptr[Mi] = dptrs0[o0[30] + gi]*dptrs2_1[gi]       *dptrs1[o1[30] + hi];
+
+      a[31].mptr[Mi] = dptrs0[o0[31] + gi]*dptrs2_1[gi]       *dptrs1[o1[31] + hi];
+
+      a[32].mptr[Mi] = dptrs0[o0[32] + gi]*dptrs2_1[gi]       *dptrs1[o1[32] + hi];
+
+      a[0].mptr[Mi]  = dptrs0_0[gi]*      dptrs2_0[gi]      *dptrs1_0[hi] +
+                       dptrs0_0[gi]                         *dptrs1_1[hi] +
+                       dptrs0_1[gi]*      dptrs2_1[gi]      *dptrs1_2[hi] +
+                       dptrs0_1[gi]                         *dptrs1[o1[3] + hi] +
+                                                             dptrs1[o1[4] + hi] +
+                                          dptrs2_1[gi]      *dptrs1[o1[5] + hi] +
+                                          dptrs2_0[gi]      *dptrs1[o1[6] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   return hypre_error_flag;
+
+   HYPRE_ANNOTATE_FUNC_END;
+}
+
+/* Test with hacked version that approximates master without the "+=" sign but using as
+   many boxloops as the number of stencil entries in M */
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v5( hypre_StructMatmultHelper *a,
+                                       HYPRE_Int    ncomponents,
+                                       HYPRE_Int   *indices,
+                                       HYPRE_Int    ndim,
+                                       hypre_Index  loop_size,
+                                       hypre_Box   *gdbox,
+                                       hypre_Index  gdstart,
+                                       hypre_Index  gdstride,
+                                       hypre_Box   *hdbox,
+                                       hypre_Index  hdstart,
+                                       hypre_Index  hdstride,
+                                       hypre_Box   *Mdbox,
+                                       hypre_Index  Mdstart,
+                                       hypre_Index  Mdstride,
+                                       HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[0].mptr[Mi]  = a[0].cprod*dptrs0[o0[0] + gi]*dptrs2[o2[0] + gi]*dptrs1[o1[0] + hi] +
+                       a[1].cprod*dptrs0[o0[1] + gi]*dptrs2[o2[1] + gi]*dptrs1[o1[1] + hi] +
+                       a[2].cprod*dptrs0[o0[2] + gi]*dptrs2[o2[2] + gi]*dptrs1[o1[2] + hi] +
+                       a[3].cprod*dptrs0[o0[3] + gi]*dptrs2[o2[3] + gi]*dptrs1[o1[3] + hi] +
+                       a[4].cprod*dptrs0[o0[4] + gi]*dptrs2[o2[4] + gi]*dptrs1[o1[4] + hi] +
+                       a[5].cprod*dptrs0[o0[5] + gi]*dptrs2[o2[5] + gi]*dptrs1[o1[5] + hi] +
+                       a[6].cprod*dptrs0[o0[6] + gi]*dptrs2[o2[6] + gi]*dptrs1[o1[6] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[7].mptr[Mi]  = a[7].cprod*dptrs0[o0[7] + gi]*dptrs2[o2[7] + gi]*dptrs1[o1[7] + hi] +
+                       a[8].cprod*dptrs0[o0[8] + gi]*dptrs2[o2[8] + gi]*dptrs1[o1[8] + hi] +
+                       a[9].cprod*dptrs0[o0[9] + gi]*dptrs2[o2[9] + gi]*dptrs1[o1[9] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[10].mptr[Mi] = a[10].cprod*dptrs0[o0[10] + gi]*dptrs2[o2[10] + gi]*dptrs1[o1[10] + hi] +
+                       a[11].cprod*dptrs0[o0[11] + gi]*dptrs2[o2[11] + gi]*dptrs1[o1[11] + hi] +
+                       a[12].cprod*dptrs0[o0[12] + gi]*dptrs2[o2[12] + gi]*dptrs1[o1[12] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[13].mptr[Mi] = a[13].cprod*dptrs0[o0[13] + gi]*dptrs2[o2[13] + gi]*dptrs1[o1[13] + hi] +
+                       a[14].cprod*dptrs0[o0[14] + gi]*dptrs2[o2[14] + gi]*dptrs1[o1[14] + hi] +
+                       a[15].cprod*dptrs0[o0[15] + gi]*dptrs2[o2[15] + gi]*dptrs1[o1[15] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[16].mptr[Mi] = a[16].cprod*dptrs0[o0[16] + gi]*dptrs2[o2[16] + gi]*dptrs1[o1[16] + hi] +
+                       a[17].cprod*dptrs0[o0[17] + gi]*dptrs2[o2[17] + gi]*dptrs1[o1[17] + hi] +
+                       a[18].cprod*dptrs0[o0[18] + gi]*dptrs2[o2[18] + gi]*dptrs1[o1[18] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[19].mptr[Mi] = a[19].cprod*dptrs0[o0[19] + gi]*dptrs2[o2[19] + gi]*dptrs1[o1[19] + hi] +
+                       a[20].cprod*dptrs0[o0[20] + gi]*dptrs2[o2[20] + gi]*dptrs1[o1[20] + hi] +
+                       a[21].cprod*dptrs0[o0[21] + gi]*dptrs2[o2[21] + gi]*dptrs1[o1[21] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[22].mptr[Mi] = a[22].cprod*dptrs0[o0[22] + gi]*dptrs2[o2[22] + gi]*dptrs1[o1[22] + hi] +
+                       a[23].cprod*dptrs0[o0[23] + gi]*dptrs2[o2[23] + gi]*dptrs1[o1[23] + hi] +
+                       a[24].cprod*dptrs0[o0[24] + gi]*dptrs2[o2[24] + gi]*dptrs1[o1[24] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      a[25].mptr[Mi] = a[25].cprod*dptrs0[o0[25] + gi]*dptrs2[o2[25] + gi]*dptrs1[o1[25] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[26].mptr[Mi] = a[26].cprod*dptrs0[o0[26] + gi]*dptrs2[o2[26] + gi]*dptrs1[o1[26] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[27].mptr[Mi] = a[27].cprod*dptrs0[o0[27] + gi]*dptrs2[o2[27] + gi]*dptrs1[o1[27] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[28].mptr[Mi] = a[28].cprod*dptrs0[o0[28] + gi]*dptrs2[o2[28] + gi]*dptrs1[o1[28] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[29].mptr[Mi] = a[29].cprod*dptrs0[o0[29] + gi]*dptrs2[o2[29] + gi]*dptrs1[o1[29] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[30].mptr[Mi] = a[30].cprod*dptrs0[o0[30] + gi]*dptrs2[o2[30] + gi]*dptrs1[o1[30] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[31].mptr[Mi] = a[31].cprod*dptrs0[o0[31] + gi]*dptrs2[o2[31] + gi]*dptrs1[o1[31] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      a[32].mptr[Mi] = a[32].cprod*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
 
    HYPRE_ANNOTATE_FUNC_END;
 
