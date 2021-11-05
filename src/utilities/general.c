@@ -100,8 +100,35 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* sycl device set at construction of hypre_DeviceData object */
-#elif defined(HYPRE_USING_GPU)
+   HYPRE_Int nDevices=0;
+   hypre_GetDeviceCount(&nDevices);
+   if (device_id > nDevices) {
+     hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
+   }
+
+   HYPRE_Int local_nDevices=0;
+   for (int i = 0; i < gpu_devices.size(); i++) {
+     // multi-tile GPUs
+     if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) {
+       auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+       for (auto &tile : subDevicesDomainNuma) {
+         if (local_nDevices == device_id) {
+           hypre_HandleDevice(hypre_handle_) = &tile;
+         }
+         local_nDevices++;
+       }
+     }
+     // single-tile GPUs
+     else {
+       if (local_nDevices == device_id) {
+         hypre_HandleDevice(hypre_handle_) = &(gpu_devices[i]);
+       }
+       local_nDevices++;
+     }
+   }
+#endif
+
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
       hypre_HandleDevice(hypre_handle_) = device_id;
@@ -152,25 +179,20 @@ hypre_GetDeviceCount(hypre_int *device_count)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - doesn't work on frank... commenting out */
-   /* sycl::platform platform(sycl::gpu_selector{}); */
-   /* auto const& gpu_devices = platform.get_devices(); */
-   /* for (int i = 0; i < gpu_devices.size(); i++) */
-   /* { */
-   /*    if (gpu_devices[i].is_gpu()) */
-   /*    { */
-   /*       if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-   /*       { */
-   /*          auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>( */
-   /*                                      sycl::info::partition_affinity_domain::numa); */
-   /*          (*device_count) += subDevicesDomainNuma.size(); */
-   /*       } */
-   /*       else */
-   /*       { */
-	         /* (*device_count)++; */
-   /*       } */
-   /*    } */
-   /* } */
+   sycl::platform platform(sycl::gpu_selector{});
+   auto const& gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
+   for (int i = 0; i < gpu_devices.size(); i++)
+   {
+     if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
+     {
+       auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+       (*device_count) += subDevicesDomainNuma.size();
+     }
+     else
+     {
+       (*device_count)++;
+     }
+   }
 #endif
 
    return hypre_error_flag;
