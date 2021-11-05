@@ -106,6 +106,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
      hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
    }
 
+   sycl::platform platform(sycl::gpu_selector{});
+   auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
    HYPRE_Int local_nDevices=0;
    for (int i = 0; i < gpu_devices.size(); i++) {
      // multi-tile GPUs
@@ -157,7 +159,20 @@ hypre_GetDevice(hypre_int *device_id)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* sycl device set at construction of hypre_DeviceData object */
+   if( const char* ptr = std::getenv("ZE_AFFINITY_MASK") ) {
+     std::string str(ptr);
+     std::istringstream streamData(str);
+     std::vector<std::string> splitStrings;
+     std::string splitString;
+     while (std::getline(streamData, splitString, '.')) {
+       splitStrings.push_back( splitString );
+     }
+     int deviceID = std::stoi(splitStrings[0]);
+     int tileID = std::stoi(splitStrings[1]);
+     *device_id = 2 * deviceID + tileID;
+   } else {
+     *device_id = 0;
+   }
 #endif
 
    return hypre_error_flag;

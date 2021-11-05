@@ -964,7 +964,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
             catch (sycl::exception const& ex)
             {
                std::cout << "Caught asynchronous SYCL exception:" << std::endl
-               << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+               << ex.what() << ", OpenCL code: " << ex.get_cl_code() << std::endl;
             }
          }
       };
@@ -1231,7 +1231,7 @@ hypre_DeviceDataCreate()
    /* WM: does the default selector get a GPU if available? Having trouble with getting the device on frank, so temporarily just passing the default selector */
    hypre_DeviceDataDevice(data)            = nullptr;
 
-   hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data).get_info<sycl::info::device::max_work_group_size>();
+   hypre_DeviceDataDeviceMaxWorkGroupSize(data) = hypre_DeviceDataDevice(data)->get_info<sycl::info::device::max_work_group_size>();
 #else
    hypre_DeviceDataDevice(data)            = 0;
 #endif
