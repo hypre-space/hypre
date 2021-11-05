@@ -162,7 +162,10 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   // WM: TODO
+   if (location == hypre_MEMORY_DEVICE)
+   {
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() );
+   }
 #endif
 }
 
