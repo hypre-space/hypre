@@ -4178,6 +4178,7 @@ hypre_ParCSRMatrixGetBlockDiagInv(hypre_ParCSRMatrix   *A,
   HYPRE_Int           left_size, inv_size;
   HYPRE_Real          *diaginv = *diaginv_ptr;
   HYPRE_Real          wall_time;
+  HYPRE_Int           nrows = hypre_CSRMatrixNumRows(A_diag);
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm, &my_id);
@@ -4191,7 +4192,7 @@ hypre_ParCSRMatrixGetBlockDiagInv(hypre_ParCSRMatrix   *A,
   }
   else
   {
-    for (i = 0; i < n; i++)
+    for (i = 0; i < nrows; i++)
     {
       if (CF_marker[i] == point_type)
       {
@@ -4228,7 +4229,7 @@ hypre_ParCSRMatrixGetBlockDiagInv(hypre_ParCSRMatrix   *A,
   wall_time = time_getWallclockSeconds();
   cnt = 0;
   row_offset = 0;
-  for (i = 0; i < n; i++)
+  for (i = 0; i < nrows; i++)
   {
     if (CF_marker[i] == point_type)
     {
