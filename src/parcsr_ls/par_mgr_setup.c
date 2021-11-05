@@ -56,6 +56,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   HYPRE_Int  *interp_type = (mgr_data -> interp_type);
   HYPRE_Int  *restrict_type = (mgr_data -> restrict_type);
+  HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
   HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
   HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
   HYPRE_Int max_elmts = (mgr_data -> P_max_elmts);
@@ -605,6 +606,15 @@ hypre_MGRSetup( void               *mgr_vdata,
       (mgr_data -> restrict_type) = 0;
     }
     (mgr_data -> restrict_type) = restrict_type;
+  }
+  if (num_relax_sweeps == NULL)
+  {
+    num_relax_sweeps = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+    for (i = 0; i < max_num_coarse_levels; i++)
+    {
+      (mgr_data -> num_relax_sweeps) = 0;
+    }
+    (mgr_data -> num_relax_sweeps) = num_relax_sweeps;
   }
 
   /* set interp_type, restrict_type, and Frelax_method if we reduce the reserved C-points */

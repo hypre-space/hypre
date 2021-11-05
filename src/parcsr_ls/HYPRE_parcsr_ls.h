@@ -3963,6 +3963,11 @@ HYPRE_Int
 HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver,
                                   HYPRE_Int smooth_iter );
 
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
+                              HYPRE_Int *smooth_iters );
+
+
 /**
  * (Optional) Determines type of global smoother.
  * Options for \e smooth_type are:
@@ -3980,6 +3985,10 @@ HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver,
                               HYPRE_Int smooth_type );
+
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
+                             HYPRE_Int *smooth_type );
 
 /**
  * (Optional) Return the number of MGR iterations.

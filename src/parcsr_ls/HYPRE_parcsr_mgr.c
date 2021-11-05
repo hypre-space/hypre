@@ -429,15 +429,31 @@ HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 	return hypre_MGRSetMaxGlobalsmoothIters(solver, max_iter);
 }
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelsmoothIters
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
+                              HYPRE_Int *smooth_iters )
+{
+  return hypre_MGRSetLevelSmoothIters(solver, smooth_iters);
+}
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 {
 	return hypre_MGRSetGlobalsmoothType(solver, iter_type);
 }
-
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelsmoothIters
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
+                             HYPRE_Int *smooth_type )
+{
+  return hypre_MGRSetLevelSmoothType(solver, smooth_type);
+}
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxPElmts
  *--------------------------------------------------------------------------*/
