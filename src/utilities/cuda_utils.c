@@ -75,7 +75,7 @@ void hypre_CudaCompileFlagCheck()
 dim3
 hypre_GetDefaultCUDABlockDimension()
 {
-   dim3 bDim(512, 1, 1);
+   dim3 bDim(HYPRE_1D_BLOCK_SIZE, 1, 1);
 
    return bDim;
 }
@@ -1007,20 +1007,18 @@ hypre_HYPREIntToCusparseIndexType()
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t
-#elif defined(HYPRE_USING_CUDA)
+/* CUDA/HIP stream */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
 #endif
 hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   cudaStream_t stream = 0;
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    cudaStream_t stream = 0;
 #elif defined(HYPRE_USING_HIP)
    hipStream_t stream = 0;
@@ -1042,9 +1040,7 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
       return data->cuda_streams[i];
    }
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 #elif defined(HYPRE_USING_HIP)
@@ -1057,9 +1053,7 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
    return stream;
 }
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
@@ -1069,6 +1063,10 @@ hypre_CudaDataCudaComputeStream(hypre_CudaData *data)
    return hypre_CudaDataCudaStream(data,
                                    hypre_CudaDataCudaComputeStreamNum(data));
 }
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
@@ -1269,6 +1267,7 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
 
+#if defined(HYPRE_USING_GPU)
 
 hypre_CudaData*
 hypre_CudaDataCreate()
@@ -1290,8 +1289,8 @@ hypre_CudaDataCreate()
 
    hypre_CudaDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   hypre_CudaDataSpgemmRownnzEstimateMethod(data)     = 3;
-   hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = 32;
+   hypre_CudaDataSpgemmRownnzEstimateMethod(data) = 3;
+   hypre_CudaDataSpgemmRownnzEstimateNsamples(data) = 32;
    hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
    hypre_CudaDataSpgemmHashType(data)                 = 'D';
 
@@ -1359,19 +1358,19 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
    }
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->cuda_streams[i])
       {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
          HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
 #elif defined(HYPRE_USING_HIP)
          HYPRE_HIP_CALL( hipStreamDestroy(data->cuda_streams[i]) );
 #endif
       }
    }
+#endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_CudaDataCubCachingAllocatorDestroy(data);
@@ -1383,9 +1382,7 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
 HYPRE_Int
 hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
@@ -1442,9 +1439,6 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#else
          if (cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
@@ -1453,7 +1447,6 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
             HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
 #endif
          }
-#endif
          break;
       default:
          hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
