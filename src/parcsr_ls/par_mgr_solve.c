@@ -574,6 +574,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Int      *level_smooth_iters = (mgr_data -> level_smooth_iters);
 
    HYPRE_Int      *restrict_type = (mgr_data -> restrict_type);
+   HYPRE_Int      level_smooth_order = (mgr_data -> level_smooth_order);
    HYPRE_Int      use_air = 0;
    HYPRE_Int      my_id;
 
@@ -596,7 +597,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    while (Not_Finished)
    {
       // Global/level relaxation
-      if (cycle_type == 2)
+      if (cycle_type == level_smooth_order)
       {
          if (level_smooth_iters[level] > 0)
          {

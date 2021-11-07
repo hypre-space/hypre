@@ -319,6 +319,15 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelNumRelaxSweeps
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int *nsweeps )
+{
+   return hypre_MGRSetLevelNumRelaxSweeps(solver, *nsweeps);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetInterpType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
@@ -446,7 +455,7 @@ HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 	return hypre_MGRSetGlobalsmoothType(solver, iter_type);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetLevelsmoothIters
+ * HYPRE_MGRSetLevelsmoothType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
@@ -454,6 +463,16 @@ HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
 {
   return hypre_MGRSetLevelSmoothType(solver, smooth_type);
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelsmoothOrder
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
+                              HYPRE_Int level_smooth_order )
+{
+  return hypre_MGRSetLevelSmoothOrder(solver, level_smooth_order);
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxPElmts
  *--------------------------------------------------------------------------*/

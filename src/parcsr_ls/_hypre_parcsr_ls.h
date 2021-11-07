@@ -2217,6 +2217,7 @@ HYPRE_Int hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrictTyp
 HYPRE_Int hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_MGRSetLevelInterpType( void *mgr_vdata, HYPRE_Int *interpType);
 HYPRE_Int hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
+HYPRE_Int hypre_MGRSetLevelNumRelaxSweeps( void *mgr_vdata, HYPRE_Int *nsweeps );
 HYPRE_Int hypre_MGRSetNumInterpSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetLevelSmoothType( void *mgr_data, HYPRE_Int *level_smooth_type);

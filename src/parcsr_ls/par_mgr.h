@@ -98,6 +98,7 @@ typedef struct
   HYPRE_Int           *level_smooth_iters;
   HYPRE_Int           *level_smooth_type;
   HYPRE_Solver        *level_smoother;
+  HYPRE_Int           level_smooth_order;
 
   /*
    Number of points that remain part of the coarse grid throughout the hierarchy.
@@ -141,6 +142,7 @@ typedef struct
 
 } hypre_ParMGRData;
 
+// F-relaxation struct for future refactoring of F-relaxation in MGR
 typedef struct
 {
   HYPRE_Int relax_type;

@@ -3857,6 +3857,10 @@ HYPRE_Int
 HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
                             HYPRE_Int nsweeps );
 
+HYPRE_Int
+HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver,
+                                 HYPRE_Int *nsweeps );
+
 /**
  * (Optional) Set number of interpolation sweeps.
  * This option is for \e interp_type > 2.
@@ -3962,11 +3966,18 @@ HYPRE_MGRSetTol( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver,
                                   HYPRE_Int smooth_iter );
-
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
                               HYPRE_Int *smooth_iters );
-
+/**
+ * (Optional) Set the smoothing order for global smoothing at each level.
+ * Options for \e level_smooth_order are:
+ *    - 1 : Pre-smoothing (default)
+ *    - 2 : Post-smoothing
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
+                              HYPRE_Int level_smooth_order );
 
 /**
  * (Optional) Determines type of global smoother.
