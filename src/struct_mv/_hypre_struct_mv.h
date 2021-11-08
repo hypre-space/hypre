@@ -1907,8 +1907,6 @@ HYPRE_Int hypre_StructVectorMigrate ( hypre_CommPkg *comm_pkg , hypre_StructVect
 HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *vector , HYPRE_Int all );
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1926,8 +1924,10 @@ hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER
+#define HYPRE_BOXLOOP_DEVICEOMP_HEADER
+
+#if defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 #include "omp.h"
 
@@ -1944,7 +1944,7 @@ hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
 
 #ifndef AUTO_OMP_TEAM
 /* omp team size (aka. gpu block size) */
-#define hypre_gpu_block_size 512
+#define hypre_gpu_block_size HYPRE_1D_BLOCK_SIZE
 /* the max number of omp teams */
 #define hypre_max_num_blocks 1000000
 #endif
@@ -2483,8 +2483,9 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 
 #endif
 
+#endif /* #ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER */
 
-#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2502,8 +2503,10 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_HOST_HEADER
+#define HYPRE_BOXLOOP_HOST_HEADER
+
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_DEVICE_OPENMP)
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION
@@ -2768,7 +2771,8 @@ typedef struct hypre_Boxloop_struct
 
 #endif
 
-#endif
+#endif /* #ifndef HYPRE_BOXLOOP_HOST_HEADER */
+
 
 #ifdef __cplusplus
 }

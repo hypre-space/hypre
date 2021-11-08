@@ -800,7 +800,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    hypre_IndexRef        start;
    HYPRE_Int             i, d, size;
 
-   size = (HYPRE_Int)(pow(3, ndim) + 0.5);
+   size = (HYPRE_Int)(pow(3.0, ndim) + 0.5);
    stencil_shape = hypre_CTAlloc(hypre_Index,  size, HYPRE_MEMORY_HOST);
    box = hypre_BoxCreate(ndim);
    for (d = 0; d < ndim; d++)

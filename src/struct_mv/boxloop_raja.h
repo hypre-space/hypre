@@ -15,8 +15,10 @@
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_RAJA_HEADER
+#define HYPRE_BOXLOOP_RAJA_HEADER
+
+#if defined(HYPRE_USING_RAJA)
 
 #ifdef __cplusplus
 extern "C++" {
@@ -40,8 +42,8 @@ typedef struct hypre_Boxloop_struct
 
 #if defined(HYPRE_USING_CUDA) /* RAJA with CUDA, running on device */
 
-#define BLOCKSIZE 256
-#define hypre_RAJA_DEVICE   RAJA_DEVICE
+#define BLOCKSIZE                HYPRE_1D_BLOCK_SIZE
+#define hypre_RAJA_DEVICE        RAJA_DEVICE
 #define hypre_raja_exec_policy   cuda_exec<BLOCKSIZE>
 /* #define hypre_raja_reduce_policy cuda_reduce_atomic<BLOCKSIZE> */
 #define hypre_raja_reduce_policy cuda_reduce //<BLOCKSIZE>
@@ -57,7 +59,10 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP) /* RAJA with OpenMP (>4.5), running on device */
 
-//TODO
+#define hypre_RAJA_DEVICE
+#define hypre_raja_exec_policy   omp_target_parallel_for_exec<BLOCKSIZE>
+#define hypre_raja_reduce_policy omp_target_reduce
+#define hypre_fence()
 
 #elif defined(HYPRE_USING_OPENMP) /* RAJA with OpenMP, running on host (CPU) */
 
@@ -289,7 +294,7 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
    hypre_fence();                                                              \
 }
 
-#define hypre_newBoxLoopGetIndex(index)                                        \
+#define hypre_BoxLoopGetIndex(index)                                           \
   index[0] = hypre_IndexD(local_idx, 0);                                       \
   index[1] = hypre_IndexD(local_idx, 1);                                       \
   index[2] = hypre_IndexD(local_idx, 2);
@@ -330,3 +335,6 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
         hypre_BoxLoop2End(i1, i2)
 
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_RAJA_HEADER */
+
