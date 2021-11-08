@@ -819,7 +819,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
     /* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
     cflag = last_level || setNonCpointToF;
-    if (!cflag || (interp_type[lev] > 4 && interp_type[lev] != 12))
+    if (!cflag || (interp_type[lev] > 2 && (interp_type[lev] != 4 || interp_type[lev] != 12)))
     {
       hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);
     }

@@ -5430,7 +5430,10 @@ hypre_MGRSetMaxGlobalsmoothIters( void *mgr_vdata, HYPRE_Int max_iter )
     (mgr_data -> level_smooth_iters) = NULL;
   }
   HYPRE_Int *level_smooth_iters = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-  level_smooth_iters[0] = max_iter;
+  if (max_num_coarse_levels > 0)
+  {
+    level_smooth_iters[0] = max_iter;
+  }
   (mgr_data -> level_smooth_iters) = level_smooth_iters;
 
   return hypre_error_flag;
@@ -5448,7 +5451,10 @@ hypre_MGRSetGlobalsmoothType( void *mgr_vdata, HYPRE_Int gsmooth_type )
     (mgr_data -> level_smooth_type) = NULL;
   }
   HYPRE_Int *level_smooth_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-  level_smooth_type[0] = gsmooth_type;
+  if (max_num_coarse_levels > 0)
+  {
+    level_smooth_type[0] = gsmooth_type;
+  }
   (mgr_data -> level_smooth_type) = level_smooth_type;
 
   return hypre_error_flag;
