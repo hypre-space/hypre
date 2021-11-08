@@ -27,7 +27,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
                       HYPRE_BigInt    jupper,
                       HYPRE_IJMatrix *matrix )
 {
-   HYPRE_BigInt *info;
+   HYPRE_BigInt info[2];
    HYPRE_Int num_procs;
    HYPRE_Int myid;
 
@@ -35,7 +35,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    HYPRE_BigInt  row0, col0, rowN, colN;
 
-   ijmatrix = hypre_CTAlloc(hypre_IJMatrix,  1, HYPRE_MEMORY_HOST);
+   ijmatrix = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_IJMatrixComm(ijmatrix)           = comm;
    hypre_IJMatrixObject(ijmatrix)         = NULL;
@@ -78,8 +78,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       return hypre_error_flag;
    }
 
-   info = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
    hypre_IJMatrixRowPartitioning(ijmatrix)[0] = ilower;
    hypre_IJMatrixRowPartitioning(ijmatrix)[1] = iupper+1;
    hypre_IJMatrixColPartitioning(ijmatrix)[0] = jlower;
@@ -113,8 +111,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_IJMatrixGlobalFirstCol(ijmatrix) = col0;
    hypre_IJMatrixGlobalNumRows(ijmatrix) = rowN - row0 + 1;
    hypre_IJMatrixGlobalNumCols(ijmatrix) = colN - col0 + 1;
-
-   hypre_TFree(info, HYPRE_MEMORY_HOST);
 
    *matrix = (HYPRE_IJMatrix) ijmatrix;
 

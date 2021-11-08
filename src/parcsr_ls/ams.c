@@ -3976,12 +3976,11 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
    HYPRE_Real *x_data, *y_data, *z_data;
 
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-   HYPRE_BigInt *vert_part, num_global_vert;
+   HYPRE_BigInt vert_part[2], num_global_vert;
    HYPRE_BigInt vert_start, vert_end;
    HYPRE_BigInt big_local_vert = (HYPRE_BigInt) num_local_vert;
 
    /* Find the processor partitioning of the vertices */
-   vert_part = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    hypre_MPI_Scan(&big_local_vert, &vert_part[1], 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    vert_part[0] = vert_part[1] - big_local_vert;
    hypre_MPI_Allreduce(&big_local_vert, &num_global_vert, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);

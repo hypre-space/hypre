@@ -1779,9 +1779,9 @@ HYPRE_Int hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix *S, hypre_ParCSRM
 HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int CF_init, HYPRE_Int aug_rand, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf );
 
 /* par_coarse_parms.c */
-HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
-HYPRE_Int hypre_BoomerAMGCoarseParmsHost ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
-HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt **coarse_pnts_global_ptr );
+HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt *coarse_pnts_global );
+HYPRE_Int hypre_BoomerAMGCoarseParmsHost ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt *coarse_pnts_global );
+HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm , HYPRE_Int local_num_variables , HYPRE_Int num_functions , hypre_IntArray *dof_func , hypre_IntArray *CF_marker , hypre_IntArray **coarse_dof_func_ptr , HYPRE_BigInt *coarse_pnts_global );
 HYPRE_Int hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func, HYPRE_Int local_size, HYPRE_Int offset, HYPRE_Int num_functions );
 
 /* par_coordinates.c */

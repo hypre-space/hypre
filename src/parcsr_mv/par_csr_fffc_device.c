@@ -236,7 +236,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    HYPRE_Int           my_id, num_procs;
    /* nF and nC */
    HYPRE_Int           n_local, nF_local, nC_local, nF2_local = 0;
-   HYPRE_BigInt       *fpts_starts, *row_starts, *f2pts_starts = NULL;
+   HYPRE_BigInt        fpts_starts[2], *row_starts, f2pts_starts[2];
    HYPRE_BigInt        nF_global, nC_global, nF2_global = 0;
    HYPRE_BigInt        F_first, C_first;
    /* work arrays */
@@ -255,7 +255,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    }
    hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
-   fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];
    fpts_starts[1] = row_starts[1] - cpts_starts[1];
    F_first = fpts_starts[0];
@@ -276,7 +275,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       HYPRE_BigInt nF2_local_big = nF2_local;
 
-      f2pts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&nF2_local_big, f2pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f2pts_starts[0] = f2pts_starts[1] - nF2_local_big;
       if (my_id == (num_procs -1))
@@ -1012,7 +1010,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int           my_id, num_procs;
    /* nF and nC */
    HYPRE_Int           n_local, /*nF_local,*/ nC_local;
-   HYPRE_BigInt       *fpts_starts, *row_starts;
+   HYPRE_BigInt        fpts_starts[2], *row_starts;
    HYPRE_BigInt        /*nF_global,*/ nC_global;
    HYPRE_BigInt        F_first, C_first;
    /* work arrays */
@@ -1039,7 +1037,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    }
    hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
-   fpts_starts = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];
    fpts_starts[1] = row_starts[1] - cpts_starts[1];
    F_first = fpts_starts[0];
