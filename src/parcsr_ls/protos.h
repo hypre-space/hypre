@@ -114,7 +114,7 @@ HYPRE_Int hypre_AMGHybridSetup ( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A ,
 HYPRE_Int hypre_AMGHybridSolve ( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 
 /* ams.c */
-HYPRE_Int hypre_ParCSRRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real *l1_norms , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real max_eig_est , HYPRE_Real min_eig_est , HYPRE_Int cheby_order , HYPRE_Real cheby_fraction , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *z );
+HYPRE_Int hypre_ParCSRRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real *l1_norms , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real max_eig_est , HYPRE_Real min_eig_est , HYPRE_Int cheby_order , HYPRE_Real cheby_fraction , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *z, hypre_ParVector *p, hypre_ParVector *rtmp, HYPRE_Real *poly_coefs, HYPRE_Real *diags);
 hypre_ParVector *hypre_ParVectorInRangeOf ( hypre_ParCSRMatrix *A );
 hypre_ParVector *hypre_ParVectorInDomainOf ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParVectorBlockSplit ( hypre_ParVector *x , hypre_ParVector *x_ [3 ], HYPRE_Int dim );
@@ -149,7 +149,7 @@ HYPRE_Int hypre_AMSComputePixyz ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G 
 HYPRE_Int hypre_AMSComputeGPi ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *G , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz , HYPRE_Int dim , hypre_ParCSRMatrix **GPi_ptr );
 HYPRE_Int hypre_AMSSetup ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 HYPRE_Int hypre_AMSSolve ( void *solver , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
-HYPRE_Int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , HYPRE_Int A0_relax_type , HYPRE_Int A0_relax_times , HYPRE_Real *A0_l1_norms , HYPRE_Real A0_relax_weight , HYPRE_Real A0_omega , HYPRE_Real A0_max_eig_est , HYPRE_Real A0_min_eig_est , HYPRE_Int A0_cheby_order , HYPRE_Real A0_cheby_fraction , hypre_ParCSRMatrix **A , HYPRE_Solver *B , HYPRE_PtrToSolverFcn *HB , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z );
+HYPRE_Int hypre_ParCSRSubspacePrec ( hypre_ParCSRMatrix *A0 , HYPRE_Int A0_relax_type , HYPRE_Int A0_relax_times , HYPRE_Real *A0_l1_norms , HYPRE_Real A0_relax_weight , HYPRE_Real A0_omega , HYPRE_Real A0_max_eig_est , HYPRE_Real A0_min_eig_est , HYPRE_Int A0_cheby_order , HYPRE_Real A0_cheby_fraction , hypre_ParCSRMatrix **A , HYPRE_Solver *B , HYPRE_PtrToSolverFcn *HB , hypre_ParCSRMatrix **P , hypre_ParVector **r , hypre_ParVector **g , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *r0 , hypre_ParVector *g0 , char *cycle , hypre_ParVector *z, hypre_ParVector *p, hypre_ParVector *rtmp, HYPRE_Real *poly_coefs, HYPRE_Real *diags );
 HYPRE_Int hypre_AMSGetNumIterations ( void *solver , HYPRE_Int *num_iterations );
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm ( void *solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int hypre_AMSProjectOutGradients ( void *solver , hypre_ParVector *x );

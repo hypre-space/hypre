@@ -54,8 +54,10 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
+   HYPRE_Real lower, upper;
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
+
       if (j >= q)
       {
          continue;
@@ -65,9 +67,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
       if ( read_only_load(&diag_ja[j]) == row_i )
       {
          diag_value = aij;
-      }
-      else
-      {
+      } else {
          row_sum_i += fabs(aij);
       }
    }

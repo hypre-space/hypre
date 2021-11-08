@@ -40,7 +40,11 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
                    HYPRE_Real          cheby_fraction,
                    hypre_ParVector    *u,              /* initial/updated approximation */
                    hypre_ParVector    *v,              /* temporary vector */
-                   hypre_ParVector    *z               /* temporary vector */ )
+                   hypre_ParVector    *z,              /* temporary vector */
+                   hypre_ParVector    *p,              /* temporary vector */
+                   hypre_ParVector    *r,              /* temporary vector */
+                   HYPRE_Real         *poly_coefs,     /* Coefficients of smoothing poly */
+                   HYPRE_Real         *diags)          /* Diagonal of matrix */
 {
    HYPRE_Int sweep;
 
@@ -75,8 +79,7 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       {
          if (relax_type == 16)
          {
-            hypre_ParCSRRelax_Cheby(A, f, max_eig_est, min_eig_est, cheby_fraction, cheby_order, 1,
-                                    0, u, v, z);
+            hypre_ParCSRRelax_Cheby_Solve(A, f, diags, poly_coefs, cheby_order, 1, 0, u, v, z, p, r);
          }
          else
          {
@@ -808,6 +811,8 @@ void * hypre_AMSCreate()
    ams_data -> A_omega = 1.0;          /* SSOR coefficient */
    ams_data -> A_cheby_order = 2;      /* Cheby: order (1 -4 are vaild) */
    ams_data -> A_cheby_fraction = .3;  /* Cheby: fraction of spectrum to smooth */
+   ams_data -> A_poly_coefs = NULL;    /* Cheby: Coefficienst of polynomial */
+   ams_data -> A_diags = NULL;         /* Cheby: Diagonal elements */
 
    ams_data -> B_G_coarsen_type = 10;  /* HMIS coarsening */
    ams_data -> B_G_agg_levels = 1;     /* Levels of aggressive coarsening */
@@ -850,6 +855,8 @@ void * hypre_AMSCreate()
    ams_data -> r2  = NULL;
    ams_data -> g2  = NULL;
    ams_data -> zz  = NULL;
+   ams_data -> p  = NULL;
+   ams_data -> rtmp  = NULL;
 
    ams_data -> Pix    = NULL;
    ams_data -> Piy    = NULL;
@@ -895,6 +902,7 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
       return hypre_error_flag;
    }
 
+
    if (ams_data -> owns_A_G)
       if (ams_data -> A_G)
          hypre_ParCSRMatrixDestroy(ams_data -> A_G);
@@ -909,6 +917,11 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
          hypre_ParCSRMatrixDestroy(ams_data -> A_Pi);
    if (ams_data -> B_Pi)
       HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
+
+   if (ams_data -> A_diags)
+      hypre_TFree(ams_data -> A_diags, hypre_ParCSRMatrixMemoryLocation(ams_data->A));
+   if (ams_data -> A_poly_coefs)
+      hypre_TFree(ams_data -> A_poly_coefs, HYPRE_MEMORY_HOST);
 
    if (ams_data -> owns_Pi && ams_data -> Pix)
       hypre_ParCSRMatrixDestroy(ams_data -> Pix);
@@ -943,6 +956,10 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
       hypre_ParVectorDestroy(ams_data -> g2);
    if (ams_data -> zz)
       hypre_ParVectorDestroy(ams_data -> zz);
+   if (ams_data -> p)
+      hypre_ParVectorDestroy(ams_data -> p);
+   if (ams_data -> rtmp)
+      hypre_ParVectorDestroy(ams_data -> rtmp);
 
    if (ams_data -> G0)
       hypre_ParCSRMatrixDestroy(ams_data -> A);
@@ -952,6 +969,8 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
       hypre_ParCSRMatrixDestroy(ams_data -> A_G0);
    if (ams_data -> B_G0)
       HYPRE_BoomerAMGDestroy(ams_data -> B_G0);
+
+
 
    hypre_SeqVectorDestroy(ams_data -> A_l1_norms);
 
@@ -2896,6 +2915,16 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       hypre_ParCSRMaxEigEstimateCG(ams_data->A, 1, 10,
                                    &ams_data->A_max_eig_est,
                                    &ams_data->A_min_eig_est);
+
+      hypre_ParCSRRelax_Cheby_Setup(ams_data->A,
+          ams_data->A_max_eig_est,
+          ams_data->A_min_eig_est,
+          ams_data->A_cheby_fraction,
+          ams_data->A_cheby_order,
+          1,
+          0,
+          &ams_data->A_poly_coefs,
+          &ams_data->A_diags);
    }
 
    /* If not given, compute Gx, Gy and Gz */
@@ -3441,7 +3470,11 @@ HYPRE_Int hypre_AMSSolve(void *solver,
    HYPRE_PtrToSolverFcn HBi[5];
    hypre_ParVector *ri[5], *gi[5];
    HYPRE_Int needZ = 0;
+   HYPRE_Int needR = 0;
+   HYPRE_Int needP = 0;
 
+   hypre_ParVector *p = ams_data -> p;
+   hypre_ParVector *rtmp = ams_data -> rtmp;
    hypre_ParVector *z = ams_data -> zz;
 
    Ai[0] = ams_data -> A_G;    Pi[0] = ams_data -> G;
@@ -3476,6 +3509,9 @@ HYPRE_Int hypre_AMSSolve(void *solver,
       needZ = hypre_NumThreads() > 1 || ams_data -> A_relax_type == 16;
    }
 
+   needP =  ams_data -> A_relax_type == 16;
+   needR =  ams_data -> A_relax_type == 16;
+
    if (needZ && !z)
    {
       z = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
@@ -3483,6 +3519,23 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                 hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(z);
       ams_data -> zz = z;
+   }
+   if (needP && !p)
+   {
+
+      p = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(p);
+      ams_data -> p = p;
+   }
+   if (needR && !rtmp)
+   {
+      rtmp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(rtmp);
+      ams_data -> rtmp = rtmp;
    }
 
    if (ams_data -> print_level > 0)
@@ -3622,7 +3675,9 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                                ams_data -> r0,
                                ams_data -> g0,
                                cycle,
-                               z);
+                               z, p, rtmp,
+                               ams_data -> A_poly_coefs,
+                               ams_data -> A_diags);
 
       /* Compute new residual norms */
       if (ams_data -> maxit > 1)
@@ -3656,6 +3711,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
 
    if (ams_data -> num_iterations == ams_data -> maxit && ams_data -> tol > 0.0)
       hypre_error(HYPRE_ERROR_CONV);
+
 
    return hypre_error_flag;
 }
@@ -3706,7 +3762,13 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
                                    hypre_ParVector *g0,
                                    char *cycle,
                                    /* temporary vector */
-                                   hypre_ParVector *z)
+                                   hypre_ParVector *z,
+                                   hypre_ParVector *p,
+                                   hypre_ParVector *rtmp,
+                                   /* Polynomial smoother coefficients */
+                                   HYPRE_Real      *poly_coefs,
+                                   /* Diagonal of A matrix (used for Cheby) */
+                                   HYPRE_Real      *diags)
 {
    char *op;
    HYPRE_Int use_saved_residual = 0;
@@ -3744,7 +3806,9 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
                            A0_min_eig_est,
                            A0_cheby_order,
                            A0_cheby_fraction,
-                           y, g0, z);
+                           y, g0, z, p, rtmp,
+                           poly_coefs,
+                           diags);
       }
 
       /* subspace correction: y += P B^{-1} P^t r */

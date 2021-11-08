@@ -82,6 +82,8 @@ typedef struct
    HYPRE_Real A_min_eig_est;
    HYPRE_Int A_cheby_order;
    HYPRE_Real  A_cheby_fraction;
+   HYPRE_Real  *A_poly_coefs;
+   HYPRE_Real  *A_diags;
 
    /* AMG options for B_G */
    HYPRE_Int B_G_coarsen_type;
@@ -102,7 +104,7 @@ typedef struct
    HYPRE_Int B_Pi_Pmax;
 
    /* Temporary vectors */
-   hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2, *zz;
+   hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2, *zz, *rtmp, *p;
 
    /* Output log info */
    HYPRE_Int num_iterations;
