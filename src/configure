@@ -8532,13 +8532,13 @@ then
    CXXFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CXXFLAGS"
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for cabs in -lm" >&5
-$as_echo_n "checking for cabs in -lm... " >&6; }
-if ${ac_cv_lib_m_cabs+:} false; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlsym in -ldl" >&5
+$as_echo_n "checking for dlsym in -ldl... " >&6; }
+if ${ac_cv_lib_dl_dlsym+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lm  $LIBS"
+LIBS="-ldl  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -8548,7 +8548,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char cabs ();
+char dlsym ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -8560,24 +8560,24 @@ char cabs ();
 int
 main ()
 {
-return cabs ();
+return dlsym ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_m_cabs=yes
+  ac_cv_lib_dl_dlsym=yes
 else
-  ac_cv_lib_m_cabs=no
+  ac_cv_lib_dl_dlsym=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_m_cabs" >&5
-$as_echo "$ac_cv_lib_m_cabs" >&6; }
-if test "x$ac_cv_lib_m_cabs" = xyes; then :
-  LIBS="$LIBS -lm"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlsym" >&5
+$as_echo "$ac_cv_lib_dl_dlsym" >&6; }
+if test "x$ac_cv_lib_dl_dlsym" = xyes; then :
+  LIBS="$LIBS -ldl"
 fi
 
 
@@ -8954,6 +8954,55 @@ $as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
       fi
    fi
 
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for cabs in -lm" >&5
+$as_echo_n "checking for cabs in -lm... " >&6; }
+if ${ac_cv_lib_m_cabs+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lm  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char cabs ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return cabs ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_m_cabs=yes
+else
+  ac_cv_lib_m_cabs=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_m_cabs" >&5
+$as_echo "$ac_cv_lib_m_cabs" >&6; }
+if test "x$ac_cv_lib_m_cabs" = xyes; then :
+  LIBS="$LIBS -lm"
+fi
+
+
          LINK_CC=${LINK_CXX}
    fi
 
@@ -9007,54 +9056,12 @@ $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
 
 
-<<<<<<< HEAD
-$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
-
-
-   if test "$hypre_using_gpu_profiling" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_cusparse" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_device_pool" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_DEVICE_POOL 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_cublas" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_CUBLAS 1" >>confdefs.h
-
-   fi
-
-   if test "$hypre_using_curand" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
-
-   fi
-
    if test "$hypre_using_umpire" = "yes"
    then
       LINK_CC='${CUCC}'
    else
       LINK_CC=${LINK_CXX}
    fi
-=======
-   LINK_CC=${LINK_CXX}
->>>>>>> ba4ed17684e4542d71dce498a716f30cd05948a2
 
       if test "x$HYPRE_CUDA_SM" = "x"
    then

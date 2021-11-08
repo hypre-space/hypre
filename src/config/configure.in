@@ -1850,7 +1850,7 @@ fi
 dnl *********************************************************************
 dnl * FIND libraries needed to link with hypre
 dnl *********************************************************************
-AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
+AC_CHECK_LIB(dl, dlsym, LIBS="$LIBS -ldl")
 dnl * Commenting this out because it doesn't really behave correctly.
 dnl * This should probably be deleted altogether at some point. (RDF)
 dnl AC_HYPRE_FIND_G2C
@@ -2077,6 +2077,8 @@ then
          CXXFLAGS="${CXXFLAGS} -+"
       fi
    fi
+
+   AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
 
    dnl let CC be CXX
    dnl CC=${CXX}
