@@ -100,32 +100,45 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int nDevices=0;
-   hypre_GetDeviceCount(&nDevices);
-   if (device_id > nDevices) {
-     hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
+   sycl::platform platform(sycl::gpu_selector{});
+   auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
+   HYPRE_Int n_devices=0;
+   hypre_GetDeviceCount(&n_devices);
+   hypre_printf("WM: debug - n_devices = %d\n", n_devices);
+   if (device_id > n_devices)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: SYCL device-ID exceed the number of devices on-node\n");
    }
 
-   HYPRE_Int local_nDevices=0;
-   for (int i = 0; i < gpu_devices.size(); i++) {
-     // multi-tile GPUs
-     if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) {
-       auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
-       for (auto &tile : subDevicesDomainNuma) {
-         if (local_nDevices == device_id) {
-           hypre_HandleDevice(hypre_handle_) = &tile;
+   HYPRE_Int local_n_devices = 0;
+   HYPRE_Int i;
+   for (i = 0; i < gpu_devices.size(); i++)
+   {
+      // multi-tile GPUs
+      if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
+      {
+         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+         for (auto &tile : subDevicesDomainNuma)
+         {
+            if (local_n_devices == device_id)
+            {
+               hypre_HandleDevice(hypre_handle_) = &tile;
+            }
+            local_n_devices++;
          }
-         local_nDevices++;
-       }
-     }
-     // single-tile GPUs
-     else {
-       if (local_nDevices == device_id) {
-         hypre_HandleDevice(hypre_handle_) = &(gpu_devices[i]);
-       }
-       local_nDevices++;
-     }
+      }
+      // single-tile GPUs
+      else
+      {
+         if (local_n_devices == device_id)
+         {
+            hypre_HandleDevice(hypre_handle_) = &(gpu_devices[i]);
+         }
+         local_n_devices++;
+      }
    }
+   hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) = 
+      hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
 #endif
 
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
@@ -157,7 +170,11 @@ hypre_GetDevice(hypre_int *device_id)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* sycl device set at construction of hypre_DeviceData object */
+   /* WM: question - this is basically what's done by hypre_bind_device... should I do this here? */
+   HYPRE_Int n_devices, my_id;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
+   hypre_GetDeviceCount(&n_devices);
+   (*device_id) = my_id % n_devices;
 #endif
 
    return hypre_error_flag;
@@ -179,19 +196,21 @@ hypre_GetDeviceCount(hypre_int *device_count)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
+   (*device_count) = 0;
    sycl::platform platform(sycl::gpu_selector{});
    auto const& gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-   for (int i = 0; i < gpu_devices.size(); i++)
+   HYPRE_Int i;
+   for (i = 0; i < gpu_devices.size(); i++)
    {
-     if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-     {
-       auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
-       (*device_count) += subDevicesDomainNuma.size();
-     }
-     else
-     {
-       (*device_count)++;
-     }
+      if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
+      {
+         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+         (*device_count) += subDevicesDomainNuma.size();
+      }
+      else
+      {
+         (*device_count)++;
+      }
    }
 #endif
 
