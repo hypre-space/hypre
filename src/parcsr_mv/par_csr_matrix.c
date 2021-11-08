@@ -1187,8 +1187,8 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    HYPRE_Int           num_procs, my_id;
    HYPRE_Int          *num_rows_proc;
    HYPRE_Int          *num_nonzeros_proc;
-   HYPRE_BigInt       *row_starts = NULL;
-   HYPRE_BigInt       *col_starts = NULL;
+   HYPRE_BigInt        row_starts[2];
+   HYPRE_BigInt        col_starts[2];
 
    hypre_CSRMatrix    *local_A;
    HYPRE_Complex      *A_data;
@@ -1295,9 +1295,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
 
       if (global_data[3] == 2)
       {
-         row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-         col_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
          send_start = 4;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
                            &row_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
@@ -1316,8 +1313,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       }
       else if ((global_data[3] == 0) || (global_data[3] == 1))
       {
-         row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
          send_start = 4;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
                            &row_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
@@ -1328,13 +1323,12 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
 
          if (global_data[3] == 0)
          {
-            col_starts = row_starts;
+            col_starts[0] = row_starts[0];
+            col_starts[1] = row_starts[1];
          }
       }
       else
       {
-         col_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
          send_start = 4;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
                            &col_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
@@ -1349,8 +1343,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    // Create ParCSR matrix
    parcsr_A = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
                                        row_starts, col_starts, 0, 0, 0);
-   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    // Allocate memory for building ParCSR matrix
    num_rows_proc     = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);

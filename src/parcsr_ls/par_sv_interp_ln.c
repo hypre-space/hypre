@@ -146,7 +146,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_Int       *col_map;
    HYPRE_Int       *coarse_to_fine;
 
-   HYPRE_BigInt    *new_col_starts;
+   HYPRE_BigInt     new_col_starts[2];
 
    HYPRE_Real       af_sum;
 
@@ -2384,7 +2384,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
       /* assumes that unknowns are together on a procsessor with
        * nodal coarsening  */
-      new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       new_col_starts[0] = (col_starts[0]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf ;
       new_col_starts[1] = (col_starts[1]/(HYPRE_BigInt)num_functions)*(HYPRE_BigInt)new_nf;
 
@@ -2397,7 +2396,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       g_nc = hypre_ParCSRMatrixGlobalNumCols(*P);
 
       /* copy col starts */
-      new_col_starts =  hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       new_col_starts[0] = col_starts[0];
       new_col_starts[1] = col_starts[1];
     }
@@ -2423,8 +2421,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data_new;
    hypre_CSRMatrixI(P_offd) = P_offd_i_new;
    hypre_CSRMatrixJ(P_offd) = P_offd_j_new;
-
-   hypre_TFree(new_col_starts, HYPRE_MEMORY_HOST);
 
    /* If parallel we need to do the col map offd! */
    if (num_procs > 1)
