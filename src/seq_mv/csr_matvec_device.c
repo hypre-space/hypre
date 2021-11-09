@@ -53,7 +53,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-// WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemlksparse implementation is in
+   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemlksparse implementation is in
 #elif defined(HYPRE_USING_SYCL)
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
@@ -328,7 +328,7 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
                                    hypre_Vector    *y,
                                    HYPRE_Int        offset )
 {
-/* WM: TODO */
+   /* WM: TODO */
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)

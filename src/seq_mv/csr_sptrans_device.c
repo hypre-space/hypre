@@ -153,7 +153,7 @@ hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int   m,        HYPRE_Int   n,        H
                                    HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                                    HYPRE_Int   want_data)
 {
-/* WM: TODO */
+   /* WM: TODO */
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ONEMKLSPARSE)
@@ -242,7 +242,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
 {
-/* WM: TODO */
+   /* WM: TODO */
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_SYCL)

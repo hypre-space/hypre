@@ -1175,57 +1175,59 @@ else                                                            \
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
-/*********************************************************************
- * wrapper functions calling sycl parallel_for
- *********************************************************************/
+   /*********************************************************************
+    * wrapper functions calling sycl parallel_for
+    *********************************************************************/
 
-template<typename LOOP_BODY>
-void
-BoxLoopforall( HYPRE_Int length,
-               LOOP_BODY loop_body)
-{
-   if (length <= 0)
+   template<typename LOOP_BODY>
+   void
+   BoxLoopforall( HYPRE_Int length,
+                  LOOP_BODY loop_body)
    {
-      return;
-   }
-   const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-   const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
-
-   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
+      if (length <= 0)
       {
-         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), loop_body);
-      }).wait_and_throw();
-}
+         return;
+      }
+      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
-template<typename LOOP_BODY>
-void
-ReductionBoxLoopforall( LOOP_BODY  loop_body,
-                        HYPRE_Int length,
-                        HYPRE_Real *shared_sum_var )
-{
-   if (length <= 0)
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
+      {
+         cgh.parallel_for(sycl::nd_range<1>(gDim * bDim, bDim), loop_body);
+      }).wait_and_throw();
+   }
+
+   template<typename LOOP_BODY>
+   void
+   ReductionBoxLoopforall( LOOP_BODY  loop_body,
+                           HYPRE_Int length,
+                           HYPRE_Real * shared_sum_var )
    {
-      return;
-   }
-   const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-   const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
-
-   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh)
+      if (length <= 0)
       {
-         cgh.parallel_for(sycl::nd_range<1>(gDim*bDim, bDim), sycl::reduction(shared_sum_var, std::plus<>()), loop_body);
+         return;
+      }
+      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
+      {
+         cgh.parallel_for(sycl::nd_range<1>(gDim * bDim, bDim), sycl::reduction(shared_sum_var,
+                                                                                std::plus<>()), loop_body);
       }).wait_and_throw();
-}
+   }
 
 #ifdef __cplusplus
 }

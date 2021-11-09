@@ -162,16 +162,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       HYPRE_Int *indicator = hypre_CTAlloc(HYPRE_Int, len, HYPRE_MEMORY_DEVICE);
       hypreDevice_CsrRowPtrsToIndices_v2(nrows - 1, len1, (HYPRE_Int *) row_indexes, indicator);
       /* mark unwanted elements as -1 */
-<<<<<<< HEAD
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(len1, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator, (HYPRE_Int *) row_indexes, ncols, indicator );
-=======
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(len1, "thread", bDim);
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
                          (HYPRE_Int *) row_indexes, ncols, indicator );
->>>>>>> master
 
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,

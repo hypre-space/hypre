@@ -16,8 +16,8 @@ sycl::range<1> hypre_GetDefaultDeviceBlockDimension()
 }
 
 sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
-                                                 const char *granularity,
-                                                 sycl::range<1> wgDim)
+                                                   const char *granularity,
+                                                   sycl::range<1> wgDim)
 {
    HYPRE_Int num_WGs = 0;
    HYPRE_Int num_workitems_per_WG = wgDim[0];
@@ -121,8 +121,8 @@ hypre_GetDefaultDeviceBlockDimension()
 
 dim3
 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
-                                   const char *granularity,
-                                   dim3 bDim )
+                                     const char *granularity,
+                                     dim3 bDim )
 {
    HYPRE_Int num_blocks = 0;
    HYPRE_Int num_threads_per_block = bDim.x * bDim.y * bDim.z;
@@ -985,9 +985,9 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
    }
    else
    {
-      auto sycl_asynchandler = [] (sycl::exception_list exceptions) 
+      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
       {
-         for (std::exception_ptr const& e : exceptions) 
+         for (std::exception_ptr const& e : exceptions)
          {
             try
             {
@@ -996,7 +996,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
             catch (sycl::exception const& ex)
             {
                std::cout << "Caught asynchronous SYCL exception:" << std::endl
-               << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
             }
          }
       };
@@ -1290,7 +1290,7 @@ hypre_DeviceDataCreate()
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_DeviceDataCubBinGrowth(data)      = 8u;
    hypre_DeviceDataCubMinBin(data)         = 1u;
-   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) -1;
+   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) - 1;
    hypre_DeviceDataCubMaxCachedBytes(data) = (size_t) -1;
    hypre_DeviceDataCubDevAllocator(data)   = NULL;
    hypre_DeviceDataCubUvmAllocator(data)   = NULL;

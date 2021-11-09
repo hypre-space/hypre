@@ -238,7 +238,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   ptr = (void *)sycl::malloc_device(size, *(hypre_HandleComputeStream(hypre_handle())));
+      ptr = (void *)sycl::malloc_device(size, *(hypre_HandleComputeStream(hypre_handle())));
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
@@ -278,7 +278,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_shared(size, *(hypre_HandleComputeStream(hypre_handle()))) );
+   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_shared(size,
+                                                      *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
@@ -319,7 +320,8 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_host(size, *(hypre_HandleComputeStream(hypre_handle()))) );
+   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_host(size,
+                                                    *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
@@ -422,7 +424,7 @@ hypre_DeviceFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
+      HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
@@ -1425,12 +1427,12 @@ hypre_CachingMallocDevice(void **ptr, size_t nbytes)
    {
       hypre_HandleCubDevAllocator(hypre_handle()) =
          hypre_DeviceDataCubCachingAllocatorCreate( hypre_HandleCubBinGrowth(hypre_handle()),
-                                                  hypre_HandleCubMinBin(hypre_handle()),
-                                                  hypre_HandleCubMaxBin(hypre_handle()),
-                                                  hypre_HandleCubMaxCachedBytes(hypre_handle()),
-                                                  false,
-                                                  false,
-                                                  false );
+                                                    hypre_HandleCubMinBin(hypre_handle()),
+                                                    hypre_HandleCubMaxBin(hypre_handle()),
+                                                    hypre_HandleCubMaxCachedBytes(hypre_handle()),
+                                                    false,
+                                                    false,
+                                                    false );
    }
 
    return hypre_HandleCubDevAllocator(hypre_handle()) -> DeviceAllocate(ptr, nbytes);
@@ -1449,12 +1451,12 @@ hypre_CachingMallocManaged(void **ptr, size_t nbytes)
    {
       hypre_HandleCubUvmAllocator(hypre_handle()) =
          hypre_DeviceDataCubCachingAllocatorCreate( hypre_HandleCubBinGrowth(hypre_handle()),
-                                                  hypre_HandleCubMinBin(hypre_handle()),
-                                                  hypre_HandleCubMaxBin(hypre_handle()),
-                                                  hypre_HandleCubMaxCachedBytes(hypre_handle()),
-                                                  false,
-                                                  false,
-                                                  true );
+                                                    hypre_HandleCubMinBin(hypre_handle()),
+                                                    hypre_HandleCubMaxBin(hypre_handle()),
+                                                    hypre_HandleCubMaxCachedBytes(hypre_handle()),
+                                                    false,
+                                                    false,
+                                                    true );
    }
 
    return hypre_HandleCubUvmAllocator(hypre_handle()) -> DeviceAllocate(ptr, nbytes);
@@ -1468,12 +1470,12 @@ hypre_CachingFreeManaged(void *ptr)
 
 hypre_cub_CachingDeviceAllocator *
 hypre_DeviceDataCubCachingAllocatorCreate(hypre_uint bin_growth,
-                                        hypre_uint min_bin,
-                                        hypre_uint max_bin,
-                                        size_t     max_cached_bytes,
-                                        bool       skip_cleanup,
-                                        bool       debug,
-                                        bool       use_managed_memory)
+                                          hypre_uint min_bin,
+                                          hypre_uint max_bin,
+                                          size_t     max_cached_bytes,
+                                          bool       skip_cleanup,
+                                          bool       debug,
+                                          bool       use_managed_memory)
 {
    hypre_cub_CachingDeviceAllocator *allocator =
       new hypre_cub_CachingDeviceAllocator( bin_growth,

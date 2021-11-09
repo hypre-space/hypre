@@ -71,8 +71,8 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
 #endif
 
-// In debug mode, hypre_TFree() checks the pointer location, which requires the
-// hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
+   // In debug mode, hypre_TFree() checks the pointer location, which requires the
+   // hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
 #if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL)
    free(hypre_handle_);
 #else
@@ -107,12 +107,13 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
       /* I don't have an analogue to cudaSetDevice() here, so what functionality should this have? Could set an environment varible? */
       sycl::platform platform(sycl::gpu_selector{});
       auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-      HYPRE_Int n_devices=0;
+      HYPRE_Int n_devices = 0;
       hypre_GetDeviceCount(&n_devices);
       printf("WM: debug - n_devices = %d, n_gpus = %d\n", n_devices, gpu_devices.size());
       if (device_id >= n_devices)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: SYCL device-ID exceed the number of devices on-node\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ERROR: SYCL device-ID exceed the number of devices on-node\n");
       }
 
       HYPRE_Int local_n_devices = 0;
@@ -122,7 +123,9 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
          // multi-tile GPUs
          if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
          {
-            auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+            auto subDevicesDomainNuma =
+               gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>
+               (sycl::info::partition_affinity_domain::numa);
             for (auto &tile : subDevicesDomainNuma)
             {
                if (local_n_devices == device_id)
@@ -143,8 +146,9 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
             local_n_devices++;
          }
       }
-      hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) = 
-         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
+      hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
+         hypre_DeviceDataDevice(hypre_HandleDeviceData(
+                                   hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
 #else
       hypre_HandleDevice(hypre_handle_) = device_id;
 #endif // #if defined(HYPRE_USING_SYCL)
@@ -175,7 +179,7 @@ hypre_GetDevice(hypre_int *device_id)
 #if defined(HYPRE_USING_SYCL)
    /* WM: question - this is basically what's done by hypre_bind_device... should I do this here? */
    HYPRE_Int n_devices, my_id;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
    /* WM: below is from Abhishek */
@@ -222,7 +226,9 @@ hypre_GetDeviceCount(hypre_int *device_count)
    {
       if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
       {
-         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+         auto subDevicesDomainNuma =
+            gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>
+            (sycl::info::partition_affinity_domain::numa);
          (*device_count) += subDevicesDomainNuma.size();
       }
       else
@@ -415,17 +421,17 @@ HYPRE_PrintDeviceInfo()
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-  auto device = *hypre_HandleDevice(hypre_handle());
-  auto p_name = device.get_platform().get_info<sycl::info::platform::name>();
-  hypre_printf("Platform Name: %s\n", p_name.c_str());
-  auto p_version = device.get_platform().get_info<sycl::info::platform::version>();
-  hypre_printf("Platform Version: %s\n", p_version.c_str());
-  auto d_name = device.get_info<sycl::info::device::name>();
-  hypre_printf("Device Name: %s\n", d_name.c_str());
-  auto max_work_group = device.get_info<sycl::info::device::max_work_group_size>();
-  hypre_printf("Max Work Groups: %d\n", max_work_group);
-  auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();
-  hypre_printf("Max Compute Units: %d\n", max_compute_units);
+   auto device = *hypre_HandleDevice(hypre_handle());
+   auto p_name = device.get_platform().get_info<sycl::info::platform::name>();
+   hypre_printf("Platform Name: %s\n", p_name.c_str());
+   auto p_version = device.get_platform().get_info<sycl::info::platform::version>();
+   hypre_printf("Platform Version: %s\n", p_version.c_str());
+   auto d_name = device.get_info<sycl::info::device::name>();
+   hypre_printf("Device Name: %s\n", d_name.c_str());
+   auto max_work_group = device.get_info<sycl::info::device::max_work_group_size>();
+   hypre_printf("Max Work Groups: %d\n", max_work_group);
+   auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();
+   hypre_printf("Max Compute Units: %d\n", max_compute_units);
 #endif
 
    return hypre_error_flag;

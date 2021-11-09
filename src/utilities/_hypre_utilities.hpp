@@ -399,7 +399,8 @@ struct hypre_GpuMatData
 /* device_utils.c */
 sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
 
-sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, sycl::range<1> bDim );
+sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
+                                                    sycl::range<1> bDim );
 
 #endif // #if defined(HYPRE_USING_SYCL)
 

@@ -5534,8 +5534,8 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    else
 #endif
    {
-      ierr = hypre_BoomerAMGBuildExtInterpHost(A,CF_marker,S,num_cpts_global,num_functions,dof_func,
-                                               debug_flag,trunc_factor,max_elmts,P_ptr);
+      ierr = hypre_BoomerAMGBuildExtInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
+                                               debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -5576,7 +5576,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix   *A,
    else
 #endif
    {
-      ierr = hypre_BoomerAMGBuildExtPIInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
+      ierr = hypre_BoomerAMGBuildExtPIInterpHost(A, CF_marker, S, num_cpts_global, num_functions,
+                                                 dof_func,
                                                  debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
