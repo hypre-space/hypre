@@ -36,8 +36,8 @@
 
 HYPRE_Int
 HYPRE_ConvertPETScMatrixToDistributedMatrix(
-                 Mat PETSc_matrix,
-                 HYPRE_DistributedMatrix *DistributedMatrix )
+   Mat PETSc_matrix,
+   HYPRE_DistributedMatrix *DistributedMatrix )
 {
    HYPRE_Int ierr;
    MPI_Comm hypre_MPI_Comm;
@@ -48,7 +48,7 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
 
 
 
-   if (!PETSc_matrix) return(-1);
+   if (!PETSc_matrix) { return (-1); }
 
 #ifdef HYPRE_TIMING
    timer = hypre_InitializeTiming( "ConvertPETScMatrixToDistributedMatrix");
@@ -62,7 +62,7 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
    /* if(ierr) return(ierr); */
 
    ierr = HYPRE_DistributedMatrixSetLocalStorageType( *DistributedMatrix,
-                                                     HYPRE_PETSC );
+                                                      HYPRE_PETSC );
    /* if(ierr) return(ierr);*/
 
    ierr = HYPRE_DistributedMatrixInitialize( *DistributedMatrix );
@@ -76,7 +76,8 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
       the latter is really a "just in case" option, and so if we don't *have*
       to use it, we won't.*/
 
-   ierr = MatGetSize( PETSc_matrix, &M, &N); if(ierr) return(ierr);
+   ierr = MatGetSize( PETSc_matrix, &M, &N);
+   if (ierr) { return (ierr); }
    ierr = HYPRE_DistributedMatrixSetDims( *DistributedMatrix, M, N);
 
    ierr = HYPRE_DistributedMatrixAssemble( *DistributedMatrix );
@@ -87,7 +88,7 @@ HYPRE_ConvertPETScMatrixToDistributedMatrix(
    /* hypre_FinalizeTiming( timer ); */
 #endif
 
-   return(0);
+   return (0);
 }
 
 #endif

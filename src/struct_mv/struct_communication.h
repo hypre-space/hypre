@@ -50,7 +50,7 @@ typedef struct hypre_CommEntryType_struct
    HYPRE_Int  offset;                       /* offset for the data */
    HYPRE_Int  dim;                          /* dimension of the communication */
    HYPRE_Int  length_array[HYPRE_MAXDIM];   /* last dim has length num_values */
-   HYPRE_Int  stride_array[HYPRE_MAXDIM+1];
+   HYPRE_Int  stride_array[HYPRE_MAXDIM + 1];
    HYPRE_Int *order;                        /* order of last dim values */
 
 } hypre_CommEntryType;
@@ -90,8 +90,10 @@ typedef struct hypre_CommPkg_struct
 
    HYPRE_Int         send_bufsize;            /* total send buffer size (in doubles) */
    HYPRE_Int         recv_bufsize;            /* total recv buffer size (in doubles) */
-   HYPRE_Int         send_bufsize_first_comm; /* total send buffer size (in doubles) at the first comm. */
-   HYPRE_Int         recv_bufsize_first_comm; /* total recv buffer size (in doubles) at the first comm. */
+   HYPRE_Int
+   send_bufsize_first_comm; /* total send buffer size (in doubles) at the first comm. */
+   HYPRE_Int
+   recv_bufsize_first_comm; /* total recv buffer size (in doubles) at the first comm. */
 
    HYPRE_Int         num_sends;
    HYPRE_Int         num_recvs;

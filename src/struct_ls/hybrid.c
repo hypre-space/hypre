@@ -76,11 +76,11 @@ hypre_HybridCreate( MPI_Comm  comm )
    (hybrid_data -> krylov_precond)       = NULL;
 
    /* initialize */
-   (hybrid_data -> dscg_num_its)      = 0; 
+   (hybrid_data -> dscg_num_its)      = 0;
    (hybrid_data -> krylov_num_its)    = 0;
    (hybrid_data -> logging)           = 0;
    (hybrid_data -> print_level)       = 0;
-   
+
    return (void *) hybrid_data;
 }
 
@@ -314,12 +314,12 @@ hypre_HybridSetPrecond( void  *krylov_vdata,
                         void  *krylov_precond          )
 {
    hypre_HybridData *krylov_data = (hypre_HybridData *)krylov_vdata;
- 
+
    (krylov_data -> krylov_default)       = 0;
    (krylov_data -> krylov_precond_solve) = krylov_precond_solve;
    (krylov_data -> krylov_precond_setup) = krylov_precond_setup;
    (krylov_data -> krylov_precond)       = krylov_precond;
- 
+
    return hypre_error_flag;
 }
 
@@ -559,7 +559,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    HYPRE_Int          krylov_max_its    = (hybrid_data -> krylov_max_its);
    HYPRE_Int          logging        = (hybrid_data -> logging);
    HYPRE_Int          solver_type    = (hybrid_data -> solver_type);
-  
+
    HYPRE_Int          krylov_default = (hybrid_data -> krylov_default);
    HYPRE_Int        (*krylov_precond_solve)(void*, void*, void*, void*);
    HYPRE_Int        (*krylov_precond_setup)(void*, void*, void*, void*);
@@ -606,7 +606,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
        * Get additional information from PCG if logging on for hybrid solver.
        * Currently used as debugging flag to print norms.
        *--------------------------------------------------------------------*/
-      if( logging > 1 )
+      if ( logging > 1 )
       {
          hypre_MPI_Comm_rank(comm, &myid );
          hypre_PCGPrintLogging(krylov_solver, myid);
@@ -652,7 +652,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       hypre_GMRESGetConverged(krylov_solver, &converged);
    }
 
-   else 
+   else
    {
       /*--------------------------------------------------------------------
        * Setup BiCGSTAB
@@ -688,17 +688,23 @@ hypre_HybridSolve( void               *hybrid_vdata,
    }
 
    /*-----------------------------------------------------------------------
-    * if converged, done... 
+    * if converged, done...
     *-----------------------------------------------------------------------*/
-   if( converged )
+   if ( converged )
    {
       (hybrid_data -> final_rel_res_norm) = res_norm;
       if (solver_type == 1)
+      {
          hypre_PCGDestroy(krylov_solver);
+      }
       else if (solver_type == 2)
+      {
          hypre_GMRESDestroy(krylov_solver);
+      }
       else
+      {
          hypre_BiCGSTABDestroy(krylov_solver);
+      }
    }
 
    /*-----------------------------------------------------------------------
@@ -775,7 +781,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
           * Get additional information from PCG if logging on for hybrid solver.
           * Currently used as debugging flag to print norms.
           *-----------------------------------------------------------------*/
-         if( logging > 1 )
+         if ( logging > 1 )
          {
             hypre_MPI_Comm_rank(comm, &myid );
             hypre_PCGPrintLogging(krylov_solver, myid);

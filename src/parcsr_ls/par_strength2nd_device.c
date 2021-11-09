@@ -44,7 +44,8 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    */
 
    CF_marker = hypre_TAlloc(HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_HOST);
 
    /* 1. Create new matrix with added diagonal */
    hypre_GpuProfilingPushRange("Setup");

@@ -6,9 +6,9 @@
  ******************************************************************************/
 
 /*
- * File:	timer.c
- * Author:	Scott Kohn (skohn@llnl.gov)
- * Description:	somewhat portable timing routines for C++, C, and Fortran
+ * File: timer.c
+ * Author:  Scott Kohn (skohn@llnl.gov)
+ * Description:   somewhat portable timing routines for C++, C, and Fortran
  *
  * This has been modified many times since the original author's version.
  */
@@ -24,15 +24,15 @@
 HYPRE_Real time_getWallclockSeconds(void)
 {
 #ifndef HYPRE_SEQUENTIAL
-   return(hypre_MPI_Wtime());
+   return (hypre_MPI_Wtime());
 #else
 #ifdef WIN32
-   clock_t cl=clock();
-   return(((HYPRE_Real) cl)/((HYPRE_Real) CLOCKS_PER_SEC));
+   clock_t cl = clock();
+   return (((HYPRE_Real) cl) / ((HYPRE_Real) CLOCKS_PER_SEC));
 #else
    struct tms usage;
    hypre_longint wallclock = times(&usage);
-   return(((HYPRE_Real) wallclock)/((HYPRE_Real) sysconf(_SC_CLK_TCK)));
+   return (((HYPRE_Real) wallclock) / ((HYPRE_Real) sysconf(_SC_CLK_TCK)));
 #endif
 #endif
 }
@@ -41,18 +41,18 @@ HYPRE_Real time_getCPUSeconds(void)
 {
 #ifndef TIMER_NO_SYS
    clock_t cpuclock = clock();
-   return(((HYPRE_Real) (cpuclock))/((HYPRE_Real) CLOCKS_PER_SEC));
+   return (((HYPRE_Real) (cpuclock)) / ((HYPRE_Real) CLOCKS_PER_SEC));
 #else
-   return(0.0);
+   return (0.0);
 #endif
 }
 
 HYPRE_Real time_get_wallclock_seconds_(void)
 {
-   return(time_getWallclockSeconds());
+   return (time_getWallclockSeconds());
 }
 
 HYPRE_Real time_get_cpu_seconds_(void)
 {
-   return(time_getCPUSeconds());
+   return (time_getCPUSeconds());
 }

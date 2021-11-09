@@ -12,7 +12,7 @@
 #define hypre_RECVINFODATA_HEADER
 
 
-typedef struct 
+typedef struct
 {
    HYPRE_Int             size;
 

@@ -78,7 +78,8 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                              hypre_ParVector    *Vtemp )
 
 {
-   return hypre_BoomerAMGRelax(A, f, cf_marker, 18, relax_points, relax_weight, 0.0, l1_norms, u, Vtemp, NULL);
+   return hypre_BoomerAMGRelax(A, f, cf_marker, 18, relax_points, relax_weight, 0.0, l1_norms, u,
+                               Vtemp, NULL);
 }
 
 /*--------------------------------------------------------------------------

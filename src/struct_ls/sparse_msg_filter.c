@@ -120,7 +120,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          HYPRE_Real lambday = 0.0;
          HYPRE_Real lambdaz = 0.0;
          HYPRE_Int si, dir, Astenc;
-         HYPRE_Real *Ap,lambda_max;
+         HYPRE_Real *Ap, lambda_max;
 
          for (si = 0; si < stencil_size; si++)
          {
@@ -364,10 +364,13 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
    {
       HYPRE_Int nboxes = hypre_BoxArraySize(compute_boxes);
-      data_indices_d  = hypre_TAlloc(HYPRE_Int,   stencil_size*nboxes, HYPRE_MEMORY_DEVICE);
+      data_indices_d  = hypre_TAlloc(HYPRE_Int,   stencil_size * nboxes, HYPRE_MEMORY_DEVICE);
       stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size,        HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size*nboxes, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size * nboxes,
+                    HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -395,7 +398,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
       {
-         HYPRE_Real lambdax,lambday,lambdaz;
+         HYPRE_Real lambdax, lambday, lambdaz;
          HYPRE_Real *Ap;
          HYPRE_Int si, Astenc;
 
@@ -405,7 +408,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
          for (si = 0; si < stencil_size; si++)
          {
-            Ap = matrixA_data + data_indices_d[i*stencil_size+si];
+            Ap = matrixA_data + data_indices_d[i * stencil_size + si];
 
             /* compute lambdax */
             Astenc = hypre_IndexD(stencil_shape_d[si], 0);

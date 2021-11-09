@@ -118,7 +118,8 @@ hypre_BoomerAMGCoarseParms(MPI_Comm         comm,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(CF_marker));
    if (num_functions > 1)
    {
-      exec = hypre_GetExecPolicy2(hypre_IntArrayMemoryLocation(CF_marker), hypre_IntArrayMemoryLocation(dof_func));
+      exec = hypre_GetExecPolicy2(hypre_IntArrayMemoryLocation(CF_marker),
+                                  hypre_IntArrayMemoryLocation(dof_func));
    }
 
    if (exec == HYPRE_EXEC_DEVICE)
