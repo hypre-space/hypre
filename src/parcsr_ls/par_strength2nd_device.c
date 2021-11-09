@@ -31,7 +31,6 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_CSRMatrix    *S_offd     = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int           S_diag_nnz = hypre_CSRMatrixNumNonzeros(S_diag);
    HYPRE_Int           S_offd_nnz = hypre_CSRMatrixNumNonzeros(S_offd);
-   hypre_ParCSRMatrix *SI         = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
    hypre_CSRMatrix    *Id, *SI_diag;
    hypre_ParCSRMatrix *S_XC, *S_CX, *S2;
    HYPRE_Int          *CF_marker, *new_end;

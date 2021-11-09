@@ -1547,18 +1547,11 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    }
 
    /* Create ParCSRMatrix C */
-   HYPRE_BigInt *row_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   HYPRE_BigInt *col_starts_C = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(row_starts_C, hypre_ParCSRMatrixRowStarts(A), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(col_starts_C, hypre_ParCSRMatrixColStarts(A), HYPRE_BigInt, 2,
-                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
    hypre_ParCSRMatrix *C = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
                                                     hypre_ParCSRMatrixGlobalNumRows(A),
                                                     hypre_ParCSRMatrixGlobalNumCols(A),
-                                                    row_starts_C,
-                                                    col_starts_C,
+                                                    hypre_ParCSRMatrixRowStarts(A),
+                                                    hypre_ParCSRMatrixColStarts(A),
                                                     num_cols_offd_C,
                                                     hypre_CSRMatrixNumNonzeros(C_diag),
                                                     hypre_CSRMatrixNumNonzeros(C_offd));

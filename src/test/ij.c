@@ -8052,8 +8052,6 @@ final:
       hypre_FinalizeMemoryDebug();
    */
 
-   //hypre_PrintMemoryTracker();
-
    /* Finalize Hypre */
    HYPRE_Finalize();
 
@@ -8062,7 +8060,7 @@ final:
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   hypre_ResetCudaDevice(hypre_handle());
+   hypre_ResetCudaDevice(NULL);
 #endif
 
    return (0);
