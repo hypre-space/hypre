@@ -12,9 +12,14 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-__global__ void hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int nnz, HYPRE_Int dim, HYPRE_Int *j_in, HYPRE_Int *j_out);
-__global__ void hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int nrows, HYPRE_Int dim, HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data, HYPRE_Real *data_out);
-__global__ void hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int nrows, HYPRE_Int dim, HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data, HYPRE_Real *data_x_out, HYPRE_Real *data_y_out, HYPRE_Real *data_z_out );
+__global__ void hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int nnz, HYPRE_Int dim, HYPRE_Int *j_in,
+                                                   HYPRE_Int *j_out);
+__global__ void hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int nrows, HYPRE_Int dim, HYPRE_Int *i_in,
+                                                   HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
+                                                   HYPRE_Real *data_out);
+__global__ void hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int nrows, HYPRE_Int dim,
+                                                     HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
+                                                     HYPRE_Real *data_x_out, HYPRE_Real *data_y_out, HYPRE_Real *data_z_out );
 #endif
 
 /*--------------------------------------------------------------------------
@@ -118,57 +123,101 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
    }
 
    if (ads_data -> A_C)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> A_C);
+   }
    if (ads_data -> B_C)
+   {
       HYPRE_AMSDestroy(ads_data -> B_C);
+   }
 
    if (ads_data -> owns_Pi && ads_data -> Pi)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> Pi);
+   }
    if (ads_data -> A_Pi)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> A_Pi);
+   }
    if (ads_data -> B_Pi)
+   {
       HYPRE_BoomerAMGDestroy(ads_data -> B_Pi);
+   }
 
    if (ads_data -> owns_Pi && ads_data -> Pix)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> Pix);
+   }
    if (ads_data -> A_Pix)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> A_Pix);
+   }
    if (ads_data -> B_Pix)
+   {
       HYPRE_BoomerAMGDestroy(ads_data -> B_Pix);
+   }
    if (ads_data -> owns_Pi && ads_data -> Piy)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> Piy);
+   }
    if (ads_data -> A_Piy)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> A_Piy);
+   }
    if (ads_data -> B_Piy)
+   {
       HYPRE_BoomerAMGDestroy(ads_data -> B_Piy);
+   }
    if (ads_data -> owns_Pi && ads_data -> Piz)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> Piz);
+   }
    if (ads_data -> A_Piz)
+   {
       hypre_ParCSRMatrixDestroy(ads_data -> A_Piz);
+   }
    if (ads_data -> B_Piz)
+   {
       HYPRE_BoomerAMGDestroy(ads_data -> B_Piz);
+   }
 
    if (ads_data -> r0)
+   {
       hypre_ParVectorDestroy(ads_data -> r0);
+   }
    if (ads_data -> g0)
+   {
       hypre_ParVectorDestroy(ads_data -> g0);
+   }
    if (ads_data -> r1)
+   {
       hypre_ParVectorDestroy(ads_data -> r1);
+   }
    if (ads_data -> g1)
+   {
       hypre_ParVectorDestroy(ads_data -> g1);
+   }
    if (ads_data -> r2)
+   {
       hypre_ParVectorDestroy(ads_data -> r2);
+   }
    if (ads_data -> g2)
+   {
       hypre_ParVectorDestroy(ads_data -> g2);
+   }
    if (ads_data -> zz)
+   {
       hypre_ParVectorDestroy(ads_data -> zz);
+   }
 
    hypre_SeqVectorDestroy(ads_data -> A_l1_norms);
 
    /* C, G, x, y and z are not destroyed */
 
    if (ads_data)
+   {
       hypre_TFree(ads_data, HYPRE_MEMORY_HOST);
+   }
 
    return hypre_error_flag;
 }
@@ -524,18 +573,20 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
       {
          MPI_Comm comm = hypre_ParCSRMatrixComm(F2V);
          HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(F2V);
-         HYPRE_BigInt global_num_cols = 3*hypre_ParCSRMatrixGlobalNumCols(F2V);
+         HYPRE_BigInt global_num_cols = 3 * hypre_ParCSRMatrixGlobalNumCols(F2V);
          HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(F2V);
          HYPRE_BigInt *col_starts;
          HYPRE_Int col_starts_size;
-         HYPRE_Int num_cols_offd = 3*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
-         HYPRE_Int num_nonzeros_diag = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
-         HYPRE_Int num_nonzeros_offd = 3*hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
+         HYPRE_Int num_cols_offd = 3 * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(F2V));
+         HYPRE_Int num_nonzeros_diag = 3 * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(F2V));
+         HYPRE_Int num_nonzeros_offd = 3 * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(F2V));
          HYPRE_BigInt *col_starts_F2V = hypre_ParCSRMatrixColStarts(F2V);
          col_starts_size = 2;
          col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
          for (i = 0; i < col_starts_size; i++)
+         {
             col_starts[i] = 3 * col_starts_F2V[i];
+         }
 
          Pi = hypre_ParCSRMatrixCreate(comm,
                                        global_num_rows,
@@ -588,15 +639,19 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          else
 #endif
          {
-            for (i = 0; i < F2V_diag_nrows+1; i++)
+            for (i = 0; i < F2V_diag_nrows + 1; i++)
+            {
                Pi_diag_I[i] = 3 * F2V_diag_I[i];
+            }
 
             for (i = 0; i < F2V_diag_nnz; i++)
                for (d = 0; d < 3; d++)
-                  Pi_diag_J[3*i+d] = 3*F2V_diag_J[i]+d;
+               {
+                  Pi_diag_J[3 * i + d] = 3 * F2V_diag_J[i] + d;
+               }
 
             for (i = 0; i < F2V_diag_nrows; i++)
-               for (j = F2V_diag_I[i]; j < F2V_diag_I[i+1]; j++)
+               for (j = F2V_diag_I[i]; j < F2V_diag_I[i + 1]; j++)
                {
                   *Pi_diag_data++ = RT100_data[i];
                   *Pi_diag_data++ = RT010_data[i];
@@ -651,15 +706,19 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
 #endif
          {
             if (F2V_offd_ncols)
-               for (i = 0; i < F2V_offd_nrows+1; i++)
+               for (i = 0; i < F2V_offd_nrows + 1; i++)
+               {
                   Pi_offd_I[i] = 3 * F2V_offd_I[i];
+               }
 
             for (i = 0; i < F2V_offd_nnz; i++)
                for (d = 0; d < 3; d++)
-                  Pi_offd_J[3*i+d] = 3*F2V_offd_J[i]+d;
+               {
+                  Pi_offd_J[3 * i + d] = 3 * F2V_offd_J[i] + d;
+               }
 
             for (i = 0; i < F2V_offd_nrows; i++)
-               for (j = F2V_offd_I[i]; j < F2V_offd_I[i+1]; j++)
+               for (j = F2V_offd_I[i]; j < F2V_offd_I[i + 1]; j++)
                {
                   *Pi_offd_data++ = RT100_data[i];
                   *Pi_offd_data++ = RT010_data[i];
@@ -669,7 +728,9 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
 
          for (i = 0; i < F2V_offd_ncols; i++)
             for (d = 0; d < 3; d++)
-               Pi_cmap[3*i+d] = 3*F2V_cmap[i]+(HYPRE_BigInt)d;
+            {
+               Pi_cmap[3 * i + d] = 3 * F2V_cmap[i] + (HYPRE_BigInt)d;
+            }
       }
 
       hypre_ParCSRMatrixDestroy(F2V);
@@ -853,7 +914,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          else
 #endif
          {
-            for (i = 0; i < F2V_diag_nrows+1; i++)
+            for (i = 0; i < F2V_diag_nrows + 1; i++)
             {
                Pix_diag_I[i] = F2V_diag_I[i];
                Piy_diag_I[i] = F2V_diag_I[i];
@@ -868,7 +929,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
             }
 
             for (i = 0; i < F2V_diag_nrows; i++)
-               for (j = F2V_diag_I[i]; j < F2V_diag_I[i+1]; j++)
+               for (j = F2V_diag_I[i]; j < F2V_diag_I[i + 1]; j++)
                {
                   *Pix_diag_data++ = RT100_data[i];
                   *Piy_diag_data++ = RT010_data[i];
@@ -934,7 +995,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
 #endif
          {
             if (F2V_offd_ncols)
-               for (i = 0; i < F2V_offd_nrows+1; i++)
+               for (i = 0; i < F2V_offd_nrows + 1; i++)
                {
                   Pix_offd_I[i] = F2V_offd_I[i];
                   Piy_offd_I[i] = F2V_offd_I[i];
@@ -949,7 +1010,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
             }
 
             for (i = 0; i < F2V_offd_nrows; i++)
-               for (j = F2V_offd_I[i]; j < F2V_offd_I[i+1]; j++)
+               for (j = F2V_offd_I[i]; j < F2V_offd_I[i + 1]; j++)
                {
                   *Pix_offd_data++ = RT100_data[i];
                   *Piy_offd_data++ = RT010_data[i];
@@ -966,9 +1027,13 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
       }
 
       if (HYPRE_AssumedPartitionCheck())
+      {
          hypre_ParCSRMatrixDestroy(F2V);
+      }
       else
+      {
          hypre_ParCSRBooleanMatrixDestroy((hypre_ParCSRBooleanMatrix*)F2V);
+      }
    }
 
    hypre_ParVectorDestroy(RT100);
@@ -1019,7 +1084,8 @@ HYPRE_Int hypre_ADSSetup(void *solver,
 
       ads_data -> A_l1_norms = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(ads_data -> A));
       hypre_VectorData(ads_data -> A_l1_norms) = l1_norm_data;
-      hypre_SeqVectorInitialize_v2(ads_data -> A_l1_norms, hypre_ParCSRMatrixMemoryLocation(ads_data -> A));
+      hypre_SeqVectorInitialize_v2(ads_data -> A_l1_norms,
+                                   hypre_ParCSRMatrixMemoryLocation(ads_data -> A));
    }
 
    /* Chebyshev? */
@@ -1157,7 +1223,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
    }
 
    if (ads_data -> cycle_type > 10)
-   /* Create the AMG solvers on the range of Pi{x,y,z}^T */
+      /* Create the AMG solvers on the range of Pi{x,y,z}^T */
    {
       HYPRE_BoomerAMGCreate(&ads_data -> B_Pix);
       HYPRE_BoomerAMGSetCoarsenType(ads_data -> B_Pix, ads_data -> B_Pi_coarsen_type);
@@ -1280,7 +1346,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                            NULL, NULL);
    }
    else
-   /* Create the AMG solver on the range of Pi^T */
+      /* Create the AMG solver on the range of Pi^T */
    {
       HYPRE_BoomerAMGCreate(&ads_data -> B_Pi);
       HYPRE_BoomerAMGSetCoarsenType(ads_data -> B_Pi, ads_data -> B_Pi_coarsen_type);
@@ -1411,7 +1477,8 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      needZ = ads_data -> A_relax_type == 2 || ads_data -> A_relax_type == 4 || ads_data -> A_relax_type == 16;
+      needZ = ads_data -> A_relax_type == 2 || ads_data -> A_relax_type == 4 ||
+              ads_data -> A_relax_type == 16;
    }
    else
 #endif
@@ -1429,49 +1496,51 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    }
 
    if (ads_data -> print_level > 0)
+   {
       hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
+   }
 
    switch (ads_data -> cycle_type)
    {
       case 1:
       default:
-         hypre_sprintf(cycle,"%s","01210");
+         hypre_sprintf(cycle, "%s", "01210");
          break;
       case 2:
-         hypre_sprintf(cycle,"%s","(0+1+2)");
+         hypre_sprintf(cycle, "%s", "(0+1+2)");
          break;
       case 3:
-         hypre_sprintf(cycle,"%s","02120");
+         hypre_sprintf(cycle, "%s", "02120");
          break;
       case 4:
-         hypre_sprintf(cycle,"%s","(010+2)");
+         hypre_sprintf(cycle, "%s", "(010+2)");
          break;
       case 5:
-         hypre_sprintf(cycle,"%s","0102010");
+         hypre_sprintf(cycle, "%s", "0102010");
          break;
       case 6:
-         hypre_sprintf(cycle,"%s","(020+1)");
+         hypre_sprintf(cycle, "%s", "(020+1)");
          break;
       case 7:
-         hypre_sprintf(cycle,"%s","0201020");
+         hypre_sprintf(cycle, "%s", "0201020");
          break;
       case 8:
-         hypre_sprintf(cycle,"%s","0(+1+2)0");
+         hypre_sprintf(cycle, "%s", "0(+1+2)0");
          break;
       case 9:
-         hypre_sprintf(cycle,"%s","01210");
+         hypre_sprintf(cycle, "%s", "01210");
          break;
       case 11:
-         hypre_sprintf(cycle,"%s","013454310");
+         hypre_sprintf(cycle, "%s", "013454310");
          break;
       case 12:
-         hypre_sprintf(cycle,"%s","(0+1+3+4+5)");
+         hypre_sprintf(cycle, "%s", "(0+1+3+4+5)");
          break;
       case 13:
-         hypre_sprintf(cycle,"%s","034515430");
+         hypre_sprintf(cycle, "%s", "034515430");
          break;
       case 14:
-         hypre_sprintf(cycle,"%s","01(+3+4+5)10");
+         hypre_sprintf(cycle, "%s", "01(+3+4+5)10");
          break;
    }
 
@@ -1482,13 +1551,17 @@ HYPRE_Int hypre_ADSSolve(void *solver,
       {
          hypre_ParVectorCopy(b, ads_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ads_data -> A, x, 1.0, ads_data -> r0);
-         r_norm = sqrt(hypre_ParVectorInnerProd(ads_data -> r0,ads_data -> r0));
+         r_norm = sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
          r0_norm = r_norm;
          b_norm = sqrt(hypre_ParVectorInnerProd(b, b));
          if (b_norm)
+         {
             relative_resid = r_norm / b_norm;
+         }
          else
+         {
             relative_resid = r_norm;
+         }
          if (my_id == 0 && ads_data -> print_level > 0)
          {
             hypre_printf("                                            relative\n");
@@ -1523,14 +1596,18 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          old_resid = r_norm;
          hypre_ParVectorCopy(b, ads_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ads_data -> A, x, 1.0, ads_data -> r0);
-         r_norm = sqrt(hypre_ParVectorInnerProd(ads_data -> r0,ads_data -> r0));
+         r_norm = sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
          if (b_norm)
+         {
             relative_resid = r_norm / b_norm;
+         }
          else
+         {
             relative_resid = r_norm;
+         }
          if (my_id == 0 && ads_data -> print_level > 0)
             hypre_printf("    Cycle %2d   %e    %f     %e \n",
-                         i+1, r_norm, r_norm / old_resid, relative_resid);
+                         i + 1, r_norm, r_norm / old_resid, relative_resid);
       }
 
       if (relative_resid < ads_data -> tol)
@@ -1542,13 +1619,15 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 
    if (my_id == 0 && ads_data -> print_level > 0 && ads_data -> maxit > 1)
       hypre_printf("\n\n Average Convergence Factor = %f\n\n",
-                   pow((r_norm/r0_norm),(1.0/(HYPRE_Real) i)));
+                   pow((r_norm / r0_norm), (1.0 / (HYPRE_Real) i)));
 
    ads_data -> num_iterations = i;
    ads_data -> rel_resid_norm = relative_resid;
 
    if (ads_data -> num_iterations == ads_data -> maxit && ads_data -> tol > 0.0)
+   {
       hypre_error(HYPRE_ERROR_CONV);
+   }
 
    return hypre_error_flag;
 }

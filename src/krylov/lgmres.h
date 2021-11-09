@@ -84,13 +84,13 @@ typedef struct
    HYPRE_Real   a_tol;
    HYPRE_Real   rel_residual_norm;
 
-/*lgmres specific stuff */
+   /*lgmres specific stuff */
    HYPRE_Int      aug_dim;
    HYPRE_Int      approx_constant;
    void   **aug_vecs;
    HYPRE_Int     *aug_order;
    void   **a_aug_vecs;
-/*---*/
+   /*---*/
 
    void  *A;
    void  *r;
@@ -105,7 +105,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
    HYPRE_Real  *norms;
@@ -150,7 +150,7 @@ hypre_LGMRESFunctionsCreate(
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
-   );
+);
 
 /**
  * Description...

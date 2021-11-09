@@ -1,216 +1,108 @@
 # Output file: benchmark_ij.out.1
-     Complexity:    grid = 1.386281
-                operator = 2.317626
-                memory = 2.740965
-
 Iterations = 55
 Final Relative Residual Norm = 7.846640e-09
 
 # Output file: benchmark_ij.out.2
-     Complexity:    grid = 1.386750
-                operator = 2.314724
-                memory = 2.738467
-
 Iterations = 47
 Final Relative Residual Norm = 7.463067e-09
 
 # Output file: benchmark_ij.out.3
-     Complexity:    grid = 1.234000
-                operator = 1.239607
-                memory = 1.468688
-
 Iterations = 93
 Final Relative Residual Norm = 7.952106e-09
 
 # Output file: benchmark_ij.out.4
-     Complexity:    grid = 1.363905
-                operator = 2.856171
-                memory = 3.482328
-
 Iterations = 20
 Final Relative Residual Norm = 8.258745e-09
 
 # Output file: benchmark_ij.out.5
-     Complexity:    grid = 1.091717
-                operator = 1.219345
-                memory = 1.372455
-
 Iterations = 18
 Final Relative Residual Norm = 5.554025e-09
 
 # Output file: benchmark_ij.out.6
-     Complexity:    grid = 1.234015
-                operator = 1.239642
-                memory = 1.468759
-
 Iterations = 84
 Final Relative Residual Norm = 8.011055e-09
 
 # Output file: benchmark_ij.out.7
-     Complexity:    grid = 1.223736
-                operator = 1.527425
-                memory = 1.987193
-
 Iterations = 20
 Final Relative Residual Norm = 6.626333e-09
 
 # Output file: benchmark_ij.out.8
-     Complexity:    grid = 1.386265
-                operator = 2.317442
-                memory = 2.740765
-
 Iterations = 55
 Final Relative Residual Norm = 9.474079e-09
 
 # Output file: benchmark_ij.out.9
-     Complexity:    grid = 1.386750
-                operator = 2.314724
-                memory = 2.738467
-
 Iterations = 47
 Final Relative Residual Norm = 7.463067e-09
 
 # Output file: benchmark_ij.out.10
-     Complexity:    grid = 1.233994
-                operator = 1.239593
-                memory = 1.468671
-
 Iterations = 91
 Final Relative Residual Norm = 8.206536e-09
 
 # Output file: benchmark_ij.out.11
-     Complexity:    grid = 1.363905
-                operator = 2.856171
-                memory = 3.482328
-
 Iterations = 20
 Final Relative Residual Norm = 8.258745e-09
 
 # Output file: benchmark_ij.out.12
-     Complexity:    grid = 1.091717
-                operator = 1.219345
-                memory = 1.372455
-
 Iterations = 18
 Final Relative Residual Norm = 5.554025e-09
 
 # Output file: benchmark_ij.out.13
-     Complexity:    grid = 1.234015
-                operator = 1.239642
-                memory = 1.468759
-
 Iterations = 84
 Final Relative Residual Norm = 8.011036e-09
 
 # Output file: benchmark_ij.out.14
-     Complexity:    grid = 1.353478
-                operator = 2.781080
-                memory = 3.405082
-
 Iterations = 20
 Final Relative Residual Norm = 9.331252e-09
 
 # Output file: benchmark_ij.out.15
-     Complexity:    grid = 1.363169
-                operator = 2.859458
-                memory = 3.484816
-
 Iterations = 22
 Final Relative Residual Norm = 4.989202e-09
 
 # Output file: benchmark_ij.out.16
-     Complexity:    grid = 1.353489
-                operator = 2.783363
-                memory = 3.407368
-
 Iterations = 20
 Final Relative Residual Norm = 9.799174e-09
 
 # Output file: benchmark_ij.out.17
-     Complexity:    grid = 1.015757
-                operator = 1.046616
-                memory = 1.317502
-
 Iterations = 20
 Final Relative Residual Norm = 3.591664e-09
 
 # Output file: benchmark_ij.out.18
-     Complexity:    grid = 1.070985
-                operator = 1.449032
-                memory = 1.990633
-
 Iterations = 20
 Final Relative Residual Norm = 3.426856e-09
 
 # Output file: benchmark_ij.out.19
-     Complexity:    grid = 1.079983
-                operator = 1.533983
-                memory = 1.702191
-
 Iterations = 43
 Final Relative Residual Norm = 6.495721e-09
 
 # Output file: benchmark_ij.out.20
-     Complexity:    grid = 1.082188
-                operator = 1.551144
-                memory = 2.054636
-
 Iterations = 38
 Final Relative Residual Norm = 6.437212e-09
 
 # Output file: benchmark_ij.out.21
-     Complexity:    grid = 1.061736
-                operator = 1.424757
-                memory = 2.084035
-
 Iterations = 28
 Final Relative Residual Norm = 5.555885e-09
 
 # Output file: benchmark_ij.out.22
-     Complexity:    grid = 1.354127
-                operator = 2.781838
-                memory = 3.406628
-
 Iterations = 12
 Final Relative Residual Norm = 8.710224e-09
 
 # Output file: benchmark_ij.out.23
-     Complexity:    grid = 1.354127
-                operator = 2.781838
-                memory = 3.406628
-
 Iterations = 13
 Final Relative Residual Norm = 6.320185e-09
 
 # Output file: benchmark_ij.out.24
-     Complexity:    grid = 1.354127
-                operator = 2.781838
-                memory = 3.406628
-
 Iterations = 14
 Final Relative Residual Norm = 2.238583e-09
 
 # Output file: benchmark_ij.out.25
-     Complexity:    grid = 1.354127
-                operator = 2.781838
-                memory = 3.406628
-
 Iterations = 15
 Final Relative Residual Norm = 4.854928e-09
 
 # Output file: benchmark_ij.out.26
-     Complexity:    grid = 1.014377
-                operator = 1.014669
-                memory = 1.078974
-
 Iterations = 37
 Final Relative Residual Norm = 7.386539e-09
 
 # Output file: benchmark_ij.out.27
-     Complexity:    grid = 1.016504
-                operator = 1.025273
-                memory = 1.092554
-
 Iterations = 22
 Final Relative Residual Norm = 7.869651e-09
 

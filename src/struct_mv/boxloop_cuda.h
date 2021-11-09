@@ -30,113 +30,114 @@ typedef struct hypre_Boxloop_struct
 } hypre_Boxloop;
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
-/* -------------------------
- *     parfor-loop
- * ------------------------*/
+   /* -------------------------
+    *     parfor-loop
+    * ------------------------*/
 
-template <typename LOOP_BODY>
-__global__ void
-forall_kernel( LOOP_BODY loop_body,
-               HYPRE_Int length )
-{
-   const HYPRE_Int idx = hypre_cuda_get_grid_thread_id<1,1>();
-   /* const HYPRE_Int number_threads = hypre_cuda_get_grid_num_threads<1,1>(); */
-
-   if (idx < length)
+   template <typename LOOP_BODY>
+   __global__ void
+   forall_kernel( LOOP_BODY loop_body,
+                  HYPRE_Int length )
    {
-      loop_body(idx);
-   }
-}
+      const HYPRE_Int idx = hypre_cuda_get_grid_thread_id<1, 1>();
+      /* const HYPRE_Int number_threads = hypre_cuda_get_grid_num_threads<1,1>(); */
 
-template<typename LOOP_BODY>
-void
-BoxLoopforall( HYPRE_Int length,
-               LOOP_BODY loop_body )
-{
-   HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
-
-   if (exec_policy == HYPRE_EXEC_HOST)
-   {
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
-      for (HYPRE_Int idx = 0; idx < length; idx++)
+      if (idx < length)
       {
          loop_body(idx);
       }
    }
-   else if (exec_policy == HYPRE_EXEC_DEVICE)
+
+   template<typename LOOP_BODY>
+   void
+   BoxLoopforall( HYPRE_Int length,
+                  LOOP_BODY loop_body )
    {
-      const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      const dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
 
-      HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
-   }
-}
+      if (exec_policy == HYPRE_EXEC_HOST)
+      {
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+         for (HYPRE_Int idx = 0; idx < length; idx++)
+         {
+            loop_body(idx);
+         }
+      }
+      else if (exec_policy == HYPRE_EXEC_DEVICE)
+      {
+         const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+         const dim3 gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
 
-/* ------------------------------
- *     parforreduction-loop
- * -----------------------------*/
-
-template <typename LOOP_BODY, typename REDUCER>
-__global__ void
-reductionforall_kernel( HYPRE_Int length,
-                        REDUCER   reducer,
-                        LOOP_BODY loop_body )
-{
-   const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1,1>();
-   const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1,1>();
-
-   for (HYPRE_Int idx = thread_id; idx < length; idx += n_threads)
-   {
-      loop_body(idx, reducer);
-   }
-
-   /* reduction in block-level and the save the results in reducer */
-   reducer.BlockReduce();
-}
-
-template<typename LOOP_BODY, typename REDUCER>
-void
-ReductionBoxLoopforall( HYPRE_Int  length,
-                        REDUCER   &reducer,
-                        LOOP_BODY  loop_body )
-{
-   if (length <= 0)
-   {
-      return;
+         HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
+      }
    }
 
-   HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+   /* ------------------------------
+    *     parforreduction-loop
+    * -----------------------------*/
 
-   if (exec_policy == HYPRE_EXEC_HOST)
+   template <typename LOOP_BODY, typename REDUCER>
+   __global__ void
+   reductionforall_kernel( HYPRE_Int length,
+                           REDUCER   reducer,
+                           LOOP_BODY loop_body )
    {
-      for (HYPRE_Int idx = 0; idx < length; idx++)
+      const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+      const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1, 1>();
+
+      for (HYPRE_Int idx = thread_id; idx < length; idx += n_threads)
       {
          loop_body(idx, reducer);
       }
+
+      /* reduction in block-level and the save the results in reducer */
+      reducer.BlockReduce();
    }
-   else if (exec_policy == HYPRE_EXEC_DEVICE)
+
+   template<typename LOOP_BODY, typename REDUCER>
+   void
+   ReductionBoxLoopforall( HYPRE_Int  length,
+                           REDUCER   & reducer,
+                           LOOP_BODY  loop_body )
    {
-      const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+      if (length <= 0)
+      {
+         return;
+      }
 
-      /* Note: we assume gDim cannot exceed 1024
-       *       and bDim < WARP * WARP
-       */
-      gDim.x = hypre_min(gDim.x, 1024);
-      reducer.nblocks = gDim.x;
+      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
 
-      /*
-      hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
-      */
+      if (exec_policy == HYPRE_EXEC_HOST)
+      {
+         for (HYPRE_Int idx = 0; idx < length; idx++)
+         {
+            loop_body(idx, reducer);
+         }
+      }
+      else if (exec_policy == HYPRE_EXEC_DEVICE)
+      {
+         const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+         dim3 gDim = hypre_GetDefaultCUDAGridDimension(length, "thread", bDim);
 
-      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
+         /* Note: we assume gDim cannot exceed 1024
+          *       and bDim < WARP * WARP
+          */
+         gDim.x = hypre_min(gDim.x, 1024);
+         reducer.nblocks = gDim.x;
+
+         /*
+         hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
+         */
+
+         HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
+      }
    }
-}
 
 #ifdef __cplusplus
 }

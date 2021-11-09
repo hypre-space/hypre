@@ -31,7 +31,8 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 {
    if (hypre_VectorData(x) == hypre_VectorData(y))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice2");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice2");
    }
 
 #ifdef HYPRE_USING_CUSPARSE

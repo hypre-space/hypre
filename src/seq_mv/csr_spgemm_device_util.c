@@ -44,7 +44,7 @@ hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
                         HYPRE_Int *ghash_sizes,
                         HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id >= num_ghash)
    {
@@ -72,7 +72,7 @@ hypre_SpGemmGhashSize2( HYPRE_Int  num_rows,
                         HYPRE_Int *ghash_sizes,
                         HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < num_rows)
    {
@@ -116,7 +116,8 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
 
    hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);
 
-   hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
 
    if (!ghash_size)
    {

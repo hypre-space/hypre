@@ -220,7 +220,7 @@ hypre_BoxCreate( HYPRE_Int  ndim )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_BoxDestroy( hypre_Box *box )
 {
    if (box)
@@ -290,7 +290,7 @@ hypre_BoxDuplicate( hypre_Box *box )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_BoxVolume( hypre_Box *box )
 {
    HYPRE_Int volume, d, ndim = hypre_BoxNDim(box);
@@ -365,7 +365,7 @@ hypre_BoxGetSize( hypre_Box   *box,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_BoxGetStrideSize( hypre_Box   *box,
                         hypre_Index  stride,
                         hypre_Index  size   )
@@ -388,7 +388,7 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_BoxGetStrideVolume( hypre_Box   *box,
                           hypre_Index  stride,
                           HYPRE_Int   *volume_ptr )
@@ -447,7 +447,7 @@ hypre_BoxRankIndex( hypre_Box   *box,
 
    r = rank;
    s = hypre_BoxVolume(box);
-   for (d = ndim-1; d >= 0; d--)
+   for (d = ndim - 1; d >= 0; d--)
    {
       s = s / hypre_BoxSizeD(box, d);
       hypre_IndexD(index, d) = r / s;
@@ -487,7 +487,7 @@ hypre_BoxOffsetDistance( hypre_Box   *box,
 HYPRE_Int
 hypre_BoxShiftPos( hypre_Box   *box,
                    hypre_Index  shift )
-{ 
+{
    HYPRE_Int  d, ndim = hypre_BoxNDim(box);
 
    for (d = 0; d < ndim; d++)
@@ -495,7 +495,7 @@ hypre_BoxShiftPos( hypre_Box   *box,
       hypre_BoxIMinD(box, d) += hypre_IndexD(shift, d);
       hypre_BoxIMaxD(box, d) += hypre_IndexD(shift, d);
    }
-  
+
    return hypre_error_flag;
 }
 
@@ -506,7 +506,7 @@ hypre_BoxShiftPos( hypre_Box   *box,
 HYPRE_Int
 hypre_BoxShiftNeg( hypre_Box   *box,
                    hypre_Index  shift )
-{ 
+{
    HYPRE_Int  d, ndim = hypre_BoxNDim(box);
 
    for (d = 0; d < ndim; d++)
@@ -514,7 +514,7 @@ hypre_BoxShiftNeg( hypre_Box   *box,
       hypre_BoxIMinD(box, d) -= hypre_IndexD(shift, d);
       hypre_BoxIMaxD(box, d) -= hypre_IndexD(shift, d);
    }
-  
+
    return hypre_error_flag;
 }
 
@@ -525,7 +525,7 @@ hypre_BoxShiftNeg( hypre_Box   *box,
 HYPRE_Int
 hypre_BoxGrowByIndex( hypre_Box   *box,
                       hypre_Index  index )
-{ 
+{
    hypre_IndexRef  imin = hypre_BoxIMin(box);
    hypre_IndexRef  imax = hypre_BoxIMax(box);
    HYPRE_Int       ndim = hypre_BoxNDim(box);
@@ -537,7 +537,7 @@ hypre_BoxGrowByIndex( hypre_Box   *box,
       hypre_IndexD(imin, d) -= i;
       hypre_IndexD(imax, d) += i;
    }
-  
+
    return hypre_error_flag;
 }
 
@@ -548,18 +548,18 @@ hypre_BoxGrowByIndex( hypre_Box   *box,
 HYPRE_Int
 hypre_BoxGrowByValue( hypre_Box  *box,
                       HYPRE_Int   val )
-{ 
+{
    HYPRE_Int  *imin = hypre_BoxIMin(box);
    HYPRE_Int  *imax = hypre_BoxIMax(box);
    HYPRE_Int   ndim = hypre_BoxNDim(box);
-   HYPRE_Int  d; 
+   HYPRE_Int  d;
 
    for (d = 0; d < ndim; d++)
    {
       hypre_IndexD(imin, d) -= val;
       hypre_IndexD(imax, d) += val;
    }
-  
+
    return hypre_error_flag;
 }
 
@@ -570,18 +570,18 @@ hypre_BoxGrowByValue( hypre_Box  *box,
 HYPRE_Int
 hypre_BoxGrowByArray( hypre_Box  *box,
                       HYPRE_Int  *array )
-{ 
+{
    HYPRE_Int  *imin = hypre_BoxIMin(box);
    HYPRE_Int  *imax = hypre_BoxIMax(box);
    HYPRE_Int   ndim = hypre_BoxNDim(box);
-   HYPRE_Int   d; 
+   HYPRE_Int   d;
 
    for (d = 0; d < ndim; d++)
    {
-      imin[d] -= array[2*d];
-      imax[d] += array[2*d+1];
+      imin[d] -= array[2 * d];
+      imax[d] += array[2 * d + 1];
    }
-  
+
    return hypre_error_flag;
 }
 
@@ -618,7 +618,7 @@ hypre_BoxArrayCreate( HYPRE_Int size,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
 {
    if (box_array)
@@ -676,7 +676,7 @@ hypre_BoxArrayDuplicate( hypre_BoxArray *box_array )
    HYPRE_Int        i;
 
    new_box_array = hypre_BoxArrayCreate(
-      hypre_BoxArraySize(box_array), hypre_BoxArrayNDim(box_array));
+                      hypre_BoxArraySize(box_array), hypre_BoxArrayNDim(box_array));
    hypre_ForBoxI(i, box_array)
    {
       hypre_CopyBox(hypre_BoxArrayBox(box_array, i),
@@ -691,7 +691,7 @@ hypre_BoxArrayDuplicate( hypre_BoxArray *box_array )
  * The box_array may be empty.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_AppendBox( hypre_Box      *box,
                  hypre_BoxArray *box_array )
 {
@@ -708,7 +708,7 @@ hypre_AppendBox( hypre_Box      *box,
  * Delete box from box_array.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DeleteBox( hypre_BoxArray *box_array,
                  HYPRE_Int       index     )
 {
@@ -716,7 +716,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
 
    for (i = index; i < hypre_BoxArraySize(box_array) - 1; i++)
    {
-      hypre_CopyBox(hypre_BoxArrayBox(box_array, i+1),
+      hypre_CopyBox(hypre_BoxArrayBox(box_array, i + 1),
                     hypre_BoxArrayBox(box_array, i));
    }
 
@@ -730,7 +730,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
  * Assumes indices are in ascending order. (AB 11/04)
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
                            HYPRE_Int*  indices,
                            HYPRE_Int num )
@@ -742,30 +742,30 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
       return hypre_error_flag;
    }
 
-   array_size =  hypre_BoxArraySize(box_array);   
+   array_size =  hypre_BoxArraySize(box_array);
    start = indices[0];
    j = 0;
-   
+
    for (i = start; (i + j) < array_size; i++)
    {
       if (j < num)
       {
-         while ((i+j) == indices[j]) /* see if deleting consecutive items */
+         while ((i + j) == indices[j]) /* see if deleting consecutive items */
          {
             j++; /*increase the shift*/
-            if (j == num) break;
+            if (j == num) { break; }
          }
       }
-            
-      if ( (i+j) < array_size)  /* if deleting the last item then no moving */
+
+      if ( (i + j) < array_size) /* if deleting the last item then no moving */
       {
-         hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
+         hypre_CopyBox(hypre_BoxArrayBox(box_array, i + j),
                        hypre_BoxArrayBox(box_array, i));
       }
    }
 
    hypre_BoxArraySize(box_array) = array_size - num;
-   
+
    return hypre_error_flag;
 }
 
@@ -774,7 +774,7 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
  * The box_array_1 may be empty.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
                       hypre_BoxArray *box_array_1 )
 {
@@ -808,12 +808,12 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size,
 {
    hypre_BoxArrayArray  *box_array_array;
    HYPRE_Int             i;
- 
+
    box_array_array = hypre_CTAlloc(hypre_BoxArrayArray,  1, HYPRE_MEMORY_HOST);
- 
+
    hypre_BoxArrayArrayBoxArrays(box_array_array) =
       hypre_CTAlloc(hypre_BoxArray *,  size, HYPRE_MEMORY_HOST);
- 
+
    for (i = 0; i < size; i++)
    {
       hypre_BoxArrayArrayBoxArray(box_array_array, i) =
@@ -821,7 +821,7 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size,
    }
    hypre_BoxArrayArraySize(box_array_array) = size;
    hypre_BoxArrayArrayNDim(box_array_array) = ndim;
- 
+
    return box_array_array;
 }
 
@@ -832,12 +832,12 @@ HYPRE_Int
 hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
 {
    HYPRE_Int  i;
- 
+
    if (box_array_array)
    {
       hypre_ForBoxArrayI(i, box_array_array)
-         hypre_BoxArrayDestroy(
-            hypre_BoxArrayArrayBoxArray(box_array_array, i));
+      hypre_BoxArrayDestroy(
+         hypre_BoxArrayArrayBoxArray(box_array_array, i));
 
       hypre_TFree(hypre_BoxArrayArrayBoxArrays(box_array_array), HYPRE_MEMORY_HOST);
       hypre_TFree(box_array_array, HYPRE_MEMORY_HOST);
@@ -856,24 +856,24 @@ hypre_BoxArrayArrayDuplicate( hypre_BoxArrayArray *box_array_array )
    hypre_BoxArrayArray  *new_box_array_array;
    hypre_BoxArray      **new_box_arrays;
    HYPRE_Int             new_size;
- 
+
    hypre_BoxArray      **box_arrays;
    HYPRE_Int             i;
- 
+
    new_size = hypre_BoxArrayArraySize(box_array_array);
    new_box_array_array = hypre_BoxArrayArrayCreate(
-      new_size, hypre_BoxArrayArrayNDim(box_array_array));
- 
+                            new_size, hypre_BoxArrayArrayNDim(box_array_array));
+
    if (new_size)
    {
       new_box_arrays = hypre_BoxArrayArrayBoxArrays(new_box_array_array);
       box_arrays     = hypre_BoxArrayArrayBoxArrays(box_array_array);
- 
+
       for (i = 0; i < new_size; i++)
       {
          hypre_AppendBoxArray(box_arrays[i], new_box_arrays[i]);
       }
    }
- 
+
    return new_box_array_array;
 }

@@ -20,6 +20,8 @@
  * Test driver to time new boxloops and compare to the old ones
  *--------------------------------------------------------------------------*/
 
+#define DEVICE_VAR
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -37,7 +39,6 @@ main( hypre_int argc,
    //HYPRE_Int         xi1, xi2, xi3, xi4;
    HYPRE_Int         xi1;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
-   HYPRE_Real       *d_xp1, *d_xp2, *d_xp3, *d_xp4;
    hypre_Index       loop_size, start, unit_stride, index;
 
    /*-----------------------------------------------------------
@@ -49,8 +50,6 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
-   HYPRE_Init();
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -65,8 +64,6 @@ main( hypre_int argc,
    P  = num_procs;
    Q  = 1;
    R  = 1;
-
-   reps = -1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -94,11 +91,6 @@ main( hypre_int argc,
       {
          arg_index++;
          dim = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-reps") == 0 )
-      {
-         arg_index++;
-         reps = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -135,7 +127,7 @@ main( hypre_int argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) > num_procs)
+   if ((P * Q * R) > num_procs)
    {
       if (myid == 0)
       {
@@ -143,7 +135,7 @@ main( hypre_int argc,
       }
       exit(1);
    }
-   else if ((P*Q*R) < num_procs)
+   else if ((P * Q * R) < num_procs)
    {
       if (myid == 0)
       {
@@ -164,26 +156,18 @@ main( hypre_int argc,
    x3_data_box = hypre_BoxCreate(dim);
    x4_data_box = hypre_BoxCreate(dim);
    hypre_SetIndex3(hypre_BoxIMin(x1_data_box), 0, 0, 0);
-   hypre_SetIndex3(hypre_BoxIMax(x1_data_box), nx+1, ny+1, nz+1);
+   hypre_SetIndex3(hypre_BoxIMax(x1_data_box), nx + 1, ny + 1, nz + 1);
    hypre_CopyBox(x1_data_box, x2_data_box);
    hypre_CopyBox(x1_data_box, x3_data_box);
    hypre_CopyBox(x1_data_box, x4_data_box);
 
-   size = (nx+2)*(ny+2)*(nz+2);
-   xp1 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
-   xp2 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
-   xp3 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
-   xp4 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+   size = (nx + 2) * (ny + 2) * (nz + 2);
+   xp1 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp2 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp3 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp4 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
 
-   d_xp1 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
-   d_xp2 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
-   d_xp3 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
-   d_xp4 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
-
-   if (reps < 0)
-   {
-      reps = 1000000000/(nx*ny*nz+1000);
-   }
+   reps = 1000000000 / (nx * ny * nz + 1000);
 
    /*-----------------------------------------------------------
     * Print driver parameters
@@ -229,7 +213,7 @@ main( hypre_int argc,
    }
    hypre_SerialBoxLoop1End(xi1);
 
-   if (sum != (nx*ny*nz))
+   if (sum != (nx * ny * nz))
    {
       hypre_printf("*sum = %d\n", sum);
       fail = 1;
@@ -246,7 +230,7 @@ main( hypre_int argc,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
-    * Time old boxloops [Device]
+    * Time old boxloops
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop0 */
@@ -255,14 +239,12 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       xi1 = 0;
-#define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop0Begin(3, loop_size);
       {
-         d_xp1[xi1] += d_xp1[xi1];
+         xp1[xi1] += xp1[xi1];
          //xi1++;
       }
       hypre_BoxLoop0End();
-#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -271,14 +253,12 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-#define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop1Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1);
       {
-         d_xp1[xi1] += d_xp1[xi1];
+         xp1[xi1] += xp1[xi1];
       }
       hypre_BoxLoop1End(xi1);
-#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -287,15 +267,13 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-#define DEVICE_VAR is_device_ptr(d_xp1,d_xp2)
       hypre_BoxLoop2Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
       {
-         d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2];
+         xp1[xi1] += xp1[xi1] + xp2[xi2];
       }
       hypre_BoxLoop2End(xi1, xi2);
-#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -304,16 +282,14 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-#define DEVICE_VAR is_device_ptr(d_xp1,d_xp2,d_xp3)
       hypre_BoxLoop3Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
       {
-         d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2] + d_xp3[xi3];
+         xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3];
       }
       hypre_BoxLoop3End(xi1, xi2, xi3);
-#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
@@ -322,26 +298,24 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-#define DEVICE_VAR is_device_ptr(d_xp1,d_xp2,d_xp3,d_xp4)
       hypre_BoxLoop4Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
       {
-         d_xp1[xi1] += d_xp1[xi1] + d_xp2[xi2] + d_xp3[xi3] + d_xp4[xi4];
+         xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3] + xp4[xi4];
       }
       hypre_BoxLoop4End(xi1, xi2, xi3, xi4);
-#undef DEVICE_VAR
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("Old BoxLoop times [DEVICE]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("Old BoxLoop times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
-    * Time new boxloops [Host]
+    * Time new boxloops
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop0 */
@@ -352,7 +326,7 @@ main( hypre_int argc,
       xi1 = 0;
       zypre_BoxLoop0Begin(dim, loop_size);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop0For()
       {
@@ -371,7 +345,7 @@ main( hypre_int argc,
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop1For(xi1)
       {
@@ -390,7 +364,7 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop2For(xi1, xi2)
       {
@@ -410,7 +384,7 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop3For(xi1, xi2, xi3)
       {
@@ -431,7 +405,7 @@ main( hypre_int argc,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
@@ -441,7 +415,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoop times [HOST]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("New BoxLoop times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
@@ -453,18 +427,10 @@ main( hypre_int argc,
    hypre_BoxDestroy(x2_data_box);
    hypre_BoxDestroy(x3_data_box);
    hypre_BoxDestroy(x4_data_box);
-
    hypre_TFree(xp1, HYPRE_MEMORY_HOST);
    hypre_TFree(xp2, HYPRE_MEMORY_HOST);
    hypre_TFree(xp3, HYPRE_MEMORY_HOST);
    hypre_TFree(xp4, HYPRE_MEMORY_HOST);
-
-   hypre_TFree(d_xp1, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_xp2, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_xp3, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_xp4, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

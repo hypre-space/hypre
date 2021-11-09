@@ -26,7 +26,7 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
                              HYPRE_Int  *IS_marker_offd,
                              HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (warp_id >= graph_diag_size)
    {
@@ -112,7 +112,7 @@ hypreCUDAKernel_IndepSetFixMarker(HYPRE_Int  *IS_marker_diag,
                                   HYPRE_Int  *int_send_buf,
                                   HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (thread_id >= num_elmts_send)
    {
@@ -229,7 +229,8 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       HYPRE_Real  *urand_global = hypre_TAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_DEVICE);
       // To make sure all rank generate the same sequence
       hypre_CurandUniform(n_global, urand_global, 0, 0, 1, 0);
-      hypre_TMemcpy(urand, urand_global + n_first, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(urand, urand_global + n_first, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
       hypre_TFree(urand_global, HYPRE_MEMORY_DEVICE);
    }
    else

@@ -17,7 +17,7 @@ template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
 struct HYPRE_double4
 {
-   HYPRE_Real x,y,z,w;
+   HYPRE_Real x, y, z, w;
 
    __host__ __device__
    HYPRE_double4() {}
@@ -50,7 +50,7 @@ struct HYPRE_double4
 
 struct HYPRE_double6
 {
-   HYPRE_Real x,y,z,w,u,v;
+   HYPRE_Real x, y, z, w, u, v;
 
    __host__ __device__
    HYPRE_double6() {}
@@ -91,42 +91,44 @@ __inline__ __host__ __device__
 HYPRE_Real warpReduceSum(HYPRE_Real val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
-  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
-  {
-    val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
-  }
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+   {
+      val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
+   }
 #endif
-  return val;
+   return val;
 }
 
 __inline__ __host__ __device__
-HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
+HYPRE_double4 warpReduceSum(HYPRE_double4 val)
+{
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
-  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
-  {
-    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
-    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
-    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
-  }
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+   {
+      val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+      val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+      val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+   }
 #endif
-  return val;
+   return val;
 }
 
 __inline__ __host__ __device__
-HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
+HYPRE_double6 warpReduceSum(HYPRE_double6 val)
+{
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
-  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
-  {
-    val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
-    val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
-    val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
-    val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
-    val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
-    val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
-  }
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+   {
+      val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+      val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
+      val.z += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.z, offset);
+      val.w += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.w, offset);
+      val.u += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.u, offset);
+      val.v += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.v, offset);
+   }
 #endif
-  return val;
+   return val;
 }
 
 /* reduction within a block */
@@ -214,7 +216,8 @@ struct ReduceSum
       if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
       {
          /* allocate for the max size for reducing double6 type */
-         hypre_HandleReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+         hypre_HandleCudaReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024,
+                                                                     HYPRE_MEMORY_DEVICE);
       }
 
       d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
