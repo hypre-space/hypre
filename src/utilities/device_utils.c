@@ -1491,6 +1491,41 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 
 #endif // #if defined(HYPRE_USING_GPU)
 
+#if defined(HYPRE_USING_SYCL)
+HYPRE_Int
+HYPRE_SetSYCLDevice(sycl::device user_device)
+{
+   if (!hypre_handle())
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "ERROR: must call HYPRE_Init() before HYPRE_SetSYCLDevice()\n");
+   }
+   else
+   {
+      hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle());
+
+      /* Cleanup default device and queues */
+      if (data->device)
+      {
+         delete data->device;
+      }
+      for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
+      {
+         if (data->streams[i])
+         {
+            delete data->streams[i];
+            data->streams[i] = nullptr;
+         }
+      }
+
+      /* Setup new device and compute stream */
+      data->device = new sycl::device(user_device);
+      hypre_HandleComputeStream(hypre_handle());
+   }
+
+   return hypre_error_flag;
+}
+#endif
 
 /* This function is supposed to be used in the test drivers to mimic
  * users' GPU binding approaches
