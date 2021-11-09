@@ -39,8 +39,7 @@ typedef struct hypre_ParILUData_struct
    hypre_ParCSRMatrix      *P;
    hypre_Vector            *Ftemp_upper;
    hypre_Vector            *Utemp_lower;
-   HYPRE_Int
-   *A_diag_fake;//fake diagonal, used to pretend that the diagonal matrix is empty
+   HYPRE_Int               *A_diag_fake;//fake diagonal, pretend the diagonal matrix is empty
 #endif
    //general data
    HYPRE_Int            global_solver;

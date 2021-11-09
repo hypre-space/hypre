@@ -72,7 +72,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    HYPRE_Real         *AN_offd_data;
    HYPRE_BigInt       *col_map_offd_AN;
    HYPRE_BigInt       *new_col_map_offd;
-   HYPRE_BigInt       *row_starts_AN;
+   HYPRE_BigInt        row_starts_AN[2];
    HYPRE_Int           AN_num_nonzeros_diag = 0;
    HYPRE_Int           AN_num_nonzeros_offd = 0;
    HYPRE_Int           num_cols_offd_AN;
@@ -130,8 +130,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    comm_pkg_AN = NULL;
    col_map_offd_AN = NULL;
-
-   row_starts_AN = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < 2; i++)
    {
@@ -824,7 +822,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    *AN_ptr = AN;
 
    hypre_TFree(counter, HYPRE_MEMORY_HOST);
-   hypre_TFree(row_starts_AN, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -852,8 +849,8 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    hypre_CSRMatrix    *S_offd;
    HYPRE_Int          *S_offd_i;
    HYPRE_Int          *S_offd_j;
-   HYPRE_BigInt       *row_starts_S = NULL;
-   HYPRE_BigInt       *col_starts_S = NULL;
+   HYPRE_BigInt        row_starts_S[2];
+   HYPRE_BigInt        col_starts_S[2];
    HYPRE_BigInt       *row_starts_A = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_BigInt       *col_starts_A = hypre_ParCSRMatrixColStarts(A);
    hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -951,15 +948,9 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
       }
    }
 
-   row_starts_S = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2; i++)
    {
       row_starts_S[i] = row_starts_A[i];
-   }
-
-   col_starts_S = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-   for (i = 0; i < 2; i++)
-   {
       col_starts_S[i] = col_starts_A[i];
    }
 
@@ -1158,8 +1149,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
    hypre_TFree(S_tmp_j, HYPRE_MEMORY_HOST);
    hypre_TFree(S_marker, HYPRE_MEMORY_HOST);
    hypre_TFree(S_marker_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree(row_starts_S, HYPRE_MEMORY_HOST);
-   hypre_TFree(col_starts_S, HYPRE_MEMORY_HOST);
 
    *S_ptr = S;
 
@@ -1167,7 +1156,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix  *SN,
 }
 
 
-/* This function just finds the scalaer CF_marker and dof_func */
+/* This function just finds the scalar CF_marker and dof_func */
 
 HYPRE_Int
 hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,

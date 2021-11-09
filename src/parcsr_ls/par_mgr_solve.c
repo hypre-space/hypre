@@ -234,7 +234,8 @@ hypre_MGRSolve( void               *mgr_vdata,
                else
                {
                   hypre_blockRelax_solve(A_array[0], F_array[0], U_array[0], 1, n_block, left_size,
-                                         global_smooth_type, diaginv, Vtemp);
+                                         global_smooth_type,
+                                         diaginv, Vtemp);
                }
             }
          }

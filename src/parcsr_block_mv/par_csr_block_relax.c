@@ -244,8 +244,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          }
          if (num_procs > 1)
          {
-            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data
-                                                 is populated */
+            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data is populated */
             comm_handle = NULL;
          }
          /*-----------------------------------------------------------------
@@ -406,8 +405,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          if (num_procs > 1)
          {
-            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data
-                                                 is populated */
+            hypre_ParCSRBlockCommHandleDestroy(comm_handle); /* now Vext_data is populated */
             comm_handle = NULL;
          }
 

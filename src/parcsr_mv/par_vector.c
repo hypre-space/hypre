@@ -899,7 +899,7 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
    hypre_ParVector  *vector;
    hypre_Vector     *local_vector;
    HYPRE_Complex    *local_data;
-   HYPRE_BigInt     *partitioning;
+   HYPRE_BigInt      partitioning[2];
    HYPRE_Int         base_j;
 
    HYPRE_Int         myid, num_procs, i, j;
@@ -919,8 +919,6 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
 
    hypre_fscanf(file, "%b", &global_size);
    /* this may need to be changed so that the base is available in the file! */
-   partitioning = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
-
    hypre_fscanf(file, "%b", partitioning);
    for (i = 0; i < 2; i++)
    {

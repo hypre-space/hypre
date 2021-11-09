@@ -37,10 +37,7 @@ HYPRE_BiCGSTABSetup( HYPRE_Solver solver,
                      HYPRE_Vector b,
                      HYPRE_Vector x      )
 {
-   return ( hypre_BiCGSTABSetup( (void *) solver,
-                                 (void *) A,
-                                 (void *) b,
-                                 (void *) x ) );
+   return ( hypre_BiCGSTABSetup( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -53,10 +50,7 @@ HYPRE_BiCGSTABSolve( HYPRE_Solver solver,
                      HYPRE_Vector b,
                      HYPRE_Vector x      )
 {
-   return ( hypre_BiCGSTABSolve( (void *) solver,
-                                 (void *) A,
-                                 (void *) b,
-                                 (void *) x ) );
+   return ( hypre_BiCGSTABSolve( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------

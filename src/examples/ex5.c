@@ -537,11 +537,13 @@ int main (int argc, char *argv[])
 
 
       if (modify)
+      {
          /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
             is used - which does nothing.  Otherwise, you can define your own, similar to
             the one used here */
-         HYPRE_FlexGMRESSetModifyPC( solver,
-                                     (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+         HYPRE_FlexGMRESSetModifyPC(
+            solver, (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+      }
 
 
       /* Now setup and solve! */

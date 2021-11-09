@@ -135,7 +135,8 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
 
          case 3: /* -(6*del^2*th - 12*del*th^2 - t^2*(4*del + 16*th) + t*(12*del*th - 3*del^2 + 24*th^2) + 3*del^3 + 4*t^3 - 16*th^3)/(4*del*th^3 - 3*del^2*th^2 - 3*del^3*th + 4*th^4)*/
             den = - (4 * delta * pow(theta, 3) - 3 * pow(delta, 2) * pow(theta, 2) - 3 * pow(delta,
-                                                                                             3) * theta + 4 * pow(theta, 4) );
+                                                                                             3) * theta + 4 * pow(theta,
+                                                                                                   4) );
 
             coefs[0] = (6 * pow(delta, 2) * theta - 12 * delta * pow(theta, 2) + 3 * pow(delta,
                                                                                          3) - 16 * pow(theta, 3)   ) / den;

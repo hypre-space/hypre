@@ -26,7 +26,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int    num_c_levels, nc, index_i, cflag;
    HYPRE_Int      set_c_points_method;
    HYPRE_Int    debug_flag = 0;
-   //  HYPRE_Int  num_threads;
+   //  HYPRE_Int num_threads;
 
    hypre_ParCSRMatrix  *RT = NULL;
    hypre_ParCSRMatrix  *P = NULL;
@@ -36,7 +36,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    hypre_IntArray      *dof_func_buff = NULL;
    HYPRE_Int           *dof_func_buff_data = NULL;
-   HYPRE_BigInt        *coarse_pnts_global = NULL;
+   HYPRE_BigInt         coarse_pnts_global[2];
    hypre_Vector       **l1_norms = NULL;
 
    hypre_ParVector     *Ztemp;
@@ -783,7 +783,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Get global coarse sizes. Note that we assume num_functions = 1
        * so dof_func arrays are NULL */
       hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_array[lev], &dof_func_buff,
-                                 &coarse_pnts_global);
+                                 coarse_pnts_global);
       if (dof_func_buff)
       {
          dof_func_buff_data = hypre_IntArrayData(dof_func_buff);
@@ -1218,7 +1218,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
       level_coarse_size = NULL;
    }
-   hypre_TFree(coarse_pnts_global, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1247,7 +1246,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
    HYPRE_Int local_size;
    HYPRE_BigInt coarse_size;
 
-   HYPRE_BigInt    *coarse_pnts_global_lvl = NULL;
+   HYPRE_BigInt     coarse_pnts_global_lvl[2];
    hypre_IntArray  *coarse_dof_func_lvl    = NULL;
    hypre_IntArray  *dof_func               = NULL;
    HYPRE_Int       *dof_func_data          = NULL;
@@ -1441,9 +1440,12 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
       hypre_BoomerAMGCoarseParms(comm, local_size,
                                  num_functions, dof_func_array[lev_local], CF_marker_array_local[lev_local],
-                                 &coarse_dof_func_lvl, &coarse_pnts_global_lvl);
+                                 &coarse_dof_func_lvl, coarse_pnts_global_lvl);
 
-      if (my_id == (num_procs - 1)) { coarse_size = coarse_pnts_global_lvl[1]; }
+      if (my_id == (num_procs - 1))
+      {
+         coarse_size = coarse_pnts_global_lvl[1];
+      }
       hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
       //hypre_printf("Coarse size = %d \n", coarse_size);
       if (coarse_size == 0) // stop coarsening
@@ -1479,7 +1481,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
             hypre_IntArrayDestroy(CF_marker_array_local[lev_local]);
             CF_marker_array_local[lev_local] = NULL;
          }
-         hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
          break;
       }
 
@@ -1537,7 +1538,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       S_local = NULL;
       if ( (lev_local == max_local_lvls - 1) || (coarse_size <= max_local_coarse_size) )
       {
-         hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
          not_finished = 0;
       }
 

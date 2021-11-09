@@ -3071,8 +3071,15 @@ hypre_BoomerAMGCorrectCFMarkerHost(hypre_IntArray *CF_marker, hypre_IntArray *ne
    {
       if (hypre_IntArrayData(CF_marker)[i] > 0 )
       {
-         if (hypre_IntArrayData(CF_marker)[i] == 1) { hypre_IntArrayData(CF_marker)[i] = hypre_IntArrayData(new_CF_marker)[cnt++]; }
-         else { hypre_IntArrayData(CF_marker)[i] = 1; cnt++;}
+         if (hypre_IntArrayData(CF_marker)[i] == 1)
+         {
+            hypre_IntArrayData(CF_marker)[i] = hypre_IntArrayData(new_CF_marker)[cnt++];
+         }
+         else
+         {
+            hypre_IntArrayData(CF_marker)[i] = 1;
+            cnt++;
+         }
       }
    }
 
@@ -3092,8 +3099,14 @@ hypre_BoomerAMGCorrectCFMarker2Host(hypre_IntArray *CF_marker, hypre_IntArray *n
    {
       if (hypre_IntArrayData(CF_marker)[i] > 0 )
       {
-         if (hypre_IntArrayData(new_CF_marker)[cnt] == -1) { hypre_IntArrayData(CF_marker)[i] = -2; }
-         else { hypre_IntArrayData(CF_marker)[i] = 1; }
+         if (hypre_IntArrayData(new_CF_marker)[cnt] == -1)
+         {
+            hypre_IntArrayData(CF_marker)[i] = -2;
+         }
+         else
+         {
+            hypre_IntArrayData(CF_marker)[i] = 1;
+         }
          cnt++;
       }
    }

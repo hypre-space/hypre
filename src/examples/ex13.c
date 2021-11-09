@@ -379,12 +379,14 @@ int main (int argc, char *argv[])
 
       /* Define the geometry of the 9-point stencil */
       int stencil_size = 9;
-      int offsets[9][2] = {{0, 0},          /*  [8] [4] [7]  */
-         {-1, 0}, {1, 0}, /*     \ | /     */
-         {0, -1}, {0, 1}, /*  [1]-[0]-[2]  */
-         {-1, -1}, {1, -1}, /*     / | \     */
-         {1, 1}, {-1, 1}
-      };  /*  [5] [3] [6]  */
+      int offsets[9][2] =
+      {
+         { 0,  0},           /*  [8] [4] [7]  */
+         {-1,  0}, { 1,  0}, /*     \ | /     */
+         { 0, -1}, { 0,  1}, /*  [1]-[0]-[2]  */
+         {-1, -1}, { 1, -1}, /*     / | \     */
+         { 1,  1}, {-1,  1}  /*  [5] [3] [6]  */
+      };
 
       HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil);
 

@@ -13,17 +13,17 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
-                               HYPRE_Int           *CF_marker,
-                               hypre_ParCSRMatrix  *S,
-                               HYPRE_BigInt        *num_cpts_global,
-                               HYPRE_Int            num_functions,
-                               HYPRE_Int           *dof_func,
-                               HYPRE_Int            debug_flag,
-                               HYPRE_Real           trunc_factor,
-                               HYPRE_Int            P_max_elmts,
-                               HYPRE_Int            weight_option,
-                               hypre_ParCSRMatrix **P_ptr )
+hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
+                                   HYPRE_Int           *CF_marker,
+                                   hypre_ParCSRMatrix  *S,
+                                   HYPRE_BigInt        *num_cpts_global,
+                                   HYPRE_Int            num_functions,
+                                   HYPRE_Int           *dof_func,
+                                   HYPRE_Int            debug_flag,
+                                   HYPRE_Real           trunc_factor,
+                                   HYPRE_Int            P_max_elmts,
+                                   HYPRE_Int            weight_option,
+                                   hypre_ParCSRMatrix **P_ptr )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
@@ -255,8 +255,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    if (pass_array_size) { pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST); }
    pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes + 1, HYPRE_MEMORY_HOST);
    if (n_fine) { assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_HOST);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_HOST);
    if (n_coarse) { C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); }
 
    if (num_cols_offd)
@@ -1138,14 +1138,14 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_TFree(cnt_nz_offd_per_thread, HYPRE_MEMORY_HOST);
    hypre_TFree(max_num_threads, HYPRE_MEMORY_HOST);
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_DEVICE);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_HOST);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_HOST);
 
 
    if (total_nz_offd)
    {
-      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_DEVICE);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_DEVICE);
+      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_HOST);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_HOST);
    }
 
    for (i = 0; i < n_fine; i++)
@@ -2121,3 +2121,50 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    return (0);
 }
+
+HYPRE_Int
+hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
+                               HYPRE_Int           *CF_marker,
+                               hypre_ParCSRMatrix  *S,
+                               HYPRE_BigInt        *num_cpts_global,
+                               HYPRE_Int            num_functions,
+                               HYPRE_Int           *dof_func,
+                               HYPRE_Int            debug_flag,
+                               HYPRE_Real           trunc_factor,
+                               HYPRE_Int            P_max_elmts,
+                               HYPRE_Int            weight_option,
+                               hypre_ParCSRMatrix **P_ptr )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("MultipassInterp");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParCSRMatrixMemoryLocation(S) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      /* Notice: call the mod version on GPUs */
+      ierr = hypre_BoomerAMGBuildModMultipassDevice( A, CF_marker, S, num_cpts_global,
+                                                     trunc_factor, P_max_elmts, 9,
+                                                     num_functions, dof_func,
+                                                     P_ptr );
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGBuildMultipassHost( A, CF_marker, S, num_cpts_global,
+                                                num_functions, dof_func, debug_flag,
+                                                trunc_factor, P_max_elmts, weight_option,
+                                                P_ptr );
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
+}
+

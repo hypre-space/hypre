@@ -492,19 +492,21 @@ int main (int argc, char *argv[])
          is done by listing the variable offset directions relative to the
          element's center.  See the Reference Manual for more details. */
       {
-         int ordering[48] =       { 0,  0, -1, -1,    /* x-edge [0]-[1] */
-                                    1, +1,  0, -1,    /* y-edge [1]-[2] */
-                                    /*     [7]------[6]  */    0,  0, +1, -1,    /* x-edge [3]-[2] */
-                                    /*     /|       /|   */    1, -1,  0, -1,    /* y-edge [0]-[3] */
-                                    /*    / |      / |   */    0,  0, -1, +1,    /* x-edge [4]-[5] */
-                                    /*  [4]------[5] |   */    1, +1,  0, +1,    /* y-edge [5]-[6] */
-                                    /*   | [3]----|-[2]  */    0,  0, +1, +1,    /* x-edge [7]-[6] */
-                                    /*   | /      | /    */    1, -1,  0, +1,    /* y-edge [4]-[7] */
-                                    /*   |/       |/     */    2, -1, -1,  0,    /* z-edge [0]-[4] */
-                                    /*  [0]------[1]     */    2, +1, -1,  0,    /* z-edge [1]-[5] */
-                                    2, +1, +1,  0,    /* z-edge [2]-[6] */
-                                    2, -1, +1,  0
-                                  };  /* z-edge [3]-[7] */
+         int ordering[48] =
+         {
+            0,  0, -1, -1,    /* x-edge [0]-[1]                  */
+            1, +1,  0, -1,    /* y-edge [1]-[2]                  */
+            0,  0, +1, -1,    /* x-edge [3]-[2]     [7]------[6] */
+            1, -1,  0, -1,    /* y-edge [0]-[3]     /|       /|  */
+            0,  0, -1, +1,    /* x-edge [4]-[5]    / |      / |  */
+            1, +1,  0, +1,    /* y-edge [5]-[6]  [4]------[5] |  */
+            0,  0, +1, +1,    /* x-edge [7]-[6]   | [3]----|-[2] */
+            1, -1,  0, +1,    /* y-edge [4]-[7]   | /      | /   */
+            2, -1, -1,  0,    /* z-edge [0]-[4]   |/       |/    */
+            2, +1, -1,  0,    /* z-edge [1]-[5]  [0]------[1]    */
+            2, +1, +1,  0,    /* z-edge [2]-[6]                  */
+            2, -1, +1,  0     /* z-edge [3]-[7]                  */
+         };
 
          HYPRE_SStructGridSetFEMOrdering(edge_grid, part, ordering);
       }
@@ -574,7 +576,10 @@ int main (int argc, char *argv[])
                   /* Compute the FEM matrix and r.h.s. for cell (i,j,k) with
                      coefficients evaluated at the cell center. */
                   index[0] = i + pi * n; index[1] = j + pj * n; index[2] = k + pk * n;
-                  ComputeFEMND1(S, F, (pi * n + i)*h - h / 2, (pj * n + j)*h - h / 2, (pk * n + k)*h - h / 2, h);
+                  ComputeFEMND1(S, F,
+                                (pi * n + i)*h - h / 2,
+                                (pj * n + j)*h - h / 2,
+                                (pk * n + k)*h - h / 2, h);
 
                   /* Eliminate boundary conditions on x = 0 */
                   if (index[0] == 1)

@@ -91,8 +91,8 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
    HYPRE_BigInt *L1_col_map_offd =  hypre_ParCSRMatrixColMapOffd(L1);
    HYPRE_BigInt *L2_col_map_offd =  hypre_ParCSRMatrixColMapOffd(L2);
 
-   HYPRE_BigInt *A_row_starts;
-   HYPRE_BigInt *A_col_starts;
+   HYPRE_BigInt A_row_starts[2];
+   HYPRE_BigInt A_col_starts[2];
 
    HYPRE_BigInt *A_col_map_offd = NULL;
 
@@ -115,8 +115,6 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
    n = L_n * (HYPRE_BigInt)dim;
 
    /* global row/col starts */
-   A_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   A_col_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    for (i = 0; i < 2; i++)
    {
       A_row_starts[i] = L_row_starts[i] * (HYPRE_BigInt)dim;

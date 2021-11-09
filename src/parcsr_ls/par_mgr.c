@@ -4730,8 +4730,8 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
    //HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_IntArray          *coarse_dof_func_ptr = NULL;
-   HYPRE_BigInt            *num_row_cpts_global = NULL;
-   HYPRE_BigInt            *num_col_cpts_global = NULL;
+   HYPRE_BigInt             num_row_cpts_global[2];
+   HYPRE_BigInt             num_col_cpts_global[2];
 
    hypre_ParCSRMatrix    *Ablock;
    HYPRE_BigInt         *col_map_offd_Ablock;
@@ -4799,7 +4799,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
    hypre_IntArrayMemoryLocation(wrap_cf) = HYPRE_MEMORY_HOST;
    hypre_IntArrayData(wrap_cf) = row_cf_marker;
    hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, wrap_cf, &coarse_dof_func_ptr,
-                              &num_row_cpts_global);
+                              num_row_cpts_global);
    hypre_IntArrayDestroy(coarse_dof_func_ptr);
    coarse_dof_func_ptr = NULL;
 
@@ -4812,7 +4812,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
    /* get the number of coarse rows */
    hypre_IntArrayData(wrap_cf) = col_cf_marker;
    hypre_BoomerAMGCoarseParms(comm, local_numrows, 1, NULL, wrap_cf, &coarse_dof_func_ptr,
-                              &num_col_cpts_global);
+                              num_col_cpts_global);
    hypre_IntArrayDestroy(coarse_dof_func_ptr);
    coarse_dof_func_ptr = NULL;
 

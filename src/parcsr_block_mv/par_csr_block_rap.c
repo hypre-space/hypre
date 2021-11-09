@@ -219,7 +219,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    HYPRE_Int  num_cols_diag_P = hypre_CSRBlockMatrixNumCols(P_diag);
    HYPRE_Int  num_cols_offd_P = hypre_CSRBlockMatrixNumCols(P_offd);
    HYPRE_BigInt *coarse_partitioning = hypre_ParCSRBlockMatrixColStarts(P);
-   HYPRE_BigInt *row_starts, *col_starts;
+   HYPRE_BigInt row_starts[2], col_starts[2];
 
    hypre_ParCSRBlockMatrix *RAP;
    HYPRE_BigInt            *col_map_offd_RAP;
@@ -1824,9 +1824,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    }
 
 
-   row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   col_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= 1; i++)
+   for (i = 0; i < 2; i++)
    {
       row_starts[i] = col_starts[i] = coarse_partitioning[i];
    }
@@ -1905,8 +1903,6 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    hypre_TFree(r_a_products, HYPRE_MEMORY_HOST);
    hypre_TFree(r_a_p_products, HYPRE_MEMORY_HOST);
-   hypre_TFree(row_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

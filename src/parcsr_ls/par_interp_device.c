@@ -1506,5 +1506,4 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows,
    }
 }
 
-
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

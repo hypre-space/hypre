@@ -263,11 +263,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    if (stop_crit)
    {
-      eps = tol * tol;   /* absolute residual norm */
+      eps = tol * tol; /* absolute residual norm */
    }
    else
    {
-      eps = (tol * tol) * bi_prod;   /* relative residual norm */
+      eps = (tol * tol) * bi_prod; /* relative residual norm */
    }
 
    /* Check to see if the rhs vector b is zero */

@@ -1238,13 +1238,13 @@ HYPRE_Int hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommP
 /* par_coarse_parms.c */
 HYPRE_Int hypre_BoomerAMGCoarseParms ( MPI_Comm comm, HYPRE_Int local_num_variables,
                                        HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker,
-                                       hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr );
+                                       hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global );
 HYPRE_Int hypre_BoomerAMGCoarseParmsHost ( MPI_Comm comm, HYPRE_Int local_num_variables,
                                            HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker,
-                                           hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr );
+                                           hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global );
 HYPRE_Int hypre_BoomerAMGCoarseParmsDevice ( MPI_Comm comm, HYPRE_Int local_num_variables,
                                              HYPRE_Int num_functions, hypre_IntArray *dof_func, hypre_IntArray *CF_marker,
-                                             hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr );
+                                             hypre_IntArray **coarse_dof_func_ptr, HYPRE_BigInt *coarse_pnts_global );
 HYPRE_Int hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func, HYPRE_Int local_size,
                                             HYPRE_Int offset, HYPRE_Int num_functions );
 
@@ -1485,11 +1485,45 @@ HYPRE_Int hypre_BoomerAMGBuildModPartialExtPEInterp ( hypre_ParCSRMatrix *A, HYP
                                                       HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
                                                       HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 
+/* par_mod_multi_interp.c */
+HYPRE_Int hypre_BoomerAMGBuildModMultipass ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                             hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Real trunc_factor,
+                                             HYPRE_Int P_max_elmts, HYPRE_Int interp_type, HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                             hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildModMultipassHost ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                                 hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Real trunc_factor,
+                                                 HYPRE_Int P_max_elmts, HYPRE_Int interp_type, HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                                 hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_GenerateMultipassPi ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
+                                      HYPRE_BigInt *c_pts_starts, HYPRE_Int *pass_order, HYPRE_Int *pass_marker,
+                                      HYPRE_Int *pass_marker_offd, HYPRE_Int num_points, HYPRE_Int color, HYPRE_Real *row_sums,
+                                      hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_GenerateMultiPi ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
+                                  hypre_ParCSRMatrix *P, HYPRE_BigInt *c_pts_starts, HYPRE_Int *pass_order, HYPRE_Int *pass_marker,
+                                  HYPRE_Int *pass_marker_offd, HYPRE_Int num_points, HYPRE_Int color, HYPRE_Int num_functions,
+                                  HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, hypre_ParCSRMatrix **Pi_ptr );
+HYPRE_Int hypre_BoomerAMGBuildModMultipassDevice ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                                   hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Real trunc_factor,
+                                                   HYPRE_Int P_max_elmts, HYPRE_Int interp_type, HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                                   hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_GenerateMultipassPiDevice ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
+                                            HYPRE_BigInt *c_pts_starts, HYPRE_Int *pass_order, HYPRE_Int *pass_marker,
+                                            HYPRE_Int *pass_marker_offd, HYPRE_Int num_points, HYPRE_Int color, HYPRE_Real *row_sums,
+                                            hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_GenerateMultiPiDevice ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
+                                        hypre_ParCSRMatrix *P, HYPRE_BigInt *c_pts_starts, HYPRE_Int *pass_order, HYPRE_Int *pass_marker,
+                                        HYPRE_Int *pass_marker_offd, HYPRE_Int num_points, HYPRE_Int color, HYPRE_Int num_functions,
+                                        HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, hypre_ParCSRMatrix **Pi_ptr );
+
 /* par_multi_interp.c */
 HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                           hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
                                           HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int P_max_elmts, HYPRE_Int weight_option,
                                           hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGBuildMultipassHost ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                              hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                              HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int P_max_elmts, HYPRE_Int weight_option,
+                                              hypre_ParCSRMatrix **P_ptr );
 
 /* par_nodal_systems.c */
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A, HYPRE_Int num_functions,

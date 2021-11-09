@@ -7,6 +7,17 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.23.0 released 2021/10/01
+
+- Added GPU support for multipass interpolation.
+- Added new header file variables (HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_NUMBER,
+  HYPRE_DEVELOP_BRANCH) to help users working with the development branch.
+- Added rocsparse triangular solve required for Gauss-Seidel relaxation when
+  using hip and rocsparse on AMD GPUs.
+- Various bug fixes.
+
+#====================================
+
 Version 2.22.1 released 2021/08/20
 
 - Ported Neumann version of AIR to the GPU.

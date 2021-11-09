@@ -350,7 +350,8 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       /* [optional] first run naive estimate for naive lower and upper bounds,
                     which will be given to Cohen's alg as corrections */
       char *work_mem = hypre_TAlloc(char,
-                                    cohen_nsamples * (n + k) * sizeof(float) +2 * m * sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+                                    cohen_nsamples * (n + k) * sizeof(float) +2 * m * sizeof(HYPRE_Int),
+                                    HYPRE_MEMORY_DEVICE);
       char *work_mem_saved = work_mem;
 
       //HYPRE_Int *d_low_upp = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
