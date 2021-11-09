@@ -30,15 +30,15 @@
 #include "IJ_mv/HYPRE_IJ_mv.h"
 
 /* Local routine prototypes */
-HYPRE_Int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix, 
-                                      HYPRE_Int local_storage_type );
+HYPRE_Int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix,
+                                            HYPRE_Int local_storage_type );
 
-HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix, 
-                               HYPRE_Int row, HYPRE_Int col );
+HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix,
+                                     HYPRE_Int row, HYPRE_Int col );
 
-HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
-                             HYPRE_Int size, HYPRE_BigInt i, HYPRE_BigInt *col_ind,
-                             HYPRE_Real *values );
+HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix,
+                                   HYPRE_Int size, HYPRE_BigInt i, HYPRE_BigInt *col_ind,
+                                   HYPRE_Real *values );
 
 /*--------------------------------------------------------------------------
  * HYPRE_BuildIJMatrixFromDistributedMatrix
@@ -49,13 +49,13 @@ distributed_matrix and putting them into the IJMatrix. This routine does not
 effect the distributed matrix. In essence, it makes a copy of the input matrix
 in another format. NOTE: because this routine makes a copy and is not just
 a simple conversion, it is memory-expensive and should only be used in
-low-memory requirement situations (such as unit-testing code). 
+low-memory requirement situations (such as unit-testing code).
 */
-HYPRE_Int 
+HYPRE_Int
 HYPRE_BuildIJMatrixFromDistributedMatrix(
-                 HYPRE_DistributedMatrix DistributedMatrix,
-                 HYPRE_IJMatrix *ij_matrix,
-                 HYPRE_Int local_storage_type )
+   HYPRE_DistributedMatrix DistributedMatrix,
+   HYPRE_IJMatrix *ij_matrix,
+   HYPRE_Int local_storage_type )
 {
    HYPRE_Int ierr;
    MPI_Comm comm;
@@ -69,32 +69,32 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
 
 
 
-   if (!DistributedMatrix) return(-1);
+   if (!DistributedMatrix) { return (-1); }
 
    comm = HYPRE_DistributedMatrixGetContext( DistributedMatrix );
    ierr = HYPRE_DistributedMatrixGetDims( DistributedMatrix, &M, &N );
 
-   ierr = HYPRE_DistributedMatrixGetLocalRange( DistributedMatrix, 
-             &first_local_row, &last_local_row ,
-             &first_local_col, &last_local_col );
+   ierr = HYPRE_DistributedMatrixGetLocalRange( DistributedMatrix,
+                                                &first_local_row, &last_local_row,
+                                                &first_local_col, &last_local_col );
 
    ierr = HYPRE_IJMatrixCreate( comm, first_local_row, last_local_row,
                                 first_local_col, last_local_col,
                                 ij_matrix );
 
-   ierr = HYPRE_IJMatrixSetLocalStorageType( 
-                 *ij_matrix, local_storage_type );
+   ierr = HYPRE_IJMatrixSetLocalStorageType(
+             *ij_matrix, local_storage_type );
    /* if(ierr) return(ierr); */
 
-   ierr = HYPRE_IJMatrixSetLocalSize( *ij_matrix, 
-                last_local_row-first_local_row+1,
-                last_local_col-first_local_col+1 );
+   ierr = HYPRE_IJMatrixSetLocalSize( *ij_matrix,
+                                      last_local_row - first_local_row + 1,
+                                      last_local_col - first_local_col + 1 );
 
    ierr = HYPRE_IJMatrixInitialize( *ij_matrix );
    /* if(ierr) return(ierr);*/
 
    /* Loop through all locally stored rows and insert them into ij_matrix */
-   for (i=first_local_row; i<= last_local_row; i++)
+   for (i = first_local_row; i <= last_local_row; i++)
    {
       ierr = HYPRE_DistributedMatrixGetRow( DistributedMatrix, i, &size, &col_ind, &values );
       /* if( ierr ) return(ierr);*/
@@ -110,6 +110,6 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    ierr = HYPRE_IJMatrixAssemble( *ij_matrix );
    /* if(ierr) return(ierr); */
 
-   return(ierr);
+   return (ierr);
 }
 

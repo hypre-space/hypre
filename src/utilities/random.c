@@ -53,13 +53,13 @@ static HYPRE_Int Seed = 13579;
 void hypre_SeedRand( HYPRE_Int seed )
 {
    /* RL: seed must be between 1 and 2^31-2 */
-   if (seed < 1) 
+   if (seed < 1)
    {
       seed = 1;
    }
    else if (seed >= m)
    {
-     seed = m - 1;
+      seed = m - 1;
    }
 
    Seed = seed;
@@ -77,7 +77,7 @@ HYPRE_Int hypre_RandI()
    high = Seed / q;
    low = Seed % q;
    test = a * low - r * high;
-   if(test > 0)
+   if (test > 0)
    {
       Seed = test;
    }
@@ -98,6 +98,6 @@ HYPRE_Int hypre_RandI()
  *--------------------------------------------------------------------------*/
 HYPRE_Real hypre_Rand()
 {
-  return ((HYPRE_Real)(hypre_RandI()) / m);
+   return ((HYPRE_Real)(hypre_RandI()) / m);
 }
 

@@ -41,7 +41,7 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
    HYPRE_Int        i, my_id;
    HYPRE_Int        ierr = 0;
 
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
    i = 2747 + my_id;
    if (seq_rand)
    {
@@ -142,7 +142,7 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    for (ig = 0; ig < graph_array_offd_size; ig++)
    {
       i = graph_array_offd[ig];
-      if (measure_array[i+local_num_vars] > 1)
+      if (measure_array[i + local_num_vars] > 1)
       {
          IS_marker_offd[i] = 1;
       }
@@ -157,12 +157,12 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
       i = graph_array[ig];
       if (measure_array[i] > 1)
       {
-         for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
+         for (jS = S_diag_i[i]; jS < S_diag_i[i + 1]; jS++)
          {
             j = S_diag_j[jS];
             if (j < 0)
             {
-               j = -j-1;
+               j = -j - 1;
             }
 
             /* only consider valid graph edges */
@@ -179,14 +179,14 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                }
             }
          }
-         for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
+         for (jS = S_offd_i[i]; jS < S_offd_i[i + 1]; jS++)
          {
             jj = S_offd_j[jS];
             if (jj < 0)
             {
-               jj = -jj-1;
+               jj = -jj - 1;
             }
-            j = local_num_vars+jj;
+            j = local_num_vars + jj;
 
             /* only consider valid graph edges */
             /* if ( (measure_array[j] > 1) && (S_offd_data[jS]) ) */

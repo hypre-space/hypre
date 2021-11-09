@@ -28,7 +28,8 @@ static __device__ __forceinline__
 hypre_int get_thread_id()
 {
    //return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x); // in general cases
-   return (threadIdx.z * HYPRE_WARP_SIZE + threadIdx.y * blockDim.x + threadIdx.x);           // if blockDim.x * blockDim.y = WARP_SIZE
+   return (threadIdx.z * HYPRE_WARP_SIZE + threadIdx.y * blockDim.x +
+           threadIdx.x);           // if blockDim.x * blockDim.y = WARP_SIZE
 }
 
 static __device__ __forceinline__
@@ -81,9 +82,12 @@ HYPRE_Int HashFunc(HYPRE_Int m, HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
    return hashval;
 }
 
-void hypre_create_ija( HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz );
+void hypre_create_ija( HYPRE_Int m, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j,
+                       HYPRE_Complex **d_a, HYPRE_Int *nnz );
 
-HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_id, HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr, HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr, HYPRE_Int type);
+HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_id,
+                                             HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr,
+                                             HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr, HYPRE_Int type);
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 #endif

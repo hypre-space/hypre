@@ -33,7 +33,7 @@ HYPRE_StructMatrixCreate( MPI_Comm             comm,
 HYPRE_Int
 HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixDestroy(matrix) );
+   return ( hypre_StructMatrixDestroy(matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -217,7 +217,7 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Complex     *values )
 {
    return hypre_StructMatrixSetConstantValues(
-      matrix, num_stencil_indices, stencil_indices, values, 0 );
+             matrix, num_stencil_indices, stencil_indices, values, 0 );
 }
 
 /*--------------------------------------------------------------------------
@@ -311,7 +311,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Complex     *values )
 {
    return hypre_StructMatrixSetConstantValues(
-      matrix, num_stencil_indices, stencil_indices, values, 1 );
+             matrix, num_stencil_indices, stencil_indices, values, 1 );
 }
 
 /*--------------------------------------------------------------------------
@@ -320,7 +320,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
 HYPRE_Int
 HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixAssemble(matrix) );
+   return ( hypre_StructMatrixAssemble(matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -372,8 +372,8 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int  HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
-                                           HYPRE_Int           nentries,
-                                           HYPRE_Int          *entries )
+                                                 HYPRE_Int           nentries,
+                                                 HYPRE_Int          *entries )
 {
    return hypre_StructMatrixSetConstantEntries( matrix, nentries, entries );
 }
@@ -410,5 +410,5 @@ HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
 HYPRE_Int
 HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixClearBoundary(matrix) );
+   return ( hypre_StructMatrixClearBoundary(matrix) );
 }
