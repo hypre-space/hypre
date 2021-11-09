@@ -1496,6 +1496,8 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
  * users' GPU binding approaches
  * It is supposed to be called before HYPRE_Init,
  * so that HYPRE_Init can get the wanted device id
+ * WM: note - sycl has no analogue to cudaSetDevice(),
+ * so this has no effect on the sycl implementation.
  */
 HYPRE_Int
 hypre_bind_device( HYPRE_Int myid,

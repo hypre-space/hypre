@@ -103,13 +103,11 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    if (hypre_handle_)
    {
 #if defined(HYPRE_USING_SYCL)
-      /* WM: question - hypre_bind_device calls hypre_SetDevice() before construction of the hypre handle.. */
-      /* I don't have an analogue to cudaSetDevice() here, so what functionality should this have? Could set an environment varible? */
+      /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
       sycl::platform platform(sycl::gpu_selector{});
       auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
       HYPRE_Int n_devices = 0;
       hypre_GetDeviceCount(&n_devices);
-      printf("WM: debug - n_devices = %d, n_gpus = %d\n", n_devices, gpu_devices.size());
       if (device_id >= n_devices)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
@@ -120,24 +118,24 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
       HYPRE_Int i;
       for (i = 0; i < gpu_devices.size(); i++)
       {
+         /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
          // multi-tile GPUs
-         if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-         {
-            auto subDevicesDomainNuma =
-               gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>
-               (sycl::info::partition_affinity_domain::numa);
-            for (auto &tile : subDevicesDomainNuma)
-            {
-               if (local_n_devices == device_id)
-               {
-                  hypre_HandleDevice(hypre_handle_) = new sycl::device(tile);
-                  printf("WM: debug - set device to tile\n");
-               }
-               local_n_devices++;
-            }
-         }
-         // single-tile GPUs
-         else
+         /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
+         /* { */
+         /*    auto subDevicesDomainNuma = */
+         /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
+         /*       (sycl::info::partition_affinity_domain::numa); */
+         /*    for (auto &tile : subDevicesDomainNuma) */
+         /*    { */
+         /*       if (local_n_devices == device_id) */
+         /*       { */
+         /*          hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
+         /*       } */
+         /*       local_n_devices++; */
+         /*    } */
+         /* } */
+         /* // single-tile GPUs */
+         /* else */
          {
             if (local_n_devices == device_id)
             {
@@ -177,26 +175,12 @@ hypre_GetDevice(hypre_int *device_id)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: question - this is basically what's done by hypre_bind_device... should I do this here? */
+   /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
+    * Assume the rank/device binding below */
    HYPRE_Int n_devices, my_id;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
-   /* WM: below is from Abhishek */
-   /* if( const char* ptr = std::getenv("ZE_AFFINITY_MASK") ) { */
-   /*   std::string str(ptr); */
-   /*   std::istringstream streamData(str); */
-   /*   std::vector<std::string> splitStrings; */
-   /*   std::string splitString; */
-   /*   while (std::getline(streamData, splitString, '.')) { */
-   /*     splitStrings.push_back( splitString ); */
-   /*   } */
-   /*   int deviceID = std::stoi(splitStrings[0]); */
-   /*   int tileID = std::stoi(splitStrings[1]); */
-   /*   *device_id = 2 * deviceID + tileID; */
-   /* } else { */
-   /*   *device_id = 0; */
-   /* } */
 #endif
 
    return hypre_error_flag;
@@ -224,14 +208,15 @@ hypre_GetDeviceCount(hypre_int *device_count)
    HYPRE_Int i;
    for (i = 0; i < gpu_devices.size(); i++)
    {
-      if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-      {
-         auto subDevicesDomainNuma =
-            gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>
-            (sycl::info::partition_affinity_domain::numa);
-         (*device_count) += subDevicesDomainNuma.size();
-      }
-      else
+      /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
+      /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
+      /* { */
+      /*    auto subDevicesDomainNuma = */
+      /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
+      /*       (sycl::info::partition_affinity_domain::numa); */
+      /*    (*device_count) += subDevicesDomainNuma.size(); */
+      /* } */
+      /* else */
       {
          (*device_count)++;
       }
@@ -294,7 +279,7 @@ HYPRE_Init()
 
 #if defined(HYPRE_USING_GPU)
 #if !defined(HYPRE_USING_SYCL)
-   /* WM: note - cannot call hypre_GetDeviceLastError() until after device and queue setup */
+   /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
    hypre_GetDeviceLastError();
 #endif
 
@@ -375,7 +360,7 @@ HYPRE_Finalize()
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
-   /* WM: note - cannot call hypre_GetDeviceLastError() after destroying the handle */
+   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle */
    hypre_GetDeviceLastError();
 #endif
 
