@@ -99,54 +99,55 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
 #endif
 
+#if defined(HYPRE_USING_GPU)
+   if (hypre_handle_)
+   {
 #if defined(HYPRE_USING_SYCL)
-   sycl::platform platform(sycl::gpu_selector{});
-   auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-   HYPRE_Int n_devices=0;
-   hypre_GetDeviceCount(&n_devices);
-   hypre_printf("WM: debug - n_devices = %d\n", n_devices);
-   if (device_id > n_devices)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: SYCL device-ID exceed the number of devices on-node\n");
-   }
-
-   HYPRE_Int local_n_devices = 0;
-   HYPRE_Int i;
-   for (i = 0; i < gpu_devices.size(); i++)
-   {
-      // multi-tile GPUs
-      if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
+      /* WM: question - hypre_bind_device calls hypre_SetDevice() before construction of the hypre handle.. */
+      /* I don't have an analogue to cudaSetDevice() here, so what functionality should this have? Could set an environment varible? */
+      sycl::platform platform(sycl::gpu_selector{});
+      auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
+      HYPRE_Int n_devices=0;
+      hypre_GetDeviceCount(&n_devices);
+      if (device_id >= n_devices)
       {
-         auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
-         for (auto &tile : subDevicesDomainNuma)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: SYCL device-ID exceed the number of devices on-node\n");
+      }
+
+      HYPRE_Int local_n_devices = 0;
+      HYPRE_Int i;
+      for (i = 0; i < gpu_devices.size(); i++)
+      {
+         // multi-tile GPUs
+         if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
+         {
+            auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
+            for (auto &tile : subDevicesDomainNuma)
+            {
+               if (local_n_devices == device_id)
+               {
+                  hypre_HandleDevice(hypre_handle_) = new sycl::device(tile);
+               }
+               local_n_devices++;
+            }
+         }
+         // single-tile GPUs
+         else
          {
             if (local_n_devices == device_id)
             {
-               hypre_HandleDevice(hypre_handle_) = &tile;
+               hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
             }
             local_n_devices++;
          }
       }
-      // single-tile GPUs
-      else
-      {
-         if (local_n_devices == device_id)
-         {
-            hypre_HandleDevice(hypre_handle_) = &(gpu_devices[i]);
-         }
-         local_n_devices++;
-      }
-   }
-   hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) = 
-      hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
-#endif
-
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
-   if (hypre_handle_)
-   {
+      hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) = 
+         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
+#else
       hypre_HandleDevice(hypre_handle_) = device_id;
+#endif // #if defined(HYPRE_USING_SYCL)
    }
-#endif
+#endif // # if defined(HYPRE_USING_GPU)
 
    return hypre_error_flag;
 }
@@ -175,6 +176,21 @@ hypre_GetDevice(hypre_int *device_id)
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
+   /* WM: below is from Abhishek */
+   /* if( const char* ptr = std::getenv("ZE_AFFINITY_MASK") ) { */
+   /*   std::string str(ptr); */
+   /*   std::istringstream streamData(str); */
+   /*   std::vector<std::string> splitStrings; */
+   /*   std::string splitString; */
+   /*   while (std::getline(streamData, splitString, '.')) { */
+   /*     splitStrings.push_back( splitString ); */
+   /*   } */
+   /*   int deviceID = std::stoi(splitStrings[0]); */
+   /*   int tileID = std::stoi(splitStrings[1]); */
+   /*   *device_id = 2 * deviceID + tileID; */
+   /* } else { */
+   /*   *device_id = 0; */
+   /* } */
 #endif
 
    return hypre_error_flag;
@@ -269,7 +285,10 @@ HYPRE_Init()
    }
 
 #if defined(HYPRE_USING_GPU)
+#if !defined(HYPRE_USING_SYCL)
+   /* WM: note - cannot call hypre_GetDeviceLastError() until after device and queue setup */
    hypre_GetDeviceLastError();
+#endif
 
    /* Notice: the cudaStream created is specific to the device
     * that was in effect when you created the stream.
@@ -347,7 +366,10 @@ HYPRE_Finalize()
 
    _hypre_handle = NULL;
 
+#if !defined(HYPRE_USING_SYCL)
+   /* WM: note - cannot call hypre_GetDeviceLastError() after destroying the handle */
    hypre_GetDeviceLastError();
+#endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
    hypre_PrintMemoryTracker();

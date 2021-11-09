@@ -1085,24 +1085,32 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 
 #if defined(HYPRE_USING_SYCL)
    *memory_location = hypre_MEMORY_UNDEFINED;
-   sycl::usm::alloc allocType;
-   allocType = sycl::get_pointer_type(ptr, (hypre_HandleComputeStream(hypre_handle()))->get_context());
+   /* If the device is not setup, then all allocations are assumed to be on the host */
+   if (hypre_HandleDevice(hypre_handle()))
+   {
+      sycl::usm::alloc allocType;
+      allocType = sycl::get_pointer_type(ptr, (hypre_HandleComputeStream(hypre_handle()))->get_context());
 
-   if (allocType == sycl::usm::alloc::unknown)
+      if (allocType == sycl::usm::alloc::unknown)
+      {
+         *memory_location = hypre_MEMORY_HOST;
+      }
+      else if (allocType == sycl::usm::alloc::host)
+      {
+         *memory_location = hypre_MEMORY_HOST_PINNED;
+      }
+      else if (allocType == sycl::usm::alloc::device)
+      {
+         *memory_location = hypre_MEMORY_DEVICE;
+      }
+      else if (allocType == sycl::usm::alloc::shared)
+      {
+         *memory_location = hypre_MEMORY_UNIFIED;
+      }
+   }
+   else
    {
       *memory_location = hypre_MEMORY_HOST;
-   }
-   else if (allocType == sycl::usm::alloc::host)
-   {
-      *memory_location = hypre_MEMORY_HOST_PINNED;
-   }
-   else if (allocType == sycl::usm::alloc::device)
-   {
-      *memory_location = hypre_MEMORY_DEVICE;
-   }
-   else if (allocType == sycl::usm::alloc::shared)
-   {
-      *memory_location = hypre_MEMORY_UNIFIED;
    }
 #endif //HYPRE_USING_SYCL
 

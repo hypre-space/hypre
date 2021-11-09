@@ -969,9 +969,9 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
          }
       };
 
-      sycl::device*  syclDev   = data->device;
-      sycl::context  syclctxt  = sycl::context(*syclDev, sycl_asynchandler);
-      stream = new sycl::queue(syclctxt, *syclDev, sycl::property_list{sycl::property::queue::in_order{}});
+      sycl::device*  sycl_device   = data->device;
+      sycl::context  sycl_ctxt     = sycl::context(*sycl_device, sycl_asynchandler);
+      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
       data->streams[i] = stream;
    }
 #endif
@@ -1330,6 +1330,11 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_DeviceDataCubCachingAllocatorDestroy(data);
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   delete data->device;
+   data->device = nullptr;
 #endif
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);

@@ -9141,7 +9141,17 @@ $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 	     LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+           if test "$hypre_using_debug" = "yes"
+           then
+              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
+           else
+              CUFLAGS="-O2 ${CUFLAGS}"
+           fi
+        fi
+
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
   SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"

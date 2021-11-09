@@ -2314,7 +2314,17 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
 	     LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+           if test "$hypre_using_debug" = "yes"
+           then
+              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
+           else
+              CUFLAGS="-O2 ${CUFLAGS}"
+           fi
+        fi
+
 
         dnl If not in debug mode, at least -O2, but the user can override with
         dnl with SYCLFLAGS on the configure line. If in debug mode, -O0 -Wall
