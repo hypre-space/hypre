@@ -109,6 +109,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
       auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
       HYPRE_Int n_devices=0;
       hypre_GetDeviceCount(&n_devices);
+      printf("WM: debug - n_devices = %d, n_gpus = %d\n", n_devices, gpu_devices.size());
       if (device_id >= n_devices)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR: SYCL device-ID exceed the number of devices on-node\n");
@@ -127,6 +128,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
                if (local_n_devices == device_id)
                {
                   hypre_HandleDevice(hypre_handle_) = new sycl::device(tile);
+                  printf("WM: debug - set device to tile\n");
                }
                local_n_devices++;
             }
@@ -410,7 +412,17 @@ HYPRE_PrintDeviceInfo()
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-  // WM: TODO
+  auto device = *hypre_HandleDevice(hypre_handle());
+  auto p_name = device.get_platform().get_info<sycl::info::platform::name>();
+  hypre_printf("Platform Name: %s\n", p_name.c_str());
+  auto p_version = device.get_platform().get_info<sycl::info::platform::version>();
+  hypre_printf("Platform Version: %s\n", p_version.c_str());
+  auto d_name = device.get_info<sycl::info::device::name>();
+  hypre_printf("Device Name: %s\n", d_name.c_str());
+  auto max_work_group = device.get_info<sycl::info::device::max_work_group_size>();
+  hypre_printf("Max Work Groups: %d\n", max_work_group);
+  auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();
+  hypre_printf("Max Compute Units: %d\n", max_compute_units);
 #endif
 
    return hypre_error_flag;
