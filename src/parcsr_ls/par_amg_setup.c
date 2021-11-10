@@ -1529,6 +1529,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (num_functions > 1)
                {
                   hypre_IntArrayDestroy(coarse_dof_func);
+                  coarse_dof_func = NULL;
                }
                hypre_IntArrayDestroy(CF_marker_array[level]);
                CF_marker_array[level] = NULL;
