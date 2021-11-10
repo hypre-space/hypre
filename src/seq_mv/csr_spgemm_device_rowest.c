@@ -61,7 +61,7 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
@@ -126,7 +126,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id();
 #if COHEN_USE_SHMEM
@@ -279,8 +279,19 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1, t2;
+   t1 = hypre_MPI_Wtime();
+#endif
+
    /* random V1: uniform --> exp */
    hypre_CurandUniformSingle(nsamples * N, d_V1, 0, 0, 0, 0);
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_SyncCudaComputeStream(hypre_handle());
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("Curand time %f\n", t2);
+#endif
 
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
@@ -334,9 +345,9 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   HYPRE_Int   row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
-   HYPRE_Int   cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
-   float cohen_mult           = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
+   HYPRE_Int row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
+   size_t    cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
+   float     cohen_mult     = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
 
    //hypre_printf("Cohen Nsamples %d, mult %f\n", cohen_nsamples, cohen_mult);
 

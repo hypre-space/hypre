@@ -101,7 +101,10 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    if (myid == 0)
    {
-      hypre_printf("A %d x %d, NNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A), hypre_ParCSRMatrixGlobalNumCols(parcsr_A), hypre_ParCSRMatrixNumNonzeros(parcsr_A));
+      hypre_printf("A %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
+                                                  hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
+                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_A),
+                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_A) / hypre_ParCSRMatrixGlobalNumRows(parcsr_A));
    }
 
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
@@ -135,6 +138,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    for (i = 0 ; i < rep; i++)
    {
+      hypre_printf("--- rep %d (out of %d) ---\n", i, rep);
       if (i == rep-1)
       {
          time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, A*A");
@@ -189,6 +193,15 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
    }
 
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_B);
+   if (myid == 0)
+   {
+      hypre_printf("B %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B),
+                                                  hypre_ParCSRMatrixGlobalNumCols(parcsr_B),
+                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_B),
+                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_B) / hypre_ParCSRMatrixGlobalNumRows(parcsr_B));
+   }
+
    hypre_ParCSRMatrixDestroy(parcsr_B);
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
@@ -216,7 +229,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    char         fname[1024];
 
    hypre_IntArray    *CF_marker         = NULL;
-   hypre_IntArray    *coarse_dof_func   = NULL; 
+   hypre_IntArray    *coarse_dof_func   = NULL;
    HYPRE_ParCSRMatrix parcsr_S          = NULL;
    HYPRE_ParCSRMatrix parcsr_P          = NULL;
    HYPRE_ParCSRMatrix parcsr_Q          = NULL;
@@ -540,7 +553,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-cusparse") == 0 )
       {
          arg_index++;
-         use_cusparse = 1;
+         use_cusparse = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemmalg") == 0 )
       {
@@ -759,15 +772,13 @@ main( hypre_int argc,
 
  final:
 
+   hypre_TFree(gpu_ptr, HYPRE_MEMORY_DEVICE);
+
    /* Finalize Hypre */
    HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
-
-   hypre_printf("Done ...\n");
-
-   hypre_TFree(gpu_ptr, HYPRE_MEMORY_DEVICE);
 
    return (0);
 }
