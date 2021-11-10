@@ -217,7 +217,7 @@ struct ReduceSum
       {
          /* allocate for the max size for reducing double6 type */
          hypre_HandleReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024,
-                                                                     HYPRE_MEMORY_DEVICE);
+                                                                 HYPRE_MEMORY_DEVICE);
       }
 
       d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());

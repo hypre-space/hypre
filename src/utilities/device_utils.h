@@ -994,8 +994,8 @@ cudaError_t hypre_CachingFreeManaged(void *ptr);
 #endif
 
 hypre_cub_CachingDeviceAllocator * hypre_DeviceDataCubCachingAllocatorCreate(hypre_uint bin_growth,
-                                                                           hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug,
-                                                                           bool use_managed_memory);
+                                                                             hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug,
+                                                                             bool use_managed_memory);
 
 void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 
