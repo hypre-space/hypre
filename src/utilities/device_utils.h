@@ -273,7 +273,7 @@ curandGenerator_t   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
-rocrand_generator   hypre_CudaDataCurandGenerator(hypre_CudaData *data);
+rocrand_generator   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -405,7 +405,7 @@ using namespace thrust::placeholders;
    }                                                                                                                          \
    else                                                                                                                       \
    {                                                                                                                          \
-      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleCudaComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
       GPU_LAUNCH_SYNC;                                                                                                        \
    }                                                                                                                          \
 }
@@ -417,10 +417,10 @@ using namespace thrust::placeholders;
 
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleCudaComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
 
 /* return the number of threads in block */
@@ -993,7 +993,7 @@ cudaError_t hypre_CachingFreeDevice(void *ptr);
 cudaError_t hypre_CachingFreeManaged(void *ptr);
 #endif
 
-hypre_cub_CachingDeviceAllocator * hypre_CudaDataCubCachingAllocatorCreate(hypre_uint bin_growth,
+hypre_cub_CachingDeviceAllocator * hypre_DeviceDataCubCachingAllocatorCreate(hypre_uint bin_growth,
                                                                            hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes, bool skip_cleanup, bool debug,
                                                                            bool use_managed_memory);
 

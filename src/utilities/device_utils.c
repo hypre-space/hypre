@@ -1109,7 +1109,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 
 #if defined(HYPRE_USING_ROCRAND)
 rocrand_generator
-hypre_CudaDataCurandGenerator(hypre_CudaData *data)
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
    {
@@ -1119,7 +1119,7 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
    rocrand_generator gen;
    HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
-   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_CudaDataCudaComputeStream(data)) );
+   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
 
@@ -1281,7 +1281,7 @@ hypre_DeviceDataCreate()
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-   hypre_CudaDataUseGpuRand(data) = 1;
+   hypre_DeviceDataUseGpuRand(data) = 1;
 #else
    hypre_DeviceDataUseGpuRand(data) = 0;
 #endif
