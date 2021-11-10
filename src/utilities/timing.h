@@ -106,7 +106,7 @@ HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
-HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
+HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
 
 #endif
 

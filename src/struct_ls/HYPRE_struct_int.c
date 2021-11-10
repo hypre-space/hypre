@@ -29,7 +29,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-//   srand( seed );
+   //   srand( seed );
    hypre_SeedRand(seed);
 
    hypre_SetIndex3(unit_stride, 1, 1, 1);
@@ -58,9 +58,9 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_DEVICE);
 
       ii = 0;
-      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector),loop_size)
+      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector), loop_size)
       {
-         rand_host[ii++] = 2.0*hypre_Rand() - 1.0;
+         rand_host[ii++] = 2.0 * hypre_Rand() - 1.0;
       }
       hypre_SerialBoxLoop0End()
       hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, loop_n,
@@ -74,7 +74,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 #if defined(HYPRE_USING_GPU)
          vp[vi] = rand_device[idx];
 #else
-         vp[vi] = 2.0*hypre_Rand() - 1.0;
+         vp[vi] = 2.0 * hypre_Rand() - 1.0;
 #endif
       }
       hypre_BoxLoop1End(vi);
@@ -90,7 +90,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 }
 
 HYPRE_Int
-hypre_StructSetRandomValues( void* v, HYPRE_Int seed ) {
+hypre_StructSetRandomValues( void* v, HYPRE_Int seed )
+{
 
    return hypre_StructVectorSetRandomValues( (hypre_StructVector*)v, seed );
 }

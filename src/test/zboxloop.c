@@ -139,7 +139,7 @@ main( hypre_int argc,
     * Check a few things
     *-----------------------------------------------------------*/
 
-   if ((P*Q*R) > num_procs)
+   if ((P * Q * R) > num_procs)
    {
       if (myid == 0)
       {
@@ -147,7 +147,7 @@ main( hypre_int argc,
       }
       exit(1);
    }
-   else if ((P*Q*R) < num_procs)
+   else if ((P * Q * R) < num_procs)
    {
       if (myid == 0)
       {
@@ -168,12 +168,12 @@ main( hypre_int argc,
    x3_data_box = hypre_BoxCreate(dim);
    x4_data_box = hypre_BoxCreate(dim);
    hypre_SetIndex3(hypre_BoxIMin(x1_data_box), 0, 0, 0);
-   hypre_SetIndex3(hypre_BoxIMax(x1_data_box), nx+1, ny+1, nz+1);
+   hypre_SetIndex3(hypre_BoxIMax(x1_data_box), nx + 1, ny + 1, nz + 1);
    hypre_CopyBox(x1_data_box, x2_data_box);
    hypre_CopyBox(x1_data_box, x3_data_box);
    hypre_CopyBox(x1_data_box, x4_data_box);
 
-   size = (nx+2)*(ny+2)*(nz+2);
+   size = (nx + 2) * (ny + 2) * (nz + 2);
    xp1 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
    xp2 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
    xp3 = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
@@ -186,7 +186,7 @@ main( hypre_int argc,
 
    if (reps < 0)
    {
-      reps = 1000000000/(nx*ny*nz+1000);
+      reps = 1000000000 / (nx * ny * nz + 1000);
    }
 
    /*-----------------------------------------------------------
@@ -233,7 +233,7 @@ main( hypre_int argc,
    }
    hypre_SerialBoxLoop1End(xi1);
 
-   if (sum != (nx*ny*nz))
+   if (sum != (nx * ny * nz))
    {
       hypre_printf("*sum = %d\n", sum);
       fail = 1;
@@ -356,7 +356,7 @@ main( hypre_int argc,
       xi1 = 0;
       zypre_BoxLoop0Begin(dim, loop_size);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop0For()
       {
@@ -375,7 +375,7 @@ main( hypre_int argc,
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop1For(xi1)
       {
@@ -394,7 +394,7 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop2For(xi1, xi2)
       {
@@ -414,7 +414,7 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop3For(xi1, xi2, xi3)
       {
@@ -435,7 +435,7 @@ main( hypre_int argc,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
@@ -541,7 +541,7 @@ main( hypre_int argc,
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE reduction(+:zbox_sum1)
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE reduction(+:zbox_sum1)
 #endif
       zypre_BoxLoop1For(xi1)
       {
@@ -560,7 +560,7 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE reduction(+:zbox_sum2)
+      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE reduction(+:zbox_sum2)
 #endif
       zypre_BoxLoop2For(xi1, xi2)
       {

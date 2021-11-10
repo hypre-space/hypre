@@ -143,8 +143,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
    /* u = u + p(A)r */
 
-   if (order > 4) order = 4;
-   if (order < 1) order = 1;
+   if (order > 4) { order = 4; }
+   if (order < 1) { order = 1; }
 
    /* we are using the order of p(A) */
    cheby_order = order - 1;
@@ -160,10 +160,11 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
       /* o = u; u = r .* coef */
       HYPRE_THRUST_CALL(
-          for_each,
-          thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
-          thrust::make_zip_iterator(thrust::make_tuple(orig_u + num_rows, u_data + num_rows, r_data + num_rows)),
-          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+         for_each,
+         thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
+         thrust::make_zip_iterator(thrust::make_tuple(orig_u + num_rows, u_data + num_rows,
+                                                      r_data + num_rows)),
+         save_and_scale<HYPRE_Real>(coefs[cheby_order]));
 
       for (i = cheby_order - 1; i >= 0; i--)
       {
@@ -229,10 +230,11 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
       /* u = orig_u + ds .* u */
       HYPRE_THRUST_CALL(
-          for_each,
-          thrust::make_zip_iterator(thrust::make_tuple(u_data, orig_u, ds_data)),
-          thrust::make_zip_iterator(thrust::make_tuple(u_data + num_rows, orig_u + num_rows, ds_data + num_rows)),
-          xpyz<HYPRE_Real>());
+         for_each,
+         thrust::make_zip_iterator(thrust::make_tuple(u_data, orig_u, ds_data)),
+         thrust::make_zip_iterator(thrust::make_tuple(u_data + num_rows, orig_u + num_rows,
+                                                      ds_data + num_rows)),
+         xpyz<HYPRE_Real>());
 
 
    } /* end of scaling code */

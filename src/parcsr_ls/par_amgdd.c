@@ -360,7 +360,7 @@ hypre_BoomerAMGDDGetNumGhostLayers( void      *data,
 
 HYPRE_Int
 hypre_BoomerAMGDDSetUserFACRelaxation( void *data,
-   HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata , HYPRE_Int level, HYPRE_Int cycle_param ))
+                                       HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ))
 {
    hypre_ParAMGDDData  *amgdd_data = (hypre_ParAMGDDData*) data;
 

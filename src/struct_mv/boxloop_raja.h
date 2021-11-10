@@ -21,11 +21,12 @@
 #if defined(HYPRE_USING_RAJA)
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
 #include <RAJA/RAJA.hpp>
-using namespace RAJA;
+   using namespace RAJA;
 
 #ifdef __cplusplus
 }
@@ -33,10 +34,10 @@ using namespace RAJA;
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 

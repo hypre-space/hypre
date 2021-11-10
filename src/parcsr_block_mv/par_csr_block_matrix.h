@@ -37,15 +37,15 @@ typedef struct
    HYPRE_BigInt         first_row_index;
    HYPRE_BigInt         first_col_diag;
 
- /* need to know entire local range in case row_starts and col_starts
-    are null */
+   /* need to know entire local range in case row_starts and col_starts
+      are null */
    HYPRE_BigInt         last_row_index;
    HYPRE_BigInt         last_col_diag;
 
    hypre_CSRBlockMatrix *diag;
    hypre_CSRBlockMatrix *offd;
    HYPRE_BigInt         *col_map_offd;
-        /* maps columns of offd to global columns */
+   /* maps columns of offd to global columns */
    HYPRE_BigInt          row_starts[2];
    /* row_starts[0] is start of local rows
       row_starts[1] is start of next processor's rows */
@@ -294,9 +294,9 @@ void hypre_block_qsort( HYPRE_Int *v,
 
 
 void hypre_swap_blk( HYPRE_Complex *v,
-               HYPRE_Int block_size,
-               HYPRE_Int  i,
-               HYPRE_Int  j );
+                     HYPRE_Int block_size,
+                     HYPRE_Int  i,
+                     HYPRE_Int  j );
 
 
 #ifdef __cplusplus

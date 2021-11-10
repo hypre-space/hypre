@@ -232,9 +232,9 @@ void hypre_qsort0( HYPRE_Int *v,
    {
       return;
    }
-   hypre_swap(v, left, (left+right)/2);
+   hypre_swap(v, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -242,8 +242,8 @@ void hypre_qsort0( HYPRE_Int *v,
       }
    }
    hypre_swap(v, left, last);
-   hypre_qsort0(v, left, last-1);
-   hypre_qsort0(v, last+1, right);
+   hypre_qsort0(v, left, last - 1);
+   hypre_qsort0(v, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -260,9 +260,9 @@ void hypre_qsort1( HYPRE_Int  *v,
    {
       return;
    }
-   hypre_swap2( v, w, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -270,8 +270,8 @@ void hypre_qsort1( HYPRE_Int  *v,
       }
    }
    hypre_swap2(v, w, left, last);
-   hypre_qsort1(v, w, left, last-1);
-   hypre_qsort1(v, w, last+1, right);
+   hypre_qsort1(v, w, left, last - 1);
+   hypre_qsort1(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -288,9 +288,9 @@ void hypre_BigQsort1( HYPRE_BigInt *v,
    {
       return;
    }
-   hypre_BigSwap2(v, w, left, (left+right)/2);
+   hypre_BigSwap2(v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -298,8 +298,8 @@ void hypre_BigQsort1( HYPRE_BigInt *v,
       }
    }
    hypre_BigSwap2(v, w, left, last);
-   hypre_BigQsort1(v, w, left, last-1);
-   hypre_BigQsort1(v, w, last+1, right);
+   hypre_BigQsort1(v, w, left, last - 1);
+   hypre_BigQsort1(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -316,9 +316,9 @@ void hypre_qsort2i( HYPRE_Int *v,
    {
       return;
    }
-   hypre_swap2i( v, w, left, (left+right)/2);
+   hypre_swap2i( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -326,17 +326,17 @@ void hypre_qsort2i( HYPRE_Int *v,
       }
    }
    hypre_swap2i(v, w, left, last);
-   hypre_qsort2i(v, w, left, last-1);
-   hypre_qsort2i(v, w, last+1, right);
+   hypre_qsort2i(v, w, left, last - 1);
+   hypre_qsort2i(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 void hypre_BigQsort2i( HYPRE_BigInt *v,
-                    HYPRE_Int *w,
-                    HYPRE_Int  left,
-                    HYPRE_Int  right )
+                       HYPRE_Int *w,
+                       HYPRE_Int  left,
+                       HYPRE_Int  right )
 {
    HYPRE_Int i, last;
 
@@ -344,9 +344,9 @@ void hypre_BigQsort2i( HYPRE_BigInt *v,
    {
       return;
    }
-   hypre_BigSwap2i( v, w, left, (left+right)/2);
+   hypre_BigSwap2i( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -354,8 +354,8 @@ void hypre_BigQsort2i( HYPRE_BigInt *v,
       }
    }
    hypre_BigSwap2i(v, w, left, last);
-   hypre_BigQsort2i(v, w, left, last-1);
-   hypre_BigQsort2i(v, w, last+1, right);
+   hypre_BigQsort2i(v, w, left, last - 1);
+   hypre_BigQsort2i(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -374,9 +374,9 @@ void hypre_qsort2( HYPRE_Int  *v,
    {
       return;
    }
-   hypre_swap2( v, w, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (w[i] < w[left])
       {
@@ -384,8 +384,8 @@ void hypre_qsort2( HYPRE_Int  *v,
       }
    }
    hypre_swap2(v, w, left, last);
-   hypre_qsort2(v, w, left, last-1);
-   hypre_qsort2(v, w, last+1, right);
+   hypre_qsort2(v, w, left, last - 1);
+   hypre_qsort2(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -402,9 +402,9 @@ void hypre_qsort2_abs( HYPRE_Int  *v,
    {
       return;
    }
-   hypre_swap2( v, w, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (fabs(w[i]) > fabs(w[left]))
       {
@@ -412,8 +412,8 @@ void hypre_qsort2_abs( HYPRE_Int  *v,
       }
    }
    hypre_swap2(v, w, left, last);
-   hypre_qsort2_abs(v, w, left, last-1);
-   hypre_qsort2_abs(v, w, last+1, right);
+   hypre_qsort2_abs(v, w, left, last - 1);
+   hypre_qsort2_abs(v, w, last + 1, right);
 }
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -432,9 +432,9 @@ void hypre_qsort3i( HYPRE_Int *v,
    {
       return;
    }
-   hypre_swap3i( v, w, z, left, (left+right)/2);
+   hypre_swap3i( v, w, z, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -442,8 +442,8 @@ void hypre_qsort3i( HYPRE_Int *v,
       }
    }
    hypre_swap3i(v, w, z, left, last);
-   hypre_qsort3i(v, w, z, left, last-1);
-   hypre_qsort3i(v, w, z, last+1, right);
+   hypre_qsort3i(v, w, z, left, last - 1);
+   hypre_qsort3i(v, w, z, last + 1, right);
 }
 
 /* sort on v, move w and z DOK */
@@ -459,9 +459,9 @@ void hypre_qsort3ir( HYPRE_Int  *v,
    {
       return;
    }
-   hypre_swap3_d_perm( v, w, z, left, (left+right)/2);
+   hypre_swap3_d_perm( v, w, z, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -469,8 +469,8 @@ void hypre_qsort3ir( HYPRE_Int  *v,
       }
    }
    hypre_swap3_d_perm(v, w, z, left, last);
-   hypre_qsort3ir(v, w, z, left, last-1);
-   hypre_qsort3ir(v, w, z, last+1, right);
+   hypre_qsort3ir(v, w, z, left, last - 1);
+   hypre_qsort3ir(v, w, z, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -489,18 +489,18 @@ void hypre_qsort3( HYPRE_Real *v,
    {
       return;
    }
-   hypre_swap3_d( v, w, z, left, (left+right)/2);
+   hypre_swap3_d( v, w, z, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
-         hypre_swap3_d(v,w, z, ++last, i);
+         hypre_swap3_d(v, w, z, ++last, i);
       }
    }
    hypre_swap3_d(v, w, z, left, last);
-   hypre_qsort3(v, w, z, left, last-1);
-   hypre_qsort3(v, w, z, last+1, right);
+   hypre_qsort3(v, w, z, left, last - 1);
+   hypre_qsort3(v, w, z, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -520,18 +520,18 @@ void hypre_qsort3_abs(HYPRE_Real *v,
    {
       return;
    }
-   hypre_swap3_d( v, w, z, left, (left+right)/2);
+   hypre_swap3_d( v, w, z, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (fabs(v[i]) < fabs(v[left]))
       {
-         hypre_swap3_d(v,w, z, ++last, i);
+         hypre_swap3_d(v, w, z, ++last, i);
       }
    }
    hypre_swap3_d(v, w, z, left, last);
-   hypre_qsort3_abs(v, w, z, left, last-1);
-   hypre_qsort3_abs(v, w, z, last+1, right);
+   hypre_qsort3_abs(v, w, z, left, last - 1);
+   hypre_qsort3_abs(v, w, z, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -552,18 +552,18 @@ void hypre_BigQsort4_abs( HYPRE_Real   *v,
    {
       return;
    }
-   hypre_BigSwap4_d( v, w, z, y, left, (left+right)/2);
+   hypre_BigSwap4_d( v, w, z, y, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (fabs(v[i]) < fabs(v[left]))
       {
-         hypre_BigSwap4_d(v,w, z, y, ++last, i);
+         hypre_BigSwap4_d(v, w, z, y, ++last, i);
       }
    }
    hypre_BigSwap4_d(v, w, z, y, left, last);
-   hypre_BigQsort4_abs(v, w, z, y, left, last-1);
-   hypre_BigQsort4_abs(v, w, z, y, last+1, right);
+   hypre_BigQsort4_abs(v, w, z, y, left, last - 1);
+   hypre_BigQsort4_abs(v, w, z, y, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -580,9 +580,9 @@ void hypre_qsort_abs( HYPRE_Real *w,
    {
       return;
    }
-   hypre_swap_d( w, left, (left+right)/2);
+   hypre_swap_d( w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (fabs(w[i]) < fabs(w[left]))
       {
@@ -590,8 +590,8 @@ void hypre_qsort_abs( HYPRE_Real *w,
       }
    }
    hypre_swap_d(w, left, last);
-   hypre_qsort_abs(w, left, last-1);
-   hypre_qsort_abs(w, last+1, right);
+   hypre_qsort_abs(w, left, last - 1);
+   hypre_qsort_abs(w, last + 1, right);
 }
 
 
@@ -628,9 +628,9 @@ void hypre_BigQsortbi( HYPRE_BigInt *v,
    {
       return;
    }
-   hypre_BigSwapbi( v, w, left, (left+right)/2);
+   hypre_BigSwapbi( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -638,8 +638,8 @@ void hypre_BigQsortbi( HYPRE_BigInt *v,
       }
    }
    hypre_BigSwapbi(v, w, left, last);
-   hypre_BigQsortbi(v, w, left, last-1);
-   hypre_BigQsortbi(v, w, last+1, right);
+   hypre_BigQsortbi(v, w, left, last - 1);
+   hypre_BigQsortbi(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -673,9 +673,9 @@ void hypre_BigQsortbLoc( HYPRE_BigInt *v,
    {
       return;
    }
-   hypre_BigSwapLoc( v, w, left, (left+right)/2);
+   hypre_BigSwapLoc( v, w, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -683,8 +683,8 @@ void hypre_BigQsortbLoc( HYPRE_BigInt *v,
       }
    }
    hypre_BigSwapLoc(v, w, left, last);
-   hypre_BigQsortbLoc(v, w, left, last-1);
-   hypre_BigQsortbLoc(v, w, last+1, right);
+   hypre_BigQsortbLoc(v, w, left, last - 1);
+   hypre_BigQsortbLoc(v, w, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -726,9 +726,9 @@ void hypre_BigQsortb2i( HYPRE_BigInt *v,
    {
       return;
    }
-   hypre_BigSwapb2i( v, w, z, left, (left+right)/2);
+   hypre_BigSwapb2i( v, w, z, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -736,8 +736,8 @@ void hypre_BigQsortb2i( HYPRE_BigInt *v,
       }
    }
    hypre_BigSwapb2i(v, w, z, left, last);
-   hypre_BigQsortb2i(v, w, z, left, last-1);
-   hypre_BigQsortb2i(v, w, z, last+1, right);
+   hypre_BigQsortb2i(v, w, z, left, last - 1);
+   hypre_BigQsortb2i(v, w, z, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -767,9 +767,9 @@ void hypre_BigQsort0( HYPRE_BigInt *v,
    {
       return;
    }
-   hypre_BigSwap( v, left, (left+right)/2);
+   hypre_BigSwap( v, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       if (v[i] < v[left])
       {
@@ -777,8 +777,8 @@ void hypre_BigQsort0( HYPRE_BigInt *v,
       }
    }
    hypre_BigSwap(v, left, last);
-   hypre_BigQsort0(v, left, last-1);
-   hypre_BigQsort0(v, last+1, right);
+   hypre_BigQsort0(v, left, last - 1);
+   hypre_BigQsort0(v, last + 1, right);
 }
 
 // Recursive DFS search.
@@ -796,11 +796,11 @@ static void hypre_search_row(HYPRE_Int            row,
    {
       HYPRE_Int j;
       visited[row] = 1;
-      for (j=row_ptr[row]; j<row_ptr[row+1]; j++)
+      for (j = row_ptr[row]; j < row_ptr[row + 1]; j++)
       {
          HYPRE_Int col = col_inds[j];
          hypre_search_row(col, row_ptr, col_inds, data,
-                         visited, ordering, order_ind);
+                          visited, ordering, order_ind);
       }
       // Add node to ordering *after* it has been searched
       ordering[*order_ind] = row;
@@ -854,16 +854,16 @@ static void hypre_dense_search_row(HYPRE_Int            row,
    {
       HYPRE_Int col;
       visited[row] = 1;
-      for (col=0; col<n; col++)
+      for (col = 0; col < n; col++)
       {
          HYPRE_Complex val;
          if (is_col_major)
          {
-            val = L[col*n + row];
+            val = L[col * n + row];
          }
          else
          {
-            val = L[row*n + col];
+            val = L[row * n + col];
          }
          if (fabs(val) > 1e-14)
          {

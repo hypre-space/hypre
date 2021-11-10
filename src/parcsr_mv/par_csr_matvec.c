@@ -76,7 +76,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
-   hypre_assert( idxstride>0 );
+   hypre_assert( idxstride > 0 );
 
    if (num_cols != x_size)
    {
@@ -117,7 +117,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   hypre_assert( num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg, hypre_ParCSRCommPkgNumRecvs(comm_pkg)) );
+   hypre_assert( num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg,
+                                                                  hypre_ParCSRCommPkgNumRecvs(comm_pkg)) );
    hypre_assert( hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0) == 0 );
 
 #ifdef HYPRE_PROFILE
@@ -153,9 +154,11 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
 #if 1
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd,
+                                                             HYPRE_MEMORY_DEVICE);
 #else
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd, hypre_MEMORY_DEVICE);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd,
+                                                              hypre_MEMORY_DEVICE);
 #endif
       }
       hypre_VectorData(x_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
@@ -165,7 +168,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
-      hypre_VectorData(x_tmp) = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvDataBuffer(persistent_comm_handle);
+      hypre_VectorData(x_tmp) = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvDataBuffer(
+                                   persistent_comm_handle);
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
 #endif
    }
@@ -247,7 +251,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       HYPRE_Int *device_send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
       HYPRE_Int start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(send_data, locl_data, device_send_map_elmts)
+      #pragma omp target teams distribute parallel for private(i) is_device_ptr(send_data, locl_data, device_send_map_elmts)
       for (i = start; i < end; i++)
       {
          send_data[i] = locl_data[device_send_map_elmts[i]];
@@ -256,13 +260,13 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       HYPRE_Int i;
       /* pack send data on host */
 #if defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
       for (i = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
            i < hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
            i ++)
       {
-         send_data[i] = locl_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
+         send_data[i] = locl_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)];
       }
 #endif
    }
@@ -292,7 +296,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       for ( jv = 0; jv < num_vectors; ++jv )
       {
          comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2( 1, comm_pkg, HYPRE_MEMORY_DEVICE, x_buf_data[jv],
-                                                            HYPRE_MEMORY_DEVICE, &x_tmp_data[jv*num_cols_offd] );
+                                                            HYPRE_MEMORY_DEVICE, &x_tmp_data[jv * num_cols_offd] );
       }
    }
 
@@ -487,7 +491,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   hypre_assert( num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg, hypre_ParCSRCommPkgNumRecvs(comm_pkg)) );
+   hypre_assert( num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg,
+                                                                  hypre_ParCSRCommPkgNumRecvs(comm_pkg)) );
    hypre_assert( hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0) == 0 );
 
 #ifdef HYPRE_PROFILE
@@ -523,9 +528,11 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
       {
 #if 1
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_DEVICE);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex, num_cols_offd,
+                                                             HYPRE_MEMORY_DEVICE);
 #else
-         hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd, hypre_MEMORY_DEVICE);
+         hypre_ParCSRCommPkgTmpData(comm_pkg) = _hypre_TAlloc(HYPRE_Complex, num_cols_offd,
+                                                              hypre_MEMORY_DEVICE);
 #endif
       }
       hypre_VectorData(y_tmp) = hypre_ParCSRCommPkgTmpData(comm_pkg);
@@ -535,7 +542,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
-      hypre_VectorData(y_tmp) = (HYPRE_Complex *) hypre_ParCSRCommHandleSendDataBuffer(persistent_comm_handle);
+      hypre_VectorData(y_tmp) = (HYPRE_Complex *) hypre_ParCSRCommHandleSendDataBuffer(
+                                   persistent_comm_handle);
       hypre_SeqVectorSetDataOwner(y_tmp, 0);
 #endif
    }
@@ -630,7 +638,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       for ( jv = 0; jv < num_vectors; ++jv )
       {
          /* this is where we assume multivectors are 'column' storage */
-         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2( 2, comm_pkg, HYPRE_MEMORY_DEVICE, &y_tmp_data[jv*num_cols_offd],
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2( 2, comm_pkg, HYPRE_MEMORY_DEVICE,
+                                                            &y_tmp_data[jv * num_cols_offd],
                                                             HYPRE_MEMORY_DEVICE, y_buf_data[jv] );
       }
    }
@@ -708,7 +717,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       {
          hypre_ParCSRCommPkgWorkSpace(comm_pkg) =
             hypre_TAlloc( char,
-                          (2*sizeof(HYPRE_Int)+sizeof(HYPRE_Real)) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                          (2 * sizeof(HYPRE_Int) + sizeof(HYPRE_Real)) * hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                           HYPRE_MEMORY_DEVICE );
       }
       hypreDevice_GenScatterAdd(locl_data,
@@ -724,8 +733,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       {
          HYPRE_Int *device_send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
          HYPRE_Int start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1);
-#pragma omp target teams distribute parallel for private(j) is_device_ptr(recv_data, locl_data, device_send_map_elmts)
+         HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
+         #pragma omp target teams distribute parallel for private(j) is_device_ptr(recv_data, locl_data, device_send_map_elmts)
          for (j = start; j < end; j++)
          {
             locl_data[device_send_map_elmts[j]] += recv_data[j];
@@ -738,7 +747,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
            i < hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
            i ++)
       {
-         locl_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)] += recv_data[i];
+         locl_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)] += recv_data[i];
       }
 #endif
    }
@@ -823,16 +832,22 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    if (num_cols != x_size)
+   {
       ierr = 11;
+   }
 
    if (num_rows != y_size)
+   {
       ierr = 12;
+   }
 
    if (num_cols != x_size && num_rows != y_size)
+   {
       ierr = 13;
+   }
 
    if (num_procs > 1)
    {
@@ -862,9 +877,9 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
             x_buf_data[index++]
-               = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
       }
       comm_handle =
          hypre_ParCSRCommHandleCreate ( 1, comm_pkg, x_buf_data, x_tmp_data );
@@ -880,23 +895,23 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       if (num_sends)
          int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart
                                       (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
-      if (num_cols_offd) CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
+      if (num_cols_offd) { CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
             int_buf_data[index++]
-               = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
       }
       comm_handle =
-         hypre_ParCSRCommHandleCreate(11,comm_pkg,int_buf_data,CF_marker_offd );
+         hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, CF_marker_offd );
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
 
       if (num_cols_offd) hypre_CSRMatrixMatvec_FF( alpha, offd, x_tmp, 1.0, y_local,
-                                                   CF_marker, CF_marker_offd, fpt);
+                                                      CF_marker, CF_marker_offd, fpt);
 
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
@@ -936,7 +951,8 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
       send_map_sort     = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
       send_map_rowcount = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
 
-      hypre_TMemcpy(send_map_sort, send_map, HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(send_map_sort, send_map, HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
 
       HYPRE_THRUST_CALL( sequence,
                          send_map_j,
@@ -959,7 +975,8 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
 
       send_map_n = new_end.first - send_map_rowind;
 
-      send_map_rowind = hypre_TReAlloc_v2(send_map_rowind, HYPRE_Int, num_elemt, HYPRE_Int, send_map_n, HYPRE_MEMORY_DEVICE);
+      send_map_rowind = hypre_TReAlloc_v2(send_map_rowind, HYPRE_Int, num_elemt, HYPRE_Int, send_map_n,
+                                          HYPRE_MEMORY_DEVICE);
       send_map_i = hypre_TAlloc(HYPRE_Int, send_map_n + 1, HYPRE_MEMORY_DEVICE);
 
       hypre_Memset(send_map_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
@@ -1006,10 +1023,11 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
    hypre_VectorSize(&vec_x) = num_elemt;
    hypre_VectorData(&vec_y) = locl_data;
 
-   hypre_CSRMatrixSpMVDevice(1.0, &csr, &vec_x, 1.0, &vec_y, hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
+   hypre_CSRMatrixSpMVDevice(1.0, &csr, &vec_x, 1.0, &vec_y,
+                             hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
 #endif
 
-   return hypre_error_flag;
+                      return hypre_error_flag;
 }
 #endif
 

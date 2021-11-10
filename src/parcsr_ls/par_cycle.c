@@ -238,14 +238,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
           || smooth_type == 9 || smooth_type == 19)
       {
          HYPRE_Int actual_local_size = hypre_ParVectorActualLocalSize(Vtemp);
-         Utemp = hypre_ParVectorCreate(comm,hypre_ParVectorGlobalSize(Vtemp),
+         Utemp = hypre_ParVectorCreate(comm, hypre_ParVectorGlobalSize(Vtemp),
                                        hypre_ParVectorPartitioning(Vtemp));
          local_size
             = hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp));
          if (local_size < actual_local_size)
          {
             hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) =
-            hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
+               hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
@@ -311,7 +311,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             hypre_VectorSize(hypre_ParVectorLocalVector(Ptemp)) = local_size;
             Ztemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ztemp));
             Ptemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ptemp));
-            hypre_ParVectorSetConstantValues(Ztemp,0);
+            hypre_ParVectorSetConstantValues(Ztemp, 0);
             alpha = -1.0;
             beta = 1.0;
 
@@ -431,11 +431,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   switch (relax_points)
                   {
                      case 1:
-                        cycle_op_count += num_coeffs[level+1];
+                        cycle_op_count += num_coeffs[level + 1];
                         break;
 
                      case -1:
-                        cycle_op_count += (num_coeffs[level]-num_coeffs[level+1]);
+                        cycle_op_count += (num_coeffs[level] - num_coeffs[level + 1]);
                         break;
                   }
                }
@@ -477,7 +477,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        (HYPRE_ParVector) Vtemp,
                                        (HYPRE_ParVector) Utemp);
                   }
-                  hypre_ParVectorAxpy(relax_weight[level],Utemp,Aux_U);
+                  hypre_ParVectorAxpy(relax_weight[level], Utemp, Aux_U);
                }
                else if ( smooth_num_levels > level && (smooth_type == 5 || smooth_type == 15) )
                {
@@ -527,7 +527,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   }
                }
                else if (relax_type == 16)
-               { /* scaled Chebyshev */
+               {
+                  /* scaled Chebyshev */
                   HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
                   HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
                   hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
@@ -608,30 +609,30 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   hypre_GpuProfilingPopRange();
                   hypre_GpuProfilingPopRange();
 #endif
-                  return(Solve_err_flag);
+                  return (Solve_err_flag);
                }
             }
             if  (smooth_num_levels > level && smooth_type > 9)
             {
                gammaold = gamma;
-               gamma = hypre_ParVectorInnerProd(Rtemp,Ztemp);
+               gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
                if (jj == 0)
                {
-                  hypre_ParVectorCopy(Ztemp,Ptemp);
+                  hypre_ParVectorCopy(Ztemp, Ptemp);
                }
                else
                {
-                  beta = gamma/gammaold;
-                  for (i=0; i < local_size; i++)
+                  beta = gamma / gammaold;
+                  for (i = 0; i < local_size; i++)
                   {
-                     Ptemp_data[i] = Ztemp_data[i] + beta*Ptemp_data[i];
+                     Ptemp_data[i] = Ztemp_data[i] + beta * Ptemp_data[i];
                   }
                }
 
-               hypre_ParCSRMatrixMatvec(1.0,A_array[level],Ptemp,0.0,Vtemp);
-               alfa = gamma /hypre_ParVectorInnerProd(Ptemp,Vtemp);
-               hypre_ParVectorAxpy(alfa,Ptemp,U_array[level]);
-               hypre_ParVectorAxpy(-alfa,Vtemp,Rtemp);
+               hypre_ParCSRMatrixMatvec(1.0, A_array[level], Ptemp, 0.0, Vtemp);
+               alfa = gamma / hypre_ParVectorInnerProd(Ptemp, Vtemp);
+               hypre_ParVectorAxpy(alfa, Ptemp, U_array[level]);
+               hypre_ParVectorAxpy(-alfa, Vtemp, Rtemp);
             }
          }
          HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
@@ -647,7 +648,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       --lev_counter[level];
 
       //if ( level != num_levels-1 && lev_counter[level] >= 0 )
-      if (lev_counter[level] >= 0 && level != num_levels-1)
+      if (lev_counter[level] >= 0 && level != num_levels - 1)
       {
          /*---------------------------------------------------------------
           * Visit coarser level next.
@@ -670,7 +671,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #endif
          if (block_mode)
          {
-            hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+            hypre_ParVectorCopy(F_array[fine_grid], Vtemp);
             hypre_ParCSRBlockMatrixMatvec(alpha, A_block_array[fine_grid], U_array[fine_grid],
                                           beta, Vtemp);
          }
@@ -721,7 +722,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          ++level;
          lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
          cycle_param = 1;
-         if (level == num_levels-1)
+         if (level == num_levels - 1)
          {
             cycle_param = 3;
          }
@@ -816,5 +817,5 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_GpuProfilingPopRange();
 #endif
 
-   return(Solve_err_flag);
+   return (Solve_err_flag);
 }

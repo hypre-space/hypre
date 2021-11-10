@@ -92,7 +92,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
       HYPRE_Int p = 0, q = 0;
       if (grid_group_id < n && group_lane < 2)
       {
-         p = read_only_load(&d_ia[grid_group_id+group_lane]);
+         p = read_only_load(&d_ia[grid_group_id + group_lane]);
       }
       q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
       p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
@@ -103,7 +103,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
       {
          p = read_only_load(&d_ia[s]);
       }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id+1);
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id + 1);
       p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id);
 #endif
       T sum = 0.0;
@@ -138,7 +138,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
 #endif
       // parallel reduction
 #pragma unroll
-      for (HYPRE_Int d = K/2; d > 0; d >>= 1)
+      for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
       {
          sum += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum, d);
       }
@@ -275,7 +275,8 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
    }
    else if (fill == -1)
    {
-      return hypreDevice_CSRMatrixMatvec<-1>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+      return hypreDevice_CSRMatrixMatvec < -1 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
+                                                 y_ind);
    }
    else if (fill == 2)
    {
@@ -283,7 +284,8 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
    }
    else if (fill == -2)
    {
-      return hypreDevice_CSRMatrixMatvec<-2>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+      return hypreDevice_CSRMatrixMatvec < -2 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
+                                                 y_ind);
    }
 
    return hypre_error_flag;
