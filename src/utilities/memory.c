@@ -62,7 +62,7 @@ hypre_DeviceMemset(void *ptr, HYPRE_Int value, size_t num)
 {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-#pragma omp target teams distribute parallel for is_device_ptr(ptr)
+   #pragma omp target teams distribute parallel for is_device_ptr(ptr)
    for (size_t i = 0; i < num; i++)
    {
       ((unsigned char *) ptr)[i] = (unsigned char) value;

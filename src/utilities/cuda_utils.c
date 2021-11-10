@@ -334,7 +334,7 @@ template<typename T>
 __global__ void
 hypreCUDAKernel_axpyn(T *x, size_t n, T *y, T *z, T a)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
@@ -364,7 +364,8 @@ hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
 }
 
 HYPRE_Int
-hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex *d_z, HYPRE_Complex a)
+hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex *d_z,
+                         HYPRE_Complex a)
 {
    return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
 }
@@ -379,7 +380,7 @@ template<typename T>
 __global__ void
 hypreCUDAKernel_scalen(T *x, size_t n, T *y, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
@@ -424,7 +425,7 @@ template<typename T>
 __global__ void
 hypreCUDAKernel_filln(T *x, size_t n, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < n)
    {
