@@ -14,10 +14,10 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash table */
+hypre_spgemm_hash_insert_symbl( char        HashType,
+                                HYPRE_Int   HashSize, /* capacity of the hash table */
                        volatile HYPRE_Int  *HashKeys, /* assumed to be initialized as all -1's */
                                 HYPRE_Int   key,      /* assumed to be nonnegative */
                                 HYPRE_Int  &count     /* increase by 1 if is a new entry */)
@@ -34,7 +34,7 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
       }
       else
       {
-         j = HashFunc<HashType>(HashSize, key, i, j);
+         j = HashFunc(HashType, HashSize, key, i, j);
       }
 
       /* try to insert key+1 into slot j */
@@ -53,10 +53,10 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
    return -1;
 }
 
-template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
+hypre_spgemm_compute_row_symbl( char       HashType,
+                                HYPRE_Int  rowi,
                                 HYPRE_Int  warp_lane_id,
                                 HYPRE_Int *ia,
                                 HYPRE_Int *ja,
@@ -114,11 +114,11 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
          {
             const HYPRE_Int k_idx = read_only_load(jb + k);
             /* first try to insert into shared memory hash table */
-            HYPRE_Int pos = hypre_spgemm_hash_insert_symbl<HashType>(s_HashSize, s_HashKeys, k_idx, num_new_insert);
+            HYPRE_Int pos = hypre_spgemm_hash_insert_symbl(HashType, s_HashSize, s_HashKeys, k_idx, num_new_insert);
 
             if (-1 == pos)
             {
-               pos = hypre_spgemm_hash_insert_symbl<HashType>(g_HashSize, g_HashKeys, k_idx, num_new_insert);
+               pos = hypre_spgemm_hash_insert_symbl(HashType, g_HashSize, g_HashKeys, k_idx, num_new_insert);
             }
             /* if failed again, both hash tables must have been full
                (hash table size estimation was too small).
@@ -136,9 +136,10 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
    return num_new_insert;
 }
 
-template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
+template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT>
 __global__ void
-hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
+hypre_spgemm_symbolic( char       HashType,
+                       HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                        HYPRE_Int *rind,
                        HYPRE_Int *ia,
                        HYPRE_Int *ja,
@@ -218,9 +219,9 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       group_sync<GROUP_SIZE>();
 
       /* work with two hash tables */
-      jsum = hypre_spgemm_compute_row_symbl<HashType>(ii, warp_lane_id, ia, ja, ib, jb,
-                                                      SHMEM_HASH_SIZE, group_s_HashKeys,
-                                                      ghash_size, jg + istart_g, failed);
+      jsum = hypre_spgemm_compute_row_symbl(HashType, ii, warp_lane_id, ia, ja, ib, jb,
+                                            SHMEM_HASH_SIZE, group_s_HashKeys,
+                                            ghash_size, jg + istart_g, failed);
 
 #if defined(HYPRE_DEBUG)
       if (ATTEMPT == 2)
@@ -330,21 +331,8 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * symbolic multiplication:
     * On output, it provides an upper bound of nnz in rows of C
     * ---------------------------------------------------------------------------*/
-   if (hash_type == 'L')
-   {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT, 'L'>), gDim, bDim,
-                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
-   else if (hash_type == 'Q')
-   {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT, 'Q'>), gDim, bDim,
-                         m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
-   else if (hash_type == 'D')
-   {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT, 'D'>), gDim, bDim,
-                         m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
-   }
+   HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, ATTEMPT>), gDim, bDim,
+                       hash_type, m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
 
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
@@ -440,10 +428,6 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 }
 
 template HYPRE_Int hypreDevice_CSRSpGemmRownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
-
-template HYPRE_Int hypreDevice_CSRSpGemmRownnz<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
-
-//template HYPRE_Int hypreDevice_CSRSpGemmRownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, 4*HYPRE_WARP_SIZE>(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 

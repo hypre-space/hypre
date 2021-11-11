@@ -149,9 +149,8 @@ HYPRE_Int Hash2Func(HYPRE_Int key)
    return ( (key >> 6) | 1 );
 }
 
-template <char type>
 static __device__ __forceinline__
-HYPRE_Int HashFunc(HYPRE_Int m, HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
+HYPRE_Int HashFunc(char type, HYPRE_Int m, HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
 {
    HYPRE_Int hashval = 0;
 
