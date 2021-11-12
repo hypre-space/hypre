@@ -1617,8 +1617,26 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper *a,
                                          cdbox, cdstart, cdstride,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride, dptrs);
-#else
+#elif 0
    hypre_StructMatmultCompute_core_2t_v5(a, ncomp[6], indices[6],
+                                         ndim, loop_size,
+                                         cdbox, cdstart, cdstride,
+                                         fdbox, fdstart, fdstride,
+                                         Mdbox, Mdstart, Mdstride, dptrs);
+#elif 0
+   hypre_StructMatmultCompute_core_2t_v5a(a, ncomp[6], indices[6],
+                                          ndim, loop_size,
+                                          cdbox, cdstart, cdstride,
+                                          fdbox, fdstart, fdstride,
+                                          Mdbox, Mdstart, Mdstride, dptrs);
+#elif 0
+   hypre_StructMatmultCompute_core_2t_v5b(a, ncomp[6], indices[6],
+                                          ndim, loop_size,
+                                          cdbox, cdstart, cdstride,
+                                          fdbox, fdstart, fdstride,
+                                          Mdbox, Mdstart, Mdstride, dptrs);
+#elif 0
+   hypre_StructMatmultCompute_core_2t_v6(a, ncomp[6], indices[6],
                                          ndim, loop_size,
                                          cdbox, cdstart, cdstride,
                                          fdbox, fdstart, fdstride,
@@ -4028,6 +4046,699 @@ hypre_StructMatmultCompute_core_2t_v5( hypre_StructMatmultHelper *a,
                        hdbox, hdstart, hdstride, hi);
    {
       a[32].mptr[Mi] = a[32].cprod*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/* Test with hacked version that approximates master
+     1) without the "+=" sign
+     2) as many boxloops as the number of stencil entries in M.
+     3) Uses a temporary value to set the resulting stencil coefficient
+*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v5a( hypre_StructMatmultHelper *a,
+                                       HYPRE_Int    ncomponents,
+                                       HYPRE_Int   *indices,
+                                       HYPRE_Int    ndim,
+                                       hypre_Index  loop_size,
+                                       hypre_Box   *gdbox,
+                                       hypre_Index  gdstart,
+                                       hypre_Index  gdstride,
+                                       hypre_Box   *hdbox,
+                                       hypre_Index  hdstart,
+                                       hypre_Index  hdstride,
+                                       hypre_Box   *Mdbox,
+                                       hypre_Index  Mdstart,
+                                       hypre_Index  Mdstride,
+                                       HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   HYPRE_Complex val;
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val  = a[0].cprod*dptrs0[o0[0] + gi]*dptrs2[o2[0] + gi]*dptrs1[o1[0] + hi] +
+             a[1].cprod*dptrs0[o0[1] + gi]*dptrs2[o2[1] + gi]*dptrs1[o1[1] + hi] +
+             a[2].cprod*dptrs0[o0[2] + gi]*dptrs2[o2[2] + gi]*dptrs1[o1[2] + hi] +
+             a[3].cprod*dptrs0[o0[3] + gi]*dptrs2[o2[3] + gi]*dptrs1[o1[3] + hi] +
+             a[4].cprod*dptrs0[o0[4] + gi]*dptrs2[o2[4] + gi]*dptrs1[o1[4] + hi] +
+             a[5].cprod*dptrs0[o0[5] + gi]*dptrs2[o2[5] + gi]*dptrs1[o1[5] + hi] +
+             a[6].cprod*dptrs0[o0[6] + gi]*dptrs2[o2[6] + gi]*dptrs1[o1[6] + hi];
+
+      a[0].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[7].cprod*dptrs0[o0[7] + gi]*dptrs2[o2[7] + gi]*dptrs1[o1[7] + hi] +
+            a[8].cprod*dptrs0[o0[8] + gi]*dptrs2[o2[8] + gi]*dptrs1[o1[8] + hi] +
+            a[9].cprod*dptrs0[o0[9] + gi]*dptrs2[o2[9] + gi]*dptrs1[o1[9] + hi];
+
+      a[7].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[10].cprod*dptrs0[o0[10] + gi]*dptrs2[o2[10] + gi]*dptrs1[o1[10] + hi] +
+            a[11].cprod*dptrs0[o0[11] + gi]*dptrs2[o2[11] + gi]*dptrs1[o1[11] + hi] +
+            a[12].cprod*dptrs0[o0[12] + gi]*dptrs2[o2[12] + gi]*dptrs1[o1[12] + hi];
+
+      a[10].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[13].cprod*dptrs0[o0[13] + gi]*dptrs2[o2[13] + gi]*dptrs1[o1[13] + hi] +
+            a[14].cprod*dptrs0[o0[14] + gi]*dptrs2[o2[14] + gi]*dptrs1[o1[14] + hi] +
+            a[15].cprod*dptrs0[o0[15] + gi]*dptrs2[o2[15] + gi]*dptrs1[o1[15] + hi];
+
+      a[13].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[16].cprod*dptrs0[o0[16] + gi]*dptrs2[o2[16] + gi]*dptrs1[o1[16] + hi] +
+            a[17].cprod*dptrs0[o0[17] + gi]*dptrs2[o2[17] + gi]*dptrs1[o1[17] + hi] +
+            a[18].cprod*dptrs0[o0[18] + gi]*dptrs2[o2[18] + gi]*dptrs1[o1[18] + hi];
+
+      a[16].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[19].cprod*dptrs0[o0[19] + gi]*dptrs2[o2[19] + gi]*dptrs1[o1[19] + hi] +
+            a[20].cprod*dptrs0[o0[20] + gi]*dptrs2[o2[20] + gi]*dptrs1[o1[20] + hi] +
+            a[21].cprod*dptrs0[o0[21] + gi]*dptrs2[o2[21] + gi]*dptrs1[o1[21] + hi];
+
+      a[19].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[22].cprod*dptrs0[o0[22] + gi]*dptrs2[o2[22] + gi]*dptrs1[o1[22] + hi] +
+            a[23].cprod*dptrs0[o0[23] + gi]*dptrs2[o2[23] + gi]*dptrs1[o1[23] + hi] +
+            a[24].cprod*dptrs0[o0[24] + gi]*dptrs2[o2[24] + gi]*dptrs1[o1[24] + hi];
+
+      a[22].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[25].cprod*dptrs0[o0[25] + gi]*dptrs2[o2[25] + gi]*dptrs1[o1[25] + hi];
+      a[25].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[26].cprod*dptrs0[o0[26] + gi]*dptrs2[o2[26] + gi]*dptrs1[o1[26] + hi];
+      a[26].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[27].cprod*dptrs0[o0[27] + gi]*dptrs2[o2[27] + gi]*dptrs1[o1[27] + hi];
+      a[27].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[28].cprod*dptrs0[o0[28] + gi]*dptrs2[o2[28] + gi]*dptrs1[o1[28] + hi];
+      a[28].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[29].cprod*dptrs0[o0[29] + gi]*dptrs2[o2[29] + gi]*dptrs1[o1[29] + hi];
+      a[29].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[30].cprod*dptrs0[o0[30] + gi]*dptrs2[o2[30] + gi]*dptrs1[o1[30] + hi];
+      a[30].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[31].cprod*dptrs0[o0[31] + gi]*dptrs2[o2[31] + gi]*dptrs1[o1[31] + hi];
+      a[31].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[32].cprod*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+      a[32].mptr[Mi] = val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/* Test with hacked version that approximates master
+     1) Uses the "+=" sign
+     2) as many boxloops as the number of stencil entries in M.
+     3) Uses a temporary value to set the resulting stencil coefficient
+*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v5b( hypre_StructMatmultHelper *a,
+                                       HYPRE_Int    ncomponents,
+                                       HYPRE_Int   *indices,
+                                       HYPRE_Int    ndim,
+                                       hypre_Index  loop_size,
+                                       hypre_Box   *gdbox,
+                                       hypre_Index  gdstart,
+                                       hypre_Index  gdstride,
+                                       hypre_Box   *hdbox,
+                                       hypre_Index  hdstart,
+                                       hypre_Index  hdstride,
+                                       hypre_Box   *Mdbox,
+                                       hypre_Index  Mdstart,
+                                       hypre_Index  Mdstride,
+                                       HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   HYPRE_Complex val;
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val  = a[0].cprod*dptrs0[o0[0] + gi]*dptrs2[o2[0] + gi]*dptrs1[o1[0] + hi] +
+             a[1].cprod*dptrs0[o0[1] + gi]*dptrs2[o2[1] + gi]*dptrs1[o1[1] + hi] +
+             a[2].cprod*dptrs0[o0[2] + gi]*dptrs2[o2[2] + gi]*dptrs1[o1[2] + hi] +
+             a[3].cprod*dptrs0[o0[3] + gi]*dptrs2[o2[3] + gi]*dptrs1[o1[3] + hi] +
+             a[4].cprod*dptrs0[o0[4] + gi]*dptrs2[o2[4] + gi]*dptrs1[o1[4] + hi] +
+             a[5].cprod*dptrs0[o0[5] + gi]*dptrs2[o2[5] + gi]*dptrs1[o1[5] + hi] +
+             a[6].cprod*dptrs0[o0[6] + gi]*dptrs2[o2[6] + gi]*dptrs1[o1[6] + hi];
+
+      a[0].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[7].cprod*dptrs0[o0[7] + gi]*dptrs2[o2[7] + gi]*dptrs1[o1[7] + hi] +
+            a[8].cprod*dptrs0[o0[8] + gi]*dptrs2[o2[8] + gi]*dptrs1[o1[8] + hi] +
+            a[9].cprod*dptrs0[o0[9] + gi]*dptrs2[o2[9] + gi]*dptrs1[o1[9] + hi];
+
+      a[7].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[10].cprod*dptrs0[o0[10] + gi]*dptrs2[o2[10] + gi]*dptrs1[o1[10] + hi] +
+            a[11].cprod*dptrs0[o0[11] + gi]*dptrs2[o2[11] + gi]*dptrs1[o1[11] + hi] +
+            a[12].cprod*dptrs0[o0[12] + gi]*dptrs2[o2[12] + gi]*dptrs1[o1[12] + hi];
+
+      a[10].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[13].cprod*dptrs0[o0[13] + gi]*dptrs2[o2[13] + gi]*dptrs1[o1[13] + hi] +
+            a[14].cprod*dptrs0[o0[14] + gi]*dptrs2[o2[14] + gi]*dptrs1[o1[14] + hi] +
+            a[15].cprod*dptrs0[o0[15] + gi]*dptrs2[o2[15] + gi]*dptrs1[o1[15] + hi];
+
+      a[13].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[16].cprod*dptrs0[o0[16] + gi]*dptrs2[o2[16] + gi]*dptrs1[o1[16] + hi] +
+            a[17].cprod*dptrs0[o0[17] + gi]*dptrs2[o2[17] + gi]*dptrs1[o1[17] + hi] +
+            a[18].cprod*dptrs0[o0[18] + gi]*dptrs2[o2[18] + gi]*dptrs1[o1[18] + hi];
+
+      a[16].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[19].cprod*dptrs0[o0[19] + gi]*dptrs2[o2[19] + gi]*dptrs1[o1[19] + hi] +
+            a[20].cprod*dptrs0[o0[20] + gi]*dptrs2[o2[20] + gi]*dptrs1[o1[20] + hi] +
+            a[21].cprod*dptrs0[o0[21] + gi]*dptrs2[o2[21] + gi]*dptrs1[o1[21] + hi];
+
+      a[19].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[22].cprod*dptrs0[o0[22] + gi]*dptrs2[o2[22] + gi]*dptrs1[o1[22] + hi] +
+            a[23].cprod*dptrs0[o0[23] + gi]*dptrs2[o2[23] + gi]*dptrs1[o1[23] + hi] +
+            a[24].cprod*dptrs0[o0[24] + gi]*dptrs2[o2[24] + gi]*dptrs1[o1[24] + hi];
+
+      a[22].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+
+      val = a[25].cprod*dptrs0[o0[25] + gi]*dptrs2[o2[25] + gi]*dptrs1[o1[25] + hi];
+      a[25].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[26].cprod*dptrs0[o0[26] + gi]*dptrs2[o2[26] + gi]*dptrs1[o1[26] + hi];
+      a[26].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[27].cprod*dptrs0[o0[27] + gi]*dptrs2[o2[27] + gi]*dptrs1[o1[27] + hi];
+      a[27].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[28].cprod*dptrs0[o0[28] + gi]*dptrs2[o2[28] + gi]*dptrs1[o1[28] + hi];
+      a[28].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[29].cprod*dptrs0[o0[29] + gi]*dptrs2[o2[29] + gi]*dptrs1[o1[29] + hi];
+      a[29].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[30].cprod*dptrs0[o0[30] + gi]*dptrs2[o2[30] + gi]*dptrs1[o1[30] + hi];
+      a[30].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[31].cprod*dptrs0[o0[31] + gi]*dptrs2[o2[31] + gi]*dptrs1[o1[31] + hi];
+      a[31].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = a[32].cprod*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+      a[32].mptr[Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/* Test with hacked version that approximates master
+     1) Uses the "+=" sign
+     2) as many boxloops as the number of stencil entries in M.
+     3) Uses a temporary value to set the resulting stencil coefficient
+*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_2t_v6( hypre_StructMatmultHelper *a,
+                                       HYPRE_Int    ncomponents,
+                                       HYPRE_Int   *indices,
+                                       HYPRE_Int    ndim,
+                                       hypre_Index  loop_size,
+                                       hypre_Box   *gdbox,
+                                       hypre_Index  gdstart,
+                                       hypre_Index  gdstride,
+                                       hypre_Box   *hdbox,
+                                       hypre_Index  hdstart,
+                                       hypre_Index  hdstride,
+                                       hypre_Box   *Mdbox,
+                                       hypre_Index  Mdstart,
+                                       hypre_Index  Mdstride,
+                                       HYPRE_Complex **dptrs )
+
+{
+   HYPRE_Int  o0[512], o1[512], o2[512];
+   HYPRE_Int  k;
+   HYPRE_Complex val;
+   HYPRE_Complex c[512];
+   const HYPRE_Complex *dptrs0 = dptrs[0];
+   const HYPRE_Complex *dptrs1 = dptrs[1];
+   const HYPRE_Complex *dptrs2 = dptrs[2];
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k++)
+   {
+      c[k]  = a[k].cprod;
+      o0[k] = a[k].offsets[0];
+      o1[k] = a[k].offsets[1];
+      o2[k] = a[k].offsets[2];
+   }
+
+   HYPRE_Complex *mptr[15];
+   mptr[0 ] = a[0].mptr;
+   mptr[1 ] = a[7].mptr;
+   mptr[2 ] = a[10].mptr;
+   mptr[3 ] = a[13].mptr;
+   mptr[4 ] = a[16].mptr;
+   mptr[5 ] = a[19].mptr;
+   mptr[6 ] = a[22].mptr;
+   mptr[7 ] = a[25].mptr;
+   mptr[8 ] = a[26].mptr;
+   mptr[9 ] = a[27].mptr;
+   mptr[10] = a[28].mptr;
+   mptr[11] = a[29].mptr;
+   mptr[12] = a[30].mptr;
+   mptr[13] = a[31].mptr;
+   mptr[14] = a[32].mptr;
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val  = c[0]*dptrs0[o0[0] + gi]*dptrs2[o2[0] + gi]*dptrs1[o1[0] + hi] +
+             c[1]*dptrs0[o0[1] + gi]*dptrs2[o2[1] + gi]*dptrs1[o1[1] + hi] +
+             c[2]*dptrs0[o0[2] + gi]*dptrs2[o2[2] + gi]*dptrs1[o1[2] + hi] +
+             c[3]*dptrs0[o0[3] + gi]*dptrs2[o2[3] + gi]*dptrs1[o1[3] + hi] +
+             c[4]*dptrs0[o0[4] + gi]*dptrs2[o2[4] + gi]*dptrs1[o1[4] + hi] +
+             c[5]*dptrs0[o0[5] + gi]*dptrs2[o2[5] + gi]*dptrs1[o1[5] + hi] +
+             c[6]*dptrs0[o0[6] + gi]*dptrs2[o2[6] + gi]*dptrs1[o1[6] + hi];
+
+      mptr[0][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[7]*dptrs0[o0[7] + gi]*dptrs2[o2[7] + gi]*dptrs1[o1[7] + hi] +
+            c[8]*dptrs0[o0[8] + gi]*dptrs2[o2[8] + gi]*dptrs1[o1[8] + hi] +
+            c[9]*dptrs0[o0[9] + gi]*dptrs2[o2[9] + gi]*dptrs1[o1[9] + hi];
+
+      mptr[1][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[10]*dptrs0[o0[10] + gi]*dptrs2[o2[10] + gi]*dptrs1[o1[10] + hi] +
+            c[11]*dptrs0[o0[11] + gi]*dptrs2[o2[11] + gi]*dptrs1[o1[11] + hi] +
+            c[12]*dptrs0[o0[12] + gi]*dptrs2[o2[12] + gi]*dptrs1[o1[12] + hi];
+
+      mptr[2][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[13]*dptrs0[o0[13] + gi]*dptrs2[o2[13] + gi]*dptrs1[o1[13] + hi] +
+            c[14]*dptrs0[o0[14] + gi]*dptrs2[o2[14] + gi]*dptrs1[o1[14] + hi] +
+            c[15]*dptrs0[o0[15] + gi]*dptrs2[o2[15] + gi]*dptrs1[o1[15] + hi];
+
+      mptr[3][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[16]*dptrs0[o0[16] + gi]*dptrs2[o2[16] + gi]*dptrs1[o1[16] + hi] +
+            c[17]*dptrs0[o0[17] + gi]*dptrs2[o2[17] + gi]*dptrs1[o1[17] + hi] +
+            c[18]*dptrs0[o0[18] + gi]*dptrs2[o2[18] + gi]*dptrs1[o1[18] + hi];
+
+      mptr[4][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[19]*dptrs0[o0[19] + gi]*dptrs2[o2[19] + gi]*dptrs1[o1[19] + hi] +
+            c[20]*dptrs0[o0[20] + gi]*dptrs2[o2[20] + gi]*dptrs1[o1[20] + hi] +
+            c[21]*dptrs0[o0[21] + gi]*dptrs2[o2[21] + gi]*dptrs1[o1[21] + hi];
+
+      mptr[5][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[22]*dptrs0[o0[22] + gi]*dptrs2[o2[22] + gi]*dptrs1[o1[22] + hi] +
+            c[23]*dptrs0[o0[23] + gi]*dptrs2[o2[23] + gi]*dptrs1[o1[23] + hi] +
+            c[24]*dptrs0[o0[24] + gi]*dptrs2[o2[24] + gi]*dptrs1[o1[24] + hi];
+
+      mptr[6][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[25]*dptrs0[o0[25] + gi]*dptrs2[o2[25] + gi]*dptrs1[o1[25] + hi];
+      mptr[7][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[26]*dptrs0[o0[26] + gi]*dptrs2[o2[26] + gi]*dptrs1[o1[26] + hi];
+      mptr[8][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[27]*dptrs0[o0[27] + gi]*dptrs2[o2[27] + gi]*dptrs1[o1[27] + hi];
+      mptr[9][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[28]*dptrs0[o0[28] + gi]*dptrs2[o2[28] + gi]*dptrs1[o1[28] + hi];
+      mptr[10][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[29]*dptrs0[o0[29] + gi]*dptrs2[o2[29] + gi]*dptrs1[o1[29] + hi];
+      mptr[11][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[30]*dptrs0[o0[30] + gi]*dptrs2[o2[30] + gi]*dptrs1[o1[30] + hi];
+      mptr[12][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[31]*dptrs0[o0[31] + gi]*dptrs2[o2[31] + gi]*dptrs1[o1[31] + hi];
+      mptr[13][Mi] += val;
+   }
+   hypre_BoxLoop3End(Mi,gi,hi);
+
+   hypre_BoxLoop3Begin(ndim, loop_size,
+                       Mdbox, Mdstart, Mdstride, Mi,
+                       gdbox, gdstart, gdstride, gi,
+                       hdbox, hdstart, hdstride, hi);
+   {
+      val = c[32]*dptrs0[o0[32] + gi]*dptrs2[o2[32] + gi]*dptrs1[o1[32] + hi];
+      mptr[14][Mi] += val;
    }
    hypre_BoxLoop3End(Mi,gi,hi);
 
