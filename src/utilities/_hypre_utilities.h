@@ -1339,7 +1339,7 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_DeviceDataSpgemmRownnzEstimateMultFactor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_DeviceDataSpgemmHashType(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleUmpireDeviceAllocator(hypre_handle)          hypre_DeviceDataUmpireDeviceAllocator(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleDeviceAllocator(hypre_handle)                hypre_DeviceDataDeviceAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_DeviceDataUseGpuRand(hypre_HandleDeviceData(hypre_handle))
 
 #define hypre_HandleUserDeviceMalloc(hypre_handle)               ((hypre_handle) -> user_device_malloc)
