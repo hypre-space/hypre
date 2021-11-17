@@ -165,68 +165,18 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
                               hypre_ParVector    *u,
                               hypre_ParVector    *Vtemp )
 {
-   HYPRE_Int       num_rows = hypre_ParCSRMatrixNumRows(A);
-   hypre_Vector    l1_norms_vec;
-   hypre_ParVector l1_norms_parvec;
-   HYPRE_Complex   *Vtemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Vtemp));
-   HYPRE_Int       *CF_marker_dev = NULL;
-   //HYPRE_Complex   *point_type_scale = NULL;
-
-   hypre_VectorData(&l1_norms_vec) = l1_norms;
-   hypre_VectorSize(&l1_norms_vec) = num_rows;
-   /* TODO XXX
-    * The next line is NOT 100% correct, which should be the memory location of l1_norms instead of f
-    * But how do I know it? As said, don't use raw pointers, don't use raw pointers!
-    * It is fine normally since A, f, and l1_norms should live in the same memory space
-    */
-   hypre_VectorMemoryLocation(&l1_norms_vec) = hypre_ParVectorMemoryLocation(f);
-   hypre_ParVectorLocalVector(&l1_norms_parvec) = &l1_norms_vec;
+   HYPRE_Int *CF_marker_dev = NULL;
 
    // Copy CF_marker_host to device
    if (CF_marker_host != NULL)
    {
-     CF_marker_dev = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
-     //point_type_scale = hypre_CTAlloc(HYPRE_Complex, num_rows, HYPRE_MEMORY_DEVICE);
-     hypre_TMemcpy(CF_marker_dev, CF_marker_host, HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-     HYPRE_THRUST_CALL( transform,
-                        CF_marker_dev, CF_marker_dev + num_rows,
-                        CF_marker_dev, equal<HYPRE_Int>(relax_points) );
-      //                  point_type_scale, equal<HYPRE_Int>(relax_points) );
-      //hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
+      CF_marker_dev = hypre_TAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(CF_marker_dev, CF_marker_host, HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    }
 
-   HYPRE_Int sync_stream;
-   hypre_GetSyncCudaCompute(&sync_stream);
-   hypre_SetSyncCudaCompute(0);
+   hypre_BoomerAMGRelax(A, f, CF_marker_dev, 18, relax_points, relax_weight, 1.0, l1_norms, u, Vtemp, NULL);
 
-   /*-----------------------------------------------------------------
-    * Copy f into temporary vector.
-    *-----------------------------------------------------------------*/
-   hypre_ParVectorCopy(f, Vtemp);
-
-   /*-----------------------------------------------------------------
-    * Perform Matvec Vtemp = w * (f - Au)
-    *-----------------------------------------------------------------*/
-   hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
-
-   if (CF_marker_host != NULL)
-   {
-      HYPRE_THRUST_CALL( transform,
-                         Vtemp_data, Vtemp_data + num_rows,
-                         CF_marker_dev, Vtemp_data, thrust::multiplies<HYPRE_Complex>() );
-//                         point_type_scale, Vtemp_data, thrust::multiplies<HYPRE_Complex>() );
-      hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
-      //hypre_TFree(point_type_scale, HYPRE_MEMORY_DEVICE);
-   }
-
-   /*-----------------------------------------------------------------
-    * u += D^{-1} * Vtemp, where D_ii = ||A(i,:)||_1
-    *-----------------------------------------------------------------*/
-   hypre_ParVectorElmdivpy(Vtemp, &l1_norms_parvec, u);
-
-   hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
