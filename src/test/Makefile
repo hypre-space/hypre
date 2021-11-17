@@ -186,7 +186,7 @@ test_mgr: test_mgr.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-test_mgr_gpu: test_mgr_gpu.${OBJ_SUFFIX}
+test_mgr_gpu: test_mgr_gpu.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
