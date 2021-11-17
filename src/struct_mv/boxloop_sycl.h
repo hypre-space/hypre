@@ -337,7 +337,7 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
    HYPRE_Real *shared_sum_var = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
    hypre_TMemcpy(shared_sum_var, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
-   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &hypre_sycl_sum)                          \
+   ReductionBoxLoopforall( [=,hypre_unused_var=sum_var] (sycl::nd_item<1> item, auto &sum_var)        \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -360,7 +360,7 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                             \
    HYPRE_Real *shared_sum_var = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
    hypre_TMemcpy(shared_sum_var, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
-   ReductionBoxLoopforall( [=] (sycl::nd_item<1> item, auto &hypre_sycl_sum)                          \
+   ReductionBoxLoopforall( [=,hypre_unused_var=sum_var] (sycl::nd_item<1> item, auto &sum_var)        \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \

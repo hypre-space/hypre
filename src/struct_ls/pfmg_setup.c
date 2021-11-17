@@ -1060,11 +1060,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx;
-#else
       cxb += tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -1074,11 +1070,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy;
-#else
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -1088,11 +1080,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx * tcx;
-#else
       sqcxb += tcx * tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1102,11 +1090,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy * tcy;
-#else
       sqcyb += tcy * tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
@@ -1266,11 +1250,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx;
-#else
       cxb += tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -1280,11 +1260,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy;
-#else
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -1294,11 +1270,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx * tcx;
-#else
       sqcxb += tcx * tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1308,11 +1280,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy * tcy;
-#else
       sqcyb += tcy * tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
@@ -1458,11 +1426,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx;
-#else
       cxb += tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -1472,11 +1436,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy;
-#else
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -1486,11 +1446,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcz;
-#else
       czb += tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
 
@@ -1500,11 +1456,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx * tcx;
-#else
       sqcxb += tcx * tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1514,11 +1466,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy * tcy;
-#else
       sqcyb += tcy * tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
@@ -1528,11 +1476,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcz * tcz;
-#else
       sqczb += tcz * tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
@@ -1739,11 +1683,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] +
                                 a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx;
-#else
       cxb += tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -1754,11 +1694,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
                                 a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy;
-#else
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -1769,11 +1705,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
                                 a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcz;
-#else
       czb += tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
 
@@ -1784,11 +1716,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] +
                                 a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx * tcx;
-#else
       sqcxb += tcx * tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1799,11 +1727,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
                                 a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy * tcy;
-#else
       sqcyb += tcy * tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
@@ -1814,11 +1738,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
                                 a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcz * tcz;
-#else
       sqczb += tcz * tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
@@ -2072,11 +1992,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
                      a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx;
-#else
       cxb += tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -2090,11 +2006,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
                      a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy;
-#else
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -2108,11 +2020,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
                      a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcz;
-#else
       czb += tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
 
@@ -2126,11 +2034,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
                      a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcx * tcx;
-#else
       sqcxb += tcx * tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -2144,11 +2048,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
                      a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcy * tcy;
-#else
       sqcyb += tcy * tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb);
 
@@ -2162,11 +2062,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
                      a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
-#if defined(HYPRE_USING_SYCL)
-      hypre_sycl_sum += tcz * tcz;
-#else
       sqczb += tcz * tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
@@ -2341,19 +2237,11 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
             HYPRE_Real zero = 0.0;
             if (Ap[Ai] == 0.0)
             {
-#if defined(HYPRE_USING_SYCL)
-               hypre_sycl_sum += one;
-#else
                diag_product_local += one;
-#endif
             }
             else
             {
-#if defined(HYPRE_USING_SYCL)
-               hypre_sycl_sum += zero;
-#else
                diag_product_local += zero;
-#endif
             }
          }
          hypre_BoxLoop1ReductionEnd(Ai, diag_product_local);

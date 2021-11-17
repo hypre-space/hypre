@@ -2321,7 +2321,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            then
               CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
            else
-              CUFLAGS="-O2 ${CUFLAGS}"
+              CUFLAGS="-g -O3 ${CUFLAGS}"
            fi
         fi
 

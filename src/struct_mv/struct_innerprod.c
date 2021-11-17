@@ -89,11 +89,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
                                    box_sum)
       {
          HYPRE_Real tmp = xp[xi] * hypre_conj(yp[yi]);
-#if defined(HYPRE_USING_SYCL)
-         hypre_sycl_sum += tmp;
-#else
          box_sum += tmp;
-#endif
       }
       hypre_BoxLoop2ReductionEnd(xi, yi, box_sum);
 
