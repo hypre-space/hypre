@@ -373,6 +373,11 @@ if (HYPRE_USING_CUDA)
   endif ()
 endif ()
 
+if (HYPRE_USING_CALIPER)
+  find_package(caliper REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC caliper)
+endif()
+
 # Configure a header file to pass CMake settings to the source code
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
