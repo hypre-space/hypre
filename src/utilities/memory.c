@@ -1092,8 +1092,8 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 #endif // defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_SYCL)
-   *memory_location = hypre_MEMORY_UNDEFINED;
    /* If the device is not setup, then all allocations are assumed to be on the host */
+   *memory_location = hypre_MEMORY_HOST;
    if (hypre_HandleDeviceData(hypre_handle()))
    {
       if (hypre_HandleDevice(hypre_handle()))
@@ -1118,10 +1118,6 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
             *memory_location = hypre_MEMORY_UNIFIED;
          }
       }
-   }
-   else
-   {
-      *memory_location = hypre_MEMORY_HOST;
    }
 #endif //HYPRE_USING_SYCL
 
