@@ -53,7 +53,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemlksparse implementation is in
+   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemklsparse implementation is in
 #elif defined(HYPRE_USING_SYCL)
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
@@ -328,7 +328,39 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
                                    hypre_Vector    *y,
                                    HYPRE_Int        offset )
 {
-   /* WM: TODO */
+   sycl::queue *compute_queue = hypre_HandleComputeStream(hypre_handle());
+   hypre_CSRMatrix *AT;
+   oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
+
+   oneapi::mkl::transpose transpose_op = oneapi::mlk::transpose::nontrans;
+   if (trans)
+   {
+      /* WM: TODO
+       * WM: I should verify that this yields better performance in onemklsparse
+       * We handle the transpose explicitly to ensure the same output each run
+       * and for potential performance improvement memory for AT */
+      /* hypre_CSRMatrixTransposeDevice(A, &AT, 1); */
+      /* matA_handle = hypre_CSRMatrixGPUMatHandle(AT); */
+      transpose_op = oneapi::mkl::transpose::trans;
+   }
+
+   /* SpMV */
+   /* WM: for now, use the transpose version of gemv */
+   auto event = HYPRE_SYCL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
+                                                           transpose_op,
+                                                           alpha,
+                                                           matA_handle,
+                                                           hypre_VectorData(x),
+                                                           beta,
+                                                           hypre_VectorData(y) + offset) );
+   event.wait();
+
+   if (trans)
+   {
+      /* WM: TODO */
+      /* hypre_CSRMatrixDestroy(AT); */
+   }
+
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)

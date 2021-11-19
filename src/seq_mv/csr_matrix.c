@@ -78,7 +78,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_TFree(hypre_CSRMatrixBigJ(matrix), memory_location);
       }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_SYCL)
       hypre_TFree(hypre_CSRMatrixSortedData(matrix), memory_location);
       hypre_TFree(hypre_CSRMatrixSortedJ(matrix), memory_location);
       hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(matrix));
@@ -1086,6 +1086,7 @@ hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
    if (!hypre_CSRMatrixGPUMatData(matrix))
    {
       hypre_CSRMatrixGPUMatData(matrix) = hypre_GpuMatDataCreate();
+      hypre_GPUMatDataSetCSRData(hypre_CSRMatrixGPUMatData(matrix), matrix);
    }
 
    return hypre_CSRMatrixGPUMatData(matrix);
