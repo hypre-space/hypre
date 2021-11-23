@@ -53,8 +53,6 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemklsparse implementation is in
-#elif defined(HYPRE_USING_SYCL)
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -332,7 +330,7 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
    hypre_CSRMatrix *AT;
    oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
 
-   oneapi::mkl::transpose transpose_op = oneapi::mlk::transpose::nontrans;
+   oneapi::mkl::transpose transpose_op = oneapi::mkl::transpose::nontrans;
    if (trans)
    {
       /* WM: TODO
@@ -346,14 +344,15 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 
    /* SpMV */
    /* WM: for now, use the transpose version of gemv */
-   auto event = HYPRE_SYCL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
+   /* WM: Q - do we need the event.wait() call, or do oneapi::mkl calls block? */
+   HYPRE_SYCL_CALL( auto event = oneapi::mkl::sparse::gemv(*compute_queue,
                                                            transpose_op,
                                                            alpha,
                                                            matA_handle,
                                                            hypre_VectorData(x),
                                                            beta,
-                                                           hypre_VectorData(y) + offset) );
-   event.wait();
+                                                           hypre_VectorData(y) + offset);
+                    event.wait(); );
 
    if (trans)
    {

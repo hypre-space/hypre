@@ -113,6 +113,10 @@ option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
 set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
+# oneAPI options
+option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
+option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
+option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")

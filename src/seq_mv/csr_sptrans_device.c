@@ -154,7 +154,8 @@ hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int   m,        HYPRE_Int   n,        H
                                    HYPRE_Int   want_data)
 {
    /* WM: Q - will this function be available in the future? */
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypreDevice_CSRSpTransOnemklsparse not implemented for onemkl::SPARSE!\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                     "hypreDevice_CSRSpTransOnemklsparse not implemented for onemkl::SPARSE!\n");
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ONEMKLSPARSE)

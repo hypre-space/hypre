@@ -47,6 +47,15 @@
 
 #include <hip/hip_runtime.h>
 
+#if defined(HYPRE_USING_ROCSPARSE)
+#include <rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+#include <rocrand.h>
+#endif
+
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          sycl includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -56,15 +65,11 @@
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
 
+#if defined(HYPRE_USING_ONEMKLSPARSE) || defined(HYPRE_USING_ONEMKLBLAS) || defined(HYPRE_USING_ONEMKLRAND)
+#include <oneapi/mkl.hpp>
+#endif
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-#if defined(HYPRE_USING_ROCSPARSE)
-#include <rocsparse.h>
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-#include <rocrand.h>
-#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
@@ -308,6 +313,10 @@ struct hypre_CsrsvData
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info info_L;
    rocsparse_mat_info info_U;
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   /* WM: todo - placeholders */
+   char info_L;
+   char info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
