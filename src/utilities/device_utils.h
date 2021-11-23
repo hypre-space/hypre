@@ -112,6 +112,29 @@
       assert(0); exit(1);                                                                    \
    }
 
+#define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
+  func_name(oneapi::dpl::execution::make_device_policy(                                      \
+           *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+#define HYPRE_SYCL_LAUNCH(kernel_name, gridsize, blocksize, ...)                             \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]);                                                \
+     assert(0); exit(1);                                                                     \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \

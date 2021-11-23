@@ -42,6 +42,71 @@ sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
 
    return gDim;
 }
+void
+hypreSYCLKernel_IVAXPY(sycl::nd_item<1>& item,
+                       HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y )
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < n)
+   {
+      y[i] += x[i] / a[i];
+   }
+}
+
+/* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
+HYPRE_Int
+hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPY, gDim, bDim, n, a, x, y );
+
+   return hypre_error_flag;
+}
+
+void
+hypreSYCLKernel_IVAXPYMarked(sycl::nd_item<1>& item,
+                             HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
+                             HYPRE_Int *marker, HYPRE_Int marker_val)
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < n)
+   {
+      if (marker[i] == marker_val)
+      {
+         y[i] += x[i] / a[i];
+      }
+   }
+}
+
+/* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
+HYPRE_Int
+hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
+                         HYPRE_Int *marker, HYPRE_Int marker_val)
+{
+   /* WM: needs testing */
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
+
+   return hypre_error_flag;
+}
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1381,6 +1446,17 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
+#elif defined(HYPRE_USING_SYCL)
+   try
+   {
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+   }
+   catch (sycl::exception const &exc)
+   {
+      std::cerr << exc.what() << "Exception caught at file:" << __FILE__
+                << ", line:" << __LINE__ << std::endl;
+      std::exit(1);
+   }
 #endif
    return hypre_error_flag;
 }

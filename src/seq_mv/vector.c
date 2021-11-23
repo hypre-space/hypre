@@ -11,6 +11,14 @@
  *
  *****************************************************************************/
 
+/* WM: these need to be included before other headers... how to do this properly?
+ * Can't use #if defined(HYPRE_USING_SYCL) here since that macro is defined in other hypre headers
+ * Also, would like to just have these included once in, say, a utilities header... */
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp" //RL: TODO vector_device.c, include cuda there
 
@@ -286,6 +294,11 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    {
       HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
    }
+#elif defined(HYPRE_USING_SYCL)
+   if (size > 0)
+   {
+      HYPRE_ONEDPL_CALL( std::fill_n, vector_data, size, value );
+   }
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -467,13 +480,30 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
-#endif
+#endif // #if defined(HYPRE_USING_CUBLAS)
+
+#elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   /* WM: Q - do we need an event.wait() call, or do oneapi::mkl calls block? */
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()), size, alpha, y_data, 1) );
 #else
+   /* WM: make sure to test this branch */
+   HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size, y_data, alpha * _1 );
+#endif // #if defined(HYPRE_USING_ONEMKL)
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data)
@@ -485,7 +515,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
       y_data[i] *= alpha;
    }
 
-#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
@@ -520,14 +550,31 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
                                   y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
-#endif
+#endif // #if defined(HYPRE_USING_CUBLAS)
+
+#elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   /* WM: Q - do we need an event.wait() call, or do oneapi::mkl calls block? */
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()), size, alpha, x_data, 1, y_data, 1) );
 #else
+   /* WM: make sure to test this branch */
+   HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
+#endif // #if defined(HYPRE_USING_ONEMKL)
+
+#endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
+
+#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
@@ -539,7 +586,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
       y_data[i] += alpha * x_data[i];
    }
 
-#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
@@ -567,7 +614,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(b);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
    //RL: TODO back to hypre_GetExecPolicy2 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -678,19 +725,43 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 #ifndef HYPRE_COMPLEX
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1,
                                  &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
-#endif
+#endif // #if defined(HYPRE_USING_CUBLAS)
+
+#elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   /* WM: Q - do we need an event.wait() call, or do oneapi::mkl calls block? */
+   HYPRE_Real *result_dev = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()), size, x_data, 1, y_data, 1, result_dev) );
+   hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else
+   /* WM: make sure to test this branch */
+   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0, std::plus<>(), std::multiplies<>() );
+   /* result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0, _1 + _2, _1 * _2 ); */
+   /* result = HYPRE_ONEDPL_CALL( std::inner_product, x_data, x_data + size, y_data, 0.0 ); */
+#endif // #if defined(HYPRE_USING_ONEMKLBLAS)
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#else // #ifndef HYPRE_COMPLEX
    /* TODO */
 #error "Complex inner product"
-#endif
-#else /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif // #ifndef HYPRE_COMPLEX
+
+#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams  distribute  parallel for private(i) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
@@ -701,7 +772,8 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    {
       result += hypre_conj(y_data[i]) * x_data[i];
    }
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncCudaComputeStream(hypre_handle());
