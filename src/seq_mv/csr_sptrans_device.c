@@ -146,6 +146,18 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
 
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+HYPRE_Int
+hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+                                   HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
+                                   HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
+                                   HYPRE_Int   want_data)
+{
+   /* WM: TODO */
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_ONEMKLSPARSE)
+
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -222,3 +234,15 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 }
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_SYCL)
+HYPRE_Int
+hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
+                       HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
+                       HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
+                       HYPRE_Int   want_data)
+{
+   /* WM: TODO */
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_SYCL)

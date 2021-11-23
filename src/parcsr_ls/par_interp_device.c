@@ -194,8 +194,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    P_diag_i = hypre_TAlloc(HYPRE_Int, n_fine + 1, memory_location);
    P_offd_i = hypre_TAlloc(HYPRE_Int, n_fine + 1, memory_location);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
                       n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
@@ -1158,8 +1158,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    P_diag_j_temp = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    P_offd_j_temp = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
                       n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,

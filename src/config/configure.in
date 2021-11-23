@@ -203,6 +203,14 @@ hypre_using_rocrand=no
 hypre_found_hip=no
 
 
+dnl *********************************************************************
+dnl * Initialize hypre-SYCL variables
+dnl *********************************************************************
+hypre_using_sycl=no
+hypre_using_onemklsparse=no
+hypre_using_onemklblas=no
+hypre_using_onemklrand=no
+
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -1158,6 +1166,19 @@ AS_HELP_STRING([--with-hip],
 [hypre_using_hip=no]
 )
 
+dnl ***** SYCL
+AC_ARG_WITH(sycl,
+AS_HELP_STRING([--with-sycl],
+               [Use SYCL for Intel GPUs. (default is NO).]),
+[case "$withval" in
+    yes) hypre_using_sycl=yes ;;
+    no)  hypre_using_sycl=no ;;
+    *)   hypre_using_sycl=no ;;
+esac],
+[hypre_using_sycl=no]
+)
+
+
 AC_ARG_WITH(cuda-home,
 AS_HELP_STRING([--with-cuda-home=DIR],
                [User specifies CUDA_HOME in DIR.]),
@@ -1551,6 +1572,11 @@ then
    if test "$hypre_using_hip" = "yes"
    then
       AC_CHECK_PROGS(CUCC, hipcc)
+   fi
+
+   if test "$hypre_using_sycl" = "yes"
+   then
+      AC_CHECK_PROGS(CUCC, dpcpp)
    fi
 fi
 
@@ -1960,9 +1986,9 @@ fi
 
 if [test "x$hypre_using_um" = "xyes"]
 then
-   if [test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"]
+   if [test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes" && test "x$hypre_using_sycl" != "xyes"]
    then
-      AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, or device OpenMP!])
+      AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!])
    fi
 fi dnl hypre_using_um
 
@@ -2002,8 +2028,6 @@ AS_IF([ test x"$hypre_using_hip" == x"yes" ],
                           [hypre_found_hip=yes],
                           [AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
       [])
-
-
 
 dnl *********************************************************************
 dnl * Set raja options
@@ -2279,6 +2303,55 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
       ]) dnl AS_IF([test x"$hypre_using_hip" == x"yes"]
 
 
+dnl *********************************************************************
+dnl * Set SYCL options
+dnl *********************************************************************
+AS_IF([test x"$hypre_using_sycl" == x"yes"],
+      [
+        AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
+        AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
+
+	     LINK_CC=${CUCC}
+        LINK_CXX=${CUCC}
+
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+           if test "$hypre_using_debug" = "yes"
+           then
+              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
+           else
+              CUFLAGS="-g -O3 ${CUFLAGS}"
+           fi
+        fi
+
+
+        dnl If not in debug mode, at least -O2, but the user can override with
+        dnl with SYCLFLAGS on the configure line. If in debug mode, -O0 -Wall
+        dnl plus flags for debugging symbols
+        AS_IF([test x"$hypre_using_debug" == x"yes"],
+              [SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"],
+              [SYCLFLAGS="-O2 ${SYCLFLAGS}"],)
+
+        AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
+               ])
+
+        AS_IF([test x"$hypre_using_onemklblas" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])
+	            HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
+               ])
+
+        AS_IF([test x"$hypre_using_onemklrand" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+               ])
+
+      ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
 
 
 dnl *********************************************************************
@@ -2302,6 +2375,14 @@ then
       AC_MSG_NOTICE([It only works for structured solvers and selected unstructured solvers])
       AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
       AC_MSG_NOTICE([***********************************************************************])
+   fi
+   if test "$hypre_using_sycl" = "yes"
+   then
+      AC_MSG_NOTICE([***********************************************************])
+      AC_MSG_NOTICE([Configuring with --with-sycl=yes without unified memory.])
+      AC_MSG_NOTICE([It only works for struct interface.])
+      AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+      AC_MSG_NOTICE([***********************************************************])
    fi
    if test "$hypre_using_device_openmp" = "yes"
    then
@@ -2390,7 +2471,7 @@ if test "x$hypre_using_um" = "xyes"
 then
    AC_DEFINE([HYPRE_USING_UNIFIED_MEMORY],1,[Define to 1 if using unified memory])
 else
-   if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"]
+   if [test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"]
    then
       AC_DEFINE([HYPRE_USING_DEVICE_MEMORY],1,[Define to 1 if using device memory without UM])
    else
@@ -2549,6 +2630,12 @@ dnl * HIP stuff
 dnl *********************************************************************
 AC_SUBST(HYPRE_HIP_INCL)
 AC_SUBST(HYPRE_HIP_LIBS)
+
+dnl *********************************************************************
+dnl * SYCL stuff
+dnl *********************************************************************
+AC_SUBST(HYPRE_SYCL_INCL)
+AC_SUBST(HYPRE_SYCL_LIBS)
 
 dnl *********************************************************************
 dnl * Caliper instrumentation

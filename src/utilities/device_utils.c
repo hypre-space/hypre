@@ -8,6 +8,42 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_SYCL)
+sycl::range<1> hypre_GetDefaultDeviceBlockDimension()
+{
+   sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   return wgDim;
+}
+
+sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
+                                                   const char *granularity,
+                                                   sycl::range<1> wgDim)
+{
+   HYPRE_Int num_WGs = 0;
+   HYPRE_Int num_workitems_per_WG = wgDim[0];
+
+   if (granularity[0] == 't')
+   {
+      num_WGs = (n + num_workitems_per_WG - 1) / num_workitems_per_WG;
+   }
+   else if (granularity[0] == 'w')
+   {
+      HYPRE_Int num_subgroups_per_block = num_workitems_per_WG >> HYPRE_WARP_BITSHIFT;
+      hypre_assert(num_subgroups_per_block * HYPRE_WARP_SIZE == num_workitems_per_WG);
+      num_WGs = (n + num_subgroups_per_block - 1) / num_subgroups_per_block;
+   }
+   else
+   {
+      hypre_printf("Error %s %d: Unknown granularity !\n", __FILE__, __LINE__);
+      hypre_assert(0);
+   }
+
+   sycl::range<1> gDim(num_WGs);
+
+   return gDim;
+}
+#endif
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /*
@@ -35,7 +71,7 @@ void hypre_CudaCompileFlagCheck()
    // This is really only defined for CUDA and not for HIP
 #if defined(HYPRE_USING_CUDA)
 
-   HYPRE_Int device = hypre_HandleCudaDevice(hypre_handle());
+   HYPRE_Int device = hypre_HandleDevice(hypre_handle());
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);
@@ -76,7 +112,7 @@ void hypre_CudaCompileFlagCheck()
 }
 
 dim3
-hypre_GetDefaultCUDABlockDimension()
+hypre_GetDefaultDeviceBlockDimension()
 {
    dim3 bDim(512, 1, 1);
 
@@ -84,9 +120,9 @@ hypre_GetDefaultCUDABlockDimension()
 }
 
 dim3
-hypre_GetDefaultCUDAGridDimension( HYPRE_Int n,
-                                   const char *granularity,
-                                   dim3 bDim )
+hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
+                                     const char *granularity,
+                                     dim3 bDim )
 {
    HYPRE_Int num_blocks = 0;
    HYPRE_Int num_threads_per_block = bDim.x * bDim.y * bDim.z;
@@ -150,8 +186,8 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
                       HYPRE_Int *d_offd_ia,
                       HYPRE_Int *d_rownnz)
 {
-   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "thread", bDim);
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
 
    /* trivial case */
    if (nrows <= 0)
@@ -290,8 +326,8 @@ hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
 
    hypre_assert(!(nrows > 1 && d_ib == NULL));
 
-   const dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   const dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
+   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
    /*
    if (job == 2)
@@ -546,8 +582,8 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 
       hypre_assert(reduced_n == new_end.second - reduced_y);
 
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(reduced_n, "thread", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
                          reduced_n, x, reduced_map, reduced_y );
@@ -589,8 +625,8 @@ hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
 
@@ -623,8 +659,8 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
 
@@ -657,8 +693,8 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
 
@@ -696,8 +732,8 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
 
@@ -731,8 +767,8 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
 
@@ -755,8 +791,8 @@ hypreCUDAKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
 HYPRE_Int
 hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size)
 {
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(size, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
 
@@ -924,8 +960,10 @@ cudaStream_t
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
+#elif defined(HYPRE_USING_SYCL)
+sycl::queue*
 #endif
-hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
+hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    cudaStream_t stream = 0;
@@ -933,6 +971,41 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
    cudaStream_t stream = 0;
 #elif defined(HYPRE_USING_HIP)
    hipStream_t stream = 0;
+#elif defined(HYPRE_USING_SYCL)
+   sycl::queue   *stream = NULL;
+   if (i >= HYPRE_MAX_NUM_STREAMS)
+   {
+      hypre_printf("SYCL queue %d exceeds the max number %d\n",
+                   i, HYPRE_MAX_NUM_STREAMS);
+      return NULL;
+   }
+   if (data->streams[i])
+   {
+      return data->streams[i];
+   }
+   else
+   {
+      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+      {
+         for (std::exception_ptr const& e : exceptions)
+         {
+            try
+            {
+               std::rethrow_exception(e);
+            }
+            catch (sycl::exception const& ex)
+            {
+               std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+            }
+         }
+      };
+
+      sycl::device*  sycl_device   = data->device;
+      sycl::context  sycl_ctxt     = sycl::context(*sycl_device, sycl_asynchandler);
+      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+      data->streams[i] = stream;
+   }
 #endif
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -946,9 +1019,9 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
       return NULL;
    }
 
-   if (data->cuda_streams[i])
+   if (data->streams[i])
    {
-      return data->cuda_streams[i];
+      return data->streams[i];
    }
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -960,7 +1033,7 @@ hypre_CudaDataCudaStream(hypre_CudaData *data, HYPRE_Int i)
    HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
 #endif
 
-   data->cuda_streams[i] = stream;
+   data->streams[i] = stream;
 #endif
 
    return stream;
@@ -972,16 +1045,17 @@ cudaStream_t
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
+#elif defined(HYPRE_USING_SYCL)
+sycl::queue*
 #endif
-hypre_CudaDataCudaComputeStream(hypre_CudaData *data)
+hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 {
-   return hypre_CudaDataCudaStream(data,
-                                   hypre_CudaDataCudaComputeStreamNum(data));
+   return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
 }
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
-hypre_CudaDataCurandGenerator(hypre_CudaData *data)
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
    {
@@ -991,7 +1065,7 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
-   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_CudaDataCudaComputeStream(data)) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
 
@@ -1035,7 +1109,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 
 #if defined(HYPRE_USING_ROCRAND)
 rocrand_generator
-hypre_CudaDataCurandGenerator(hypre_CudaData *data)
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
    if (data->curand_generator)
    {
@@ -1045,7 +1119,7 @@ hypre_CudaDataCurandGenerator(hypre_CudaData *data)
    rocrand_generator gen;
    HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
-   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_CudaDataCudaComputeStream(data)) );
+   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
 
@@ -1118,7 +1192,7 @@ hypre_CurandUniformSingle( HYPRE_Int          n,
 
 #if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t
-hypre_CudaDataCublasHandle(hypre_CudaData *data)
+hypre_DeviceDataCublasHandle(hypre_DeviceData *data)
 {
    if (data->cublas_handle)
    {
@@ -1128,7 +1202,7 @@ hypre_CudaDataCublasHandle(hypre_CudaData *data)
    cublasHandle_t handle;
    HYPRE_CUBLAS_CALL( cublasCreate(&handle) );
 
-   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_CudaDataCudaComputeStream(data)) );
+   HYPRE_CUBLAS_CALL( cublasSetStream(handle, hypre_DeviceDataComputeStream(data)) );
 
    data->cublas_handle = handle;
 
@@ -1138,7 +1212,7 @@ hypre_CudaDataCublasHandle(hypre_CudaData *data)
 
 #if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t
-hypre_CudaDataCusparseHandle(hypre_CudaData *data)
+hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 {
    if (data->cusparse_handle)
    {
@@ -1148,7 +1222,7 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
    cusparseHandle_t handle;
    HYPRE_CUSPARSE_CALL( cusparseCreate(&handle) );
 
-   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_CudaDataCudaComputeStream(data)) );
+   HYPRE_CUSPARSE_CALL( cusparseSetStream(handle, hypre_DeviceDataComputeStream(data)) );
 
    data->cusparse_handle = handle;
 
@@ -1159,7 +1233,7 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
 
 #if defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle
-hypre_CudaDataCusparseHandle(hypre_CudaData *data)
+hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 {
    if (data->cusparse_handle)
    {
@@ -1169,7 +1243,7 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
    rocsparse_handle handle;
    HYPRE_ROCSPARSE_CALL( rocsparse_create_handle(&handle) );
 
-   HYPRE_ROCSPARSE_CALL( rocsparse_set_stream(handle, hypre_CudaDataCudaComputeStream(data)) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_stream(handle, hypre_DeviceDataComputeStream(data)) );
 
    data->cusparse_handle = handle;
 
@@ -1179,59 +1253,63 @@ hypre_CudaDataCusparseHandle(hypre_CudaData *data)
 
 
 
-hypre_CudaData*
-hypre_CudaDataCreate()
+hypre_DeviceData*
+hypre_DeviceDataCreate()
 {
-   hypre_CudaData *data = hypre_CTAlloc(hypre_CudaData, 1, HYPRE_MEMORY_HOST);
+   hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
 
-   hypre_CudaDataCudaDevice(data)            = 0;
-   hypre_CudaDataCudaComputeStreamNum(data)  = 0;
+#if defined(HYPRE_USING_SYCL)
+   hypre_DeviceDataDevice(data)            = nullptr;
+#else
+   hypre_DeviceDataDevice(data)            = 0;
+#endif
+   hypre_DeviceDataComputeStreamNum(data)  = 0;
 
    /* SpGeMM */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-   hypre_CudaDataSpgemmUseCusparse(data) = 1;
+   hypre_DeviceDataSpgemmUseCusparse(data) = 1;
 #else
-   hypre_CudaDataSpgemmUseCusparse(data) = 0;
+   hypre_DeviceDataSpgemmUseCusparse(data) = 0;
 #endif
 
-   hypre_CudaDataSpgemmAlgorithm(data)                = 1;
+   hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   hypre_CudaDataSpgemmRownnzEstimateMethod(data)     = 3;
-   hypre_CudaDataSpgemmRownnzEstimateNsamples(data)   = 32;
-   hypre_CudaDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
-   hypre_CudaDataSpgemmHashType(data)                 = 'D';
+   hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
+   hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = 32;
+   hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
+   hypre_DeviceDataSpgemmHashType(data)                 = 'D';
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-   hypre_CudaDataUseGpuRand(data) = 1;
+   hypre_DeviceDataUseGpuRand(data) = 1;
 #else
-   hypre_CudaDataUseGpuRand(data) = 0;
+   hypre_DeviceDataUseGpuRand(data) = 0;
 #endif
 
    /* device pool */
 #ifdef HYPRE_USING_DEVICE_POOL
-   hypre_CudaDataCubBinGrowth(data)      = 8u;
-   hypre_CudaDataCubMinBin(data)         = 1u;
-   hypre_CudaDataCubMaxBin(data)         = (hypre_uint) - 1;
-   hypre_CudaDataCubMaxCachedBytes(data) = (size_t) -1;
-   hypre_CudaDataCubDevAllocator(data)   = NULL;
-   hypre_CudaDataCubUvmAllocator(data)   = NULL;
+   hypre_DeviceDataCubBinGrowth(data)      = 8u;
+   hypre_DeviceDataCubMinBin(data)         = 1u;
+   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) - 1;
+   hypre_DeviceDataCubMaxCachedBytes(data) = (size_t) -1;
+   hypre_DeviceDataCubDevAllocator(data)   = NULL;
+   hypre_DeviceDataCubUvmAllocator(data)   = NULL;
 #endif
 
    return data;
 }
 
 void
-hypre_CudaDataDestroy(hypre_CudaData *data)
+hypre_DeviceDataDestroy(hypre_DeviceData *data)
 {
    if (!data)
    {
       return;
    }
 
-   hypre_TFree(hypre_CudaDataCudaReduceBuffer(data),     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_CudaDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_CudaDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (data->curand_generator)
@@ -1267,20 +1345,28 @@ hypre_CudaDataDestroy(hypre_CudaData *data)
 
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
-      if (data->cuda_streams[i])
+      if (data->streams[i])
       {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
+         HYPRE_CUDA_CALL( cudaStreamDestroy(data->streams[i]) );
 #elif defined(HYPRE_USING_CUDA)
-         HYPRE_CUDA_CALL( cudaStreamDestroy(data->cuda_streams[i]) );
+         HYPRE_CUDA_CALL( cudaStreamDestroy(data->streams[i]) );
 #elif defined(HYPRE_USING_HIP)
-         HYPRE_HIP_CALL( hipStreamDestroy(data->cuda_streams[i]) );
+         HYPRE_HIP_CALL( hipStreamDestroy(data->streams[i]) );
+#elif defined(HYPRE_USING_SYCL)
+         delete data->streams[i];
+         data->streams[i] = nullptr;
 #endif
       }
    }
 
 #ifdef HYPRE_USING_DEVICE_POOL
-   hypre_CudaDataCubCachingAllocatorDestroy(data);
+   hypre_DeviceDataCubCachingAllocatorDestroy(data);
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   delete data->device;
+   data->device = nullptr;
 #endif
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
@@ -1354,9 +1440,9 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
          if (cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
-            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
 #elif defined(HYPRE_USING_HIP)
-            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleCudaComputeStream(hypre_handle)) );
+            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
 #endif
          }
 #endif
@@ -1405,11 +1491,40 @@ hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
 
 #endif // #if defined(HYPRE_USING_GPU)
 
+#if defined(HYPRE_USING_SYCL)
+HYPRE_Int
+HYPRE_SetSYCLDevice(sycl::device user_device)
+{
+   hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle());
+
+   /* Cleanup default device and queues */
+   if (data->device)
+   {
+      delete data->device;
+   }
+   for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
+   {
+      if (data->streams[i])
+      {
+         delete data->streams[i];
+         data->streams[i] = nullptr;
+      }
+   }
+
+   /* Setup new device and compute stream */
+   data->device = new sycl::device(user_device);
+   hypre_HandleComputeStream(hypre_handle());
+
+   return hypre_error_flag;
+}
+#endif
 
 /* This function is supposed to be used in the test drivers to mimic
  * users' GPU binding approaches
  * It is supposed to be called before HYPRE_Init,
  * so that HYPRE_Init can get the wanted device id
+ * WM: note - sycl has no analogue to cudaSetDevice(),
+ * so this has no effect on the sycl implementation.
  */
 HYPRE_Int
 hypre_bind_device( HYPRE_Int myid,
