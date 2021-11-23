@@ -69,15 +69,10 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
+   hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
-   // In debug mode, hypre_TFree() checks the pointer location, which requires the
-   // hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
-#if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL)
-   free(hypre_handle_);
-#else
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
-#endif
 
    return hypre_error_flag;
 }
