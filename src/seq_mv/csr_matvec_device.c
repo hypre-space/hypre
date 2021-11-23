@@ -51,6 +51,10 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ROCSPARSE)
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
+   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemlksparse implementation is in
+#elif defined(HYPRE_USING_SYCL)
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -170,7 +174,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                                    &beta,
                                                    vecY,
                                                    data_type,
-#if CUSPARSE_VERSION >= 11200
+#if CUSPARSE_VERSION >= 11400
                                                    CUSPARSE_SPMV_CSR_ALG2,
 #else
                                                    CUSPARSE_CSRMV_ALG2,
@@ -190,7 +194,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      &beta,
                                      vecY,
                                      data_type,
-#if CUSPARSE_VERSION >= 11200
+#if CUSPARSE_VERSION >= 11400
                                      CUSPARSE_SPMV_CSR_ALG2,
 #else
                                      CUSPARSE_CSRMV_ALG2,
@@ -310,6 +314,21 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
       hypre_CSRMatrixDestroy(B);
    }
 
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+HYPRE_Int
+hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
+                                   HYPRE_Complex    alpha,
+                                   hypre_CSRMatrix *A,
+                                   hypre_Vector    *x,
+                                   HYPRE_Complex    beta,
+                                   hypre_Vector    *y,
+                                   HYPRE_Int        offset )
+{
+   /* WM: TODO */
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)

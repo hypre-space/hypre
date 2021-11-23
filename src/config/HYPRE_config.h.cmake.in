@@ -67,6 +67,9 @@
 /* Use if executing on device with CUDA */
 #cmakedefine HYPRE_USING_CUDA 1
 
+/* Use if executing on device with SYCL */
+#cmakedefine HYPRE_USING_SYCL 1
+
 /* Use cuBLAS */
 #cmakedefine HYPRE_USING_CUBLAS 1
 

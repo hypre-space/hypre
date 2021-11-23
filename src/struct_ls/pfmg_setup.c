@@ -1051,8 +1051,8 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_SetIndex3(index,  0,  1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+   // FIXME TODO HOW TO DO KOKKOS (WM: and SYCL) IN ONE BOXLOOP ?
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1094,7 +1094,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
-#else /* kokkos */
+#else // #if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_RAJA)
    ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]), cyb(cxyz[1]), sqcxb(sqcxyz[0]),
@@ -1242,7 +1242,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1418,7 +1418,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    a_bc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1674,7 +1674,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1980,7 +1980,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    a_bne = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -2209,7 +2209,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
          HYPRE_Real diag_product_local = diag_product;
 #elif defined(HYPRE_USING_RAJA)
          ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> diag_product_local(diag_product);

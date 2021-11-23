@@ -624,13 +624,13 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                                Pi_diag_I,
                                3 * _1 );
 
-            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nnz, "thread", bDim);
+            dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+            dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nnz, "thread", bDim);
 
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
                                F2V_diag_nnz, 3, F2V_diag_J, Pi_diag_J );
 
-            gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nrows, "warp", bDim);
+            gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nrows, "warp", bDim);
 
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
                                F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
@@ -690,13 +690,13 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                                   3 * _1 );
             }
 
-            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_offd_nnz, "thread", bDim);
+            dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+            dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nnz, "thread", bDim);
 
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
                                F2V_offd_nnz, 3, F2V_offd_J, Pi_offd_J );
 
-            gDim = hypre_GetDefaultCUDAGridDimension(F2V_offd_nrows, "warp", bDim);
+            gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nrows, "warp", bDim);
 
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
                                F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
@@ -904,8 +904,8 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
                                F2V_diag_nnz,
                                thrust::make_zip_iterator(thrust::make_tuple(Pix_diag_J, Piy_diag_J, Piz_diag_J)) );
 
-            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_diag_nrows, "warp", bDim);
+            dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+            dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nrows, "warp", bDim);
 
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
                                F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
@@ -984,8 +984,8 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
                                F2V_offd_nnz,
                                thrust::make_zip_iterator(thrust::make_tuple(Pix_offd_J, Piy_offd_J, Piz_offd_J)) );
 
-            dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-            dim3 gDim = hypre_GetDefaultCUDAGridDimension(F2V_offd_nrows, "warp", bDim);
+            dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+            dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nrows, "warp", bDim);
 
             HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
                                F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,

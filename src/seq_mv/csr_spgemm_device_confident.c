@@ -423,9 +423,9 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    /* CUDA V100 */
    hypre_int v1, v2;
    cudaDeviceGetAttribute(&v1, cudaDevAttrMaxSharedMemoryPerBlock,
-                          hypre_HandleCudaDevice(hypre_handle()));
+                          hypre_HandleDevice(hypre_handle()));
    cudaDeviceGetAttribute(&v2, cudaDevAttrMaxSharedMemoryPerBlockOptin,
-                          hypre_HandleCudaDevice(hypre_handle()));
+                          hypre_HandleDevice(hypre_handle()));
 
    if (shmem_maxbytes > 49152)
    {
