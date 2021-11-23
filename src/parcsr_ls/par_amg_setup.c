@@ -2340,7 +2340,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorDestroy(F_array[level]);
             hypre_ParVectorDestroy(U_array[level]);
          }
-         if (level < max_levels - 1)
+         if (level + 1 < max_levels)
          {
             hypre_IntArrayDestroy(dof_func_array[level + 1]);
             dof_func_array[level + 1] = NULL;
