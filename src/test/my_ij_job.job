@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#SBATCH -n 1
+#SBATCH -t 0:05:00
+#SBATCH -A asccasc
+#SBATCH -p pdebug
+#SBATCH -o output.my_ij_job
+
+source /usr/workspace/dragon/drl-env-ci/bin/activate
+rm rank*.txt
+rm *.png
+srun -n 1 ./ij -9pt -n 20 20 -prs -mxl 2 -mg_max_iter 1
+python make_cf_plots.py
+

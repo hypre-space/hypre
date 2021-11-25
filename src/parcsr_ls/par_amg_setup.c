@@ -1082,6 +1082,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (coarsen_type == 10)
                hypre_BoomerAMGCoarsenHMIS(S, A_array[level], measure_type,
                                           coarsen_cut_factor, debug_flag, &(CF_marker_array[level]));
+            /* WM: inserting new test coarsening here */
+            else if (coarsen_type == 12)
+               hypre_BoomerAMGCoarsenPRS(S, A_array[level], 0,
+                                         debug_flag, &(CF_marker_array[level]));
             else if (coarsen_type == 21 || coarsen_type == 22)
             {
 #ifdef HYPRE_MIXEDINT

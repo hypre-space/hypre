@@ -773,6 +773,11 @@ main( hypre_int argc,
          arg_index++;
          coarsen_type      = 8;
       }
+      else if ( strcmp(argv[arg_index], "-prs") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 12;
+      }
       else if ( strcmp(argv[arg_index], "-pmis1") == 0 )
       {
          arg_index++;

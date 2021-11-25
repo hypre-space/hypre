@@ -2035,3 +2035,89 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+
+HYPRE_Int
+hypre_CSRMatrixRemoveDiagonalHost(hypre_CSRMatrix *A)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int      new_nnz = 0;
+   HYPRE_Int     *new_i;
+   HYPRE_Int     *new_j;
+   HYPRE_Complex *new_data;
+   HYPRE_Int      i, j;
+
+   for (i = 0; i < nrows; i++)
+   {
+      for (j = A_i[i]; j < A_i[i+1]; j++)
+      {
+         if (A_j[j] != i)
+         {
+            new_nnz++;
+         }
+      }
+   }
+
+   if (new_nnz == nnz)
+   {
+      /* no diagonal entries found */
+      return hypre_error_flag;
+   }
+
+   new_i = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+   new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
+
+   if (A_data)
+   {
+      new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
+      new_nnz = 0;
+
+      new_i[0] = 0;
+      for (i = 0; i < nrows; i++)
+      {
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            if (A_j[j] != i)
+            {
+               new_j[new_nnz] = A_j[j];
+               new_data[new_nnz] = A_data[j];
+               new_nnz++;
+            }
+         }
+         new_i[i+1] = new_nnz;
+      }
+   }
+   else
+   {
+      new_data = NULL;
+      new_nnz = 0;
+
+      new_i[0] = 0;
+      for (i = 0; i < nrows; i++)
+      {
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            if (A_j[j] != i)
+            {
+               new_j[new_nnz] = A_j[j];
+               new_nnz++;
+            }
+         }
+         new_i[i+1] = new_nnz;
+      }
+   }
+
+   hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
+   hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
+   hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixNumNonzeros(A) = new_nnz;
+   hypre_CSRMatrixI(A) = new_i;
+   hypre_CSRMatrixJ(A) = new_j;
+   hypre_CSRMatrixData(A) = new_data;
+
+   return hypre_error_flag;
+}

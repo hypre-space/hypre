@@ -252,6 +252,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
          hypre_printf(" Coarsening Type = Ruge 1st pass only \n");
       }
+      else if (hypre_abs(coarsen_type) == 12)
+      {
+         hypre_printf(" Coarsening Type = PRS \n");
+      }
       else if (hypre_abs(coarsen_type) == 9)
       {
          hypre_printf(" Coarsening Type = PMIS fixed random \n");
