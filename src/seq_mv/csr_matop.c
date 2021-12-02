@@ -1269,6 +1269,8 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
 {
    HYPRE_Int ierr = 0;
 
+/* WM: TODO - transpose on the device using sycl is a WIP due to problems with underlying algorithms in DPL */
+/* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 

@@ -115,7 +115,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
    }
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -199,7 +199,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
 #endif
                                      dBuffer) );
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    if (trans)
    {
@@ -330,23 +330,22 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
    hypre_CSRMatrix *AT;
    oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
 
-   oneapi::mkl::transpose transpose_op = oneapi::mkl::transpose::nontrans;
    if (trans)
    {
-      /* WM: TODO
+      /* WM: TODO - transpose is not currently supported on the device in sycl
        * WM: I should verify that this yields better performance in onemklsparse
        * We handle the transpose explicitly to ensure the same output each run
        * and for potential performance improvement memory for AT */
       /* hypre_CSRMatrixTransposeDevice(A, &AT, 1); */
-      /* matA_handle = hypre_CSRMatrixGPUMatHandle(AT); */
-      transpose_op = oneapi::mkl::transpose::trans;
+      hypre_CSRMatrixTransposeHost(A, &AT, 1);
+      matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
    }
 
    /* SpMV */
    /* WM: for now, use the transpose version of gemv */
    /* WM: Q - do we need the event.wait() call, or do oneapi::mkl calls block? */
    HYPRE_SYCL_CALL( auto event = oneapi::mkl::sparse::gemv(*compute_queue,
-                                                           transpose_op,
+                                                           oneapi::mkl::transpose::nontrans,
                                                            alpha,
                                                            matA_handle,
                                                            hypre_VectorData(x),
@@ -356,8 +355,7 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 
    if (trans)
    {
-      /* WM: TODO */
-      /* hypre_CSRMatrixDestroy(AT); */
+      hypre_CSRMatrixDestroy(AT);
    }
 
    return hypre_error_flag;

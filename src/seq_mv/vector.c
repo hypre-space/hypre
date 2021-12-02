@@ -16,6 +16,7 @@
  * Also, would like to just have these included once in, say, a utilities header... */
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/numeric>
 #include <oneapi/dpl/iterator>
 #include <oneapi/dpl/functional>
 
@@ -313,7 +314,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -494,7 +495,8 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
    /* WM: Q - do we need an event.wait() call, or do oneapi::mkl calls block? */
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()), size, alpha, y_data, 1) );
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()), size, alpha,
+                                            y_data, 1) );
 #else
    /* WM: make sure to test this branch */
    HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size, y_data, alpha * _1 );
@@ -518,7 +520,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -565,7 +567,8 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
    /* WM: Q - do we need an event.wait() call, or do oneapi::mkl calls block? */
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()), size, alpha, x_data, 1, y_data, 1) );
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()), size, alpha,
+                                            x_data, 1, y_data, 1) );
 #else
    /* WM: make sure to test this branch */
    HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
@@ -589,7 +592,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -643,7 +646,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -694,7 +697,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -743,12 +746,14 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_ONEMKLBLAS)
    /* WM: Q - do we need an event.wait() call, or do oneapi::mkl calls block? */
    HYPRE_Real *result_dev = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()), size, x_data, 1, y_data, 1, result_dev) );
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()), size, x_data, 1,
+                                           y_data, 1, result_dev) );
    hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else
    /* WM: make sure to test this branch */
-   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0, std::plus<>(), std::multiplies<>() );
+   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0,
+                               std::plus<>(), std::multiplies<>() );
    /* result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0, _1 + _2, _1 * _2 ); */
    /* result = HYPRE_ONEDPL_CALL( std::inner_product, x_data, x_data + size, y_data, 0.0 ); */
 #endif // #if defined(HYPRE_USING_ONEMKLBLAS)
@@ -776,7 +781,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -878,7 +883,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

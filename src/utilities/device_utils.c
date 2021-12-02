@@ -5,6 +5,15 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/* WM: these need to be included before other headers... how to do this properly?
+ * Can't use #if defined(HYPRE_USING_SYCL) here since that macro is defined in other hypre headers
+ * Also, would like to just have these included once in, say, a utilities header... */
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/numeric>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
@@ -107,7 +116,117 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
 
    return hypre_error_flag;
 }
-#endif
+
+HYPRE_Int*
+hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return NULL;
+   }
+
+   HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, d_row_ind);
+
+   return d_row_ind;
+}
+
+void
+hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
+                              HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < nrows)
+   {
+      HYPRE_Int row_start = d_row_ptr[i];
+      HYPRE_Int row_end = d_row_ptr[i+1];
+      if (row_start != row_end)
+      {
+         d_row_ind[row_start] = i;
+      }
+   }
+}
+
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                   HYPRE_Int *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
+
+   HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
+
+   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
+
+   /* WM: todo - the inclusive_scan call is hanging for me... bug in oneDPL? */
+   HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+                      oneapi::dpl::maximum<HYPRE_Int>());
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int*
+hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)
+{
+   HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
+
+   /* WM: TODO - lower_bound is supposed to be available in ondDPL, but no dice? */
+   /* oneapi::dpl::counting_iterator<HYPRE_Int> count(0); */
+   /* HYPRE_ONEDPL_CALL( std::lower_bound, */
+   /*                    d_row_ind, d_row_ind + nnz, */
+   /*                    count, */
+   /*                    count + nrows + 1, */
+   /*                    d_row_ptr); */
+   HYPRE_Int i, cnt;
+   cnt = 0;
+   d_row_ptr[0] = 0;
+   for (i = 0; i < nrows; i++)
+   {
+      while (d_row_ind[cnt] == i)
+      {
+         cnt++;
+      }
+      d_row_ptr[i+1] = cnt;
+   }
+   
+   return d_row_ptr;
+}
+
+HYPRE_Int
+hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
+                                   HYPRE_Int *d_row_ptr)
+{
+   /* WM: TODO - lower_bound is supposed to be available in ondDPL, but no dice? */
+   /* oneapi::dpl::counting_iterator<HYPRE_Int> count(0); */
+   /* HYPRE_ONEDPL_CALL( std::lower_bound, */
+   /*                    d_row_ind, d_row_ind + nnz, */
+   /*                    count, */
+   /*                    count + nrows + 1, */
+   /*                    d_row_ptr); */
+   HYPRE_Int i, cnt;
+   cnt = 0;
+   d_row_ptr[0] = 0;
+   for (i = 0; i < nrows; i++)
+   {
+      while (d_row_ind[cnt] == i)
+      {
+         cnt++;
+      }
+      d_row_ptr[i+1] = cnt;
+   }
+
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -1480,7 +1599,7 @@ hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
  *         4: sync stream based on cuda_compute_stream_sync
  */
 HYPRE_Int
-hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
+hypre_SyncComputeStream_core(HYPRE_Int     action,
                                  hypre_Handle *hypre_handle,
                                  HYPRE_Int    *cuda_compute_stream_sync_ptr)
 {
@@ -1524,7 +1643,7 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
 #endif
          break;
       default:
-         hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
+         hypre_printf("hypre_SyncComputeStream_core invalid action\n");
          hypre_error_in_arg(1);
    }
 
@@ -1536,7 +1655,7 @@ hypre_SetSyncCudaCompute(HYPRE_Int action)
 {
    /* convert to 1/0 */
    action = action != 0;
-   hypre_SyncCudaComputeStream_core(action, NULL, NULL);
+   hypre_SyncComputeStream_core(action, NULL, NULL);
 
    return hypre_error_flag;
 }
@@ -1544,7 +1663,7 @@ hypre_SetSyncCudaCompute(HYPRE_Int action)
 HYPRE_Int
 hypre_RestoreSyncCudaCompute()
 {
-   hypre_SyncCudaComputeStream_core(2, NULL, NULL);
+   hypre_SyncComputeStream_core(2, NULL, NULL);
 
    return hypre_error_flag;
 }
@@ -1552,15 +1671,15 @@ hypre_RestoreSyncCudaCompute()
 HYPRE_Int
 hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
 {
-   hypre_SyncCudaComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
+   hypre_SyncComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncComputeStream(hypre_Handle *hypre_handle)
 {
-   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
 
    return hypre_error_flag;
 }

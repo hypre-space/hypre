@@ -5,6 +5,15 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/* WM: these need to be included before other headers... how to do this properly?
+ * Can't use #if defined(HYPRE_USING_SYCL) here since that macro is defined in other hypre headers
+ * Also, would like to just have these included once in, say, a utilities header... */
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/numeric>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
@@ -244,7 +253,110 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
 {
-   /* WM: TODO */
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
+#endif
+   hypre_printf("WM: debug - in sycl version of hypreDevice_CSRSpTrans()\n");
+
+   HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
+   HYPRE_Complex *d_ac = NULL;
+   HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, 3 * nnzA, HYPRE_MEMORY_DEVICE);
+
+   /* allocate C */
+   d_jc = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   if (want_data)
+   {
+      d_ac = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+   }
+
+   /* permutation vector */
+   d_pm = mem_work;
+
+   /* expansion: A's row idx */
+   d_it = d_pm + nnzA;
+   hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
+
+   /* WM: debug */
+   HYPRE_Int i;
+   hypre_printf("d_ia: ");
+   for (i = 0; i < m; i++) hypre_printf("%d ", d_ia[i]);
+   hypre_printf("\n");
+   hypre_printf("d_it: ");
+   for (i = 0; i < nnzA; i++) hypre_printf("%d ", d_it[i]);
+   hypre_printf("\n");
+
+   /* a copy of col idx of A */
+   d_jt = d_it + nnzA;
+   hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   /* sort: by col */
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      count,
+                      count + nnzA,
+                      d_pm);
+
+   /* WM: debug */
+   hypre_printf("init d_pm: ");
+   for (i = 0; i < nnzA; i++) hypre_printf("%d ", d_pm[i]);
+   hypre_printf("\n");
+
+   auto zip_jt_pm = oneapi::dpl::make_zip_iterator(d_jt, d_pm);
+   HYPRE_ONEDPL_CALL( std::stable_sort,
+                      zip_jt_pm,
+                      zip_jt_pm + nnzA,
+                      [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+
+   /* WM: debug */
+   hypre_printf("sorted d_pm: ");
+   for (i = 0; i < nnzA; i++) hypre_printf("%d ", d_pm[i]);
+   hypre_printf("\n");
+
+   auto permuted_it = oneapi::dpl::make_permutation_iterator(d_it, d_pm);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      permuted_it,
+                      permuted_it + nnzA,
+                      d_jc );
+
+   /* WM: debug */
+   hypre_printf("d_jc: ");
+   for (i = 0; i < nnzA; i++) hypre_printf("%d ", d_jc[i]);
+   hypre_printf("\n");
+
+   if (want_data)
+   {
+      auto permuted_aa = oneapi::dpl::make_permutation_iterator(d_aa, d_pm);
+      HYPRE_ONEDPL_CALL( std::copy,
+                         permuted_aa,
+                         permuted_aa + nnzA,
+                         d_ac );
+   }
+
+   /* convert into ic: row idx --> row ptrs */
+   d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
+
+   /* WM: debug */
+   hypre_printf("d_ic: ");
+   for (i = 0; i < nnzA; i++) hypre_printf("%d ", d_ic[i]);
+   hypre_printf("\n");
+
+#ifdef HYPRE_DEBUG
+   HYPRE_Int nnzC;
+   hypre_TMemcpy(&nnzC, &d_ic[n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_assert(nnzC == nnzA);
+#endif
+
+   hypre_TFree(mem_work, HYPRE_MEMORY_DEVICE);
+
+   *d_ic_out = d_ic;
+   *d_jc_out = d_jc;
+   *d_ac_out = d_ac;
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
+#endif
+   hypre_printf("WM: debug - finished with hypreDevice_CSRSpTrans\n");
+
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_SYCL)
