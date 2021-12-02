@@ -17,10 +17,10 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+template <char HASHTYPE>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_attempt( char           HashType,
-                                  HYPRE_Int      HashSize,      /* capacity of the hash table */
+hypre_spgemm_hash_insert_attempt( HYPRE_Int      HashSize,      /* capacity of the hash table */
                          volatile HYPRE_Int     *HashKeys,      /* assumed to be initialized as all -1's */
                          volatile HYPRE_Complex *HashVals,      /* assumed to be initialized as all 0's */
                                   HYPRE_Int      key,           /* assumed to be nonnegative */
@@ -40,7 +40,7 @@ hypre_spgemm_hash_insert_attempt( char           HashType,
       }
       else
       {
-         j = HashFunc(HashType, HashSize, key, i, j);
+         j = HashFunc<HASHTYPE>(HashSize, key, i, j);
       }
 
       /* try to insert key+1 into slot j */
@@ -67,11 +67,10 @@ hypre_spgemm_hash_insert_attempt( char           HashType,
    return -1;
 }
 
-template <HYPRE_Int ATTEMPT>
+template <HYPRE_Int ATTEMPT, char HASHTYPE>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_compute_row_attempt( char           HashType,
-                                  HYPRE_Int      rowi,
+hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
                          volatile HYPRE_Int      lane_id,
                                   HYPRE_Int     *ia,
                                   HYPRE_Int     *ja,
@@ -138,13 +137,13 @@ hypre_spgemm_compute_row_attempt( char           HashType,
             const HYPRE_Int     k_idx = read_only_load(jb + k);
             const HYPRE_Complex k_val = read_only_load(ab + k) * mult;
             /* first try to insert into shared memory hash table */
-            HYPRE_Int pos = hypre_spgemm_hash_insert_attempt
-               (HashType, s_HashSize, s_HashKeys, s_HashVals, k_idx, k_val, num_new_insert, warp_failed);
+            HYPRE_Int pos = hypre_spgemm_hash_insert_attempt<HASHTYPE>
+               (s_HashSize, s_HashKeys, s_HashVals, k_idx, k_val, num_new_insert, warp_failed);
 
             if (-1 == pos)
             {
-               pos = hypre_spgemm_hash_insert_attempt
-                     (HashType, g_HashSize, g_HashKeys, g_HashVals, k_idx, k_val, num_new_insert, warp_failed);
+               pos = hypre_spgemm_hash_insert_attempt<HASHTYPE>
+                     (g_HashSize, g_HashKeys, g_HashVals, k_idx, k_val, num_new_insert, warp_failed);
             }
             /* if failed again, both hash tables must have been full
                (hash table size estimation was too small).
@@ -222,10 +221,9 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int      lane_id,
    return j;
 }
 
-template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT>
+template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HASHTYPE>
 __global__ void
-hypre_spgemm_attempt( char           HashType,
-                      HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
+hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
                       HYPRE_Int     *rind,
                       HYPRE_Int     *ia,
                       HYPRE_Int     *ja,
@@ -314,9 +312,9 @@ hypre_spgemm_attempt( char           HashType,
       __syncwarp();
 
       /* work with two hash tables */
-      jsum = hypre_spgemm_compute_row_attempt<ATTEMPT>(HashType, ii, lane_id, ia, ja, aa, ib, jb, ab,
-                                                       SHMEM_HASH_SIZE, warp_s_HashKeys, warp_s_HashVals,
-                                                       ghash_size, jg + istart_g, ag + istart_g, failed);
+      jsum = hypre_spgemm_compute_row_attempt<ATTEMPT, HASHTYPE>(ii, lane_id, ia, ja, aa, ib, jb, ab,
+                                                                 SHMEM_HASH_SIZE, warp_s_HashKeys, warp_s_HashVals,
+                                                                 ghash_size, jg + istart_g, ag + istart_g, failed);
 
       /* num of inserts in this row (an upper bound) */
       jsum = warp_allreduce_sum(jsum);
@@ -512,9 +510,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       exit(0);
    }
 
-   HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, SHMEM_HASH_SIZE, ATTEMPT>),
-                        gDim, bDim,
-                        hash_type,
+   HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, SHMEM_HASH_SIZE, ATTEMPT, 'D'>), gDim, bDim,
                         m, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ghash_i, d_ghash_j, d_ghash_a,
                         *d_ic_out, *d_jc_out, *d_c_out, d_rc, d_rf );
 
