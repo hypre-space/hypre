@@ -413,7 +413,7 @@ main( hypre_int argc,
    void               *object;
    HYPRE_IJMatrix     ij_A = NULL;
    HYPRE_ParCSRMatrix parcsr_A   = NULL;
-   HYPRE_Int          errcode, job = 2;
+   HYPRE_Int          errcode, job = 1;
    HYPRE_Int          num_procs, myid;
    HYPRE_Int          time_index;
    MPI_Comm           comm = hypre_MPI_COMM_WORLD;
