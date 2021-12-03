@@ -13,6 +13,8 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
+/* WM: debug */
+#include "_hypre_utilities.h"
 #include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_GPU)
@@ -338,12 +340,39 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
        * and for potential performance improvement memory for AT */
       /* hypre_CSRMatrixTransposeDevice(A, &AT, 1); */
       hypre_CSRMatrixTransposeHost(A, &AT, 1);
+      /* hypre_CSRMatrix *AT_host; */
+      /* hypre_CSRMatrixTransposeHost(A, &AT_host, 1); */
+      /* AT = hypre_CSRMatrixClone_v2(AT_host, 1, HYPRE_MEMORY_DEVICE); */
+      /* hypre_CSRMatrixDestroy(AT_host); */
       matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
    }
 
    /* SpMV */
    /* WM: for now, use the transpose version of gemv */
    /* WM: Q - do we need the event.wait() call, or do oneapi::mkl calls block? */
+   /* hypre_printf("WM: debug - memory location of x = %d\n", hypre_VectorMemoryLocation(x)); */
+   /* hypre_printf("WM: debug - memory location of y = %d\n", hypre_VectorMemoryLocation(y)); */
+   /* hypre_MemoryLocation memory_location; */
+   /* hypre_GetPointerLocation(hypre_VectorData(x), &memory_location); */
+   /* hypre_printf("WM: debug - memory location of x = %d\n", memory_location); */
+   /* hypre_GetPointerLocation(hypre_VectorData(y), &memory_location); */
+   /* hypre_printf("WM: debug - memory location of y = %d\n", memory_location); */
+   if (trans)
+   {
+      /* hypre_printf("WM: debug - transpose operation!\n"); */
+      /* hypre_printf("WM: debug - memory location of AT = %d\n", hypre_CSRMatrixMemoryLocation(AT)); */
+   }
+   else
+   {
+      /* hypre_printf("WM: debug - memory location of A = %d\n", hypre_CSRMatrixMemoryLocation(A)); */
+      /* hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location); */
+      /* hypre_printf("WM: debug - pointer location of A row = %d\n", memory_location); */
+      /* hypre_GetPointerLocation(hypre_CSRMatrixJ(A), &memory_location); */
+      /* hypre_printf("WM: debug - pointer location of A col = %d\n", memory_location); */
+      /* hypre_GetPointerLocation(hypre_CSRMatrixData(A), &memory_location); */
+      /* hypre_printf("WM: debug - pointer location of A data = %d\n", memory_location); */
+      /* hypre_printf("WM: debug - a size = %d, %d,  %d\n", hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A)); */
+   }
    HYPRE_SYCL_CALL( auto event = oneapi::mkl::sparse::gemv(*compute_queue,
                                                            oneapi::mkl::transpose::nontrans,
                                                            alpha,

@@ -142,7 +142,7 @@ hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
    if (i < nrows)
    {
       HYPRE_Int row_start = d_row_ptr[i];
-      HYPRE_Int row_end = d_row_ptr[i+1];
+      HYPRE_Int row_end = d_row_ptr[i + 1];
       if (row_start != row_end)
       {
          d_row_ind[row_start] = i;
@@ -167,9 +167,11 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
    HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
 
-   /* WM: todo - the inclusive_scan call is hanging for me... bug in oneDPL? */
+   /* WM: note - the inclusive_scan call is hanging for me even with ZE_AFFINITY_MASK=0.0... bug in oneDPL? */
+   hypre_printf("WM: debug - about to inclusive_scan\n");
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
+   hypre_printf("WM: debug - done with inclusive_scan\n");
 
    return hypre_error_flag;
 }
@@ -195,9 +197,9 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
       {
          cnt++;
       }
-      d_row_ptr[i+1] = cnt;
+      d_row_ptr[i + 1] = cnt;
    }
-   
+
    return d_row_ptr;
 }
 
@@ -221,7 +223,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
       {
          cnt++;
       }
-      d_row_ptr[i+1] = cnt;
+      d_row_ptr[i + 1] = cnt;
    }
 
    return hypre_error_flag;
@@ -1600,8 +1602,8 @@ hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
  */
 HYPRE_Int
 hypre_SyncComputeStream_core(HYPRE_Int     action,
-                                 hypre_Handle *hypre_handle,
-                                 HYPRE_Int    *cuda_compute_stream_sync_ptr)
+                             hypre_Handle *hypre_handle,
+                             HYPRE_Int    *cuda_compute_stream_sync_ptr)
 {
    /* with UVM the default is to sync at kernel completions, since host is also able to
     * touch GPU memory */
