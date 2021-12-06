@@ -251,7 +251,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   return hypre_ParCSRDiagScale(HA, Hy, Hx);
+   return hypre_ParCSRDiagScaleVector(HA, Hy, Hx);
 }
 
 /*--------------------------------------------------------------------------
