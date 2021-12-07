@@ -992,7 +992,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    /* Indices */
    HYPRE_Int              entry, Mentry;
    HYPRE_Int              Mj, Mb;
-   HYPRE_Int              b, e, i, id, m, t;
+   HYPRE_Int              b, i, id, m, t;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -1209,7 +1209,6 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultHelper *a,
                                         HYPRE_Int   *terms)
 {
    HYPRE_Int               *ncomp;
-   HYPRE_Int              **indices;
    HYPRE_Complex          **cprod;
    HYPRE_Int             ***order;
    const HYPRE_Complex  ****tptrs;
@@ -3137,13 +3136,13 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3) +
-                                   HYPRE_SMMCORE_2ETB(k + 4) +
-                                   HYPRE_SMMCORE_2ETB(k + 5) +
-                                   HYPRE_SMMCORE_2ETB(k + 6);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
+                                   HYPRE_SMMCORE_2TBB(k + 1) +
+                                   HYPRE_SMMCORE_2TBB(k + 2) +
+                                   HYPRE_SMMCORE_2TBB(k + 3) +
+                                   HYPRE_SMMCORE_2TBB(k + 4) +
+                                   HYPRE_SMMCORE_2TBB(k + 5) +
+                                   HYPRE_SMMCORE_2TBB(k + 6);
                mptr[Mi] += val;
             }
             hypre_BoxLoop3End(Mi,gi,hi);
@@ -3155,12 +3154,12 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3) +
-                                   HYPRE_SMMCORE_2ETB(k + 4) +
-                                   HYPRE_SMMCORE_2ETB(k + 5);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
+                                   HYPRE_SMMCORE_2TBB(k + 1) +
+                                   HYPRE_SMMCORE_2TBB(k + 2) +
+                                   HYPRE_SMMCORE_2TBB(k + 3) +
+                                   HYPRE_SMMCORE_2TBB(k + 4) +
+                                   HYPRE_SMMCORE_2TBB(k + 5);
                mptr[Mi] += val;
             }
             hypre_BoxLoop3End(Mi,gi,hi);
@@ -3172,11 +3171,11 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3) +
-                                   HYPRE_SMMCORE_2ETB(k + 4);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
+                                   HYPRE_SMMCORE_2TBB(k + 1) +
+                                   HYPRE_SMMCORE_2TBB(k + 2) +
+                                   HYPRE_SMMCORE_2TBB(k + 3) +
+                                   HYPRE_SMMCORE_2TBB(k + 4);
                mptr[Mi] += val;
             }
             hypre_BoxLoop3End(Mi,gi,hi);
@@ -3188,10 +3187,10 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
+                                   HYPRE_SMMCORE_2TBB(k + 1) +
+                                   HYPRE_SMMCORE_2TBB(k + 2) +
+                                   HYPRE_SMMCORE_2TBB(k + 3);
 
                mptr[Mi] += val;
             }
@@ -3204,9 +3203,9 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
+                                   HYPRE_SMMCORE_2TBB(k + 1) +
+                                   HYPRE_SMMCORE_2TBB(k + 2);
 
                mptr[Mi] += val;
             }
@@ -3219,8 +3218,8 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
+                                   HYPRE_SMMCORE_2TBB(k + 1);
 
                mptr[Mi] += val;
             }
@@ -3233,7 +3232,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                 gdbox, gdstart, gdstride, gi,
                                 hdbox, hdstart, hdstride, hi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0);
+               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0);
 
                mptr[Mi] += val;
             }
