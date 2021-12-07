@@ -163,7 +163,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
       // Compute coarse matrix
-      hypre_SSAMGComputeRAP(A_l[l], P_l[l], grid_l[l+1], cdir_l[l], non_galerkin, &A_l[l+1]);
+      hypre_SSAMGComputeRAP(A_l[l], P_l[l], &grid_l[l+1], cdir_l[l], non_galerkin, &A_l[l+1]);
 
       // Build SStructVectors
       HYPRE_SStructVectorCreate(comm, grid_l[l+1], &b_l[l+1]);

@@ -634,7 +634,7 @@ hypre_SStructMatrix* hypre_SSAMGCreateInterpOp ( hypre_SStructMatrix *A , hypre_
 HYPRE_Int hypre_SSAMGSetupInterpOp ( hypre_SStructMatrix  *A , HYPRE_Int *cdir_p , hypre_SStructMatrix *P );
 
 /* ssamg_setup_rap.c */
-HYPRE_Int hypre_SSAMGComputeRAP ( hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructGrid *cgrid , HYPRE_Int *cdir_p , HYPRE_Int non_galerkin , hypre_SStructMatrix **Ac_ptr );
+HYPRE_Int hypre_SSAMGComputeRAP ( hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructGrid **cgrid , HYPRE_Int *cdir_p , HYPRE_Int non_galerkin , hypre_SStructMatrix **Ac_ptr );
 HYPRE_Int hypre_SSAMGComputeRAPNonGlk ( hypre_SStructMatrix *A , hypre_SStructMatrix *P , HYPRE_Int *cdir_p , hypre_SStructMatrix **Ac_ptr );
 
 /* ssamg_relax.c */

@@ -21,14 +21,16 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
-                       hypre_SStructMatrix   *P,
-                       hypre_SStructGrid     *cgrid,
-                       HYPRE_Int             *cdir_p,
-                       HYPRE_Int              non_galerkin,
-                       hypre_SStructMatrix  **Ac_ptr )
+hypre_SSAMGComputeRAP( hypre_SStructMatrix    *A,
+                       hypre_SStructMatrix    *P,
+                       hypre_SStructGrid     **cgrid,
+                       HYPRE_Int              *cdir_p,
+                       HYPRE_Int               non_galerkin,
+                       hypre_SStructMatrix   **Ac_ptr )
 {
    hypre_SStructMatrix *Ac;
+   hypre_SStructGraph  *graph;
+   hypre_SStructGrid   *grid;
 
    if (non_galerkin)
    {
@@ -39,6 +41,13 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
       hypre_SStructMatrixPtAP(A, P, &Ac);
    }
 
+   /* Update grid object */
+   graph = hypre_SStructMatrixGraph(Ac);
+   grid  = hypre_SStructGraphGrid(graph);
+   HYPRE_SStructGridDestroy(*cgrid);
+   hypre_SStructGridRef(grid, cgrid);
+
+   /* Update pointer to resulting matrix */
    *Ac_ptr = Ac;
 
    return hypre_error_flag;
