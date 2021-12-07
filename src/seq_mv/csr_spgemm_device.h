@@ -101,7 +101,7 @@ hypre_int get_warp_lane_id()
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2, HYPRE_Int lane)
+void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2, HYPRE_Int lane)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
@@ -128,7 +128,7 @@ void group_read(HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2, HY
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int lane)
+void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int lane)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
@@ -308,7 +308,9 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
    return hashval;
 }
 
-void hypre_create_ija(HYPRE_Int type, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int m, HYPRE_Int *row_id, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz_ptr );
+void hypre_create_ija(HYPRE_Int m, HYPRE_Int *row_id, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz_ptr );
+
+void hypre_create_ija(HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int m, HYPRE_Int *row_id, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz_ptr );
 
 HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_id, HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr, HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr);
 

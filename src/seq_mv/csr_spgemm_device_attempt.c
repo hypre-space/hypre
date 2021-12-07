@@ -498,11 +498,20 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
 
    hypre_assert(SHMEM_HASH_SIZE == HYPRE_SPGEMM_NUMER_HASH_SIZE);
 
-   /* in ATTEMPT 1, allocate ija with slightly larger size than in d_rc (raise to power to 2), type == 2
-    * in ATTEMPT 2, allocate ija with size in d_rc, type == 1 */
-   HYPRE_Int ija_size;
-   hypre_create_ija(3 - ATTEMPT, SHMEM_HASH_SIZE, m, rf_ind, d_rc, *d_ic_out, d_jc_out, d_c_out, &ija_size);
-   hypre_printf("ATTEMPT %d: ija_size %d\n", ATTEMPT, ija_size);
+   /* in ATTEMPT 1, allocate ija with slightly larger size than in d_rc (raise to power to 2)
+    * in ATTEMPT 2, allocate ija with size in d_rc */
+   HYPRE_Int ija_size = -1;
+   if (ATTEMPT == 1)
+   {
+      hypre_create_ija(SHMEM_HASH_SIZE, m, rf_ind, d_rc, *d_ic_out, d_jc_out, d_c_out, &ija_size);
+   }
+   else if (ATTEMPT == 2)
+   {
+      hypre_create_ija(m, rf_ind, d_rc, *d_ic_out, d_jc_out, d_c_out, &ija_size);
+   }
+#ifdef HYPRE_SPGEMM_PRINTF
+   printf("%s[%d]: ATTEMPT %d: ija_size %d\n", __func__, __LINE__, ATTEMPT, ija_size);
+#endif
 
    if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
    {
@@ -593,10 +602,10 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    HYPRE_Int     *d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
    HYPRE_Int     *d_jc;
    HYPRE_Complex *d_c;
-   HYPRE_Int      nnzC;
+   HYPRE_Int      nnzC = -1;
 
    /* d_rc has (exact) row nnz now */
-   hypre_create_ija(1, SHMEM_HASH_SIZE, m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
+   hypre_create_ija(m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
    const HYPRE_Int num_warps_per_block = 16;
    dim3 bDim(4, 8, num_warps_per_block);

@@ -18,17 +18,73 @@ struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 
    __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
    {
+      // RL: ???
       return next_power_of_2(x - SHMEM_HASH_SIZE) + x;
    }
 };
 
 /* Assume d_c is of length m and contains the size of each row
  *        d_i has size (m+1) on entry
- * type = 1: generate (i,j,a) with d_c
- * type = 2: generate (i,j,a) with row_size(d_c) see above (over allocation) */
+ * generate (i,j,a) with d_c */
 void
-hypre_create_ija( HYPRE_Int       type,
-                  HYPRE_Int       SHMEM_HASH_SIZE,
+hypre_create_ija( HYPRE_Int       m,
+                  HYPRE_Int      *row_id, /* length of m, row indices; if null, it is [0,1,2,3,...] */
+                  HYPRE_Int      *d_c,    /* d_c[row_id[i]] is the size of ith row */
+                  HYPRE_Int      *d_i,
+                  HYPRE_Int     **d_j,
+                  HYPRE_Complex **d_a,
+                  HYPRE_Int      *nnz_ptr /* in/out: if input >= 0, it must be the sum of d_c, remain unchanged in output
+                                                     if input <  0, it is computed as the sum of d_c and output */)
+{
+   HYPRE_Int nnz = 0;
+
+   hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+
+   if (row_id)
+   {
+      HYPRE_THRUST_CALL(inclusive_scan,
+                        thrust::make_permutation_iterator(d_c, row_id),
+                        thrust::make_permutation_iterator(d_c, row_id) + m,
+                        d_i + 1);
+   }
+   else
+   {
+      HYPRE_THRUST_CALL(inclusive_scan,
+                        d_c,
+                        d_c + m,
+                        d_i + 1);
+   }
+
+   if (*nnz_ptr >= 0)
+   {
+#if defined(HYPRE_DEBUG)
+      hypre_TMemcpy(&nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_assert(nnz == *nnz_ptr);
+#endif
+      nnz = *nnz_ptr;
+   }
+   else
+   {
+      hypre_TMemcpy(&nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      *nnz_ptr = nnz;
+   }
+
+   if (d_j)
+   {
+      *d_j = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+   }
+
+   if (d_a)
+   {
+      *d_a = hypre_TAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_DEVICE);
+   }
+}
+
+/* Assume d_c is of length m and contains the size of each row
+ *        d_i has size (m+1) on entry
+ * generate (i,j,a) with row_size(d_c) see above (over allocation) */
+void
+hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
                   HYPRE_Int       m,
                   HYPRE_Int      *row_id,        /* length of m, row indices; if null, it is [0,1,2,3,...] */
                   HYPRE_Int      *d_c,           /* d_c[row_id[i]] is the size of ith row */
@@ -43,37 +99,17 @@ hypre_create_ija( HYPRE_Int       type,
 
    if (row_id)
    {
-      if (1 == type)
-      {
-         HYPRE_THRUST_CALL(inclusive_scan,
-                           thrust::make_permutation_iterator(d_c, row_id),
-                           thrust::make_permutation_iterator(d_c, row_id) + m,
-                           d_i + 1);
-      }
-      else if (2 == type)
-      {
-         HYPRE_THRUST_CALL( inclusive_scan,
-                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)),
-                            thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)) + m,
-                            d_i + 1 );
-      }
+      HYPRE_THRUST_CALL( inclusive_scan,
+                         thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)),
+                         thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)) + m,
+                         d_i + 1 );
    }
    else
    {
-      if (1 == type)
-      {
-         HYPRE_THRUST_CALL(inclusive_scan,
-                           d_c,
-                           d_c + m,
-                           d_i + 1);
-      }
-      else if (2 == type)
-      {
-         HYPRE_THRUST_CALL( inclusive_scan,
-                            thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)),
-                            thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)) + m,
-                            d_i + 1 );
-      }
+      HYPRE_THRUST_CALL( inclusive_scan,
+                         thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)),
+                         thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)) + m,
+                         d_i + 1 );
    }
 
    hypre_TMemcpy(&nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
