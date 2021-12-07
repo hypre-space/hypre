@@ -282,7 +282,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
          HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
 
-#ifdef DEBUG_SETUP
+#ifdef DEBUG_SOLVE
          hypre_sprintf(filename, "pfmg_xbottom.i%02d.l%02d", i, l);
          hypre_StructVectorPrint(filename, x_l[l], 0);
 #endif
@@ -311,7 +311,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 
-#ifdef DEBUG_SETUP
+#ifdef DEBUG_SOLVE
             hypre_sprintf(filename, "pfmg_eup.i%02d.l%02d", i, l);
             hypre_StructVectorPrint(filename, e_l[l], 0);
             hypre_sprintf(filename, "pfmg_xup.i%02d.l%02d", i, l);
@@ -348,7 +348,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 
-#ifdef DEBUG_SETUP
+#ifdef DEBUG_SOLVE
          hypre_sprintf(filename, "pfmg_eup.i%02d.l%02d", i, 0);
          hypre_StructVectorPrint(filename, e_l[0], 0);
          hypre_sprintf(filename, "pfmg_xup.i%02d.l%02d", i, 0);

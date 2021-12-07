@@ -412,7 +412,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVector   *Pones = NULL;
       char                  filename[255];
 
-      hypre_sprintf(filename, "pfmg_A.%02d", l);
+      l = num_levels - 1;
+      hypre_sprintf(filename, "pfmg_A.l%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
 
       for (l = 0; l < (num_levels - 1); l++)
