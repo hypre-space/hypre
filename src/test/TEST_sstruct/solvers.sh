@@ -44,6 +44,9 @@ FILES="\
  ${TNAME}.out.32\
  ${TNAME}.out.33\
  ${TNAME}.out.34\
+ ${TNAME}.out.35\
+ ${TNAME}.out.36\
+ ${TNAME}.out.37\
  ${TNAME}.out.121\
  ${TNAME}.out.122\
  ${TNAME}.out.123\
@@ -58,6 +61,9 @@ FILES="\
  ${TNAME}.out.132\
  ${TNAME}.out.133\
  ${TNAME}.out.134\
+ ${TNAME}.out.135\
+ ${TNAME}.out.136\
+ ${TNAME}.out.137\
 "
 # ${TNAME}.out.5\
 # ${TNAME}.out.6\
