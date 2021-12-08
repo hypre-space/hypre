@@ -1740,8 +1740,8 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
                                            hypre_UnorderedBigIntMap *inverse_map);
 
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncDeviceComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
@@ -1772,10 +1772,10 @@ HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 char *hypre_strcpy(char *destination, const char *source);
 
-HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
-HYPRE_Int hypre_RestoreSyncCudaCompute();
-HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SetSyncDeviceCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncDeviceCompute();
+HYPRE_Int hypre_GetSyncDeviceCompute(HYPRE_Int *device_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncDeviceComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );

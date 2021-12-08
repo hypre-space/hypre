@@ -161,7 +161,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       if (i == rep - 1)
       {
-         hypre_SyncCudaDevice(hypre_handle());
+         hypre_SyncDevice(hypre_handle());
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, A*A", hypre_MPI_COMM_WORLD);
@@ -350,7 +350,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
 
       if (i == 1)
       {
-         hypre_SyncCudaDevice(hypre_handle());
+         hypre_SyncDevice(hypre_handle());
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, RAP2", hypre_MPI_COMM_WORLD);
@@ -452,7 +452,7 @@ main( hypre_int argc,
    HYPRE_Init();
 
    /* for timing, sync after kernels */
-   hypre_SetSyncCudaCompute(1);
+   hypre_SetSyncDeviceCompute(1);
 
 #if defined(HYPRE_USING_CUDA)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE;

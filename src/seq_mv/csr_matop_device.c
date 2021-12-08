@@ -927,7 +927,7 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
   hypre_CSRMatrixData(C) = C_data;
   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return C;
 }
@@ -950,7 +950,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
   hypreDevice_CSRSpGemm(A, B, &C);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return C;
 }
@@ -1100,7 +1100,7 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
   *B_ext_diag_ptr = B_ext_diag;
   *B_ext_offd_ptr = B_ext_offd;
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -1331,7 +1331,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
   hypre_CSRMatrixData(C) = C_data;
   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return C;
 }
@@ -1373,7 +1373,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
   hypre_TFree(reduced_col_indices, HYPRE_MEMORY_DEVICE);
   hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return hypre_error_flag;
 }
@@ -1394,7 +1394,7 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
                    nrows, A_i, A_j, A_data);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return hypre_error_flag;
 }
@@ -1421,7 +1421,7 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 
   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -1466,7 +1466,7 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -1506,7 +1506,7 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -1629,7 +1629,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
                       row_sum, scal, set_or_add[0] == 's' );
   }
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 }
 
 void
@@ -1648,7 +1648,7 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
 
   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 }
 
 /* return C = [A; B] */
@@ -1907,7 +1907,7 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
   hypre_CSRMatrixData(C) = C_data;
   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return C;
 }
@@ -1930,7 +1930,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
   hypreDevice_CSRSpGemm(A, B, &C);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return C;
 }
@@ -2080,7 +2080,7 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
   *B_ext_diag_ptr = B_ext_diag;
   *B_ext_offd_ptr = B_ext_offd;
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -2308,7 +2308,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
   hypre_CSRMatrixData(C) = C_data;
   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return C;
 }
@@ -2354,7 +2354,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
   hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
   hypre_TFree(values,              HYPRE_MEMORY_UNIFIED);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return hypre_error_flag;
 }
@@ -2375,7 +2375,7 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
                    nrows, A_i, A_j, A_data);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return hypre_error_flag;
 }
@@ -2402,7 +2402,7 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 
   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -2447,7 +2447,7 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -2487,7 +2487,7 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
   return ierr;
 }
@@ -2598,7 +2598,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
                       row_sum, scal, set_or_add[0] == 's' );
   }
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 }
 
 void
@@ -2617,7 +2617,7 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
 
   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 }
 
 /* return C = [A; B] */
@@ -2878,7 +2878,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 
    *AT_ptr = C;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
