@@ -836,6 +836,7 @@ with_mli
 with_MPI
 with_cuda
 with_hip
+with_sycl
 with_cuda_home
 with_gpu_arch
 with_sycl
@@ -1646,6 +1647,7 @@ Optional Packages:
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
   --with-hip              Use HIP for AMD GPUs. (default is NO).
+  --with-sycl             Use SYCL for Intel GPUs. (default is NO).
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
   --with-gpu-arch=ARG     User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
@@ -2822,13 +2824,11 @@ hypre_using_rocrand=no
 hypre_found_hip=no
 
 
-hypre_using_sycl_queues=no
+
 hypre_using_sycl=no
 hypre_using_onemklsparse=no
 hypre_using_onemklblas=no
 hypre_using_onemklrand=no
-
-hypre_found_sycl=no
 
 
 hypre_blas_lib_old_style=no
@@ -4085,6 +4085,21 @@ fi
 
 
 
+# Check whether --with-sycl was given.
+if test "${with_sycl+set}" = set; then :
+  withval=$with_sycl; case "$withval" in
+    yes) hypre_using_sycl=yes ;;
+    no)  hypre_using_sycl=no ;;
+    *)   hypre_using_sycl=no ;;
+esac
+else
+  hypre_using_sycl=no
+
+fi
+
+
+
+
 # Check whether --with-cuda-home was given.
 if test "${with_cuda_home+set}" = set; then :
   withval=$with_cuda_home; for cuda_dir in $withval; do
@@ -5125,6 +5140,52 @@ test -n "$CUCC" || CUCC=""""
    if test "$hypre_using_hip" = "yes"
    then
       for ac_prog in hipcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUCC" && break
+done
+
+   fi
+
+   if test "$hypre_using_sycl" = "yes"
+   then
+      for ac_prog in dpcpp
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8678,9 +8739,9 @@ fi
 
 if test "x$hypre_using_um" = "xyes"
 then
-   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"
+   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes" && test "x$hypre_using_sycl" != "xyes"
    then
-      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, or device OpenMP!" "$LINENO" 5
+      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!" "$LINENO" 5
    fi
 fi
 if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"
@@ -8884,12 +8945,6 @@ fi
 done
 
 fi
-
-
-
-
-
-
 
 
 if test "x$hypre_using_raja" = "xyes"
@@ -9152,109 +9207,66 @@ fi
 
 fi
 
-
 if test x"$hypre_using_sycl" == x"yes"; then :
+
+
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 
 
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
-if test "x$hypre_using_sycl_queues" = "xyes"
-then
 
-$as_echo "#define HYPRE_USING_SYCL_QUEUES 1" >>confdefs.h
+	     LINK_CC=${CUCC}
+        LINK_CXX=${CUCC}
 
-fi
-
-for ac_prog in dpcpp
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CXX"; then
-  ac_cv_prog_CXX="$CXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CXX=$ac_cv_prog_CXX
-if test -n "$CXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CXX" >&5
-$as_echo "$CXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+           if test "$hypre_using_debug" = "yes"
+           then
+              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
+           else
+              CUFLAGS="-g -O3 ${CUFLAGS}"
+           fi
+        fi
 
 
-  test -n "$CXX" && break
-done
-
-
-LINK_CC=${CXX}
-LINK_CXX=${CXX}
-
-SYCLCXXFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel "
-
-if test x"$hypre_using_debug" == x"yes"; then :
-  SYCLCXXFLAGS="-O0 -Wall -g -gdb ${SYCLCXXFLAGS}"
-elif SYCLCXXFLAGS="-O2 ${SYCLCXXFLAGS}"; then :
+                                if test x"$hypre_using_debug" == x"yes"; then :
+  SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"
+elif SYCLFLAGS="-O2 ${SYCLFLAGS}"; then :
 
 fi
 
-CXXFLAGS="${SYCLCXXFLAGS}"
+        if test x"$hypre_using_onemklsparse" == x"yes"; then :
 
-HYPRE_SYCL_INCL="-I/home/abagusetty/build/oneDPL/build_sycl/include"
-HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${ONEAPI_PATH}/dpcpp-ct/latest/include"
-
-if test x"$hypre_using_onemklsparse" == x"yes"; then :
 
 $as_echo "#define HYPRE_USING_ONEMKLSPARSE 1" >>confdefs.h
 
-HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
 
 fi
 
-if test x"$hypre_using_onemklblas" == x"yes"; then :
+        if test x"$hypre_using_onemklblas" == x"yes"; then :
 
 $as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
 
-HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
+	            HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
 
 fi
 
-if test x"$hypre_using_onemklrand" == x"yes"; then :
+        if test x"$hypre_using_onemklrand" == x"yes"; then :
 
 $as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
 
-HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
 
 fi
 
-]
+
 fi
-
-
 
 if test "$hypre_using_um" != "yes"
 then
@@ -9393,7 +9405,7 @@ then
 $as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
 
 else
-   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"
+   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h

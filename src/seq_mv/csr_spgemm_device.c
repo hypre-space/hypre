@@ -72,7 +72,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
 #else
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
 #endif
    }
    else
@@ -81,7 +82,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 
       if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 1)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -96,7 +97,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1 /* exact row nnz */,
+         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
+                                                        1 /* exact row nnz */,
                                                         &d_ic, &d_jc, &d_c, &nnzC);
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
@@ -106,7 +108,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
       else if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 2)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -131,7 +133,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
       else
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -146,12 +148,13 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmRownnzUpperbound(m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, d_rc + m);
+         hypreDevice_CSRSpGemmRownnzUpperbound(m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc,
+                                               d_rc + m);
 
          /* row nnz is exact if no row failed */
          HYPRE_Int rownnz_exact = !HYPRE_THRUST_CALL( any_of,
                                                       d_rc + m,
-                                                      d_rc + 2*m,
+                                                      d_rc + 2 * m,
                                                       thrust::identity<HYPRE_Int>() );
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
@@ -162,7 +165,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, rownnz_exact,
+         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
+                                                        rownnz_exact,
                                                         &d_ic, &d_jc, &d_c, &nnzC);
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());

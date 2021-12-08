@@ -43,16 +43,16 @@ target_sources(${PROJECT_NAME}
           ${HDRS}
 )
 
-if (HYPRE_USING_CUDA)
-  set(CUDA_SRCS
+if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
+  set(GPU_SRCS
     par_csr_matvec.c
     par_csr_fffc_device.c
     par_csr_matop_device.c
     par_csr_triplemat_device.c
     par_vector_device.c
   )
-  convert_filenames_to_full_paths(CUDA_SRCS)
-  set(HYPRE_CUDA_SOURCES ${HYPRE_CUDA_SOURCES} ${CUDA_SRCS} PARENT_SCOPE)
+  convert_filenames_to_full_paths(GPU_SRCS)
+  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
 
 convert_filenames_to_full_paths(HDRS)

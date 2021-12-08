@@ -12,7 +12,7 @@ hypre_ParVectorZeroBCValues(hypre_ParVector *v,
                             HYPRE_Int       *rows,
                             HYPRE_Int        nrows)
 {
-   HYPRE_Int   ierr= 0;
+   HYPRE_Int   ierr = 0;
 
    hypre_Vector *v_local = hypre_ParVectorLocalVector(v);
 
@@ -31,10 +31,12 @@ hypre_SeqVectorZeroBCValues(hypre_Vector *v,
    HYPRE_Int      ierr  = 0;
 
 #if defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < nrows; i++)
-      vector_data[rows[i]]= 0.0;
+   {
+      vector_data[rows[i]] = 0.0;
+   }
 
    return ierr;
 }

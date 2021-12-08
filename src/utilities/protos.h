@@ -7,14 +7,17 @@
 
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
-void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
+void hypre_remove_point ( hypre_LinkList *LoL_head_ptr, hypre_LinkList *LoL_tail_ptr,
+                          HYPRE_Int measure, HYPRE_Int index, HYPRE_Int *lists, HYPRE_Int *where );
 hypre_LinkList hypre_create_elt ( HYPRE_Int Item );
-void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
+void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr, hypre_LinkList *LoL_tail_ptr,
+                            HYPRE_Int measure, HYPRE_Int index, HYPRE_Int *lists, HYPRE_Int *where );
 
 /* binsearch.c */
-HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
-HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list , HYPRE_BigInt value , HYPRE_Int list_length );
-HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
+HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_length );
+HYPRE_Int hypre_BigBinarySearch ( HYPRE_BigInt *list, HYPRE_BigInt value, HYPRE_Int list_length );
+HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list, HYPRE_Int value, HYPRE_Int low, HYPRE_Int high,
+                                HYPRE_Int *spot );
 HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 HYPRE_BigInt *hypre_BigLowerBound( HYPRE_BigInt *first, HYPRE_BigInt *last, HYPRE_BigInt value );
 
@@ -49,43 +52,50 @@ HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
 /* qsort.c */
-void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap_c ( HYPRE_Complex *v , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_BigSwap2 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_BigSwap2i ( HYPRE_BigInt *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap ( HYPRE_Int *v, HYPRE_Int i, HYPRE_Int j );
+void hypre_swap_c ( HYPRE_Complex *v, HYPRE_Int i, HYPRE_Int j );
+void hypre_swap2 ( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int i, HYPRE_Int j );
+void hypre_BigSwap2 ( HYPRE_BigInt *v, HYPRE_Real *w, HYPRE_Int i, HYPRE_Int j );
+void hypre_swap2i ( HYPRE_Int *v, HYPRE_Int *w, HYPRE_Int i, HYPRE_Int j );
+void hypre_BigSwap2i ( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int i, HYPRE_Int j );
+void hypre_swap3i ( HYPRE_Int *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int i, HYPRE_Int j );
+void hypre_swap3_d ( HYPRE_Real *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int i, HYPRE_Int j );
 void hypre_swap3_d_perm(HYPRE_Int  *v, HYPRE_Real  *w, HYPRE_Int  *z, HYPRE_Int  i, HYPRE_Int  j );
-void hypre_BigSwap4_d ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
-void hypre_qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigQsort1 ( HYPRE_BigInt *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_BigSwap4_d ( HYPRE_Real *v, HYPRE_BigInt *w, HYPRE_Int *z, HYPRE_Int *y, HYPRE_Int i,
+                        HYPRE_Int j );
+void hypre_swap_d ( HYPRE_Real *v, HYPRE_Int i, HYPRE_Int j );
+void hypre_qsort0 ( HYPRE_Int *v, HYPRE_Int left, HYPRE_Int right );
+void hypre_qsort1 ( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
+void hypre_BigQsort1 ( HYPRE_BigInt *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
+void hypre_qsort2i ( HYPRE_Int *v, HYPRE_Int *w, HYPRE_Int left, HYPRE_Int right );
 void hypre_BigQsort2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
-void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort3ir ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort2 ( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
+void hypre_qsort2_abs ( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
+void hypre_qsort3i ( HYPRE_Int *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int left, HYPRE_Int right );
+void hypre_qsort3ir ( HYPRE_Int *v, HYPRE_Real *w, HYPRE_Int *z, HYPRE_Int left, HYPRE_Int right );
 void hypre_qsort3( HYPRE_Real *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
-void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_BigQsort4_abs ( HYPRE_Real *v , HYPRE_BigInt *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort3_abs ( HYPRE_Real *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int left,
+                        HYPRE_Int right );
+void hypre_BigQsort4_abs ( HYPRE_Real *v, HYPRE_BigInt *w, HYPRE_Int *z, HYPRE_Int *y,
+                           HYPRE_Int left, HYPRE_Int right );
+void hypre_qsort_abs ( HYPRE_Real *w, HYPRE_Int left, HYPRE_Int right );
 void hypre_BigSwapbi(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
 void hypre_BigQsortbi( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
 void hypre_BigSwapLoc(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  i, HYPRE_Int  j );
 void hypre_BigQsortbLoc( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int  left, HYPRE_Int  right );
 void hypre_BigSwapb2i(HYPRE_BigInt  *v, HYPRE_Int  *w, HYPRE_Int  *z, HYPRE_Int  i, HYPRE_Int  j );
-void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left, HYPRE_Int  right );
+void hypre_BigQsortb2i( HYPRE_BigInt *v, HYPRE_Int *w, HYPRE_Int *z, HYPRE_Int  left,
+                        HYPRE_Int  right );
 void hypre_BigSwap( HYPRE_BigInt *v, HYPRE_Int  i, HYPRE_Int  j );
 void hypre_BigQsort0( HYPRE_BigInt *v, HYPRE_Int  left, HYPRE_Int  right );
-void hypre_topo_sort(const HYPRE_Int *row_ptr, const HYPRE_Int *col_inds, const HYPRE_Complex *data, HYPRE_Int *ordering, HYPRE_Int n);
-void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_Int n, HYPRE_Int is_col_major);
+void hypre_topo_sort(const HYPRE_Int *row_ptr, const HYPRE_Int *col_inds, const HYPRE_Complex *data,
+                     HYPRE_Int *ordering, HYPRE_Int n);
+void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_Int n,
+                           HYPRE_Int is_col_major);
 
 /* qsplit.c */
-HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
+HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values, HYPRE_Int *indices, HYPRE_Int list_length,
+                                   HYPRE_Int NumberKept );
 
 /* random.c */
 /* HYPRE_CUDA_GLOBAL */ void hypre_SeedRand ( HYPRE_Int seed );
@@ -113,12 +123,14 @@ void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
  *                  workspace[2*tid] and workspace[2*tid+1] will contain results for tid
  *                  workspace[3*nthreads] and workspace[3*nthreads + 1] will contain sums
  */
-void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace);
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2,
+                           HYPRE_Int *workspace);
 /**
  * @param workspace at least with length 3*(nthreads+1)
  *                  workspace[3*tid:3*tid+3) will contain results for tid
  */
-void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
+void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2,
+                             HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
 
 /**
  * n prefix-sums together.
@@ -127,7 +139,8 @@ void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_
  *
  * @param workspace at least with length n*(nthreads+1)
  */
-void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
+void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
+                               HYPRE_Int *workspace);
 
 /* hopscotch_hash.c */
 
@@ -156,8 +169,8 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, H
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 typedef struct
 {
-  HYPRE_Int volatile timestamp;
-  omp_lock_t         lock;
+   HYPRE_Int volatile timestamp;
+   omp_lock_t         lock;
 } hypre_HopscotchSegment;
 #endif
 
@@ -197,18 +210,18 @@ typedef struct
 
 typedef struct
 {
-  hypre_uint volatile hopInfo;
-  HYPRE_Int  volatile hash;
-  HYPRE_Int  volatile key;
-  HYPRE_Int  volatile data;
+   hypre_uint volatile hopInfo;
+   HYPRE_Int  volatile hash;
+   HYPRE_Int  volatile key;
+   HYPRE_Int  volatile data;
 } hypre_HopscotchBucket;
 
 typedef struct
 {
-  hypre_uint volatile hopInfo;
-  HYPRE_BigInt  volatile hash;
-  HYPRE_BigInt  volatile key;
-  HYPRE_Int  volatile data;
+   hypre_uint volatile hopInfo;
+   HYPRE_BigInt  volatile hash;
+   HYPRE_BigInt  volatile key;
+   HYPRE_Int  volatile data;
 } hypre_BigHopscotchBucket;
 
 /**
@@ -243,38 +256,38 @@ typedef struct
  * 1) Merge sort can take advantage of eliminating duplicates.
  * 2) Merge sort is more efficiently parallelizable than qsort
  */
-HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1 , HYPRE_Int *array1 , HYPRE_Int size2 , HYPRE_Int *array2 , HYPRE_Int *size3_ptr , HYPRE_Int **array3_ptr);
-void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3, HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
+HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1, HYPRE_Int *array1, HYPRE_Int size2,
+                                    HYPRE_Int *array2, HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr);
+void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3,
+                  HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
-void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len, HYPRE_BigInt **sorted);
-void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
-void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out, hypre_UnorderedBigIntMap *inverse_map);
+void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
+                          HYPRE_BigInt **sorted);
+void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out,
+                                       hypre_UnorderedIntMap *inverse_map);
+void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out,
+                                           hypre_UnorderedBigIntMap *inverse_map);
 
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z);
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+                                      HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+                                       HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
+HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
+                                   HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 HYPRE_Int hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
 HYPRE_Int hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
 #endif
 
-#if defined(HYPRE_USING_SYCL)
-HYPRE_Int hypre_SyncSyclComputeQueue(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncSyclDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z);
-HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
-HYPRE_Int hypreDevice_MaskedIVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int *mask);
-HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
-#endif
-
-HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
-HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_seed, hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed,
+                               hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_seed,
+                                     hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
 
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
@@ -308,9 +321,11 @@ HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
 /* int_array.c */
 hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );
 HYPRE_Int hypre_IntArrayDestroy( hypre_IntArray *array );
-HYPRE_Int hypre_IntArrayInitialize_v2( hypre_IntArray *array, HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_IntArrayInitialize_v2( hypre_IntArray *array,
+                                       HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_IntArrayInitialize( hypre_IntArray *array );
 HYPRE_Int hypre_IntArrayCopy( hypre_IntArray *x, hypre_IntArray *y );
-hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x, HYPRE_MemoryLocation memory_location );
+hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x,
+                                            HYPRE_MemoryLocation memory_location );
 hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );

@@ -139,8 +139,8 @@ HYPRE_Int HYPRE_IJMatrixSetConstantValues(HYPRE_IJMatrix matrix,
                                           HYPRE_Complex value);
 
 /**
- * Adds to values for \e nrows rows or partial rows of the matrix.  
- * Usage details are analogous to \ref HYPRE_IJMatrixSetValues.  
+ * Adds to values for \e nrows rows or partial rows of the matrix.
+ * Usage details are analogous to \ref HYPRE_IJMatrixSetValues.
  * Adds to any previous values at the specified locations, or, if
  * there was no value there before, inserts a new one.
  * AddToValues can be used to add to values on other processors.
@@ -179,7 +179,7 @@ HYPRE_Int HYPRE_IJMatrixSetValues2(HYPRE_IJMatrix       matrix,
                                    const HYPRE_Complex *values);
 
 /**
- * Adds to values for \e nrows rows or partial rows of the matrix.  
+ * Adds to values for \e nrows rows or partial rows of the matrix.
  *
  * Same as IJMatrixAddToValues, but with an additional \e row_indexes array
  * that provides indexes into the \e cols and \e values arrays.  Because
@@ -210,7 +210,7 @@ HYPRE_Int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
                                      HYPRE_Int      *ncols);
 
 /**
- * Gets values for \e nrows rows or partial rows of the matrix.  
+ * Gets values for \e nrows rows or partial rows of the matrix.
  * Usage details are mostly
  * analogous to \ref HYPRE_IJMatrixSetValues.
  * Note that if nrows is negative, the routine will return
@@ -394,7 +394,8 @@ HYPRE_Int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
  * allowing users to modify coefficient values. This routine
  * also specifies the memory location, i.e. host or device.
  **/
-HYPRE_Int HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location );
+HYPRE_Int HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector,
+                                       HYPRE_MemoryLocation memory_location );
 
 /**
  * (Optional) Sets the maximum number of elements that are expected to be set
