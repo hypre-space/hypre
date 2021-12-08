@@ -95,14 +95,13 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 
 #if defined(HYPRE_USING_CUSPARSE)
    HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_GpuMatDataMatDecsr(data)) );
+   hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDecsr(data)) );
    HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
 #endif
-
-   hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
@@ -114,45 +113,45 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 
 __global__ void
 hypreGPUKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
-                                  HYPRE_Int     *ia,
-                                  HYPRE_Int     *ja,
-                                  HYPRE_Complex *aa )
+                                 HYPRE_Int     *ia,
+                                 HYPRE_Int     *ja,
+                                 HYPRE_Complex *aa )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+  HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
-   if (row >= nrows)
-   {
-      return;
-   }
+  if (row >= nrows)
+  {
+    return;
+  }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p = 0, q = 0;
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+  HYPRE_Int p = 0, q = 0;
 
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+  if (lane < 2)
+  {
+    p = read_only_load(ia + row + lane);
+  }
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && ja[j] == row;
+  for (HYPRE_Int j = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && ja[j] == row;
 
-      if (find_diag)
-      {
-         ja[j] = ja[p];
-         ja[p] = row;
-         HYPRE_Complex tmp = aa[p];
-         aa[p] = aa[j];
-         aa[j] = tmp;
-      }
+    if (find_diag)
+    {
+      ja[j] = ja[p];
+      ja[p] = row;
+      HYPRE_Complex tmp = aa[p];
+      aa[p] = aa[j];
+      aa[j] = tmp;
+    }
 
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
-      {
-         break;
-      }
-   }
+    if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+    {
+      break;
+    }
+  }
 }
 
 /* check if diagonal entry is the first one at each row
@@ -161,122 +160,122 @@ hypreGPUKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
  */
 __global__ void
 hypreGPUKernel_CSRCheckDiagFirst( HYPRE_Int  nrows,
-                                   HYPRE_Int *ia,
-                                   HYPRE_Int *ja,
-                                   HYPRE_Int *result )
+                                  HYPRE_Int *ia,
+                                  HYPRE_Int *ja,
+                                  HYPRE_Int *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>();
-   if (row < nrows)
-   {
-      result[row] = (ia[row+1] > ia[row]) && (ja[ia[row]] != row);
-   }
+  const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>();
+  if (row < nrows)
+  {
+    result[row] = (ia[row+1] > ia[row]) && (ja[ia[row]] != row);
+  }
 }
 
 __global__ void
 hypreGPUKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
-                                            HYPRE_Int      nrows,
-                                            HYPRE_Int     *ia,
-                                            HYPRE_Int     *ja,
-                                            HYPRE_Complex *data,
-                                            HYPRE_Real     tol,
-                                            HYPRE_Int     *result )
+                                           HYPRE_Int      nrows,
+                                           HYPRE_Int     *ia,
+                                           HYPRE_Int     *ja,
+                                           HYPRE_Complex *data,
+                                           HYPRE_Real     tol,
+                                           HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+  const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
-   if (row >= nrows)
-   {
-      return;
-   }
+  if (row >= nrows)
+  {
+    return;
+  }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p = 0, q = 0;
-   bool has_diag = false;
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+  HYPRE_Int p = 0, q = 0;
+  bool has_diag = false;
 
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+  if (lane < 2)
+  {
+    p = read_only_load(ia + row + lane);
+  }
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
+  for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
 
-      if (find_diag)
+    if (find_diag)
+    {
+      if (fabs(data[j]) <= tol)
       {
-         if (fabs(data[j]) <= tol)
-         {
-            data[j] = v;
-         }
+        data[j] = v;
       }
+    }
 
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
-      {
-         has_diag = true;
-         break;
-      }
-   }
+    if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+    {
+      has_diag = true;
+      break;
+    }
+  }
 
-   if (result && !has_diag && lane == 0)
-   {
-      result[row] = 1;
-   }
+  if (result && !has_diag && lane == 0)
+  {
+    result[row] = 1;
+  }
 }
 
 __global__ void
 hypreGPUKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
-                                            HYPRE_Complex  v,
-                                            HYPRE_Int      nrows,
-                                            HYPRE_Int     *ia,
-                                            HYPRE_Int     *ja,
-                                            HYPRE_Complex *data,
-                                            HYPRE_Real     tol,
-                                            HYPRE_Int     *result )
+                                           HYPRE_Complex  v,
+                                           HYPRE_Int      nrows,
+                                           HYPRE_Int     *ia,
+                                           HYPRE_Int     *ja,
+                                           HYPRE_Complex *data,
+                                           HYPRE_Real     tol,
+                                           HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+  const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
-   if (row >= nrows)
-   {
-      return;
-   }
+  if (row >= nrows)
+  {
+    return;
+  }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p = 0, q = 0;
-   bool has_diag = false;
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+  HYPRE_Int p = 0, q = 0;
+  bool has_diag = false;
 
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+  if (lane < 2)
+  {
+    p = read_only_load(ia + row + lane);
+  }
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
+  for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
 
-      if (find_diag)
+    if (find_diag)
+    {
+      HYPRE_Complex d = read_only_load(&new_diag[row]);
+      if (fabs(d) <= tol)
       {
-         HYPRE_Complex d = read_only_load(&new_diag[row]);
-         if (fabs(d) <= tol)
-         {
-            d = v;
-         }
-         data[j] = d;
+        d = v;
       }
+      data[j] = d;
+    }
 
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
-      {
-         has_diag = true;
-         break;
-      }
-   }
+    if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+    {
+      has_diag = true;
+      break;
+    }
+  }
 
-   if (result && !has_diag && lane == 0)
-   {
-      result[row] = 1;
-   }
+  if (result && !has_diag && lane == 0)
+  {
+    result[row] = 1;
+  }
 }
 
 /* type == 0, sum,
@@ -286,70 +285,70 @@ hypreGPUKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
 template<HYPRE_Int type>
 __global__ void
 hypreGPUKernel_CSRRowSum( HYPRE_Int      nrows,
-                           HYPRE_Int     *ia,
-                           HYPRE_Int     *ja,
-                           HYPRE_Complex *aa,
-                           HYPRE_Int     *CF_i,
-                           HYPRE_Int     *CF_j,
-                           HYPRE_Complex *row_sum,
-                           HYPRE_Complex  scal,
-                           HYPRE_Int      set)
+                          HYPRE_Int     *ia,
+                          HYPRE_Int     *ja,
+                          HYPRE_Complex *aa,
+                          HYPRE_Int     *CF_i,
+                          HYPRE_Int     *CF_j,
+                          HYPRE_Complex *row_sum,
+                          HYPRE_Complex  scal,
+                          HYPRE_Int      set)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
+  HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1,1>();
 
-   if (row_i >= nrows)
-   {
-      return;
-   }
+  if (row_i >= nrows)
+  {
+    return;
+  }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p = 0, q = 0;
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+  HYPRE_Int p = 0, q = 0;
 
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row_i + lane);
-   }
+  if (lane < 2)
+  {
+    p = read_only_load(ia + row_i + lane);
+  }
 
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   HYPRE_Complex row_sum_i = 0.0;
+  HYPRE_Complex row_sum_i = 0.0;
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE) {
-      if ( j >= q || (CF_i && CF_j && read_only_load(&CF_i[row_i]) != read_only_load(&CF_j[ja[j]])) )
-      {
-         continue;
-      }
+  for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE) {
+    if ( j >= q || (CF_i && CF_j && read_only_load(&CF_i[row_i]) != read_only_load(&CF_j[ja[j]])) )
+    {
+      continue;
+    }
 
-      HYPRE_Complex aii = aa[j];
+    HYPRE_Complex aii = aa[j];
 
-      if (type == 0)
-      {
-         row_sum_i += aii;
-      }
-      else if (type == 1)
-      {
-         row_sum_i += fabs(aii);
-      }
-      else if (type == 2)
-      {
-         row_sum_i += aii * aii;
-      }
-   }
+    if (type == 0)
+    {
+      row_sum_i += aii;
+    }
+    else if (type == 1)
+    {
+      row_sum_i += fabs(aii);
+    }
+    else if (type == 2)
+    {
+      row_sum_i += aii * aii;
+    }
+  }
 
-   row_sum_i = warp_reduce_sum(row_sum_i);
+  row_sum_i = warp_reduce_sum(row_sum_i);
 
-   if (lane == 0)
-   {
-      if (set)
-      {
-         row_sum[row_i] = scal * row_sum_i;
-      }
-      else
-      {
-         row_sum[row_i] += scal * row_sum_i;
-      }
-   }
+  if (lane == 0)
+  {
+    if (set)
+    {
+      row_sum[row_i] = scal * row_sum_i;
+    }
+    else
+    {
+      row_sum[row_i] += scal * row_sum_i;
+    }
+  }
 }
 
 /* type 0: diag
@@ -360,70 +359,70 @@ hypreGPUKernel_CSRRowSum( HYPRE_Int      nrows,
  */
 __global__ void
 hypreGPUKernel_CSRExtractDiag( HYPRE_Int      nrows,
-                                HYPRE_Int     *ia,
-                                HYPRE_Int     *ja,
-                                HYPRE_Complex *aa,
-                                HYPRE_Complex *d,
-                                HYPRE_Int      type)
+                               HYPRE_Int     *ia,
+                               HYPRE_Int     *ja,
+                               HYPRE_Complex *aa,
+                               HYPRE_Complex *d,
+                               HYPRE_Int      type)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+  HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
 
-   if (row >= nrows)
-   {
-      return;
-   }
+  if (row >= nrows)
+  {
+    return;
+  }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p = 0, q = 0;
+  HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+  HYPRE_Int p = 0, q = 0;
 
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+  if (lane < 2)
+  {
+    p = read_only_load(ia + row + lane);
+  }
+  q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+  p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
-   HYPRE_Int has_diag = 0;
+  HYPRE_Int has_diag = 0;
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && ja[j] == row;
+  for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && ja[j] == row;
 
-      if (find_diag)
+    if (find_diag)
+    {
+      if (type == 0)
       {
-         if (type == 0)
-         {
-            d[row] = aa[j];
-         }
-         else if (type == 1)
-         {
-            d[row] = fabs(aa[j]);
-         }
-         else if (type == 2)
-         {
-            d[row] = 1.0 / aa[j];
-         }
-         else if (type == 3)
-         {
-            d[row] = 1.0 / sqrt(aa[j]);
-         }
-         else if (type == 4)
-         {
-            d[row] = 1.0 / sqrt(fabs(aa[j]));
-         }
+        d[row] = aa[j];
       }
-
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+      else if (type == 1)
       {
-         has_diag = 1;
-         break;
+        d[row] = fabs(aa[j]);
       }
-   }
+      else if (type == 2)
+      {
+        d[row] = 1.0 / aa[j];
+      }
+      else if (type == 3)
+      {
+        d[row] = 1.0 / sqrt(aa[j]);
+      }
+      else if (type == 4)
+      {
+        d[row] = 1.0 / sqrt(fabs(aa[j]));
+      }
+    }
 
-   if (!has_diag && lane == 0)
-   {
-      d[row] = 0.0;
-   }
+    if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+    {
+      has_diag = 1;
+      break;
+    }
+  }
+
+  if (!has_diag && lane == 0)
+  {
+    d[row] = 0.0;
+  }
 }
 
 /* mark is of size nA
@@ -431,63 +430,63 @@ hypreGPUKernel_CSRExtractDiag( HYPRE_Int      nrows,
  */
 __global__ void
 hypreGPUKernel_CSRMatrixIntersectPattern(HYPRE_Int  n,
-                                          HYPRE_Int  nA,
-                                          HYPRE_Int *rowid,
-                                          HYPRE_Int *colid,
-                                          HYPRE_Int *idx,
-                                          HYPRE_Int *mark,
-                                          HYPRE_Int  diag_option)
+                                         HYPRE_Int  nA,
+                                         HYPRE_Int *rowid,
+                                         HYPRE_Int *colid,
+                                         HYPRE_Int *idx,
+                                         HYPRE_Int *mark,
+                                         HYPRE_Int  diag_option)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+  HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
 
-   if (i >= n)
-   {
-      return;
-   }
+  if (i >= n)
+  {
+    return;
+  }
 
-   HYPRE_Int r1 = read_only_load(&rowid[i]);
-   HYPRE_Int c1 = read_only_load(&colid[i]);
-   HYPRE_Int j = read_only_load(&idx[i]);
+  HYPRE_Int r1 = read_only_load(&rowid[i]);
+  HYPRE_Int c1 = read_only_load(&colid[i]);
+  HYPRE_Int j = read_only_load(&idx[i]);
 
-   if (0 == diag_option)
-   {
-      if (j < nA)
+  if (0 == diag_option)
+  {
+    if (j < nA)
+    {
+      HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
+      HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
+      if (r1 == r2 && c1 == c2)
       {
-         HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
-         HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
-         if (r1 == r2 && c1 == c2)
-         {
-            mark[j] = c1;
-         }
-         else
-         {
-            mark[j] = -1;
-         }
+        mark[j] = c1;
       }
-   }
-   else if (1 == diag_option)
-   {
-      if (j < nA)
+      else
       {
-         if (r1 == c1)
-         {
-            mark[j] = -2;
-         }
-         else
-         {
-            HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
-            HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
-            if (r1 == r2 && c1 == c2)
-            {
-               mark[j] = c1;
-            }
-            else
-            {
-               mark[j] = -1;
-            }
-         }
+        mark[j] = -1;
       }
-   }
+    }
+  }
+  else if (1 == diag_option)
+  {
+    if (j < nA)
+    {
+      if (r1 == c1)
+      {
+        mark[j] = -2;
+      }
+      else
+      {
+        HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
+        HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
+        if (r1 == r2 && c1 == c2)
+        {
+          mark[j] = c1;
+        }
+        else
+        {
+          mark[j] = -1;
+        }
+      }
+    }
+  }
 }
 
 #elif defined(HYPRE_USING_SYCL)
@@ -502,39 +501,39 @@ hypreGPUKernel_CSRMoveDiagFirst( sycl::nd_item<1>& item,
   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1,1>(item);
 
   if (row >= nrows)
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
   HYPRE_Int p = 0, q = 0;
 
   if (lane < 2)
-    {
-      p = read_only_load(ia + row + lane);
-    }
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  {
+    p = read_only_load(ia + row + lane);
+  }
+  sycl::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
   for (HYPRE_Int j = p + lane + 1; sycl::any_of_group(SG, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && ja[j] == row;
+
+    if (find_diag)
     {
-      hypre_int find_diag = j < q && ja[j] == row;
-
-      if (find_diag)
-        {
-          ja[j] = ja[p];
-          ja[p] = row;
-          HYPRE_Complex tmp = aa[p];
-          aa[p] = aa[j];
-          aa[j] = tmp;
-        }
-
-      if ( sycl::any_of_group(SG, find_diag) )
-        {
-          break;
-        }
+      ja[j] = ja[p];
+      ja[p] = row;
+      HYPRE_Complex tmp = aa[p];
+      aa[p] = aa[j];
+      aa[j] = tmp;
     }
+
+    if ( sycl::any_of_group(SG, find_diag) )
+    {
+      break;
+    }
+  }
 }
 
 /* check if diagonal entry is the first one at each row
@@ -550,9 +549,9 @@ hypreGPUKernel_CSRCheckDiagFirst( sycl::nd_item<1>& item,
 {
   const HYPRE_Int row = hypre_gpu_get_grid_thread_id<1,1>(item);
   if (row < nrows)
-    {
-      result[row] = (ia[row+1] > ia[row]) && (ja[ia[row]] != row);
-    }
+  {
+    result[row] = (ia[row+1] > ia[row]) && (ja[ia[row]] != row);
+  }
 }
 
 void
@@ -568,45 +567,45 @@ hypreGPUKernel_CSRMatrixFixZeroDiagDevice( sycl::nd_item<1>& item,
   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1,1>(item);
 
   if (row >= nrows)
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
   HYPRE_Int p = 0, q = 0;
   bool has_diag = false;
 
   if (lane < 2)
-    {
-      p = read_only_load(ia + row + lane);
-    }
+  {
+    p = read_only_load(ia + row + lane);
+  }
   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
   for (HYPRE_Int j = p + lane; sycl::any_of_group(SG, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
+
+    if (find_diag)
     {
-      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
-
-      if (find_diag)
-        {
-          if (fabs(data[j]) <= tol)
-            {
-              data[j] = v;
-            }
-        }
-
-      if ( sycl::any_of_group(SG, find_diag) )
-        {
-          has_diag = true;
-          break;
-        }
+      if (fabs(data[j]) <= tol)
+      {
+        data[j] = v;
+      }
     }
+
+    if ( sycl::any_of_group(SG, find_diag) )
+    {
+      has_diag = true;
+      break;
+    }
+  }
 
   if (result && !has_diag && lane == 0)
-    {
-      result[row] = 1;
-    }
+  {
+    result[row] = 1;
+  }
 }
 
 void
@@ -623,47 +622,47 @@ hypreGPUKernel_CSRMatrixReplaceDiagDevice( sycl::nd_item<1>& item,
   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1,1>(item);
 
   if (row >= nrows)
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
   HYPRE_Int p = 0, q = 0;
   bool has_diag = false;
 
   if (lane < 2)
-    {
-      p = read_only_load(ia + row + lane);
-    }
+  {
+    p = read_only_load(ia + row + lane);
+  }
   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
   for (HYPRE_Int j = p + lane; sycl::any_of_group(SG, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
+
+    if (find_diag)
     {
-      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
-
-      if (find_diag)
-        {
-          HYPRE_Complex d = read_only_load(&new_diag[row]);
-          if (fabs(d) <= tol)
-            {
-              d = v;
-            }
-          data[j] = d;
-        }
-
-      if ( sycl::any_of_group(SG, find_diag) )
-        {
-          has_diag = true;
-          break;
-        }
+      HYPRE_Complex d = read_only_load(&new_diag[row]);
+      if (fabs(d) <= tol)
+      {
+        d = v;
+      }
+      data[j] = d;
     }
+
+    if ( sycl::any_of_group(SG, find_diag) )
+    {
+      has_diag = true;
+      break;
+    }
+  }
 
   if (result && !has_diag && lane == 0)
-    {
-      result[row] = 1;
-    }
+  {
+    result[row] = 1;
+  }
 }
 
 /* type == 0, sum,
@@ -686,17 +685,17 @@ hypreGPUKernel_CSRRowSum( sycl::nd_item<1>& item,
   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1,1>(item);
 
   if (row_i >= nrows)
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
   HYPRE_Int p = 0, q = 0;
 
   if (lane < 2)
-    {
-      p = read_only_load(ia + row_i + lane);
-    }
+  {
+    p = read_only_load(ia + row_i + lane);
+  }
 
   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
@@ -706,39 +705,39 @@ hypreGPUKernel_CSRRowSum( sycl::nd_item<1>& item,
 
   for (HYPRE_Int j = p + lane; sycl::any_of_group(SG, j < q); j += HYPRE_WARP_SIZE) {
     if ( j >= q || (CF_i && CF_j && read_only_load(&CF_i[row_i]) != read_only_load(&CF_j[ja[j]])) )
-      {
-        continue;
-      }
+    {
+      continue;
+    }
 
     HYPRE_Complex aii = aa[j];
 
     if (type == 0)
-      {
-        row_sum_i += aii;
-      }
+    {
+      row_sum_i += aii;
+    }
     else if (type == 1)
-      {
-        row_sum_i += fabs(aii);
-      }
+    {
+      row_sum_i += fabs(aii);
+    }
     else if (type == 2)
-      {
-        row_sum_i += aii * aii;
-      }
+    {
+      row_sum_i += aii * aii;
+    }
   }
 
   row_sum_i = warp_reduce_sum(row_sum_i, item);
 
   if (lane == 0)
+  {
+    if (set)
     {
-      if (set)
-        {
-          row_sum[row_i] = scal * row_sum_i;
-        }
-      else
-        {
-          row_sum[row_i] += scal * row_sum_i;
-        }
+      row_sum[row_i] = scal * row_sum_i;
     }
+    else
+    {
+      row_sum[row_i] += scal * row_sum_i;
+    }
+  }
 }
 
 /* type 0: diag
@@ -759,17 +758,17 @@ hypreGPUKernel_CSRExtractDiag( sycl::nd_item<1>& item,
   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1,1>(item);
 
   if (row >= nrows)
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
   HYPRE_Int p = 0, q = 0;
 
   if (lane < 2)
-    {
-      p = read_only_load(ia + row + lane);
-    }
+  {
+    p = read_only_load(ia + row + lane);
+  }
   sycl::ext::oneapi::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
@@ -777,44 +776,44 @@ hypreGPUKernel_CSRExtractDiag( sycl::nd_item<1>& item,
   HYPRE_Int has_diag = 0;
 
   for (HYPRE_Int j = p + lane; sycl::any_of_group(SG, j < q); j += HYPRE_WARP_SIZE)
+  {
+    hypre_int find_diag = j < q && ja[j] == row;
+
+    if (find_diag)
     {
-      hypre_int find_diag = j < q && ja[j] == row;
-
-      if (find_diag)
-        {
-          if (type == 0)
-            {
-              d[row] = aa[j];
-            }
-          else if (type == 1)
-            {
-              d[row] = fabs(aa[j]);
-            }
-          else if (type == 2)
-            {
-              d[row] = 1.0 / aa[j];
-            }
-          else if (type == 3)
-            {
-              d[row] = 1.0 / sqrt(aa[j]);
-            }
-          else if (type == 4)
-            {
-              d[row] = 1.0 / sqrt(fabs(aa[j]));
-            }
-        }
-
-      if ( sycl::any_of_group(SG, find_diag) )
-        {
-          has_diag = 1;
-          break;
-        }
+      if (type == 0)
+      {
+        d[row] = aa[j];
+      }
+      else if (type == 1)
+      {
+        d[row] = fabs(aa[j]);
+      }
+      else if (type == 2)
+      {
+        d[row] = 1.0 / aa[j];
+      }
+      else if (type == 3)
+      {
+        d[row] = 1.0 / sqrt(aa[j]);
+      }
+      else if (type == 4)
+      {
+        d[row] = 1.0 / sqrt(fabs(aa[j]));
+      }
     }
+
+    if ( sycl::any_of_group(SG, find_diag) )
+    {
+      has_diag = 1;
+      break;
+    }
+  }
 
   if (!has_diag && lane == 0)
-    {
-      d[row] = 0.0;
-    }
+  {
+    d[row] = 0.0;
+  }
 }
 
 /* mark is of size nA
@@ -833,53 +832,53 @@ hypreGPUKernel_CSRMatrixIntersectPattern( sycl::nd_item<1>& item,
   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1,1>(item);
 
   if (i >= n)
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   HYPRE_Int r1 = read_only_load(&rowid[i]);
   HYPRE_Int c1 = read_only_load(&colid[i]);
   HYPRE_Int j = read_only_load(&idx[i]);
 
   if (0 == diag_option)
+  {
+    if (j < nA)
     {
-      if (j < nA)
-        {
-          HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
-          HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
-          if (r1 == r2 && c1 == c2)
-            {
-              mark[j] = c1;
-            }
-          else
-            {
-              mark[j] = -1;
-            }
-        }
+      HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
+      HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
+      if (r1 == r2 && c1 == c2)
+      {
+        mark[j] = c1;
+      }
+      else
+      {
+        mark[j] = -1;
+      }
     }
+  }
   else if (1 == diag_option)
+  {
+    if (j < nA)
     {
-      if (j < nA)
+      if (r1 == c1)
+      {
+        mark[j] = -2;
+      }
+      else
+      {
+        HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
+        HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
+        if (r1 == r2 && c1 == c2)
         {
-          if (r1 == c1)
-            {
-              mark[j] = -2;
-            }
-          else
-            {
-              HYPRE_Int r2 = i < n - 1 ? read_only_load(&rowid[i + 1]) : -1;
-              HYPRE_Int c2 = i < n - 1 ? read_only_load(&colid[i + 1]) : -1;
-              if (r1 == r2 && c1 == c2)
-                {
-                  mark[j] = c1;
-                }
-              else
-                {
-                  mark[j] = -1;
-                }
-            }
+          mark[j] = c1;
         }
+        else
+        {
+          mark[j] = -1;
+        }
+      }
     }
+  }
 }
 
 #endif // HYPRE_USING_SYCL
@@ -893,67 +892,67 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
                            HYPRE_Complex    beta,
                            hypre_CSRMatrix *B     )
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
-   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   HYPRE_Int         nnzC;
-   hypre_CSRMatrix  *C;
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
+  HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
+  HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
+  HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+  HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+  HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
+  HYPRE_Complex    *C_data;
+  HYPRE_Int        *C_i;
+  HYPRE_Int        *C_j;
+  HYPRE_Int         nnzC;
+  hypre_CSRMatrix  *C;
 
-   if (nrows_A != nrows_B || ncols_A != ncols_B)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! Incompatible matrix dimensions!\n");
+  if (nrows_A != nrows_B || ncols_A != ncols_B)
+  {
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! Incompatible matrix dimensions!\n");
 
-      return NULL;
-   }
+    return NULL;
+  }
 
-   hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B,
-                        A_i, A_j, alpha, A_data, NULL, B_i, B_j, beta, B_data, NULL, NULL,
-                        &nnzC, &C_i, &C_j, &C_data);
+  hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B,
+                       A_i, A_j, alpha, A_data, NULL, B_i, B_j, beta, B_data, NULL, NULL,
+                       &nnzC, &C_i, &C_j, &C_data);
 
-   C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+  C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
+  hypre_CSRMatrixI(C) = C_i;
+  hypre_CSRMatrixJ(C) = C_j;
+  hypre_CSRMatrixData(C) = C_data;
+  hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return C;
+  return C;
 }
 
 hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   hypre_CSRMatrix  *C;
+  HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+  hypre_CSRMatrix  *C;
 
-   if (ncols_A != nrows_B)
-   {
-      hypre_printf("Warning! incompatible matrix dimensions!\n");
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+  if (ncols_A != nrows_B)
+  {
+    hypre_printf("Warning! incompatible matrix dimensions!\n");
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
 
-      return NULL;
-   }
+    return NULL;
+  }
 
-   hypreDevice_CSRSpGemm(A, B, &C);
+  hypreDevice_CSRSpGemm(A, B, &C);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return C;
+  return C;
 }
 
 hypre_CSRMatrix*
@@ -961,12 +960,12 @@ hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A,
                                       hypre_CSRMatrix *B,
                                       hypre_CSRMatrix *C )
 {
-   hypre_CSRMatrix *BC  = hypre_CSRMatrixMultiplyDevice(B, C);
-   hypre_CSRMatrix *ABC = hypre_CSRMatrixMultiplyDevice(A, BC);
+  hypre_CSRMatrix *BC  = hypre_CSRMatrixMultiplyDevice(B, C);
+  hypre_CSRMatrix *ABC = hypre_CSRMatrixMultiplyDevice(A, BC);
 
-   hypre_CSRMatrixDestroy(BC);
+  hypre_CSRMatrixDestroy(BC);
 
-   return ABC;
+  return ABC;
 }
 
 HYPRE_Int
@@ -977,13 +976,13 @@ hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
                                         hypre_Vector    *u )
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
+  hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
 #elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
+  hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
 #else
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
+  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
 #endif
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 /* split CSR matrix B_ext (extended rows of parcsr B) into diag part and offd part
@@ -1005,105 +1004,105 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
                             hypre_CSRMatrix **B_ext_diag_ptr,
                             hypre_CSRMatrix **B_ext_offd_ptr )
 {
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(B_ext);
-   HYPRE_Int B_ext_nnz = hypre_CSRMatrixNumNonzeros(B_ext);
+  HYPRE_Int num_rows = hypre_CSRMatrixNumRows(B_ext);
+  HYPRE_Int B_ext_nnz = hypre_CSRMatrixNumNonzeros(B_ext);
 
-   HYPRE_Int *B_ext_ii = hypre_TAlloc(HYPRE_Int, B_ext_nnz, HYPRE_MEMORY_DEVICE);
-   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, B_ext_nnz, hypre_CSRMatrixI(B_ext), B_ext_ii);
+  HYPRE_Int *B_ext_ii = hypre_TAlloc(HYPRE_Int, B_ext_nnz, HYPRE_MEMORY_DEVICE);
+  hypreDevice_CsrRowPtrsToIndices_v2(num_rows, B_ext_nnz, hypre_CSRMatrixI(B_ext), B_ext_ii);
 
-   HYPRE_Int B_ext_diag_nnz;
-   HYPRE_Int B_ext_offd_nnz;
-   HYPRE_Int ierr;
+  HYPRE_Int B_ext_diag_nnz;
+  HYPRE_Int B_ext_offd_nnz;
+  HYPRE_Int ierr;
 
-   ierr = hypre_CSRMatrixSplitDevice_core( 0,
-                                           num_rows,
-                                           B_ext_nnz,
-                                           NULL,
-                                           hypre_CSRMatrixBigJ(B_ext),
-                                           NULL,
-                                           NULL,
-                                           first_col_diag_B,
-                                           last_col_diag_B,
-                                           num_cols_offd_B,
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           &B_ext_diag_nnz,
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           &B_ext_offd_nnz,
-                                           NULL,
-                                           NULL,
-                                           NULL,
-                                           NULL );
+  ierr = hypre_CSRMatrixSplitDevice_core( 0,
+                                          num_rows,
+                                          B_ext_nnz,
+                                          NULL,
+                                          hypre_CSRMatrixBigJ(B_ext),
+                                          NULL,
+                                          NULL,
+                                          first_col_diag_B,
+                                          last_col_diag_B,
+                                          num_cols_offd_B,
+                                          NULL,
+                                          NULL,
+                                          NULL,
+                                          NULL,
+                                          &B_ext_diag_nnz,
+                                          NULL,
+                                          NULL,
+                                          NULL,
+                                          NULL,
+                                          &B_ext_offd_nnz,
+                                          NULL,
+                                          NULL,
+                                          NULL,
+                                          NULL );
 
-   HYPRE_Int     *B_ext_diag_ii = hypre_TAlloc(HYPRE_Int,     B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int     *B_ext_diag_j  = hypre_TAlloc(HYPRE_Int,     B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *B_ext_diag_a  = hypre_TAlloc(HYPRE_Complex, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int     *B_ext_diag_ii = hypre_TAlloc(HYPRE_Int,     B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int     *B_ext_diag_j  = hypre_TAlloc(HYPRE_Int,     B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
+  HYPRE_Complex *B_ext_diag_a  = hypre_TAlloc(HYPRE_Complex, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_Int     *B_ext_offd_ii = hypre_TAlloc(HYPRE_Int,     B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int     *B_ext_offd_j  = hypre_TAlloc(HYPRE_Int,     B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *B_ext_offd_a  = hypre_TAlloc(HYPRE_Complex, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int     *B_ext_offd_ii = hypre_TAlloc(HYPRE_Int,     B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int     *B_ext_offd_j  = hypre_TAlloc(HYPRE_Int,     B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
+  HYPRE_Complex *B_ext_offd_a  = hypre_TAlloc(HYPRE_Complex, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
 
-   ierr = hypre_CSRMatrixSplitDevice_core( 1,
-                                           num_rows,
-                                           B_ext_nnz,
-                                           B_ext_ii,
-                                           hypre_CSRMatrixBigJ(B_ext),
-                                           hypre_CSRMatrixData(B_ext),
-                                           NULL,
-                                           first_col_diag_B,
-                                           last_col_diag_B,
-                                           num_cols_offd_B,
-                                           col_map_offd_B,
-                                           map_B_to_C_ptr,
-                                           num_cols_offd_C_ptr,
-                                           col_map_offd_C_ptr,
-                                           &B_ext_diag_nnz,
-                                           B_ext_diag_ii,
-                                           B_ext_diag_j,
-                                           B_ext_diag_a,
-                                           NULL,
-                                           &B_ext_offd_nnz,
-                                           B_ext_offd_ii,
-                                           B_ext_offd_j,
-                                           B_ext_offd_a,
-                                           NULL );
+  ierr = hypre_CSRMatrixSplitDevice_core( 1,
+                                          num_rows,
+                                          B_ext_nnz,
+                                          B_ext_ii,
+                                          hypre_CSRMatrixBigJ(B_ext),
+                                          hypre_CSRMatrixData(B_ext),
+                                          NULL,
+                                          first_col_diag_B,
+                                          last_col_diag_B,
+                                          num_cols_offd_B,
+                                          col_map_offd_B,
+                                          map_B_to_C_ptr,
+                                          num_cols_offd_C_ptr,
+                                          col_map_offd_C_ptr,
+                                          &B_ext_diag_nnz,
+                                          B_ext_diag_ii,
+                                          B_ext_diag_j,
+                                          B_ext_diag_a,
+                                          NULL,
+                                          &B_ext_offd_nnz,
+                                          B_ext_offd_ii,
+                                          B_ext_offd_j,
+                                          B_ext_offd_a,
+                                          NULL );
 
-   hypre_TFree(B_ext_ii, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(B_ext_ii, HYPRE_MEMORY_DEVICE);
 
-   /* convert to row ptrs */
-   HYPRE_Int *B_ext_diag_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, B_ext_diag_nnz, B_ext_diag_ii);
-   HYPRE_Int *B_ext_offd_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, B_ext_offd_nnz, B_ext_offd_ii);
+  /* convert to row ptrs */
+  HYPRE_Int *B_ext_diag_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, B_ext_diag_nnz, B_ext_diag_ii);
+  HYPRE_Int *B_ext_offd_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, B_ext_offd_nnz, B_ext_offd_ii);
 
-   hypre_TFree(B_ext_diag_ii, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(B_ext_offd_ii, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(B_ext_diag_ii, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(B_ext_offd_ii, HYPRE_MEMORY_DEVICE);
 
-   /* create diag and offd CSR */
-   hypre_CSRMatrix *B_ext_diag = hypre_CSRMatrixCreate(num_rows, last_col_diag_B - first_col_diag_B + 1, B_ext_diag_nnz);
-   hypre_CSRMatrix *B_ext_offd = hypre_CSRMatrixCreate(num_rows, *num_cols_offd_C_ptr, B_ext_offd_nnz);
+  /* create diag and offd CSR */
+  hypre_CSRMatrix *B_ext_diag = hypre_CSRMatrixCreate(num_rows, last_col_diag_B - first_col_diag_B + 1, B_ext_diag_nnz);
+  hypre_CSRMatrix *B_ext_offd = hypre_CSRMatrixCreate(num_rows, *num_cols_offd_C_ptr, B_ext_offd_nnz);
 
-   hypre_CSRMatrixI(B_ext_diag) = B_ext_diag_i;
-   hypre_CSRMatrixJ(B_ext_diag) = B_ext_diag_j;
-   hypre_CSRMatrixData(B_ext_diag) = B_ext_diag_a;
-   hypre_CSRMatrixNumNonzeros(B_ext_diag) = B_ext_diag_nnz;
-   hypre_CSRMatrixMemoryLocation(B_ext_diag) = HYPRE_MEMORY_DEVICE;
+  hypre_CSRMatrixI(B_ext_diag) = B_ext_diag_i;
+  hypre_CSRMatrixJ(B_ext_diag) = B_ext_diag_j;
+  hypre_CSRMatrixData(B_ext_diag) = B_ext_diag_a;
+  hypre_CSRMatrixNumNonzeros(B_ext_diag) = B_ext_diag_nnz;
+  hypre_CSRMatrixMemoryLocation(B_ext_diag) = HYPRE_MEMORY_DEVICE;
 
-   hypre_CSRMatrixI(B_ext_offd) = B_ext_offd_i;
-   hypre_CSRMatrixJ(B_ext_offd) = B_ext_offd_j;
-   hypre_CSRMatrixData(B_ext_offd) = B_ext_offd_a;
-   hypre_CSRMatrixNumNonzeros(B_ext_offd) = B_ext_offd_nnz;
-   hypre_CSRMatrixMemoryLocation(B_ext_offd) = HYPRE_MEMORY_DEVICE;
+  hypre_CSRMatrixI(B_ext_offd) = B_ext_offd_i;
+  hypre_CSRMatrixJ(B_ext_offd) = B_ext_offd_j;
+  hypre_CSRMatrixData(B_ext_offd) = B_ext_offd_a;
+  hypre_CSRMatrixNumNonzeros(B_ext_offd) = B_ext_offd_nnz;
+  hypre_CSRMatrixMemoryLocation(B_ext_offd) = HYPRE_MEMORY_DEVICE;
 
-   *B_ext_diag_ptr = B_ext_diag;
-   *B_ext_offd_ptr = B_ext_offd;
+  *B_ext_diag_ptr = B_ext_diag;
+  *B_ext_offd_ptr = B_ext_offd;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return ierr;
+  return ierr;
 }
 
 HYPRE_Int
@@ -1132,155 +1131,155 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
                                  HYPRE_Complex    *B_ext_offd_data,
                                  char             *B_ext_offd_xata      /* companion with B_ext_offd_data_ptr; NULL if none */ )
 {
-   HYPRE_Int      B_ext_diag_nnz;
-   HYPRE_Int      B_ext_offd_nnz;
-   HYPRE_BigInt  *B_ext_diag_bigj = NULL;
-   HYPRE_BigInt  *B_ext_offd_bigj = NULL;
-   HYPRE_BigInt  *col_map_offd_C;
-   HYPRE_Int     *map_B_to_C = NULL;
-   HYPRE_Int      num_cols_offd_C;
+  HYPRE_Int      B_ext_diag_nnz;
+  HYPRE_Int      B_ext_offd_nnz;
+  HYPRE_BigInt  *B_ext_diag_bigj = NULL;
+  HYPRE_BigInt  *B_ext_offd_bigj = NULL;
+  HYPRE_BigInt  *col_map_offd_C;
+  HYPRE_Int     *map_B_to_C = NULL;
+  HYPRE_Int      num_cols_offd_C;
 
-   in_range<HYPRE_BigInt> pred1(first_col_diag_B, last_col_diag_B);
+  in_range<HYPRE_BigInt> pred1(first_col_diag_B, last_col_diag_B);
 
-   /* get diag and offd nnz */
-   if (job == 0)
-   {
-      /* query the nnz's */
-      B_ext_diag_nnz = HYPRE_THRUST_CALL( count_if,
-                                          B_ext_bigj,
-                                          B_ext_bigj + B_ext_nnz,
-                                          pred1 );
-      B_ext_offd_nnz = B_ext_nnz - B_ext_diag_nnz;
+  /* get diag and offd nnz */
+  if (job == 0)
+  {
+    /* query the nnz's */
+    B_ext_diag_nnz = HYPRE_THRUST_CALL( count_if,
+                                        B_ext_bigj,
+                                        B_ext_bigj + B_ext_nnz,
+                                        pred1 );
+    B_ext_offd_nnz = B_ext_nnz - B_ext_diag_nnz;
 
-      *B_ext_diag_nnz_ptr = B_ext_diag_nnz;
-      *B_ext_offd_nnz_ptr = B_ext_offd_nnz;
+    *B_ext_diag_nnz_ptr = B_ext_diag_nnz;
+    *B_ext_offd_nnz_ptr = B_ext_offd_nnz;
 
-      return hypre_error_flag;
-   }
-   else
-   {
-      B_ext_diag_nnz = *B_ext_diag_nnz_ptr;
-      B_ext_offd_nnz = *B_ext_offd_nnz_ptr;
-   }
+    return hypre_error_flag;
+  }
+  else
+  {
+    B_ext_diag_nnz = *B_ext_diag_nnz_ptr;
+    B_ext_offd_nnz = *B_ext_offd_nnz_ptr;
+  }
 
-   /* copy to diag */
-   B_ext_diag_bigj = hypre_TAlloc(HYPRE_BigInt, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
+  /* copy to diag */
+  B_ext_diag_bigj = hypre_TAlloc(HYPRE_BigInt, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
 
-   if (B_ext_diag_xata)
-   {
-      auto new_end = HYPRE_THRUST_CALL(
-         copy_if,
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)),             /* first */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)) + B_ext_nnz, /* last */
-         B_ext_bigj,                                                                                                          /* stencil */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data, B_ext_diag_xata)),     /* result */
-         pred1 );
+  if (B_ext_diag_xata)
+  {
+    auto new_end = HYPRE_THRUST_CALL(
+      copy_if,
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)),             /* first */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)) + B_ext_nnz, /* last */
+      B_ext_bigj,                                                                                                          /* stencil */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data, B_ext_diag_xata)),     /* result */
+      pred1 );
 
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_diag_ii + B_ext_diag_nnz );
-   }
-   else
-   {
-      auto new_end = HYPRE_THRUST_CALL(
-         copy_if,
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)),             /* first */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)) + B_ext_nnz, /* last */
-         B_ext_bigj,                                                                                            /* stencil */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data)),        /* result */
-         pred1 );
+    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_diag_ii + B_ext_diag_nnz );
+  }
+  else
+  {
+    auto new_end = HYPRE_THRUST_CALL(
+      copy_if,
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)),             /* first */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)) + B_ext_nnz, /* last */
+      B_ext_bigj,                                                                                            /* stencil */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data)),        /* result */
+      pred1 );
 
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_diag_ii + B_ext_diag_nnz );
-   }
+    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_diag_ii + B_ext_diag_nnz );
+  }
 
-   HYPRE_THRUST_CALL( transform,
-                      B_ext_diag_bigj,
-                      B_ext_diag_bigj + B_ext_diag_nnz,
-                      thrust::make_constant_iterator(first_col_diag_B),
-                      B_ext_diag_j,
-                      thrust::minus<HYPRE_BigInt>());
+  HYPRE_THRUST_CALL( transform,
+                     B_ext_diag_bigj,
+                     B_ext_diag_bigj + B_ext_diag_nnz,
+                     thrust::make_constant_iterator(first_col_diag_B),
+                     B_ext_diag_j,
+                     thrust::minus<HYPRE_BigInt>());
 
-   hypre_TFree(B_ext_diag_bigj, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(B_ext_diag_bigj, HYPRE_MEMORY_DEVICE);
 
-   /* copy to offd */
-   B_ext_offd_bigj = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
+  /* copy to offd */
+  B_ext_offd_bigj = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
 
-   if (B_ext_offd_xata)
-   {
-      auto new_end = HYPRE_THRUST_CALL(
-         copy_if,
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)),             /* first */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)) + B_ext_nnz, /* last */
-         B_ext_bigj,                                                                                                          /* stencil */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data, B_ext_offd_xata)),     /* result */
-         thrust::not1(pred1) );
+  if (B_ext_offd_xata)
+  {
+    auto new_end = HYPRE_THRUST_CALL(
+      copy_if,
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)),             /* first */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,   B_ext_xata)) + B_ext_nnz, /* last */
+      B_ext_bigj,                                                                                                          /* stencil */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data, B_ext_offd_xata)),     /* result */
+      thrust::not1(pred1) );
 
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
-   }
-   else
-   {
-      auto new_end = HYPRE_THRUST_CALL(
-         copy_if,
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)),             /* first */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)) + B_ext_nnz, /* last */
-         B_ext_bigj,                                                                                            /* stencil */
-         thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data)),        /* result */
-         thrust::not1(pred1) );
+    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
+  }
+  else
+  {
+    auto new_end = HYPRE_THRUST_CALL(
+      copy_if,
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)),             /* first */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data)) + B_ext_nnz, /* last */
+      B_ext_bigj,                                                                                            /* stencil */
+      thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data)),        /* result */
+      thrust::not1(pred1) );
 
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
-   }
+    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
+  }
 
-   /* offd map of B_ext_offd Union col_map_offd_B */
-   col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(col_map_offd_C,                  B_ext_offd_bigj, HYPRE_BigInt, B_ext_offd_nnz,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(col_map_offd_C + B_ext_offd_nnz, col_map_offd_B,  HYPRE_BigInt, num_cols_offd_B, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  /* offd map of B_ext_offd Union col_map_offd_B */
+  col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(col_map_offd_C,                  B_ext_offd_bigj, HYPRE_BigInt, B_ext_offd_nnz,  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(col_map_offd_C + B_ext_offd_nnz, col_map_offd_B,  HYPRE_BigInt, num_cols_offd_B, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_THRUST_CALL( sort,
-                      col_map_offd_C,
-                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+  HYPRE_THRUST_CALL( sort,
+                     col_map_offd_C,
+                     col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-   HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
-                                              col_map_offd_C,
-                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+  HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
+                                             col_map_offd_C,
+                                             col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-   num_cols_offd_C = new_end - col_map_offd_C;
+  num_cols_offd_C = new_end - col_map_offd_C;
 
 #if 1
-   HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
-   col_map_offd_C = tmp;
+  HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
+  col_map_offd_C = tmp;
 #else
-   col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+  col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
 #endif
 
-   /* create map from col_map_offd_B */
-   if (num_cols_offd_B)
-   {
-      map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
-      HYPRE_THRUST_CALL( lower_bound,
-                         col_map_offd_C,
-                         col_map_offd_C + num_cols_offd_C,
-                         col_map_offd_B,
-                         col_map_offd_B + num_cols_offd_B,
-                         map_B_to_C );
-   }
+  /* create map from col_map_offd_B */
+  if (num_cols_offd_B)
+  {
+    map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
+    HYPRE_THRUST_CALL( lower_bound,
+                       col_map_offd_C,
+                       col_map_offd_C + num_cols_offd_C,
+                       col_map_offd_B,
+                       col_map_offd_B + num_cols_offd_B,
+                       map_B_to_C );
+  }
 
-   HYPRE_THRUST_CALL( lower_bound,
-                      col_map_offd_C,
-                      col_map_offd_C + num_cols_offd_C,
-                      B_ext_offd_bigj,
-                      B_ext_offd_bigj + B_ext_offd_nnz,
-                      B_ext_offd_j );
+  HYPRE_THRUST_CALL( lower_bound,
+                     col_map_offd_C,
+                     col_map_offd_C + num_cols_offd_C,
+                     B_ext_offd_bigj,
+                     B_ext_offd_bigj + B_ext_offd_nnz,
+                     B_ext_offd_j );
 
-   hypre_TFree(B_ext_offd_bigj, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(B_ext_offd_bigj, HYPRE_MEMORY_DEVICE);
 
-   if (map_B_to_C_ptr)
-   {
-      *map_B_to_C_ptr   = map_B_to_C;
-   }
-   *num_cols_offd_C_ptr = num_cols_offd_C;
-   *col_map_offd_C_ptr  = col_map_offd_C;
+  if (map_B_to_C_ptr)
+  {
+    *map_B_to_C_ptr   = map_B_to_C;
+  }
+  *num_cols_offd_C_ptr = num_cols_offd_C;
+  *col_map_offd_C_ptr  = col_map_offd_C;
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1298,133 +1297,133 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
                                  hypre_CSRMatrix *B,
                                  HYPRE_Int       *row_nums)
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
-   HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
-   HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   HYPRE_Int         nnzC;
-   hypre_CSRMatrix  *C;
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
+  HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
+  HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
+  HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
+  HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
+  HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
+  HYPRE_Complex    *C_data;
+  HYPRE_Int        *C_i;
+  HYPRE_Int        *C_j;
+  HYPRE_Int         nnzC;
+  hypre_CSRMatrix  *C;
 
-   if (ncols_A != ncols_B)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+  if (ncols_A != ncols_B)
+  {
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! Incompatible matrix dimensions!\n");
 
-      return NULL;
-   }
+    return NULL;
+  }
 
-   hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B, A_i, A_j, 1.0, A_data, NULL, B_i, B_j, 1.0, B_data, NULL, row_nums,
-                        &nnzC, &C_i, &C_j, &C_data);
+  hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B, A_i, A_j, 1.0, A_data, NULL, B_i, B_j, 1.0, B_data, NULL, row_nums,
+                       &nnzC, &C_i, &C_j, &C_data);
 
-   C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+  C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
+  hypre_CSRMatrixI(C) = C_i;
+  hypre_CSRMatrixJ(C) = C_j;
+  hypre_CSRMatrixData(C) = C_data;
+  hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return C;
+  return C;
 }
 
 HYPRE_Int
 hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
                                  HYPRE_Real       *colnnz)
 {
-   HYPRE_Int *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int  ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int  nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int *A_j_sorted;
-   HYPRE_Int  num_reduced_col_indices;
-   HYPRE_Int *reduced_col_indices;
-   HYPRE_Int *reduced_col_nnz;
+  HYPRE_Int *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int  ncols_A  = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int  nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Int *A_j_sorted;
+  HYPRE_Int  num_reduced_col_indices;
+  HYPRE_Int *reduced_col_indices;
+  HYPRE_Int *reduced_col_nnz;
 
-   A_j_sorted = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(A_j_sorted, A_j, HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL(sort, A_j_sorted, A_j_sorted + nnz_A);
+  A_j_sorted = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(A_j_sorted, A_j, HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  HYPRE_THRUST_CALL(sort, A_j_sorted, A_j_sorted + nnz_A);
 
-   reduced_col_indices = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
-   reduced_col_nnz     = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
+  reduced_col_indices = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
+  reduced_col_nnz     = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
 
-   thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
-   HYPRE_THRUST_CALL(reduce_by_key, A_j_sorted, A_j_sorted + nnz_A,
-                     thrust::make_constant_iterator(1),
-                     reduced_col_indices,
-                     reduced_col_nnz);
+  thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
+    HYPRE_THRUST_CALL(reduce_by_key, A_j_sorted, A_j_sorted + nnz_A,
+                      thrust::make_constant_iterator(1),
+                      reduced_col_indices,
+                      reduced_col_nnz);
 
-   hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
+  hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
 
-   num_reduced_col_indices = new_end.first - reduced_col_indices;
+  num_reduced_col_indices = new_end.first - reduced_col_indices;
 
-   hypre_Memset(colnnz, 0, ncols_A * sizeof(HYPRE_Real), HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL(scatter, reduced_col_nnz, reduced_col_nnz + num_reduced_col_indices,
-                     reduced_col_indices, colnnz);
+  hypre_Memset(colnnz, 0, ncols_A * sizeof(HYPRE_Real), HYPRE_MEMORY_DEVICE);
+  HYPRE_THRUST_CALL(scatter, reduced_col_nnz, reduced_col_nnz + num_reduced_col_indices,
+                    reduced_col_indices, colnnz);
 
-   hypre_TFree(A_j_sorted,          HYPRE_MEMORY_DEVICE);
-   hypre_TFree(reduced_col_indices, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_j_sorted,          HYPRE_MEMORY_DEVICE);
+  hypre_TFree(reduced_col_indices, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 
 HYPRE_Int
 hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
 {
-   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   dim3           bDim, gDim;
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+  dim3           bDim, gDim;
 
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+  bDim = hypre_GetDefaultDeviceBlockDimension();
+  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
-                     nrows, A_i, A_j, A_data);
+  HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
+                   nrows, A_i, A_j, A_data);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 {
-   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-   {
-      return 0;
-   }
+  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+  {
+    return 0;
+  }
 
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
 
-   HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRCheckDiagFirst, gDim, bDim,
-                      hypre_CSRMatrixNumRows(A),
-                      hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
+  HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRCheckDiagFirst, gDim, bDim,
+                    hypre_CSRMatrixNumRows(A),
+                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
 
-   HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
-                                       result,
-                                       result + hypre_CSRMatrixNumRows(A) );
+  HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
+                                      result,
+                                      result + hypre_CSRMatrixNumRows(A) );
 
-   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return ierr;
+  return ierr;
 }
 
 /* For square A, find numerical zeros (absolute values <= tol) on its diagonal and replace with v
@@ -1438,38 +1437,38 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
                                   HYPRE_Complex    v,
                                   HYPRE_Real       tol )
 {
-   HYPRE_Int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-   {
-      return ierr;
-   }
+  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+  {
+    return ierr;
+  }
 
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
 
 #if HYPRE_DEBUG
-   HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
 #else
-   HYPRE_Int *result = NULL;
+  HYPRE_Int *result = NULL;
 #endif
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
-                      v, hypre_CSRMatrixNumRows(A),
-                      hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                      tol, result );
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
+                    v, hypre_CSRMatrixNumRows(A),
+                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                    tol, result );
 
 #if HYPRE_DEBUG
-   ierr = HYPRE_THRUST_CALL( reduce,
-                             result,
-                             result + hypre_CSRMatrixNumRows(A) );
+  ierr = HYPRE_THRUST_CALL( reduce,
+                            result,
+                            result + hypre_CSRMatrixNumRows(A) );
 
-   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return ierr;
+  return ierr;
 }
 
 HYPRE_Int
@@ -1478,122 +1477,122 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
                                   HYPRE_Complex    v,
                                   HYPRE_Real       tol )
 {
-   HYPRE_Int ierr = 0;
+  HYPRE_Int ierr = 0;
 
-   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-   {
-      return ierr;
-   }
+  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+  {
+    return ierr;
+  }
 
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
 
 #if HYPRE_DEBUG
-   HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
 #else
-   HYPRE_Int *result = NULL;
+  HYPRE_Int *result = NULL;
 #endif
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixReplaceDiagDevice, gDim, bDim,
-                      new_diag, v, hypre_CSRMatrixNumRows(A),
-                      hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                      tol, result );
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixReplaceDiagDevice, gDim, bDim,
+                    new_diag, v, hypre_CSRMatrixNumRows(A),
+                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                    tol, result );
 
 #if HYPRE_DEBUG
-   ierr = HYPRE_THRUST_CALL( reduce,
-                             result,
-                             result + hypre_CSRMatrixNumRows(A) );
+  ierr = HYPRE_THRUST_CALL( reduce,
+                            result,
+                            result + hypre_CSRMatrixNumRows(A) );
 
-   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 
-   return ierr;
+  return ierr;
 }
 
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Int2;
 struct Int2Unequal : public thrust::unary_function<Int2, bool>
 {
-   __host__ __device__
-   bool operator()(const Int2& t) const
-   {
-      return (thrust::get<0>(t) != thrust::get<1>(t));
-   }
+  __host__ __device__
+    bool operator()(const Int2& t) const
+  {
+    return (thrust::get<0>(t) != thrust::get<1>(t));
+  }
 };
 
 HYPRE_Int
 hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
 {
-   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_ii   = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
-   HYPRE_Int      new_nnz;
-   HYPRE_Int     *new_ii;
-   HYPRE_Int     *new_j;
-   HYPRE_Complex *new_data;
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_ii   = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
+  HYPRE_Int      new_nnz;
+  HYPRE_Int     *new_ii;
+  HYPRE_Int     *new_j;
+  HYPRE_Complex *new_data;
 
-   new_nnz = HYPRE_THRUST_CALL( count_if,
-                                thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
-                                Int2Unequal() );
+  new_nnz = HYPRE_THRUST_CALL( count_if,
+                               thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                               thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
+                               Int2Unequal() );
 
-   if (new_nnz == nnz)
-   {
-      /* no diagonal entries found */
-      hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
-      return hypre_error_flag;
-   }
+  if (new_nnz == nnz)
+  {
+    /* no diagonal entries found */
+    hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
+    return hypre_error_flag;
+  }
 
-   new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
-   new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
+  new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
+  new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
 
-   if (A_data)
-   {
-      new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
+  if (A_data)
+  {
+    new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
 
-      thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
+    thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   Int2Unequal() );
+    new_end = HYPRE_THRUST_CALL( copy_if,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                 Int2Unequal() );
 
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
-   }
-   else
-   {
-      new_data = NULL;
+    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
+  }
+  else
+  {
+    new_data = NULL;
 
-      thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*> > new_end;
+    thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*> > new_end;
 
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j)),
-                                   Int2Unequal() );
+    new_end = HYPRE_THRUST_CALL( copy_if,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j)),
+                                 Int2Unequal() );
 
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
-   }
+    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
+  }
 
-   hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
 
-   hypre_CSRMatrixNumNonzeros(A) = new_nnz;
-   hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
-   hypre_CSRMatrixJ(A) = new_j;
-   hypre_CSRMatrixData(A) = new_data;
-   hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
+  hypre_CSRMatrixNumNonzeros(A) = new_nnz;
+  hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
+  hypre_CSRMatrixJ(A) = new_j;
+  hypre_CSRMatrixData(A) = new_data;
+  hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 void
@@ -1605,32 +1604,32 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
                                     HYPRE_Complex    scal,
                                     const char      *set_or_add)
 {
-   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   dim3           bDim, gDim;
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+  dim3           bDim, gDim;
 
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+  bDim = hypre_GetDefaultDeviceBlockDimension();
+  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   if (type == 0)
-   {
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                         row_sum, scal, set_or_add[0] == 's' );
-   }
-   else if (type == 1)
-   {
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                         row_sum, scal, set_or_add[0] == 's' );
-   }
-   else if (type == 2)
-   {
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                         row_sum, scal, set_or_add[0] == 's' );
-   }
+  if (type == 0)
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
+  else if (type == 1)
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
+  else if (type == 2)
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 }
 
 void
@@ -1638,101 +1637,101 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
                                       HYPRE_Complex   *d,
                                       HYPRE_Int        type)
 {
-   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   dim3           bDim, gDim;
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+  dim3           bDim, gDim;
 
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+  bDim = hypre_GetDefaultDeviceBlockDimension();
+  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+  hypre_SyncCudaComputeStream(hypre_handle());
 }
 
 /* return C = [A; B] */
 hypre_CSRMatrix*
 hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
 {
-   hypre_assert( hypre_CSRMatrixNumCols(A) == hypre_CSRMatrixNumCols(B) );
+  hypre_assert( hypre_CSRMatrixNumCols(A) == hypre_CSRMatrixNumCols(B) );
 
-   hypre_CSRMatrix *C = hypre_CSRMatrixCreate( hypre_CSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(B),
-                                               hypre_CSRMatrixNumCols(A),
-                                               hypre_CSRMatrixNumNonzeros(A) + hypre_CSRMatrixNumNonzeros(B) );
+  hypre_CSRMatrix *C = hypre_CSRMatrixCreate( hypre_CSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(B),
+                                              hypre_CSRMatrixNumCols(A),
+                                              hypre_CSRMatrixNumNonzeros(A) + hypre_CSRMatrixNumNonzeros(B) );
 
-   HYPRE_Int     *C_i = hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumRows(C) + 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int     *C_j = hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumNonzeros(C), HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex *C_a = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(C), HYPRE_MEMORY_DEVICE);
+  HYPRE_Int     *C_i = hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumRows(C) + 1, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int     *C_j = hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumNonzeros(C), HYPRE_MEMORY_DEVICE);
+  HYPRE_Complex *C_a = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(C), HYPRE_MEMORY_DEVICE);
 
-   hypre_TMemcpy(C_i, hypre_CSRMatrixI(A), HYPRE_Int, hypre_CSRMatrixNumRows(A) + 1,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(C_i + hypre_CSRMatrixNumRows(A) + 1, hypre_CSRMatrixI(B) + 1, HYPRE_Int, hypre_CSRMatrixNumRows(B),
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( transform,
-                      C_i + hypre_CSRMatrixNumRows(A) + 1,
-                      C_i + hypre_CSRMatrixNumRows(C) + 1,
-                      thrust::make_constant_iterator(hypre_CSRMatrixNumNonzeros(A)),
-                      C_i + hypre_CSRMatrixNumRows(A) + 1,
-                      thrust::plus<HYPRE_Int>() );
+  hypre_TMemcpy(C_i, hypre_CSRMatrixI(A), HYPRE_Int, hypre_CSRMatrixNumRows(A) + 1,
+                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(C_i + hypre_CSRMatrixNumRows(A) + 1, hypre_CSRMatrixI(B) + 1, HYPRE_Int, hypre_CSRMatrixNumRows(B),
+                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  HYPRE_THRUST_CALL( transform,
+                     C_i + hypre_CSRMatrixNumRows(A) + 1,
+                     C_i + hypre_CSRMatrixNumRows(C) + 1,
+                     thrust::make_constant_iterator(hypre_CSRMatrixNumNonzeros(A)),
+                     C_i + hypre_CSRMatrixNumRows(A) + 1,
+                     thrust::plus<HYPRE_Int>() );
 
-   hypre_TMemcpy(C_j, hypre_CSRMatrixJ(A), HYPRE_Int, hypre_CSRMatrixNumNonzeros(A),
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(C_j + hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixJ(B), HYPRE_Int, hypre_CSRMatrixNumNonzeros(B),
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(C_j, hypre_CSRMatrixJ(A), HYPRE_Int, hypre_CSRMatrixNumNonzeros(A),
+                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(C_j + hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixJ(B), HYPRE_Int, hypre_CSRMatrixNumNonzeros(B),
+                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   hypre_TMemcpy(C_a, hypre_CSRMatrixData(A), HYPRE_Complex, hypre_CSRMatrixNumNonzeros(A),
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(C_a + hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixData(B), HYPRE_Complex, hypre_CSRMatrixNumNonzeros(B),
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(C_a, hypre_CSRMatrixData(A), HYPRE_Complex, hypre_CSRMatrixNumNonzeros(A),
+                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(C_a + hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixData(B), HYPRE_Complex, hypre_CSRMatrixNumNonzeros(B),
+                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_a;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+  hypre_CSRMatrixI(C) = C_i;
+  hypre_CSRMatrixJ(C) = C_j;
+  hypre_CSRMatrixData(C) = C_a;
+  hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-   return C;
+  return C;
 }
 
 /* A = alp * I */
 hypre_CSRMatrix *
 hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
 {
-   hypre_CSRMatrix *A = hypre_CSRMatrixCreate(n, n, n);
+  hypre_CSRMatrix *A = hypre_CSRMatrixCreate(n, n, n);
 
-   hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
+  hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_THRUST_CALL( sequence,
-                      hypre_CSRMatrixI(A),
-                      hypre_CSRMatrixI(A) + n + 1,
-                      0  );
+  HYPRE_THRUST_CALL( sequence,
+                     hypre_CSRMatrixI(A),
+                     hypre_CSRMatrixI(A) + n + 1,
+                     0  );
 
-   HYPRE_THRUST_CALL( sequence,
-                      hypre_CSRMatrixJ(A),
-                      hypre_CSRMatrixJ(A) + n,
-                      0  );
+  HYPRE_THRUST_CALL( sequence,
+                     hypre_CSRMatrixJ(A),
+                     hypre_CSRMatrixJ(A) + n,
+                     0  );
 
-   HYPRE_THRUST_CALL( fill,
-                      hypre_CSRMatrixData(A),
-                      hypre_CSRMatrixData(A) + n,
-                      alp );
+  HYPRE_THRUST_CALL( fill,
+                     hypre_CSRMatrixData(A),
+                     hypre_CSRMatrixData(A) + n,
+                     alp );
 
-   return A;
+  return A;
 }
 
 /* this predicate compares first and second element in a tuple in absolute value */
 /* first is assumed to be complex, second to be real > 0 */
 struct cabsfirst_greaterthan_second_pred : public thrust::unary_function<thrust::tuple<HYPRE_Complex, HYPRE_Real>,bool>
 {
-   __host__ __device__
-   bool operator()(const thrust::tuple<HYPRE_Complex, HYPRE_Real>& t) const
-   {
-      const HYPRE_Complex i = thrust::get<0>(t);
-      const HYPRE_Real j = thrust::get<1>(t);
+  __host__ __device__
+    bool operator()(const thrust::tuple<HYPRE_Complex, HYPRE_Real>& t) const
+  {
+    const HYPRE_Complex i = thrust::get<0>(t);
+    const HYPRE_Real j = thrust::get<1>(t);
 
-      return hypre_cabs(i) > j;
-   }
+    return hypre_cabs(i) > j;
+  }
 };
 
 /* drop the entries that are smaller than:
@@ -1743,81 +1742,81 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
                                        HYPRE_Real       tol,
                                        HYPRE_Real      *elmt_tols)
 {
-   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_ii   = NULL;
-   HYPRE_Int      new_nnz = 0;
-   HYPRE_Int     *new_ii;
-   HYPRE_Int     *new_j;
-   HYPRE_Complex *new_data;
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int      nnz    = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_ii   = NULL;
+  HYPRE_Int      new_nnz = 0;
+  HYPRE_Int     *new_ii;
+  HYPRE_Int     *new_j;
+  HYPRE_Complex *new_data;
 
-   if (elmt_tols == NULL)
-   {
-      new_nnz = HYPRE_THRUST_CALL( count_if,
-                                   A_data,
-                                   A_data + nnz,
-                                   thrust::not1(less_than<HYPRE_Complex>(tol)) );
-   }
-   else
-   {
-      new_nnz = HYPRE_THRUST_CALL( count_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)) + nnz,
-                                   cabsfirst_greaterthan_second_pred() );
-   }
+  if (elmt_tols == NULL)
+  {
+    new_nnz = HYPRE_THRUST_CALL( count_if,
+                                 A_data,
+                                 A_data + nnz,
+                                 thrust::not1(less_than<HYPRE_Complex>(tol)) );
+  }
+  else
+  {
+    new_nnz = HYPRE_THRUST_CALL( count_if,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)) + nnz,
+                                 cabsfirst_greaterthan_second_pred() );
+  }
 
-   if (new_nnz == nnz)
-   {
-      hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
-      return hypre_error_flag;
-   }
+  if (new_nnz == nnz)
+  {
+    hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
+    return hypre_error_flag;
+  }
 
-   if (!A_ii)
-   {
-      A_ii = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
-   }
-   new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
-   new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
-   new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
+  if (!A_ii)
+  {
+    A_ii = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
+  }
+  new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
+  new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
+  new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
 
-   thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
+  thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
-   if (elmt_tols == NULL)
-   {
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   A_data,
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   thrust::not1(less_than<HYPRE_Complex>(tol)) );
-   }
-   else
-   {
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   cabsfirst_greaterthan_second_pred() );
-   }
+  if (elmt_tols == NULL)
+  {
+    new_end = HYPRE_THRUST_CALL( copy_if,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                 A_data,
+                                 thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                 thrust::not1(less_than<HYPRE_Complex>(tol)) );
+  }
+  else
+  {
+    new_end = HYPRE_THRUST_CALL( copy_if,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                 thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
+                                 thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                 cabsfirst_greaterthan_second_pred() );
+  }
 
-   hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
+  hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
 
-   hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
+  hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
 
-   hypre_CSRMatrixNumNonzeros(A) = new_nnz;
-   hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
-   hypre_CSRMatrixJ(A) = new_j;
-   hypre_CSRMatrixData(A) = new_data;
-   hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
+  hypre_CSRMatrixNumNonzeros(A) = new_nnz;
+  hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
+  hypre_CSRMatrixJ(A) = new_j;
+  hypre_CSRMatrixData(A) = new_data;
+  hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 /* markA: array of size nnz(A), for pattern of (A and B), markA is the column indices as in A_J
@@ -1829,38 +1828,38 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
                                 HYPRE_Int       *markA,
                                 HYPRE_Int        diag_opt)
 {
-   HYPRE_Int nrows = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int nnzA  = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int nnzB  = hypre_CSRMatrixNumNonzeros(B);
+  HYPRE_Int nrows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int nnzA  = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Int nnzB  = hypre_CSRMatrixNumNonzeros(B);
 
-   HYPRE_Int *Cii = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *Cjj = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *idx = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int *Cii = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int *Cjj = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
+  HYPRE_Int *idx = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
 
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzA, hypre_CSRMatrixI(A), Cii);
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzB, hypre_CSRMatrixI(B), Cii + nnzA);
-   hypre_TMemcpy(Cjj,        hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(Cjj + nnzA, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( sequence, idx, idx + nnzA + nnzB );
+  hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzA, hypre_CSRMatrixI(A), Cii);
+  hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzB, hypre_CSRMatrixI(B), Cii + nnzA);
+  hypre_TMemcpy(Cjj,        hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(Cjj + nnzA, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  HYPRE_THRUST_CALL( sequence, idx, idx + nnzA + nnzB );
 
-   HYPRE_THRUST_CALL( stable_sort_by_key,
-                      thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)),
-                      thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)) + nnzA + nnzB,
-                      idx );
+  HYPRE_THRUST_CALL( stable_sort_by_key,
+                     thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)),
+                     thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)) + nnzA + nnzB,
+                     idx );
 
-   hypre_TMemcpy(markA, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(markA, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nnzA + nnzB, "thread", bDim);
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(nnzA + nnzB, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixIntersectPattern, gDim, bDim,
-                      nnzA + nnzB, nnzA, Cii, Cjj, idx, markA, diag_opt );
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixIntersectPattern, gDim, bDim,
+                    nnzA + nnzB, nnzA, Cii, Cjj, idx, markA, diag_opt );
 
-   hypre_TFree(Cii, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(Cjj, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(idx, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(Cii, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(Cjj, HYPRE_MEMORY_DEVICE);
+  hypre_TFree(idx, HYPRE_MEMORY_DEVICE);
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
@@ -1892,11 +1891,11 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
   hypre_CSRMatrix  *C;
 
   if (nrows_A != nrows_B || ncols_A != ncols_B)
-    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! Incompatible matrix dimensions!\n");
+  {
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! Incompatible matrix dimensions!\n");
 
-      return NULL;
-    }
+    return NULL;
+  }
 
   hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B,
                        A_i, A_j, alpha, A_data, NULL, B_i, B_j, beta, B_data, NULL, NULL,
@@ -1922,12 +1921,12 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
   hypre_CSRMatrix  *C;
 
   if (ncols_A != nrows_B)
-    {
-      hypre_printf("Warning! incompatible matrix dimensions!\n");
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+  {
+    hypre_printf("Warning! incompatible matrix dimensions!\n");
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
 
-      return NULL;
-    }
+    return NULL;
+  }
 
   hypreDevice_CSRSpGemm(A, B, &C);
 
@@ -2189,7 +2188,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
                                       first + B_ext_nnz,                                                                                /* last */
                                       B_ext_bigj,                                                                                       /* stencil */
                                       oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data, B_ext_offd_xata), /* result */
-                                      std::not1(pred1) );
+                                      std::not_fn(pred1) );
 
     // hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
   }
@@ -2200,7 +2199,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
                                       first + B_ext_nnz,                                                               /* last */
                                       B_ext_bigj,                                                                      /* stencil */
                                       oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data), /* result */
-                                      std::not1(pred1) );
+                                      std::not_fn(pred1) );
 
     // hypre_assert( std::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
   }
@@ -2222,11 +2221,13 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
 
 #if 1
   HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
-  hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+  hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
+                HYPRE_MEMORY_DEVICE);
   hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
   col_map_offd_C = tmp;
 #else
-  col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+  col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
+                                     HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
 #endif
 
   /* create map from col_map_offd_B */
@@ -2292,11 +2293,11 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
   hypre_CSRMatrix  *C;
 
   if (ncols_A != ncols_B)
-    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
+  {
+    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
 
-      return NULL;
-    }
+    return NULL;
+  }
 
   hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B, A_i, A_j, 1.0, A_data, NULL, B_i, B_j, 1.0, B_data, NULL, row_nums,
                        &nnzC, &C_i, &C_j, &C_data);
@@ -2383,9 +2384,9 @@ HYPRE_Int
 hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 {
   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-    {
-      return 0;
-    }
+  {
+    return 0;
+  }
 
   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
@@ -2420,9 +2421,9 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
   HYPRE_Int ierr = 0;
 
   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-    {
-      return ierr;
-    }
+  {
+    return ierr;
+  }
 
   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
@@ -2460,9 +2461,9 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
   HYPRE_Int ierr = 0;
 
   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-    {
-      return ierr;
-    }
+  {
+    return ierr;
+  }
 
   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
@@ -2511,43 +2512,43 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
                                [](auto t) { return std::get<0>(t) != std::get<1>(t); } );
 
   if (new_nnz == nnz)
-    {
-      /* no diagonal entries found */
-      hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
-      return hypre_error_flag;
-    }
+  {
+    /* no diagonal entries found */
+    hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
+    return hypre_error_flag;
+  }
 
   new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
   new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
 
   if (A_data)
-    {
-      new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
+  {
+    new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
 
-      auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
-      auto new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
-                                        first, first + nnz,
-                                        oneapi::dpl::make_zip_iterator(A_ii, A_j),
-                                        oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
-                                        [](auto t) { return std::get<0>(t) != std::get<1>(t); } );
+    auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
+    auto new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                      first, first + nnz,
+                                      oneapi::dpl::make_zip_iterator(A_ii, A_j),
+                                      oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
+                                      [](auto t) { return std::get<0>(t) != std::get<1>(t); } );
 
-      // todo: fix this
-      // hypre_assert( std::get<0>(*new_end) == new_ii + new_nnz );
-    }
+    // todo: fix this
+    // hypre_assert( std::get<0>(*new_end) == new_ii + new_nnz );
+  }
   else
-    {
-      new_data = NULL;
+  {
+    new_data = NULL;
 
-      auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j);
-      auto new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
-                                        first, first + nnz,
-                                        first,
-                                        oneapi::dpl::make_zip_iterator(new_ii, new_j),
-                                        [](auto t) { return std::get<0>(t) != std::get<1>(t); } );
+    auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j);
+    auto new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                      first, first + nnz,
+                                      first,
+                                      oneapi::dpl::make_zip_iterator(new_ii, new_j),
+                                      [](auto t) { return std::get<0>(t) != std::get<1>(t); } );
 
-      // todo: fix this
-      // hypre_assert( std::get<0>(*new_end) == new_ii + new_nnz );
-    }
+    // todo: fix this
+    // hypre_assert( std::get<0>(*new_end) == new_ii + new_nnz );
+  }
 
   hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
   hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
@@ -2582,20 +2583,20 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
   if (type == 0)
-    {
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                        row_sum, scal, set_or_add[0] == 's' );
-    }
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
   else if (type == 1)
-    {
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                        row_sum, scal, set_or_add[0] == 's' );
-    }
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
   else if (type == 2)
-    {
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                        row_sum, scal, set_or_add[0] == 's' );
-    }
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
 
   hypre_SyncCudaComputeStream(hypre_handle());
 }
@@ -2638,10 +2639,8 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
   hypre_TMemcpy(C_i + hypre_CSRMatrixNumRows(A) + 1, hypre_CSRMatrixI(B) + 1, HYPRE_Int, hypre_CSRMatrixNumRows(B),
                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-
-  // ABB: check the right size B_ext_diag_nnz
-  HYPRE_Int *const_iterator = hypre_TAlloc(HYPRE_Int, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
-  hypre_DeviceDataComputeStream(hypre_handle())->fill(const_iterator, hypre_CSRMatrixNumNonzeros(A), B_ext_diag_nnz*sizeof(HYPRE_Int)).wait();
+  HYPRE_Int *const_iterator = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(C) + 1, HYPRE_MEMORY_DEVICE);
+  hypre_DeviceDataComputeStream(hypre_handle())->fill(const_iterator, hypre_CSRMatrixNumNonzeros(A), (hypre_CSRMatrixNumRows(C) + 1)*sizeof(HYPRE_Int)).wait();
   HYPRE_ONEDPL_CALL( std::transform,
                      C_i + hypre_CSRMatrixNumRows(A) + 1,
                      C_i + hypre_CSRMatrixNumRows(C) + 1,
@@ -2700,12 +2699,12 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
 struct cabsfirst_greaterthan_second_pred
 {
   bool operator()(const std::tuple<HYPRE_Complex, HYPRE_Real>& t) const
-  {
-    const HYPRE_Complex i = std::get<0>(t);
-    const HYPRE_Real j = std::get<1>(t);
+    {
+      const HYPRE_Complex i = std::get<0>(t);
+      const HYPRE_Real j = std::get<1>(t);
 
-    return hypre_cabs(i) > j;
-  }
+      return hypre_cabs(i) > j;
+    }
 };
 
 /* drop the entries that are smaller than:
@@ -2728,32 +2727,31 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
   HYPRE_Complex *new_data;
 
   if (elmt_tols == NULL)
-    {
-      // abb TODO: issue with working here
-      new_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                   A_data,
-                                   A_data + nnz,
-                                   std::not_fn(less_than<HYPRE_Complex>(tol)) );
-    }
+  {
+    new_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                 A_data,
+                                 A_data + nnz,
+                                 std::not_fn(less_than<HYPRE_Complex>(tol)) );
+  }
   else
-    {
-      auto first = oneapi::dpl::make_zip_iterator(A_data, elmt_tols);
-      new_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                   first,
-                                   first + nnz,
-                                   cabsfirst_greaterthan_second_pred() );
-    }
+  {
+    auto first = oneapi::dpl::make_zip_iterator(A_data, elmt_tols);
+    new_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                 first,
+                                 first + nnz,
+                                 cabsfirst_greaterthan_second_pred() );
+  }
 
   if (new_nnz == nnz)
-    {
-      hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
-      return hypre_error_flag;
-    }
+  {
+    hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
+    return hypre_error_flag;
+  }
 
   if (!A_ii)
-    {
-      A_ii = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
-    }
+  {
+    A_ii = hypreDevice_CsrRowPtrsToIndices(nrows, nnz, A_i);
+  }
   new_ii = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
   new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
   new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
@@ -2761,38 +2759,26 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
   oneapi::dpl::zip_iterator< HYPRE_Int*, HYPRE_Int*, HYPRE_Complex* > new_end;
 
   if (elmt_tols == NULL)
-    {
-      auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
-      new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
-                                   first, first + nnz,
-                                   A_data,
-                                   oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
-                                   std::not_fn(less_than<HYPRE_Complex>(tol)) );
-    }
+  {
+    auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
+    new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                 first, first + nnz,
+                                 A_data,
+                                 oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
+                                 std::not_fn(less_than<HYPRE_Complex>(tol)) );
+  }
   else
-    {
-      auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
-      new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
-                                   first, first + nnz,
-                                   oneapi::dpl::make_zip_iterator(A_data, elmt_tols),
-                                   oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
-                                   cabsfirst_greaterthan_second_pred() );
-    }
+  {
+    auto first = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
+    new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
+                                 first, first + nnz,
+                                 oneapi::dpl::make_zip_iterator(A_data, elmt_tols),
+                                 oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data),
+                                 cabsfirst_greaterthan_second_pred() );
+  }
 
   // todo: fix this
   // hypre_assert( thrust::get<0>(*new_end) == new_ii + new_nnz );
-
-  hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
-  hypre_TFree(A_i,    HYPRE_MEMORY_DEVICE);
-  hypre_TFree(A_j,    HYPRE_MEMORY_DEVICE);
-  hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
-
-  hypre_CSRMatrixNumNonzeros(A) = new_nnz;
-  hypre_CSRMatrixI(A) = hypreDevice_CsrRowIndicesToPtrs(nrows, new_nnz, new_ii);
-  hypre_CSRMatrixJ(A) = new_j;
-  hypre_CSRMatrixData(A) = new_data;
-  hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
-
   return hypre_error_flag;
 }
 
@@ -2871,11 +2857,14 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    else
    {
 #if defined(HYPRE_USING_CUSPARSE)
-      hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+      hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                     data);
 #elif defined(HYPRE_USING_ROCSPARSE)
-      hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+      hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                      data);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
-      hypreDevice_CSRSpTransOnemklsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+      hypreDevice_CSRSpTransOnemklsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                         data);
 #else
       hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
@@ -2900,13 +2889,16 @@ HYPRE_Int
 hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
+   hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
+                         hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                          hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
+   hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
+                          hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                           hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #else
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE!\n");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                     "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE!\n");
 #endif
 
    return hypre_error_flag;
@@ -2926,7 +2918,7 @@ hypre_SortCSRCusparse(       HYPRE_Int      n,
                              HYPRE_Int      m,
                              HYPRE_Int      nnzA,
                              cusparseMatDescr_t descrA,
-                       const HYPRE_Int     *d_ia,
+                             const HYPRE_Int     *d_ia,
                              HYPRE_Int     *d_ja_sorted,
                              HYPRE_Complex *d_a_sorted )
 {
@@ -3059,7 +3051,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
          HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&hypre_CsrsvDataInfoL(csrsv_data)) );
 
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                              nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+                                                         nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -3075,7 +3067,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                        hypre_CsrsvDataInfoL(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
 
-         cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoL(csrsv_data), &structural_zero);
+         cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoL(csrsv_data),
+                                                             &structural_zero);
          if (CUSPARSE_STATUS_ZERO_PIVOT == status)
          {
             char msg[256];
@@ -3101,7 +3094,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
          HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&hypre_CsrsvDataInfoU(csrsv_data)) );
 
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                              nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+                                                         nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -3117,7 +3110,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                        hypre_CsrsvDataInfoU(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
 
-         cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoU(csrsv_data), &structural_zero);
+         cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoU(csrsv_data),
+                                                             &structural_zero);
          if (CUSPARSE_STATUS_ZERO_PIVOT == status)
          {
             char msg[256];
@@ -3231,7 +3225,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
          HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoL(csrsv_data)) );
 
          HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_buffer_size(handle, rocsparse_operation_none,
-                               nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+                                                            nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -3247,7 +3241,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
                                                          hypre_CsrsvDataInfoL(csrsv_data), rocsparse_analysis_policy_reuse,
                                                          rocsparse_solve_policy_auto, hypre_CsrsvDataBuffer(csrsv_data)) );
 
-         rocsparse_status status = rocsparse_csrsv_zero_pivot(handle, descr, hypre_CsrsvDataInfoL(csrsv_data), &structural_zero);
+         rocsparse_status status = rocsparse_csrsv_zero_pivot(handle, descr,
+                                                              hypre_CsrsvDataInfoL(csrsv_data), &structural_zero);
          if (rocsparse_status_zero_pivot == status)
          {
             char msg[256];
@@ -3273,7 +3268,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
          HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoU(csrsv_data)) );
 
          HYPRE_ROCSPARSE_CALL( rocsparse_dcsrsv_buffer_size(handle, rocsparse_operation_none,
-                               nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+                                                            nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -3289,7 +3284,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
                                                          hypre_CsrsvDataInfoU(csrsv_data), rocsparse_analysis_policy_reuse,
                                                          rocsparse_solve_policy_auto, hypre_CsrsvDataBuffer(csrsv_data)) );
 
-         rocsparse_status status = rocsparse_csrsv_zero_pivot(handle, descr, hypre_CsrsvDataInfoU(csrsv_data), &structural_zero);
+         rocsparse_status status = rocsparse_csrsv_zero_pivot(handle, descr,
+                                                              hypre_CsrsvDataInfoU(csrsv_data), &structural_zero);
          if (rocsparse_status_zero_pivot == status)
          {
             char msg[256];
@@ -3323,7 +3319,7 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
                               HYPRE_Int      m,
                               HYPRE_Int      nnzA,
                               rocsparse_mat_descr descrA,
-                        const HYPRE_Int     *d_ia,
+                              const HYPRE_Int     *d_ia,
                               HYPRE_Int     *d_ja_sorted,
                               HYPRE_Complex *d_a_sorted )
 {
@@ -3343,21 +3339,25 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
    HYPRE_Complex *d_a_tmp;
    d_a_tmp  = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_ROCSPARSE_CALL( rocsparse_csrsort_buffer_size(handle, n, m, nnzA, d_ia, d_ja_sorted, &pBufferSizeInBytes) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_csrsort_buffer_size(handle, n, m, nnzA, d_ia, d_ja_sorted,
+                                                       &pBufferSizeInBytes) );
 
    pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
    P       = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
 
    HYPRE_ROCSPARSE_CALL( rocsparse_create_identity_permutation(handle, nnzA, P) );
-   HYPRE_ROCSPARSE_CALL( rocsparse_csrsort(handle, n, m, nnzA, descrA, d_ia, d_ja_sorted, P, pBuffer) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_csrsort(handle, n, m, nnzA, descrA, d_ia, d_ja_sorted, P,
+                                           pBuffer) );
 
    if (isDoublePrecision)
    {
-      HYPRE_ROCSPARSE_CALL( rocsparse_dgthr(handle, nnzA, d_a_sorted, d_a_tmp, P, rocsparse_index_base_zero) );
+      HYPRE_ROCSPARSE_CALL( rocsparse_dgthr(handle, nnzA, d_a_sorted, d_a_tmp, P,
+                                            rocsparse_index_base_zero) );
    }
    else if (isSinglePrecision)
    {
-      HYPRE_ROCSPARSE_CALL( rocsparse_sgthr(handle, nnzA, (float *) d_a_sorted, (float *) d_a_tmp, P, rocsparse_index_base_zero) );
+      HYPRE_ROCSPARSE_CALL( rocsparse_sgthr(handle, nnzA, (float *) d_a_sorted, (float *) d_a_tmp, P,
+                                            rocsparse_index_base_zero) );
    }
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
@@ -3373,16 +3373,16 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
 {
 #if defined(HYPRE_USING_ROCSPARSE)
 
-  HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
-                                                  rocsparse_operation_none,
-                                                  hypre_CSRMatrixNumRows(matrix),
-                                                  hypre_CSRMatrixNumCols(matrix),
-                                                  hypre_CSRMatrixNumNonzeros(matrix),
-                                                  hypre_CSRMatrixGPUMatDescr(matrix),
-                                                  hypre_CSRMatrixData(matrix),
-                                                  hypre_CSRMatrixI(matrix),
-                                                  hypre_CSRMatrixJ(matrix),
-                                                  hypre_CSRMatrixGPUMatInfo(matrix)) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
+                                                   rocsparse_operation_none,
+                                                   hypre_CSRMatrixNumRows(matrix),
+                                                   hypre_CSRMatrixNumCols(matrix),
+                                                   hypre_CSRMatrixNumNonzeros(matrix),
+                                                   hypre_CSRMatrixGPUMatDescr(matrix),
+                                                   hypre_CSRMatrixData(matrix),
+                                                   hypre_CSRMatrixI(matrix),
+                                                   hypre_CSRMatrixJ(matrix),
+                                                   hypre_CSRMatrixGPUMatInfo(matrix)) );
 
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }

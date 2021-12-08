@@ -59,7 +59,7 @@ hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
 HYPRE_Int
 hypre_SeqVectorDestroy( hypre_Vector *vector )
 {
-   HYPRE_Int ierr=0;
+   HYPRE_Int ierr = 0;
 
    if (vector)
    {
@@ -96,7 +96,7 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_
     * when being used, and freed */
    if ( !hypre_VectorData(vector) )
    {
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size, memory_location);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
    }
 
    if ( multivec_storage_method == 0 )
@@ -135,7 +135,7 @@ HYPRE_Int
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
                              HYPRE_Int     owns_data   )
 {
-   HYPRE_Int    ierr=0;
+   HYPRE_Int    ierr = 0;
 
    hypre_VectorOwnsData(vector) = owns_data;
 
@@ -226,14 +226,14 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
       hypre_fprintf(fp, "%d vectors of size %d\n", num_vectors, size );
    }
 
-   if ( num_vectors>1 )
+   if ( num_vectors > 1 )
    {
-      for ( j=0; j<num_vectors; ++j )
+      for ( j = 0; j < num_vectors; ++j )
       {
          hypre_fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            value = data[ j*vecstride + i*idxstride ];
+            value = data[ j * vecstride + i * idxstride ];
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(fp, "%.14e , %.14e\n",
                           hypre_creal(value), hypre_cimag(value));
@@ -289,9 +289,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(vector_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(vector_data)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
    {
@@ -343,7 +343,8 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
       {
          h_data[i] = 2.0 * hypre_Rand() - 1.0;
       }
-      hypre_TMemcpy(vector_data, h_data, HYPRE_Complex, size, hypre_VectorMemoryLocation(v), HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(vector_data, h_data, HYPRE_Complex, size, hypre_VectorMemoryLocation(v),
+                    HYPRE_MEMORY_HOST);
       hypre_TFree(h_data, HYPRE_MEMORY_HOST);
    }
 
@@ -475,9 +476,9 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
    {
@@ -521,16 +522,17 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1, y_data, 1) );
+   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
+                                  y_data, 1) );
 #else
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
 #endif
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
    {
@@ -574,9 +576,9 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       //TODO
       //hypre_SeqVectorElmdivpyDevice(x, b, y);
       /*
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(u_data,v_data,l1_norms)
-#endif
+      #if defined(HYPRE_USING_DEVICE_OPENMP)
+      #pragma omp target teams distribute parallel for private(i) is_device_ptr(u_data,v_data,l1_norms)
+      #endif
       */
       hypreDevice_IVAXPY(size, b_data, x_data, y_data);
    }
@@ -585,7 +587,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    {
       HYPRE_Int i;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < size; i++)
       {
@@ -622,7 +624,8 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    HYPRE_Int      size   = hypre_VectorSize(b);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(b) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
       hypreDevice_IVAXPYMarked(size, b_data, x_data, y_data, marker, marker_val);
@@ -632,7 +635,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    {
       HYPRE_Int i;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < size; i++)
       {
@@ -678,7 +681,8 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #ifndef HYPRE_COMPLEX
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1, &result) );
+   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1,
+                                 &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
 #endif
@@ -689,13 +693,13 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #else /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams  distribute  parallel for private(i) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
+   #pragma omp target teams  distribute  parallel for private(i) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
    {
-     result += hypre_conj(y_data[i]) * x_data[i];
+      result += hypre_conj(y_data[i]) * x_data[i];
    }
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
@@ -725,9 +729,9 @@ HYPRE_Complex hypre_SeqVectorSumElts( hypre_Vector *vector )
    HYPRE_Int      i;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
-   for ( i=0; i<size; ++i ) sum += data[i];
+   for ( i = 0; i < size; ++i ) { sum += data[i]; }
 
    return sum;
 }
@@ -791,9 +795,9 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
    {

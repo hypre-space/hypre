@@ -93,8 +93,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(A_diag);
    num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(A_offd);
 
-   S_diag_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
-   S_offd_i = hypre_TAlloc(HYPRE_Int, num_variables+1, memory_location);
+   S_diag_i = hypre_TAlloc(HYPRE_Int, num_variables + 1, memory_location);
+   S_offd_i = hypre_TAlloc(HYPRE_Int, num_variables + 1, memory_location);
    S_temp_diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag, HYPRE_MEMORY_DEVICE);
    S_temp_offd_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_offd, HYPRE_MEMORY_DEVICE);
 
@@ -103,9 +103,9 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
       dof_func_offd_dev = hypre_TAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
    }
 
-  /*-------------------------------------------------------------------
-    * Get the dof_func data for the off-processor columns
-    *-------------------------------------------------------------------*/
+   /*-------------------------------------------------------------------
+     * Get the dof_func data for the off-processor columns
+     *-------------------------------------------------------------------*/
    if (!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
@@ -116,7 +116,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (num_functions > 1)
    {
-      HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                                                        num_sends), HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
       HYPRE_THRUST_CALL( gather,
@@ -163,17 +164,21 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int *tmp, S_num_nonzeros_diag, S_num_nonzeros_offd;
 
-   hypre_TMemcpy(&S_num_nonzeros_diag, &S_diag_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
-   hypre_TMemcpy(&S_num_nonzeros_offd, &S_offd_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
+   hypre_TMemcpy(&S_num_nonzeros_diag, &S_diag_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+                 memory_location);
+   hypre_TMemcpy(&S_num_nonzeros_offd, &S_offd_i[num_variables], HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+                 memory_location);
 
    S_diag_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_diag, memory_location);
    S_offd_j = hypre_TAlloc(HYPRE_Int, S_num_nonzeros_offd, memory_location);
 
-   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j, is_nonnegative<HYPRE_Int>());
+   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j,
+                           is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_diag == tmp - S_diag_j);
 
-   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j, is_nonnegative<HYPRE_Int>());
+   tmp = HYPRE_THRUST_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j,
+                           is_nonnegative<HYPRE_Int>());
 
    hypre_assert(S_num_nonzeros_offd == tmp - S_offd_j);
 
@@ -217,22 +222,22 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 }
 
 /*-----------------------------------------------------------------------*/
- __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
-                                                  HYPRE_Real  max_row_sum,
-                                                  HYPRE_Real  strength_threshold,
-                                                  HYPRE_Real *A_diag_data,
-                                                  HYPRE_Int  *A_diag_i,
-                                                  HYPRE_Int  *A_diag_j,
-                                                  HYPRE_Real *A_offd_data,
-                                                  HYPRE_Int  *A_offd_i,
-                                                  HYPRE_Int  *A_offd_j,
-                                                  HYPRE_Int  *S_temp_diag_j,
-                                                  HYPRE_Int  *S_temp_offd_j,
-                                                  HYPRE_Int   num_functions,
-                                                  HYPRE_Int  *dof_func,
-                                                  HYPRE_Int  *dof_func_offd,
-                                                  HYPRE_Int  *jS_diag,
-                                                  HYPRE_Int  *jS_offd )
+__global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
+                                                 HYPRE_Real  max_row_sum,
+                                                 HYPRE_Real  strength_threshold,
+                                                 HYPRE_Real *A_diag_data,
+                                                 HYPRE_Int  *A_diag_i,
+                                                 HYPRE_Int  *A_diag_j,
+                                                 HYPRE_Real *A_offd_data,
+                                                 HYPRE_Int  *A_offd_i,
+                                                 HYPRE_Int  *A_offd_j,
+                                                 HYPRE_Int  *S_temp_diag_j,
+                                                 HYPRE_Int  *S_temp_offd_j,
+                                                 HYPRE_Int   num_functions,
+                                                 HYPRE_Int  *dof_func,
+                                                 HYPRE_Int  *dof_func_offd,
+                                                 HYPRE_Int  *jS_diag,
+                                                 HYPRE_Int  *jS_offd )
 {
    /*-----------------------------------------------------------------------*/
    /*
@@ -255,7 +260,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, row_max = 0.0, row_min = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nr_of_rows)
    {
@@ -273,7 +278,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
    p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
       {
@@ -306,7 +312,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
    p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
       {
@@ -342,13 +349,14 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
    const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
       {
          const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
                                 ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                                                        read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
+                                  read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
                                 sdiag * read_only_load(&A_diag_data[i]) < thresh;
          S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
          row_nnz_diag += cond;
@@ -361,13 +369,14 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
       {
          const HYPRE_Int cond = all_weak == 0 &&
                                 ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                                                        read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
+                                  read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
                                 sdiag * read_only_load(&A_offd_data[i]) < thresh;
          S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
          row_nnz_offd += cond;
@@ -412,22 +421,22 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 }
 
 /*-----------------------------------------------------------------------*/
- __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
-                                                     HYPRE_Real  max_row_sum,
-                                                     HYPRE_Real  strength_threshold,
-                                                     HYPRE_Real *A_diag_data,
-                                                     HYPRE_Int  *A_diag_i,
-                                                     HYPRE_Int  *A_diag_j,
-                                                     HYPRE_Real *A_offd_data,
-                                                     HYPRE_Int  *A_offd_i,
-                                                     HYPRE_Int  *A_offd_j,
-                                                     HYPRE_Int  *S_temp_diag_j,
-                                                     HYPRE_Int  *S_temp_offd_j,
-                                                     HYPRE_Int   num_functions,
-                                                     HYPRE_Int  *dof_func,
-                                                     HYPRE_Int  *dof_func_offd,
-                                                     HYPRE_Int  *jS_diag,
-                                                     HYPRE_Int  *jS_offd )
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
+                                                    HYPRE_Real  max_row_sum,
+                                                    HYPRE_Real  strength_threshold,
+                                                    HYPRE_Real *A_diag_data,
+                                                    HYPRE_Int  *A_diag_i,
+                                                    HYPRE_Int  *A_diag_j,
+                                                    HYPRE_Real *A_offd_data,
+                                                    HYPRE_Int  *A_offd_i,
+                                                    HYPRE_Int  *A_offd_j,
+                                                    HYPRE_Int  *S_temp_diag_j,
+                                                    HYPRE_Int  *S_temp_offd_j,
+                                                    HYPRE_Int   num_functions,
+                                                    HYPRE_Int  *dof_func,
+                                                    HYPRE_Int  *dof_func_offd,
+                                                    HYPRE_Int  *jS_diag,
+                                                    HYPRE_Int  *jS_offd )
 {
    /*-----------------------------------------------------------------------*/
    /*
@@ -450,7 +459,7 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nr_of_rows)
    {
@@ -468,7 +477,8 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
    q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
    p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
       {
@@ -500,7 +510,8 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
    q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
    p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
       {
@@ -524,13 +535,14 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
    const HYPRE_Real thresh = strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
       {
          const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
                                 ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                                                        read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
+                                  read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
                                 hypre_cabs( read_only_load(&A_diag_data[i]) ) > thresh;
          S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
          row_nnz_diag += cond;
@@ -543,13 +555,14 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
       {
          const HYPRE_Int cond = all_weak == 0 &&
                                 ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                                                        read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
+                                  read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
                                 hypre_cabs( read_only_load(&A_offd_data[i]) ) > thresh;
          S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
          row_nnz_offd += cond;

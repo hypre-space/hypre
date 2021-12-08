@@ -5,12 +5,12 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_parcsr_mv.h" 
- 
+#include "_hypre_parcsr_mv.h"
+
 /*--------------------------------------------------------------------------
  * Test driver for unstructured Boolean matrix interface , A * A^T
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -24,18 +24,18 @@ main( HYPRE_Int   argc,
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD,&num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD,&my_id);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    row_starts = NULL;
    col_starts = NULL;
 
    if (my_id == 0)
    {
-   	As = hypre_CSRBooleanMatrixRead("inpr");
-   	hypre_printf(" read input A\n");
+      As = hypre_CSRBooleanMatrixRead("inpr");
+      hypre_printf(" read input A\n");
    }
    A = hypre_CSRBooleanMatrixToParCSRBooleanMatrix(hypre_MPI_COMM_WORLD, As, row_starts,
-                                                 col_starts);
+                                                   col_starts);
    row_starts = hypre_ParCSRBooleanMatrix_Get_RowStarts(A);
    col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
 
@@ -47,7 +47,7 @@ main( HYPRE_Int   argc,
 
    if (my_id == 0)
    {
-	hypre_CSRBooleanMatrixDestroy(As);
+      hypre_CSRBooleanMatrixDestroy(As);
    }
    hypre_ParCSRBooleanMatrixDestroy(A);
    hypre_ParCSRBooleanMatrixDestroy(C);

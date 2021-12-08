@@ -22,13 +22,13 @@ extern "C" {
 #endif
 
 HYPRE_Int hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex, hypre_ParCSRMatrix*,
-                                  hypre_ParMultiVector*,
-                                  HYPRE_Complex, hypre_ParMultiVector*);
+                                        hypre_ParMultiVector*,
+                                        HYPRE_Complex, hypre_ParMultiVector*);
 
 
 HYPRE_Int hypre_ParCSRMatrixMatMultiVecT(HYPRE_Complex, hypre_ParCSRMatrix*,
-                                  hypre_ParMultiVector*,
-                                  HYPRE_Complex, hypre_ParMultiVector*);
+                                         hypre_ParMultiVector*,
+                                         HYPRE_Complex, hypre_ParMultiVector*);
 
 #ifdef __cplusplus
 }

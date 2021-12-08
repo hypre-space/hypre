@@ -69,6 +69,7 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
+   hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
 // In debug mode, hypre_TFree() checks the pointer location, which requires the
@@ -133,9 +134,59 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
+#if defined(HYPRE_USING_SYCL)
+      if (!hypre_HandleDevice(hypre_handle_))
+      {
+         /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
+         sycl::platform platform(sycl::gpu_selector{});
+         auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
+         HYPRE_Int n_devices = 0;
+         hypre_GetDeviceCount(&n_devices);
+         if (device_id >= n_devices)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ERROR: SYCL device-ID exceed the number of devices on-node\n");
+         }
+
+         HYPRE_Int local_n_devices = 0;
+         HYPRE_Int i;
+         for (i = 0; i < gpu_devices.size(); i++)
+         {
+            /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
+            // multi-tile GPUs
+            /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
+            /* { */
+            /*    auto subDevicesDomainNuma = */
+            /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
+            /*       (sycl::info::partition_affinity_domain::numa); */
+            /*    for (auto &tile : subDevicesDomainNuma) */
+            /*    { */
+            /*       if (local_n_devices == device_id) */
+            /*       { */
+            /*          hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
+            /*       } */
+            /*       local_n_devices++; */
+            /*    } */
+            /* } */
+            /* // single-tile GPUs */
+            /* else */
+            {
+               if (local_n_devices == device_id)
+               {
+                  hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
+               }
+               local_n_devices++;
+            }
+         }
+      }
+      hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
+         hypre_DeviceDataDevice(hypre_HandleDeviceData(
+                                   hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
+#else
       hypre_HandleDevice(hypre_handle_) = device_id;
+#endif // #if defined(HYPRE_USING_SYCL)
    }
-#endif
+#endif // # if defined(HYPRE_USING_GPU)
 
    return hypre_error_flag;
 }
@@ -159,7 +210,12 @@ hypre_GetDevice(hypre_int *device_id)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* sycl device set at construction of hypre_DeviceData object */
+   /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
+    * Assume the rank/device binding below */
+   HYPRE_Int n_devices, my_id;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
+   hypre_GetDeviceCount(&n_devices);
+   (*device_id) = my_id % n_devices;
 #endif
 
    return hypre_error_flag;
@@ -181,19 +237,24 @@ hypre_GetDeviceCount(hypre_int *device_count)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
+   (*device_count) = 0;
    sycl::platform platform(sycl::gpu_selector{});
    auto const& gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-   for (int i = 0; i < gpu_devices.size(); i++)
+   HYPRE_Int i;
+   for (i = 0; i < gpu_devices.size(); i++)
    {
-     if(gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0)
-     {
-       auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa);
-       (*device_count) += subDevicesDomainNuma.size();
-     }
-     else
-     {
-       (*device_count)++;
-     }
+      /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
+      /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
+      /* { */
+      /*    auto subDevicesDomainNuma = */
+      /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
+      /*       (sycl::info::partition_affinity_domain::numa); */
+      /*    (*device_count) += subDevicesDomainNuma.size(); */
+      /* } */
+      /* else */
+      {
+         (*device_count)++;
+      }
    }
 #endif
 
@@ -252,7 +313,10 @@ HYPRE_Init()
    }
 
 #if defined(HYPRE_USING_GPU)
+#if !defined(HYPRE_USING_SYCL)
+   /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
    hypre_GetDeviceLastError();
+#endif
 
    /* Notice: the cudaStream created is specific to the device
     * that was in effect when you created the stream.
@@ -330,7 +394,10 @@ HYPRE_Finalize()
 
    _hypre_handle = NULL;
 
+#if !defined(HYPRE_USING_SYCL)
+   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle */
    hypre_GetDeviceLastError();
+#endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
    hypre_PrintMemoryTracker();
@@ -344,30 +411,47 @@ HYPRE_Int
 HYPRE_PrintDeviceInfo()
 {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-  hypre_int dev;
-  struct cudaDeviceProp deviceProp;
+   hypre_int dev;
+   struct cudaDeviceProp deviceProp;
 
-  HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
-  HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+   HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
+   HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-  hypre_int dev;
-  struct cudaDeviceProp deviceProp;
+   hypre_int dev;
+   struct cudaDeviceProp deviceProp;
 
-  HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
-  HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+   HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
+   HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
 #endif
 
 #if defined(HYPRE_USING_HIP)
-  hypre_int dev;
-  hipDeviceProp_t deviceProp;
+   hypre_int dev;
+   hipDeviceProp_t deviceProp;
 
-  HYPRE_HIP_CALL( hipGetDevice(&dev) );
-  HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
-  hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name, deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem/1e9);
+   HYPRE_HIP_CALL( hipGetDevice(&dev) );
+   HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   auto device = *hypre_HandleDevice(hypre_handle());
+   auto p_name = device.get_platform().get_info<sycl::info::platform::name>();
+   hypre_printf("Platform Name: %s\n", p_name.c_str());
+   auto p_version = device.get_platform().get_info<sycl::info::platform::version>();
+   hypre_printf("Platform Version: %s\n", p_version.c_str());
+   auto d_name = device.get_info<sycl::info::device::name>();
+   hypre_printf("Device Name: %s\n", d_name.c_str());
+   auto max_work_group = device.get_info<sycl::info::device::max_work_group_size>();
+   hypre_printf("Max Work Groups: %d\n", max_work_group);
+   auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();
+   hypre_printf("Max Compute Units: %d\n", max_compute_units);
 #endif
 
 #if defined(HYPRE_USING_SYCL)

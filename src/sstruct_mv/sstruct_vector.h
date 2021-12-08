@@ -31,7 +31,7 @@ typedef struct
 
    HYPRE_Int               ref_count;
 
-   HYPRE_Int              *dataindices;  /* GEC1002 array for starting index of the 
+   HYPRE_Int              *dataindices;  /* GEC1002 array for starting index of the
                                             svector. pdataindices[varx] */
    HYPRE_Int               datasize;     /* Size of the pvector = sums size of svectors */
 
@@ -56,7 +56,7 @@ typedef struct hypre_SStructVector_struct
    /* inter-part communication info */
    HYPRE_Int               nbor_ncomms;  /* num comm_pkgs with neighbor parts */
 
-  /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
+   /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
 
    HYPRE_Complex           *data;        /* GEC1002 pointer to chunk data  */
    HYPRE_Int               *dataindices; /* GEC1002 dataindices[partx] is the starting index

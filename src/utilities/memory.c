@@ -30,7 +30,7 @@
 static inline void
 hypre_OutOfMemory(size_t size)
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY,"Out of memory trying to allocate too many bytes\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Out of memory trying to allocate too many bytes\n");
    hypre_assert(0);
    fflush(stdout);
 }
@@ -38,7 +38,8 @@ hypre_OutOfMemory(size_t size)
 static inline void
 hypre_WrongMemoryLocation()
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Wrong HYPRE MEMORY location: Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_HOST_PINNED are supported!\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY,
+                     "Wrong HYPRE MEMORY location: Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_HOST_PINNED are supported!\n");
    hypre_assert(0);
    fflush(stdout);
 }
@@ -123,12 +124,12 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
    if (location == hypre_MEMORY_DEVICE)
    {
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()),
-                       hypre_HandleComputeStream(hypre_handle())) );
+                                            hypre_HandleComputeStream(hypre_handle())) );
    }
    else if (location == hypre_MEMORY_HOST)
    {
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
-                       hypre_HandleComputeStream(hypre_handle())) );
+                                            hypre_HandleComputeStream(hypre_handle())) );
    }
 #endif
 
@@ -136,12 +137,12 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
    if (location == hypre_MEMORY_DEVICE)
    {
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, hypre_HandleDevice(hypre_handle()),
-                       hypre_HandleComputeStream(hypre_handle())) );
+                                            hypre_HandleComputeStream(hypre_handle())) );
    }
    else if (location == hypre_MEMORY_HOST)
    {
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
-                       hypre_HandleComputeStream(hypre_handle())) );
+                                            hypre_HandleComputeStream(hypre_handle())) );
    }
 #endif
 
@@ -162,7 +163,10 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   // WM: TODO
+   if (location == hypre_MEMORY_DEVICE)
+   {
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() );
+   }
 #endif
 }
 
@@ -234,7 +238,7 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   ptr = (void *)sycl::malloc_device(size, *(hypre_HandleComputeStream(hypre_handle())));
+      ptr = (void *)sycl::malloc_device(size, *(hypre_HandleComputeStream(hypre_handle())));
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
@@ -274,7 +278,8 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_shared(size, *(hypre_HandleComputeStream(hypre_handle()))) );
+   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_shared(size,
+                                                      *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
@@ -315,7 +320,8 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_host(size, *(hypre_HandleComputeStream(hypre_handle()))) );
+   HYPRE_SYCL_CALL( ptr = (void *)sycl::malloc_host(size,
+                                                    *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
@@ -418,7 +424,7 @@ hypre_DeviceFree(void *ptr)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
+      HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
 #endif
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_DEVICE) */
@@ -527,7 +533,8 @@ _hypre_Free(void *ptr, hypre_MemoryLocation location)
  * Memcpy
  *--------------------------------------------------------------------------*/
 static inline void
-hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst, hypre_MemoryLocation loc_src)
+hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst,
+                  hypre_MemoryLocation loc_src)
 {
 #if defined(HYPRE_USING_SYCL)
    sycl::queue* q = hypre_HandleComputeStream(hypre_handle());
@@ -631,7 +638,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 
 
    /* 2: Device <-- Host, Device <-- Pinned */
-   if ( loc_dst == hypre_MEMORY_DEVICE && (loc_src == hypre_MEMORY_HOST || loc_src == hypre_MEMORY_HOST_PINNED) )
+   if ( loc_dst == hypre_MEMORY_DEVICE && (loc_src == hypre_MEMORY_HOST ||
+                                           loc_src == hypre_MEMORY_HOST_PINNED) )
    {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
@@ -658,7 +666,8 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 
 
    /* 2: Host <-- Device, Pinned <-- Device */
-   if ( (loc_dst == hypre_MEMORY_HOST || loc_dst == hypre_MEMORY_HOST_PINNED) && loc_src == hypre_MEMORY_DEVICE )
+   if ( (loc_dst == hypre_MEMORY_HOST || loc_dst == hypre_MEMORY_HOST_PINNED) &&
+        loc_src == hypre_MEMORY_DEVICE )
    {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
@@ -885,9 +894,11 @@ hypre_Free(void *ptr, HYPRE_MemoryLocation location)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src)
+hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst,
+             HYPRE_MemoryLocation loc_src)
 {
-   hypre_Memcpy_core( dst, src, size, hypre_GetActualMemLocation(loc_dst), hypre_GetActualMemLocation(loc_src) );
+   hypre_Memcpy_core( dst, src, size, hypre_GetActualMemLocation(loc_dst),
+                      hypre_GetActualMemLocation(loc_src) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1081,25 +1092,32 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 #endif // defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_SYCL)
-   *memory_location = hypre_MEMORY_UNDEFINED;
-   sycl::usm::alloc allocType;
-   allocType = sycl::get_pointer_type(ptr, (hypre_HandleComputeStream(hypre_handle()))->get_context());
+   /* If the device is not setup, then all allocations are assumed to be on the host */
+   *memory_location = hypre_MEMORY_HOST;
+   if (hypre_HandleDeviceData(hypre_handle()))
+   {
+      if (hypre_HandleDevice(hypre_handle()))
+      {
+         sycl::usm::alloc allocType;
+         allocType = sycl::get_pointer_type(ptr, (hypre_HandleComputeStream(hypre_handle()))->get_context());
 
-   if (allocType == sycl::usm::alloc::unknown)
-   {
-      *memory_location = hypre_MEMORY_HOST;
-   }
-   else if (allocType == sycl::usm::alloc::host)
-   {
-      *memory_location = hypre_MEMORY_HOST_PINNED;
-   }
-   else if (allocType == sycl::usm::alloc::device)
-   {
-      *memory_location = hypre_MEMORY_DEVICE;
-   }
-   else if (allocType == sycl::usm::alloc::shared)
-   {
-      *memory_location = hypre_MEMORY_UNIFIED;
+         if (allocType == sycl::usm::alloc::unknown)
+         {
+            *memory_location = hypre_MEMORY_HOST;
+         }
+         else if (allocType == sycl::usm::alloc::host)
+         {
+            *memory_location = hypre_MEMORY_HOST_PINNED;
+         }
+         else if (allocType == sycl::usm::alloc::device)
+         {
+            *memory_location = hypre_MEMORY_DEVICE;
+         }
+         else if (allocType == sycl::usm::alloc::shared)
+         {
+            *memory_location = hypre_MEMORY_UNIFIED;
+         }
+      }
    }
 #endif //HYPRE_USING_SYCL
 
@@ -1153,7 +1171,8 @@ hypre_MemoryTrackerInsert(const char           *action,
    if (tracker->alloced_size <= tracker->actual_size)
    {
       tracker->alloced_size = 2 * tracker->alloced_size + 1;
-      tracker->data = (hypre_MemoryTrackerEntry *) realloc(tracker->data, tracker->alloced_size * sizeof(hypre_MemoryTrackerEntry));
+      tracker->data = (hypre_MemoryTrackerEntry *) realloc(tracker->data,
+                                                           tracker->alloced_size * sizeof(hypre_MemoryTrackerEntry));
    }
 
    hypre_assert(tracker->actual_size < tracker->alloced_size);
@@ -1187,7 +1206,7 @@ hypre_PrintMemoryTracker()
    hypre_MemoryTracker *tracker = hypre_memory_tracker();
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_sprintf(filename,"HypreMemoryTrack.log.%05d", myid);
+   hypre_sprintf(filename, "HypreMemoryTrack.log.%05d", myid);
    if ((file = fopen(filename, "a")) == NULL)
    {
       fprintf(stderr, "Error: can't open output file %s\n", filename);
@@ -1195,11 +1214,12 @@ hypre_PrintMemoryTracker()
    }
 
    fprintf(file, "==== Operations:\n");
-   fprintf(file, "     ID        EVENT                 ADDRESS       BYTE         LOCATION                                       FILE(LINE)                                           FUNCTION  |  Memory (   H            P            D            U )\n");
+   fprintf(file,
+           "     ID        EVENT                 ADDRESS       BYTE         LOCATION                                       FILE(LINE)                                           FUNCTION  |  Memory (   H            P            D            U )\n");
 
-   size_t totl_bytes[hypre_MEMORY_UNIFIED+1] = {0};
-   size_t peak_bytes[hypre_MEMORY_UNIFIED+1] = {0};
-   size_t curr_bytes[hypre_MEMORY_UNIFIED+1] = {0};
+   size_t totl_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
+   size_t peak_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
+   size_t curr_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
 
    for (i = 0; i < tracker->actual_size; i++)
    {
@@ -1224,7 +1244,7 @@ hypre_PrintMemoryTracker()
             continue;
          }
 
-         for (j = i+1; j < tracker->actual_size; j++)
+         for (j = i + 1; j < tracker->actual_size; j++)
          {
             if ( strstr(tracker->data[j]._action, "free") != NULL &&
                  tracker->data[j]._pair == (size_t) -1 &&
@@ -1308,7 +1328,7 @@ hypre_PrintMemoryTracker()
               curr_bytes[hypre_MEMORY_HOST_PINNED],
               curr_bytes[hypre_MEMORY_DEVICE],
               curr_bytes[hypre_MEMORY_UNIFIED]
-              );
+             );
    }
 
    fprintf(file, "\n==== Total allocated (byte):\n");
@@ -1406,12 +1426,12 @@ hypre_CachingMallocDevice(void **ptr, size_t nbytes)
    {
       hypre_HandleCubDevAllocator(hypre_handle()) =
          hypre_DeviceDataCubCachingAllocatorCreate( hypre_HandleCubBinGrowth(hypre_handle()),
-                                                  hypre_HandleCubMinBin(hypre_handle()),
-                                                  hypre_HandleCubMaxBin(hypre_handle()),
-                                                  hypre_HandleCubMaxCachedBytes(hypre_handle()),
-                                                  false,
-                                                  false,
-                                                  false );
+                                                    hypre_HandleCubMinBin(hypre_handle()),
+                                                    hypre_HandleCubMaxBin(hypre_handle()),
+                                                    hypre_HandleCubMaxCachedBytes(hypre_handle()),
+                                                    false,
+                                                    false,
+                                                    false );
    }
 
    return hypre_HandleCubDevAllocator(hypre_handle()) -> DeviceAllocate(ptr, nbytes);
@@ -1430,12 +1450,12 @@ hypre_CachingMallocManaged(void **ptr, size_t nbytes)
    {
       hypre_HandleCubUvmAllocator(hypre_handle()) =
          hypre_DeviceDataCubCachingAllocatorCreate( hypre_HandleCubBinGrowth(hypre_handle()),
-                                                  hypre_HandleCubMinBin(hypre_handle()),
-                                                  hypre_HandleCubMaxBin(hypre_handle()),
-                                                  hypre_HandleCubMaxCachedBytes(hypre_handle()),
-                                                  false,
-                                                  false,
-                                                  true );
+                                                    hypre_HandleCubMinBin(hypre_handle()),
+                                                    hypre_HandleCubMaxBin(hypre_handle()),
+                                                    hypre_HandleCubMaxCachedBytes(hypre_handle()),
+                                                    false,
+                                                    false,
+                                                    true );
    }
 
    return hypre_HandleCubUvmAllocator(hypre_handle()) -> DeviceAllocate(ptr, nbytes);
@@ -1449,12 +1469,12 @@ hypre_CachingFreeManaged(void *ptr)
 
 hypre_cub_CachingDeviceAllocator *
 hypre_DeviceDataCubCachingAllocatorCreate(hypre_uint bin_growth,
-                                        hypre_uint min_bin,
-                                        hypre_uint max_bin,
-                                        size_t     max_cached_bytes,
-                                        bool       skip_cleanup,
-                                        bool       debug,
-                                        bool       use_managed_memory)
+                                          hypre_uint min_bin,
+                                          hypre_uint max_bin,
+                                          size_t     max_cached_bytes,
+                                          bool       skip_cleanup,
+                                          bool       debug,
+                                          bool       use_managed_memory)
 {
    hypre_cub_CachingDeviceAllocator *allocator =
       new hypre_cub_CachingDeviceAllocator( bin_growth,

@@ -35,7 +35,7 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
    (smsg_data -> jump)             = 0;
    (smsg_data -> relax_type)       = 1;       /* weighted Jacobi */
    (smsg_data -> jacobi_weight)    = 0.0;
-   (smsg_data -> usr_jacobi_weight)= 0;     /* no user Jacobi weight */
+   (smsg_data -> usr_jacobi_weight) = 0;    /* no user Jacobi weight */
    (smsg_data -> num_pre_relax)    = 1;
    (smsg_data -> num_post_relax)   = 1;
    (smsg_data -> num_fine_relax)   = 1;
@@ -59,7 +59,7 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
 {
    HYPRE_Int ierr = 0;
 
-/* RDF */
+   /* RDF */
 #if 0
    hypre_SparseMSGData *smsg_data = smsg_vdata;
 
@@ -99,20 +99,20 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
          for (l = 0; l < (smsg_data -> num_grids[0]) - 1; l++)
          {
             hypre_StructMatrixDestroy(smsg_data -> Px_array[l]);
-            hypre_StructGridDestroy(smsg_data -> Px_grid_array[l]); 
+            hypre_StructGridDestroy(smsg_data -> Px_grid_array[l]);
          }
          for (l = 0; l < (smsg_data -> num_grids[1]) - 1; l++)
          {
             hypre_StructMatrixDestroy(smsg_data -> Py_array[l]);
-            hypre_StructGridDestroy(smsg_data -> Py_grid_array[l]); 
+            hypre_StructGridDestroy(smsg_data -> Py_grid_array[l]);
          }
          for (l = 0; l < (smsg_data -> num_grids[2]) - 1; l++)
          {
             hypre_StructMatrixDestroy(smsg_data -> Pz_array[l]);
-            hypre_StructGridDestroy(smsg_data -> Pz_grid_array[l]); 
+            hypre_StructGridDestroy(smsg_data -> Pz_grid_array[l]);
          }
 
-          hypre_TFree(smsg_data -> data, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> data, HYPRE_MEMORY_HOST);
 
          hypre_TFree(smsg_data -> relax_array, HYPRE_MEMORY_HOST);
          hypre_TFree(smsg_data -> matvec_array, HYPRE_MEMORY_HOST);
@@ -138,12 +138,12 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
          hypre_TFree(smsg_data -> Py_grid_array, HYPRE_MEMORY_HOST);
          hypre_TFree(smsg_data -> Pz_grid_array, HYPRE_MEMORY_HOST);
       }
- 
+
       hypre_FinalizeTiming(smsg_data -> time_index);
       hypre_TFree(smsg_data, HYPRE_MEMORY_HOST);
    }
 #endif
-/* RDF */
+   /* RDF */
 
    return ierr;
 }
@@ -156,11 +156,11 @@ HYPRE_Int
 hypre_SparseMSGSetTol( void   *smsg_vdata,
                        HYPRE_Real  tol        )
 {
-	hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
+   hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> tol) = tol;
- 
+
    return ierr;
 }
 
@@ -174,9 +174,9 @@ hypre_SparseMSGSetMaxIter( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> max_iter) = max_iter;
- 
+
    return ierr;
 }
 
@@ -207,25 +207,25 @@ hypre_SparseMSGSetRelChange( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> rel_change) = rel_change;
- 
+
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_SparseMSGSetZeroGuess
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SparseMSGSetZeroGuess( void *smsg_vdata,
                              HYPRE_Int   zero_guess )
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> zero_guess) = zero_guess;
- 
+
    return ierr;
 }
 
@@ -239,9 +239,9 @@ hypre_SparseMSGSetRelaxType( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> relax_type) = relax_type;
- 
+
    return ierr;
 }
 
@@ -255,8 +255,8 @@ hypre_SparseMSGSetJacobiWeight( void  *smsg_vdata,
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
 
    (smsg_data -> jacobi_weight)    = weight;
-   (smsg_data -> usr_jacobi_weight)= 1;
-                                                                                                                                      
+   (smsg_data -> usr_jacobi_weight) = 1;
+
    return hypre_error_flag;
 }
 
@@ -270,9 +270,9 @@ hypre_SparseMSGSetNumPreRelax( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> num_pre_relax) = num_pre_relax;
- 
+
    return ierr;
 }
 
@@ -286,9 +286,9 @@ hypre_SparseMSGSetNumPostRelax( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> num_post_relax) = num_post_relax;
- 
+
    return ierr;
 }
 
@@ -302,9 +302,9 @@ hypre_SparseMSGSetNumFineRelax( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> num_fine_relax) = num_fine_relax;
- 
+
    return ierr;
 }
 
@@ -318,9 +318,9 @@ hypre_SparseMSGSetLogging( void *smsg_vdata,
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> logging) = logging;
- 
+
    return ierr;
 }
 
@@ -330,13 +330,13 @@ hypre_SparseMSGSetLogging( void *smsg_vdata,
 
 HYPRE_Int
 hypre_SparseMSGSetPrintLevel( void *smsg_vdata,
-                           HYPRE_Int   print_level    )
+                              HYPRE_Int   print_level    )
 {
    hypre_SparseMSGData *smsg_data = (hypre_SparseMSGData *)smsg_vdata;
    HYPRE_Int       ierr = 0;
- 
+
    (smsg_data -> print_level) = print_level;
- 
+
    return ierr;
 }
 
@@ -375,19 +375,19 @@ hypre_SparseMSGPrintLogging( void *smsg_vdata,
 
    if (myid == 0)
    {
-     if (print_level > 0)
-     {
-        if (logging > 0)
-        {
-           for (i = 0; i < num_iterations; i++)
-           {
-              hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-              hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-           }
-        }
-     }
+      if (print_level > 0)
+      {
+         if (logging > 0)
+         {
+            for (i = 0; i < num_iterations; i++)
+            {
+               hypre_printf("Residual norm[%d] = %e   ", i, norms[i]);
+               hypre_printf("Relative residual norm[%d] = %e\n", i, rel_norms[i]);
+            }
+         }
+      }
    }
-  
+
    return ierr;
 }
 
@@ -405,10 +405,10 @@ hypre_SparseMSGGetFinalRelativeResidualNorm( void   *smsg_vdata,
    HYPRE_Int       num_iterations  = (smsg_data -> num_iterations);
    HYPRE_Int       logging         = (smsg_data -> logging);
    HYPRE_Real     *rel_norms       = (smsg_data -> rel_norms);
-            
+
    HYPRE_Int       ierr = 0;
 
-   
+
    if (logging > 0)
    {
       if (max_iter == 0)
@@ -417,14 +417,14 @@ hypre_SparseMSGGetFinalRelativeResidualNorm( void   *smsg_vdata,
       }
       else if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {
          *relative_residual_norm = rel_norms[num_iterations];
       }
    }
-   
+
    return ierr;
 }
 
