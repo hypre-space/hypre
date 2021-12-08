@@ -106,6 +106,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
      hypre_printf("ERROR: SYCL device-ID exceed the number of devices on-node... \n");
    }
 
+   sycl::platform platform(sycl::gpu_selector{});
+   auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
    HYPRE_Int local_nDevices=0;
    for (int i = 0; i < gpu_devices.size(); i++) {
      // multi-tile GPUs

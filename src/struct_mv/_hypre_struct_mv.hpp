@@ -797,7 +797,7 @@ BoxLoopforall( HYPRE_Int length,
       const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       const dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
-      HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
+      HYPRE_GPU_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
    }
 }
 
@@ -858,7 +858,7 @@ ReductionBoxLoopforall( HYPRE_Int  length,
       hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
       */
 
-      HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
+      HYPRE_GPU_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
    }
 }
 
