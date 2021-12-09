@@ -2067,7 +2067,7 @@ hypre_CSRMatrixRemoveDiagonalHost(hypre_CSRMatrix *A)
       return hypre_error_flag;
    }
 
-   new_i = hypre_TAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+   new_i = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
    new_j = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
 
    if (A_data)

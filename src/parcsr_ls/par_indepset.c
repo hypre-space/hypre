@@ -63,6 +63,41 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
    return (ierr);
 }
 
+HYPRE_Int
+hypre_BoomerAMGIndepSetInit2( hypre_ParCSRMatrix *S,
+                              HYPRE_Real         *measure_array,
+                              HYPRE_Int           seq_rand,
+                              HYPRE_Real          factor)
+{
+   hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
+   MPI_Comm         comm = hypre_ParCSRMatrixComm(S);
+   HYPRE_Int        S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_BigInt     big_i;
+   HYPRE_Int        i, my_id;
+   HYPRE_Int        ierr = 0;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   i = 2747 + my_id;
+   if (seq_rand)
+   {
+      i = 2747;
+   }
+   hypre_SeedRand(i);
+   if (seq_rand)
+   {
+      for (big_i = 0; big_i < hypre_ParCSRMatrixFirstRowIndex(S); big_i++)
+      {
+         hypre_Rand();
+      }
+   }
+   for (i = 0; i < S_num_nodes; i++)
+   {
+      measure_array[i] += factor * hypre_Rand();
+   }
+
+   return (ierr);
+}
+
 /*==========================================================================*/
 /*==========================================================================*/
 /**

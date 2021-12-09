@@ -2687,6 +2687,21 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
          hypre_ParCSRCommHandleDestroy(comm_handle);
       }
 
+      /* WM: debug - print out intermediate CF_marker */
+      char my_filename[256];
+      FILE *my_fp;
+      HYPRE_Int my_print_debug_files = 1;
+      if (my_print_debug_files)
+      {
+         hypre_sprintf(my_filename, "CF_marker_it%d_rank%d.txt", iter-1, my_id);
+         my_fp = fopen(my_filename, "w");
+         for (i = 0; i < num_variables; i++)
+         {
+            hypre_fprintf(my_fp, "%d\n", CF_marker[i]);
+         }
+         fclose(my_fp);
+      }
+
       /*------------------------------------------------
        * Update subgraph
        *------------------------------------------------*/
@@ -2770,6 +2785,7 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
       hypre_TFree(prefix_sum_workspace, HYPRE_MEMORY_HOST);
 
    } /* end while */
+   hypre_printf("WM: debug - total PMIS iterations = %d\n", iter);
 
    /*
       hypre_printf("*** MIS iteration %d\n",iter);
@@ -2949,6 +2965,7 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
 
    /* WM: */ 
    HYPRE_Real max_rs_weight;
+   HYPRE_Int my_print_debug_files = 1;
 
    /* WM: debug */
    char my_filename[256];
@@ -3146,6 +3163,14 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
       measure_array[i] = 0;
    }
 
+   /* WM: increment by 0.5 at the boundary to preference boundary points */
+   for (i = 0; i < num_variables; i++)
+   {
+      if (S_offd_i[i+1] - S_offd_i[i] > 0)
+      {
+         measure_array[i] += 0.5;
+      }
+   }
    /* this augments the measures with a random number between 0 and 1 */
    /* (only for the local part) */
    /* this augments the measures */
@@ -3155,7 +3180,10 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
    }
    else
    {
-      hypre_BoomerAMGIndepSetInit(S, measure_array, 0);
+      /* hypre_BoomerAMGIndepSetInit(S, measure_array, 0); */
+      /* WM: random weight scaled by 0.5 to preserve distinction between boundary and interior */
+      /* WM: NOTE - what about the case where the boundary dofs are truly less suitable as C-points, i.e. less strong connections than the interior? */
+      hypre_BoomerAMGIndepSetInit2(S, measure_array, 0, 0.5);
    }
 
    /*---------------------------------------------------
@@ -3247,6 +3275,21 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
       }
    }
 
+   /* WM: try init CF as processor boundary */
+   /* CF_init = 1; */
+   /* HYPRE_Int n = (HYPRE_Int) sqrt(num_variables); */
+   /* for (j = 0; j < n; j+=2) */
+   /* { */
+   /*    CF_marker[j] = 1; */
+   /*    CF_marker[(n-2)*n + j] = 1; */
+   /* } */
+   /* for (i = 0; i < n; i+=2) */
+   /* { */
+   /*    CF_marker[i*n] = 1; */
+   /*    CF_marker[i*n + n - 2] = 1; */
+   /* } */
+
+
    graph_size = cnt;
 
    /* now the off-diagonal part of CF_marker */
@@ -3304,13 +3347,16 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
 
 
    /* WM: debug - print out initial measure_array */
-   hypre_sprintf(my_filename, "measure_it%d_rank%d.txt", 0, my_id);
-   my_fp = fopen(my_filename, "w");
-   for (i = 0; i < num_variables; i++)
+   if (my_print_debug_files)
    {
-      hypre_fprintf(my_fp, "%f\n", measure_array[i]);
+      hypre_sprintf(my_filename, "measure_it%d_rank%d.txt", 0, my_id);
+      my_fp = fopen(my_filename, "w");
+      for (i = 0; i < num_variables; i++)
+      {
+         hypre_fprintf(my_fp, "%f\n", measure_array[i]);
+      }
+      fclose(my_fp);
    }
-   fclose(my_fp);
 
 
 
@@ -3433,66 +3479,111 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
 
 
          /* WM: debug - print out tentative CF_marker */
-         hypre_sprintf(my_filename, "tentative_CF_marker_it%d_rank%d.txt", iter, my_id);
-         my_fp = fopen(my_filename, "w");
-         for (i = 0; i < num_variables; i++)
+         if (my_print_debug_files)
          {
-            hypre_fprintf(my_fp, "%d\n", CF_marker[i]);
-         }
-         fclose(my_fp);
-
-         /* WM: get the summed RS weights */
-         for (ig = 0; ig < graph_size; ig++)
-         {
-            i = graph_array[ig];
-            if (CF_marker[i] > 0)
+            hypre_sprintf(my_filename, "tentative_CF_marker_it%d_rank%d.txt", iter, my_id);
+            my_fp = fopen(my_filename, "w");
+            for (i = 0; i < num_variables; i++)
             {
-               hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 1.0;
+               hypre_fprintf(my_fp, "%d\n", CF_marker[i]);
             }
-            else
-            {
-               hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 0.0;
-            }
-         }
-         hypre_ParCSRMatrixMatvec(1.0, dist2walks, cpt_vector, 0.0, rs_weights);
-
-
-         /* WM: debug - print out rejection measures */
-         hypre_sprintf(my_filename, "rejection_measure_it%d_rank%d.txt", iter, my_id);
-         my_fp = fopen(my_filename, "w");
-         for (i = 0; i < num_variables; i++)
-         {
-            if (CF_marker[i] > 0)
-            {
-               hypre_fprintf(my_fp, "%f\n", hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i]);
-            }
-            else
-            {
-               hypre_fprintf(my_fp, "%f\n", 0);
-            }
-         }
-         fclose(my_fp);
-
-         /* WM: find the maximal weight at tentative C-pts */
-         max_rs_weight = 0.0;
-         for (ig = 0; ig < graph_size; ig++)
-         {
-            i = graph_array[ig];
-            if (CF_marker[i] > 0 && hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i] > max_rs_weight)
-            {
-               max_rs_weight = hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i];
-            }
+            fclose(my_fp);
          }
 
-         /* WM: reject C-pts that do not have the maximal weight */
-         for (ig = 0; ig < graph_size; ig++)
+         if (iter > 0)
+         /* if (0) */
          {
-            i = graph_array[ig];
-            if (CF_marker[i] > 0 && hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i] < max_rs_weight)
+            /* WM: find the maximal interger measure */
+            /* max_rs_weight = 0.0; */
+            /* for (ig = 0; ig < graph_size; ig++) */
+            /* { */
+            /*    i = graph_array[ig]; */
+            /*    if (CF_marker[i] > 0 && measure_array[i] > max_rs_weight) */
+            /*    { */
+            /*       max_rs_weight = measure_array[i]; */
+            /*    } */
+            /* } */
+
+            /* WM: reject C-pts that are not in the top "tier" */
+            /* HYPRE_Real max_rs_weight_floor = floor(max_rs_weight); */
+            HYPRE_Real max_rs_weight_floor = 2.0;
+            for (ig = 0; ig < graph_size; ig++)
             {
-               CF_marker[i] = 0;
-               hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 0.0;
+               i = graph_array[ig];
+               if (CF_marker[i] > 0 && measure_array[i] < max_rs_weight_floor)
+               {
+                  CF_marker[i] = 0;
+               }
             }
+         }
+         else
+         {
+            /* WM: on the first iteration reject C-points not on the boundary */ 
+            for (ig = 0; ig < graph_size; ig++)
+            {
+               i = graph_array[ig];
+               if (S_offd_i[i+1] - S_offd_i[i] == 0)
+               {
+                  CF_marker[i] = 0;
+               }
+            }
+
+            /* WM: get the summed RS weights */
+            /* for (ig = 0; ig < graph_size; ig++) */
+            /* { */
+            /*    i = graph_array[ig]; */
+            /*    if (CF_marker[i] > 0) */
+            /*    { */
+            /*       hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 1.0; */
+            /*    } */
+            /*    else */
+            /*    { */
+            /*       hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 0.0; */
+            /*    } */
+            /* } */
+            /* hypre_ParCSRMatrixMatvec(1.0, dist2walks, cpt_vector, 0.0, rs_weights); */
+
+
+            /* WM: debug - print out rejection measures */
+            /* if (my_print_debug_files) */
+            /* { */
+            /*    hypre_sprintf(my_filename, "rejection_measure_it%d_rank%d.txt", iter, my_id); */
+            /*    my_fp = fopen(my_filename, "w"); */
+            /*    for (i = 0; i < num_variables; i++) */
+            /*    { */
+            /*       if (CF_marker[i] > 0) */
+            /*       { */
+            /*          hypre_fprintf(my_fp, "%f\n", hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i]); */
+            /*       } */
+            /*       else */
+            /*       { */
+            /*          hypre_fprintf(my_fp, "%f\n", 0); */
+            /*       } */
+            /*    } */
+            /*    fclose(my_fp); */
+            /* } */
+
+            /* WM: find the maximal weight at tentative C-pts */
+            /* max_rs_weight = 0.0; */
+            /* for (ig = 0; ig < graph_size; ig++) */
+            /* { */
+            /*    i = graph_array[ig]; */
+            /*    if (CF_marker[i] > 0 && hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i] > max_rs_weight) */
+            /*    { */
+            /*       max_rs_weight = hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i]; */
+            /*    } */
+            /* } */
+
+            /* WM: reject C-pts that do not have the maximal weight */
+            /* for (ig = 0; ig < graph_size; ig++) */
+            /* { */
+            /*    i = graph_array[ig]; */
+            /*    if (CF_marker[i] > 0 && hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i] < max_rs_weight) */
+            /*    { */
+            /*       CF_marker[i] = 0; */
+            /*       hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 0.0; */
+            /*    } */
+            /* } */
          }
 
 
@@ -3552,6 +3643,7 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
       } /* if (!CF_init || iter) */
 
       iter++;
+      hypre_printf("WM: debug - PRS iterations = %d\n", iter);
 
       /*------------------------------------------------
        * Set C-pts and F-pts.
@@ -3636,14 +3728,16 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
       }
 
       /* WM: debug - print out intermediate CF_marker */
-      hypre_sprintf(my_filename, "CF_marker_it%d_rank%d.txt", iter-1, my_id);
-      my_fp = fopen(my_filename, "w");
-      for (i = 0; i < num_variables; i++)
+      if (my_print_debug_files)
       {
-         hypre_fprintf(my_fp, "%d\n", CF_marker[i]);
+         hypre_sprintf(my_filename, "CF_marker_it%d_rank%d.txt", iter-1, my_id);
+         my_fp = fopen(my_filename, "w");
+         for (i = 0; i < num_variables; i++)
+         {
+            hypre_fprintf(my_fp, "%d\n", CF_marker[i]);
+         }
+         fclose(my_fp);
       }
-      fclose(my_fp);
-
 
       /*------------------------------------------------
        * Update subgraph
@@ -3733,32 +3827,96 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
 
 
       /* WM: increment the measures in the remaining subgraph as the max number of dist 2 walks to a C-pt (mimics serial RS coarsening scheme) */
+      /* for (ig = 0; ig < graph_size; ig++) */
+      /* { */
+      /*    i = graph_array[ig]; */
+      /*    max_rs_weight = 0.0; */
+      /*    for (j = hypre_CSRMatrixI(dist2walks_diag)[i]; j < hypre_CSRMatrixI(dist2walks_diag)[i+1]; j++) */
+      /*    { */
+      /*       if (CF_marker[ hypre_CSRMatrixJ(dist2walks_diag)[j] ] == C_PT && hypre_CSRMatrixData(dist2walks_diag)[j] > max_rs_weight) */
+      /*       { */
+      /*          max_rs_weight = hypre_CSRMatrixData(dist2walks_diag)[j]; */
+      /*       } */
+      /*       /1* WM: TODO - need to check offd as well in parallel *1/ */
+      /*    } */
+      /*    measure_array[i] += max_rs_weight; */
+      /* } */
+
+      /* WM: increment the measures in the remaining subgraph as the summed number of dist 2 walks to a C-pt */
+      /* WM: get the summed RS weights */
+      /* for (i = 0; i < num_variables; i++) */
+      /* { */
+      /*    if (CF_marker[i] > 0) */
+      /*    { */
+      /*       hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 1.0; */
+      /*    } */
+      /*    else */
+      /*    { */
+      /*       hypre_VectorData(hypre_ParVectorLocalVector(cpt_vector))[i] = 0.0; */
+      /*    } */
+      /* } */
+      /* hypre_ParCSRMatrixMatvec(1.0, dist2walks, cpt_vector, 0.0, rs_weights); */
+      /* for (ig = 0; ig < graph_size; ig++) */
+      /* { */
+      /*    i = graph_array[ig]; */
+      /*    measure_array[i] += hypre_VectorData(hypre_ParVectorLocalVector(rs_weights))[i]; */
+      /* } */
+
+      /* WM: reset the measures in the remaining subgraph as the total number of dist 2 walks to C-pts */
       for (ig = 0; ig < graph_size; ig++)
       {
          i = graph_array[ig];
-         max_rs_weight = 0.0;
+         measure_array[i] = 1.0;
          for (j = hypre_CSRMatrixI(dist2walks_diag)[i]; j < hypre_CSRMatrixI(dist2walks_diag)[i+1]; j++)
          {
-            if (CF_marker[ hypre_CSRMatrixJ(dist2walks_diag)[j] ] == C_PT && hypre_CSRMatrixData(dist2walks_diag)[j] > max_rs_weight)
+            if (CF_marker[ hypre_CSRMatrixJ(dist2walks_diag)[j] ] == C_PT)
             {
-               max_rs_weight = hypre_CSRMatrixData(dist2walks_diag)[j];
+               measure_array[i] += hypre_CSRMatrixData(dist2walks_diag)[j];
             }
-            /* WM: TODO - need to check offd as well in parallel */
          }
-         measure_array[i] += max_rs_weight;
+         measure_array[i] += hypre_Rand();
+         /* WM: NOTE - I need to communicate CF_marker at distance 2 from the boundary (i.e. matvec comm pattern for dist2walks...) */
+         /* for (j = hypre_CSRMatrixI(dist2walks_offd)[i]; j < hypre_CSRMatrixI(dist2walks_offd)[i+1]; j++) */
+         /* { */
+         /*    if (CF_marker_offd[ hypre_CSRMatrixJ(dist2walks_offd)[j] ] == C_PT) */
+         /*    { */
+         /*       measure_array[i] += hypre_CSRMatrixData(dist2walks_offd)[j]; */
+         /*    } */
+         /* } */
       }
 
-      /* WM: TODO - for parallel, I think I need to communicate the updated measure_array at boundaries */
+      /*------------------------------------------------
+       * WM: Communicate the updated local measures
+       *------------------------------------------------*/
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+         {
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
+            buf_data[index++] = measure_array[jrow];
+         }
+      }
+
+      if (num_procs > 1)
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, buf_data, &measure_array[num_variables]);
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+      }
 
 
       /* WM: debug - print out intermediate measure_array */
-      hypre_sprintf(my_filename, "measure_it%d_rank%d.txt", iter, my_id);
-      my_fp = fopen(my_filename, "w");
-      for (i = 0; i < num_variables; i++)
+      if (my_print_debug_files)
       {
-         hypre_fprintf(my_fp, "%f\n", measure_array[i]);
+         hypre_sprintf(my_filename, "measure_it%d_rank%d.txt", iter, my_id);
+         my_fp = fopen(my_filename, "w");
+         for (i = 0; i < num_variables; i++)
+         {
+            hypre_fprintf(my_fp, "%f\n", measure_array[i]);
+         }
+         fclose(my_fp);
       }
-      fclose(my_fp);
 
 
 
@@ -3771,6 +3929,13 @@ hypre_BoomerAMGCoarsenPRS( hypre_ParCSRMatrix    *S,
 
    } /* end while */
 
+   hypre_printf("WM: debug - total PRS iterations = %d\n", iter);
+   /* WM: debug - prevent infinite loop */
+   if (iter > 1000)
+   {
+      hypre_MPI_Finalize();
+      exit(1);
+   }
    /*
       hypre_printf("*** MIS iteration %d\n",iter);
       hypre_printf("graph_size remaining %d\n",graph_size);

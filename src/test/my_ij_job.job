@@ -7,8 +7,15 @@
 #SBATCH -o output.my_ij_job
 
 source /usr/workspace/dragon/drl-env-ci/bin/activate
-rm rank*.txt
+rm *_rank*.txt
 rm *.png
-srun -n 1 ./ij -9pt -n 20 20 -prs -mxl 2 -mg_max_iter 1
+
+# srun -n 1 ./ij -9pt -n 20 20 -pmis -mxl 2 -mg_max_iter 1
+srun -n 4 valgrind ./ij -P 2 2 -9pt -n 40 40 -prs -mxl 2 -mg_max_iter 1
+# srun -n 4 ./ij -P 2 2 -9pt -n 40 40 -pmis -mxl 2 -mg_max_iter 1
+
+# srun -n 1 ./ij -9pt -n 2000 2000 -pmis -mg_max_iter 1
+# srun -n 1 ./ij -9pt -n 2000 2000 -prs -mg_max_iter 1
+
 python make_cf_plots.py
 

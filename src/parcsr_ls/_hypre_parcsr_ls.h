@@ -2100,6 +2100,8 @@ HYPRE_Int hypre_BoomerAMGBuildInterpGSMG ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_
 /* par_indepset.c */
 HYPRE_Int hypre_BoomerAMGIndepSetInit ( hypre_ParCSRMatrix *S, HYPRE_Real *measure_array,
                                         HYPRE_Int seq_rand );
+HYPRE_Int hypre_BoomerAMGIndepSetInit2 ( hypre_ParCSRMatrix *S, HYPRE_Real *measure_array,
+                                         HYPRE_Int seq_rand, HYPRE_Real factor );
 HYPRE_Int hypre_BoomerAMGIndepSet ( hypre_ParCSRMatrix *S, HYPRE_Real *measure_array,
                                     HYPRE_Int *graph_array, HYPRE_Int graph_array_size, HYPRE_Int *graph_array_offd,
                                     HYPRE_Int graph_array_offd_size, HYPRE_Int *IS_marker, HYPRE_Int *IS_marker_offd );
