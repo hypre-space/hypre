@@ -635,6 +635,11 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 #endif
    }
 
+   if (location == HYPRE_MEMORY_UNIFIED)
+   {
+      return hypre_MEMORY_UNIFIED;
+   }
+
    return hypre_MEMORY_UNDEFINED;
 }
 

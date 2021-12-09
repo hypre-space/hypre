@@ -1378,139 +1378,6 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
   return hypre_error_flag;
 }
 
-
-HYPRE_Int
-hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
-{
-  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-  dim3           bDim, gDim;
-
-  bDim = hypre_GetDefaultDeviceBlockDimension();
-  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-  HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
-                   nrows, A_i, A_j, A_data);
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
-{
-  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-  {
-    return 0;
-  }
-
-  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
-
-  HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRCheckDiagFirst, gDim, bDim,
-                    hypre_CSRMatrixNumRows(A),
-                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
-
-  HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
-                                      result,
-                                      result + hypre_CSRMatrixNumRows(A) );
-
-  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return ierr;
-}
-
-/* For square A, find numerical zeros (absolute values <= tol) on its diagonal and replace with v
- * Does NOT assume diagonal is the first entry of each row of A
- * In debug mode:
- *    Returns the number of rows that do not have diag in the pattern
- *    (i.e., structural zeroes on the diagonal)
- */
-HYPRE_Int
-hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
-                                  HYPRE_Complex    v,
-                                  HYPRE_Real       tol )
-{
-  HYPRE_Int ierr = 0;
-
-  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-  {
-    return ierr;
-  }
-
-  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
-
-#if HYPRE_DEBUG
-  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-#else
-  HYPRE_Int *result = NULL;
-#endif
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
-                    v, hypre_CSRMatrixNumRows(A),
-                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                    tol, result );
-
-#if HYPRE_DEBUG
-  ierr = HYPRE_THRUST_CALL( reduce,
-                            result,
-                            result + hypre_CSRMatrixNumRows(A) );
-
-  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-#endif
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return ierr;
-}
-
-HYPRE_Int
-hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
-                                  HYPRE_Complex   *new_diag,
-                                  HYPRE_Complex    v,
-                                  HYPRE_Real       tol )
-{
-  HYPRE_Int ierr = 0;
-
-  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-  {
-    return ierr;
-  }
-
-  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
-
-#if HYPRE_DEBUG
-  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-#else
-  HYPRE_Int *result = NULL;
-#endif
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixReplaceDiagDevice, gDim, bDim,
-                    new_diag, v, hypre_CSRMatrixNumRows(A),
-                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                    tol, result );
-
-#if HYPRE_DEBUG
-  ierr = HYPRE_THRUST_CALL( reduce,
-                            result,
-                            result + hypre_CSRMatrixNumRows(A) );
-
-  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-#endif
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return ierr;
-}
-
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Int2;
 struct Int2Unequal : public thrust::unary_function<Int2, bool>
 {
@@ -1593,62 +1460,6 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
   hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
 
   return hypre_error_flag;
-}
-
-void
-hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
-                                    HYPRE_Int       *CF_i,
-                                    HYPRE_Int       *CF_j,
-                                    HYPRE_Complex   *row_sum,
-                                    HYPRE_Int        type,
-                                    HYPRE_Complex    scal,
-                                    const char      *set_or_add)
-{
-  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-  dim3           bDim, gDim;
-
-  bDim = hypre_GetDefaultDeviceBlockDimension();
-  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-  if (type == 0)
-  {
-    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                      row_sum, scal, set_or_add[0] == 's' );
-  }
-  else if (type == 1)
-  {
-    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                      row_sum, scal, set_or_add[0] == 's' );
-  }
-  else if (type == 2)
-  {
-    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                      row_sum, scal, set_or_add[0] == 's' );
-  }
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-}
-
-void
-hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
-                                      HYPRE_Complex   *d,
-                                      HYPRE_Int        type)
-{
-  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-  dim3           bDim, gDim;
-
-  bDim = hypre_GetDefaultDeviceBlockDimension();
-  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
 }
 
 /* return C = [A; B] */
@@ -1815,49 +1626,6 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
   hypre_CSRMatrixJ(A) = new_j;
   hypre_CSRMatrixData(A) = new_data;
   hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
-
-  return hypre_error_flag;
-}
-
-/* markA: array of size nnz(A), for pattern of (A and B), markA is the column indices as in A_J
- * Otherwise, mark pattern not in A-B as -1 in markA
- * Note the special treatment for diagonal entries of A (marked as -2) */
-HYPRE_Int
-hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
-                                hypre_CSRMatrix *B,
-                                HYPRE_Int       *markA,
-                                HYPRE_Int        diag_opt)
-{
-  HYPRE_Int nrows = hypre_CSRMatrixNumRows(A);
-  HYPRE_Int nnzA  = hypre_CSRMatrixNumNonzeros(A);
-  HYPRE_Int nnzB  = hypre_CSRMatrixNumNonzeros(B);
-
-  HYPRE_Int *Cii = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
-  HYPRE_Int *Cjj = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
-  HYPRE_Int *idx = hypre_TAlloc(HYPRE_Int, nnzA + nnzB, HYPRE_MEMORY_DEVICE);
-
-  hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzA, hypre_CSRMatrixI(A), Cii);
-  hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzB, hypre_CSRMatrixI(B), Cii + nnzA);
-  hypre_TMemcpy(Cjj,        hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-  hypre_TMemcpy(Cjj + nnzA, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-  HYPRE_THRUST_CALL( sequence, idx, idx + nnzA + nnzB );
-
-  HYPRE_THRUST_CALL( stable_sort_by_key,
-                     thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)),
-                     thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)) + nnzA + nnzB,
-                     idx );
-
-  hypre_TMemcpy(markA, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-  dim3 gDim = hypre_GetDefaultDeviceGridDimension(nnzA + nnzB, "thread", bDim);
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixIntersectPattern, gDim, bDim,
-                    nnzA + nnzB, nnzA, Cii, Cjj, idx, markA, diag_opt );
-
-  hypre_TFree(Cii, HYPRE_MEMORY_DEVICE);
-  hypre_TFree(Cjj, HYPRE_MEMORY_DEVICE);
-  hypre_TFree(idx, HYPRE_MEMORY_DEVICE);
 
   return hypre_error_flag;
 }
@@ -2167,7 +1935,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int         job,                 /* 0: qu
   }
 
   HYPRE_BigInt *const_iterator = hypre_TAlloc(HYPRE_BigInt, B_ext_diag_nnz, HYPRE_MEMORY_DEVICE);
-  hypre_DeviceDataComputeStream(hypre_handle())->fill(const_iterator, first_col_diag_B, B_ext_diag_nnz*sizeof(HYPRE_BigInt)).wait();
+  hypre_HandleComputeStream(hypre_handle())->fill(const_iterator, first_col_diag_B, B_ext_diag_nnz*sizeof(HYPRE_BigInt)).wait();
   HYPRE_ONEDPL_CALL( std::transform,
                      B_ext_diag_bigj,
                      B_ext_diag_bigj + B_ext_diag_nnz,
@@ -2333,8 +2101,8 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
   reduced_col_nnz     = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
 
   // ABB: Replace values in-place with dpct::make_constant_iterator(1)
-  HYPRE_Int* values = hypre_TAlloc(HYPRE_Int, nnz_A, hypre_MEMORY_UNIFIED);
-  hypre_DeviceDataComputeStream(hypre_handle())->fill(values, 1, nnz_A*sizeof(HYPRE_Int)).wait();
+  HYPRE_Int* values = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_UNIFIED);
+  hypre_HandleComputeStream(hypre_handle())->fill(values, 1, nnz_A*sizeof(HYPRE_Int)).wait();
   std::pair<HYPRE_Int*, HYPRE_Int*> new_end =
     HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, A_j_sorted, A_j_sorted + nnz_A,
                        values,
@@ -2357,139 +2125,6 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
   hypre_SyncDeviceComputeStream(hypre_handle());
 
   return hypre_error_flag;
-}
-
-
-HYPRE_Int
-hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
-{
-  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-  sycl::range<1> bDim, gDim;
-
-  bDim = hypre_GetDefaultDeviceBlockDimension();
-  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-  HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
-                   nrows, A_i, A_j, A_data);
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
-{
-  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-  {
-    return 0;
-  }
-
-  sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-  sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
-
-  HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRCheckDiagFirst, gDim, bDim,
-                    hypre_CSRMatrixNumRows(A),
-                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
-
-  HYPRE_Int ierr = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce,
-                                      result,
-                                      result + hypre_CSRMatrixNumRows(A) );
-
-  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return ierr;
-}
-
-/* For square A, find numerical zeros (absolute values <= tol) on its diagonal and replace with v
- * Does NOT assume diagonal is the first entry of each row of A
- * In debug mode:
- *    Returns the number of rows that do not have diag in the pattern
- *    (i.e., structural zeroes on the diagonal)
- */
-HYPRE_Int
-hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
-                                  HYPRE_Complex    v,
-                                  HYPRE_Real       tol )
-{
-  HYPRE_Int ierr = 0;
-
-  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-  {
-    return ierr;
-  }
-
-  sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-  sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
-
-#if HYPRE_DEBUG
-  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-#else
-  HYPRE_Int *result = NULL;
-#endif
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
-                    v, hypre_CSRMatrixNumRows(A),
-                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                    tol, result );
-
-#if HYPRE_DEBUG
-  ierr = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce,
-                            result,
-                            result + hypre_CSRMatrixNumRows(A) );
-
-  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-#endif
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return ierr;
-}
-
-HYPRE_Int
-hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
-                                  HYPRE_Complex   *new_diag,
-                                  HYPRE_Complex    v,
-                                  HYPRE_Real       tol )
-{
-  HYPRE_Int ierr = 0;
-
-  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-  {
-    return ierr;
-  }
-
-  sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-  sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
-
-#if HYPRE_DEBUG
-  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-#else
-  HYPRE_Int *result = NULL;
-#endif
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixReplaceDiagDevice, gDim, bDim,
-                    new_diag, v, hypre_CSRMatrixNumRows(A),
-                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                    tol, result );
-
-#if HYPRE_DEBUG
-  ierr = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce,
-                            result,
-                            result + hypre_CSRMatrixNumRows(A) );
-
-  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-#endif
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-
-  return ierr;
 }
 
 HYPRE_Int
@@ -2564,62 +2199,6 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
   return hypre_error_flag;
 }
 
-void
-hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
-                                    HYPRE_Int       *CF_i,
-                                    HYPRE_Int       *CF_j,
-                                    HYPRE_Complex   *row_sum,
-                                    HYPRE_Int        type,
-                                    HYPRE_Complex    scal,
-                                    const char      *set_or_add)
-{
-  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-  sycl::range<1>           bDim, gDim;
-
-  bDim = hypre_GetDefaultDeviceBlockDimension();
-  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-  if (type == 0)
-  {
-    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                      row_sum, scal, set_or_add[0] == 's' );
-  }
-  else if (type == 1)
-  {
-    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                      row_sum, scal, set_or_add[0] == 's' );
-  }
-  else if (type == 2)
-  {
-    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                      row_sum, scal, set_or_add[0] == 's' );
-  }
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-}
-
-void
-hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
-                                      HYPRE_Complex   *d,
-                                      HYPRE_Int        type)
-{
-  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-  sycl::range<1>           bDim, gDim;
-
-  bDim = hypre_GetDefaultDeviceBlockDimension();
-  gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
-
-  hypre_SyncDeviceComputeStream(hypre_handle());
-}
-
 /* return C = [A; B] */
 hypre_CSRMatrix*
 hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
@@ -2640,7 +2219,7 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
   HYPRE_Int *const_iterator = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(C) + 1, HYPRE_MEMORY_DEVICE);
-  hypre_DeviceDataComputeStream(hypre_handle())->fill(const_iterator, hypre_CSRMatrixNumNonzeros(A), (hypre_CSRMatrixNumRows(C) + 1)*sizeof(HYPRE_Int)).wait();
+  hypre_HandleComputeStream(hypre_handle())->fill(const_iterator, hypre_CSRMatrixNumNonzeros(A), (hypre_CSRMatrixNumRows(C) + 1)*sizeof(HYPRE_Int)).wait();
   HYPRE_ONEDPL_CALL( std::transform,
                      C_i + hypre_CSRMatrixNumRows(A) + 1,
                      C_i + hypre_CSRMatrixNumRows(C) + 1,
@@ -2782,6 +2361,158 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
   return hypre_error_flag;
 }
 
+#endif /* HYPRE_USING_SYCL */
+
+
+#if defined(HYPRE_USING_GPU)
+
+/* For square A, find numerical zeros (absolute values <= tol) on its diagonal and replace with v
+ * Does NOT assume diagonal is the first entry of each row of A
+ * In debug mode:
+ *    Returns the number of rows that do not have diag in the pattern
+ *    (i.e., structural zeroes on the diagonal)
+ */
+HYPRE_Int
+hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
+                                  HYPRE_Complex    v,
+                                  HYPRE_Real       tol )
+{
+  HYPRE_Int ierr = 0;
+
+  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+  {
+    return ierr;
+  }
+
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
+
+#if HYPRE_DEBUG
+  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+#else
+  HYPRE_Int *result = NULL;
+#endif
+
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
+                    v, hypre_CSRMatrixNumRows(A),
+                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                    tol, result );
+
+#if HYPRE_DEBUG
+#if defined(HYPRE_USING_CUDA)
+  ierr = HYPRE_THRUST_CALL( reduce,
+                            result,
+                            result + hypre_CSRMatrixNumRows(A) );
+#elif defined(HYPRE_USING_SYCL)
+  ierr = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce,
+                            result,
+                            result + hypre_CSRMatrixNumRows(A) );
+#endif
+  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+#endif // HYPRE_DEBUG
+
+  hypre_SyncDeviceComputeStream(hypre_handle());
+
+  return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
+                                  HYPRE_Complex   *new_diag,
+                                  HYPRE_Complex    v,
+                                  HYPRE_Real       tol )
+{
+  HYPRE_Int ierr = 0;
+
+  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+  {
+    return ierr;
+  }
+
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
+
+#if HYPRE_DEBUG
+  HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+#else
+  HYPRE_Int *result = NULL;
+#endif
+
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixReplaceDiagDevice, gDim, bDim,
+                    new_diag, v, hypre_CSRMatrixNumRows(A),
+                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                    tol, result );
+
+#if HYPRE_DEBUG
+#if defined(HYPRE_USING_CUDA)
+  ierr = HYPRE_THRUST_CALL( reduce,
+                            result,
+                            result + hypre_CSRMatrixNumRows(A) );
+#elif defined(HYPRE_USING_SYCL)
+  ierr = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce,
+                            result,
+                            result + hypre_CSRMatrixNumRows(A) );
+#endif
+  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+#endif // HYPRE_DEBUG
+
+  hypre_SyncDeviceComputeStream(hypre_handle());
+
+  return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
+{
+  if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+  {
+    return 0;
+  }
+
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
+
+  HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRCheckDiagFirst, gDim, bDim,
+                    hypre_CSRMatrixNumRows(A),
+                    hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
+
+#if defined(HYPRE_USING_CUDA)
+  HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
+                                      result,
+                                      result + hypre_CSRMatrixNumRows(A) );
+#elif defined(HYPRE_USING_SYCL)
+  HYPRE_Int ierr = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce,
+                                      result,
+                                      result + hypre_CSRMatrixNumRows(A) );
+#endif
+
+  hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+
+  hypre_SyncDeviceComputeStream(hypre_handle());
+
+  return ierr;
+}
+
+HYPRE_Int
+hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
+{
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+
+  HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
+                   nrows, A_i, A_j, A_data);
+
+  hypre_SyncDeviceComputeStream(hypre_handle());
+
+  return hypre_error_flag;
+}
+
 /* markA: array of size nnz(A), for pattern of (A and B), markA is the column indices as in A_J
  * Otherwise, mark pattern not in A-B as -1 in markA
  * Note the special treatment for diagonal entries of A (marked as -2) */
@@ -2803,17 +2534,26 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnzB, hypre_CSRMatrixI(B), Cii + nnzA);
   hypre_TMemcpy(Cjj,        hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
   hypre_TMemcpy(Cjj + nnzA, hypre_CSRMatrixJ(B), HYPRE_Int, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_CUDA)
+  HYPRE_THRUST_CALL( sequence, idx, idx + nnzA + nnzB );
+
+  HYPRE_THRUST_CALL( stable_sort_by_key,
+                     thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)),
+                     thrust::make_zip_iterator(thrust::make_tuple(Cii, Cjj)) + nnzA + nnzB,
+                     idx );
+#elif defined(HYPRE_USING_SYCL)
   HYPRE_ONEDPL_CALL( dpct::iota, idx, idx + nnzA + nnzB, 0 );
 
-  auto keys_begin = oneapi::dpl::make_zip_iterator(Cii, Cjj);
-  auto zipped_begin = oneapi::dpl::make_zip_iterator(keys_begin, idx);
+  auto zipped_begin = oneapi::dpl::make_zip_iterator(Cii, Cjj, idx);
   HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + nnzA + nnzB,
                      [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+#endif
 
   hypre_TMemcpy(markA, hypre_CSRMatrixJ(A), HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-  sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-  sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(nnzA + nnzB, "thread", bDim);
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(nnzA + nnzB, "thread", bDim);
 
   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixIntersectPattern, gDim, bDim,
                     nnzA + nnzB, nnzA, Cii, Cjj, idx, markA, diag_opt );
@@ -2825,62 +2565,112 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
   return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_SYCL */
+void
+hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
+                                      HYPRE_Complex   *d,
+                                      HYPRE_Int        type)
+{
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
 
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-#if defined(HYPRE_USING_GPU)
+  HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
+
+  hypre_SyncDeviceComputeStream(hypre_handle());
+}
+
+void
+hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
+                                    HYPRE_Int       *CF_i,
+                                    HYPRE_Int       *CF_j,
+                                    HYPRE_Complex   *row_sum,
+                                    HYPRE_Int        type,
+                                    HYPRE_Complex    scal,
+                                    const char      *set_or_add)
+{
+  HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+  HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+  HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+
+  dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+  dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+
+  if (type == 0)
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
+  else if (type == 1)
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
+  else if (type == 2)
+  {
+    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
+                      row_sum, scal, set_or_add[0] == 's' );
+  }
+
+  hypre_SyncDeviceComputeStream(hypre_handle());
+}
+
 
 HYPRE_Int
 hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
                                hypre_CSRMatrix **AT_ptr,
                                HYPRE_Int         data)
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   hypre_CSRMatrix  *C;
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+  HYPRE_Complex    *C_data;
+  HYPRE_Int        *C_i;
+  HYPRE_Int        *C_j;
+  hypre_CSRMatrix  *C;
 
 
-   /* trivial case */
-   if (nnz_A == 0)
-   {
-      C_i =    hypre_CTAlloc(HYPRE_Int,     ncols_A + 1, HYPRE_MEMORY_DEVICE);
-      C_j =    hypre_CTAlloc(HYPRE_Int,     0,           HYPRE_MEMORY_DEVICE);
-      C_data = hypre_CTAlloc(HYPRE_Complex, 0,           HYPRE_MEMORY_DEVICE);
-   }
-   else
-   {
+  /* trivial case */
+  if (nnz_A == 0)
+  {
+    C_i =    hypre_CTAlloc(HYPRE_Int,     ncols_A + 1, HYPRE_MEMORY_DEVICE);
+    C_j =    hypre_CTAlloc(HYPRE_Int,     0,           HYPRE_MEMORY_DEVICE);
+    C_data = hypre_CTAlloc(HYPRE_Complex, 0,           HYPRE_MEMORY_DEVICE);
+  }
+  else
+  {
 #if defined(HYPRE_USING_CUSPARSE)
-      hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
-                                     data);
+    hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                   data);
 #elif defined(HYPRE_USING_ROCSPARSE)
-      hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
-                                      data);
+    hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                    data);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
-      hypreDevice_CSRSpTransOnemklsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
-                                         data);
+    hypreDevice_CSRSpTransOnemklsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                       data);
 #else
-      hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+    hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
-   }
+  }
 
-   C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+  C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
+  hypre_CSRMatrixI(C) = C_i;
+  hypre_CSRMatrixJ(C) = C_j;
+  hypre_CSRMatrixData(C) = C_data;
+  hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-   *AT_ptr = C;
+  *AT_ptr = C;
 
-   hypre_SyncDeviceComputeStream(hypre_handle());
+  hypre_SyncDeviceComputeStream(hypre_handle());
 
-   return hypre_error_flag;
+  return hypre_error_flag;
 }
 
 #endif /* #if defined(HYPRE_USING_GPU) */

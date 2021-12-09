@@ -9,15 +9,15 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_SYCL)
-sycl::range<1> hypre_GetDefaultDeviceBlockDimension()
+dim3 hypre_GetDefaultDeviceBlockDimension()
 {
    sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
    return wgDim;
 }
 
-sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
-                                                   const char *granularity,
-                                                   sycl::range<1> wgDim)
+dim3 hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
+					 const char *granularity,
+					 sycl::range<1> wgDim)
 {
    HYPRE_Int num_WGs = 0;
    HYPRE_Int num_workitems_per_WG = wgDim[0];
@@ -42,7 +42,67 @@ sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
 
    return gDim;
 }
-#endif
+
+
+// /**
+//  * Get NNZ of each row in d_row_indices and stored the results in d_rownnz
+//  * All pointers are device pointers.
+//  * d_rownnz can be the same as d_row_indices
+//  */
+// void
+// hypreCUDAKernel_GetRowNnz(sycl::nd_item<1>& item,
+// 			  HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+//                           HYPRE_Int *d_offd_ia,
+//                           HYPRE_Int *d_rownnz)
+// {
+//   const HYPRE_Int global_thread_id = hypre_sycl_get_grid_thread_id<1, 1>(item);
+
+//   if (global_thread_id < nrows)
+//   {
+//     HYPRE_Int i;
+
+//     if (d_row_indices)
+//     {
+//       i = read_only_load(&d_row_indices[global_thread_id]);
+//     }
+//     else
+//     {
+//       i = global_thread_id;
+//     }
+
+//     d_rownnz[global_thread_id] = read_only_load(&d_diag_ia[i + 1]) - read_only_load(&d_diag_ia[i]) +
+//       read_only_load(&d_offd_ia[i + 1]) - read_only_load(&d_offd_ia[i]);
+//   }
+// }
+
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                   HYPRE_Int *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
+
+   // TODO: need to fix this by passing a "predicate" as last argument
+   HYPRE_ONEDPL_CALL( dpct::scatter_if,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
+                      d_row_ptr,
+                      oneapi::dpl::make_transform_iterator( oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
+                                                            [](auto t) { return std::get<0>(t) != std::get<1>(t); } ),
+                      d_row_ind );
+
+   HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+                      sycl::maximum<HYPRE_Int>() );
+
+   return hypre_error_flag;
+}
+
+#endif // HYPRE_USING_SYCL
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -1570,4 +1630,3 @@ hypre_bind_device( HYPRE_Int myid,
 
    return hypre_error_flag;
 }
-

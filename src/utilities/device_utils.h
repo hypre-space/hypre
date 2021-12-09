@@ -53,6 +53,8 @@
 
 #elif defined(HYPRE_USING_SYCL)
 
+typedef sycl::range<1> dim3;
+
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
 
@@ -335,17 +337,22 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
+/* device_utils.c, some common functions for CUDA, SYCL, HIP */
+
+dim3 hypre_GetDefaultDeviceBlockDimension();
+
+dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
+					  dim3 bDim );
+
+HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                             HYPRE_Int *d_row_ind);
+
 #endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 
 /* device_utils.c */
 HYPRE_Int HYPRE_SetSYCLDevice(sycl::device user_device);
-sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
-
-sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
-                                                    sycl::range<1> bDim );
-
 #endif // #if defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -968,9 +975,6 @@ HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
-                                             HYPRE_Int *d_row_ind);
-
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
 
 HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
@@ -1005,20 +1009,19 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_SYCL)
 
-#define PSTL_USE_PARALLEL_POLICIES 0 // for libstdc++ 9
-#define _GLIBCXX_USE_TBB_PAR_BACKEND 0 // for libstdc++ 10
+#pragma once
 
-// #include <oneapi/dpl/execution>
-// #include <oneapi/dpl/algorithm>
-// #include <oneapi/dpl/iterator>
-// #include <oneapi/dpl/functional>
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
 
-//#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if
+#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if, scatter_if
 
-// #include <algorithm>
-// #include <numeric>
-// #include <functional>
-// #include <iterator>
+#include <algorithm>
+#include <numeric>
+#include <functional>
+#include <iterator>
 
 #define __forceinline__ __inline__ __attribute__((always_inline))
 
@@ -1047,7 +1050,7 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
    }                                                                                         \
    else                                                                                      \
    {                                                                                         \
-     hypre_DeviceDataComputeStream(hypre_handle())->parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), \
+     hypre_HandleComputeStream(hypre_handle())->parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), \
         [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {        \
            (kernel_name)(item, __VA_ARGS__);                                                 \
      });                                                                                     \
@@ -1058,7 +1061,7 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
  * The following one works OK for now */
 
 #define HYPRE_ONEDPL_CALL(func_name, ...) \
-  func_name(oneapi::dpl::execution::make_device_policy(*hypre_DeviceDataComputeStream(hypre_handle()), __VA_ARGS__);
+  func_name(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
 // /* return the number of threads in block */
 // template <hypre_int dim>
