@@ -80,7 +80,9 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 
       if (alg == 1)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         bool binned = 0;
+
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -96,8 +98,16 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
 #endif
-         hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+         if (binned)
+         {
+            hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
+               (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+         }
+         else
+         {
+            hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
+               (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+         }
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;

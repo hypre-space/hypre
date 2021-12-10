@@ -22,8 +22,10 @@
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
 #endif
 
-#define HYPRE_SPGEMM_TIMING
-#define HYPRE_SPGEMM_PRINTF
+#define HYPRE_SPGEMM_NBIN 10
+
+//#define HYPRE_SPGEMM_TIMING
+//#define HYPRE_SPGEMM_PRINTF
 //#define HYPRE_SPGEMM_NVTX
 
 /* ----------------------------------------------------------------------------------------------- *
@@ -308,6 +310,32 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
    return hashval;
 }
 
+template<typename T, HYPRE_Int s>
+struct spgemm_bin_op : public thrust::unary_function<T, char>
+{
+
+   __device__ T operator()(const T &x)
+   {
+      if (x <= 0)
+      {
+         return 0;
+      }
+
+      const T y = (x + s - 1) / s;
+
+#pragma unroll
+      for (char i = 0; i < HYPRE_SPGEMM_NBIN - 1; i++)
+      {
+         if (y <= (1 << i))
+         {
+            return i + 1;
+         }
+      }
+
+      return HYPRE_SPGEMM_NBIN;
+   }
+};
+
 void hypre_create_ija(HYPRE_Int m, HYPRE_Int *row_id, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz_ptr );
 
 void hypre_create_ija(HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int m, HYPRE_Int *row_id, HYPRE_Int *d_c, HYPRE_Int *d_i, HYPRE_Int **d_j, HYPRE_Complex **d_a, HYPRE_Int *nnz_ptr );
@@ -321,6 +349,8 @@ HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_
 HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
 HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int exact_rownnz, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+
+HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int exact_rownnz, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
 HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 

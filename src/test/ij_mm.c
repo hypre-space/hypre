@@ -124,6 +124,8 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       hypre_PrintTiming("Host Parcsr Matrix-by-Matrix, A*A", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_B_host);
    }
 
    if (print_system)
@@ -134,6 +136,8 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       }
       sprintf(fname,"%s/%s", file_dir, "IJ.out.A");
       hypre_ParCSRMatrixPrintIJ(parcsr_A_host, 0, 0, fname);
+
+      //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A_host), 1, 1, 0, "A.mtx");
    }
 
    for (i = 0 ; i < rep; i++)
@@ -176,8 +180,9 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       if (myid == 0)
       {
-         printf("A^2: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
+         printf("A^2: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
                hypre_ParCSRMatrixGlobalNumCols(parcsr_B_host2),
+               hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
                hypre_ParCSRMatrixNumNonzeros(parcsr_B_host2),
                rfnorm);
       }
@@ -191,6 +196,8 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       }
       sprintf(fname,"%s/%s", file_dir, "IJ.out.B");
       hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
+      sprintf(fname,"%s/%s", file_dir, "IJ.out.B.CPU");
+      hypre_ParCSRMatrixPrintIJ(parcsr_B_host, 0, 0, fname);
    }
 
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_B);
@@ -429,7 +436,7 @@ main( hypre_int argc,
    HYPRE_Int          rowest_nsamples = -1; /* default */
    HYPRE_Real         rowest_mult = -1.0; /* default */
    HYPRE_Int          zero_mem_cost = 0;
-   char               hash_type = 'L';
+   char               hash_type = 'D';
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -476,7 +483,13 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-fromfile") == 0 )
+      if ( strcmp(argv[arg_index], "-fromMMfile") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = -2;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-fromfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -1;
@@ -677,7 +690,17 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    time_index = hypre_InitializeTiming("Generate Matrix A");
    hypre_BeginTiming(time_index);
-   if ( build_matrix_type == -1 )
+   if ( build_matrix_type == -2 )
+   {
+      ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
+                                   HYPRE_PARCSR, &ij_A );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix in MM format!\n");
+         exit(1);
+      }
+   }
+   else if ( build_matrix_type == -1 )
    {
       ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
                                  HYPRE_PARCSR, &ij_A );
