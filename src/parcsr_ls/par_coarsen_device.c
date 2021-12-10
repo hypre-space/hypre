@@ -328,8 +328,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int        num_sends     = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    dim3 bDim, gDim;
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(num_rows_diag, "thread", bDim);
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(num_rows_diag, "thread", bDim);
 
    hypre_ParCSRCommHandle *comm_handle;
    HYPRE_Int *new_end;
@@ -495,8 +495,8 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    HYPRE_Int        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    dim3 bDim, gDim;
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(graph_diag_size, "warp", bDim);
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
                       gDim, bDim,

@@ -35,7 +35,7 @@ extern "C" {
 #define HYPRE_MAXDIM 3
 #endif
 
-#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 #define hypre_BoxLoopSetOneBlock()
 #else
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
@@ -2647,7 +2647,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #ifndef HYPRE_BOXLOOP_HOST_HEADER
 #define HYPRE_BOXLOOP_HOST_HEADER
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_DEVICE_OPENMP)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_USING_SYCL)
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION

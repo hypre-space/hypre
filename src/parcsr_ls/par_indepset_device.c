@@ -167,8 +167,8 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set
     *-------------------------------------------------------*/
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(graph_diag_size, "warp", bDim);
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IndepSetMain, gDim, bDim,
                       graph_diag_size, graph_diag, measure_diag, measure_offd,
@@ -188,7 +188,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* adjust IS_marker_diag from the received */
-   gDim = hypre_GetDefaultCUDAGridDimension(num_elmts_send, "thread", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(num_elmts_send, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IndepSetFixMarker, gDim, bDim,
                       IS_marker_diag, num_elmts_send, send_map_elmts,

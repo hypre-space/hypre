@@ -61,12 +61,12 @@ FILES =\
  timing.c
 
 CUFILES=\
- cuda_utils.c\
+ device_utils.c\
  general.c\
  handle.c\
  int_array.c\
  memory.c\
- omp_device.c \
+ omp_device.c\
  nvtx.c
 
 COBJS = ${FILES:.c=.o}

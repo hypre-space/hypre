@@ -100,6 +100,7 @@ extern "C++" {
 cat boxloop_raja.h         >> $INTERNAL_HEADER
 cat boxloop_kokkos.h       >> $INTERNAL_HEADER
 cat boxloop_cuda.h         >> $INTERNAL_HEADER
+cat boxloop_sycl.h         >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
