@@ -104,8 +104,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 #ifdef __cplusplus
 }
 #endif
-
-#define SECOND_TIME 0
+#define SECOND_TIME 1
 
 hypre_int
 main( hypre_int argc,
@@ -3277,6 +3276,16 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_x0_type == 7)
+   {
+      /* from file */
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
+      }
+
+      ReadParVectorFromFile(argc, argv, build_x0_arg_index, &x);
+   }
    else if (build_x0_type == 1)
    {
       /* random */
@@ -3380,7 +3389,9 @@ main( hypre_int argc,
    hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));
 
    /* save the initial guess for the 2nd time */
+#if SECOND_TIME
    x0_save = hypre_ParVectorCloneDeep_v2(x, hypre_ParVectorMemoryLocation(x));
+#endif
 
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver

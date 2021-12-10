@@ -390,8 +390,8 @@ hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_axpyn, gDim, bDim, d_x, n, d_y, d_z, a );
 #endif
@@ -436,8 +436,8 @@ hypreDevice_Scalen(T *d_x, size_t n, T *d_y, T v)
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_scalen, gDim, bDim, d_x, n, d_y, v );
 #endif
@@ -481,8 +481,8 @@ hypreDevice_Filln(T *d_x, size_t n, T v)
       return hypre_error_flag;
    }
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_filln, gDim, bDim, d_x, n, v );
 #endif
