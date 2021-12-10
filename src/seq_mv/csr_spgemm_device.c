@@ -70,7 +70,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
 #else
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
 #endif
    }
    else
@@ -116,7 +117,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
       else if (alg == 2)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -141,7 +142,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
       else if (alg == 3)
       {
-         d_rc = hypre_TAlloc(HYPRE_Int, 2*m, HYPRE_MEMORY_DEVICE);
+         d_rc = hypre_TAlloc(HYPRE_Int, 2 * m, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
          t1 = hypre_MPI_Wtime();
@@ -163,7 +164,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          /* row nnz is exact if no row failed */
          HYPRE_Int rownnz_exact = !HYPRE_THRUST_CALL( any_of,
                                                       d_rc + m,
-                                                      d_rc + 2*m,
+                                                      d_rc + 2 * m,
                                                       thrust::identity<HYPRE_Int>() );
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncCudaComputeStream(hypre_handle());

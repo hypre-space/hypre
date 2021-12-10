@@ -47,7 +47,7 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
 
    HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 

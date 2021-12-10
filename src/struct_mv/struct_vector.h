@@ -34,7 +34,7 @@ typedef struct hypre_StructVector_struct
                                           is the starting index of vector
                                           data corresponding to box b. */
 
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each
                                                      * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
 

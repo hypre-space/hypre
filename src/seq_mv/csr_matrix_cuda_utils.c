@@ -68,7 +68,7 @@ hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int      n,
  */
 cusparseSpMatDescr_t
 hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A,
-                                     HYPRE_Int        offset)
+                               HYPRE_Int        offset)
 {
    return hypre_CSRMatrixToCusparseSpMat_core( hypre_CSRMatrixNumRows(A),
                                                hypre_CSRMatrixNumCols(A),
@@ -88,8 +88,8 @@ hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A,
  */
 cusparseDnVecDescr_t
 hypre_VectorToCusparseDnVec(const hypre_Vector *x,
-                                  HYPRE_Int     offset,
-                                  HYPRE_Int     size_override)
+                            HYPRE_Int     offset,
+                            HYPRE_Int     size_override)
 {
    const cudaDataType data_type = hypre_HYPREComplexToCudaDataType();
 

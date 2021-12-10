@@ -633,6 +633,8 @@ SUPERLU_LIBS
 SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
+HYPRE_SYCL_LIBS
+HYPRE_SYCL_INCL
 HYPRE_HIP_LIBS
 HYPRE_HIP_INCL
 HYPRE_CUDA_LIBS
@@ -830,6 +832,7 @@ with_mli
 with_MPI
 with_cuda
 with_hip
+with_sycl
 with_cuda_home
 with_gpu_arch
 with_raja
@@ -1635,6 +1638,7 @@ Optional Packages:
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
   --with-hip              Use HIP for AMD GPUs. (default is NO).
+  --with-sycl             Use SYCL for Intel GPUs. (default is NO).
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
   --with-gpu-arch=ARG     User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
@@ -2701,10 +2705,13 @@ eval ac_res=\$$as_ac_File
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
-   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
-   develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
-   develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
+  develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
+  develop_number=$(git -C $HYPRE_SRCDIR rev-list --count $develop_lastag..HEAD)
+  develop_branch=$(git -C $HYPRE_SRCDIR rev-parse --abbrev-ref HEAD)
+  if test -n "$develop_string"; then :
+
 
 cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_STRING "$develop_string"
@@ -2715,7 +2722,7 @@ cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_NUMBER $develop_number
 _ACEOF
 
-   if test "x$develop_branch" = "xmaster"; then :
+    if test "x$develop_branch" = "xmaster"; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_BRANCH "$develop_branch"
@@ -2726,6 +2733,13 @@ else
 $as_echo "$as_me: NOTE: On branch $develop_branch, not the main development branch" >&6;}
 
 fi
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: Could not describe development branch" >&5
+$as_echo "$as_me: NOTE: Could not describe development branch" >&6;}
+
+fi
+
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: NOTE: Could not find .git directory" >&5
 $as_echo "$as_me: NOTE: Could not find .git directory" >&6;}
@@ -2799,6 +2813,11 @@ hypre_using_rocrand=no
 
 hypre_found_hip=no
 
+
+hypre_using_sycl=no
+hypre_using_onemklsparse=no
+hypre_using_onemklblas=no
+hypre_using_onemklrand=no
 
 
 hypre_blas_lib_old_style=no
@@ -4003,6 +4022,21 @@ fi
 
 
 
+# Check whether --with-sycl was given.
+if test "${with_sycl+set}" = set; then :
+  withval=$with_sycl; case "$withval" in
+    yes) hypre_using_sycl=yes ;;
+    no)  hypre_using_sycl=no ;;
+    *)   hypre_using_sycl=no ;;
+esac
+else
+  hypre_using_sycl=no
+
+fi
+
+
+
+
 # Check whether --with-cuda-home was given.
 if test "${with_cuda_home+set}" = set; then :
   withval=$with_cuda_home; for cuda_dir in $withval; do
@@ -5029,6 +5063,52 @@ test -n "$CUCC" || CUCC=""""
    if test "$hypre_using_hip" = "yes"
    then
       for ac_prog in hipcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUCC" && break
+done
+
+   fi
+
+   if test "$hypre_using_sycl" = "yes"
+   then
+      for ac_prog in dpcpp
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8582,9 +8662,9 @@ fi
 
 if test "x$hypre_using_um" = "xyes"
 then
-   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"
+   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes" && test "x$hypre_using_sycl" != "xyes"
    then
-      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, or device OpenMP!" "$LINENO" 5
+      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!" "$LINENO" 5
    fi
 fi
 if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"
@@ -8788,8 +8868,6 @@ fi
 done
 
 fi
-
-
 
 if test "x$hypre_using_raja" = "xyes"
 then
@@ -9056,7 +9134,65 @@ fi
 
 fi
 
+if test x"$hypre_using_sycl" == x"yes"; then :
 
+
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+
+
+$as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
+
+
+	     LINK_CC=${CUCC}
+        LINK_CXX=${CUCC}
+
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+           if test "$hypre_using_debug" = "yes"
+           then
+              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
+           else
+              CUFLAGS="-g -O3 ${CUFLAGS}"
+           fi
+        fi
+
+
+                                if test x"$hypre_using_debug" == x"yes"; then :
+  SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"
+elif SYCLFLAGS="-O2 ${SYCLFLAGS}"; then :
+
+fi
+
+        if test x"$hypre_using_onemklsparse" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ONEMKLSPARSE 1" >>confdefs.h
+
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
+
+fi
+
+        if test x"$hypre_using_onemklblas" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
+
+	            HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
+
+fi
+
+        if test x"$hypre_using_onemklrand" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
+
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+
+fi
+
+
+fi
 
 if test "$hypre_using_um" != "yes"
 then
@@ -9085,6 +9221,19 @@ $as_echo "$as_me: It only works for structured solvers and selected unstructured
 $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
 $as_echo "$as_me: ***********************************************************************" >&6;}
+   fi
+   if test "$hypre_using_sycl" = "yes"
+   then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-sycl=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-sycl=yes without unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
    fi
    if test "$hypre_using_device_openmp" = "yes"
    then
@@ -9182,7 +9331,7 @@ then
 $as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
 
 else
-   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"
+   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h
@@ -9317,6 +9466,9 @@ $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
+
+
 
 
 

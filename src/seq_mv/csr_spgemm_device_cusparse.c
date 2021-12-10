@@ -170,7 +170,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    hypre_assert(C_num_rows == m);
    hypre_assert(C_num_cols == n);
 
-   d_ic = hypre_TAlloc(HYPRE_Int,     C_num_rows+1, HYPRE_MEMORY_DEVICE);
+   d_ic = hypre_TAlloc(HYPRE_Int,     C_num_rows + 1, HYPRE_MEMORY_DEVICE);
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC,         HYPRE_MEMORY_DEVICE);
    d_c  = hypre_TAlloc(HYPRE_Complex, nnzC,         HYPRE_MEMORY_DEVICE);
 
@@ -178,8 +178,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    HYPRE_CUSPARSE_CALL(cusparseCsrSetPointers(matC, d_ic, d_jc, d_c));
 
    /* Copy the data into C */
-   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_copy( cusparsehandle, opA, opB, 
-                                            &alpha, matA, matB, &beta, matC, 
+   HYPRE_CUSPARSE_CALL(cusparseSpGEMM_copy( cusparsehandle, opA, opB,
+                                            &alpha, matA, matB, &beta, matC,
                                             computeType, CUSPARSE_SPGEMM_DEFAULT,
                                             spgemmDesc) );
 
@@ -280,7 +280,7 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
    HYPRE_CUSPARSE_CALL( cusparseSetPointerMode(cusparsehandle, CUSPARSE_POINTER_MODE_HOST) );
 
-   d_ic = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
+   d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 
    HYPRE_CUSPARSE_CALL( cusparseXcsrgemmNnz(cusparsehandle, transA, transB,
                                             m, n, k,

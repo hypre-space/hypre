@@ -143,7 +143,7 @@ typedef struct
    HYPRE_Int            ilu_max_iter;
    HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_reordering_type;
-   
+
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
@@ -256,7 +256,7 @@ typedef struct
    HYPRE_BigInt  *F_points_marker;
 
 #ifdef HYPRE_USING_DSUPERLU
- /* Parameters and data for SuperLU_Dist */
+   /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
 #endif

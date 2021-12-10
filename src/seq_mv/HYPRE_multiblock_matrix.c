@@ -17,7 +17,7 @@
  * HYPRE_MultiblockMatrixCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_MultiblockMatrix 
+HYPRE_MultiblockMatrix
 HYPRE_MultiblockMatrixCreate( )
 {
    return ( (HYPRE_MultiblockMatrix)
@@ -28,20 +28,20 @@ HYPRE_MultiblockMatrixCreate( )
  * HYPRE_MultiblockMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MultiblockMatrixDestroy( HYPRE_MultiblockMatrix matrix )
 {
-   return( hypre_MultiblockMatrixDestroy( (hypre_MultiblockMatrix *) matrix ) );
+   return ( hypre_MultiblockMatrixDestroy( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MultiblockMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MultiblockMatrixLimitedDestroy( HYPRE_MultiblockMatrix matrix )
 {
-   return( hypre_MultiblockMatrixLimitedDestroy( (hypre_MultiblockMatrix *) matrix ) );
+   return ( hypre_MultiblockMatrixLimitedDestroy( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -59,10 +59,10 @@ HYPRE_MultiblockMatrixInitialize( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MultiblockMatrixAssemble( HYPRE_MultiblockMatrix matrix )
 {
-   return( hypre_MultiblockMatrixAssemble( (hypre_MultiblockMatrix *) matrix ) );
+   return ( hypre_MultiblockMatrixAssemble( (hypre_MultiblockMatrix *) matrix ) );
 }
 
 
@@ -71,7 +71,7 @@ HYPRE_MultiblockMatrixAssemble( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixPrint
  *--------------------------------------------------------------------------*/
 
-void 
+void
 HYPRE_MultiblockMatrixPrint( HYPRE_MultiblockMatrix matrix )
 {
    hypre_MultiblockMatrixPrint( (hypre_MultiblockMatrix *) matrix );
@@ -86,22 +86,22 @@ HYPRE_MultiblockMatrixPrint( HYPRE_MultiblockMatrix matrix )
  * HYPRE_MultiblockMatrixSetNumSubmatrices
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_MultiblockMatrixSetNumSubmatrices( HYPRE_MultiblockMatrix matrix, HYPRE_Int n )
 {
-   return( hypre_MultiblockMatrixSetNumSubmatrices( 
-             (hypre_MultiblockMatrix *) matrix, n ) );
+   return ( hypre_MultiblockMatrixSetNumSubmatrices(
+               (hypre_MultiblockMatrix *) matrix, n ) );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MultiblockMatrixSetSubmatrixType
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix, 
-                                      HYPRE_Int j,
-                                      HYPRE_Int type )
+HYPRE_Int
+HYPRE_MultiblockMatrixSetSubmatrixType( HYPRE_MultiblockMatrix matrix,
+                                        HYPRE_Int j,
+                                        HYPRE_Int type )
 {
-   return( hypre_MultiblockMatrixSetSubmatrixType( 
-             (hypre_MultiblockMatrix *) matrix, j, type ) );
+   return ( hypre_MultiblockMatrixSetSubmatrixType(
+               (hypre_MultiblockMatrix *) matrix, j, type ) );
 }
