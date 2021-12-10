@@ -1695,7 +1695,6 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
                                 a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -1707,7 +1706,6 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
                                 a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
       czb += tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
 
@@ -1995,7 +1993,6 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
       cxb += tcx;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -2010,7 +2007,6 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
       cyb += tcy;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
@@ -2025,7 +2021,6 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
                      a_bne[Ai]);
       czb += tcz;
-#endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
 
