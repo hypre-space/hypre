@@ -116,9 +116,9 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    if (myid == 0)
    {
       hypre_printf("A %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
-                                                  hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
-                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_A),
-                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_A) / hypre_ParCSRMatrixGlobalNumRows(parcsr_A));
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_A),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_A) / hypre_ParCSRMatrixGlobalNumRows(parcsr_A));
    }
 
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
@@ -194,9 +194,10 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       if (myid == 0)
       {
-         printf("A^2: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
+         printf("A^2: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n",
+                hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
                 hypre_ParCSRMatrixGlobalNumCols(parcsr_B_host2),
-               hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
+                hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
                 hypre_ParCSRMatrixNumNonzeros(parcsr_B_host2),
                 rfnorm);
       }
@@ -210,7 +211,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       }
       sprintf(fname, "%s/%s", file_dir, "IJ.out.B");
       hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
-      sprintf(fname,"%s/%s", file_dir, "IJ.out.B.CPU");
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.B.CPU");
       hypre_ParCSRMatrixPrintIJ(parcsr_B_host, 0, 0, fname);
    }
 
@@ -218,9 +219,9 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    if (myid == 0)
    {
       hypre_printf("B %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B),
-                                                  hypre_ParCSRMatrixGlobalNumCols(parcsr_B),
-                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_B),
-                                                  hypre_ParCSRMatrixNumNonzeros(parcsr_B) / hypre_ParCSRMatrixGlobalNumRows(parcsr_B));
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_B),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_B),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_B) / hypre_ParCSRMatrixGlobalNumRows(parcsr_B));
    }
 
    hypre_ParCSRMatrixDestroy(parcsr_B);
@@ -682,13 +683,13 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    if (rowest_nsamples > 0)
    {
-   errcode = hypre_SetSpGemmRownnzEstimateNSamples(rowest_nsamples);
-   hypre_assert(errcode == 0);
+      errcode = hypre_SetSpGemmRownnzEstimateNSamples(rowest_nsamples);
+      hypre_assert(errcode == 0);
    }
    if (rowest_mult > 0.0)
    {
-   errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
-   hypre_assert(errcode == 0);
+      errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
+      hypre_assert(errcode == 0);
    }
    errcode = hypre_SetSpGemmHashType(hash_type);
    hypre_assert(errcode == 0);

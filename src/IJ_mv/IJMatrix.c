@@ -139,11 +139,11 @@ hypre_IJMatrixRead( const char     *filename,
 
    if (is_mm)
    {
-      hypre_sprintf(new_filename,"%s", filename);
+      hypre_sprintf(new_filename, "%s", filename);
    }
    else
    {
-      hypre_sprintf(new_filename,"%s.%05d", filename, myid);
+      hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    }
 
    if ((file = fopen(new_filename, "r")) == NULL)
@@ -169,9 +169,11 @@ hypre_IJMatrixRead( const char     *filename,
          return hypre_error_flag;
       }
 
-      if ( !( (hypre_mm_is_real(matcode) || hypre_mm_is_integer(matcode)) && hypre_mm_is_coordinate(matcode) && hypre_mm_is_sparse(matcode) ) )
+      if ( !( (hypre_mm_is_real(matcode) || hypre_mm_is_integer(matcode)) &&
+              hypre_mm_is_coordinate(matcode) && hypre_mm_is_sparse(matcode) ) )
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Only sparse real-valued/integer coordinate matrices are supported");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Only sparse real-valued/integer coordinate matrices are supported");
          return hypre_error_flag;
       }
 
@@ -180,7 +182,7 @@ hypre_IJMatrixRead( const char     *filename,
          isSym = 1;
       }
 
-      if (hypre_mm_read_mtx_crd_size(file, &nrow, &ncol, &nnz) !=0)
+      if (hypre_mm_read_mtx_crd_size(file, &nrow, &ncol, &nnz) != 0)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MM read size error !");
          return hypre_error_flag;

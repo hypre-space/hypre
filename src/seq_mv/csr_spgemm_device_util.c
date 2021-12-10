@@ -33,7 +33,8 @@ hypre_create_ija( HYPRE_Int       m,
                   HYPRE_Int      *d_i,
                   HYPRE_Int     **d_j,
                   HYPRE_Complex **d_a,
-                  HYPRE_Int      *nnz_ptr /* in/out: if input >= 0, it must be the sum of d_c, remain unchanged in output
+                  HYPRE_Int
+                  *nnz_ptr /* in/out: if input >= 0, it must be the sum of d_c, remain unchanged in output
                                                      if input <  0, it is computed as the sum of d_c and output */)
 {
    HYPRE_Int nnz = 0;
@@ -100,8 +101,10 @@ hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
    if (row_id)
    {
       HYPRE_THRUST_CALL( inclusive_scan,
-                         thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)),
-                         thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id), row_size(SHMEM_HASH_SIZE)) + m,
+                         thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id),
+                                                         row_size(SHMEM_HASH_SIZE)),
+                         thrust::make_transform_iterator(thrust::make_permutation_iterator(d_c, row_id),
+                                                         row_size(SHMEM_HASH_SIZE)) + m,
                          d_i + 1 );
    }
    else
@@ -138,7 +141,7 @@ hypre_SpGemmGhashSize( HYPRE_Int  num_rows,
                        HYPRE_Int *ghash_sizes,
                        HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id >= num_ghash)
    {
@@ -181,7 +184,8 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
 
    hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);
 
-   hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
 
    if (!ghash_size)
    {
