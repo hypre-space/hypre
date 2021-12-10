@@ -292,7 +292,8 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, HYPRE_Int ATTEMPT>
 void
-hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
+hypre_spgemm_rownnz_attempt(HYPRE_Int  m0,
+                            HYPRE_Int  m,
                             HYPRE_Int *rf_ind, /* ATTEMPT = 2, input: row indices (length of m) */
                             HYPRE_Int  k,
                             HYPRE_Int  n,
@@ -363,8 +364,8 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    */
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf("%s[%d]: SHMEM_HASH_SIZE %d, GROUP_SIZE %d, ATTEMPT %d, ghash %p size %d\n", __func__, __LINE__,
-         SHMEM_HASH_SIZE, GROUP_SIZE, ATTEMPT, d_ghash_i, ghash_size);
+   printf("%s[%d]: HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, ATTEMPT %d, ghash %p size %d\n", __func__, __LINE__,
+         hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, ATTEMPT, d_ghash_i, ghash_size);
    printf("%s[%d]: kernel spec [%d %d %d] x [%d %d %d]\n", __func__, __LINE__, gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
 #endif
 
@@ -413,7 +414,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound_core( HYPRE_Int  m,
 #endif
 
    hypre_spgemm_rownnz_attempt<SHMEM_HASH_SIZE, GROUP_SIZE, 1>
-      (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
+      (m, m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
 
    if (SECOND_TIME)
    {
@@ -440,7 +441,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound_core( HYPRE_Int  m,
          hypre_assert(new_end - rf_ind == num_failed_rows);
 
          hypre_spgemm_rownnz_attempt<SHMEM_HASH_SIZE, GROUP_SIZE, 2>
-            (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, 1, d_rc, NULL);
+            (m, num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, 1, d_rc, NULL);
 
          hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
       }
