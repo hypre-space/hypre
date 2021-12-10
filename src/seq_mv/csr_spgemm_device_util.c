@@ -175,10 +175,10 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    hypre_assert(num_ghash <= num_rows);
 
    HYPRE_Int *ghash_i, ghash_size;
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
 
    ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_ghash, "thread", bDim);
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_ghash, "thread", bDim);
    HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize, gDim, bDim,
                       num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
 
