@@ -228,6 +228,10 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    /* compute local column nnz of the offd part */
    hypre_CSRMatrixColNNzRealDevice(S_offd, measure_offd);
 
+#ifdef HYPRE_WITH_GPU_AWARE_MPI
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+#endif
+
    /* send local column nnz of the offd part to neighbors */
    comm_handle = hypre_ParCSRCommHandleCreate_v2(2, comm_pkg, HYPRE_MEMORY_DEVICE, measure_offd,
                                                  HYPRE_MEMORY_DEVICE, real_send_buf);

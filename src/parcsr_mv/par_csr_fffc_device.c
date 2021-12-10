@@ -434,10 +434,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + AFF_offd_nnz );
       num_cols_AFF_offd = tmp_end - tmp_j;
-      HYPRE_THRUST_CALL( fill_n,
-                         offd_mark,
-                         num_cols_A_offd,
-                         0 );
+      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
@@ -580,10 +577,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + AFC_offd_nnz );
       num_cols_AFC_offd = tmp_end - tmp_j;
-      HYPRE_THRUST_CALL( fill_n,
-                         offd_mark,
-                         num_cols_A_offd,
-                         0 );
+      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
@@ -727,10 +721,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + ACF_offd_nnz );
       num_cols_ACF_offd = tmp_end - tmp_j;
-      HYPRE_THRUST_CALL( fill_n,
-                         offd_mark,
-                         num_cols_A_offd,
-                         0 );
+      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
@@ -875,10 +866,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + ACC_offd_nnz );
       num_cols_ACC_offd = tmp_end - tmp_j;
-      HYPRE_THRUST_CALL( fill_n,
-                         offd_mark,
-                         num_cols_A_offd,
-                         0 );
+      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
@@ -1210,10 +1198,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + ACX_offd_nnz );
       num_cols_ACX_offd = tmp_end - tmp_j;
-      HYPRE_THRUST_CALL( fill_n,
-                         offd_mark,
-                         num_cols_A_offd,
-                         0 );
+      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_ACX_offd, tmp_j, 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
@@ -1346,10 +1331,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                               tmp_j,
                                               tmp_j + AXC_offd_nnz );
       num_cols_AXC_offd = tmp_end - tmp_j;
-      HYPRE_THRUST_CALL( fill_n,
-                         offd_mark,
-                         num_cols_A_offd,
-                         0 );
+      hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_AXC_offd, tmp_j, 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,

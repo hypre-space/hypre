@@ -89,7 +89,6 @@ FILES =\
  par_amgdd_solve.c\
  par_amgdd_fac_cycle.c\
  par_amgdd_helpers.c\
- par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
  par_cg_relax_wt.c\
@@ -145,6 +144,7 @@ CUFILES =\
  ads.c\
  ams.c\
  ame.c\
+ par_amg_setup.c\
  par_ilu.c\
  par_ilu_setup.c \
  par_ilu_solve.c \

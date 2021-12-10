@@ -1101,6 +1101,10 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Relax7Jacobi");
+#endif
+
    HYPRE_Int       num_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_Vector    l1_norms_vec;
    hypre_ParVector l1_norms_parvec;
@@ -1146,6 +1150,10 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_SetSyncCudaCompute(sync_stream);
    hypre_SyncCudaComputeStream(hypre_handle());
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;

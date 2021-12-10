@@ -178,6 +178,10 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*--------------------------------------------------------------------
     * Exchange boundary data for IS_marker: send external IS to internal
     *-------------------------------------------------------------------*/
+#ifdef HYPRE_WITH_GPU_AWARE_MPI
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(12, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, IS_marker_offd,
                                                  HYPRE_MEMORY_DEVICE, int_send_buf);
@@ -239,9 +243,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       hypre_CurandUniform(num_rows_diag, urand, 0, 0, 0, 0);
    }
 
-   thrust::plus<HYPRE_Real> op;
-   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
-                     urand, measure_array, op);
+   hypreDevice_ComplexAxpyn(measure_array, num_rows_diag, urand, measure_array, 1.0);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
 

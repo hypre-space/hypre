@@ -152,7 +152,7 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (size > 0)
    {
-      HYPRE_THRUST_CALL( fill_n, array_data, size, value );
+      hypreDevice_IntFilln( array_data, size, value );
    }
 #else
    HYPRE_Int i;

@@ -284,7 +284,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (size > 0)
    {
-      HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
+      hypreDevice_ComplexFilln( vector_data, size, value );
    }
 #else
    HYPRE_Int i;
@@ -471,7 +471,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
-   HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
+   hypreDevice_ComplexScalen( y_data, size, y_data, alpha );
 #endif
 #else
    HYPRE_Int i;
@@ -525,7 +525,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
                                   y_data, 1) );
 #else
-   HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
+   hypreDevice_ComplexAxpyn(x_data, size, y_data, y_data, alpha);
 #endif
 #else
    HYPRE_Int i;

@@ -10,8 +10,6 @@
 #ifdef __cplusplus
 extern "C++" {
 #endif
-
-#if defined(HYPRE_USING_RAJA)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -29,8 +27,10 @@ extern "C++" {
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_RAJA_HEADER
+#define HYPRE_BOXLOOP_RAJA_HEADER
+
+#if defined(HYPRE_USING_RAJA)
 
 #ifdef __cplusplus
 extern "C++"
@@ -55,8 +55,8 @@ typedef struct hypre_Boxloop_struct
 
 #if defined(HYPRE_USING_CUDA) /* RAJA with CUDA, running on device */
 
-#define BLOCKSIZE 256
-#define hypre_RAJA_DEVICE   RAJA_DEVICE
+#define BLOCKSIZE                HYPRE_1D_BLOCK_SIZE
+#define hypre_RAJA_DEVICE        RAJA_DEVICE
 #define hypre_raja_exec_policy   cuda_exec<BLOCKSIZE>
 /* #define hypre_raja_reduce_policy cuda_reduce_atomic<BLOCKSIZE> */
 #define hypre_raja_reduce_policy cuda_reduce //<BLOCKSIZE>
@@ -72,7 +72,10 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP) /* RAJA with OpenMP (>4.5), running on device */
 
-//TODO
+#define hypre_RAJA_DEVICE
+#define hypre_raja_exec_policy   omp_target_parallel_for_exec<BLOCKSIZE>
+#define hypre_raja_reduce_policy omp_target_reduce
+#define hypre_fence()
 
 #elif defined(HYPRE_USING_OPENMP) /* RAJA with OpenMP, running on host (CPU) */
 
@@ -304,7 +307,7 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
    hypre_fence();                                                              \
 }
 
-#define hypre_newBoxLoopGetIndex(index)                                        \
+#define hypre_BoxLoopGetIndex(index)                                           \
   index[0] = hypre_IndexD(local_idx, 0);                                       \
   index[1] = hypre_IndexD(local_idx, 1);                                       \
   index[2] = hypre_IndexD(local_idx, 2);
@@ -346,7 +349,8 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
 #endif
 
-#elif defined(HYPRE_USING_KOKKOS)
+#endif /* #ifndef HYPRE_BOXLOOP_RAJA_HEADER */
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -364,8 +368,10 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_KOKKOS_HEADER
+#define HYPRE_BOXLOOP_KOKKOS_HEADER
+
+#if defined(HYPRE_USING_KOKKOS)
 
 #ifdef __cplusplus
 extern "C++"
@@ -721,9 +727,11 @@ struct ColumnSums
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
 #define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
+
 #endif
 
-#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif /* #ifndef HYPRE_BOXLOOP_KOKKOS_HEADER */
+
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -743,6 +751,8 @@ struct ColumnSums
 
 #ifndef HYPRE_BOXLOOP_CUDA_HEADER
 #define HYPRE_BOXLOOP_CUDA_HEADER
+
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 #define HYPRE_LAMBDA [=] __host__  __device__
 
@@ -1150,9 +1160,10 @@ else                                                            \
 #define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
 
+#endif
+
 #endif /* #ifndef HYPRE_BOXLOOP_CUDA_HEADER */
 
-#elif defined(HYPRE_USING_SYCL)
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1172,6 +1183,8 @@ else                                                            \
 
 #ifndef HYPRE_BOXLOOP_SYCL_HEADER
 #define HYPRE_BOXLOOP_SYCL_HEADER
+
+#if defined(HYPRE_USING_SYCL) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 typedef struct hypre_Boxloop_struct
 {

@@ -937,12 +937,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       W_diag_i,
                       P_diag_i );
 
-   HYPRE_THRUST_CALL( transform,
-                      P_diag_i,
-                      P_diag_i + P_nr_of_rows + 1,
-                      PWoffset,
-                      P_diag_i,
-                      thrust::plus<HYPRE_Int>() );
+   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    HYPRE_THRUST_CALL( gather,

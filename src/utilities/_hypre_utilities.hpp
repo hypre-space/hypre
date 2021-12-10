@@ -71,7 +71,7 @@ struct hypre_device_allocator
  *                          cuda includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -96,6 +96,8 @@ struct hypre_device_allocator
 
 #define CUSPARSE_NEWAPI_VERSION 11000
 
+#define CUDA_MALLOCASYNC_VERSION 11020
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          hip includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -113,7 +115,7 @@ struct hypre_device_allocator
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif // defined(HYPRE_USING_CUDA)
 
 #if defined(HYPRE_USING_ROCSPARSE)
 #include <rocsparse.h>
@@ -252,12 +254,14 @@ struct hypre_DeviceData
    rocsparse_handle                  cusparse_handle;
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA_STREAMS)
+#if defined(HYPRE_USING_CUDA)
    cudaStream_t                      streams[HYPRE_MAX_NUM_STREAMS];
 #elif defined(HYPRE_USING_HIP)
    hipStream_t                       streams[HYPRE_MAX_NUM_STREAMS];
 #elif defined(HYPRE_USING_SYCL)
    sycl::queue*                      streams[HYPRE_MAX_NUM_STREAMS] = {NULL};
+#endif
 #endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
@@ -295,7 +299,10 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
-   /* PMIS */
+   /* cusparse */
+   HYPRE_Int                         spmv_use_cusparse;
+   HYPRE_Int                         sptrans_use_cusparse;
+   /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
 
@@ -314,6 +321,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_DeviceDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_DeviceDataSpgemmUseCusparse(data)              ((data) -> spgemm_use_cusparse)
+#define hypre_DeviceDataSpMVUseCusparse(data)                ((data) -> spmv_use_cusparse)
+#define hypre_DeviceDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
@@ -345,7 +354,8 @@ cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA_STREAMS)
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 cudaStream_t        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_HIP)
@@ -354,6 +364,7 @@ hipStream_t         hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_SYCL)
 sycl::queue*        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 sycl::queue*        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+#endif
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
@@ -462,7 +473,7 @@ using namespace thrust::placeholders;
    }                                                                                                                          \
    else                                                                                                                       \
    {                                                                                                                          \
-      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__);     \
       GPU_LAUNCH_SYNC;                                                                                                        \
    }                                                                                                                          \
 }

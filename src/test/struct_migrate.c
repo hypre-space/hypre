@@ -75,6 +75,10 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    HYPRE_Init();
 
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -413,6 +417,10 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(from_vector);
    HYPRE_StructVectorDestroy(to_vector);
    HYPRE_StructVectorDestroy(check_vector);
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::finalize ();
+#endif
 
    /* Finalize Hypre */
    HYPRE_Finalize();

@@ -148,6 +148,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     ams.c
     ads.c
     ame.c
+    par_amg_setup.c
     par_ilu.c
     par_ilu_setup.c
     par_ilu_solve.c

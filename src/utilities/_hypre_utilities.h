@@ -1071,6 +1071,7 @@ extern hypre_TimingType *hypre_global_timing;
 /* timing.c */
 HYPRE_Int hypre_InitializeTiming( const char *name );
 HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
+HYPRE_Int hypre_FinalizeAllTimings();
 HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
@@ -1334,6 +1335,8 @@ typedef struct
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_DeviceDataStructCommRecvBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_DeviceDataStructCommSendBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmUseCusparse(hypre_handle)              hypre_DeviceDataSpgemmUseCusparse(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpMVUseCusparse(hypre_handle)                hypre_DeviceDataSpMVUseCusparse(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpTransUseCusparse(hypre_handle)             hypre_DeviceDataSpTransUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_DeviceDataSpgemmRownnzEstimateMethod(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))
@@ -1740,7 +1743,6 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
                                            hypre_UnorderedBigIntMap *inverse_map);
 
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
@@ -1750,9 +1752,17 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Comple
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
+HYPRE_Int hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
-HYPRE_Int hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
-HYPRE_Int hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypreDevice_CharFilln(char *d_x, size_t n, char v);
+HYPRE_Int hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
+HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
+                                    HYPRE_Complex v);
+HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
+                                   HYPRE_Complex *d_z, HYPRE_Complex a);
+HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
+                               HYPRE_Int a);
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed,
@@ -1776,6 +1786,7 @@ HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_ForceSyncCudaComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
@@ -1849,13 +1860,13 @@ HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
-#include <math.h>
+//#include <math.h>
 
 #ifdef HYPRE_USING_OPENMP
 #include <omp.h>
 #endif
 
-#include "_hypre_utilities.h"
+//#include "_hypre_utilities.h"
 
 // Potentially architecture specific features used here:
 // __sync_val_compare_and_swap

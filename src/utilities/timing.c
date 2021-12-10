@@ -194,6 +194,26 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
    return ierr;
 }
 
+HYPRE_Int
+hypre_FinalizeAllTimings()
+{
+   HYPRE_Int time_index, ierr = 0;
+
+   if (hypre_global_timing == NULL)
+   {
+      return ierr;
+   }
+
+   HYPRE_Int size = hypre_global_timing_ref(threadid, size);
+
+   for (time_index = 0; time_index < size; time_index++)
+   {
+      ierr += hypre_FinalizeTiming(time_index);
+   }
+
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_IncFLOPCount
  *--------------------------------------------------------------------------*/
@@ -258,6 +278,9 @@ hypre_EndTiming( HYPRE_Int time_index )
    hypre_TimingState(time_index) --;
    if (hypre_TimingState(time_index) == 0)
    {
+#if defined(HYPRE_USING_GPU)
+      hypre_ForceSyncCudaComputeStream(hypre_handle());
+#endif
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) += hypre_TimingWallCount;
       hypre_TimingCPUTime(time_index)  += hypre_TimingCPUCount;

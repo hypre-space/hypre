@@ -214,7 +214,7 @@
 /* Define to 1 if Node Aware MPI library is used */
 #undef HYPRE_USING_NODE_AWARE_MPI
 
-/* NVTX being used */
+/* Define to 1 if using NVIDIA Tools Extension (NVTX) */
 #undef HYPRE_USING_NVTX
 
 /* onemkl::BLAS being used */

@@ -565,7 +565,7 @@ HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre
                                          HYPRE_Int *marker, HYPRE_Int marker_val );
 
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x,
-                                     HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
+                                     HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int *y_ind, HYPRE_Int fill );
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
