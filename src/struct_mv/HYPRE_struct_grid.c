@@ -109,6 +109,11 @@ HYPRE_StructGridSetNumGhost( HYPRE_StructGrid  grid,
 }
 
 /*---------------------------------------------------------------------------
+ * HYPRE_StructGridCoarsen
+ *
+ * This function creates and assembles cgrid by coarsening an input grid.
+ * Note that, in contrast to the internal hypre_StructGridCoarsen function,
+ * it also assembled the resulting grid.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -120,6 +125,7 @@ HYPRE_StructGridCoarsen(HYPRE_StructGrid  grid,
 
    hypre_SetIndex(origin, 0);
    hypre_StructCoarsen(grid, origin, stride, 1, cgrid);
+   hypre_StructGridAssemble(*cgrid);
 
    return hypre_error_flag;
 }

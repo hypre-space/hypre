@@ -66,6 +66,7 @@ HYPRE_DRIVERS =\
  ij.c\
  ij_assembly.c\
  sstruct.c\
+ sstructmat.c\
  struct.c\
  structmat.c\
  ams_driver.c\
@@ -126,7 +127,9 @@ distclean: clean
 	rm -f TEST_sstruct/*.err*
 	rm -f TEST_struct/*.out*
 	rm -f TEST_struct/*.err*
-	rm -f ex1 ex2 ex3 ex4 ex5 ex5big ex5b ex5b77 ex6 ex7 ex8 ex9 ex15big ex18comp
+	rm -f TEST_structmat/*.out*
+	rm -f TEST_structmat/*.err*
+
 
 ##################################################################
 # Rules
@@ -142,9 +145,13 @@ ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct: sstruct.o
+sstruct: sstruct_helpers.o sstruct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
+	${LINK_CC} -o $@ $^ ${LFLAGS}
+
+sstructmat: sstruct_helpers.o sstructmat.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $^ ${LFLAGS}
 
 struct: struct.obj
 	@echo  "Building" $@ "... "

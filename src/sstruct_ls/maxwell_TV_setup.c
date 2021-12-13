@@ -501,7 +501,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                         hypre_SStructVectorParVector(bn),
                         hypre_SStructVectorParVector(xn));
    {
-      amg_data = (hypre_ParAMGData*) amg_vdata;
+	   amg_data = (hypre_ParAMGData*) amg_vdata;
 
       node_numlevels= hypre_ParAMGDataNumLevels(amg_data);
 

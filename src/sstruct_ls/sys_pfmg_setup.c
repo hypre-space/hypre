@@ -575,6 +575,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
       hypre_SStructPGridVTPBndBoxArrayArray(cgrid, t) = NULL;
       hypre_SStructPGridVTSGrid(cgrid, t)     = NULL;
       hypre_SStructPGridVTIBoxArray(cgrid, t) = NULL;
+      hypre_SStructPGridVTActive(cgrid, t)    = 1;
    }
 
    /*-----------------------------------------
@@ -583,6 +584,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
 
    sfgrid = hypre_SStructPGridCellSGrid(fgrid);
    hypre_StructCoarsen(sfgrid, index, stride, prune, &scgrid);
+   hypre_StructGridAssemble(scgrid);
 
    hypre_CopyIndex(hypre_StructGridPeriodic(scgrid),
                    hypre_SStructPGridPeriodic(cgrid));

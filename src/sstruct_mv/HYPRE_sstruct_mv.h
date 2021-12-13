@@ -530,6 +530,38 @@ HYPRE_Int
 HYPRE_SStructGridSetNumGhost(HYPRE_SStructGrid  grid,
                              HYPRE_Int         *num_ghost);
 
+/**
+ * Helper function for returning the box dimensions of a (part,var)-structured grid.
+ **/
+HYPRE_Int
+HYPRE_SStructGridGetVariableBox(HYPRE_SStructGrid  grid,
+                                HYPRE_Int          part,
+                                HYPRE_Int          var,
+                                HYPRE_Int         *cell_ilower,
+                                HYPRE_Int         *cell_iupper,
+                                HYPRE_Int         *var_ilower,
+                                HYPRE_Int         *var_iupper );
+
+/**
+ * Project the box described by \e ilower and \e iupper onto the strided
+ * index space that contains the index \e origin and has stride \e stride.
+ * This routine is useful when dealing with rectangular matrices.
+ **/
+HYPRE_Int
+HYPRE_SStructGridProjectBox(HYPRE_SStructGrid  grid,
+                            HYPRE_Int         *ilower,
+                            HYPRE_Int         *iupper,
+                            HYPRE_Int         *origin,
+                            HYPRE_Int         *stride);
+
+/**
+ * Coarsen \e grid by factor \e strides to create \e cgrid.
+ **/
+HYPRE_Int
+HYPRE_SStructGridCoarsen(HYPRE_SStructGrid    fgrid,
+                         HYPRE_Index         *strides,
+                         HYPRE_SStructGrid   *cgrid);
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -696,7 +728,16 @@ struct hypre_SStructMatrix_struct;
 typedef struct hypre_SStructMatrix_struct *HYPRE_SStructMatrix;
 
 /**
- * Create a matrix object.
+ * Create a matrix object. Matrices may have different range and domain grids,
+ * that is, they need not be square. By default, the range and domain grids are
+ * the same as the argument \e grid in \ref HYPRE_SStructMatrixCreate. Both
+ * grids live on a common fine index space and should have the same number of
+ * boxes. The actual range is a coarsening of the range grid with coarsening
+ * factor \e ran_stride specified in \ref HYPRE_SStructMatrixSetRangeStride.
+ * Similarly, the actual domain is a coarsening of the domain grid with factor
+ * \e dom_stride specified in \ref HYPRE_SStructMatrixSetDomainStride.
+ * Currently, either \e ran_stride or \e dom_stride or both must be all ones
+ * (i.e., no coarsening).
  **/
 HYPRE_Int
 HYPRE_SStructMatrixCreate(MPI_Comm              comm,
@@ -714,6 +755,37 @@ HYPRE_SStructMatrixDestroy(HYPRE_SStructMatrix matrix);
  **/
 HYPRE_Int
 HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
+
+/**
+ * (Optional) Set matrix domain stride part by part. For more information,
+ * see \ref HYPRE_SStructMatrixCreate.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetDomainStride(HYPRE_SStructMatrix matrix,
+                                   HYPRE_Int           part,
+                                   HYPRE_Int          *dom_stride);
+
+/**
+ * (Optional) Set matrix range stride part by part. For more information,
+ * see \ref HYPRE_SStructMatrixCreate.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetRangeStride(HYPRE_SStructMatrix matrix,
+                                  HYPRE_Int           part,
+                                  HYPRE_Int          *ran_stride);
+
+/**
+ * (Optional) Set matrix coefficients which are constant over the grid.
+ * This considers a block matrix associated with the tuple \e (part, var, to_var).
+ * The \e centries array is of length \e nentries.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetConstantEntries(HYPRE_SStructMatrix matrix,
+                                      HYPRE_Int           part,
+                                      HYPRE_Int           var,
+                                      HYPRE_Int           to_var,
+                                      HYPRE_Int           nentries,
+                                      HYPRE_Int          *centries );
 
 /**
  * Set matrix coefficients index by index.  The \e values array is of length

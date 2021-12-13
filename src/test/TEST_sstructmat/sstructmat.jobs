@@ -1,0 +1,66 @@
+#!/bin/sh
+# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# 2D one proc RAP - 5 to 9 points
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2quadsA sstructmat.in.2quadsPx -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsRAPx
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2quadsA.FF sstructmat.in.2quadsPx.FF -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsRAPx.FF
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2quadsA.CC sstructmat.in.2quadsPx.CC -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsRAPx.CC
+
+# interpolate in y direction
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2quadsA sstructmat.in.2quadsPy -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsRAPy
+
+# interpolate in x direction (part 0) and y direction (part 1)
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2quadsA sstructmat.in.2quadsPxy -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 1 > sstructmat.out.2quadsRAPxy
+
+#=============================================================================
+# 2D two procs RAP - 5 to 9 points
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2quadsA sstructmat.in.2quadsPx -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsRAPx.2procs
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2quadsA.FF sstructmat.in.2quadsPx.FF -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsRAPx.FF.2procs
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2quadsA.CC sstructmat.in.2quadsPx.CC -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsRAPx.CC.2procs
+
+# interpolate in y direction
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2quadsA sstructmat.in.2quadsPy -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsRAPy.2procs
+
+# interpolate in x direction (part 0) and y direction (part 1)
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2quadsA sstructmat.in.2quadsPxy -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 0 > sstructmat.out.2quadsRAPxy.2procs
+
+#=============================================================================
+# 2D idle parts RAP - 5 to 9 points
+#=============================================================================
+
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.3quadsA.idle sstructmat.in.3quadsPx.idle -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 1 > sstructmat.out.3quadsRAPx.idle
+mpirun -np 3 ./sstructmat -in 2 sstructmat.in.3quadsA.idle sstructmat.in.3quadsPx.idle -mat-mat 3 1T 0 1 -r 8 8 1 -pooldist 0 > sstructmat.out.3quadsRAPx.idle.3procs
+
+#=============================================================================
+# 3D RAP - 7 to 15 points
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPx -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesRAPx
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPx -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesRAPx.2procs
+
+# interpolate in y direction
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPy -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesRAPy
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPy -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesRAPy.2procs
+
+# interpolate in z direction
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPz -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesRAPz
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPz -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesRAPz.2procs
+
+# interpolate in x direction (part 0) and y direction (part 1)
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxy -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesRAPxy
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxy -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesRAPxy.2procs
+
+# interpolate in x direction (part 0) and z direction (part 1)
+mpirun -np 1 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxz -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 1 > sstructmat.out.2cubesRAPxz
+mpirun -np 2 ./sstructmat -in 2 sstructmat.in.2cubesA sstructmat.in.2cubesPxz -mat-mat 3 1T 0 1 -r 8 8 8 -pooldist 0 > sstructmat.out.2cubesRAPxz.2procs

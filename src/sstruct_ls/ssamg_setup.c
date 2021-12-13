@@ -163,7 +163,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
       // Compute coarse matrix
-      hypre_SSAMGComputeRAP(A_l[l], P_l[l], grid_l[l+1], cdir_l[l], non_galerkin, &A_l[l+1]);
+      hypre_SSAMGComputeRAP(A_l[l], P_l[l], &grid_l[l+1], cdir_l[l], non_galerkin, &A_l[l+1]);
 
       // Build SStructVectors
       HYPRE_SStructVectorCreate(comm, grid_l[l+1], &b_l[l+1]);
@@ -558,9 +558,9 @@ hypre_SSAMGComputeMaxLevels( hypre_SStructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SSAMGComputeDxyz computes dxyz for each part independently.
+ * hypre_SSAMGComputeDxyz
  *
- * TODO: Before implementing, check if this makes sense
+ * Computes dxyz for each part independently.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -568,19 +568,44 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
                         HYPRE_Real          **dxyz,
                         HYPRE_Int            *dxyz_flag )
 {
+   MPI_Comm               comm   = hypre_SStructMatrixComm(A);
+   HYPRE_Int              nparts = hypre_SStructMatrixNParts(A);
+   HYPRE_Int              ndim   = hypre_SStructMatrixNDim(A);
+
    hypre_SStructPMatrix  *pmatrix;
    hypre_StructMatrix    *smatrix;
+   hypre_StructGrid      *sgrid;
 
-   HYPRE_Int              d, var, part, nparts, nvars;
-   HYPRE_Int              ndim;
-   HYPRE_Real             sys_dxyz[3] = {0.0, 0.0, 0.0};
+   HYPRE_Int              size, idx;
+   HYPRE_Real            *tcxyz;
+   HYPRE_Real            *cxyz;
 
-   /*--------------------------------------------------------
-    * Allocate arrays for mesh sizes for each diagonal block
-    *--------------------------------------------------------*/
-   nparts = hypre_SStructMatrixNParts(A);
-   ndim   = hypre_SStructMatrixNDim(A);
+   HYPRE_Real             cxyz_max;
+   HYPRE_Real             sys_dxyz[HYPRE_MAXDIM];
+   HYPRE_Real             mean[HYPRE_MAXDIM];
+   HYPRE_Real             deviation[HYPRE_MAXDIM];
 
+   HYPRE_BigInt           global_size;
+   HYPRE_Int              d, var, part, nvars;
+   HYPRE_Real             max_anisotropy;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Compute cxyz array size */
+   size = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(A, part);
+      size += hypre_SStructPMatrixNVars(pmatrix);
+   }
+   size *= 2*ndim;
+
+   /* Allocate arrays */
+   tcxyz = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+   cxyz  = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+
+   /* Compute temporary (local) values for cxyz */
+   idx = 0;
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(A, part);
@@ -589,15 +614,100 @@ hypre_SSAMGComputeDxyz( hypre_SStructMatrix  *A,
       for (var = 0; var < nvars; var++)
       {
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
-         hypre_PFMGComputeDxyz(smatrix, sys_dxyz, &dxyz_flag[part]);
+
+         hypre_PFMGComputeCxyz(smatrix, &tcxyz[idx], &tcxyz[idx+ndim]);
+         idx += 2*ndim;
+      }
+   }
+
+   /* Compute global values for cxyz */
+   hypre_MPI_Allreduce(tcxyz, cxyz, size, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+
+   /* Compute dxyz for each StructMatrix */
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(A, part);
+      nvars   = hypre_SStructPMatrixNVars(pmatrix);
+      dxyz_flag[part] = 0;
+
+      for (var = 0; var < nvars; var++)
+      {
+         smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+         sgrid = hypre_StructMatrixGrid(smatrix);
+         global_size = hypre_StructGridGlobalSize(sgrid);
+
+         for (d = 0; d < ndim; d++)
+         {
+            mean[d] = cxyz[d]/(HYPRE_Real) global_size;
+            deviation[d] = cxyz[d + ndim]/(HYPRE_Real) global_size;
+         }
+
+         cxyz_max = 0.0;
+         for (d = 0; d < ndim; d++)
+         {
+            cxyz_max = hypre_max(cxyz_max, cxyz[d]);
+            sys_dxyz[d] = 0.0;
+         }
+
+         if (cxyz_max == 0.0)
+         {
+            /* Do isotropic coarsening */
+            for (d = 0; d < ndim; d++)
+            {
+               cxyz[d] = 1.0;
+            }
+            cxyz_max = 1.0;
+         }
+
+         for (d = 0; d < ndim; d++)
+         {
+            max_anisotropy = HYPRE_REAL_MAX/1000;
+            if (cxyz[d] > (cxyz_max/max_anisotropy))
+            {
+               cxyz[d] /= cxyz_max;
+               sys_dxyz[d] = sqrt(1.0 / cxyz[d]);
+            }
+            else
+            {
+               sys_dxyz[d] = sqrt(max_anisotropy);
+            }
+         }
+
+        /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+         * This is used later to set relaxation weights for Jacobi.
+         *
+         * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+         * where sigma is the standard deviation and mu is the mean.  This is
+         * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+         * the squares of the coefficients stored in 'deviation'.  Care is
+         * taken to avoid dividing by zero when the mean is zero. */
+
+         for (d = 0; d < ndim; d++)
+         {
+            deviation[d] -= mean[d]*mean[d];
+            if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
+            {
+               dxyz_flag[part] = 1;
+               break;
+            }
+         }
 
          for (d = 0; d < ndim; d++)
          {
             dxyz[d][part] += sys_dxyz[d];
-            sys_dxyz[d] = 0.0;
          }
+
+         /* Update cxyz pointer */
+         cxyz += 2*ndim;
       }
    }
+   cxyz -= size;
+
+   /* Free memory */
+   hypre_TFree(cxyz, HYPRE_MEMORY_HOST);
+   hypre_TFree(tcxyz, HYPRE_MEMORY_HOST);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

@@ -159,8 +159,15 @@ hypre_SMGSetup( void               *smg_vdata,
       /* build the interpolation grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 0, &PT_grid_l[l+1]);
 
+      /* assemble the interpolation grid */
+      hypre_StructGridAssemble(PT_grid_l[l+1]);
+
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
+
+      /* assemble the interpolation grid */
+      hypre_StructGridAssemble(grid_l[l+1]);
+
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_StructGridDataLocation(PT_grid_l[l+1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)

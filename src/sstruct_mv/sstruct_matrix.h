@@ -84,14 +84,6 @@ typedef struct hypre_SStructMatrix_struct
 
    HYPRE_Int               ref_count;
 
-   HYPRE_Int               dom_ghlocal_size; /* Number of unknowns in the domain grid
-                                                including ghosts */
-   HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
-                                                including ghosts */
-   HYPRE_Int               dom_ghstart_rank; /* Start rank in the domain grid
-                                                including ghosts */
-   HYPRE_Int               ran_ghstart_rank; /* Start rank in the range grid
-                                                including ghosts */
    /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
 } hypre_SStructMatrix;
@@ -123,10 +115,6 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
-#define hypre_SStructMatrixDomGhlocalSize(mat) ((mat) -> dom_ghlocal_size)
-#define hypre_SStructMatrixRanGhlocalSize(mat) ((mat) -> ran_ghlocal_size)
-#define hypre_SStructMatrixDomGhstartRank(mat) ((mat) -> dom_ghstart_rank)
-#define hypre_SStructMatrixRanGhstartRank(mat) ((mat) -> ran_ghstart_rank)
 #define hypre_SStructMatrixObjectType(mat)     ((mat) -> object_type)
 
 /*--------------------------------------------------------------------------

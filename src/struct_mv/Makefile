@@ -28,7 +28,8 @@ HEADERS =\
  struct_matrix.h\
  struct_stencil.h\
  struct_stmatrix.h\
- struct_vector.h
+ struct_vector.h\
+ struct_matmult.h
 
 FILES =\
  assumed_part.c\

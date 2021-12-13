@@ -2040,6 +2040,76 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/******************************************************************************
+ *
+ * Header info for the struct matrix-matrix multiplication structures
+ *
+ *****************************************************************************/
+
+#ifndef hypre_STRUCT_MATMULT_HEADER
+#define hypre_STRUCT_MATMULT_HEADER
+
+#ifdef MAXTERMS
+#undef MAXTERMS
+#endif
+#define MAXTERMS 3
+
+/*--------------------------------------------------------------------------
+ * StructMatmultHelper data structure
+ *--------------------------------------------------------------------------*/
+
+/* product term used to compute the variable stencil entries in M */
+typedef struct hypre_StructMatmulthelper_struct
+{
+   hypre_StTerm    terms[MAXTERMS]; /* stencil info for each term */
+   HYPRE_Int       mentry;          /* stencil entry for M */
+   HYPRE_Complex   cprod;           /* product of the constant terms */
+   HYPRE_Int       types[MAXTERMS]; /* types of computations to do for each term */
+   HYPRE_Complex  *tptrs[MAXTERMS]; /* pointers to matrix data for each term */
+   HYPRE_Complex  *mptr;            /* pointer to matrix data for M */
+} hypre_StructMatmultHelper;
+
+/*--------------------------------------------------------------------------
+ * StructMatmultData data structure
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_StructMatmultData_struct
+{
+   hypre_StructMatrix  **matrices;        /* matrices we are multiplying */
+   HYPRE_Int             nmatrices;       /* number of matrices */
+   HYPRE_Int             nterms;          /* number of terms involved in the multiplication */
+   HYPRE_Int            *terms;           /* pointers to matrices involved in the multiplication */
+   HYPRE_Int            *transposes;      /* transpose flag for each term */
+   HYPRE_Int            *mtypes;          /* data-map types for each matrix (fine or coarse) */
+
+   hypre_IndexRef        fstride;         /* fine data-map stride */
+   hypre_IndexRef        cstride;         /* coarse data-map stride */
+   hypre_IndexRef        coarsen_stride;  /* coarsening factor for M's grid */
+   HYPRE_Int             coarsen;         /* indicates if M's grid is obtained by coarsening */
+   hypre_BoxArray       *cdata_space;     /* coarse data space */
+   hypre_BoxArray       *fdata_space;     /* fine data space */
+
+   hypre_StMatrix       *st_M;            /* stencil matrix for M */
+   HYPRE_Int             na;              /* size of hypre_StructMMhelper object */
+   hypre_StructMatmultHelper *a;          /* helper for running multiplication */
+
+   hypre_StructVector   *mask;            /* bit mask vector for cte. coefs multiplication */
+   hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
+   hypre_CommPkg       **comm_pkg_a;      /* pointer to communication packages */
+   HYPRE_Complex       **comm_data;       /* pointer to agglomerated communication data */
+   HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
+   HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
+   HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
+} hypre_StructMatmultData;
+
+#endif
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* assumed_part.c */
 HYPRE_Int hypre_APSubdivideRegion ( hypre_Box *region , HYPRE_Int dim , HYPRE_Int level , hypre_BoxArray *box_array , HYPRE_Int *num_new_boxes );
 HYPRE_Int hypre_APFindMyBoxesInRegions ( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , HYPRE_Int **p_count_array , HYPRE_Real **p_vol_array );
@@ -2282,7 +2352,16 @@ HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypr
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matmult.c */
-HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in , hypre_StructMatrix **matrices_in , HYPRE_Int nterms , HYPRE_Int *terms_in , HYPRE_Int *transposes_in , hypre_StructMatmultData **mmdata_ptr );
+HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMatmultData *mmdata );
+HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMatmultData *mmdata , hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmat ( hypre_StructMatrix *A , hypre_StructMatrix *B , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixPtAP ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixRAP ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatrixRTtAP ( hypre_StructMatrix *RT , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix **M_ptr );
 
 /* struct_matop.c */
 HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A , HYPRE_Int type , hypre_StructVector *rowsum );

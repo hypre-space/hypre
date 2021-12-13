@@ -221,18 +221,23 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
 
 /*--------------------------------------------------------------------------
  * hypre_StructGridComputeGlobalSize
+ *
+ * Computes the global size of the grid if it has not been computed before.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructGridComputeGlobalSize( hypre_StructGrid *grid )
 {
-   MPI_Comm       comm       = hypre_StructGridComm(grid);
-   HYPRE_BigInt   local_size = (HYPRE_BigInt) hypre_StructGridLocalSize(grid);
-   HYPRE_BigInt   global_size;
+   MPI_Comm       comm        = hypre_StructGridComm(grid);
+   HYPRE_BigInt   local_size  = (HYPRE_BigInt) hypre_StructGridLocalSize(grid);
+   HYPRE_BigInt   global_size = hypre_StructGridGlobalSize(grid);
 
-   hypre_MPI_Allreduce(&local_size, &global_size, 1, HYPRE_MPI_BIG_INT,
-                        hypre_MPI_SUM, comm);
-   hypre_StructGridGlobalSize(grid) = global_size;
+   if (!global_size)
+   {
+      hypre_MPI_Allreduce(&local_size, &global_size, 1, HYPRE_MPI_BIG_INT,
+                          hypre_MPI_SUM, comm);
+      hypre_StructGridGlobalSize(grid) = global_size;
+   }
 
    return hypre_error_flag;
 }
@@ -244,9 +249,6 @@ hypre_StructGridComputeGlobalSize( hypre_StructGrid *grid )
  *
  *   Notes:
  *   1. No longer need a different assemble for the assumed partition case
- *   2. if this is called from StructCoarsen, then the Box Manager has already
- *   been created, and ids have been set
- *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -421,7 +423,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          hypre_ForBoxI(i, local_boxes)
          {
             box = hypre_BoxArrayBox(local_boxes, i);
-
 
             /* find min and max box extents */
             for (d = 0; d < ndim; d++)

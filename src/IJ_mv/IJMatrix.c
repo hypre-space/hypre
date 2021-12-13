@@ -95,9 +95,7 @@ hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix,
 
    if (hypre_IJMatrixObject(ijmatrix) != NULL)
    {
-      /*hypre_printf("Referencing a new IJMatrix object can orphan an old -- ");
-      hypre_printf("hypre_IJMatrixSetObject\n");*/
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Referencing a new IJMatrix can orphan an old\n");
       return hypre_error_flag;
    }
 

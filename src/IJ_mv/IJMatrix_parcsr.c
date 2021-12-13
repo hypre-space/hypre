@@ -1605,6 +1605,9 @@ hypre_IJMatrixDestroyParCSR(hypre_IJMatrix *matrix)
    hypre_ParCSRMatrixDestroy((hypre_ParCSRMatrix *)hypre_IJMatrixObject(matrix));
    hypre_AuxParCSRMatrixDestroy((hypre_AuxParCSRMatrix*)hypre_IJMatrixTranslator(matrix));
 
+   hypre_IJMatrixObject(matrix)     = NULL;
+   hypre_IJMatrixTranslator(matrix) = NULL;
+
    return hypre_error_flag;
 }
 

@@ -12,7 +12,9 @@ endif ()
 set(TEST_SRCS
   ij.c
   sstruct.c
+  sstructmat.c
   struct.c
+  structmat.c
   ams_driver.c
   maxwell_unscaled.c
   struct_migrate.c
@@ -21,4 +23,3 @@ set(TEST_SRCS
 )
 
 add_hypre_executables(TEST_SRCS)
- 

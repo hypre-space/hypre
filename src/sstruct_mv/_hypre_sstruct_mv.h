@@ -633,14 +633,6 @@ typedef struct hypre_SStructMatrix_struct
 
    HYPRE_Int               ref_count;
 
-   HYPRE_Int               dom_ghlocal_size; /* Number of unknowns in the domain grid
-                                                including ghosts */
-   HYPRE_Int               ran_ghlocal_size; /* Number of unknowns in the range grid
-                                                including ghosts */
-   HYPRE_Int               dom_ghstart_rank; /* Start rank in the domain grid
-                                                including ghosts */
-   HYPRE_Int               ran_ghstart_rank; /* Start rank in the range grid
-                                                including ghosts */
    /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
 } hypre_SStructMatrix;
@@ -672,10 +664,6 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
-#define hypre_SStructMatrixDomGhlocalSize(mat) ((mat) -> dom_ghlocal_size)
-#define hypre_SStructMatrixRanGhlocalSize(mat) ((mat) -> ran_ghlocal_size)
-#define hypre_SStructMatrixDomGhstartRank(mat) ((mat) -> dom_ghstart_rank)
-#define hypre_SStructMatrixRanGhstartRank(mat) ((mat) -> ran_ghstart_rank)
 #define hypre_SStructMatrixObjectType(mat)     ((mat) -> object_type)
 
 /*--------------------------------------------------------------------------
@@ -850,7 +838,9 @@ HYPRE_Int HYPRE_SStructGridAssemble ( HYPRE_SStructGrid grid );
 HYPRE_Int HYPRE_SStructGridSetPeriodic ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *periodic );
 HYPRE_Int HYPRE_SStructGridSetNumGhost ( HYPRE_SStructGrid grid , HYPRE_Int *num_ghost );
 HYPRE_Int HYPRE_SStructGridPrintGLVis ( HYPRE_SStructGrid grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
-HYPRE_Int hypre_SStructGridPrint ( hypre_SStructGrid *grid , const char *filename );
+HYPRE_Int HYPRE_SStructGridProjectBox ( HYPRE_SStructGrid grid , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int *origin , HYPRE_Int *stride );
+HYPRE_Int HYPRE_SStructGridGetVariableBox ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int *cell_ilower , HYPRE_Int *cell_iupper , HYPRE_Int *var_ilower , HYPRE_Int *var_iupper);
+HYPRE_Int HYPRE_SStructGridCoarsen ( HYPRE_SStructGrid fgrid , HYPRE_Index *strides , HYPRE_SStructGrid *cgrid);
 
 /* HYPRE_sstruct_matrix.c */
 HYPRE_Int HYPRE_SStructMatrixCreate ( MPI_Comm comm , HYPRE_SStructGraph graph , HYPRE_SStructMatrix *matrix_ptr );
@@ -929,11 +919,12 @@ HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm , HYPRE_Int ndim , hypre_SStr
 HYPRE_Int hypre_SStructPGridDestroy ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
 HYPRE_Int hypre_SStructPGridSetCellSGrid ( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
+HYPRE_Int hypre_SStructPGridSetSGrid ( hypre_StructGrid *sgrid , hypre_SStructPGrid *pgrid , HYPRE_Int var );
 HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
-HYPRE_Int hypre_SStructGridSetPartIDs ( hypre_SStructGrid *grid, HYPRE_Int *ids );
+HYPRE_Int hypre_SStructGridComputeGlobalSizes ( hypre_SStructGrid  *grid );
 HYPRE_Int hypre_SStructGridAssembleBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridAssembleNborBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridCreateCommInfo ( hypre_SStructGrid *grid );
@@ -959,6 +950,7 @@ HYPRE_Int hypre_SStructBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int part , HY
 HYPRE_Int hypre_SStructCellGridBoxNumMap ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int ***num_varboxes_ptr , HYPRE_Int ****map_ptr );
 HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , hypre_Index varoffset , HYPRE_Int *valid );
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , hypre_Box *box , HYPRE_Int action , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
+HYPRE_Int hypre_SStructGridPrint ( hypre_SStructGrid *grid , const char *filename );
 HYPRE_Int hypre_SStructGridPrintGLVis ( hypre_SStructGrid *grid, const char *meshprefix, HYPRE_Real *trans, HYPRE_Real *origin );
 HYPRE_Int hypre_SStructGridCoarsen ( hypre_SStructGrid *fgrid, hypre_IndexRef origin, hypre_Index *strides, hypre_Index *periodic, hypre_SStructGrid **cgrid_ptr );
 HYPRE_Int hypre_SStructGridSetActiveParts ( hypre_SStructGrid *grid , HYPRE_Int *active );
@@ -996,6 +988,7 @@ HYPRE_Int hypre_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int 
 HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix , HYPRE_Int part , hypre_Box *set_box , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action );
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix , HYPRE_Int fill_diagonal );
+HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A , hypre_SStructGrid *grid , hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix , hypre_SStructVector **diag_ptr );
 
 /* sstruct_matvec.c */
@@ -1013,10 +1006,16 @@ HYPRE_Int hypre_SStructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 
 /* sstruct_matmult.c */
-HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A , hypre_ParCSRMatrix *B , hypre_IJMatrix **ij_Ahat_ptr );
-HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices_input , hypre_SStructMatrix **ssmatrices_input , HYPRE_Int nterms , HYPRE_Int *terms_input , HYPRE_Int *transposes , hypre_SStructMatrix **M_ptr );
-HYPRE_Int hypre_SStructMatmultU ( HYPRE_Int nmatrices , hypre_SStructMatrix **ssmatrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_ParCSRMatrix **uM_ptr );
-HYPRE_Int hypre_SStructMatPtAP ( hypre_SStructMatrix *P , hypre_SStructMatrix *A , hypre_SStructMatrix **PtAP_ptr );
+HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices , hypre_SStructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatmat ( hypre_SStructMatrix *A , hypre_SStructMatrix *B , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatrixPtAP ( hypre_SStructMatrix *A, hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatrixRAP ( hypre_SStructMatrix *R , hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatrixRTtAP ( hypre_SStructMatrix *RT , hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructMatrix **M_ptr );
+
+/* sstruct_matop.c */
+HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA , HYPRE_Int type , hypre_SStructPVector *prowsum );
+HYPRE_Int hypre_SStructMatrixComputeRowSum ( hypre_SStructMatrix *A , HYPRE_Int type , hypre_SStructVector **rowsum_ptr );
+HYPRE_Int hypre_SStructMatrixComputeL1Norms ( hypre_SStructMatrix *A , HYPRE_Int option , hypre_SStructVector **l1_norms_ptr );
 
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA , HYPRE_Int type , hypre_SStructPVector *prowsum );
@@ -1062,4 +1061,3 @@ HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const cha
 #endif
 
 #endif
-

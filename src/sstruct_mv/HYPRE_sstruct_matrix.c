@@ -142,10 +142,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixNSSymmetric(matrix)    = 0;
    hypre_SStructMatrixGlobalSize(matrix)     = 0;
    hypre_SStructMatrixRefCount(matrix)       = 1;
-   hypre_SStructMatrixDomGhlocalSize(matrix) = 0;
-   hypre_SStructMatrixRanGhlocalSize(matrix) = 0;
-   hypre_SStructMatrixDomGhstartRank(matrix) = 0;
-   hypre_SStructMatrixRanGhstartRank(matrix) = 0;
 
    /* GEC0902 setting the default of the object_type to HYPRE_SSTRUCT */
    hypre_SStructMatrixObjectType(matrix) = HYPRE_SSTRUCT;
@@ -408,14 +404,6 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
    hypre_SStructUMatrixInitialize(matrix);
-
-   /* Set start rank and local size of variables, including ghosts, relative
-      to the domain and range grids */
-   /* TODO: We don't need to save this info in the SStructMatrix data structure */
-   hypre_SStructMatrixDomGhlocalSize(matrix) = ncols;
-   hypre_SStructMatrixRanGhlocalSize(matrix) = nrows;
-   hypre_SStructMatrixDomGhstartRank(matrix) = jlower;
-   hypre_SStructMatrixRanGhstartRank(matrix) = ilower;
 
    return hypre_error_flag;
 }
@@ -1045,7 +1033,7 @@ HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix,
                                        HYPRE_Int           part,
                                        HYPRE_Int           var,
                                        HYPRE_Int           to_var,
-                                       HYPRE_Int           num_centries,
+                                       HYPRE_Int           nentries,
                                        HYPRE_Int          *centries )
 {
    HYPRE_Int            ***mnum_centries = hypre_SStructMatrixNumCEntries(matrix);
@@ -1084,8 +1072,8 @@ HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix,
       {
          for (t = tstart; t < (tstart + tsize); t++)
          {
-            mnum_centries[p][v][t] = num_centries;
-            for (i = 0; i < num_centries; i++)
+            mnum_centries[p][v][t] = nentries;
+            for (i = 0; i < nentries; i++)
             {
                mcentries[p][v][t][i] = centries[i];
             }
@@ -1238,6 +1226,9 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_ParCSRMatrix  parcsr_s;
    HYPRE_ParCSRMatrix  parcsr_ss;
 
+   HYPRE_BigInt        nrows_ss;
+   HYPRE_BigInt        ncols_ss;
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
@@ -1259,7 +1250,14 @@ HYPRE_SStructMatrixToIJMatrix( HYPRE_SStructMatrix  matrix,
          HYPRE_IJMatrixGetObject(ij_s, (void **) &parcsr_s);
 
          hypre_ParCSRMatrixAdd(1.0, parcsr_u, 1.0, parcsr_s, &parcsr_ss);
-         hypre_ParCSRMatrixReorder(parcsr_ss);
+
+         /* For square matrices, the first row entry is the diagonal coefficient */
+         nrows_ss = hypre_ParCSRMatrixGlobalNumRows(parcsr_ss);
+         ncols_ss = hypre_ParCSRMatrixGlobalNumCols(parcsr_ss);
+         if (nrows_ss == ncols_ss)
+         {
+            hypre_ParCSRMatrixReorder(parcsr_ss);
+         }
 
          HYPRE_IJMatrixDestroy(ij_s);
          HYPRE_IJMatrixCreate(hypre_ParCSRMatrixComm(parcsr_ss),

@@ -632,11 +632,11 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
                {
                   for (vj = 0; vj < nvars; vj++)
                   {
-                     if (hypre_SStructPMatrixSMatrix(pA,vj,i) != NULL)
+                     sA = hypre_SStructPMatrixSMatrix(pA, vj, i);
+                     if (sA != NULL)
                      {
-                        sstencil = hypre_SStructPMatrixSStencil(pA, vj, i);
-                        sstencil_union_count +=
-                           hypre_StructStencilSize(sstencil);
+                        sstencil = hypre_StructMatrixStencil(sA);
+                        sstencil_union_count += hypre_StructStencilSize(sstencil);
                      }
                   }
                }
@@ -645,9 +645,10 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
             {
                for (vj = 0; vj < nvars; vj++)
                {
-                  if (hypre_SStructPMatrixSMatrix(pA,vj,vi) != NULL)
+                  sA = hypre_SStructPMatrixSMatrix(pA, vj, vi);
+                  if (sA != NULL)
                   {
-                     sstencil = hypre_SStructPMatrixSStencil(pA, vj, vi);
+                     sstencil = hypre_StructMatrixStencil(sA);
                      sstencil_union_count += hypre_StructStencilSize(sstencil);
                   }
                }
@@ -661,9 +662,10 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
                {
                   for (vj = 0; vj < nvars; vj++)
                   {
-                     if (hypre_SStructPMatrixSMatrix(pA,vj,i) != NULL)
+                     sA = hypre_SStructPMatrixSMatrix(pA, vj, i);
+                     if (sA != NULL)
                      {
-                        sstencil = hypre_SStructPMatrixSStencil(pA, vj, i);
+                        sstencil = hypre_StructMatrixStencil(sA);
                         sstencil_size = hypre_StructStencilSize(sstencil);
                         sstencil_shape = hypre_StructStencilShape(sstencil);
                         for (s = 0; s < sstencil_size; s++)
@@ -680,9 +682,10 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
             {
                for (vj = 0; vj < nvars; vj++)
                {
-                  if (hypre_SStructPMatrixSMatrix(pA,vj,vi) != NULL)
+                  sA = hypre_SStructPMatrixSMatrix(pA, vj, vi);
+                  if (sA != NULL)
                   {
-                     sstencil = hypre_SStructPMatrixSStencil(pA, vj, vi);
+                     sstencil = hypre_StructMatrixStencil(sA);
                      sstencil_size = hypre_StructStencilSize(sstencil);
                      sstencil_shape = hypre_StructStencilShape(sstencil);
                      for (s = 0; s < sstencil_size; s++)

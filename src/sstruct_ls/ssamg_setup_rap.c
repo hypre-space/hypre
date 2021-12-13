@@ -21,14 +21,16 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
-                       hypre_SStructMatrix   *P,
-                       hypre_SStructGrid     *cgrid,
-                       HYPRE_Int             *cdir_p,
-                       HYPRE_Int              non_galerkin,
-                       hypre_SStructMatrix  **Ac_ptr )
+hypre_SSAMGComputeRAP( hypre_SStructMatrix    *A,
+                       hypre_SStructMatrix    *P,
+                       hypre_SStructGrid     **cgrid,
+                       HYPRE_Int              *cdir_p,
+                       HYPRE_Int               non_galerkin,
+                       hypre_SStructMatrix   **Ac_ptr )
 {
    hypre_SStructMatrix *Ac;
+   hypre_SStructGraph  *graph;
+   hypre_SStructGrid   *grid;
 
    if (non_galerkin)
    {
@@ -36,9 +38,16 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
    }
    else
    {
-      hypre_SStructMatPtAP(A, P, &Ac);
+      hypre_SStructMatrixPtAP(A, P, &Ac);
    }
 
+   /* Update grid object */
+   graph = hypre_SStructMatrixGraph(Ac);
+   grid  = hypre_SStructGraphGrid(graph);
+   HYPRE_SStructGridDestroy(*cgrid);
+   hypre_SStructGridRef(grid, cgrid);
+
+   /* Update pointer to resulting matrix */
    *Ac_ptr = Ac;
 
    return hypre_error_flag;
@@ -49,6 +58,7 @@ hypre_SSAMGComputeRAP( hypre_SStructMatrix   *A,
  *
  * Notes:
  *        1) Multivariable version not implemented.
+ *        2) Needs debugging.
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
@@ -72,9 +82,9 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    hypre_SStructPMatrix    *pA, *pP, *pAc;
    hypre_SStructMatrix     *Ac;
    hypre_IJMatrix          *ij_Ac;
-   hypre_ParCSRMatrix      *parcsr_uAc;
+   //hypre_ParCSRMatrix      *parcsr_uAc;
 
-   hypre_SStructMatrix     *ssmatrices[3] = {A, P, P};
+   //hypre_SStructMatrix     *ssmatrices[3] = {A, P, P};
    HYPRE_Int                terms[3] = {1, 0, 1};
    HYPRE_Int                trans[3] = {1, 0, 0};
 
@@ -154,7 +164,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    }
 
    /* Compute unstructured component of Ac */
-   hypre_SStructMatmultU(3, ssmatrices, 3, terms, trans, &parcsr_uAc);
+   //call to hypre_SStructMatrixMultComputeU
 
    /* Assemble SStructGraph */
    HYPRE_SStructGraphAssemble(cgraph);
@@ -176,7 +186,7 @@ hypre_SSAMGComputeRAPNonGlk( hypre_SStructMatrix  *A,
    hypre_IJMatrixObject(ij_Ac) = NULL;
    hypre_IJMatrixTranslator(ij_Ac) = NULL;
    hypre_IJMatrixAssembleFlag(ij_Ac) = 1;
-   hypre_IJMatrixSetObject(ij_Ac, parcsr_uAc);
+   //hypre_IJMatrixSetObject(ij_Ac, parcsr_uAc);
    HYPRE_SStructMatrixAssemble(Ac);
 
    /* Set pointer to Ac */

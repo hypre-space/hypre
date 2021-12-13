@@ -562,6 +562,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
       /* coarsen the grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
+      hypre_StructGridAssemble(grid_l[l+1]);
+
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
 #endif

@@ -215,12 +215,12 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    for (l = 0; l < num_levels; l++)
    {
       nparts = hypre_SStructMatrixNParts(A_l[l]);
-      num_ghrows = hypre_SStructMatrixRanGhlocalSize(A_l[l]);
+      umatrix = hypre_SStructMatrixParCSRMatrix(A_l[l]);
 
       min_stsize = HYPRE_INT_MAX;
       max_stsize = HYPRE_INT_MIN;
 
-      num_dofs = num_boxes = num_parts = avg_stsize = 0;
+      num_ghrows = num_dofs = num_boxes = num_parts = avg_stsize = 0;
       for (part = 0; part < nparts; part++)
       {
          pmatrix = hypre_SStructMatrixPMatrix(A_l[l], part);
@@ -270,7 +270,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          global_num_boxes[l]  = (HYPRE_Int) recv_buffer[0];
          global_num_dofs[l]   = (HYPRE_Int) recv_buffer[1];
-         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[2];
+         global_num_ghrows[l] = (HYPRE_Int) recv_buffer[2] +
+                                hypre_ParCSRMatrixGlobalNumRows(umatrix);
          global_avg_stsize[l] = recv_buffer[3] / global_num_dofs[l];
       }
 
