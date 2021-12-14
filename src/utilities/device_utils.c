@@ -224,14 +224,14 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
    HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
 
-   /* // TODO: need to fix this by passing a "predicate" as last argument */
-   /* HYPRE_ONEDPL_CALL( dpct::scatter_if, */
-   /*                    oneapi::dpl::counting_iterator<HYPRE_Int>(0), */
-   /*                    oneapi::dpl::counting_iterator<HYPRE_Int>(nrows), */
-   /*                    d_row_ptr, */
-   /*                    oneapi::dpl::make_transform_iterator( oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1), */
-   /*                                                          [](auto t) { return std::get<0>(t) != std::get<1>(t); } ), */
-   /*                    d_row_ind ); */
+   HYPRE_ONEDPL_CALL( dpct::scatter_if,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
+                      d_row_ptr,
+                      oneapi::dpl::make_transform_iterator( oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
+                                                            [](auto t) { return std::get<0>(t) != std::get<1>(t); } ),
+                      d_row_ind,
+                      oneapi::dpl::identity() );
 
    HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       sycl::maximum<HYPRE_Int>() );
