@@ -25,11 +25,10 @@ hypreGPUKernel_GetRowNnz(
   HYPRE_Int *d_offd_ia,
   HYPRE_Int *d_rownnz)
 {
-
-#ifdef HYPRE_USING_CUDA
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
-#elif defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1,1>(item);
+#else
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
 
    if (global_thread_id < nrows)
@@ -55,17 +54,17 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 {
    HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
 
-#ifdef HYPRE_USING_CUDA
-   HYPRE_THRUST_CALL( lower_bound,
-                      d_row_ind, d_row_ind + nnz,
-                      thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
-                      d_row_ptr);
-#elif defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                       oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                      d_row_ptr);
+#else
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
 #endif
 
@@ -76,17 +75,17 @@ HYPRE_Int
 hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
                                    HYPRE_Int *d_row_ptr)
 {
-#ifdef HYPRE_USING_CUDA
-   HYPRE_THRUST_CALL( lower_bound,
-                      d_row_ind, d_row_ind + nnz,
-                      thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
-                      d_row_ptr);
-#elif defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                       oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                      d_row_ptr);
+#else
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
 #endif
 
@@ -108,6 +107,73 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 
    return d_row_ind;
 }
+
+HYPRE_Int
+hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
+{
+#ifdef HYPRE_USING_SYCL
+   return HYPRE_ONEDPL_CALL(oneapi::dpl::reduce, d_i, d_i + n);
+#else
+   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
+#endif
+}
+
+HYPRE_Int
+hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
+{
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(oneapi::dpl::inclusive_scan, d_i, d_i + n, d_i);
+#else
+   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
+{
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i);
+#else
+   HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
+#endif
+   return hypre_error_flag;
+}
+
+/* Input: d_row_num, of size nrows, contains the rows indices that can be BigInt or Int
+ * Output: d_row_ind */
+template <typename T>
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                          T *d_row_num, T *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
+
+#ifdef HYPRE_USING_SYCL
+   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+#else
+   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
+#endif
+
+   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                             HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
+#if defined(HYPRE_MIXEDINT)
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                             HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
+#endif
 
 #endif // HYPRE_USING_GPU
 
@@ -167,7 +233,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
    /*                                                          [](auto t) { return std::get<0>(t) != std::get<1>(t); } ), */
    /*                    d_row_ind ); */
 
-   HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       sycl::maximum<HYPRE_Int>() );
 
    return hypre_error_flag;
@@ -446,28 +512,6 @@ hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
 }
 
 HYPRE_Int
-hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
-{
-   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
-}
-
-HYPRE_Int
-hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
-{
-   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
-{
-   HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
 hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
 {
    HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_x, v * _1 );
@@ -532,37 +576,6 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
    return hypre_error_flag;
 }
-
-/* Input: d_row_num, of size nrows, contains the rows indices that can be BigInt or Int
- * Output: d_row_ind */
-template <typename T>
-HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
-                                          T *d_row_num, T *d_row_ind)
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
-
-   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
-
-   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                             HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
-#if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                             HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
-#endif
 
 __global__ void
 hypreCUDAKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)

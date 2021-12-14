@@ -412,6 +412,16 @@ HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE
 HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
                                              HYPRE_Int *d_row_ptr);
 
+HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+template <typename T>
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+
 #endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
@@ -1018,10 +1028,6 @@ template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByT
                                                                                         T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
 
 template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
-
-template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
@@ -1031,12 +1037,6 @@ HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, 
                                      HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
                                      HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
                                      HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);
@@ -1088,6 +1088,28 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
  *                    NOTE: IN HYPRE'S DEFAULT STREAM
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
+
+template <typename InputIter1, typename InputIter2,
+          typename OutputIter>
+OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
+                  InputIter2 input_first, OutputIter result) {
+  static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+                   std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<InputIter2>::iterator_category,
+              std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<OutputIter>::iterator_category,
+              std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+  auto perm_begin =
+      oneapi::dpl::make_permutation_iterator(input_first, map_first);
+  const int n = ::std::distance(map_first, map_last);
+
+  return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+			   perm_begin, perm_begin + n, result);
+}
 
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA)
