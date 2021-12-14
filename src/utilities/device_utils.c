@@ -133,7 +133,7 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i);
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0, std::plus<>());
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -212,6 +212,16 @@ dim3 hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
    return gDim;
 }
 
+struct hypre_empty_row_functor
+{
+   bool operator()(const std::tuple<HYPRE_Int, HYPRE_Int>& t) const
+   {
+      const HYPRE_Int a = std::get<0>(t);
+      const HYPRE_Int b = std::get<1>(t);
+      return a != b;
+   }
+};
+
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                    HYPRE_Int *d_row_ind)
@@ -229,7 +239,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                       oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
                       d_row_ptr,
                       oneapi::dpl::make_transform_iterator( oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
-                                                            [](auto t) { return std::get<0>(t) != std::get<1>(t); } ),
+                                                            hypre_empty_row_functor() ),
                       d_row_ind,
                       oneapi::dpl::identity() );
 
