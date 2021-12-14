@@ -575,6 +575,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
       hypre_SStructPGridVTPBndBoxArrayArray(cgrid, t) = NULL;
       hypre_SStructPGridVTSGrid(cgrid, t)     = NULL;
       hypre_SStructPGridVTIBoxArray(cgrid, t) = NULL;
+      hypre_SStructPGridVTActive(cgrid, t)    = 1;
    }
 
    /*-----------------------------------------
