@@ -55,6 +55,8 @@
 
 typedef sycl::range<1> dim3;
 #define __global__
+#define __host__
+#define __device__
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
@@ -1107,7 +1109,7 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
 /* return the number of (sub_groups) warps in (work-group) block */
 template <hypre_int dim>
 static __forceinline__
-hypre_int hypre_gpu_get_num_warps(sycl::nd_item<1>& item)
+hypre_int hypre_gpu_get_num_warps(sycl::nd_item<dim>& item)
 {
    return item.get_sub_group().get_group_range().get(0);
 }
@@ -1115,9 +1117,9 @@ hypre_int hypre_gpu_get_num_warps(sycl::nd_item<1>& item)
 /* return the thread lane id in warp */
 template <hypre_int dim>
 static __forceinline__
-hypre_int hypre_gpu_get_lane_id(sycl::nd_item<1>& item)
+hypre_int hypre_gpu_get_lane_id(sycl::nd_item<dim>& item)
 {
-   return item.get_local_linear_id() & (HYPRE_WARP_SIZE-1);
+   return item.get_sub_group().get_local_linear_id();
 }
 
 // /* return the number of threads in grid */
@@ -1128,11 +1130,15 @@ hypre_int hypre_gpu_get_lane_id(sycl::nd_item<1>& item)
 //    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>();
 // }
 
-/* return the flattened work-item/thread id in global work space */
-template <hypre_int bdim, hypre_int gdim>
+/* return the flattened work-item/thread id in global work space,
+ * Note: Since the use-cases always involved bdim = gdim = 1, the
+ * sycl:;nd_item<1> is only being used. SFINAE is used to prevent
+ * other dimensions (i.e., bdim != gdim != 1) */
+template < hypre_int bdim, hypre_int gdim >
 static __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(sycl::nd_item<1>& item)
 {
+   static_assert(bdim == 1 && gdim == 1);
    return item.get_global_id(0);
 }
 
