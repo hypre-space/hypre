@@ -517,7 +517,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    *nnzC     = nnzC_nume;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
+   hypre_SyncCudaDevice(hypre_handle());
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
 #endif
 

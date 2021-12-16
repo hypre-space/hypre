@@ -339,7 +339,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
+   hypre_SyncCudaDevice(hypre_handle());
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
 #endif
 }

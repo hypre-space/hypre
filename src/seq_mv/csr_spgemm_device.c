@@ -189,7 +189,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    hypre_CSRMatrixData(C)        = d_c;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
+   hypre_SyncCudaDevice(hypre_handle());
    hypre_profile_times[HYPRE_TIMER_ID_SPMM] += hypre_MPI_Wtime();
 #endif
 

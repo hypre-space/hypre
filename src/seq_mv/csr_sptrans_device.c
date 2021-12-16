@@ -76,7 +76,7 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
    *d_ac_out = csc_a;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
+   hypre_SyncCudaDevice(hypre_handle());
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
 #endif
 
@@ -226,7 +226,7 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    *d_ac_out = d_ac;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
+   hypre_SyncCudaDevice(hypre_handle());
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
 #endif
 
