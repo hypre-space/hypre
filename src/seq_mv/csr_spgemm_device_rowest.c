@@ -291,9 +291,9 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    hypre_CurandUniformSingle(nsamples * N, d_V1, 0, 0, 0, 0);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
-   hypre_printf("Curand time %f\n", t2);
+   printf0("Curand time %f\n", t2);
 #endif
 
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
@@ -329,7 +329,8 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
                                      HYPRE_Int *d_ja,
                                      HYPRE_Int *d_ib,
                                      HYPRE_Int *d_jb,
-                                     HYPRE_Int *d_rc )
+                                     HYPRE_Int *d_rc,
+                                     HYPRE_Int  row_est_mtd )
 {
 #ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPushRange("CSRSpGemmRowEstimate");
@@ -350,7 +351,6 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   HYPRE_Int row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
    size_t    cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
    float     cohen_mult     = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
 

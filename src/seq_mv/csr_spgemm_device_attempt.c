@@ -239,7 +239,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
                       HYPRE_Int     *jc,
                       HYPRE_Complex *ac,
                       HYPRE_Int     *rc,
-                      HYPRE_Int     *rf )
+                      char          *rf )
 {
    volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
@@ -379,7 +379,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 template <HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__ void
 hypre_spgemm_copy_into_C( HYPRE_Int      M,
-                          HYPRE_Int     *rf,
+                          char          *rf,
                           HYPRE_Int     *ic1,
                           HYPRE_Int     *jc1,
                           HYPRE_Complex *ac1,
@@ -453,7 +453,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
                                     HYPRE_Int      *d_jb,
                                     HYPRE_Complex  *d_b,
                                     HYPRE_Int      *d_rc,
-                                    HYPRE_Int      *d_rf,
+                                    char           *d_rf,
                                     HYPRE_Int     **d_ic_out,
                                     HYPRE_Int     **d_jc_out,
                                     HYPRE_Complex **d_c_out )
@@ -511,7 +511,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       hypre_create_ija(m, rf_ind, d_rc, *d_ic_out, d_jc_out, d_c_out, &ija_size);
    }
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf("%s[%d]: ATTEMPT %d: ija_size %d\n", __func__, __LINE__, ATTEMPT, ija_size);
+   printf0("%s[%d]: ATTEMPT %d: ija_size %d\n", __func__, __LINE__, ATTEMPT, ija_size);
 #endif
 
    if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
@@ -559,7 +559,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
 
    /* a binary array to indicate if row nnz counting is failed for a row */
-   HYPRE_Int     *d_rf = d_rc + m;
+   char *d_rf = hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE);
    /* temporary C */
    HYPRE_Int     *d_ic1 = NULL, *d_jc1 = NULL, *d_ic2 = NULL, *d_jc2 = NULL;
    HYPRE_Complex *d_c1 = NULL, *d_c2 = NULL;
@@ -568,7 +568,9 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    hypre_spgemm_numerical_with_rowest<SHMEM_HASH_SIZE, 1>
    (m, NULL, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_rf, &d_ic1, &d_jc1, &d_c1);
 
-   HYPRE_Int num_failed_rows = hypreDevice_IntegerReduceSum(m, d_rf);
+   HYPRE_Int num_failed_rows = HYPRE_THRUST_CALL( reduce,
+                                                  thrust::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
+                                                  thrust::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
 
    if (num_failed_rows)
    {
@@ -583,7 +585,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
                             thrust::make_counting_iterator(m),
                             d_rf,
                             rf_ind,
-                            thrust::identity<HYPRE_Int>() );
+                            thrust::identity<char>() );
 
       hypre_assert(new_end - rf_ind == num_failed_rows);
 
@@ -623,6 +625,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzEstimate( HYPRE_Int       m,
    hypre_TFree(d_c1,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_jc2, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_c2,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_rf,  HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;

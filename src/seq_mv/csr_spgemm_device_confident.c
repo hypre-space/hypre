@@ -217,7 +217,7 @@ hypre_spgemm_copy_from_hash_into_C_row(          HYPRE_Int      lane_id,
    return j;
 }
 
-template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool FAILED_SYMBL, char HASHTYPE, bool HAS_GHASH, bool BINNED>
+template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_RIND, bool FAILED_SYMBL, char HASHTYPE, bool HAS_GHASH>
 __global__ void
 hypre_spgemm_numeric( const HYPRE_Int                   M, /* HYPRE_Int K, HYPRE_Int N, */
                       const HYPRE_Int*     __restrict__ rind,
@@ -228,12 +228,12 @@ hypre_spgemm_numeric( const HYPRE_Int                   M, /* HYPRE_Int K, HYPRE
                       const HYPRE_Int*     __restrict__ jb,
                       const HYPRE_Complex* __restrict__ ab,
                       const HYPRE_Int*     __restrict__ ic,
-                      HYPRE_Int*     __restrict__ jc,
-                      HYPRE_Complex* __restrict__ ac,
-                      HYPRE_Int*     __restrict__ rc,
+                            HYPRE_Int*     __restrict__ jc,
+                            HYPRE_Complex* __restrict__ ac,
+                            HYPRE_Int*     __restrict__ rc,
                       const HYPRE_Int*     __restrict__ ig,
-                      HYPRE_Int*     __restrict__ jg,
-                      HYPRE_Complex* __restrict__ ag)
+                            HYPRE_Int*     __restrict__ jg,
+                            HYPRE_Complex* __restrict__ ag)
 {
    /* number of groups in the grid */
    volatile const HYPRE_Int grid_num_groups = get_num_groups() * gridDim.x;
@@ -258,7 +258,7 @@ hypre_spgemm_numeric( const HYPRE_Int                   M, /* HYPRE_Int K, HYPRE
    {
       HYPRE_Int ii = -1;
 
-      if (BINNED)
+      if (HAS_RIND)
       {
          group_read<GROUP_SIZE>(rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
                                 ii,
@@ -451,7 +451,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
       hypre_create_ija(m, NULL, d_rc, d_ic_new, &d_jc_new, &d_c_new, &nnzC_new);
 
 #ifdef HYPRE_SPGEMM_PRINTF
-      printf("%s[%d]: Post Copy: new nnzC %d\n", __func__, __LINE__, nnzC_new);
+      printf0("%s[%d]: Post Copy: new nnzC %d\n", __func__, __LINE__, nnzC_new);
 #endif
 
       /* copy to the final C */
@@ -477,7 +477,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
 
 
 /* SpGeMM with Rownnz/Upper bound */
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool NEED_GHASH, bool BINNED>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND, bool NEED_GHASH>
 HYPRE_Int
 hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
                                     HYPRE_Int     *row_ind,
@@ -535,10 +535,10 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    }
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf("%s[%d]: HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, EXACT_ROWNNZ %d, ghash %p size %d\n",
+   printf0("%s[%d]: HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, EXACT_ROWNNZ %d, NEED_GHASH %d, ghash %p size %d\n",
           __func__, __LINE__,
-          hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, d_ghash_i, ghash_size);
-   printf("%s[%d]: kernel spec [%d %d %d] x [%d %d %d]\n", __func__, __LINE__, gDim.x, gDim.y, gDim.z,
+          hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, NEED_GHASH, d_ghash_i, ghash_size);
+   printf0("%s[%d]: kernel spec [%d %d %d] x [%d %d %d]\n", __func__, __LINE__, gDim.x, gDim.y, gDim.z,
           bDim.x, bDim.y, bDim.z);
 #endif
 
@@ -550,7 +550,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
       if (NEED_GHASH && ghash_size)
       {
          HYPRE_CUDA_LAUNCH ( (
-                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, 'D', true, BINNED>),
+                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
                              gDim, bDim, /* shmem_size, */
                              m, row_ind, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL,
                              d_ghash_i, d_ghash_j, d_ghash_a );
@@ -558,7 +558,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
       else
       {
          HYPRE_CUDA_LAUNCH ( (
-                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, 'D', false, BINNED>),
+                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
                              gDim, bDim, /* shmem_size, */
                              m, row_ind, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL,
                              d_ghash_i, d_ghash_j, d_ghash_a );
@@ -569,7 +569,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
       if (NEED_GHASH && ghash_size)
       {
          HYPRE_CUDA_LAUNCH ( (
-                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, 'D', true, BINNED>),
+                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
                              gDim, bDim, /* shmem_size, */
                              m, row_ind, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
                              d_ghash_i, d_ghash_j, d_ghash_a );
@@ -577,16 +577,19 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
       else
       {
          HYPRE_CUDA_LAUNCH ( (
-                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, 'D', false, BINNED>),
+                                hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
                              gDim, bDim, /* shmem_size, */
                              m, row_ind, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
                              d_ghash_i, d_ghash_j, d_ghash_a );
       }
    }
 
-   hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(d_ghash_a, HYPRE_MEMORY_DEVICE);
+   if (NEED_GHASH)
+   {
+      hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_ghash_a, HYPRE_MEMORY_DEVICE);
+   }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
@@ -617,8 +620,8 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 #endif
 
    const char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
-   const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
-   const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE;
+   const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE * 16;
+   const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE * 16;
 
    if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
    {
@@ -629,7 +632,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0,      thrust::maximum<HYPRE_Int>());
    HYPRE_Int min_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, max_rc, thrust::minimum<HYPRE_Int>());
-   printf("%s[%d]: max RC %d, min RC %d\n", __func__, __LINE__, max_rc, min_rc);
+   printf0("%s[%d]: max RC %d, min RC %d\n", __func__, __LINE__, max_rc, min_rc);
 #endif
 
    /* if rc contains exact rownnz: can allocate the final C=(ic,jc,c) directly;
@@ -642,11 +645,11 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    hypre_create_ija(m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf("%s[%d]: nnzC %d\n", __func__, __LINE__, nnzC);
+   printf0("%s[%d]: nnzC %d\n", __func__, __LINE__, nnzC);
 #endif
 
    /* RL Note: even with exact rownnz, still may need global hash, since shared hash has different size from symbol. */
-   hypre_spgemm_numerical_with_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, true, false>
+   hypre_spgemm_numerical_with_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, false, true>
    (m, NULL, k, n, exact_rownnz, hash_type, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c);
 
    if (!exact_rownnz)
@@ -666,17 +669,18 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(b, SHMEM_HASH_SIZE, GROUP_SIZE, GHASH)                                  \
-{                                                                                                                         \
-   const HYPRE_Int p = h_bin_ptr[b - 1];                                                                                  \
-   const HYPRE_Int q = h_bin_ptr[b];                                                                                      \
-   const HYPRE_Int bs = q - p;                                                                                            \
-   printf("!! %d rows\n", bs);                                                                                            \
-   if (bs)                                                                                                                \
-   {                                                                                                                      \
-      hypre_spgemm_numerical_with_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, GHASH, true>                                        \
-      (bs, d_rc_indice + p, k, n, exact_rownnz, hash_type, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c);      \
-   }                                                                                                                      \
+#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(b, SHMEM_HASH_SIZE, GROUP_SIZE, GHASH)                             \
+{                                                                                                                    \
+   const HYPRE_Int p = h_bin_ptr[b - 1];                                                                             \
+   const HYPRE_Int q = h_bin_ptr[b];                                                                                 \
+   const HYPRE_Int bs = q - p;                                                                                       \
+   printf0("bin[%d]: %d rows\n", b, bs);                                                                             \
+   if (bs)                                                                                                           \
+   {                                                                                                                 \
+      hypre_spgemm_numerical_with_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, true, GHASH>                                   \
+      (bs, d_rc_indice + p, k, n, exact_rownnz, hash_type, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c); \
+   }                                                                                                                 \
+   HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                                                              \
 }
 
 HYPRE_Int
@@ -721,77 +725,39 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    hypre_create_ija(m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
-   HYPRE_Int *d_rc_indice = d_rc + m;
-   HYPRE_Int *d_bin_ptr = hypre_TAlloc(HYPRE_Int, HYPRE_SPGEMM_NBIN + 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *d_rc_indice = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_NBIN + 1];
-   const HYPRE_Int s = 12;
+   const HYPRE_Int s = 8, t = 3, u = HYPRE_SPGEMM_NBIN;
 
+#if defined(HYPRE_DEBUG)
+   HYPRE_Int _spgemm_nrows = 0;
+#endif
+
+   /* create binning */
 #ifdef HYPRE_SPGEMM_TIMING
    t1 = hypre_MPI_Wtime();
 #endif
 
-   /* assume there are no more than 127 = 2^7-1 bins, which should be enough */
-   char *d_bin_key = hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_THRUST_CALL( transform,
-                      d_rc,
-                      d_rc + m,
-                      d_bin_key,
-                      spgemm_bin_op<HYPRE_Int, s>() );
-
-   HYPRE_THRUST_CALL( sequence, d_rc_indice, d_rc_indice + m);
-   HYPRE_THRUST_CALL( stable_sort_by_key, d_bin_key, d_bin_key + m, d_rc_indice );
-
-   HYPRE_THRUST_CALL( lower_bound,
-                      d_bin_key,
-                      d_bin_key + m,
-                      thrust::make_counting_iterator(1),
-                      thrust::make_counting_iterator(HYPRE_SPGEMM_NBIN + 2),
-                      d_bin_ptr );
-
-   hypre_TFree(d_bin_key, HYPRE_MEMORY_DEVICE);
-
-   hypre_TMemcpy(h_bin_ptr, d_bin_ptr, HYPRE_Int, HYPRE_SPGEMM_NBIN + 1, HYPRE_MEMORY_HOST,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_assert(h_bin_ptr[HYPRE_SPGEMM_NBIN] == m);
-
-   hypre_TFree(d_bin_ptr, HYPRE_MEMORY_DEVICE);
+   hypre_SpGemmCreateBins<s, t, u>(m, d_rc, false, d_rc_indice, h_bin_ptr);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
-   printf("%s[%d]: binning time %f\n", __func__, __LINE__, t2);
+   printf0("%s[%d]: Binning time %f\n", __func__, __LINE__, t2);
 #endif
 
-   /*
-   HYPRE_Int *d_tmp = hypre_TAlloc(HYPRE_Int, HYPRE_SPGEMM_NBIN, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *h_tmp = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
-   HYPRE_THRUST_CALL( transform,
-                      thrust::make_counting_iterator(0),
-                      thrust::make_counting_iterator(HYPRE_SPGEMM_NBIN),
-                      d_tmp,
-                      ((1 << _1) >> 1) * s );
-
-   hypre_TMemcpy(h_tmp, d_tmp, HYPRE_Int, HYPRE_SPGEMM_NBIN, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (int i = 0; i < HYPRE_SPGEMM_NBIN; i++) printf("%d ", h_tmp[i]); printf("\n");
-
-   HYPRE_Int *h_rc = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(h_rc, d_rc_copy,       HYPRE_Int, m, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   for (int i = 0; i < m; i++) printf("%d(%d) ", h_rc[i], i); printf("\n");
-   for (int i = 0; i < HYPRE_SPGEMM_NBIN; i++) printf("%d ", h_bin_ptr[i]); printf("\n");
-   */
-
+#if 0
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 1,  HYPRE_SPGEMM_NUMER_HASH_SIZE / 16,
                                               HYPRE_WARP_SIZE / 16, false);  /* 16,      2 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 2,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  8,
                                               HYPRE_WARP_SIZE /  8, false);  /* 32,      4 */
+#endif
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 3,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  4,
                                               HYPRE_WARP_SIZE /  4, false);  /* 64,      8 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 4,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  2,
                                               HYPRE_WARP_SIZE /  2, false);  /* 128,    16 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 5,  HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE,
                                               false);  /* 256,    32 */
-#if 0
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 6,  HYPRE_SPGEMM_NUMER_HASH_SIZE *  2,
                                               HYPRE_WARP_SIZE *  2, false);  /* 512,    64 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 7,  HYPRE_SPGEMM_NUMER_HASH_SIZE *  4,
@@ -800,8 +766,17 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
                                               HYPRE_WARP_SIZE *  8, false);  /* 2048,  256 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
                                               HYPRE_WARP_SIZE * 16, false);  /* 4096,  512 */
+#if 0
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(10,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 32,
                                              HYPRE_WARP_SIZE * 32, true);   /* 8192, 1024 */
+#endif
+
+#if defined(HYPRE_DEBUG)
+   if (_spgemm_nrows != m)
+   {
+      exit(1);
+   }
+   hypre_assert(_spgemm_nrows == m);
 #endif
 
    if (!exact_rownnz)
@@ -813,6 +788,8 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    *d_jc_out = d_jc;
    *d_c_out  = d_c;
    *nnzC_out = nnzC;
+
+   hypre_TFree(d_rc_indice, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();

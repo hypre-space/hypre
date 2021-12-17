@@ -49,6 +49,11 @@ CUFILES =\
  csr_spgemm_device_rocsparse.c \
  csr_spgemm_device_rowbound.c\
  csr_spgemm_device_rowest.c\
+ csr_spgemm_device_symbl5.c\
+ csr_spgemm_device_symbl6.c\
+ csr_spgemm_device_symbl7.c\
+ csr_spgemm_device_symbl8.c\
+ csr_spgemm_device_symbl9.c\
  csr_spgemm_device_util.c\
  csr_spmv_device.c\
  csr_sptrans_device.c\
