@@ -78,6 +78,7 @@ typedef struct
 #define hypre_HandleSpMVUseCusparse(hypre_handle)                hypre_DeviceDataSpMVUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseCusparse(hypre_handle)             hypre_DeviceDataSpTransUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmAlgorithmBinned(hypre_handle)          hypre_DeviceDataSpgemmAlgorithmBinned(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_DeviceDataSpgemmRownnzEstimateMethod(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_DeviceDataSpgemmRownnzEstimateMultFactor(hypre_HandleDeviceData(hypre_handle))

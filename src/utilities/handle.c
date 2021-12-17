@@ -41,6 +41,15 @@ hypre_SetSpGemmAlgorithm( HYPRE_Int value )
 }
 
 HYPRE_Int
+hypre_SetSpGemmAlgorithmBinned( HYPRE_Int value )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpgemmAlgorithmBinned(hypre_handle()) = value;
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value )
 {
 #if defined(HYPRE_USING_GPU)

@@ -292,10 +292,11 @@ main( hypre_int argc,
    spgemm_use_cusparse = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
+   HYPRE_Int  spgemm_alg_binned = 0;
    HYPRE_Int  spgemm_rowest_mtd = 3;
-   HYPRE_Int  spgemm_rowest_nsamples = 32;
-   HYPRE_Real spgemm_rowest_mult = 1.5;
-   char       spgemm_hash_type = 'L';
+   HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
+   HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
+   char       spgemm_hash_type = 'D';
 #endif
 
    /* for CGC BM Aug 25, 2006 */
@@ -1193,6 +1194,11 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_alg  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-spgemm_alg_binned") == 0 )
+      {
+         arg_index++;
+         spgemm_alg_binned  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_rowest") == 0 )
       {
@@ -2313,9 +2319,10 @@ main( hypre_int argc,
    /* use cuSPARSE for SpGEMM */
    ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmAlgorithmBinned(spgemm_alg_binned); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
-   ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0);
-   ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0);
+   if (spgemm_rowest_nsamples > 0) { ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0); }
+   if (spgemm_rowest_mult > 0.0) { ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0); }
    ierr = hypre_SetSpGemmHashType(spgemm_hash_type); hypre_assert(ierr == 0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
@@ -3881,6 +3888,10 @@ main( hypre_int argc,
       hypre_SyncCudaDevice(hypre_handle());
 #endif
 
+#if defined(HYPRE_USING_CUDA)
+      //cudaProfilerStop();
+#endif
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -3918,6 +3929,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_CUDA)
       cudaProfilerStop();
 #endif
+
 #endif // #if SECOND_TIME
 
       if (solver_id == 0)
