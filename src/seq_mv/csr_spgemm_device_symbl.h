@@ -24,7 +24,6 @@ hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int
 {
    HYPRE_Int j = 0;
 
-#pragma unroll
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -63,7 +62,6 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
 {
    HYPRE_Int j = 0;
 
-#pragma unroll
    for (HYPRE_Int i = 0; i < HashSize; i++)
    {
       /* compute the hash value of key */
@@ -175,9 +173,9 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
                        const HYPRE_Int* __restrict__ ib,
                        const HYPRE_Int* __restrict__ jb,
                        const HYPRE_Int* __restrict__ ig,
-                             HYPRE_Int* __restrict__ jg,
-                             HYPRE_Int* __restrict__ rc,
-                             char*      __restrict__ rf )
+                       HYPRE_Int* __restrict__ jg,
+                       HYPRE_Int* __restrict__ rc,
+                       char*      __restrict__ rf )
 {
    /* number of groups in the grid */
    volatile const HYPRE_Int grid_num_groups = get_num_groups() * gridDim.x;
@@ -226,7 +224,6 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
          ghash_size = iend_g - istart_g;
 
          /* initialize group's global memory hash table */
-#pragma unroll
          for (HYPRE_Int k = lane_id; k < ghash_size; k += GROUP_SIZE)
          {
             jg[istart_g + k] = -1;
@@ -236,7 +233,6 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
       /* initialize group's shared memory hash table */
       if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
       {
-#pragma unroll
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -375,14 +371,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
       if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
    }
    else
@@ -390,14 +386,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
       if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
    }
 

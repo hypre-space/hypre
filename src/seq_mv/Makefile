@@ -46,6 +46,13 @@ CUFILES =\
  csr_spgemm_device_attempt.c\
  csr_spgemm_device_confident.c\
  csr_spgemm_device_cusparse.c\
+ csr_spgemm_device_numer3.c\
+ csr_spgemm_device_numer4.c\
+ csr_spgemm_device_numer5.c\
+ csr_spgemm_device_numer6.c\
+ csr_spgemm_device_numer7.c\
+ csr_spgemm_device_numer8.c\
+ csr_spgemm_device_numer9.c\
  csr_spgemm_device_rocsparse.c \
  csr_spgemm_device_rowbound.c\
  csr_spgemm_device_rowest.c\
