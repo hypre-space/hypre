@@ -8,7 +8,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#ifdef HYPRE_USING_GPU
 
 /* assume d_c is of length m and contains the "sizes" */
 void
@@ -21,7 +21,11 @@ hypre_create_ija( HYPRE_Int       m,
 {
    hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
+#ifdef HYPRE_USING_SYCL
+   HYPRE_ONEDPL_CALL(oneapi::dpl::inclusive_scan, d_c, d_c + m, d_i + 1);
+#else
    HYPRE_THRUST_CALL(inclusive_scan, d_c, d_c + m, d_i + 1);
+#endif
 
    hypre_TMemcpy(nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
@@ -37,14 +41,22 @@ hypre_create_ija( HYPRE_Int       m,
 }
 
 __global__ void
-hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
-                        HYPRE_Int *row_id,
-                        HYPRE_Int  num_ghash,
-                        HYPRE_Int *row_sizes,
-                        HYPRE_Int *ghash_sizes,
-                        HYPRE_Int  SHMEM_HASH_SIZE )
+hypre_SpGemmGhashSize1(
+#ifdef HYPRE_USING_SYCL
+  sycl::nd_item<1>& item,
+#endif
+  HYPRE_Int  num_rows,
+  HYPRE_Int *row_id,
+  HYPRE_Int  num_ghash,
+  HYPRE_Int *row_sizes,
+  HYPRE_Int *ghash_sizes,
+  HYPRE_Int  SHMEM_HASH_SIZE )
 {
+#ifdef HYPRE_USING_SYCL
+   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+#else
    const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+#endif
 
    if (global_thread_id >= num_ghash)
    {
@@ -65,14 +77,22 @@ hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
 }
 
 __global__ void
-hypre_SpGemmGhashSize2( HYPRE_Int  num_rows,
-                        HYPRE_Int *row_id,
-                        HYPRE_Int  num_ghash,
-                        HYPRE_Int *row_sizes,
-                        HYPRE_Int *ghash_sizes,
-                        HYPRE_Int  SHMEM_HASH_SIZE )
+hypre_SpGemmGhashSize2(
+#ifdef HYPRE_USING_SYCL
+  sycl::nd_item<1>& item,
+#endif
+  HYPRE_Int  num_rows,
+  HYPRE_Int *row_id,
+  HYPRE_Int  num_ghash,
+  HYPRE_Int *row_sizes,
+  HYPRE_Int *ghash_sizes,
+  HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+#ifdef HYPRE_USING_SYCL
+   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+#else
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+#endif
 
    if (i < num_rows)
    {
@@ -103,15 +123,15 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    {
       ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_ghash, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
-                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
+      HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
+                        num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
    else if (type == 2)
    {
       ghash_i = hypre_CTAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
-                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
+      HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
+                        num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
 
    hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);
@@ -146,6 +166,5 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
 
    return hypre_error_flag;
 }
-
 #endif
 
