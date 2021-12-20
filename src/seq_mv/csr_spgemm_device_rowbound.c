@@ -27,7 +27,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    const bool can_fail = in_rc < 2;
 
    hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
-      (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
+   (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    return hypre_error_flag;
 }
@@ -51,7 +51,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
    hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
-      (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
+   (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)
    {
@@ -65,7 +65,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
       {
 #ifdef HYPRE_SPGEMM_PRINTF
          printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
-               num_failed_rows, num_failed_rows / (m + 0.0) );
+                 num_failed_rows, num_failed_rows / (m + 0.0) );
 #endif
          HYPRE_Int *rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
@@ -79,8 +79,8 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
          hypre_assert(new_end - rf_ind == num_failed_rows);
 
-         hypre_spgemm_symbolic_rownnz<2*HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2*HYPRE_WARP_SIZE, true>
-            (num_failed_rows, rf_ind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
+         hypre_spgemm_symbolic_rownnz<2 * HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2 * HYPRE_WARP_SIZE, true>
+         (num_failed_rows, rf_ind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
 
          hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
       }
@@ -143,17 +143,17 @@ hypre_spgemm_symbolic_binned( HYPRE_Int  m,
 
 #if 1
    HYPRE_SPGEMM_ROWNNZ_BINNED( 6, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 2,
-                                  HYPRE_WARP_SIZE *  2, false, false); /* 1024,   64 */
+                               HYPRE_WARP_SIZE *  2, false, false); /* 1024,   64 */
    HYPRE_SPGEMM_ROWNNZ_BINNED( 7, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 4,
-                                  HYPRE_WARP_SIZE *  4, false, false); /* 2048,  128 */
+                               HYPRE_WARP_SIZE *  4, false, false); /* 2048,  128 */
    HYPRE_SPGEMM_ROWNNZ_BINNED( 8, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 8,
-                                  HYPRE_WARP_SIZE *  8, false, false); /* 4096,  256 */
+                               HYPRE_WARP_SIZE *  8, false, false); /* 4096,  256 */
    HYPRE_SPGEMM_ROWNNZ_BINNED( 9, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,
-                                  HYPRE_WARP_SIZE * 16, false, false); /* 8192,  512 */
+                               HYPRE_WARP_SIZE * 16, false, false); /* 8192,  512 */
 #endif
 #if 0
    HYPRE_SPGEMM_ROWNNZ_BINNED(10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,
-                                  HYPRE_WARP_SIZE * 32, true, false); /* 16384, 1024 */
+                              HYPRE_WARP_SIZE * 32, true, false); /* 16384, 1024 */
 #endif
 #if defined(HYPRE_DEBUG)
    if (_spgemm_nrows != m)
@@ -184,7 +184,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
    hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
-      (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
+   (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)
    {
@@ -197,7 +197,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
       {
 #ifdef HYPRE_SPGEMM_PRINTF
          printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
-               num_failed_rows, num_failed_rows / (m + 0.0) );
+                 num_failed_rows, num_failed_rows / (m + 0.0) );
 #endif
          HYPRE_Int *rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 

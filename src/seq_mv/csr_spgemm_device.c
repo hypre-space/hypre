@@ -90,12 +90,12 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          if (binned)
          {
             hypreDevice_CSRSpGemmRownnzBinned
-               (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
+            (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
          }
          else
          {
             hypreDevice_CSRSpGemmRownnz
-               (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
+            (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
          }
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_ForceSyncCudaComputeStream(hypre_handle());
@@ -109,12 +109,12 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          if (binned)
          {
             hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
-               (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
          }
          else
          {
             hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
-               (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
          }
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_ForceSyncCudaComputeStream(hypre_handle());
