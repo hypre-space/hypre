@@ -349,7 +349,6 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 
    /* SpMV */
    /* WM: for now, use the transpose version of gemv */
-   /* WM: Q - do we need the event.wait() call, or do oneapi::mkl calls block? */
    /* hypre_printf("WM: debug - memory location of x = %d\n", hypre_VectorMemoryLocation(x)); */
    /* hypre_printf("WM: debug - memory location of y = %d\n", hypre_VectorMemoryLocation(y)); */
    /* hypre_MemoryLocation memory_location; */

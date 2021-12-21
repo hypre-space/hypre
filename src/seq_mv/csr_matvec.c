@@ -714,6 +714,16 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
+      /* WM: debug */
+      hypre_MemoryLocation memory_location;
+      hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location);
+      if (memory_location != hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A)))
+      {
+         hypre_printf("WM: debug - matrix memory location is incorrect!\n");
+         hypre_printf("WM: debug - pointer location = %d, memory location = %d\n", memory_location, hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A)));
+         hypre_printf("WM: debug - Matrix size = %d %d %d\n", hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A));
+         hypre_assert(0);
+      }
       ierr = hypre_CSRMatrixMatvecDevice(0, alpha, A, x, beta, b, y, offset);
    }
    else
@@ -994,6 +1004,16 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
+      /* WM: debug */
+      hypre_MemoryLocation memory_location;
+      hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location);
+      if (memory_location != hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A)))
+      {
+         hypre_printf("WM: debug - matrix memory location is incorrect!\n");
+         hypre_printf("WM: debug - pointer location = %d, memory location = %d\n", memory_location, hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A)));
+         hypre_printf("WM: debug - Matrix size = %d %d %d\n", hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A), hypre_CSRMatrixNumNonzeros(A));
+         hypre_assert(0);
+      }
       ierr = hypre_CSRMatrixMatvecDevice(1, alpha, A, x, beta, y, y, 0 );
    }
    else

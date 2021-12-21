@@ -858,6 +858,7 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
                                 HYPRE_BigInt  col_to_write,       /*          Ditto             */
                                 HYPRE_Real    val_to_write )      /*          Ditto             */
 {
+   /* hypre_printf("WM: debug - in BufferWrite\n"); */
    HYPRE_Int                ierr = 0;
 
 
@@ -895,14 +896,17 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
                                            (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
       hypre_NonGalerkinIJBufferCompress(ijbuf_size, ijbuf_cnt, ijbuf_rowcounter, ijbuf_data,
                                         ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
+      /* hypre_printf("WM: debug - about to HYPRE_IJMatrixAddToValues\n"); */
       ierr += HYPRE_IJMatrixAddToValues(B, *ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums),
                                         (*ijbuf_cols), (*ijbuf_data));
+      /* hypre_printf("WM: debug - done with HYPRE_IJMatrixAddToValues\n"); */
 
       /* Reinitialize the buffer */
       hypre_NonGalerkinIJBufferInit( ijbuf_cnt, ijbuf_rowcounter, (*ijbuf_numcols));
       hypre_NonGalerkinIJBufferNewRow((*ijbuf_rownums), (*ijbuf_numcols), ijbuf_rowcounter, row_to_write);
    }
 
+   /* hypre_printf("WM: debug - done with BufferWrite\n"); */
    return ierr;
 }
 
@@ -1013,6 +1017,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    if (num_cols_RAP_offd)
    { RAP_offd_data        = hypre_CSRMatrixData(RAP_offd); }
 
+   /* hypre_printf("WM: debug - 1\n"); */
 
    /*
     * Initialize the IJ matrix, leveraging our rough knowledge of the
@@ -1029,6 +1034,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    ierr += HYPRE_IJMatrixInitialize(Pattern);
    hypre_TFree(rownz, HYPRE_MEMORY_HOST);
 
+   /* hypre_printf("WM: debug - 2\n"); */
    /*
     *For efficiency, we do a buffered IJAddToValues.
     * Here, we initialize the buffer and then initialize the buffer counters
@@ -1107,6 +1113,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
       }
 
    }
+   /* hypre_printf("WM: debug - 3\n"); */
 
    /*
     * Use drop-tolerance to compute new entries for sparsity pattern
@@ -1190,6 +1197,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
       }
 
    }
+   /* hypre_printf("WM: debug - 4\n"); */
 
    /* For efficiency, we do a buffered IJAddToValues.
     * This empties the buffer of any remaining values */
@@ -1235,6 +1243,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                                HYPRE_Real droptol, HYPRE_Int sym_collapse,
                                                HYPRE_Real lump_percent, HYPRE_Int collapse_beta )
 {
+   /* hypre_printf("WM: debug - at beginning of hypre_BoomerAMGBuildNonGalerkinCoarseOperator\n"); */
    /* Initializations */
    MPI_Comm            comm                  = hypre_ParCSRMatrixComm(*RAP_ptr);
    hypre_ParCSRMatrix  *S                    = NULL;
@@ -1363,8 +1372,10 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* Compute Sparsity Pattern  */
+   /* hypre_printf("WM: debug - about to hypre_NonGalerkinSparsityPattern\n"); */
    Pattern                    = hypre_NonGalerkinSparsityPattern(AP, RAP, CF_marker, droptol,
                                                                  sym_collapse, collapse_beta);
+   /* hypre_printf("WM: debug - done with hypre_NonGalerkinSparsityPattern\n"); */
    Pattern_diag               = hypre_ParCSRMatrixDiag(Pattern);
    Pattern_diag_i             = hypre_CSRMatrixI(Pattern_diag);
    Pattern_diag_data          = hypre_CSRMatrixData(Pattern_diag);
