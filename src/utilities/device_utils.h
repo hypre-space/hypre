@@ -1228,11 +1228,11 @@ T read_only_load( const T *ptr )
 //    return in;
 // }
 
-template <typename T>
+template <typename T, int DIM>
 static __forceinline__
-T warp_reduce_sum(T in, sycl::nd_item<1>& item)
+T warp_reduce_sum(T in, sycl::nd_item<DIM>& item)
 {
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::sub_group SG = item.get_sub_group();
   //sycl::ext::oneapi::reduce(SG, in, std::plus<T>());
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)

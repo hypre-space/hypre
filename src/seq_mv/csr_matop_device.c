@@ -579,7 +579,7 @@ hypreGPUKernel_CSRMatrixFixZeroDiagDevice( sycl::nd_item<1>& item,
   {
     p = read_only_load(ia + row + lane);
   }
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
@@ -634,7 +634,7 @@ hypreGPUKernel_CSRMatrixReplaceDiagDevice( sycl::nd_item<1>& item,
   {
     p = read_only_load(ia + row + lane);
   }
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
@@ -697,7 +697,7 @@ hypreGPUKernel_CSRRowSum( sycl::nd_item<1>& item,
     p = read_only_load(ia + row_i + lane);
   }
 
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
@@ -769,7 +769,7 @@ hypreGPUKernel_CSRExtractDiag( sycl::nd_item<1>& item,
   {
     p = read_only_load(ia + row + lane);
   }
-  sycl::ext::oneapi::sub_group SG = item.get_sub_group();
+  sycl::sub_group SG = item.get_sub_group();
   q = SG.shuffle(p, 1);
   p = SG.shuffle(p, 0);
 
