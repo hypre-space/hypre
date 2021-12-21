@@ -23,11 +23,27 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_rc,
                                        char      *d_rf )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRownnzUpperbound");
+#endif
+
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
    hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
+#endif
 
    return hypre_error_flag;
 }
@@ -45,6 +61,14 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  in_rc,
                              HYPRE_Int *d_rc )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRownnz");
+#endif
+
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
@@ -88,6 +112,14 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
 
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
+#endif
+
    return hypre_error_flag;
 }
 
@@ -96,13 +128,13 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    const HYPRE_Int p = h_bin_ptr[b - 1];                                               \
    const HYPRE_Int q = h_bin_ptr[b];                                                   \
    const HYPRE_Int bs = q - p;                                                         \
-   printf0("bin[%d]: %d rows\n", b, bs);                                               \
    if (bs)                                                                             \
    {                                                                                   \
+      printf0("bin[%d]: %d rows\n", b, bs);                                            \
       hypre_spgemm_symbolic_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, true>                  \
-      (bs, d_rind + p, k, n, GHASH, d_ia, d_ja, d_ib, d_jb, d_rc, CAN_FAIL, NULL);     \
+         (bs, d_rind + p, k, n, GHASH, d_ia, d_ja, d_ib, d_jb, d_rc, CAN_FAIL, NULL);  \
+      HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                             \
    }                                                                                   \
-   HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                                \
 }
 
 HYPRE_Int
@@ -141,7 +173,6 @@ hypre_spgemm_symbolic_binned( HYPRE_Int  m,
    printf0("%s[%d]: Binning time %f\n", __func__, __LINE__, t2);
 #endif
 
-#if 1
    HYPRE_SPGEMM_ROWNNZ_BINNED( 6, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 2,
                                HYPRE_WARP_SIZE *  2, false, false); /* 1024,   64 */
    HYPRE_SPGEMM_ROWNNZ_BINNED( 7, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 4,
@@ -150,16 +181,12 @@ hypre_spgemm_symbolic_binned( HYPRE_Int  m,
                                HYPRE_WARP_SIZE *  8, false, false); /* 4096,  256 */
    HYPRE_SPGEMM_ROWNNZ_BINNED( 9, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,
                                HYPRE_WARP_SIZE * 16, false, false); /* 8192,  512 */
-#endif
 #if 0
    HYPRE_SPGEMM_ROWNNZ_BINNED(10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,
                               HYPRE_WARP_SIZE * 32, true, false); /* 16384, 1024 */
 #endif
+
 #if defined(HYPRE_DEBUG)
-   if (_spgemm_nrows != m)
-   {
-      exit(1);
-   }
    hypre_assert(_spgemm_nrows == m);
 #endif
 
@@ -178,6 +205,14 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                    HYPRE_Int  in_rc,
                                    HYPRE_Int *d_rc )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRownnzBinned");
+#endif
+
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
@@ -214,6 +249,16 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
          hypre_spgemm_symbolic_binned(num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, d_rc);
       }
    }
+
+   hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
+#endif
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
+#endif
 
    return hypre_error_flag;
 }

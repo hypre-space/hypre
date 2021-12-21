@@ -376,14 +376,14 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
 }
 
 /* SpGeMM with Rownnz/Upper bound */
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND, bool NEED_GHASH>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int
 hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
                                     HYPRE_Int     *row_ind,
                                     HYPRE_Int      k,
                                     HYPRE_Int      n,
-                                    HYPRE_Int      EXACT_ROWNNZ,
-                                    char           hash_type,
+                                    bool           need_ghash,
+                                    HYPRE_Int      exact_rownnz,
                                     HYPRE_Int     *d_ia,
                                     HYPRE_Int     *d_ja,
                                     HYPRE_Complex *d_a,
@@ -395,10 +395,6 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
                                     HYPRE_Int     *d_jc,
                                     HYPRE_Complex *d_c )
 {
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
-#endif
-
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int num_groups_per_block  = hypre_min(16 * HYPRE_WARP_SIZE / GROUP_SIZE, 64);
    const HYPRE_Int BDIMX                 = 2;
@@ -419,6 +415,13 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
+   if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
+   {
+      hypre_error_w_msg(1, "Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
+      hash_type = 'D';
+   }
+
    /* ---------------------------------------------------------------------------
     * build hash table
     * ---------------------------------------------------------------------------*/
@@ -427,16 +430,16 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    HYPRE_Complex *d_ghash_a = NULL;
    HYPRE_Int      ghash_size = 0;
 
-   if (NEED_GHASH)
+   if (need_ghash)
    {
       hypre_SpGemmCreateGlobalHashTable(m, row_ind, num_act_groups, d_rc, SHMEM_HASH_SIZE,
                                         &d_ghash_i, &d_ghash_j, &d_ghash_a, &ghash_size);
    }
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf0("%s[%d]: HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, EXACT_ROWNNZ %d, NEED_GHASH %d, ghash %p size %d\n",
+   printf0("%s[%d]: HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, exact_rownnz %d, need_ghash %d, ghash %p size %d\n",
            __func__, __LINE__,
-           hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, NEED_GHASH, d_ghash_i, ghash_size);
+           hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, exact_rownnz, need_ghash, d_ghash_i, ghash_size);
    printf0("%s[%d]: kernel spec [%d %d %d] x [%d %d %d]\n", __func__, __LINE__, gDim.x, gDim.y, gDim.z,
            bDim.x, bDim.y, bDim.z);
 #endif
@@ -444,9 +447,13 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    /* ---------------------------------------------------------------------------
     * numerical multiplication:
     * ---------------------------------------------------------------------------*/
-   if (EXACT_ROWNNZ)
+   hypre_assert(HAS_RIND == (row_ind != NULL) );
+
+   /* <NUM_GROUPS_PER_BLOCK, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, FAILED_SYMBL, HASHTYPE, HAS_GHASH> */
+
+   if (exact_rownnz)
    {
-      if (NEED_GHASH && ghash_size)
+      if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
@@ -465,7 +472,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    }
    else
    {
-      if (NEED_GHASH && ghash_size)
+      if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
@@ -483,16 +490,9 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
       }
    }
 
-   if (NEED_GHASH)
-   {
-      hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(d_ghash_a, HYPRE_MEMORY_DEVICE);
-   }
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
-#endif
+   hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_ghash_a, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

@@ -10,17 +10,9 @@
 
 #include <csr_spgemm_device_numer.h>
 
-template HYPRE_Int
-hypre_spgemm_numerical_with_rownnz<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE, true, false>
-( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, HYPRE_Int EXACT_ROWNNZ, char hash_type,
-  HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-  HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
+template HYPRE_Int hypre_spgemm_numerical_with_rownnz < HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE, true > ( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash, HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
-template HYPRE_Int
-hypre_spgemm_numerical_with_rownnz<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE, false, true>
-( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, HYPRE_Int EXACT_ROWNNZ, char hash_type,
-  HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-  HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
+template HYPRE_Int hypre_spgemm_numerical_with_rownnz < HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE, false > ( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash, HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
 template HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_WARP_SIZE>( HYPRE_Int m,
                                                                         HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);
