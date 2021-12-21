@@ -24,8 +24,8 @@
 
 #define HYPRE_SPGEMM_NBIN 10
 
-//#define HYPRE_SPGEMM_TIMING
-//#define HYPRE_SPGEMM_PRINTF
+#define HYPRE_SPGEMM_TIMING
+#define HYPRE_SPGEMM_PRINTF
 //#define HYPRE_SPGEMM_NVTX
 
 /* ----------------------------------------------------------------------------------------------- *
@@ -169,7 +169,7 @@ T group_reduce_sum(T in)
 
       if (GROUP_SIZE > HYPRE_WARP_SIZE)
       {
-         __shared__ volatile HYPRE_Int s_WarpData[NUM_GROUPS_PER_BLOCK * GROUP_SIZE / HYPRE_WARP_SIZE];
+         __shared__ volatile T s_WarpData[NUM_GROUPS_PER_BLOCK * GROUP_SIZE / HYPRE_WARP_SIZE];
          const HYPRE_Int warp_lane_id = get_warp_lane_id();
          const HYPRE_Int warp_id = get_warp_id();
 
@@ -310,7 +310,7 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
    return hashval;
 }
 
-template<typename T, HYPRE_Int s>
+template<typename T, HYPRE_Int s, HYPRE_Int t, HYPRE_Int u>
 struct spgemm_bin_op : public thrust::unary_function<T, char>
 {
 
@@ -323,8 +323,13 @@ struct spgemm_bin_op : public thrust::unary_function<T, char>
 
       const T y = (x + s - 1) / s;
 
+      if ( y <= (1 << (t - 1)) )
+      {
+         return t;
+      }
+
 #pragma unroll
-      for (char i = 0; i < HYPRE_SPGEMM_NBIN - 1; i++)
+      for (char i = t; i < u - 1; i++)
       {
          if (y <= (1 << i))
          {
@@ -332,7 +337,7 @@ struct spgemm_bin_op : public thrust::unary_function<T, char>
          }
       }
 
-      return HYPRE_SPGEMM_NBIN;
+      return u;
    }
 };
 
@@ -347,14 +352,18 @@ HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_
                                              HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                              HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc);
+                                              HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc,
+                                              HYPRE_Int row_est_mtd);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                                 HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc,
-                                                HYPRE_Int *d_rc, HYPRE_Int *d_rf);
+                                                HYPRE_Int *d_rc, char *d_rf);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia,
                                       HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
+
+HYPRE_Int hypreDevice_CSRSpGemmRownnzBinned(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia,
+                                            HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
 HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                                          HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
@@ -370,6 +379,54 @@ HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k,
                                                        HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
                                                        HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                                        HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
+
+template<HYPRE_Int s, HYPRE_Int t, HYPRE_Int u> HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int m,
+                                                                                  HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> HYPRE_Int
+hypre_spgemm_symbolic_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
+                              bool need_ghash, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
+                              HYPRE_Int *d_rc, bool can_fail, char *d_rf );
+
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> HYPRE_Int
+hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
+                                    bool need_ghash,
+                                    HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
+                                    HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic,
+                                    HYPRE_Int *d_jc, HYPRE_Complex *d_c );
+
+template <HYPRE_Int GROUP_SIZE> HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int m,
+                                                                              HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);
+
+#if defined(HYPRE_SPGEMM_PRINTF) || defined(HYPRE_SPGEMM_TIMING)
+static hypre_int printf0( const char * format, ... )
+{
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_int ret = 0;
+
+   if (!myid)
+   {
+      va_list args;
+      va_start (args, format);
+      ret = vprintf (format, args);
+      va_end (args);
+   }
+
+   return ret;
+}
+#else
+#define printf0(...)
+#endif
+
+#if defined(HYPRE_DEBUG)
+#define HYPRE_SPGEMM_ROW(SUM, BIN_SIZE) \
+{                                       \
+   SUM += BIN_SIZE;                     \
+}
+#else
+#define HYPRE_SPGEMM_ROW(SUM, BIN_SIZE)
+#endif
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 #endif /* #ifndef CSR_SPGEMM_DEVICE_H */

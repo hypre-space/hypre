@@ -238,6 +238,7 @@ struct hypre_DeviceData
    /* device spgemm options */
    HYPRE_Int                         spgemm_use_cusparse;
    HYPRE_Int                         spgemm_algorithm;
+   HYPRE_Int                         spgemm_algorithm_binned;
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
@@ -267,6 +268,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpMVUseCusparse(data)                ((data) -> spmv_use_cusparse)
 #define hypre_DeviceDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
+#define hypre_DeviceDataSpgemmAlgorithmBinned(data)          ((data) -> spgemm_algorithm_binned)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
@@ -789,6 +791,15 @@ hypre_int next_power_of_2(hypre_int n)
 
    return n;
 }
+
+template<typename T1, typename T2>
+struct type_cast : public thrust::unary_function<T1, T2>
+{
+   __host__ __device__ T2 operator()(const T1 &x) const
+   {
+      return (T2) x;
+   }
+};
 
 template<typename T>
 struct absolute_value : public thrust::unary_function<T, T>

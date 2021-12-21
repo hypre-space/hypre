@@ -317,6 +317,7 @@ HYPRE_Int hypre_ForceSyncCudaComputeStream(hypre_Handle *hypre_handle);
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmAlgorithmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );

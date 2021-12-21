@@ -111,6 +111,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
 #endif
 
 #ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t1 = hypre_MPI_Wtime();
 #endif
 
@@ -127,7 +128,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                                       spgemmDesc, &bufferSize1, dBuffer1) );
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    hypre_printf("WorkEst %f\n", t2);
 #endif
@@ -150,7 +151,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                                spgemmDesc, &bufferSize2, dBuffer2) );
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    hypre_printf("Compute %f\n", t2);
 #endif
@@ -184,7 +185,7 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                             spgemmDesc) );
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    hypre_printf("Copy %f\n", t2);
 #endif
@@ -267,7 +268,7 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    hypre_SortCSRCusparse(k, n, nnzB, descr_B, d_ib, d_jb_sorted, d_b_sorted);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    hypre_printf("sort %f\n", t2);
 #endif
@@ -301,7 +302,7 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    hypre_printf("csrgemmNnz %f\n", t2);
 #endif
@@ -329,7 +330,7 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    hypre_printf("csrgemm %f\n", t2);
 #endif

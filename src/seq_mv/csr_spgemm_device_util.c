@@ -215,5 +215,55 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    return hypre_error_flag;
 }
 
+template<HYPRE_Int s, HYPRE_Int t, HYPRE_Int u>
+HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
+                                  HYPRE_Int *d_rc,
+                                  bool       d_rc_indice_in,
+                                  HYPRE_Int *d_rc_indice,
+                                  HYPRE_Int *h_bin_ptr )
+{
+   HYPRE_Int *d_bin_ptr = hypre_TAlloc(HYPRE_Int, HYPRE_SPGEMM_NBIN + 1, HYPRE_MEMORY_DEVICE);
+
+   /* assume there are no more than 127 = 2^7-1 bins, which should be enough */
+   char *d_bin_key = hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( transform,
+                      d_rc,
+                      d_rc + m,
+                      d_bin_key,
+                      spgemm_bin_op<HYPRE_Int, s, t, u>() );
+
+   if (!d_rc_indice_in)
+   {
+      HYPRE_THRUST_CALL( sequence, d_rc_indice, d_rc_indice + m);
+   }
+
+   HYPRE_THRUST_CALL( stable_sort_by_key, d_bin_key, d_bin_key + m, d_rc_indice );
+
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_bin_key,
+                      d_bin_key + m,
+                      thrust::make_counting_iterator(1),
+                      thrust::make_counting_iterator(HYPRE_SPGEMM_NBIN + 2),
+                      d_bin_ptr );
+
+   hypre_TFree(d_bin_key, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(h_bin_ptr, d_bin_ptr, HYPRE_Int, HYPRE_SPGEMM_NBIN + 1, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_assert(h_bin_ptr[HYPRE_SPGEMM_NBIN] == m);
+
+   hypre_TFree(d_bin_ptr, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypre_SpGemmCreateBins<8, 3, HYPRE_SPGEMM_NBIN>( HYPRE_Int m, HYPRE_Int *d_rc,
+                                                                    bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+template HYPRE_Int hypre_SpGemmCreateBins<32, 3, 5>( HYPRE_Int m, HYPRE_Int *d_rc,
+                                                     bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+template HYPRE_Int hypre_SpGemmCreateBins<32, 6, HYPRE_SPGEMM_NBIN>( HYPRE_Int m, HYPRE_Int *d_rc,
+                                                                     bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+
 #endif
 
