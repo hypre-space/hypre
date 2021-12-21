@@ -389,7 +389,8 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPR
                               HYPRE_Int *d_rc, bool can_fail, char *d_rf );
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> HYPRE_Int
-hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
+hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
+                                    bool need_ghash,
                                     HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                     HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic,
                                     HYPRE_Int *d_jc, HYPRE_Complex *d_c );
