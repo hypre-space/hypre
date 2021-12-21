@@ -258,9 +258,12 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-template HYPRE_Int hypre_SpGemmCreateBins<8,3,HYPRE_SPGEMM_NBIN>( HYPRE_Int m, HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
-template HYPRE_Int hypre_SpGemmCreateBins<32,3,5>( HYPRE_Int m, HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
-template HYPRE_Int hypre_SpGemmCreateBins<32,6,HYPRE_SPGEMM_NBIN>( HYPRE_Int m, HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+template HYPRE_Int hypre_SpGemmCreateBins<8, 3, HYPRE_SPGEMM_NBIN>( HYPRE_Int m, HYPRE_Int *d_rc,
+                                                                    bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+template HYPRE_Int hypre_SpGemmCreateBins<32, 3, 5>( HYPRE_Int m, HYPRE_Int *d_rc,
+                                                     bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+template HYPRE_Int hypre_SpGemmCreateBins<32, 6, HYPRE_SPGEMM_NBIN>( HYPRE_Int m, HYPRE_Int *d_rc,
+                                                                     bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
 
 #endif
 

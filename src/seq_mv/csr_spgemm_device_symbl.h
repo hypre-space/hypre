@@ -14,17 +14,19 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+/* HashKeys: assumed to be initialized as all -1's
+ * Key:      assumed to be nonnegative
+ * increase by 1 if is a new entry
+ */
 template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int
-                                *HashKeys, /* assumed to be initialized as all -1's */
-                                HYPRE_Int   key,      /* assumed to be nonnegative */
-                                HYPRE_Int  &count     /* increase by 1 if is a new entry */)
+hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int *HashKeys,
+                                HYPRE_Int           key,
+                                HYPRE_Int          &count )
 {
    HYPRE_Int j = 0;
 
-#pragma unroll
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -56,14 +58,13 @@ hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int
 template <char HASHTYPE>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash table */
-                                volatile HYPRE_Int  *HashKeys, /* assumed to be initialized as all -1's */
-                                HYPRE_Int   key,      /* assumed to be nonnegative */
-                                HYPRE_Int  &count     /* increase by 1 if is a new entry */)
+hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
+                                volatile HYPRE_Int *HashKeys,
+                                HYPRE_Int           key,
+                                HYPRE_Int          &count )
 {
    HYPRE_Int j = 0;
 
-#pragma unroll
    for (HYPRE_Int i = 0; i < HashSize; i++)
    {
       /* compute the hash value of key */
@@ -95,15 +96,15 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
 template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int GROUP_SIZE, bool HAS_GHASH>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_compute_row_symbl( HYPRE_Int  istart_a,
-                                HYPRE_Int  iend_a,
-                                const HYPRE_Int *ja,
-                                const HYPRE_Int *ib,
-                                const HYPRE_Int *jb,
+hypre_spgemm_compute_row_symbl( HYPRE_Int           istart_a,
+                                HYPRE_Int           iend_a,
+                                const HYPRE_Int    *ja,
+                                const HYPRE_Int    *ib,
+                                const HYPRE_Int    *jb,
                                 volatile HYPRE_Int *s_HashKeys,
-                                HYPRE_Int  g_HashSize,
-                                HYPRE_Int *g_HashKeys,
-                                char &failed )
+                                HYPRE_Int           g_HashSize,
+                                HYPRE_Int          *g_HashKeys,
+                                char               &failed )
 {
    HYPRE_Int num_new_insert = 0;
 
@@ -166,7 +167,8 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  istart_a,
    return num_new_insert;
 }
 
-template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_RIND, bool CAN_FAIL, char HASHTYPE, bool HAS_GHASH>
+template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_RIND,
+          bool CAN_FAIL, char HASHTYPE, bool HAS_GHASH>
 __global__ void
 hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_Int N, */
                        const HYPRE_Int* __restrict__ rind,
@@ -175,9 +177,9 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
                        const HYPRE_Int* __restrict__ ib,
                        const HYPRE_Int* __restrict__ jb,
                        const HYPRE_Int* __restrict__ ig,
-                             HYPRE_Int* __restrict__ jg,
-                             HYPRE_Int* __restrict__ rc,
-                             char*      __restrict__ rf )
+                       HYPRE_Int*       __restrict__ jg,
+                       HYPRE_Int*       __restrict__ rc,
+                       char*            __restrict__ rf )
 {
    /* number of groups in the grid */
    volatile const HYPRE_Int grid_num_groups = get_num_groups() * gridDim.x;
@@ -226,7 +228,6 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
          ghash_size = iend_g - istart_g;
 
          /* initialize group's global memory hash table */
-#pragma unroll
          for (HYPRE_Int k = lane_id; k < ghash_size; k += GROUP_SIZE)
          {
             jg[istart_g + k] = -1;
@@ -236,7 +237,6 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
       /* initialize group's shared memory hash table */
       if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
       {
-#pragma unroll
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -305,14 +305,6 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
                               bool       can_fail,
                               char      *d_rf  /* output: if symbolic mult. failed for each row  */ )
 {
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
-#endif
-
-#ifdef HYPRE_SPGEMM_NVTX
-   hypre_GpuProfilingPushRange("CSRSpGemmSymbolic");
-#endif
-
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int num_groups_per_block  = hypre_min(16 * HYPRE_WARP_SIZE / GROUP_SIZE, 64);
    const HYPRE_Int BDIMX                 = 2;
@@ -333,12 +325,11 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
-   const char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
-
+   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
    if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
    {
       hypre_printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
-      exit(0);
+      hash_type = 'D';
    }
 
    /* ---------------------------------------------------------------------------
@@ -375,14 +366,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
       if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
    }
    else
@@ -390,27 +381,19 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
       if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
          HYPRE_CUDA_LAUNCH(
-               (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
-               gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
+            gDim, bDim, m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
    }
 
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
-
-#ifdef HYPRE_SPGEMM_NVTX
-   hypre_GpuProfilingPopRange();
-#endif
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
-#endif
 
    return hypre_error_flag;
 }
