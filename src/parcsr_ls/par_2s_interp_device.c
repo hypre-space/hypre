@@ -109,7 +109,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
                       gDim, bDim,
                       A_nr_local,
                       A_offd_nnz > 0,
@@ -160,7 +160,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
    gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
                       gDim, bDim,
                       AF2F_nr_local,
                       hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
@@ -329,7 +329,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    dlam = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
    dtmp = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
                       gDim, bDim,
                       AFC_nr_local,
                       hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_FF)),
@@ -388,7 +388,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
                       gDim, bDim,
                       A_nr_local,
                       A_offd_nnz > 0,
@@ -438,7 +438,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
    gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
                       gDim, bDim,
                       AF2F_nr_local,
                       hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),

@@ -140,7 +140,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (abs_soc)
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
                          num_variables, max_row_sum, strength_threshold,
                          A_diag_data, A_diag_i, A_diag_j,
                          A_offd_data, A_offd_i, A_offd_j,
@@ -150,7 +150,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
    else
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
                          num_variables, max_row_sum, strength_threshold,
                          A_diag_data, A_diag_i, A_diag_j,
                          A_offd_data, A_offd_i, A_offd_j,

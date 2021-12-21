@@ -56,8 +56,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int sync_stream;
-   hypre_GetSyncCudaCompute(&sync_stream);
-   hypre_SetSyncCudaCompute(0);
+   hypre_GetSyncDeviceCompute(&sync_stream);
+   hypre_SetSyncDeviceCompute(0);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -348,8 +348,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SetSyncDeviceCompute(sync_stream);
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -415,8 +415,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int sync_stream;
-   hypre_GetSyncCudaCompute(&sync_stream);
-   hypre_SetSyncCudaCompute(0);
+   hypre_GetSyncDeviceCompute(&sync_stream);
+   hypre_SetSyncDeviceCompute(0);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -724,8 +724,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SetSyncDeviceCompute(sync_stream);
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE

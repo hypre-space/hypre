@@ -129,7 +129,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 /* host assert */
 #define hypre_assert(EX) do { if (!(EX)) { fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
 /* device assert */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
 #define hypre_device_assert(EX) assert(EX)
 #elif defined(HYPRE_USING_HIP)
 /* FIXME: Currently, asserts in device kernels in HIP do not behave well */
@@ -633,6 +633,11 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 #else
 #error Wrong HYPRE memory setting.
 #endif
+   }
+
+   if (location == HYPRE_MEMORY_UNIFIED)
+   {
+      return hypre_MEMORY_UNIFIED;
    }
 
    return hypre_MEMORY_UNDEFINED;
@@ -1740,8 +1745,8 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
                                            hypre_UnorderedBigIntMap *inverse_map);
 
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncDeviceComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
@@ -1772,10 +1777,10 @@ HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 char *hypre_strcpy(char *destination, const char *source);
 
-HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
-HYPRE_Int hypre_RestoreSyncCudaCompute();
-HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SetSyncDeviceCompute(HYPRE_Int action);
+HYPRE_Int hypre_RestoreSyncDeviceCompute();
+HYPRE_Int hypre_GetSyncDeviceCompute(HYPRE_Int *device_compute_stream_sync_ptr);
+HYPRE_Int hypre_SyncDeviceComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );

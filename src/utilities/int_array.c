@@ -168,7 +168,7 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
    return ierr;

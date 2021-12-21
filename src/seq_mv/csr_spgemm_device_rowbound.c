@@ -15,6 +15,21 @@
 #if defined(HYPRE_USING_GPU)
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
 
+// Forward declaration
+template <HYPRE_Int shmem_hash_size, HYPRE_Int ATTEMPT>
+void hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
+                                 HYPRE_Int *rf_ind, /* ATTEMPT = 2, input: row indices (length of m) */
+                                 HYPRE_Int  k,
+                                 HYPRE_Int  n,
+                                 HYPRE_Int *d_ia,
+                                 HYPRE_Int *d_ja,
+                                 HYPRE_Int *d_ib,
+                                 HYPRE_Int *d_jb,
+                                 HYPRE_Int  in_rc,
+                                 HYPRE_Int *d_rc, /* ATTEMPT = 1,  input: rownnz est (if in_rc), output: rownnz bound;
+                                                     ATTEMPT = 2,  input: rownnz bound, output: rownnz (exact) */
+                                 HYPRE_Int *d_rf  /* ATTEMPT = 1, output: if symbolic mult. failed  */ );
+
 template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
@@ -82,9 +97,9 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
                                 volatile HYPRE_Int *s_HashKeys,
                                 HYPRE_Int  g_HashSize,
                                 HYPRE_Int *g_HashKeys,
-                                hypre_int &failed,
+                                hypre_int &failed
 #ifdef HYPRE_USING_SYCL
-                                sycl::nd_item<3>& item
+                                , sycl::nd_item<3>& item
 #endif
   )
 {
@@ -137,7 +152,8 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
 
       /* threads in the same ygroup work on one row together */
 #ifdef HYPRE_USING_SYCL
-      const HYPRE_Int rowB = SG.shuffle(colA, 0, blockDim_x);
+      // TODO abb: this is build issue. Figure out the blockDim_x
+      const HYPRE_Int rowB = SG.shuffle(colA, 0);
 #else
       const HYPRE_Int rowB = __shfl_sync(HYPRE_WARP_FULL_MASK, colA, 0, blockDim_x);
 #endif
@@ -149,10 +165,10 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
       }
 #ifdef HYPRE_USING_SYCL
       // TODO abb: this is build issue. Figure out the blockDim_x
-      const HYPRE_Int rowB_start = SG.shuffle(tmp, 0, blockDim_x);
-      const HYPRE_Int rowB_end   = SG.shuffle(tmp, 1, blockDim_x);
+      const HYPRE_Int rowB_start = SG.shuffle(tmp, 0);
+      const HYPRE_Int rowB_end   = SG.shuffle(tmp, 1);
 
-      for (HYPRE_Int k = rowB_start + threadIdx_x; sycl::ext::oneapi::any_of(grp, k < rowB_end);
+      for (HYPRE_Int k = rowB_start + threadIdx_x; sycl::any_of_group(grp, k < rowB_end);
            k += blockDim_x)
 #else
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim_x);
@@ -188,7 +204,6 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
 
    return num_new_insert;
 }
-
 
 HYPRE_Int
 hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
@@ -245,7 +260,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                             oneapi::dpl::counting_iterator<HYPRE_Int>(m),
                             d_rf,
                             rf_ind,
-                            oneapi::dpl::identity<HYPRE_Int>() );
+                            oneapi::dpl::identity() );
 #else
       HYPRE_Int *new_end =
          HYPRE_THRUST_CALL( copy_if,
@@ -267,9 +282,6 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 }
 
 #endif // HYPRE_USING_GPU
-
-
-
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -479,9 +491,6 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
 
 #if defined(HYPRE_USING_SYCL)
 
-#define __device__
-#define __forceinline__ __inline__ __attribute__((always_inline))
-
 template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
 void
 hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
@@ -505,7 +514,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * item.get_group_range(2);
    /* subgroup id inside the WG */
-   const HYPRE_Int warp_id = get_wrap_id(item);
+   const HYPRE_Int warp_id = get_warp_id(item);
    /* subgroup id in the grid */
    const HYPRE_Int grid_warp_id = item.get_group(2) * NUM_WARPS_PER_BLOCK + warp_id;
    /* workitem/lane id inside the subgroup */
@@ -624,10 +633,6 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    const HYPRE_Int BDIMX               =  2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
-   static_assert(num_warps_per_block <=
-                 hypre_HandleComputeQueue(hypre_handle())->get_device().get_info<sycl::info::device::max_num_sub_groups>(),
-                 "num_warps_per_block value is more than hardware limits!");
-
    /* SYCL kernel configurations */
    sycl::range<3> bDim(num_warps_per_block, BDIMY, BDIMX);
    hypre_assert(bDim[2] * bDim[1] == HYPRE_WARP_SIZE);
@@ -655,7 +660,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * symbolic multiplication:
     * On output, it provides an upper bound of nnz in rows of C
     * ---------------------------------------------------------------------------*/
-   hypre_HandleComputeQueue(hypre_handle())->submit([&] (sycl::handler& cgh) {
+   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {
 
        sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
        sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
@@ -700,7 +705,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_PROFILE
-   hypre_HandleComputeQueue(hypre_handle())->wait();
+   hypre_HandleComputeStream(hypre_handle())->wait();
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
 #endif
 }

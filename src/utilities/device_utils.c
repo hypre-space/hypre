@@ -8,16 +8,185 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+// some common kernels for CUDA, HIP and SYCL
+#ifdef HYPRE_USING_GPU
+
+/**
+ * Get NNZ of each row in d_row_indices and stored the results in d_rownnz
+ * All pointers are device pointers.
+ * d_rownnz can be the same as d_row_indices
+ */
+__global__ void
+hypreGPUKernel_GetRowNnz(
+  #ifdef HYPRE_USING_SYCL
+  sycl::nd_item<1> item,
+  #endif
+  HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+  HYPRE_Int *d_offd_ia,
+  HYPRE_Int *d_rownnz)
+{
 #if defined(HYPRE_USING_SYCL)
-sycl::range<1> hypre_GetDefaultDeviceBlockDimension()
+   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1,1>(item);
+#else
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+#endif
+
+   if (global_thread_id < nrows)
+   {
+      HYPRE_Int i;
+
+      if (d_row_indices)
+      {
+         i = read_only_load(&d_row_indices[global_thread_id]);
+      }
+      else
+      {
+         i = global_thread_id;
+      }
+
+      d_rownnz[global_thread_id] = read_only_load(&d_diag_ia[i + 1]) - read_only_load(&d_diag_ia[i]) +
+                                   read_only_load(&d_offd_ia[i + 1]) - read_only_load(&d_offd_ia[i]);
+   }
+}
+
+HYPRE_Int*
+hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)
+{
+   HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                      d_row_ptr);
+#else
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
+                      d_row_ptr);
+#endif
+
+   return d_row_ptr;
+}
+
+HYPRE_Int
+hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
+                                   HYPRE_Int *d_row_ptr)
+{
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                      d_row_ptr);
+#else
+   HYPRE_THRUST_CALL( lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
+                      d_row_ptr);
+#endif
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int*
+hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return NULL;
+   }
+
+   HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, d_row_ind);
+
+   return d_row_ind;
+}
+
+HYPRE_Int
+hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
+{
+#ifdef HYPRE_USING_SYCL
+   return HYPRE_ONEDPL_CALL(oneapi::dpl::reduce, d_i, d_i + n);
+#else
+   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
+#endif
+}
+
+HYPRE_Int
+hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
+{
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(oneapi::dpl::inclusive_scan, d_i, d_i + n, d_i);
+#else
+   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
+{
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0, std::plus<>());
+#else
+   HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
+#endif
+   return hypre_error_flag;
+}
+
+/* Input: d_row_num, of size nrows, contains the rows indices that can be BigInt or Int
+ * Output: d_row_ind */
+template <typename T>
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                          T *d_row_num, T *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
+
+#ifdef HYPRE_USING_SYCL
+   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+#else
+   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
+#endif
+
+   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                             HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
+#if defined(HYPRE_MIXEDINT)
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                             HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
+#endif
+
+#endif // HYPRE_USING_GPU
+
+#if defined(HYPRE_USING_SYCL)
+dim3 hypre_GetDefaultDeviceBlockDimension()
 {
    sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
    return wgDim;
 }
 
-sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
-                                                   const char *granularity,
-                                                   sycl::range<1> wgDim)
+dim3 hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
+					 const char *granularity,
+					 sycl::range<1> wgDim)
 {
    HYPRE_Int num_WGs = 0;
    HYPRE_Int num_workitems_per_WG = wgDim[0];
@@ -42,7 +211,45 @@ sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
 
    return gDim;
 }
-#endif
+
+struct hypre_empty_row_functor
+{
+   bool operator()(const std::tuple<HYPRE_Int, HYPRE_Int>& t) const
+   {
+      const HYPRE_Int a = std::get<0>(t);
+      const HYPRE_Int b = std::get<1>(t);
+      return a != b;
+   }
+};
+
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                   HYPRE_Int *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
+
+   HYPRE_ONEDPL_CALL( dpct::scatter_if,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows),
+                      d_row_ptr,
+                      oneapi::dpl::make_transform_iterator( oneapi::dpl::make_zip_iterator(d_row_ptr, d_row_ptr + 1),
+                                                            hypre_empty_row_functor() ),
+                      d_row_ind,
+                      oneapi::dpl::identity() );
+
+   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+                      sycl::maximum<HYPRE_Int>() );
+
+   return hypre_error_flag;
+}
+
+#endif // HYPRE_USING_SYCL
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -84,7 +291,7 @@ void hypre_CudaCompileFlagCheck()
    HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
    hypre_TMemcpy(cuda_arch_compile_d, &cuda_arch_compile, hypre_int, 1, HYPRE_MEMORY_DEVICE,
                  HYPRE_MEMORY_HOST);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
    hypre_TMemcpy(&cuda_arch_compile, cuda_arch_compile_d, hypre_int, 1, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
    //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
@@ -150,36 +357,6 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
    return gDim;
 }
 
-/**
- * Get NNZ of each row in d_row_indices and stored the results in d_rownnz
- * All pointers are device pointers.
- * d_rownnz can be the same as d_row_indices
- */
-__global__ void
-hypreCUDAKernel_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
-                          HYPRE_Int *d_offd_ia,
-                          HYPRE_Int *d_rownnz)
-{
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
-
-   if (global_thread_id < nrows)
-   {
-      HYPRE_Int i;
-
-      if (d_row_indices)
-      {
-         i = read_only_load(&d_row_indices[global_thread_id]);
-      }
-      else
-      {
-         i = global_thread_id;
-      }
-
-      d_rownnz[global_thread_id] = read_only_load(&d_diag_ia[i + 1]) - read_only_load(&d_diag_ia[i]) +
-                                   read_only_load(&d_offd_ia[i + 1]) - read_only_load(&d_offd_ia[i]);
-   }
-}
-
 /* special case: if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1] */
 HYPRE_Int
 hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
@@ -195,7 +372,7 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
       return hypre_error_flag;
    }
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia,
                       d_offd_ia, d_rownnz );
 
    return hypre_error_flag;
@@ -335,33 +512,11 @@ hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
    }
    */
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
                       nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
                       d_diag_i, d_diag_j, d_diag_a,
                       d_offd_i, d_offd_j, d_offd_a,
                       d_ib, d_jb, d_ab );
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
-{
-   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
-}
-
-HYPRE_Int
-hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
-{
-   HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
-{
-   HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 
    return hypre_error_flag;
 }
@@ -405,22 +560,6 @@ struct hypre_empty_row_functor
    }
 };
 
-HYPRE_Int*
-hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
-{
-   /* trivial case */
-   if (nrows <= 0 || nnz <= 0)
-   {
-      return NULL;
-   }
-
-   HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, d_row_ind);
-
-   return d_row_ind;
-}
-
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                    HYPRE_Int *d_row_ind)
@@ -444,64 +583,6 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
    HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       thrust::maximum<HYPRE_Int>());
-
-   return hypre_error_flag;
-}
-
-/* Input: d_row_num, of size nrows, contains the rows indices that can be BigInt or Int
- * Output: d_row_ind */
-template <typename T>
-HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
-                                          T *d_row_num, T *d_row_ind)
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
-
-   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
-
-   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                             HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_num, HYPRE_Int *d_row_ind);
-#if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                             HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
-#endif
-
-HYPRE_Int*
-hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)
-{
-   HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_THRUST_CALL( lower_bound,
-                      d_row_ind, d_row_ind + nnz,
-                      thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
-                      d_row_ptr);
-
-   return d_row_ptr;
-}
-
-HYPRE_Int
-hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
-                                   HYPRE_Int *d_row_ptr)
-{
-   HYPRE_THRUST_CALL( lower_bound,
-                      d_row_ind, d_row_ind + nnz,
-                      thrust::counting_iterator<HYPRE_Int>(0),
-                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
-                      d_row_ptr);
 
    return hypre_error_flag;
 }
@@ -546,7 +627,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       /* trivial cases, n = 1, 2 */
       dim3 bDim = 1;
       dim3 gDim = 1;
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else
    {
@@ -585,7 +666,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
 
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
                          reduced_n, x, reduced_map, reduced_y );
 
       if (!work)
@@ -628,7 +709,7 @@ hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
 
    return hypre_error_flag;
 }
@@ -662,7 +743,7 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
 
    return hypre_error_flag;
 }
@@ -696,7 +777,7 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
 
    return hypre_error_flag;
 }
@@ -735,7 +816,7 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
 
    return hypre_error_flag;
 }
@@ -770,7 +851,7 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
 
    return hypre_error_flag;
 }
@@ -794,7 +875,7 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
 
    return hypre_error_flag;
 }
@@ -1373,7 +1454,7 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 }
 
 HYPRE_Int
-hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
+hypre_SyncDevice(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
@@ -1381,6 +1462,8 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
 #endif
    return hypre_error_flag;
 }
@@ -1400,55 +1483,57 @@ hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
  * action: 0: set sync stream to false
  *         1: set sync stream to true
  *         2: restore sync stream to default
- *         3: return the current value of cuda_compute_stream_sync
- *         4: sync stream based on cuda_compute_stream_sync
+ *         3: return the current value of device_compute_stream_sync
+ *         4: sync stream based on device_compute_stream_sync
  */
 HYPRE_Int
-hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
-                                 hypre_Handle *hypre_handle,
-                                 HYPRE_Int    *cuda_compute_stream_sync_ptr)
+hypre_SyncDeviceComputeStream_core(HYPRE_Int     action,
+                                   hypre_Handle *hypre_handle,
+                                   HYPRE_Int    *device_compute_stream_sync_ptr)
 {
    /* with UVM the default is to sync at kernel completions, since host is also able to
     * touch GPU memory */
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
-   static const HYPRE_Int cuda_compute_stream_sync_default = 1;
+   static const HYPRE_Int device_compute_stream_sync_default = 1;
 #else
-   static const HYPRE_Int cuda_compute_stream_sync_default = 0;
+   static const HYPRE_Int device_compute_stream_sync_default = 0;
 #endif
 
    /* this controls if synchronize the stream after computations */
-   static HYPRE_Int cuda_compute_stream_sync = cuda_compute_stream_sync_default;
+   static HYPRE_Int device_compute_stream_sync = device_compute_stream_sync_default;
 
    switch (action)
    {
       case 0:
-         cuda_compute_stream_sync = 0;
+         device_compute_stream_sync = 0;
          break;
       case 1:
-         cuda_compute_stream_sync = 1;
+         device_compute_stream_sync = 1;
          break;
       case 2:
-         cuda_compute_stream_sync = cuda_compute_stream_sync_default;
+         device_compute_stream_sync = device_compute_stream_sync_default;
          break;
       case 3:
-         *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
+         *device_compute_stream_sync_ptr = device_compute_stream_sync;
          break;
       case 4:
 #if defined(HYPRE_USING_DEVICE_OPENMP)
          HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #else
-         if (cuda_compute_stream_sync)
+         if (device_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
             HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
 #elif defined(HYPRE_USING_HIP)
             HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
+#elif defined(HYPRE_USING_SYCL)
+            HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->ext_oneapi_submit_barrier() );
 #endif
          }
 #endif
          break;
       default:
-         hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
+         hypre_printf("hypre_SyncDeviceComputeStream_core invalid action\n");
          hypre_error_in_arg(1);
    }
 
@@ -1456,35 +1541,35 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
 }
 
 HYPRE_Int
-hypre_SetSyncCudaCompute(HYPRE_Int action)
+hypre_SetSyncDeviceCompute(HYPRE_Int action)
 {
    /* convert to 1/0 */
    action = action != 0;
-   hypre_SyncCudaComputeStream_core(action, NULL, NULL);
+   hypre_SyncDeviceComputeStream_core(action, NULL, NULL);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_RestoreSyncCudaCompute()
+hypre_RestoreSyncDeviceCompute()
 {
-   hypre_SyncCudaComputeStream_core(2, NULL, NULL);
+   hypre_SyncDeviceComputeStream_core(2, NULL, NULL);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
+hypre_GetSyncDeviceCompute(HYPRE_Int *device_compute_stream_sync_ptr)
 {
-   hypre_SyncCudaComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
+   hypre_SyncDeviceComputeStream_core(3, NULL, device_compute_stream_sync_ptr);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncDeviceComputeStream(hypre_Handle *hypre_handle)
 {
-   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncDeviceComputeStream_core(4, hypre_handle, NULL);
 
    return hypre_error_flag;
 }
@@ -1550,6 +1635,8 @@ hypre_bind_device( HYPRE_Int myid,
 
    /* get number of devices on this node */
    hypre_GetDeviceCount(&nDevices);
+   /* TODO: ABB might need to look into this since nDevices are overwritten by 1 */
+   nDevices = 1;
 
    /* set device */
    device_id = myNodeid % nDevices;
@@ -1564,4 +1651,3 @@ hypre_bind_device( HYPRE_Int myid,
 
    return hypre_error_flag;
 }
-
