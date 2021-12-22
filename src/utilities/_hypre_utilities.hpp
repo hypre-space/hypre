@@ -114,6 +114,7 @@ typedef sycl::range<1> dim3;
 #define __global__
 #define __host__
 #define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
@@ -423,6 +424,31 @@ HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+
+static __device__ __forceinline__
+hypre_int next_power_of_2(hypre_int n)
+{
+   if (n <= 0)
+   {
+      return 0;
+   }
+
+   /* if n is power of 2, return itself */
+   if ( (n & (n - 1)) == 0 )
+   {
+      return n;
+   }
+
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   n ^= (n >>  1);
+   n  = (n <<  1);
+
+   return n;
+}
 
 #endif //#if defined(HYPRE_USING_GPU)
 
@@ -838,31 +864,6 @@ T warp_allreduce_min(T in)
    return in;
 }
 
-static __device__ __forceinline__
-hypre_int next_power_of_2(hypre_int n)
-{
-   if (n <= 0)
-   {
-      return 0;
-   }
-
-   /* if n is power of 2, return itself */
-   if ( (n & (n - 1)) == 0 )
-   {
-      return n;
-   }
-
-   n |= (n >>  1);
-   n |= (n >>  2);
-   n |= (n >>  4);
-   n |= (n >>  8);
-   n |= (n >> 16);
-   n ^= (n >>  1);
-   n  = (n <<  1);
-
-   return n;
-}
-
 template<typename T>
 struct absolute_value : public thrust::unary_function<T, T>
 {
@@ -1082,8 +1083,6 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 #include <numeric>
 #include <functional>
 #include <iterator>
-
-#define __forceinline__ __inline__ __attribute__((always_inline))
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * macro for launching SYCL kernels, SYCL, oneDPL, oneMKL calls

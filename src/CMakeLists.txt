@@ -285,7 +285,7 @@ endif (HYPRE_WITH_CUDA)
 # SYCL
 if (HYPRE_WITH_SYCL)
   enable_language(CXX)
-  message(STATUS "Enabled support for CXX.")
+  message(STATUS "Enabled support for SYCL.")
 
   # Enforce C++17
   if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
@@ -294,9 +294,6 @@ if (HYPRE_WITH_SYCL)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
-
-  # Set CXX compiler to dpcpp
-  set(CMAKE_CXX_COMPILER "dpcpp")
 
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
@@ -320,6 +317,7 @@ if (HYPRE_WITH_SYCL)
     set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   endif ()
 
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-D_GLIBCXX_USE_TBB_PAR_BACKEND=0>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")

@@ -55,11 +55,10 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
 
       /* try to insert key+1 into slot j */
 #ifdef HYPRE_USING_SYCL
-      std::remove_volatile<volatile HYPRE_Int*>::type HashKeys;
       sycl::ext::oneapi::atomic_ref< HYPRE_Int,
                                      sycl::ext::oneapi::memory_order::relaxed,
                                      sycl::ext::oneapi::memory_scope::device,
-                                     sycl::access::address_space::local_space > hashkeys_ref( *(HashKeys + j) );
+                                     sycl::access::address_space::local_space > hashkeys_ref( *(const_cast<HYPRE_Int*>(HashKeys + j)) );
       HYPRE_Int expected = -1;
       bool success = hashkeys_ref.compare_exchange_strong(expected, key);
       if (success) {
