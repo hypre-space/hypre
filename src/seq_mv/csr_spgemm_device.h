@@ -62,26 +62,26 @@ HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_
 
 #if defined(HYPRE_USING_SYCL)
 
-static __device__ __forceinline__
+static __forceinline__
 hypre_int get_block_size(sycl::nd_item<3>& item)
 {
    return (item.get_sub_group().get_local_range().get(0) * item.get_local_range(0));
 }
 
-static __device__ __forceinline__
+static __forceinline__
 hypre_int get_thread_id(sycl::nd_item<3>& item)
 {
    return (item.get_local_id(0) * item.get_sub_group().get_local_range().get(0) + item.get_local_id(1) * item.get_local_range(2) +
            item.get_local_id(2));
 }
 
-static __device__ __forceinline__
+static __forceinline__
 hypre_int get_warp_id(sycl::nd_item<3>& item)
 {
    return item.get_local_id(0);
 }
 
-static __device__ __forceinline__
+static __forceinline__
 hypre_int get_lane_id(sycl::nd_item<3>& item)
 {
    return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);

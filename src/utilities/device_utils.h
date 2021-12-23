@@ -1158,25 +1158,29 @@ hypre_int hypre_gpu_get_grid_warp_id(sycl::nd_item<1>& item)
      item.get_sub_group().get_group_linear_id();
 }
 
-// #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 600
-// static __forceinline__
-// hypre_double atomicAdd(hypre_double* address, hypre_double val)
-// {
-//     hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
-//     hypre_ulonglongint old = *address_as_ull, assumed;
+template <typename T>
+static __forceinline__
+T atomicCAS(T* address, T expected, T val)
+{
+    sycl::ext::oneapi::atomic_ref< T,
+                                   sycl::ext::oneapi::memory_order::relaxed,
+                                   sycl::ext::oneapi::memory_scope::device,
+                                   sycl::access::address_space::local_space >
+      atomicCAS_ref( *address );
+    return static_cast<T>( atomicCAS_ref.compare_exchange_strong(expected, val) );
+}
 
-//     do {
-//         assumed = old;
-//         old = atomicCAS(address_as_ull, assumed,
-//                         __double_as_longlong(val +
-//                                __longlong_as_double(assumed)));
-
-//     // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
-//     } while (assumed != old);
-
-//     return __longlong_as_double(old);
-// }
-// #endif
+template <typename T>
+static __forceinline__
+T atomicAdd(T* address, T val)
+{
+    sycl::ext::oneapi::atomic_ref< T,
+                                   sycl::ext::oneapi::memory_order::relaxed,
+                                   sycl::ext::oneapi::memory_scope::device,
+                                   sycl::access::address_space::local_space >
+      atomicAdd_ref( *address );
+    return atomicAdd_ref.fetch_add(val);
+}
 
 template <typename T>
 static __forceinline__
@@ -1185,73 +1189,78 @@ T read_only_load( const T *ptr )
    return *ptr;
 }
 
-// /* exclusive prefix scan */
-// template <typename T>
-// static __forceinline__
-// T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
-// {
-// #pragma unroll
-//    for (hypre_int d = 2; d <=HYPRE_WARP_SIZE; d <<= 1)
-//    {
-//       T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
-//       if ( (lane_id & (d - 1)) == (d - 1) )
-//       {
-//          in += t;
-//       }
-//    }
+/* exclusive prefix scan */
+template <typename T, int DIM>
+static __forceinline__
+T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<DIM>& item)
+{
+  //sycl::exclusive_scan_over_group(item.get_sub_group(), in, std::plus<>());
 
-//    all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, HYPRE_WARP_SIZE-1);
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
 
-//    if (lane_id == HYPRE_WARP_SIZE-1)
-//    {
-//       in = 0;
-//    }
+#pragma unroll
+   for (hypre_int d = 2; d <=warp_size; d <<= 1)
+   {
+      T t = SG.shuffle(in, d >> 1);
+      if ( (lane_id & (d - 1)) == (d - 1) )
+      {
+         in += t;
+      }
+   }
 
-// #pragma unroll
-//    for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-//    {
-//       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+   all_sum = SG.shuffle(in, warp_size-1);
 
-//       if ( (lane_id & (d - 1)) == (d - 1))
-//       {
-//         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
-//          {
-//             in += t;
-//          }
-//          else
-//          {
-//             in = t;
-//          }
-//       }
-//    }
-//    return in;
-// }
+   if (lane_id == warp_size-1)
+   {
+      in = 0;
+   }
+
+#pragma unroll
+   for (hypre_int d = warp_size/2; d > 0; d >>= 1)
+   {
+      T t = SG.shuffle_xor(in, d);
+
+      if ( (lane_id & (d - 1)) == (d - 1))
+      {
+        if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
+         {
+            in += t;
+         }
+         else
+         {
+            in = t;
+         }
+      }
+   }
+   return in;
+}
 
 template <typename T, int DIM>
 static __forceinline__
 T warp_reduce_sum(T in, sycl::nd_item<DIM>& item)
 {
   sycl::sub_group SG = item.get_sub_group();
-  //sycl::ext::oneapi::reduce(SG, in, std::plus<T>());
 #pragma unroll
   for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
   {
     in += SG.shuffle_down(in, d);
   }
-  return in;  
+  return in;
 }
 
-// template <typename T>
-// static __forceinline__
-// T warp_allreduce_sum(T in)
-// {
-// #pragma unroll
-//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-//   {
-//     in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
-//   }
-//   return in;
-// }
+template <typename T, int DIM>
+static __forceinline__
+T warp_allreduce_sum(T in, sycl::nd_item<DIM>& item)
+{
+  sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
+  {
+    in += SG.shuffle_xor(in, d);
+  }
+  return in;
+}
 
 // template <typename T>
 // static __forceinline__
