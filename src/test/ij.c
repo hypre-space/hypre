@@ -3272,6 +3272,16 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_x0_type == 7)
+   {
+      /* from file */
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
+      }
+
+      ReadParVectorFromFile(argc, argv, build_x0_arg_index, &x);
+   }
    else if (build_x0_type == 1)
    {
       /* random */
@@ -8163,7 +8173,7 @@ ReadParVectorFromFile( HYPRE_Int            argc,
    }
    else
    {
-      hypre_printf("Error: No filename specified \n");
+      hypre_printf("  Error: No filename specified \n");
       exit(1);
    }
 
@@ -8173,7 +8183,7 @@ ReadParVectorFromFile( HYPRE_Int            argc,
 
    if (myid == 0)
    {
-      hypre_printf(" From ParFile: %s\n", filename);
+      hypre_printf("  From ParFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------
