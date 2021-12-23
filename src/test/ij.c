@@ -2902,7 +2902,6 @@ main( hypre_int argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_v2(ij_b, memory_location);
-      /* hypre_printf("WM: debug - local_num_rows = %d, memory_location = %d, values_d[0] = %d\n", local_num_rows, memory_location, values_d[0]); */
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
       HYPRE_IJVectorAssemble(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );

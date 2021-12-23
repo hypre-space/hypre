@@ -657,9 +657,7 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       }
       else
       {
-         hypre_printf("WM: debug - about to hypre_IJMatrixAddToValuesParCSR\n");
          hypre_IJMatrixAddToValuesParCSR(ijmatrix, nrows, ncols_tmp, rows, row_indexes_tmp, cols, values);
-         hypre_printf("WM: debug - done with hypre_IJMatrixAddToValuesParCSR\n");
       }
 
       if (!ncols)

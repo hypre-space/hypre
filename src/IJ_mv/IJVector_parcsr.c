@@ -371,7 +371,6 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
 #endif
       for (j = 0; j < num_values; j++)
       {
-         /* hypre_printf("WM: debug - values[%d] = %d\n", j, values[j]); */
          data[j] = values[j];
       }
    }
