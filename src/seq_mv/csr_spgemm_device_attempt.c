@@ -91,7 +91,6 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
   )
 {
 #ifdef HYPRE_USING_SYCL
-   sycl::group grp = item.get_group();
    sycl::sub_group SG = item.get_sub_group();
    HYPRE_Int threadIdx_x = item.get_local_id(2);
    HYPRE_Int threadIdx_y = item.get_local_id(1);
@@ -155,7 +154,7 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
       const HYPRE_Int rowB_start = SG.shuffle(tmp, 0); //, blockDim_x);
       const HYPRE_Int rowB_end   = SG.shuffle(tmp, 1); //, blockDim_x);
 
-      for (HYPRE_Int k = rowB_start + threadIdx_x; sycl::any_of_group(grp, k < rowB_end);
+      for (HYPRE_Int k = rowB_start + threadIdx_x; sycl::any_of_group(SG, k < rowB_end);
            k += blockDim_x)
 #else
       /* threads in the same ygroup work on one row together */

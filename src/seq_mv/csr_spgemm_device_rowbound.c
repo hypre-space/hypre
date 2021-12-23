@@ -54,31 +54,24 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
       }
 
       /* try to insert key+1 into slot j */
-#ifdef HYPRE_USING_SYCL
-      sycl::ext::oneapi::atomic_ref< HYPRE_Int,
-                                     sycl::ext::oneapi::memory_order::relaxed,
-                                     sycl::ext::oneapi::memory_scope::device,
-                                     sycl::access::address_space::local_space > hashkeys_ref( *(const_cast<HYPRE_Int*>(HashKeys + j)) );
-      HYPRE_Int expected = -1;
-      bool success = hashkeys_ref.compare_exchange_strong(expected, key);
-      if (success) {
-         return j;
-      } else {
-         count++;
-         return j;
-      }
-#else
       HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
+#ifdef HYPRE_USING_SYCL
+      if (old == 0 /* false */)
+#else
       if (old == -1)
+#endif
       {
          count++;
          return j;
       }
+#ifdef HYPRE_USING_SYCL
+      if (old == 1 /* true */ )
+#else
       if (old == key)
+#endif
       {
          return j;
       }
-#endif
    }
    return -1;
 }
@@ -103,7 +96,6 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
   )
 {
 #ifdef HYPRE_USING_SYCL
-  sycl::group grp = item.get_group();
   sycl::sub_group SG = item.get_sub_group();
   HYPRE_Int threadIdx_x = item.get_local_id(2);
   HYPRE_Int threadIdx_y = item.get_local_id(1);
@@ -167,7 +159,7 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
       const HYPRE_Int rowB_start = SG.shuffle(tmp, 0);
       const HYPRE_Int rowB_end   = SG.shuffle(tmp, 1);
 
-      for (HYPRE_Int k = rowB_start + threadIdx_x; sycl::any_of_group(grp, k < rowB_end);
+      for (HYPRE_Int k = rowB_start + threadIdx_x; sycl::any_of_group(SG, k < rowB_end);
            k += blockDim_x)
 #else
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim_x);
