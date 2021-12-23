@@ -86,7 +86,7 @@ typedef double HYPRE_Real;
 
 #if defined(HYPRE_USING_SYCL)
   typedef std::complex<double> HYPRE_Complex;
-#elif defined(HYPRE_USING_GPU)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
   typedef thrust::complex<double> HYPRE_Complex;
 #else
   typedef double _Complex HYPRE_Complex;
