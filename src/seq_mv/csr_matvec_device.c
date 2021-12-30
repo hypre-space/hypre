@@ -171,7 +171,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                                    &beta,
                                                    vecY,
                                                    data_type,
-#if CUSPARSE_SPMV_CSR_ALG2 >= 11200
+#if CUSPARSE_VERSION >= 11400
                                                    CUSPARSE_SPMV_CSR_ALG2,
 #else
                                                    CUSPARSE_CSRMV_ALG2,
@@ -191,7 +191,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      &beta,
                                      vecY,
                                      data_type,
-#if CUSPARSE_SPMV_CSR_ALG2 >= 11200
+#if CUSPARSE_VERSION >= 11400
                                      CUSPARSE_SPMV_CSR_ALG2,
 #else
                                      CUSPARSE_CSRMV_ALG2,

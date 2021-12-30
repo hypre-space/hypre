@@ -112,7 +112,6 @@ struct hypre_device_allocator
 #include <rocrand.h>
 #endif
 
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          sycl includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
