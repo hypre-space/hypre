@@ -167,11 +167,8 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
    HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
 
-   /* WM: note - the inclusive_scan call is hanging for me even with ZE_AFFINITY_MASK=0.0... bug in oneDPL? */
-   hypre_printf("WM: debug - about to inclusive_scan\n");
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
-   hypre_printf("WM: debug - done with inclusive_scan\n");
 
    return hypre_error_flag;
 }

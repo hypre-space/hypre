@@ -241,7 +241,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
 #endif
-   hypre_printf("WM: debug - in sycl version of hypreDevice_CSRSpTrans()\n");
 
    HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
    HYPRE_Complex *d_ac = NULL;
@@ -261,15 +260,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    d_it = d_pm + nnzA;
    hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
 
-   /* WM: debug */
-   /* HYPRE_Int i; */
-   /* hypre_printf("d_ia: "); */
-   /* for (i = 0; i < m; i++) { hypre_printf("%d ", d_ia[i]); } */
-   /* hypre_printf("\n"); */
-   /* hypre_printf("d_it: "); */
-   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_it[i]); } */
-   /* hypre_printf("\n"); */
-
    /* a copy of col idx of A */
    d_jt = d_it + nnzA;
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -281,32 +271,17 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                       count + nnzA,
                       d_pm);
 
-   /* WM: debug */
-   /* hypre_printf("init d_pm: "); */
-   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_pm[i]); } */
-   /* hypre_printf("\n"); */
-
    auto zip_jt_pm = oneapi::dpl::make_zip_iterator(d_jt, d_pm);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zip_jt_pm,
                       zip_jt_pm + nnzA,
    [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 
-   /* WM: debug */
-   /* hypre_printf("sorted d_pm: "); */
-   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_pm[i]); } */
-   /* hypre_printf("\n"); */
-
    auto permuted_it = oneapi::dpl::make_permutation_iterator(d_it, d_pm);
    HYPRE_ONEDPL_CALL( std::copy,
                       permuted_it,
                       permuted_it + nnzA,
                       d_jc );
-
-   /* WM: debug */
-   /* hypre_printf("d_jc: "); */
-   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_jc[i]); } */
-   /* hypre_printf("\n"); */
 
    if (want_data)
    {
@@ -319,11 +294,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 
    /* convert into ic: row idx --> row ptrs */
    d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
-
-   /* WM: debug */
-   /* hypre_printf("d_ic: "); */
-   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_ic[i]); } */
-   /* hypre_printf("\n"); */
 
 #ifdef HYPRE_DEBUG
    HYPRE_Int nnzC;
@@ -340,7 +310,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
 #endif
-   hypre_printf("WM: debug - finished with hypreDevice_CSRSpTrans\n");
 
    return hypre_error_flag;
 }
