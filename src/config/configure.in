@@ -2346,9 +2346,9 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
                ])
 
         AS_IF([test x"$hypre_using_onemklrand" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
+              [AC_DEFINE(HYPRE_USING_ONEMKLRNG, 1, [onemkl::rng::device being used])
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng/device.hpp"
                ])
 
       ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]

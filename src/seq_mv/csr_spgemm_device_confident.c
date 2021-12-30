@@ -293,12 +293,10 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    HYPRE_Int blockDim_z = item.get_local_range(0);
    HYPRE_Int blockDim_y = item.get_local_range(1);
    HYPRE_Int blockDim_x = item.get_local_range(2);
-
-   volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * item.get_group_range(2);
+   HYPRE_Int gridDim_x  = item.get_group_range(2);
+   HYPRE_Int blockIdx_x = item.get_group(2);
    /* warp id inside the block */
    volatile const HYPRE_Int warp_id = get_warp_id(item);
-   /* warp id in the grid */
-   volatile const HYPRE_Int grid_warp_id = item.get_group(2) * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id(item);
    /* shared memory hash table */
@@ -307,12 +305,10 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    HYPRE_Int blockDim_z = blockDim.z;
    HYPRE_Int blockDim_y = blockDim.y;
    HYPRE_Int blockDim_x = blockDim.x;
-
-   volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
+   HYPRE_Int gridDim_x  = gridDim.x;
+   HYPRE_Int blockIdx_x = blockIdx.x;
    /* warp id inside the block */
    volatile const HYPRE_Int warp_id = get_warp_id();
-   /* warp id in the grid */
-   volatile const HYPRE_Int grid_warp_id = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id();
    /* shared memory hash table */
@@ -326,6 +322,10 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
                                                                                                    SHMEM_HASH_SIZE];
 #endif
 #endif // HYPRE_USING_SYCL
+   volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim_x;
+   /* warp id in the grid */
+   volatile const HYPRE_Int grid_warp_id = blockIdx_x * NUM_WARPS_PER_BLOCK + warp_id;
+
    /* shared memory hash table for this warp */
    volatile HYPRE_Int     *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
@@ -394,9 +394,9 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
          /* in the case when symb mult was failed, save row nnz into rc */
          /* num of nonzeros of this row of C (exact) */
 #ifdef HYPRE_USING_SYCL
-	 jsum = warp_reduce_sum(jsum, item);
+         jsum = warp_reduce_sum(jsum, item);
 #else
-	 jsum = warp_reduce_sum(jsum);
+         jsum = warp_reduce_sum(jsum);
 #endif
          if (lane_id == 0)
          {
@@ -453,24 +453,25 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 
 template <HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__ void
-hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
-                                    HYPRE_Int     *ix,
-                                    HYPRE_Int     *jx,
-                                    HYPRE_Complex *ax,
-                                    HYPRE_Int     *ic,
-                                    HYPRE_Int     *jc,
-                                    HYPRE_Complex *ac
+hypre_spgemm_copy_from_Cext_into_C(
 #ifdef HYPRE_USING_SYCL
-                                    , sycl::nd_item<3>& item
+  sycl::nd_item<3>& item,
 #endif
-  )
+  HYPRE_Int      M,
+  HYPRE_Int     *ix,
+  HYPRE_Int     *jx,
+  HYPRE_Complex *ax,
+  HYPRE_Int     *ic,
+  HYPRE_Int     *jc,
+  HYPRE_Complex *ac )
 {
 #ifdef HYPRE_USING_SYCL
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
+
    HYPRE_Int blockDim_y = item.get_local_range(1);
    HYPRE_Int blockDim_x = item.get_local_range(2);
    HYPRE_Int blockIdx_x = item.get_group(2);
-   sycl::sub_group SG = item.get_sub_group();
-   HYPRE_Int warp_size = SG.get_local_range().get(0);
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * item.get_group_range(2);
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_warp_id(item);
@@ -665,25 +666,12 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 
          /* copy to the final C */
 #ifdef HYPRE_USING_SYCL
-	 hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {
-
-	     sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
-	     sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
-			    sycl::target::local> s_HashKeys_acc(shared_range, cgh);
-	     sycl::accessor<HYPRE_Complex, 1, sycl::access_mode::read_write,
-			    sycl::target::local> s_HashVals_acc(shared_range, cgh);
-
-	     cgh.parallel_for(
-	       sycl::nd_range<3>(gDim*bDim, bDim), [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-		 hypre_spgemm_copy_from_Cext_into_C<num_warps_per_block>(
-		   m, d_ic, d_jc, d_c, d_ic_new, d_jc_new, d_c_new, item);
-	       });
-	   });
+         sycl::range<3> gDim( 1, 1, (m + bDim[0] - 1) / bDim[0] );
 #else
          dim3 gDim( (m + bDim.z - 1) / bDim.z );
+#endif
          HYPRE_GPU_LAUNCH( (hypre_spgemm_copy_from_Cext_into_C<num_warps_per_block>), gDim, bDim,
                             m, d_ic, d_jc, d_c, d_ic_new, d_jc_new, d_c_new );
-#endif
 
          hypre_TFree(d_ic, HYPRE_MEMORY_DEVICE);
          hypre_TFree(d_jc, HYPRE_MEMORY_DEVICE);

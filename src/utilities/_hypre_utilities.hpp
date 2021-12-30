@@ -110,11 +110,19 @@ struct hypre_device_allocator
 
 #elif defined(HYPRE_USING_SYCL)
 
-typedef sycl::range<1> dim3;
+#if defined(HYPRE_USING_ONEMKLRNG)
+#include <oneapi/mkl/rng/device.hpp>
+#endif
+
+using dim3 = sycl::range<1>;
 #define __global__
 #define __host__
 #define __device__
 #define __forceinline__ __inline__ __attribute__((always_inline))
+
+using sycl::rint;
+using sycl::min;
+using sycl::max;
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
@@ -166,6 +174,18 @@ typedef sycl::range<1> dim3;
    catch(std::runtime_error const& ex)                                                       \
    {                                                                                         \
       hypre_printf("STD ERROR (code = %s) at %s:%d\n", ex.what(),                            \
+                   __FILE__, __LINE__);                                                      \
+      assert(0); exit(1);                                                                    \
+   }
+
+#define HYPRE_ONEMKL_CALL(call)                                                              \
+   try                                                                                       \
+   {                                                                                         \
+      call;                                                                                  \
+   }                                                                                         \
+   catch (oneapi::mkl::exception const &ex)                                                  \
+   {                                                                                         \
+      hypre_printf("ONEMKL ERROR (code = %s) at %s:%d\n", ex.what(),                         \
                    __FILE__, __LINE__);                                                      \
       assert(0); exit(1);                                                                    \
    }
@@ -240,10 +260,10 @@ struct hypre_DeviceData
 {
 #if defined(HYPRE_USING_CURAND)
    curandGenerator_t                 curand_generator;
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
+#elif defined(HYPRE_USING_ROCRAND)
    rocrand_generator                 curand_generator;
+#elif defined(HYPRE_USING_ONEMKLRNG)
+   oneapi::mkl::rng::device::philox4x32x10<>* curand_generator = nullptr;
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -252,9 +272,7 @@ struct hypre_DeviceData
 
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
+#elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_handle                  cusparse_handle;
 #endif
 
@@ -333,10 +351,10 @@ void                hypre_DeviceDataDestroy(hypre_DeviceData* data);
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
+#elif defined(HYPRE_USING_ROCRAND)
 rocrand_generator   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
+#elif defined(HYPRE_USING_ONEMKLRNG)
+oneapi::mkl::rng::device::philox4x32x10<>* hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -345,9 +363,7 @@ cublasHandle_t      hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
+#elif defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
@@ -1016,10 +1032,6 @@ struct print_functor
 };
 
 /* device_utils.c */
-dim3 hypre_GetDefaultDeviceBlockDimension();
-
-dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
-
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
    HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 
@@ -1120,23 +1132,15 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
 #define GPU_LAUNCH_SYNC
 #endif // defined(HYPRE_DEBUG)
 
-#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
-{                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
-   {                                                                                         \
-     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
-                  __FILE__, __LINE__,                                                        \
-                  gridsize[0], blocksize[0]);                                                \
-     assert(0); exit(1);                                                                     \
-   }                                                                                         \
-   else                                                                                      \
-   {                                                                                         \
-     hypre_HandleComputeStream(hypre_handle())->parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), \
-        [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {        \
-           (kernel_name)(item, __VA_ARGS__);                                                 \
-     });                                                                                     \
-   }                                                                                         \
-}
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) \
+  ({                                                            \
+    hypre_HandleComputeStream(hypre_handle())->parallel_for(    \
+      sycl::nd_range(((gridsize) * (blocksize)), (blocksize))   \
+      , [=] (auto item)                                         \
+      [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {         \
+        (kernel_name)(item, __VA_ARGS__);                       \
+      });                                                       \
+  })
 
 /* RL: TODO Want macro HYPRE_ONEDPL_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
@@ -1188,7 +1192,7 @@ hypre_int hypre_gpu_get_lane_id(sycl::nd_item<dim>& item)
 
 /* return the flattened work-item/thread id in global work space,
  * Note: Since the use-cases always involved bdim = gdim = 1, the
- * sycl:;nd_item<1> is only being used. SFINAE is used to prevent
+ * sycl::nd_item<1> is only being used. SFINAE is used to prevent
  * other dimensions (i.e., bdim != gdim != 1) */
 template < hypre_int bdim, hypre_int gdim >
 static __forceinline__
@@ -1319,53 +1323,57 @@ T warp_allreduce_sum(T in, sycl::nd_item<DIM>& item)
   return in;
 }
 
-// template <typename T>
-// static __forceinline__
-// T warp_reduce_max(T in)
-// {
-// #pragma unroll
-//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-//   {
-//     in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-//   }
-//   return in;
-// }
+template <typename T, int DIM>
+static __forceinline__
+T warp_reduce_max(T in, sycl::nd_item<DIM>& item)
+{
+  sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
+  {
+    in = std::max(in, SG.shuffle_down(in, d));
+  }
+  return in;
+}
 
-// template <typename T>
-// static __forceinline__
-// T warp_allreduce_max(T in)
-// {
-// #pragma unroll
-//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-//   {
-//     in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
-//   }
-//   return in;
-// }
+template <typename T, int DIM>
+static __forceinline__
+T warp_allreduce_max(T in, sycl::nd_item<DIM>& item)
+{
+  sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
+  {
+    in = std::max(in, SG.shuffle_xor(in, d));
+  }
+  return in;
+}
 
-// template <typename T>
-// static __forceinline__
-// T warp_reduce_min(T in)
-// {
-// #pragma unroll
-//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-//   {
-//     in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
-//   }
-//   return in;
-// }
+template <typename T, int DIM>
+static __forceinline__
+T warp_reduce_min(T in, sycl::nd_item<DIM>& item)
+{
+  sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
+  {
+    in = std::min(in, SG.shuffle_down(in, d));
+  }
+  return in;
+}
 
-// template <typename T>
-// static __forceinline__
-// T warp_allreduce_min(T in)
-// {
-// #pragma unroll
-//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
-//   {
-//     in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
-//   }
-//   return in;
-// }
+template <typename T, int DIM>
+static __forceinline__
+T warp_allreduce_min(T in, sycl::nd_item<DIM>& item)
+{
+  sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
+  {
+    in = std::min(in, SG.shuffle_xor(in, d));
+  }
+  return in;
+}
 
 // static __forceinline__
 // hypre_int next_power_of_2(hypre_int n)

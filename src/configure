@@ -9179,10 +9179,10 @@ fi
 
         if test x"$hypre_using_onemklrand" == x"yes"; then :
 
-$as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
+$as_echo "#define HYPRE_USING_ONEMKLRNG 1" >>confdefs.h
 
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng/device.hpp"
 
 fi
 

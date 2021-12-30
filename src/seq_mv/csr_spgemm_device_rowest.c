@@ -12,7 +12,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                        NAIVE
@@ -21,7 +21,11 @@ template <char type>
 static __device__ __forceinline__
 void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
                        HYPRE_Int *ib,
-                       HYPRE_Int &row_nnz_sum, HYPRE_Int &row_nnz_max)
+                       HYPRE_Int &row_nnz_sum, HYPRE_Int &row_nnz_max
+#ifdef HYPRE_USING_SYCL
+                       , sycl::nd_item<3>& item
+#endif
+  )
 {
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
@@ -29,14 +33,22 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
    {
       j = read_only_load(ia + rowi + lane_id);
    }
+#ifdef HYPRE_USING_SYCL
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
+   const HYPRE_Int istart = SG.shuffle(j, 0);
+   const HYPRE_Int iend   = SG.shuffle(j, 1);
+#else
+   HYPRE_Int warp_size = HYPRE_WARP_SIZE;
    const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
    const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+#endif
 
    row_nnz_sum = 0;
    row_nnz_max = 0;
 
    /* load column idx and values of row i of A */
-   for (HYPRE_Int i = istart; i < iend; i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = istart; i < iend; i += warp_size)
    {
       if (i + lane_id < iend)
       {
@@ -57,34 +69,68 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
 
 template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
-void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
-                           HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
+void csr_spmm_rownnz_naive(
+#ifdef HYPRE_USING_SYCL
+  sycl::nd_item<3>& item,
+#endif
+  HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
+  HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
 {
-   const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
+#ifdef HYPRE_USING_SYCL
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
+   HYPRE_Int blockDim_x = item.get_local_range(2);
+   HYPRE_Int blockDim_y = item.get_local_range(1);
+   HYPRE_Int gridDim_x  = item.get_group_range(2);
+   HYPRE_Int blockIdx_x = item.get_group(2);
+   /* warp id inside the block */
+   const HYPRE_Int warp_id = get_warp_id(item);
+   /* lane id inside the warp */
+   volatile const HYPRE_Int lane_id = get_lane_id(item);
+#else
+   HYPRE_Int warp_size   = HYPRE_WARP_SIZE;
+   HYPRE_Int blockDim_x  = blockDim.x;
+   HYPRE_Int blockDim_y  = blockDim.y;
+   HYPRE_Int gridDim_x   = gridDim.x;
+   HYPRE_Int blockIdx_x  = blockIdx.x;
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_warp_id();
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
+#endif
 
-   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+   const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim_x;
+   hypre_device_assert(blockDim_x * blockDim_y == warp_size);
 
-   for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
+   for (HYPRE_Int i = blockIdx_x * NUM_WARPS_PER_BLOCK + warp_id;
         i < M;
         i += num_warps)
    {
       HYPRE_Int jU, jL;
 
-      rownnz_naive_rowi<type>(i, lane_id, ia, ja, ib, jU, jL);
+      rownnz_naive_rowi<type>(i, lane_id, ia, ja, ib, jU, jL
+#ifdef HYPRE_USING_SYCL
+                       , item
+#endif
+        );
 
       if (type == 'U' || type == 'B')
       {
+#ifdef HYPRE_USING_SYCL
+         jU = warp_reduce_sum(jU, item);
+#else
          jU = warp_reduce_sum(jU);
+#endif
          jU = min(jU, N);
       }
 
       if (type == 'L' || type == 'B')
       {
+#ifdef HYPRE_USING_SYCL
+         jL = warp_reduce_max(jL, item);
+#else
          jL = warp_reduce_max(jL);
+#endif
       }
 
       if (lane_id == 0)
@@ -106,12 +152,27 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
                        COHEN
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 __global__
-void expdistfromuniform(HYPRE_Int n, float *x)
+void expdistfromuniform(
+#ifdef HYPRE_USING_SYCL
+  sycl::nd_item<3>& item,
+#endif
+  HYPRE_Int n, float *x)
 {
+#ifdef HYPRE_USING_SYCL
+   sycl::sub_group SG   = item.get_sub_group();
+   HYPRE_Int warp_size  = SG.get_local_range().get(0);
+   HYPRE_Int blockDim_x = item.get_local_range(2);
+   HYPRE_Int blockDim_y = item.get_local_range(1);
+   const HYPRE_Int global_thread_id  = item.get_group(2) * get_block_size(item) + get_thread_id(item);
+   const HYPRE_Int total_num_threads = item.get_group_range(2) * get_block_size(item);
+#else
+   HYPRE_Int warp_size  = HYPRE_WARP_SIZE;
+   HYPRE_Int blockDim_x = blockDim.x;
+   HYPRE_Int blockDim_y = blockDim.y;
    const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
    const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
-
-   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+#endif
+   hypre_device_assert(blockDim_x * blockDim_y == warp_size);
 
    for (HYPRE_Int i = global_thread_id; i < n; i += total_num_threads)
    {
@@ -122,10 +183,32 @@ void expdistfromuniform(HYPRE_Int n, float *x)
 /* T = float: single precision should be enough */
 template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP, HYPRE_Int layer>
 __global__
-void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
-                         HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
+void cohen_rowest_kernel(
+#ifdef HYPRE_USING_SYCL
+  sycl::nd_item<3>& item,
+#endif
+  HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
+  HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
 {
-   const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
+#ifdef HYPRE_USING_SYCL
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
+   HYPRE_Int blockDim_z = item.get_local_range(0);
+   HYPRE_Int blockDim_y = item.get_local_range(1);
+   HYPRE_Int blockDim_x = item.get_local_range(2);
+   HYPRE_Int blockIdx_x = item.get_group(2);
+   HYPRE_Int gridDim_x  = item.get_group_range(2);
+   /* warp id inside the block */
+   const HYPRE_Int warp_id = get_warp_id(item);
+   /* lane id inside the warp */
+   volatile HYPRE_Int lane_id = get_lane_id(item);
+#else
+   HYPRE_Int warp_size  = HYPRE_WARP_SIZE;
+   HYPRE_Int blockDim_z = blockDim.z;
+   HYPRE_Int blockDim_y = blockDim.y;
+   HYPRE_Int blockDim_x = blockDim.x;
+   HYPRE_Int blockIdx_x = blockIdx.x;
+   HYPRE_Int gridDim_x  = gridDim.x;
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_warp_id();
    /* lane id inside the warp */
@@ -133,13 +216,16 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 #if COHEN_USE_SHMEM
    __shared__ volatile HYPRE_Int s_col[NUM_WARPS_PER_BLOCK * SHMEM_SIZE_PER_WARP];
    volatile HYPRE_Int  *warp_s_col = s_col + warp_id * SHMEM_SIZE_PER_WARP;
-#endif
+#endif // COHEN_USE_SHMEM
 
-   hypre_device_assert(blockDim.z              == NUM_WARPS_PER_BLOCK);
-   hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
+#endif // HYPRE_USING_SYCL
+
+   const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim_x;
+   hypre_device_assert(blockDim_z              == NUM_WARPS_PER_BLOCK);
+   hypre_device_assert(blockDim_x * blockDim_y == warp_size);
    hypre_device_assert(sizeof(T) == sizeof(float));
 
-   for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
+   for (HYPRE_Int i = blockIdx_x * NUM_WARPS_PER_BLOCK + warp_id;
         i < nrow;
         i += num_warps)
    {
@@ -149,14 +235,19 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
       {
          tmp = read_only_load(rowptr + i + lane_id);
       }
+#ifdef HYPRE_USING_SYCL
+      const HYPRE_Int istart = SG.shuffle(tmp, 0);
+      const HYPRE_Int iend   = SG.shuffle(tmp, 1);
+#else
       const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0);
       const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1);
+#endif
 
       /* works on WARP_SIZE samples at a time */
-      for (HYPRE_Int r = 0; r < nsamples; r += HYPRE_WARP_SIZE)
+      for (HYPRE_Int r = 0; r < nsamples; r += warp_size)
       {
          T vmin = HYPRE_FLT_LARGE;
-         for (HYPRE_Int j = istart; j < iend; j += HYPRE_WARP_SIZE)
+         for (HYPRE_Int j = istart; j < iend; j += warp_size)
          {
             HYPRE_Int col = -1;
             const HYPRE_Int j1 = j + lane_id;
@@ -195,12 +286,16 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
             }
 #endif
 
-            for (HYPRE_Int k = 0; k < HYPRE_WARP_SIZE; k++)
+            for (HYPRE_Int k = 0; k < warp_size; k++)
             {
+#ifdef HYPRE_USING_SYCL
+               HYPRE_Int colk = SG.shuffle(col, k);
+#else
                HYPRE_Int colk = __shfl_sync(HYPRE_WARP_FULL_MASK, col, k);
+#endif
                if (colk == -1)
                {
-                  hypre_device_assert(j + HYPRE_WARP_SIZE >= iend);
+                  hypre_device_assert(j + warp_size >= iend);
 
                   break;
                }
@@ -227,7 +322,11 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
             }
 
             /* partial sum along r */
+#ifdef HYPRE_USING_SYCL
+            vmin = warp_reduce_sum(vmin, item);
+#else
             vmin = warp_reduce_sum(vmin);
+#endif
 
             if (lane_id == 0)
             {
@@ -272,9 +371,19 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
                            HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc,
                            HYPRE_Int nsamples, T mult_factor, T *work)
 {
+#ifdef HYPRE_USING_SYCL
+   sycl::range<3> bDim(NUM_WARPS_PER_BLOCK, BDIMY, BDIMX);
+   hypre_assert(bDim[2] * bDim[1] == HYPRE_WARP_SIZE);
+   sycl::range<3> gDim( 1, 1, (nsamples * N + bDim[0] * HYPRE_WARP_SIZE - 1) / (bDim[0] * HYPRE_WARP_SIZE) );
+   sycl::range<3> gDim_step1( 1, 1, (K + bDim[0] - 1) / bDim[0] );
+   sycl::range<3> gDim_step2( 1, 1, (M + bDim[0] - 1) / bDim[0] );
+#else
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
-
+   dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
+   dim3 gDim_step1( (K + bDim.z - 1) / bDim.z );
+   dim3 gDim_step2( (M + bDim.z - 1) / bDim.z );
+#endif
    T *d_V1, *d_V2, *d_V3;
 
    d_V1 = work;
@@ -285,13 +394,10 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    /* random V1: uniform --> exp */
    hypre_CurandUniformSingle(nsamples * N, d_V1, 0, 0, 0, 0);
 
-   dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
-
    HYPRE_GPU_LAUNCH( expdistfromuniform, gDim, bDim, nsamples * N, d_V1 );
 
    /* step-1: layer 3-2 */
-   gDim.x = (K + bDim.z - 1) / bDim.z;
-   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim,
+   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim_step1,
                       bDim,
                       K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
 
@@ -300,11 +406,9 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    /* step-2: layer 2-1 */
    d_V3 = (T*) d_rc;
 
-   gDim.x = (M + bDim.z - 1) / bDim.z;
-   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim,
+   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim_step2,
                       bDim,
                       M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
-
    /* done */
    //hypre_TFree(d_V2, HYPRE_MEMORY_DEVICE);
 }
@@ -323,12 +427,19 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    const HYPRE_Int BDIMX               =   2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
+#ifdef HYPRE_USING_SYCL
+   /* SYCL kernel configurations */
+   sycl::range<3> bDim(num_warps_per_block, BDIMY, BDIMX);
+   hypre_assert(bDim[2] * bDim[1] == HYPRE_WARP_SIZE);
+   // for cases where one WARP works on a row
+   sycl::range<3> gDim( 1, 1, (m + bDim[0] - 1) / bDim[0] );
+#else
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
-
+#endif
    HYPRE_Int   row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
    HYPRE_Int   cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
    float cohen_mult           = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
@@ -387,4 +498,4 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_GPU */

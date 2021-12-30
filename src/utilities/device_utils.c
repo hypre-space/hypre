@@ -1134,6 +1134,59 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
    return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
 }
 
+#if defined(HYPRE_USING_ONEMKLRNG)
+/* Note: generates a uniform continouos random number between 0.0 and 1.0
+ *       (0.0 included, 1.0 excluded)
+ */
+
+/* T = float or hypre_double */
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   static_assert(std::is_same_v<T, float> || std::is_same_v<Type, hypre_double>,
+		 "oneMKL: rng/uniform: T is not supported");
+
+   if (data->curand_generator)
+   {
+      return data->curand_generator;
+   }
+
+   sycl::queue* q = hypre_DeviceDataComputeStream(data);
+
+   using rng_engine = oneapi::mkl::rng::device::philox4x32x10<>;
+   using rng_descr  = oneapi::mkl::rng::device::engine_descriptor<rng_engine>;
+   rng_descr* onemkl_rng_descr = nullptr;
+   rng_engine* gen;
+
+   if (set_seed && set_offset) {
+      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), seed, offset);
+   }
+   else if (!set_seed && set_offset) {
+      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), 1234ULL, offset);
+   }
+   else if (set_seed && !set_offset) {
+      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), seed, 1);
+   }
+   else {
+      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), 1234ULL, 1);
+   }
+
+   data->curand_generator = gen;
+
+   HYPRE_ONEMKL_CALL( oneapi::mkl::rng::device::uniform<T, oneapi::mkl::rng::uniform_method::accurate> distr(0.0, 1.0) );
+
+   HYPRE_ONEMKL_CALL( oneapi::mkl::rng::device::generate(distr, *gen, n, urand).wait() );
+
+   return hypre_error_flag;
+}
+#endif /* #if defined(HYPRE_USING_ONEMKLRNG) */
+
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
