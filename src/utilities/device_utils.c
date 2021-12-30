@@ -102,7 +102,6 @@ HYPRE_Int
 hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
                          HYPRE_Int *marker, HYPRE_Int marker_val)
 {
-   /* WM: needs testing */
    /* trivial case */
    if (n <= 0)
    {
@@ -178,24 +177,12 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 {
    HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
 
-   /* WM: TODO - lower_bound is supposed to be available in ondDPL, but no dice? */
-   /* oneapi::dpl::counting_iterator<HYPRE_Int> count(0); */
-   /* HYPRE_ONEDPL_CALL( std::lower_bound, */
-   /*                    d_row_ind, d_row_ind + nnz, */
-   /*                    count, */
-   /*                    count + nrows + 1, */
-   /*                    d_row_ptr); */
-   HYPRE_Int i, cnt;
-   cnt = 0;
-   d_row_ptr[0] = 0;
-   for (i = 0; i < nrows; i++)
-   {
-      while (d_row_ind[cnt] == i)
-      {
-         cnt++;
-      }
-      d_row_ptr[i + 1] = cnt;
-   }
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      count,
+                      count + nrows + 1,
+                      d_row_ptr);
 
    return d_row_ptr;
 }
@@ -204,24 +191,12 @@ HYPRE_Int
 hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
                                    HYPRE_Int *d_row_ptr)
 {
-   /* WM: TODO - lower_bound is supposed to be available in ondDPL, but no dice? */
-   /* oneapi::dpl::counting_iterator<HYPRE_Int> count(0); */
-   /* HYPRE_ONEDPL_CALL( std::lower_bound, */
-   /*                    d_row_ind, d_row_ind + nnz, */
-   /*                    count, */
-   /*                    count + nrows + 1, */
-   /*                    d_row_ptr); */
-   HYPRE_Int i, cnt;
-   cnt = 0;
-   d_row_ptr[0] = 0;
-   for (i = 0; i < nrows; i++)
-   {
-      while (d_row_ind[cnt] == i)
-      {
-         cnt++;
-      }
-      d_row_ptr[i + 1] = cnt;
-   }
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      count,
+                      count + nrows + 1,
+                      d_row_ptr);
 
    return hypre_error_flag;
 }
