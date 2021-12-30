@@ -9183,31 +9183,28 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
 
-	     LINK_CC=${CUCC}
+        	     LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        if test "$hypre_user_chose_cuflags" = "no"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        if test "$hypre_using_debug" = "yes"
         then
-           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
-           if test "$hypre_using_debug" = "yes"
-           then
-              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
-           else
-              CUFLAGS="-g -O3 ${CUFLAGS}"
-           fi
+           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+        else
+           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
+        fi
+
+                if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="${SYCLFLAGS}"
         fi
 
 
-                                if test x"$hypre_using_debug" == x"yes"; then :
-  SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"
-elif SYCLFLAGS="-O2 ${SYCLFLAGS}"; then :
+         if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"; then :
+  HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_tbb_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -L${TBBROOT}/lib/intel64/gcc4.8 -ltbb -lsycl -lOpenCL -lpthread -lm -ldl"
 
 fi
 
-        if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"; then :
-  HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl -lmkl_intel_ilp64 -lmkl_tbb_thread -lmkl_core"
-
-fi
 
         if test x"$hypre_using_onemklsparse" == x"yes"; then :
 

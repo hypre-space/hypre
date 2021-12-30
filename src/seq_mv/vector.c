@@ -498,8 +498,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
                                             size, alpha,
                                             y_data, 1).wait() );
 #else
-   /* WM: make sure to test this branch */
-   HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size, y_data, alpha * _1 );
+   HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size, y_data, [alpha](HYPRE_Complex y) -> HYPRE_Complex { return alpha * y; } );
 #endif // #if defined(HYPRE_USING_ONEMKL)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -570,8 +569,8 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                                             size, alpha,
                                             x_data, 1, y_data, 1).wait() );
 #else
-   /* WM: make sure to test this branch */
-   HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
+   HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
+                      [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
 #endif // #if defined(HYPRE_USING_ONEMKL)
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
@@ -751,11 +750,12 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else
-   /* WM: make sure to test this branch */
-   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0,
-                               std::plus<>(), std::multiplies<>() );
-   /* result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0, _1 + _2, _1 * _2 ); */
-   /* result = HYPRE_ONEDPL_CALL( std::inner_product, x_data, x_data + size, y_data, 0.0 ); */
+   /* WM: TODO - this onedpl call seems to be hanging, but I cannot get a minimal example to reproduce this... */
+   hypre_printf("WM: debug - in one dpl version of inner product, calling transform_reduce\n");
+   /* hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning: ONEDPL version of vector inner product may hang. Configure with ONEMKLBLAS.\n"); */
+   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0 );
+   /* result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0, */
+   /*                             std::plus<>(), std::multiplies<>() ); */
 #endif // #if defined(HYPRE_USING_ONEMKLBLAS)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

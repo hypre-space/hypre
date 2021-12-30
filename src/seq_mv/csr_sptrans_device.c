@@ -155,21 +155,6 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
 
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
-#if defined(HYPRE_USING_ONEMKLSPARSE)
-HYPRE_Int
-hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
-                                   HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
-                                   HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
-                                   HYPRE_Int   want_data)
-{
-   /* WM: Q - will this function be available in the future? */
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                     "hypreDevice_CSRSpTransOnemklsparse not implemented for onemkl::SPARSE!\n");
-   return hypre_error_flag;
-}
-#endif // #if defined(HYPRE_USING_ONEMKLSPARSE)
-
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
@@ -277,13 +262,13 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
 
    /* WM: debug */
-   HYPRE_Int i;
-   hypre_printf("d_ia: ");
-   for (i = 0; i < m; i++) { hypre_printf("%d ", d_ia[i]); }
-   hypre_printf("\n");
-   hypre_printf("d_it: ");
-   for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_it[i]); }
-   hypre_printf("\n");
+   /* HYPRE_Int i; */
+   /* hypre_printf("d_ia: "); */
+   /* for (i = 0; i < m; i++) { hypre_printf("%d ", d_ia[i]); } */
+   /* hypre_printf("\n"); */
+   /* hypre_printf("d_it: "); */
+   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_it[i]); } */
+   /* hypre_printf("\n"); */
 
    /* a copy of col idx of A */
    d_jt = d_it + nnzA;
@@ -297,9 +282,9 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                       d_pm);
 
    /* WM: debug */
-   hypre_printf("init d_pm: ");
-   for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_pm[i]); }
-   hypre_printf("\n");
+   /* hypre_printf("init d_pm: "); */
+   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_pm[i]); } */
+   /* hypre_printf("\n"); */
 
    auto zip_jt_pm = oneapi::dpl::make_zip_iterator(d_jt, d_pm);
    HYPRE_ONEDPL_CALL( std::stable_sort,
@@ -308,9 +293,9 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 
    /* WM: debug */
-   hypre_printf("sorted d_pm: ");
-   for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_pm[i]); }
-   hypre_printf("\n");
+   /* hypre_printf("sorted d_pm: "); */
+   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_pm[i]); } */
+   /* hypre_printf("\n"); */
 
    auto permuted_it = oneapi::dpl::make_permutation_iterator(d_it, d_pm);
    HYPRE_ONEDPL_CALL( std::copy,
@@ -319,9 +304,9 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                       d_jc );
 
    /* WM: debug */
-   hypre_printf("d_jc: ");
-   for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_jc[i]); }
-   hypre_printf("\n");
+   /* hypre_printf("d_jc: "); */
+   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_jc[i]); } */
+   /* hypre_printf("\n"); */
 
    if (want_data)
    {
@@ -336,9 +321,9 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
 
    /* WM: debug */
-   hypre_printf("d_ic: ");
-   for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_ic[i]); }
-   hypre_printf("\n");
+   /* hypre_printf("d_ic: "); */
+   /* for (i = 0; i < nnzA; i++) { hypre_printf("%d ", d_ic[i]); } */
+   /* hypre_printf("\n"); */
 
 #ifdef HYPRE_DEBUG
    HYPRE_Int nnzC;

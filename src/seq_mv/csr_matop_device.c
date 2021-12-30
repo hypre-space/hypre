@@ -1558,10 +1558,6 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 #elif defined(HYPRE_USING_ROCSPARSE)
       hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
                                       data);
-      /* WM: no transpose in onemkl sparse */
-      /* #elif defined(HYPRE_USING_ONEMKLSPARSE) */
-      /*       hypreDevice_CSRSpTransOnemklsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, */
-      /*                                          data); */
 #else
       hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
@@ -1576,53 +1572,6 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    *AT_ptr = C;
 
    hypre_SyncComputeStream(hypre_handle());
-
-   /* WM: debug */
-   hypre_CSRMatrix *AT_host;
-   hypre_CSRMatrixTransposeHost(A, &AT_host, data);
-   if (hypre_CSRMatrixNumRows(C) != hypre_CSRMatrixNumRows(AT_host))
-   {
-      hypre_printf("WM: error - transpose has wrong num rows\n");
-      hypre_assert(0);
-   }
-   if (hypre_CSRMatrixNumCols(C) != hypre_CSRMatrixNumCols(AT_host))
-   {
-      hypre_printf("WM: error - transpose has wrong num cols\n");
-      hypre_assert(0);
-   }
-   if (hypre_CSRMatrixNumNonzeros(C) != hypre_CSRMatrixNumNonzeros(AT_host))
-   {
-      hypre_printf("WM: error - transpose has wrong num nonzeros\n");
-      hypre_assert(0);
-   }
-   HYPRE_Int i;
-   for (i = 0; i < hypre_CSRMatrixNumRows(C) + 1; i++)
-   {
-      if (hypre_CSRMatrixI(C)[i] != hypre_CSRMatrixI(AT_host)[i])
-      {
-         hypre_printf("WM: error - transpose has wrong row ptr\n");
-         hypre_assert(0);
-      }
-   }
-   /* WM: ordering may be different... so this may not be the right test */
-   for (i = 0; i < hypre_CSRMatrixNumNonzeros(C); i++)
-   {
-      if (hypre_CSRMatrixJ(C)[i] != hypre_CSRMatrixJ(AT_host)[i])
-      {
-         hypre_printf("WM: error - transpose has wrong col ind\n");
-         hypre_assert(0);
-      }
-   }
-   for (i = 0; i < hypre_CSRMatrixNumNonzeros(C); i++)
-   {
-      if (hypre_CSRMatrixData(C)[i] != hypre_CSRMatrixData(AT_host)[i])
-      {
-         hypre_printf("WM: error - transpose has wrong data\n");
-         hypre_assert(0);
-      }
-   }
-   hypre_CSRMatrixDestroy(AT_host);
-   /* WM: end debug */
 
    return hypre_error_flag;
 }

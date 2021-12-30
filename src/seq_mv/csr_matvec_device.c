@@ -331,12 +331,7 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 
    if (trans)
    {
-      /* WM: TODO - transpose is not currently supported on the device in sycl
-       * WM: I should verify that this yields better performance in onemklsparse
-       * We handle the transpose explicitly to ensure the same output each run
-       * and for potential performance improvement memory for AT */
-      /* hypre_CSRMatrixTransposeDevice(A, &AT, 1); */
-      hypre_CSRMatrixTransposeHost(A, &AT, 1);
+      hypre_CSRMatrixTransposeDevice(A, &AT, 1);
       matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
    }
 

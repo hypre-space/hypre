@@ -2344,31 +2344,35 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
 
+        dnl (Ab)Using CUCC when compiling HIP
 	     LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        if test "$hypre_user_chose_cuflags" = "no"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        if test "$hypre_using_debug" = "yes"
         then
-           CUFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
-           if test "$hypre_using_debug" = "yes"
-           then
-              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
-           else
-              CUFLAGS="-g -O3 ${CUFLAGS}"
-           fi
+           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+        else
+           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
 
+        dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
+        if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="${SYCLFLAGS}"
+        fi
 
-        dnl If not in debug mode, at least -O2, but the user can override with
-        dnl with SYCLFLAGS on the configure line. If in debug mode, -O0 -Wall
-        dnl plus flags for debugging symbols
-        AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"],
-              [SYCLFLAGS="-O2 ${SYCLFLAGS}"],)
+dnl        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
+dnl               [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl"
+dnl               ])
 
-        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
-              [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl -lmkl_intel_ilp64 -lmkl_tbb_thread -lmkl_core"
+         AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
+               [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_tbb_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -L${TBBROOT}/lib/intel64/gcc4.8 -ltbb -lsycl -lOpenCL -lpthread -lm -ldl"
                ])
+
+dnl        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
+dnl              [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -L${MKLROOT}/lib/intel64 -lmkl_sycl -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lsycl -lOpenCL -lpthread -lm -ldl"
+dnl               ])
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
