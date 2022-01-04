@@ -252,6 +252,10 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    /* lane id inside the warp */
    HYPRE_Int lane_id = get_lane_id(item);
    /* shared memory hash table */
+
+   /* shared memory hash table for this warp */
+   HYPRE_Int *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
+   HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
 #else
    HYPRE_Int warp_size  = HYPRE_WARP_SIZE;
    HYPRE_Int blockDim_z = blockDim.z;
@@ -275,11 +279,11 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_WARPS_PER_BLOCK *
 									       SHMEM_HASH_SIZE];
 #endif // #if 1
-#endif
 
    /* shared memory hash table for this warp */
-   HYPRE_Int *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
-   HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
+   volatile HYPRE_Int *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
+   volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
+#endif
 
    hypre_device_assert(blockDim_z              == NUM_WARPS_PER_BLOCK);
    hypre_device_assert(blockDim_x * blockDim_y == warp_size);
