@@ -482,7 +482,11 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int      lane_id,
 
 template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE>
 __global__ void
-hypre_spgemm_copy_from_hash_into_C( HYPRE_Int      M,
+hypre_spgemm_copy_from_hash_into_C(
+#ifdef HYPRE_USING_SYCL
+                                    sycl::nd_item<3>& item,
+#endif
+                                    HYPRE_Int      M,
                                     HYPRE_Int     *rf,
                                     HYPRE_Int     *js,
                                     HYPRE_Complex *as,
@@ -494,11 +498,7 @@ hypre_spgemm_copy_from_hash_into_C( HYPRE_Int      M,
                                     HYPRE_Complex *ag2,
                                     HYPRE_Int     *ic,
                                     HYPRE_Int     *jc,
-                                    HYPRE_Complex *ac
-#ifdef HYPRE_USING_SYCL
-                                    , sycl::nd_item<3>& item
-#endif
-  )
+                                    HYPRE_Complex *ac )
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -768,24 +768,12 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
     * copy from hash tables to C
     * ---------------------------------------------------------------------------*/
    {
+      // for cases where one WARP works on a row
 #ifdef HYPRE_USING_SYCL
-      // for cases where one WARP works on a row
       sycl::range<3> gDim( 1, 1, (m + bDim[0] - 1) / bDim[0] );
-
-      hypre_HandleComputeStream(hypre_handle())->parallel_for(
-	sycl::nd_range<3>(gDim*bDim, bDim), [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-	  hypre_spgemm_copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>(
-	    m, d_rf,
-	    d_js, d_as,
-	    d_ghash1_i, d_ghash1_j, d_ghash1_a,
-	    d_ghash2_i, d_ghash2_j, d_ghash2_a,
-	    d_ic, d_jc, d_c,
-	    item );
-	});
 #else
-      // for cases where one WARP works on a row
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
-
+#endif
       HYPRE_GPU_LAUNCH( (hypre_spgemm_copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>), gDim,
                          bDim,
                          m, d_rf,
@@ -793,7 +781,6 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
                          d_ghash1_i, d_ghash1_j, d_ghash1_a,
                          d_ghash2_i, d_ghash2_j, d_ghash2_a,
                          d_ic, d_jc, d_c );
-#endif
    }
 
    hypre_TFree(d_ghash1_i, HYPRE_MEMORY_DEVICE);
