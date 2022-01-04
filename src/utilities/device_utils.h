@@ -63,9 +63,14 @@
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
-
-#if defined(HYPRE_USING_ONEMKLSPARSE) || defined(HYPRE_USING_ONEMKLBLAS) || defined(HYPRE_USING_ONEMKLRAND)
-#include <oneapi/mkl.hpp>
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+#include <oneapi/mkl/spblas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLBLAS)
+#include <oneapi/mkl/blas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLRAND)
+#include <oneapi/mkl/rng.hpp>
 #endif
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)

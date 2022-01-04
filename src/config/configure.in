@@ -211,6 +211,7 @@ hypre_using_onemklsparse=no
 hypre_using_onemklblas=no
 hypre_using_onemklrand=no
 
+hypre_found_mkl=no
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -2362,32 +2363,19 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            CUFLAGS="${SYCLFLAGS}"
         fi
 
-dnl        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
-dnl               [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lpthread -lm -ldl"
-dnl               ])
-
-         AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
-               [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_tbb_thread.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -L${TBBROOT}/lib/intel64/gcc4.8 -ltbb -lsycl -lOpenCL -lpthread -lm -ldl"
+        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
+              [AC_CHECK_HEADERS(["${MKLROOT}/include/mkl.h"],
+                                [hypre_found_mkl=yes],
+                                AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include"
                ])
+        
+        AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])
 
-dnl        AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
-dnl              [HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -L${MKLROOT}/lib/intel64 -lmkl_sycl -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lsycl -lOpenCL -lpthread -lm -ldl"
-dnl               ])
+        AS_IF([test x"$hypre_using_onemklblas" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])])
 
-        AS_IF([test x"$hypre_using_onemklsparse" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
-               ])
-
-        AS_IF([test x"$hypre_using_onemklblas" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
-               ])
-
-        AS_IF([test x"$hypre_using_onemklrand" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
-               ])
+        AS_IF([test x"$hypre_using_onemklrand" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])])
 
       ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
 
