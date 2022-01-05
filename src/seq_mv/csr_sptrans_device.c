@@ -5,15 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/* WM: these need to be included before other headers... how to do this properly?
- * Can't use #if defined(HYPRE_USING_SYCL) here since that macro is defined in other hypre headers
- * Also, would like to just have these included once in, say, a utilities header... */
-#include <oneapi/dpl/execution>
-#include <oneapi/dpl/algorithm>
-#include <oneapi/dpl/numeric>
-#include <oneapi/dpl/iterator>
-#include <oneapi/dpl/functional>
-
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
