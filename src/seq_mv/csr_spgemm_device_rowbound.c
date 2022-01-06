@@ -246,8 +246,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
 #ifdef HYPRE_USING_SYCL
       HYPRE_Int *new_end =
-         HYPRE_ONEDPL_CALL( dpct::copy_if,
-                            oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+         hypreSycl_copy_if( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                             oneapi::dpl::counting_iterator<HYPRE_Int>(m),
                             d_rf,
                             rf_ind,

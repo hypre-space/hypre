@@ -169,7 +169,7 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
                      rowsums_upper,
                      scale);
 
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0,
                              thrust::minimum<HYPRE_Real>());
@@ -323,7 +323,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    /* set residual to random */
    hypre_CurandUniform(local_size, r_data, 0, 0, 0, 0);
 
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    HYPRE_THRUST_CALL(transform,
                      r_data, r_data + local_size, r_data,

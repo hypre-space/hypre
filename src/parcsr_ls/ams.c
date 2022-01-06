@@ -459,7 +459,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsDevice(hypre_ParCSRMatrix *A)
    HYPRE_GPU_LAUNCH(hypreCUDAKernel_ParCSRMatrixFixZeroRows, gDim, bDim,
                      nrows, A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_data, num_cols_offd);
 
-   //hypre_SyncDeviceComputeStream(hypre_handle());
+   //hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }

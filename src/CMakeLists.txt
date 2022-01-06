@@ -106,6 +106,9 @@ option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
 # CUDA options
+option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKLSPARSE" OFF)
+option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKLBLAS" OFF)
+option(HYPRE_ENABLE_ONEMKLRNG        "Use oneMKLRNG" ON)
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
@@ -301,9 +304,8 @@ if (HYPRE_WITH_SYCL)
     add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS}>")
   endif ()
 
-  set(HYPRE_USING_SYCL      ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_GPU       ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_ONEMKLRNG ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_SYCL         ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_GPU          ON CACHE BOOL "" FORCE)
 
   if (HYPRE_ENABLE_UNIFIED_MEMORY)
     set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
@@ -318,6 +320,7 @@ if (HYPRE_WITH_SYCL)
     set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   endif ()
 
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-DPSTL_USE_PARALLEL_POLICIES=0>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-D_GLIBCXX_USE_TBB_PAR_BACKEND=0>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
@@ -325,6 +328,7 @@ if (HYPRE_WITH_SYCL)
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
+  include(HYPRE_SetupSYCLToolkit)
 endif (HYPRE_WITH_SYCL)
 
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
@@ -417,6 +421,14 @@ if (HYPRE_USING_CUDA)
   if (HYPRE_HAVE_MPI)
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${MPI_CXX_INCLUDE_DIRS})
+  endif ()
+endif ()
+
+if (HYPRE_USING_SYCL)
+  target_include_directories(${PROJECT_NAME} PUBLIC "$ENV{MKLROOT}/include/oneapi")
+  target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_SYCL_LIBS}" sycl)
+  if (HYPRE_HAVE_MPI)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
   endif ()
 endif ()
 

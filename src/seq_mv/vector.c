@@ -286,6 +286,11 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    {
       HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
    }
+#elif defined(HYPRE_USING_SYCL)
+   if (size > 0)
+   {
+      HYPRE_ONEDPL_CALL( std::fill_n, vector_data, size, value );
+   }
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -300,7 +305,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -473,6 +478,12 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #else
    HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
 #endif
+#elif defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()), size, alpha, y_data, 1).wait() );
+#else
+   HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size, y_data, [=](auto _1) {return alpha * _1;} );
+#endif
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -488,7 +499,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -527,6 +538,14 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #else
    HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
 #endif
+#elif defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()), size, alpha, x_data, 1,
+                                              y_data, 1).wait() );
+#else
+   HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
+                      [=](auto _1, auto _2) {return alpha * _1 + _2;} );
+#endif
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -542,7 +561,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -567,7 +586,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(b);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
    //RL: TODO back to hypre_GetExecPolicy2 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -596,7 +615,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -623,7 +642,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(b);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
                                                       hypre_VectorMemoryLocation(b) );
    if (exec == HYPRE_EXEC_DEVICE)
@@ -647,7 +666,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -689,7 +708,22 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #else
    /* TODO */
 #error "Complex inner product"
+#endif /* HYPRE_COMPLEX */
+#elif defined(HYPRE_USING_SYCL)
+#ifndef HYPRE_COMPLEX
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_Real *result_dot = hypre_TAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()), size, x_data, 1, y_data, 1,
+                                             result_dot).wait() );
+   hypre_TFree(result_dot, HYPRE_MEMORY_DEVICE);
+#else
+   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0 );
 #endif
+#else
+   /* TODO */
+#error "Complex inner product"
+#endif /* HYPRE_COMPLEX */
+
 #else /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -704,7 +738,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -806,7 +840,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

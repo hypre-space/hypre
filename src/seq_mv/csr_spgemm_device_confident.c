@@ -300,6 +300,10 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id(item);
    /* shared memory hash table */
+
+   /* shared memory hash table for this warp */
+   volatile HYPRE_Int     *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
+   volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
 #else
    HYPRE_Int warp_size  = HYPRE_WARP_SIZE;
    HYPRE_Int blockDim_z = blockDim.z;
@@ -320,15 +324,16 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    volatile HYPRE_Int *s_HashKeys = shared_mem;
    volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_WARPS_PER_BLOCK *
                                                                                                    SHMEM_HASH_SIZE];
-#endif
-#endif // HYPRE_USING_SYCL
-   volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim_x;
-   /* warp id in the grid */
-   volatile const HYPRE_Int grid_warp_id = blockIdx_x * NUM_WARPS_PER_BLOCK + warp_id;
+#endif // 1
 
    /* shared memory hash table for this warp */
    volatile HYPRE_Int     *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *warp_s_HashVals = s_HashVals + warp_id * SHMEM_HASH_SIZE;
+#endif // HYPRE_USING_SYCL
+
+   volatile const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim_x;
+   /* warp id in the grid */
+   volatile const HYPRE_Int grid_warp_id = blockIdx_x * NUM_WARPS_PER_BLOCK + warp_id;
 
    hypre_device_assert(blockDim_z              == NUM_WARPS_PER_BLOCK);
    hypre_device_assert(blockDim_x * blockDim_y == warp_size);

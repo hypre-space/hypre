@@ -706,8 +706,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_USING_SYCL
-      HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( dpct::copy_if,
-                                              oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+      HYPRE_Int *new_end = hypreSycl_copy_if( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
                                               oneapi::dpl::counting_iterator<HYPRE_Int>(m),
                                               d_rf,
                                               rf_ind,

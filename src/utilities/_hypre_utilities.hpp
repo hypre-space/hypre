@@ -466,6 +466,27 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
+   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
+
+template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
+                                      HYPRE_Int opt);
+
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
+                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+
+template <typename T>
+HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
+
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
+                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
+                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
+                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
+                                    char *work);
+
 #endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
@@ -512,9 +533,9 @@ using namespace thrust::placeholders;
 
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA)
-#define GPU_LAUNCH_SYNC { hypre_SyncDeviceComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
-#define GPU_LAUNCH_SYNC { hypre_SyncDeviceComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
@@ -1032,29 +1053,8 @@ struct print_functor
 };
 
 /* device_utils.c */
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
-   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
-
-template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt);
-
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
-                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
-
-template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
-
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
                                 HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
-                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
-                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
-                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
-                                    char *work);
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
@@ -1086,26 +1086,149 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/numeric>
 #include <oneapi/dpl/iterator>
 #include <oneapi/dpl/functional>
-
-#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if, scatter_if
-
-#include <algorithm>
-#include <numeric>
-#include <functional>
-#include <iterator>
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * macro for launching SYCL kernels, SYCL, oneDPL, oneMKL calls
  *                    NOTE: IN HYPRE'S DEFAULT STREAM
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
+namespace internal {
+
+//[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
+  template <typename T, typename Predicate, typename Operator>
+  struct transform_if_unary_zip_mask_fun {
+    transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
+    template <typename _T>
+    void operator()(_T&& t) const {
+      using std::get;
+      if (pred(get<1>(t)))
+        get<2>(t) = op(get<0>(t));
+    }
+
+  private:
+    Predicate pred;
+    Operator op;
+  };
+
+  template <typename T> struct sequence_fun {
+    using result_type = T;
+    sequence_fun(T _init, T _step) : init(_init), step(_step) {}
+
+    template <typename _T> result_type operator()(_T &&i) const {
+      return static_cast<T>(init + step * i);
+    }
+
+  private:
+    const T init;
+    const T step;
+  };
+
+// Functor evaluates second element of tied sequence with predicate.
+// Used by: copy_if, remove_copy_if, stable_partition_copy
+// Lambda:
+  template <typename Predicate> struct predicate_key_fun {
+    typedef bool result_of;
+    predicate_key_fun(Predicate _pred) : pred(_pred) {}
+
+    template <typename _T1> result_of operator()(_T1 &&a) const {
+      using std::get;
+      return pred(get<1>(a));
+    }
+
+  private:
+    Predicate pred;
+  };
+
+} // namespace internal
+
+template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
+Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
+                        Iter3 result, Pred pred) {
+  static_assert(
+      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
+                   std::random_access_iterator_tag>::value &&
+          std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+                       std::random_access_iterator_tag>::value &&
+          std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
+                       std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+  auto ret_val = std::copy_if(
+    oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+    oneapi::dpl::make_zip_iterator(first, mask),
+    oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
+    oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
+    internal::predicate_key_fun<Pred>(pred));
+  return std::get<0>(ret_val.base());
+}
+
+template <class Iter, class T>
+void hypreSycl_iota(Iter first, Iter last, T init, T step=1) {
+  static_assert(
+      std::is_same<typename std::iterator_traits<Iter>::iterator_category,
+                   std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+  using DiffSize = typename std::iterator_traits<Iter>::difference_type;
+  std::transform(
+    oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+    oneapi::dpl::counting_iterator<DiffSize>(0),
+    oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
+    first, internal::sequence_fun<T>(init, step));
+}
+
+template <class Iter1, class Iter2, class Iter3,
+          class UnaryOperation, class Pred>
+Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
+                             Iter3 result, UnaryOperation unary_op, Pred pred) {
+  static_assert(
+      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
+                   std::random_access_iterator_tag>::value &&
+          std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+                       std::random_access_iterator_tag>::value &&
+          std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
+                       std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+  using T = typename std::iterator_traits<Iter1>::value_type;
+  using Ref1 = typename std::iterator_traits<Iter1>::reference;
+  using Ref2 = typename std::iterator_traits<Iter2>::reference;
+  const auto n = std::distance(first, last);
+  std::for_each(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+                oneapi::dpl::make_zip_iterator(first, mask, result),
+                oneapi::dpl::make_zip_iterator(first, mask, result) + n,
+                internal::transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(
+                pred, unary_op));
+  return result + n;
+}
+
+template <typename InputIter1, typename InputIter2,
+          typename InputIter3, typename OutputIter, typename Predicate>
+void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
+                          InputIter2 map, InputIter3 mask, OutputIter result,
+                          Predicate pred) {
+  static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+                   std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<InputIter2>::iterator_category,
+              std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<InputIter3>::iterator_category,
+              std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<OutputIter>::iterator_category,
+              std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+  hypreSycl_transform_if(first, last, mask,
+                         oneapi::dpl::make_permutation_iterator(result, map),
+                         [=](auto &&v) { return v; }, [=](auto &&m) { return pred(m); });
+}
 
 template <typename InputIter1, typename InputIter2,
           typename OutputIter>
 OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
-                  InputIter2 input_first, OutputIter result) {
+                            InputIter2 input_first, OutputIter result) {
   static_assert(
       std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
                    std::random_access_iterator_tag>::value &&
@@ -1121,12 +1244,12 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
   const int n = ::std::distance(map_first, map_last);
 
   return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
-			   perm_begin, perm_begin + n, result);
+                           perm_begin, perm_begin + n, result);
 }
 
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA)
-#define GPU_LAUNCH_SYNC { hypre_SyncDeviceComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
@@ -1175,11 +1298,10 @@ hypre_int hypre_gpu_get_num_warps(sycl::nd_item<dim>& item)
 }
 
 /* return the thread lane id in warp */
-template <hypre_int dim>
 static __forceinline__
-hypre_int hypre_gpu_get_lane_id(sycl::nd_item<dim>& item)
+hypre_int hypre_gpu_get_lane_id(sycl::sub_group& sg)
 {
-   return item.get_sub_group().get_local_linear_id();
+   return sg.get_local_linear_id();
 }
 
 // /* return the number of threads in grid */
@@ -1391,47 +1513,45 @@ T warp_allreduce_min(T in, sycl::nd_item<DIM>& item)
 //   }
 // };
 
-// template<typename T1, typename T2>
-// struct TupleComp2
-// {
-//    typedef thrust::tuple<T1, T2> Tuple;
+template<typename... T>
+struct TupleComp2
+{
+   typedef std::tuple<T...> Tuple;
+   bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (std::get<0>(t1) < std::get<0>(t2))
+      {
+         return true;
+      }
+      if (std::get<0>(t1) > std::get<0>(t2))
+      {
+         return false;
+      }
+      return hypre_abs(std::get<1>(t1)) > hypre_abs(std::get<1>(t2));
+   }
+};
 
-//    bool operator()(const Tuple& t1, const Tuple& t2)
-//    {
-//       if (thrust::get<0>(t1) < thrust::get<0>(t2))
-//       {
-//          return true;
-//       }
-//       if (thrust::get<0>(t1) > thrust::get<0>(t2))
-//       {
-//          return false;
-//       }
-//       return hypre_abs(thrust::get<1>(t1)) > hypre_abs(thrust::get<1>(t2));
-//    }
-// };
-
-// template<typename T1, typename T2>
-// struct TupleComp3
-// {
-//    typedef thrust::tuple<T1, T2> Tuple;
-
-//    bool operator()(const Tuple& t1, const Tuple& t2)
-//    {
-//       if (thrust::get<0>(t1) < thrust::get<0>(t2))
-//       {
-//          return true;
-//       }
-//       if (thrust::get<0>(t1) > thrust::get<0>(t2))
-//       {
-//          return false;
-//       }
-//       if (thrust::get<0>(t2) == thrust::get<1>(t2))
-//       {
-//          return false;
-//       }
-//       return thrust::get<0>(t1) == thrust::get<1>(t1) || thrust::get<1>(t1) < thrust::get<1>(t2);
-//    }
-// };
+template<typename... T>
+struct TupleComp3
+{
+   typedef std::tuple<T...> Tuple;
+   bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (std::get<0>(t1) < std::get<0>(t2))
+      {
+         return true;
+      }
+      if (std::get<0>(t1) > std::get<0>(t2))
+      {
+         return false;
+      }
+      if (std::get<0>(t2) == std::get<1>(t2))
+      {
+         return false;
+      }
+      return std::get<0>(t1) == std::get<1>(t1) || std::get<1>(t1) < std::get<1>(t2);
+   }
+};
 
 // template<typename T>
 // struct is_negative : public thrust::unary_function<T,bool>

@@ -1145,7 +1145,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_SetSyncDeviceCompute(sync_stream);
-   hypre_SyncDeviceComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
    return hypre_error_flag;

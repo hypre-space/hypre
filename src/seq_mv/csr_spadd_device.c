@@ -8,7 +8,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 /* This function effectively does (in Matlab notation)
  *              C := alpha * A(:, a_colmap)
@@ -83,7 +83,11 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    /* expansion: j */
    if (d_ja_map)
    {
+#ifdef HYPRE_USING_SYCL
+      hypreSycl_gather(d_ja, d_ja + nnzA, d_ja_map, d_jt);
+#else
       HYPRE_THRUST_CALL(gather, d_ja, d_ja + nnzA, d_ja_map, d_jt);
+#endif
    }
    else
    {
@@ -91,7 +95,11 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    if (d_jb_map)
    {
+#ifdef HYPRE_USING_SYCL
+      hypreSycl_gather(d_jb, d_jb + nnzB, d_jb_map, d_jt + nnzA);
+#else
       HYPRE_THRUST_CALL(gather, d_jb, d_jb + nnzB, d_jb_map, d_jt + nnzA);
+#endif
    }
    else
    {
@@ -105,7 +113,11 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
+#ifdef HYPRE_USING_SYCL
+      HYPRE_ONEDPL_CALL( std::transform, d_aa, d_aa + nnzA, d_at, [=](auto _1) {return alpha * _1;} );
+#else
       HYPRE_THRUST_CALL( transform, d_aa, d_aa + nnzA, d_at, alpha * _1 );
+#endif
    }
 
    if (beta == 1.0)
@@ -114,7 +126,11 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
+#ifdef HYPRE_USING_SYCL
+      HYPRE_ONEDPL_CALL( std::transform, d_ab, d_ab + nnzB, d_at + nnzA, [=](auto _1) {return beta * _1;} );
+#else
       HYPRE_THRUST_CALL( transform, d_ab, d_ab + nnzB, d_at + nnzA, beta * _1 );
+#endif
    }
 
    /* expansion: i */
@@ -189,4 +205,4 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // defined(HYPRE_USING_GPU)
