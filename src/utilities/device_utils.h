@@ -53,8 +53,14 @@
 
 #elif defined(HYPRE_USING_SYCL)
 
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+#include <oneapi/mkl/spblas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLBLAS)
+#include <oneapi/mkl/blas.hpp>
+#endif
 #if defined(HYPRE_USING_ONEMKLRNG)
-#include <oneapi/mkl/rng/device.hpp>
+#include <oneapi/dpl/random>
 #endif
 
 using dim3 = sycl::range<1>;
@@ -205,8 +211,6 @@ struct hypre_DeviceData
    curandGenerator_t                 curand_generator;
 #elif defined(HYPRE_USING_ROCRAND)
    rocrand_generator                 curand_generator;
-#elif defined(HYPRE_USING_ONEMKLRNG)
-   oneapi::mkl::rng::device::philox4x32x10<>* curand_generator = nullptr;
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -296,8 +300,6 @@ void                hypre_DeviceDataDestroy(hypre_DeviceData* data);
 curandGenerator_t   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_ROCRAND)
 rocrand_generator   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#elif defined(HYPRE_USING_ONEMKLRNG)
-oneapi::mkl::rng::device::philox4x32x10<>* hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -1134,8 +1136,6 @@ Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
                        std::random_access_iterator_tag>::value,
       "Iterators passed to algorithms must be random-access iterators.");
   using T = typename std::iterator_traits<Iter1>::value_type;
-  using Ref1 = typename std::iterator_traits<Iter1>::reference;
-  using Ref2 = typename std::iterator_traits<Iter2>::reference;
   const auto n = std::distance(first, last);
   std::for_each(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
                 oneapi::dpl::make_zip_iterator(first, mask, result),
@@ -1185,7 +1185,6 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
   auto perm_begin =
       oneapi::dpl::make_permutation_iterator(input_first, map_first);
   const int n = ::std::distance(map_first, map_last);
-
   return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
                            perm_begin, perm_begin + n, result);
 }

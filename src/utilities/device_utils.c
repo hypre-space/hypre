@@ -661,12 +661,17 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
                         [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
 
+      // TODO: ABB: The below code has issues because of name mangling issues,
+      //       similar to https://github.com/oneapi-src/oneDPL/pull/166
       /* std::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
       /*                                                                 map2, */
       /*                                                                 map2 + ny, */
       /*                                                                 y, */
       /*                                                                 reduced_map, */
       /*                                                                 reduced_y ); */
+
+      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
+        oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 
@@ -678,9 +683,9 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
                                                                          reduced_y );
 #endif
 
-      /* reduced_n = new_end.first - reduced_map; */
+      reduced_n = new_end.first - reduced_map;
 
-      /* hypre_assert(reduced_n == new_end.second - reduced_y); */
+      hypre_assert(reduced_n == new_end.second - reduced_y);
 
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
@@ -1238,10 +1243,6 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 }
 
 #if defined(HYPRE_USING_ONEMKLRNG)
-/* Note: generates a uniform continouos random number between 0.0 and 1.0
- *       (0.0 included, 1.0 excluded)
- */
-
 /* T = float or hypre_double */
 template <typename T>
 HYPRE_Int
@@ -1252,39 +1253,16 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   static_assert(std::is_same_v<T, float> || std::is_same_v<Type, hypre_double>,
+   static_assert(std::is_same_v<T, float> || std::is_same_v<T, hypre_double>,
 		 "oneMKL: rng/uniform: T is not supported");
 
-   if (data->curand_generator)
-   {
-      return data->curand_generator;
-   }
-
-   sycl::queue* q = hypre_DeviceDataComputeStream(data);
-
-   using rng_engine = oneapi::mkl::rng::device::philox4x32x10<>;
-   using rng_descr  = oneapi::mkl::rng::device::engine_descriptor<rng_engine>;
-   rng_descr* onemkl_rng_descr = nullptr;
-   rng_engine* gen;
-
-   if (set_seed && set_offset) {
-      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), seed, offset);
-   }
-   else if (!set_seed && set_offset) {
-      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), 1234ULL, offset);
-   }
-   else if (set_seed && !set_offset) {
-      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), seed, 1);
-   }
-   else {
-      onemkl_engine_descr = new rng_descr(*q, sycl::range<1>(n), 1234ULL, 1);
-   }
-
-   data->curand_generator = gen;
-
-   HYPRE_ONEMKL_CALL( oneapi::mkl::rng::device::uniform<T, oneapi::mkl::rng::uniform_method::accurate> distr(0.0, 1.0) );
-
-   HYPRE_ONEMKL_CALL( oneapi::mkl::rng::device::generate(distr, *gen, n, urand).wait() );
+   hypre_HandleComputeStream(hypre_handle())->parallel_for(
+     sycl::range<1>(n), [=](sycl::item<1> idx) {
+       std::uint64_t offset = idx.get_linear_id();
+       oneapi::dpl::default_engine engine(1234ULL, offset);
+       oneapi::dpl::uniform_real_distribution<T> distr(0., 1.);
+       urand[idx] = distr(engine);
+     }).wait();
 
    return hypre_error_flag;
 }
