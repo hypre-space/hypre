@@ -320,15 +320,17 @@ if (HYPRE_WITH_SYCL)
     set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   endif ()
 
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-DPSTL_USE_PARALLEL_POLICIES=0>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-D_GLIBCXX_USE_TBB_PAR_BACKEND=0>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-sycl-std=2020>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-only>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
-  include(HYPRE_SetupSYCLToolkit)
+#  include(HYPRE_SetupSYCLToolkit)
+#  set(CMAKE_CXX_FLAGS "-I/home/abagusetty/build/oneDPL/build_sycl/include ${CMAKE_CXX_FLAGS}")
 endif (HYPRE_WITH_SYCL)
 
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
@@ -425,12 +427,27 @@ if (HYPRE_USING_CUDA)
 endif ()
 
 if (HYPRE_USING_SYCL)
-  target_include_directories(${PROJECT_NAME} PUBLIC "$ENV{MKLROOT}/include/oneapi")
-  target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_SYCL_LIBS}" sycl)
+  if (HYPRE_ENABLE_ONEMKLSPARSE)
+    set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
+  endif ()
+  if (HYPRE_ENABLE_ONEMKLRNG)
+    set(HYPRE_USING_ONEMKLRNG ON CACHE BOOL "" FORCE)
+  endif ()
+  if (HYPRE_ENABLE_ONEMKLBLAS)
+    set(HYPRE_USING_ONEMKLBLAS ON CACHE BOOL "" FORCE)
+  endif ()
+
+  if ((HYPRE_ENABLE_ONEMKLSPARSE) OR (HYPRE_ENABLE_ONEMKLRNG) OR (HYPRE_ENABLE_ONEMKLBLAS))
+    find_package(MKL CONFIG REQUIRED HINTS "$ENV{MKLROOT}/lib/cmake/mkl")
+    # target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_COMPILE_OPTIONS>)
+    # target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_INCLUDE_DIRECTORIES>)
+    # target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL_DPCPP>)
+  endif ()
+
   if (HYPRE_HAVE_MPI)
     target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
   endif ()
-endif ()
+endif (HYPRE_USING_SYCL)
 
 if (HYPRE_USING_CALIPER)
   find_package(caliper REQUIRED)
@@ -462,10 +479,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if (HYPRE_USING_CUDA)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
-endif ()
-
-if (HYPRE_USING_SYCL)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
 endif ()
 
 # Set MPI compile flags

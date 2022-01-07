@@ -2817,7 +2817,7 @@ hypre_found_hip=no
 hypre_using_sycl=no
 hypre_using_onemklsparse=no
 hypre_using_onemklblas=no
-hypre_using_onemklrand=no
+hypre_using_onemklrng=yes
 
 
 hypre_blas_lib_old_style=no
@@ -9138,26 +9138,18 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
 
-	     LINK_CC=${CUCC}
+        LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        if test "$hypre_user_chose_cuflags" = "no"
-        then
-           CUFLAGS="-D_GLIBCXX_USE_TBB_PAR_BACKEND=0 -fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
-           if test "$hypre_using_debug" = "yes"
-           then
-              CUFLAGS="-O0 -Wall -g ${CUFLAGS}"
-           else
-              CUFLAGS="-g -O3 ${CUFLAGS}"
-           fi
-        fi
-
-
-                                if test x"$hypre_using_debug" == x"yes"; then :
-  SYCLFLAGS="-O0 -Wall -g ${SYCLFLAGS}"
-elif SYCLFLAGS="-O2 ${SYCLFLAGS}"; then :
-
-fi
+        SYCLFLAGS="-D_GLIBCXX_USE_TBB_PAR_BACKEND=0 -std=c++17 -sycl-std=2020 -fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+	if test "$hypre_using_debug" = "yes"
+	then
+	   SYCLFLAGS="-O0 -Wall -g -fno-sycl-early-optimizations ${SYCLFLAGS}"
+	else
+	   SYCLFLAGS="-g -O2 ${SYCLFLAGS}"
+	fi
+	CXXFLAGS="$SYCLFLAGS $CXXFLAGS"
+        CUFLAGS="$SYCLFLAGS"
 
         if test x"$hypre_using_onemklsparse" == x"yes"; then :
 
@@ -9177,13 +9169,9 @@ $as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
 
 fi
 
-        if test x"$hypre_using_onemklrand" == x"yes"; then :
+        if test x"$hypre_using_onemklrng" == x"yes"; then :
 
 $as_echo "#define HYPRE_USING_ONEMKLRNG 1" >>confdefs.h
-
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng/device.hpp"
-
 fi
 
 
