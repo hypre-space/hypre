@@ -1416,10 +1416,10 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataComputeStreamNum(data)  = 0;
 
    /* SpGeMM */
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-   hypre_DeviceDataSpgemmUseCusparse(data) = 1;
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_DeviceDataSpgemmUseVendor(data) = 1;
 #else
-   hypre_DeviceDataSpgemmUseCusparse(data) = 0;
+   hypre_DeviceDataSpgemmUseVendor(data) = 0;
 #endif
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;

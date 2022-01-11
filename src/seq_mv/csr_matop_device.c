@@ -184,6 +184,10 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
    return C;
 }
 
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
@@ -219,6 +223,10 @@ hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A,
 
    return ABC;
 }
+
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,

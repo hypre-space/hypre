@@ -19,7 +19,7 @@ HYPRE_Int
 hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse )
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = use_cusparse;
+   hypre_HandleSpgemmUseVendor(hypre_handle()) = use_cusparse;
 #endif
    return hypre_error_flag;
 }

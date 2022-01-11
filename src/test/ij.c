@@ -284,7 +284,7 @@ main( hypre_int argc,
    mod_rap2      = 1;
    HYPRE_Int spgemm_use_cusparse = 0;
    HYPRE_Int use_curand = 1;
-#if defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    spgemm_use_cusparse = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;

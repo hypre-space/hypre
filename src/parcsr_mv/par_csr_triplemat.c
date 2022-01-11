@@ -164,7 +164,10 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
    }
    else
    {
-      C_diag = hypre_CSRMatrixMultiplyHost(A_diag, B_diag);
+      /* C_diag = hypre_CSRMatrixMultiplyHost(A_diag, B_diag); */
+      /* WM: debug - try just this part on the device */
+      hypre_printf("WM: debug - calling hypre_CSRMatrixMultiplyDevice()\n");
+      C_diag = hypre_CSRMatrixMultiplyDevice(A_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_rows_diag_A, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
    }

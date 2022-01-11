@@ -11,7 +11,7 @@
 
 //#define HYPRE_SPGEMM_TIMING
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 HYPRE_Int
 hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
@@ -59,7 +59,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #endif
 
    /* use CUSPARSE or rocSPARSE*/
-   if (hypre_HandleSpgemmUseCusparse(hypre_handle()))
+   if (hypre_HandleSpgemmUseVendor(hypre_handle()))
    {
 #if defined(HYPRE_USING_CUSPARSE)
       hypreDevice_CSRSpGemmCusparse(m, k, n,
@@ -71,6 +71,11 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(A), nnza, d_ia, d_ja, d_a,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+      hypreDevice_CSRSpGemmOnemklsparse(m, k, n,
+                                        hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a,
+                                        hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b,
+                                        hypre_CSRMatrixGPUMatHandle(C), &nnzC, &d_ic, &d_jc, &d_c);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
@@ -78,6 +83,8 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
    else
    {
+      /* WM: todo - sycl implementation when not using oneMKL sparse */
+#if !defined(HYPRE_USING_SYCL)
       HYPRE_Int *d_rc = NULL;
 
       if (hypre_HandleSpgemmAlgorithm(hypre_handle()) == 1)
@@ -176,6 +183,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
 
       hypre_TFree(d_rc, HYPRE_MEMORY_DEVICE);
+#endif /* !defined(HYPRE_USING_SYCL) */
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
@@ -196,5 +204,5 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 

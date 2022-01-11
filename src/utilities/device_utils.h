@@ -264,7 +264,7 @@ struct hypre_DeviceData
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
    /* device spgemm options */
-   HYPRE_Int                         spgemm_use_cusparse;
+   HYPRE_Int                         spgemm_use_vendor;
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
@@ -288,7 +288,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataStructCommSendBuffer(data)           ((data) -> struct_comm_send_buffer)
 #define hypre_DeviceDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_DeviceDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
-#define hypre_DeviceDataSpgemmUseCusparse(data)              ((data) -> spgemm_use_cusparse)
+#define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
