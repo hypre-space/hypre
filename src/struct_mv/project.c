@@ -42,14 +42,22 @@ hypre_ProjectBox( hypre_Box    *box,
       hu = hypre_BoxIMaxD(box, d) - i;
 
       if ( hl <= 0 )
+      {
          kl = (HYPRE_Int) (hl / s);
+      }
       else
-         kl = (HYPRE_Int) ((hl + (s-1)) / s);
+      {
+         kl = (HYPRE_Int) ((hl + (s - 1)) / s);
+      }
 
       if ( hu >= 0 )
+      {
          ku = (HYPRE_Int) (hu / s);
+      }
       else
-         ku = (HYPRE_Int) ((hu - (s-1)) / s);
+      {
+         ku = (HYPRE_Int) ((hu - (s - 1)) / s);
+      }
 
       hypre_BoxIMinD(box, d) = i + kl * s;
       hypre_BoxIMaxD(box, d) = i + ku * s;

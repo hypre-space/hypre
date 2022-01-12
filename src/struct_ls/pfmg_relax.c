@@ -42,7 +42,7 @@ hypre_PFMGRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_PFMGRelaxDestroy( void *pfmg_relax_vdata )
 {
-	hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
+   hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
 
    if (pfmg_relax_data)
    {
@@ -65,9 +65,9 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
 {
    hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
    HYPRE_Int    relax_type = (pfmg_relax_data -> relax_type);
-   HYPRE_Int    constant_coefficient= hypre_StructMatrixConstantCoefficient(A);
+   HYPRE_Int    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 0:
       case 1:
@@ -77,14 +77,14 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
       case 3:
          if (constant_coefficient)
          {
-            hypre_RedBlackConstantCoefGS((pfmg_relax_data -> rb_relax_data), 
+            hypre_RedBlackConstantCoefGS((pfmg_relax_data -> rb_relax_data),
                                          A, b, x);
          }
          else
          {
             hypre_RedBlackGS((pfmg_relax_data -> rb_relax_data), A, b, x);
          }
-          
+
          break;
    }
 
@@ -102,9 +102,9 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
 {
    hypre_PFMGRelaxData *pfmg_relax_data  = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
    HYPRE_Int            relax_type       = (pfmg_relax_data -> relax_type);
-   HYPRE_Real           jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
+   HYPRE_Real           jacobi_weight    = (pfmg_relax_data -> jacobi_weight);
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 0:
       case 1:
@@ -116,11 +116,11 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
          break;
    }
 
-   if (relax_type==1)
+   if (relax_type == 1)
    {
       hypre_PointRelaxSetWeight(pfmg_relax_data -> relax_data, jacobi_weight);
    }
-   
+
    return hypre_error_flag;
 }
 
@@ -136,7 +136,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 
    (pfmg_relax_data -> relax_type) = relax_type;
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 0: /* Jacobi */
       {
@@ -165,7 +165,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 
 HYPRE_Int
 hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
-                               HYPRE_Real weight) 
+                               HYPRE_Real weight)
 {
    hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
 
@@ -183,7 +183,7 @@ hypre_PFMGRelaxSetPreRelax( void  *pfmg_relax_vdata )
    hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
    HYPRE_Int            relax_type = (pfmg_relax_data -> relax_type);
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */
@@ -210,7 +210,7 @@ hypre_PFMGRelaxSetPostRelax( void  *pfmg_relax_vdata )
    hypre_PFMGRelaxData *pfmg_relax_data = (hypre_PFMGRelaxData *)pfmg_relax_vdata;
    HYPRE_Int            relax_type = (pfmg_relax_data -> relax_type);
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */

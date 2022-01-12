@@ -10,14 +10,31 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i, HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i);
+__global__ void hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *S_diag_i,
+                                                      HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker,
+                                                      HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd,
+                                                      HYPRE_Int *P_diag_i, HYPRE_Int *P_offd_i);
 
-__global__ void hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
+__global__ void hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i,
+                                                       HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
+                                                       HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker,
+                                                       HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd,
+                                                       HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i,
+                                                       HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
-__global__ void hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
+__global__ void hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i,
+                                                          HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
+                                                          HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker,
+                                                          HYPRE_Int *CF_marker_offd, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd,
+                                                          HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i,
+                                                          HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
 __global__ void
-hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i, HYPRE_Int *A_strong_diag_j, HYPRE_Complex *A_diag_a, HYPRE_Int *A_offd_i, HYPRE_Int *A_strong_offd_j, HYPRE_Complex *A_offd_a, HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int *diag_compress_marker, HYPRE_Int *offd_compress_marker, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j);
+hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int nr_of_rows, HYPRE_Int *A_diag_i,
+                                         HYPRE_Int *A_strong_diag_j, HYPRE_Complex *A_diag_a, HYPRE_Int *A_offd_i,
+                                         HYPRE_Int *A_strong_offd_j, HYPRE_Complex *A_offd_a, HYPRE_Int *CF_marker,
+                                         HYPRE_Int *CF_marker_offd, HYPRE_Int *diag_compress_marker, HYPRE_Int *offd_compress_marker,
+                                         HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j);
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildDirInterp
@@ -100,13 +117,13 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
-   if (my_id == (num_procs -1))
+   if (my_id == (num_procs - 1))
    {
       total_global_cpts = num_cpts_global[1];
    }
-   hypre_MPI_Bcast( &total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   hypre_MPI_Bcast( &total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {
@@ -125,11 +142,13 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+   int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                               HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                            num_sends),
                       CF_marker,
                       int_buf_data );
 
@@ -149,9 +168,9 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
          {
-            int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
          }
       }
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_HOST, int_buf_data,
@@ -172,11 +191,11 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    /* 3. Figure out the size of the interpolation matrix, P, i.e., compute P_diag_i and P_offd_i */
    /*    Also, compute fine_to_coarse array: When i is a coarse point, fine_to_coarse[i] will hold a  */
    /*    corresponding coarse point index in the range 0..n_coarse-1 */
-   P_diag_i = hypre_TAlloc(HYPRE_Int, n_fine+1, memory_location);
-   P_offd_i = hypre_TAlloc(HYPRE_Int, n_fine+1, memory_location);
+   P_diag_i = hypre_TAlloc(HYPRE_Int, n_fine + 1, memory_location);
+   P_offd_i = hypre_TAlloc(HYPRE_Int, n_fine + 1, memory_location);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
                       n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
@@ -184,8 +203,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                       dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
 
    /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_diag_i);
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_offd_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
 
    fine_to_coarse_d = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    /* The scan will make fine_to_coarse[i] for i a coarse point hold a
@@ -291,7 +310,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
       /* First,  set P_marker[i] to 1 if A's column i is also present in P, otherwise P_marker[i] is 0 */
       HYPRE_Int *P_marker = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *P_colids = hypre_TAlloc(HYPRE_Int, hypre_max(P_offd_size, num_cols_A_offd), HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *P_colids = hypre_TAlloc(HYPRE_Int, hypre_max(P_offd_size, num_cols_A_offd),
+                                         HYPRE_MEMORY_DEVICE);
 
       hypre_TMemcpy(P_colids, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, memory_location);
       /* sort and unique */
@@ -325,7 +345,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       hypre_assert(new_end - P_colids == num_cols_P_offd);
 
       tmp_map_offd_h = hypre_TAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(tmp_map_offd_h, P_colids, HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(tmp_map_offd_h, P_colids, HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST,
+                    HYPRE_MEMORY_DEVICE);
 
       hypre_TFree(P_colids, HYPRE_MEMORY_DEVICE);
       hypre_TFree(P_marker, HYPRE_MEMORY_DEVICE);
@@ -337,7 +358,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    /*    comm_pkg in P, and perhaps more members of P ??? */
 
    fine_to_coarse_h = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(fine_to_coarse_h, fine_to_coarse_d, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(fine_to_coarse_h, fine_to_coarse_d, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
 
    hypre_ParCSRMatrixColMapOffd(P) = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixNumCols(P_offd)  = num_cols_P_offd;
@@ -359,7 +381,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
 
 /*-----------------------------------------------------------------------*/
- __global__ void
+__global__ void
 hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
                                       HYPRE_Int *S_diag_i,
                                       HYPRE_Int *S_diag_j,
@@ -397,7 +419,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -453,7 +475,8 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
       if (j < q)
       {
          const HYPRE_Int col = read_only_load(&S_diag_j[j]);
-         if ( read_only_load(&CF_marker[col]) > 0 && (num_functions == 1 || read_only_load(&dof_func[col]) == dof_func_i) )
+         if ( read_only_load(&CF_marker[col]) > 0 && (num_functions == 1 ||
+                                                      read_only_load(&dof_func[col]) == dof_func_i) )
          {
             jPd++;
          }
@@ -475,7 +498,8 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
       {
          const HYPRE_Int tmp = read_only_load(&S_offd_j[j]);
          const HYPRE_Int col = tmp;
-         if ( read_only_load(&CF_marker_offd[col]) > 0 && (num_functions == 1 || read_only_load(&dof_func_offd[col]) == dof_func_i) )
+         if ( read_only_load(&CF_marker_offd[col]) > 0 && (num_functions == 1 ||
+                                                           read_only_load(&dof_func_offd[col]) == dof_func_i) )
          {
             jPo++;
          }
@@ -492,7 +516,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( HYPRE_Int  nr_of_rows,
 
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
- __global__ void
+__global__ void
 hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
                                        HYPRE_Int  *A_diag_i,
                                        HYPRE_Int  *A_diag_j,
@@ -537,7 +561,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
    */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -596,7 +620,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
    p_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 0);
 
    k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A);
+        j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -664,7 +689,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
    p_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 0);
 
    k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A);
+        j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -733,7 +759,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
       beta = sum_N_pos / (sum_P_pos * diagonal);
    }
 
-   for (HYPRE_Int j = p_diag_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_P); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_P);
+        j += HYPRE_WARP_SIZE)
    {
       /* if (P_diag_data[j] > 0.0)
             P_diag_data[j] *= -beta;
@@ -741,11 +768,12 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
             P_diag_data[j] *= -alfa; */
       if (j < q_diag_P)
       {
-         P_diag_data[j] *= (P_diag_data[j] > 0.0) * (alfa-beta) - alfa;
+         P_diag_data[j] *= (P_diag_data[j] > 0.0) * (alfa - beta) - alfa;
       }
    }
 
-   for (HYPRE_Int j = p_offd_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_P); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_P);
+        j += HYPRE_WARP_SIZE)
    {
       /* if (P_offd_data[indp]> 0)
             P_offd_data[indp] *= -beta;
@@ -753,14 +781,14 @@ hypre_BoomerAMGBuildDirInterp_getcoef( HYPRE_Int   nr_of_rows,
             P_offd_data[indp] *= -alfa; */
       if (j < q_offd_P)
       {
-         P_offd_data[j] *= (P_offd_data[j] > 0.0) * (alfa-beta) - alfa;
+         P_offd_data[j] *= (P_offd_data[j] > 0.0) * (alfa - beta) - alfa;
       }
    }
 }
 
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
- __global__ void
+__global__ void
 hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
                                           HYPRE_Int  *A_diag_i,
                                           HYPRE_Int  *A_diag_j,
@@ -805,7 +833,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
    */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {
@@ -864,7 +892,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
    p_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 0);
 
    k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A);
+        j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -924,7 +953,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
    p_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 0);
 
    k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A);
+        j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
       HYPRE_Int is_SC = 0; /* if is a Strong-C */
@@ -972,7 +1002,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
 
    HYPRE_Complex beta = sum_F / (q_diag_P - p_diag_P + q_offd_P - p_offd_P);
 
-   for (HYPRE_Int j = p_diag_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_P); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_P);
+        j += HYPRE_WARP_SIZE)
    {
       /* if (P_diag_data[j] > 0.0)
             P_diag_data[j] *= -beta;
@@ -984,7 +1015,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( HYPRE_Int   nr_of_rows,
       }
    }
 
-   for (HYPRE_Int j = p_offd_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_P); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_P);
+        j += HYPRE_WARP_SIZE)
    {
       /* if (P_offd_data[indp]> 0)
             P_offd_data[indp] *= -beta;
@@ -1063,11 +1095,11 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *offd_compress_marker;
 
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    my_first_cpt = num_cpts_global[0];
-   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /* fine to coarse mapping */
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1094,7 +1126,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    /* send buffer, of size send_map_starts[num_sends]),
     * i.e., number of entries to send */
-   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_DEVICE);
 
    /* copy CF markers of elements to send to buffer */
    HYPRE_THRUST_CALL( gather,
@@ -1104,7 +1137,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       CF_marker,
                       int_buf_data );
    /* create a handle to start communication. 11: for integer */
-   comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data, HYPRE_MEMORY_DEVICE, CF_marker_offd);
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
+                                                 HYPRE_MEMORY_DEVICE, CF_marker_offd);
    /* destroy the handle to finish communication */
    hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(int_buf_data, HYPRE_MEMORY_DEVICE);
@@ -1114,8 +1148,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
     *  and find the most strongly influencing C-pt for each F-pt
     *-----------------------------------------------------------------------*/
 
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
 
    diag_compress_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    offd_compress_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
@@ -1124,8 +1158,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    P_diag_j_temp = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
    P_offd_j_temp = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
                       n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,
@@ -1135,8 +1169,9 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Send and receive fine_to_coarse info.
     *-----------------------------------------------------------------------*/
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd,HYPRE_MEMORY_DEVICE);
-   big_int_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends), HYPRE_MEMORY_DEVICE);
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
+   big_int_buf_data = hypre_CTAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                    HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
@@ -1149,7 +1184,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_constant_iterator(my_first_cpt),
                       big_int_buf_data,
                       thrust::plus<HYPRE_BigInt>() );
-   comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_int_buf_data, HYPRE_MEMORY_DEVICE, fine_to_coarse_offd);
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_int_buf_data,
+                                                 HYPRE_MEMORY_DEVICE, fine_to_coarse_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
    hypre_TFree(big_int_buf_data, HYPRE_MEMORY_DEVICE);
 
@@ -1158,8 +1194,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    /* scan P_diag_i (which has number of nonzeros in each row) to get row indices */
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_diag_i);
-   hypreDevice_IntegerExclusiveScan(n_fine+1, P_offd_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
+   hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
 
    /* get the number of nonzeros and allocate column index and data arrays */
    hypre_TMemcpy(&nnz_diag, &P_diag_i[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
@@ -1258,7 +1294,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       offd_map_P_to_A + num_cols_P_offd,
                       fine_to_coarse_offd,
                       col_map_offd_P_device);
-   hypre_TMemcpy(col_map_offd_P, col_map_offd_P_device, HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(col_map_offd_P, col_map_offd_P_device, HYPRE_BigInt, num_cols_P_offd,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(offd_map_P_to_A, HYPRE_MEMORY_DEVICE);
    hypre_TFree(col_map_offd_P_device, HYPRE_MEMORY_DEVICE);
 
@@ -1339,7 +1376,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( HYPRE_Int      nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (i >= nr_of_rows)
    {

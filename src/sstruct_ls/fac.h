@@ -20,7 +20,7 @@
 typedef struct
 {
    MPI_Comm               comm;
-  
+
    HYPRE_Int             *plevels;
    hypre_Index           *prefinements;
 

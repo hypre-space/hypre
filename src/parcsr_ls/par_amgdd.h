@@ -30,7 +30,8 @@ typedef struct
    hypre_AMGDDCommPkg       *amgdd_comm_pkg;
    hypre_ParVector          *Ztemp;
 
-   HYPRE_Int       (*amgddUserFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param );
+   HYPRE_Int       (*amgddUserFACRelaxation)( void *amgdd_vdata, HYPRE_Int level,
+                                              HYPRE_Int cycle_param );
 } hypre_ParAMGDDData;
 
 /*--------------------------------------------------------------------------

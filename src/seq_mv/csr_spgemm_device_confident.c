@@ -27,8 +27,8 @@ template <char HashType, HYPRE_Int FAILED_SYMBL>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_numer( HYPRE_Int      HashSize,      /* capacity of the hash table */
-                       volatile HYPRE_Int     *HashKeys,      /* assumed to be initialized as all -1's */
-                       volatile HYPRE_Complex *HashVals,      /* assumed to be initialized as all 0's */
+                                volatile HYPRE_Int     *HashKeys,      /* assumed to be initialized as all -1's */
+                                volatile HYPRE_Complex *HashVals,      /* assumed to be initialized as all 0's */
                                 HYPRE_Int      key,           /* assumed to be nonnegative */
                                 HYPRE_Complex  val,
                                 HYPRE_Int     &count )
@@ -49,7 +49,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int      HashSize,      /* capacity of the
       }
 
       /* try to insert key+1 into slot j */
-      HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys+j), -1, key);
+      HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 
       if (old == -1 || old == key)
       {
@@ -61,7 +61,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int      HashSize,      /* capacity of the
             }
          }
          /* this slot was open or contained 'key', update value */
-         atomicAdd((HYPRE_Complex*)(HashVals+j), val);
+         atomicAdd((HYPRE_Complex*)(HashVals + j), val);
          return j;
       }
    }
@@ -81,8 +81,8 @@ hypre_spgemm_compute_row_numer( HYPRE_Int      rowi,
                                 HYPRE_Int     *jb,
                                 HYPRE_Complex *ab,
                                 HYPRE_Int      s_HashSize,
-                       volatile HYPRE_Int     *s_HashKeys,
-                       volatile HYPRE_Complex *s_HashVals,
+                                volatile HYPRE_Int     *s_HashKeys,
+                                volatile HYPRE_Complex *s_HashVals,
                                 HYPRE_Int      g_HashSize,
                                 HYPRE_Int     *g_HashKeys,
                                 HYPRE_Complex *g_HashVals)
@@ -125,12 +125,13 @@ hypre_spgemm_compute_row_numer( HYPRE_Int      rowi,
       HYPRE_Int tmp = 0;
       if (rowB != -1 && threadIdx.x < 2)
       {
-         tmp = read_only_load(ib+rowB+threadIdx.x);
+         tmp = read_only_load(ib + rowB + threadIdx.x);
       }
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
       const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
 
-      for (HYPRE_Int k = rowB_start + threadIdx.x; __any_sync(HYPRE_WARP_FULL_MASK, k < rowB_end); k += blockDim.x)
+      for (HYPRE_Int k = rowB_start + threadIdx.x; __any_sync(HYPRE_WARP_FULL_MASK, k < rowB_end);
+           k += blockDim.x)
       {
          if (k < rowB_end)
          {
@@ -138,7 +139,7 @@ hypre_spgemm_compute_row_numer( HYPRE_Int      rowi,
             const HYPRE_Complex k_val = read_only_load(ab + k) * mult;
             /* first try to insert into shared memory hash table */
             HYPRE_Int pos = hypre_spgemm_hash_insert_numer<HashType, FAILED_SYMBL>
-               (s_HashSize, s_HashKeys, s_HashVals, k_idx, k_val, num_new_insert);
+                            (s_HashSize, s_HashKeys, s_HashVals, k_idx, k_val, num_new_insert);
 
             if (-1 == pos)
             {
@@ -158,8 +159,8 @@ template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int      lane_id,
-                               volatile HYPRE_Int     *s_HashKeys,
-                               volatile HYPRE_Complex *s_HashVals,
+                                        volatile HYPRE_Int     *s_HashKeys,
+                                        volatile HYPRE_Complex *s_HashVals,
                                         HYPRE_Int      ghash_size,
                                         HYPRE_Int     *jg_start,
                                         HYPRE_Complex *ag_start,
@@ -237,7 +238,8 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 #else
    extern __shared__ volatile HYPRE_Int shared_mem[];
    volatile HYPRE_Int *s_HashKeys = shared_mem;
-   volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_WARPS_PER_BLOCK * SHMEM_HASH_SIZE];
+   volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_WARPS_PER_BLOCK *
+                                                                                                   SHMEM_HASH_SIZE];
 #endif
    /* shared memory hash table for this warp */
    volatile HYPRE_Int     *warp_s_HashKeys = s_HashKeys + warp_id * SHMEM_HASH_SIZE;
@@ -269,8 +271,8 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 #pragma unroll
          for (HYPRE_Int k = lane_id; k < ghash_size; k += HYPRE_WARP_SIZE)
          {
-            jg[istart_g+k] = -1;
-            ag[istart_g+k] = 0.0;
+            jg[istart_g + k] = -1;
+            ag[istart_g + k] = 0.0;
          }
       }
 
@@ -319,8 +321,8 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 #endif
 
       j = hypre_spgemm_copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
-         (lane_id, warp_s_HashKeys, warp_s_HashVals, ghash_size, jg + istart_g,
-          ag + istart_g, jc + istart_c, ac + istart_c);
+          (lane_id, warp_s_HashKeys, warp_s_HashVals, ghash_size, jg + istart_g,
+           ag + istart_g, jc + istart_c, ac + istart_c);
 
 #if defined(HYPRE_DEBUG)
       if (FAILED_SYMBL)
@@ -354,8 +356,8 @@ hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
    for (HYPRE_Int i = blockIdx.x * NUM_WARPS_PER_BLOCK + warp_id;
-                  i < M;
-                  i += num_warps)
+        i < M;
+        i += num_warps)
    {
       HYPRE_Int kc = 0, kx = 0;
 
@@ -376,8 +378,8 @@ hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
       HYPRE_Int p = istart_x - istart_c;
       for (HYPRE_Int k = istart_c + lane_id; k < iend_c; k += HYPRE_WARP_SIZE)
       {
-         jc[k] = jx[k+p];
-         ac[k] = ax[k+p];
+         jc[k] = jx[k + p];
+         ac[k] = ax[k + p];
       }
    }
 }
@@ -414,18 +416,22 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
 #if 0
-   const size_t    shmem_size          = num_warps_per_block * shmem_hash_size * (sizeof(HYPRE_Complex) + sizeof(HYPRE_Int));
+   const size_t    shmem_size          = num_warps_per_block * shmem_hash_size * (sizeof(
+                                                                                     HYPRE_Complex) + sizeof(HYPRE_Int));
    const HYPRE_Int shmem_maxbytes      = 65536;
    hypre_assert(shmem_size <= shmem_maxbytes);
    /* CUDA V100 */
    hypre_int v1, v2;
-   cudaDeviceGetAttribute(&v1, cudaDevAttrMaxSharedMemoryPerBlock,      hypre_HandleCudaDevice(hypre_handle()));
-   cudaDeviceGetAttribute(&v2, cudaDevAttrMaxSharedMemoryPerBlockOptin, hypre_HandleCudaDevice(hypre_handle()));
+   cudaDeviceGetAttribute(&v1, cudaDevAttrMaxSharedMemoryPerBlock,
+                          hypre_HandleDevice(hypre_handle()));
+   cudaDeviceGetAttribute(&v2, cudaDevAttrMaxSharedMemoryPerBlockOptin,
+                          hypre_HandleDevice(hypre_handle()));
 
    if (shmem_maxbytes > 49152)
    {
-      HYPRE_CUDA_CALL( cudaFuncSetAttribute(hypre_spgemm_numeric<num_warps_per_block, shmem_hash_size, !exact_rownnz, hash_type>,
-                       cudaFuncAttributeMaxDynamicSharedMemorySize, shmem_maxbytes) );
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(hypre_spgemm_numeric < num_warps_per_block, shmem_hash_size,
+                                            !exact_rownnz, hash_type >,
+                                            cudaFuncAttributeMaxDynamicSharedMemorySize, shmem_maxbytes) );
    }
 #endif
 
@@ -461,10 +467,11 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
 
    hypre_create_ija(m, d_rc, d_ic, &d_jc, &d_c, &nnzC_nume);
 
-   HYPRE_CUDA_LAUNCH ( (hypre_spgemm_numeric<num_warps_per_block, shmem_hash_size, !exact_rownnz, hash_type>),
-                        gDim, bDim, /* shmem_size, */
-                        m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
-                        d_ghash_i, d_ghash_j, d_ghash_a );
+   HYPRE_CUDA_LAUNCH ( (hypre_spgemm_numeric < num_warps_per_block, shmem_hash_size, !exact_rownnz,
+                        hash_type > ),
+                       gDim, bDim, /* shmem_size, */
+                       m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
+                       d_ghash_i, d_ghash_j, d_ghash_a );
 
    /* post-processing */
    if (!exact_rownnz)
@@ -551,17 +558,17 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
       if (hash_type == 'L')
       {
          hypre_spgemm_numerical_with_rownnz<shmem_hash_size, 1, 'L'>
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
       else if (hash_type == 'Q')
       {
          hypre_spgemm_numerical_with_rownnz<shmem_hash_size, 1, 'Q'>
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
       else if (hash_type == 'D')
       {
          hypre_spgemm_numerical_with_rownnz<shmem_hash_size, 1, 'D'>
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
    }
    else
@@ -569,17 +576,17 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
       if (hash_type == 'L')
       {
          hypre_spgemm_numerical_with_rownnz<shmem_hash_size, 0, 'L'>
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
       else if (hash_type == 'Q')
       {
          hypre_spgemm_numerical_with_rownnz<shmem_hash_size, 0, 'Q'>
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
       else if (hash_type == 'D')
       {
          hypre_spgemm_numerical_with_rownnz<shmem_hash_size, 0, 'D'>
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic_out, d_jc_out, d_c_out, nnzC);
       }
    }
 
