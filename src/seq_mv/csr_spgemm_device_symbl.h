@@ -290,7 +290,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
    }
 }
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
+template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int
 hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
                               HYPRE_Int *row_ind, /* input: row indices (length of m) */
@@ -305,23 +305,19 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
                               bool       can_fail,
                               char      *d_rf  /* output: if symbolic mult. failed for each row  */ )
 {
+   const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
 #if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int num_groups_per_block  = hypre_min(16 * HYPRE_WARP_SIZE / GROUP_SIZE, 64);
-   const HYPRE_Int BDIMX                 = 2;
+   const HYPRE_Int BDIMX                = 2;
 #elif defined(HYPRE_USING_HIP)
-   const HYPRE_Int num_groups_per_block  = hypre_min(16 * HYPRE_WARP_SIZE / GROUP_SIZE, 64);
-   const HYPRE_Int BDIMX                 = 4;
+   const HYPRE_Int BDIMX                = 4;
 #endif
-   const HYPRE_Int num_threads_per_block = num_groups_per_block * GROUP_SIZE;
-   const HYPRE_Int BDIMY                 = GROUP_SIZE / BDIMX;
+   const HYPRE_Int BDIMY                = GROUP_SIZE / BDIMX;
 
    /* CUDA kernel configurations: bDim.z is the number of groups in block */
    dim3 bDim(BDIMX, BDIMY, num_groups_per_block);
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
-   // total number of threads used: a group works on a row
-   HYPRE_Int num_threads = hypre_min((size_t) m * GROUP_SIZE, HYPRE_MAX_NUM_WARPS * HYPRE_WARP_SIZE);
    // grid dimension (number of blocks)
-   dim3 gDim( (num_threads + num_threads_per_block - 1) / num_threads_per_block );
+   dim3 gDim( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[0][BIN] );
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
@@ -346,11 +342,11 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    }
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf0("%s[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, need_ghash %d, ghash %p size %d\n",
-           __func__, __LINE__, m, k, n,
+   printf0("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
+           "need_ghash %d, ghash %p size %d\n",
+           __func__, __LINE__, BIN, m, k, n,
            hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, need_ghash, d_ghash_i, ghash_size);
-   printf0("%s[%d]: kernel spec [%d %d %d] x [%d %d %d]\n", __func__, __LINE__, gDim.x, gDim.y, gDim.z,
-           bDim.x, bDim.y, bDim.z);
+   printf0("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
 #endif
 
    /* ---------------------------------------------------------------------------
@@ -394,6 +390,26 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
+                                                HYPRE_Int *num_blocks_ptr )
+{
+   const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
+   const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
+   const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * sizeof(HYPRE_Int);
+   hypre_int numBlocksPerSm = 0;
+   hypre_int dynamic_shmem_size = GROUP_SIZE < 1024 ? 0 : shmem_bytes;
+
+   cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+         &numBlocksPerSm,
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, 'D', true>,
+         block_size, dynamic_shmem_size);
+
+   *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;
 
    return hypre_error_flag;
 }

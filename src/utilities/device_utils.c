@@ -1399,6 +1399,7 @@ hypre_DeviceDataCreate()
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
    hypre_DeviceDataSpgemmAlgorithmBinned(data)          = 0;
+   hypre_DeviceDataSpgemmAlgorithmNumBin(data)          = 0;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
    const HYPRE_Int Nsamples = 64;

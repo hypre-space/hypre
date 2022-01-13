@@ -42,6 +42,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 
    const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
    const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE;
+   const HYPRE_Int BIN = 5;
 
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0,      thrust::maximum<HYPRE_Int>());
@@ -63,7 +64,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 #endif
 
    /* even with exact rownnz, still may need global hash, since shared hash is smaller than symbol */
-   hypre_spgemm_numerical_with_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, false>
+   hypre_spgemm_numerical_with_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
    (m, NULL, k, n, true, exact_rownnz, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c);
 
    if (!exact_rownnz)
@@ -87,15 +88,15 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(b, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH)    \
+#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(BIN, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH)  \
 {                                                                                                         \
-   const HYPRE_Int p = h_bin_ptr[b - 1];                                                                  \
-   const HYPRE_Int q = h_bin_ptr[b];                                                                      \
+   const HYPRE_Int p = h_bin_ptr[BIN - 1];                                                                \
+   const HYPRE_Int q = h_bin_ptr[BIN];                                                                    \
    const HYPRE_Int bs = q - p;                                                                            \
    if (bs)                                                                                                \
    {                                                                                                      \
-      printf0("bin[%d]: %d rows\n", b, bs);                                                               \
-      hypre_spgemm_numerical_with_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, true>                               \
+      /* printf0("bin[%d]: %d rows\n", BIN, bs); */                                                       \
+      hypre_spgemm_numerical_with_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, true>                          \
          (bs, d_rc_indice + p, k, n, GHASH, EXACT_ROWNNZ, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,         \
           d_ic, d_jc, d_c);                                                                               \
       HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                                                \
@@ -148,24 +149,25 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    hypre_create_ija(m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
    HYPRE_Int *d_rc_indice = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_NBIN + 1];
-   const HYPRE_Int s = 8, t = 3, u = HYPRE_SPGEMM_NBIN;
-
-#if defined(HYPRE_DEBUG)
-   HYPRE_Int _spgemm_nrows = 0;
-#endif
+   HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
+   HYPRE_Int  num_bins = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
+   const char s = 8, t = 3, u = num_bins;
 
    /* create binning */
 #ifdef HYPRE_SPGEMM_TIMING
    t1 = hypre_MPI_Wtime();
 #endif
 
-   hypre_SpGemmCreateBins<s, t, u>(m, d_rc, false, d_rc_indice, h_bin_ptr);
+   hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rc_indice, h_bin_ptr);
 
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
    printf0("%s[%d]: Binning time %f\n", __func__, __LINE__, t2);
+#endif
+
+#if defined(HYPRE_DEBUG)
+   HYPRE_Int _spgemm_nrows = h_bin_ptr[t - 1];
 #endif
 
 #if 0

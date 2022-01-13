@@ -167,6 +167,7 @@
 #define HYPRE_FLT_LARGE       1e30
 #define HYPRE_1D_BLOCK_SIZE   512
 #define HYPRE_MAX_NUM_STREAMS 10
+#define HYPRE_SPGEMM_MAX_NBIN 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device info data structures
@@ -239,6 +240,8 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_use_cusparse;
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_algorithm_binned;
+   HYPRE_Int                         spgemm_algorithm_num_bin;
+   HYPRE_Int                         spgemm_algorithm_max_num_blocks[2][HYPRE_SPGEMM_MAX_NBIN + 1];
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
@@ -269,6 +272,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmAlgorithmBinned(data)          ((data) -> spgemm_algorithm_binned)
+#define hypre_DeviceDataSpgemmAlgorithmNumBin(data)          ((data) -> spgemm_algorithm_num_bin)
+#define hypre_DeviceDataSpgemmAlgorithmMaxNumBlocks(data)    ((data) -> spgemm_algorithm_max_num_blocks)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)

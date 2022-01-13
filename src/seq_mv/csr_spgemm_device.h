@@ -22,8 +22,6 @@
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
 #endif
 
-#define HYPRE_SPGEMM_NBIN 10
-
 #define HYPRE_SPGEMM_TIMING
 #define HYPRE_SPGEMM_PRINTF
 //#define HYPRE_SPGEMM_NVTX
@@ -310,11 +308,14 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
    return hashval;
 }
 
-template<typename T, HYPRE_Int s, HYPRE_Int t, HYPRE_Int u>
+template<typename T>
 struct spgemm_bin_op : public thrust::unary_function<T, char>
 {
+   char s, t, u; /* s: base size of bins; t: lowest bin; u: highest bin */
 
-   __device__ T operator()(const T &x)
+   spgemm_bin_op(char s_, char t_, char u_) { s = s_; t = t_; u = u_; }
+
+   __device__ char operator()(const T &x)
    {
       if (x <= 0)
       {
@@ -328,7 +329,6 @@ struct spgemm_bin_op : public thrust::unary_function<T, char>
          return t;
       }
 
-#pragma unroll
       for (char i = t; i < u - 1; i++)
       {
          if (y <= (1 << i))
@@ -380,20 +380,26 @@ HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k,
                                                        HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                                        HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
-template<HYPRE_Int s, HYPRE_Int t, HYPRE_Int u> HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int m,
-                                                                                  HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int m, char s, char t, char u, HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> HYPRE_Int
-hypre_spgemm_symbolic_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
-                              bool need_ghash, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-                              HYPRE_Int *d_rc, bool can_fail, char *d_rf );
+template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> 
+HYPRE_Int hypre_spgemm_symbolic_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
+                                        bool need_ghash, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
+                                        HYPRE_Int *d_rc, bool can_fail, char *d_rf );
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> HYPRE_Int
-hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
-                                    bool need_ghash,
-                                    HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
-                                    HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic,
-                                    HYPRE_Int *d_jc, HYPRE_Complex *d_c );
+template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
+HYPRE_Int hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
+                                              HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
+                                              HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic,
+                                              HYPRE_Int *d_jc, HYPRE_Complex *d_c );
+
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
+
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
+
+HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks();
 
 template <HYPRE_Int GROUP_SIZE> HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int m,
                                                                               HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);

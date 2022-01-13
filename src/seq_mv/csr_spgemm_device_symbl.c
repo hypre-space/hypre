@@ -31,10 +31,14 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    hypre_GpuProfilingPushRange("CSRSpGemmRownnzUpperbound");
 #endif
 
+   const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
+   const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE;
+   const HYPRE_Int BIN = 5;
+
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
-   hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
 #ifdef HYPRE_SPGEMM_NVTX
@@ -47,7 +51,6 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 
    return hypre_error_flag;
 }
-
 
 /* in_rc: 0: no input row count; 1: input row count est in d_rc; 2: input row bound in d_rc */
 HYPRE_Int
@@ -69,12 +72,16 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    hypre_GpuProfilingPushRange("CSRSpGemmRownnz");
 #endif
 
+   const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
+   const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE;
+   const HYPRE_Int BIN = 5;
+
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
 
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
-   hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)
@@ -103,7 +110,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 
          hypre_assert(new_end - rf_ind == num_failed_rows);
 
-         hypre_spgemm_symbolic_rownnz<2 * HYPRE_SPGEMM_SYMBL_HASH_SIZE, 2 * HYPRE_WARP_SIZE, true>
+         hypre_spgemm_symbolic_rownnz<BIN + 1, 2 * SHMEM_HASH_SIZE, 2 * GROUP_SIZE, true>
          (num_failed_rows, rf_ind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
 
          hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
@@ -123,15 +130,15 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-#define HYPRE_SPGEMM_ROWNNZ_BINNED(b, SHMEM_HASH_SIZE, GROUP_SIZE, GHASH, CAN_FAIL)    \
+#define HYPRE_SPGEMM_ROWNNZ_BINNED(BIN, SHMEM_HASH_SIZE, GROUP_SIZE, GHASH, CAN_FAIL)  \
 {                                                                                      \
-   const HYPRE_Int p = h_bin_ptr[b - 1];                                               \
-   const HYPRE_Int q = h_bin_ptr[b];                                                   \
+   const HYPRE_Int p = h_bin_ptr[BIN - 1];                                             \
+   const HYPRE_Int q = h_bin_ptr[BIN];                                                 \
    const HYPRE_Int bs = q - p;                                                         \
    if (bs)                                                                             \
    {                                                                                   \
-      printf0("bin[%d]: %d rows\n", b, bs);                                            \
-      hypre_spgemm_symbolic_rownnz<SHMEM_HASH_SIZE, GROUP_SIZE, true>                  \
+      /* printf0("bin[%d]: %d rows\n", BIN, bs); */                                    \
+      hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, true>             \
          (bs, d_rind + p, k, n, GHASH, d_ia, d_ja, d_ib, d_jb, d_rc, CAN_FAIL, NULL);  \
       HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                             \
    }                                                                                   \
@@ -152,8 +159,9 @@ hypre_spgemm_symbolic_binned( HYPRE_Int  m,
    HYPRE_Real t1, t2;
 #endif
 
-   HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_NBIN + 1];
-   const HYPRE_Int s = 32, t = 6, u = HYPRE_SPGEMM_NBIN;
+   HYPRE_Int h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
+   HYPRE_Int num_bins = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
+   const char s = 32, t = 6, u = num_bins;
 
 #if defined(HYPRE_DEBUG)
    HYPRE_Int _spgemm_nrows = 0;
@@ -165,7 +173,7 @@ hypre_spgemm_symbolic_binned( HYPRE_Int  m,
    t1 = hypre_MPI_Wtime();
 #endif
 
-   hypre_SpGemmCreateBins<s, t, u>(m, d_rc, true, d_rind, h_bin_ptr);
+   hypre_SpGemmCreateBins(m, s, t, u, d_rc, true, d_rind, h_bin_ptr);
 
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
@@ -218,7 +226,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
-   hypre_spgemm_symbolic_rownnz<HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
+   hypre_spgemm_symbolic_rownnz<5, HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_WARP_SIZE, false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)

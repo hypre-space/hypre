@@ -82,6 +82,11 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       const HYPRE_Int binned = hypre_HandleSpgemmAlgorithmBinned(hypre_handle());
       const HYPRE_Int row_est_mtd = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
 
+      if (hypre_HandleSpgemmAlgorithmNumBin(hypre_handle()) == 0)
+      {
+         hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks();
+      }
+
       if (alg == 1)
       {
 #ifdef HYPRE_SPGEMM_TIMING
