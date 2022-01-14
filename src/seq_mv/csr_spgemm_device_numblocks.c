@@ -8,8 +8,7 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-#include <csr_spgemm_device_symbl.h>
-#include <csr_spgemm_device_numer.h>
+#include "csr_spgemm_device.h"
 
 HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
 {
@@ -29,37 +28,40 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
    }
 
    /* symbolic */
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE,      HYPRE_WARP_SIZE>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE,      HYPRE_WARP_SIZE, false>
       (multiProcessorCount, &max_nblocks[0][5]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2, true>
       (multiProcessorCount, &max_nblocks[0][6]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4, true>
       (multiProcessorCount, &max_nblocks[0][7]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8, true>
       (multiProcessorCount, &max_nblocks[0][8]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16, true>
       (multiProcessorCount, &max_nblocks[0][9]);
 
    /* numeric */
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  4, HYPRE_WARP_SIZE /  4>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  4, HYPRE_WARP_SIZE /  4, true>
       (multiProcessorCount, &max_nblocks[1][3]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  2, HYPRE_WARP_SIZE /  2>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  2, HYPRE_WARP_SIZE /  2, true>
       (multiProcessorCount, &max_nblocks[1][4]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE,     HYPRE_WARP_SIZE>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE,      HYPRE_WARP_SIZE, true>
       (multiProcessorCount, &max_nblocks[1][5]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2, true>
       (multiProcessorCount, &max_nblocks[1][6]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4, true>
       (multiProcessorCount, &max_nblocks[1][7]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8, true>
       (multiProcessorCount, &max_nblocks[1][8]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16, true>
       (multiProcessorCount, &max_nblocks[1][9]);
 
+   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] *= 5; max_nblocks[1][i] *= 5; }
+   //for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] = max_nblocks[1][i] = 8192; }
+
 #if defined(HYPRE_SPGEMM_PRINTF)
-   printf0("Bin: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%3d ", i); } printf0("\n");
-   printf0("Sym: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%3d ", max_nblocks[0][i]); } printf0("\n");
-   printf0("Num: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%3d ", max_nblocks[1][i]); } printf0("\n");
+   printf0("Bin: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%5d ", i); } printf0("\n");
+   printf0("Sym: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%5d ", max_nblocks[0][i]); } printf0("\n");
+   printf0("Num: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%5d ", max_nblocks[1][i]); } printf0("\n");
 #endif
 
    return hypre_error_flag;

@@ -393,10 +393,10 @@ HYPRE_Int hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, H
                                               HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic,
                                               HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
 
 HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks();

@@ -27,6 +27,7 @@ hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int *HashKeys,
 {
    HYPRE_Int j = 0;
 
+#pragma unroll
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -237,6 +238,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
       /* initialize group's shared memory hash table */
       if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
       {
+#pragma unroll
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -317,7 +319,9 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    dim3 bDim(BDIMX, BDIMY, num_groups_per_block);
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
-   dim3 gDim( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[0][BIN] );
+   const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[0][BIN],
+                                           (m + bDim.z - 1) / bDim.z );
+   dim3 gDim( num_blocks );
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
@@ -394,7 +398,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
                                                 HYPRE_Int *num_blocks_ptr )
 {
@@ -406,7 +410,7 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 
    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
          &numBlocksPerSm,
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, 'D', true>,
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>,
          block_size, dynamic_shmem_size);
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;

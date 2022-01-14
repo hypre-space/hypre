@@ -31,6 +31,7 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
 {
    HYPRE_Int j = 0;
 
+#pragma unroll
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -181,6 +182,7 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int               lane_id,
    const HYPRE_Int STEP_SIZE = hypre_min(GROUP_SIZE, HYPRE_WARP_SIZE);
 
    /* copy shared memory hash table into C */
+#pragma unroll
    for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
    {
       HYPRE_Int sum;
@@ -293,6 +295,7 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
       /* initialize group's shared memory hash table */
       if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
       {
+#pragma unroll
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -407,7 +410,9 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    dim3 bDim(BDIMX, BDIMY, num_groups_per_block);
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
-   dim3 gDim( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[1][BIN] );
+   const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[1][BIN],
+                                           (m + bDim.z - 1) / bDim.z );
+   dim3 gDim( num_blocks );
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
@@ -591,7 +596,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
                                                  HYPRE_Int *num_blocks_ptr )
 {
