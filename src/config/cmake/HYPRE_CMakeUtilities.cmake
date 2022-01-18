@@ -25,6 +25,12 @@ function(add_hypre_executables EXE_SRCS)
       set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
     endif (HYPRE_USING_CUDA)
 
+    if (HYPRE_USING_SYCL)
+      # If SYCL is enabled, tag source files to be compiled with dpcpp.
+      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+    endif (HYPRE_USING_SYCL)
+
+
     string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
     # Actually add the exe
     add_executable(${EXE_NAME} ${SRC_FILE})

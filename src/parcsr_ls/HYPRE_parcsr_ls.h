@@ -53,15 +53,15 @@ typedef struct hypre_Solver_struct *HYPRE_Solver;
 #endif
 
 typedef HYPRE_Int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
-                                       HYPRE_ParCSRMatrix,
-                                       HYPRE_ParVector,
-                                       HYPRE_ParVector);
+                                             HYPRE_ParCSRMatrix,
+                                             HYPRE_ParVector,
+                                             HYPRE_ParVector);
 
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
-                                      HYPRE_Int,
-                                      HYPRE_Real);
+                                            HYPRE_Int,
+                                            HYPRE_Real);
 #endif
 
 /**@}*/
@@ -312,7 +312,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
  * then can be used to change individual levels if desired
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol (HYPRE_Solver solver,
-                                          HYPRE_Real  nongalerkin_tol);
+                                            HYPRE_Real  nongalerkin_tol);
 
 /**
  * (Optional) Defines the level specific non-Galerkin drop-tolerances
@@ -340,8 +340,8 @@ HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol (HYPRE_Solver solver,
  * @param level [IN] level on which drop tolerance is used
  **/
 HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol (HYPRE_Solver solver,
-                                          HYPRE_Real   nongalerkin_tol,
-                                          HYPRE_Int  level);
+                                                 HYPRE_Real   nongalerkin_tol,
+                                                 HYPRE_Int  level);
 
 /**
  * (Optional) Defines the non-Galerkin drop-tolerance (old version)
@@ -520,8 +520,8 @@ HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts(HYPRE_Solver solver,
  * This can only be used in context with nodal coarsening and still
  * requires the user to choose an interpolation.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetInterpVectors (HYPRE_Solver     solver ,
-                                           HYPRE_Int        num_vectors ,
+HYPRE_Int HYPRE_BoomerAMGSetInterpVectors (HYPRE_Solver     solver,
+                                           HYPRE_Int        num_vectors,
                                            HYPRE_ParVector *interp_vectors );
 
 /**
@@ -624,7 +624,7 @@ HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
  * Can only be used when AMG is used as a preconditioner !!!
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAddLastLvl(HYPRE_Solver solver,
-                                     HYPRE_Int    add_last_lvl);
+                                       HYPRE_Int    add_last_lvl);
 
 /**
  * (Optional) Defines the truncation factor for the
@@ -632,7 +632,7 @@ HYPRE_Int HYPRE_BoomerAMGSetAddLastLvl(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMultAddTruncFactor(HYPRE_Solver solver,
-                                           HYPRE_Real   add_trunc_factor);
+                                               HYPRE_Real   add_trunc_factor);
 
 /**
  * (Optional) Defines the maximal number of elements per row for the
@@ -640,7 +640,7 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAddTruncFactor(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMultAddPMaxElmts(HYPRE_Solver solver,
-                                         HYPRE_Int    add_P_max_elmts);
+                                             HYPRE_Int    add_P_max_elmts);
 /**
  * (Optional) Defines the relaxation type used in the (mult)additive cycle
  * portion (also affects simple method.)
@@ -658,7 +658,7 @@ HYPRE_Int HYPRE_BoomerAMGSetAddRelaxType(HYPRE_Solver solver,
  * The weight only affects the Jacobi method, and has no effect on L1-Jacobi
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAddRelaxWt(HYPRE_Solver solver,
-                                         HYPRE_Real    add_rlx_wt);
+                                       HYPRE_Real    add_rlx_wt);
 
 /**
  * (Optional) Sets maximal size for agglomeration or redundant coarse grid solve.
@@ -870,14 +870,14 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
  *  The default is 1 (i.e., scaled).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyScale (HYPRE_Solver solver,
-                                           HYPRE_Int   scale);
+                                        HYPRE_Int   scale);
 
 /**
  * (Optional) Defines which polynomial variant should be used.
  *  The default is 0 (i.e., scaled).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
-                                           HYPRE_Int   variant);
+                                          HYPRE_Int   variant);
 
 /**
  * (Optional) Defines how to estimate eigenvalues.
@@ -888,7 +888,7 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
  *  determine the smallest and largest eigenvalue.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
-                                           HYPRE_Int   eig_est);
+                                         HYPRE_Int   eig_est);
 
 /**
  * (Optional) Enables the use of more complex smoothers.
@@ -1056,35 +1056,35 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver  solver,
-                        HYPRE_Int	      ilu_type);
+                                     HYPRE_Int         ilu_type);
 
 /**
  * Defines level k for ILU(k) smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver  solver,
-                        HYPRE_Int	      ilu_lfil);
+                                      HYPRE_Int         ilu_lfil);
 
 /**
  * Defines max row nonzeros for ILUT smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver,
-                        HYPRE_Int	      ilu_max_row_nnz);
+                                          HYPRE_Int         ilu_max_row_nnz);
 
 /**
  * Defines number of iterations for ILU smoother on each level
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver  solver,
-                        HYPRE_Int	      ilu_max_iter);
+                                        HYPRE_Int         ilu_max_iter);
 
 /**
  * Defines drop tolorance for iLUT smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
-                        HYPRE_Real	      ilu_droptol);
+                                        HYPRE_Real        ilu_droptol);
 
 /**
  * (Optional) Defines maximum number of steps for FSAI.
@@ -1231,7 +1231,7 @@ HYPRE_Int HYPRE_BoomerAMGSetModuleRAP2(HYPRE_Solver solver,
  * (Recommended for efficient use on GPUs)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose(HYPRE_Solver solver,
-                                      HYPRE_Int    keepTranspose);
+                                          HYPRE_Int    keepTranspose);
 
 /**
  * HYPRE_BoomerAMGSetPlotGrids
@@ -1266,7 +1266,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
  * @param cgrid [IN/ OUT] preallocated array. On return, contains grid hierarchy info.
  **/
 HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
-                                                  HYPRE_Int *cgrid );
+                                          HYPRE_Int *cgrid );
 
 #ifdef HYPRE_USING_DSUPERLU
 /**
@@ -1280,7 +1280,7 @@ HYPRE_Int HYPRE_BoomerAMGGetGridHierarchy(HYPRE_Solver solver,
  **/
 
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
-                                HYPRE_Int    slu_threshold);
+                                           HYPRE_Int    slu_threshold);
 #endif
 
 /**
@@ -1300,8 +1300,8 @@ HYPRE_Int HYPRE_BoomerAMGSetCPoints(HYPRE_Solver  solver,
  * (Optional) Deprecated function. Use HYPRE_BoomerAMGSetCPoints instead.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-				HYPRE_Int  cpt_coarse_level,
-				HYPRE_Int  num_cpt_coarse,
+                                          HYPRE_Int  cpt_coarse_level,
+                                          HYPRE_Int  num_cpt_coarse,
                                           HYPRE_BigInt *cpt_coarse_index);
 
 /**
@@ -1454,7 +1454,7 @@ HYPRE_BoomerAMGDDSetNumGhostLayers( HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_BoomerAMGDDSetUserFACRelaxation( HYPRE_Solver solver,
-   HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) );
+                                       HYPRE_Int (*userFACRelaxation)( void *amgdd_vdata, HYPRE_Int level, HYPRE_Int cycle_param ) );
 
 /**
  * (Optional) Get the underlying AMG hierarchy as a HYPRE_Solver object.
@@ -2350,9 +2350,9 @@ HYPRE_Int HYPRE_ADSDestroy(HYPRE_Solver solver);
  * @param b Ignored by this function.
  * @param x Ignored by this function.
  **/
-HYPRE_Int HYPRE_ADSSetup(HYPRE_Solver       solver ,
-                         HYPRE_ParCSRMatrix A ,
-                         HYPRE_ParVector    b ,
+HYPRE_Int HYPRE_ADSSetup(HYPRE_Solver       solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    b,
                          HYPRE_ParVector    x);
 
 /**
@@ -2365,32 +2365,32 @@ HYPRE_Int HYPRE_ADSSetup(HYPRE_Solver       solver ,
  * @param b [IN] right hand side of the linear system to be solved
  * @param x [OUT] approximated solution of the linear system to be solved
  **/
-HYPRE_Int HYPRE_ADSSolve(HYPRE_Solver       solver ,
-                         HYPRE_ParCSRMatrix A ,
-                         HYPRE_ParVector    b ,
+HYPRE_Int HYPRE_ADSSolve(HYPRE_Solver       solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector    b,
                          HYPRE_ParVector    x);
 
 /**
  * Sets the discrete curl matrix \e C.
  * This function should be called before HYPRE_ADSSetup()!
  **/
-HYPRE_Int HYPRE_ADSSetDiscreteCurl(HYPRE_Solver       solver ,
+HYPRE_Int HYPRE_ADSSetDiscreteCurl(HYPRE_Solver       solver,
                                    HYPRE_ParCSRMatrix C);
 
 /**
  * Sets the discrete gradient matrix \e G.
  * This function should be called before HYPRE_ADSSetup()!
  **/
-HYPRE_Int HYPRE_ADSSetDiscreteGradient(HYPRE_Solver       solver ,
+HYPRE_Int HYPRE_ADSSetDiscreteGradient(HYPRE_Solver       solver,
                                        HYPRE_ParCSRMatrix G);
 
 /**
  * Sets the \e x, \e y and \e z coordinates of the vertices in the mesh.
  * This function should be called before HYPRE_ADSSetup()!
  **/
-HYPRE_Int HYPRE_ADSSetCoordinateVectors(HYPRE_Solver    solver ,
-                                        HYPRE_ParVector x ,
-                                        HYPRE_ParVector y ,
+HYPRE_Int HYPRE_ADSSetCoordinateVectors(HYPRE_Solver    solver,
+                                        HYPRE_ParVector x,
+                                        HYPRE_ParVector y,
                                         HYPRE_ParVector z);
 
 /**
@@ -2441,7 +2441,7 @@ HYPRE_Int HYPRE_ADSSetInterpolations(HYPRE_Solver       solver,
  * as a solver. To use ADS as a preconditioner, set the maximum
  * number of iterations to 1. The default is 20.
  **/
-HYPRE_Int HYPRE_ADSSetMaxIter(HYPRE_Solver solver ,
+HYPRE_Int HYPRE_ADSSetMaxIter(HYPRE_Solver solver,
                               HYPRE_Int    maxit);
 
 /**
@@ -2449,7 +2449,7 @@ HYPRE_Int HYPRE_ADSSetMaxIter(HYPRE_Solver solver ,
  * as a solver. When using ADS as a preconditioner, set the tolerance
  * to 0.0. The default is \f$10^{-6}\f$.
  **/
-HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver ,
+HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver,
                           HYPRE_Real   tol);
 
 /**
@@ -2470,7 +2470,7 @@ HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver ,
  *
  * The default is 1. See the user's manual for more details.
  **/
-HYPRE_Int HYPRE_ADSSetCycleType(HYPRE_Solver solver ,
+HYPRE_Int HYPRE_ADSSetCycleType(HYPRE_Solver solver,
                                 HYPRE_Int    cycle_type);
 
 /**
@@ -2478,7 +2478,7 @@ HYPRE_Int HYPRE_ADSSetCycleType(HYPRE_Solver solver ,
  * solution iterations.
  * The default is 1 (print residual norm at each step).
  **/
-HYPRE_Int HYPRE_ADSSetPrintLevel(HYPRE_Solver solver ,
+HYPRE_Int HYPRE_ADSSetPrintLevel(HYPRE_Solver solver,
                                  HYPRE_Int    print_level);
 
 /**
@@ -2493,18 +2493,18 @@ HYPRE_Int HYPRE_ADSSetPrintLevel(HYPRE_Solver solver ,
  *    - 4  : truncated version of \f$\ell_1\f$-scaled block symmetric Gauss-Seidel/SSOR
  *    - 16 : Chebyshev
  **/
-HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver ,
-                                       HYPRE_Int    relax_type ,
-                                       HYPRE_Int    relax_times ,
-                                       HYPRE_Real   relax_weight ,
+HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver,
+                                       HYPRE_Int    relax_type,
+                                       HYPRE_Int    relax_times,
+                                       HYPRE_Real   relax_weight,
                                        HYPRE_Real   omega);
 
 /**
  * (Optional) Sets parameters for Chebyshev relaxation.
  * The defaults are 2, 0.3.
  **/
-HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver ,
-                                            HYPRE_Int    cheby_order ,
+HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver,
+                                            HYPRE_Int    cheby_order,
                                             HYPRE_Int    cheby_fraction);
 
 /**
@@ -2514,37 +2514,37 @@ HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver ,
  * interface of HYPRE_ADSSetInterpolations is being used!
  * See the user's manual for more details.
  **/
-HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver ,
-                                 HYPRE_Int    cycle_type ,
-                                 HYPRE_Int    coarsen_type ,
-                                 HYPRE_Int    agg_levels ,
-                                 HYPRE_Int    relax_type ,
-                                 HYPRE_Real   strength_threshold ,
-                                 HYPRE_Int    interp_type ,
+HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver,
+                                 HYPRE_Int    cycle_type,
+                                 HYPRE_Int    coarsen_type,
+                                 HYPRE_Int    agg_levels,
+                                 HYPRE_Int    relax_type,
+                                 HYPRE_Real   strength_threshold,
+                                 HYPRE_Int    interp_type,
                                  HYPRE_Int    Pmax);
 
 /**
  * (Optional) Sets AMG parameters for \f$B_\Pi\f$.
  * The defaults are 10, 1, 3, 0.25, 0, 0. See the user's manual for more details.
  **/
-HYPRE_Int HYPRE_ADSSetAMGOptions(HYPRE_Solver solver ,
-                                 HYPRE_Int    coarsen_type ,
-                                 HYPRE_Int    agg_levels ,
-                                 HYPRE_Int    relax_type ,
-                                 HYPRE_Real   strength_threshold ,
-                                 HYPRE_Int    interp_type ,
+HYPRE_Int HYPRE_ADSSetAMGOptions(HYPRE_Solver solver,
+                                 HYPRE_Int    coarsen_type,
+                                 HYPRE_Int    agg_levels,
+                                 HYPRE_Int    relax_type,
+                                 HYPRE_Real   strength_threshold,
+                                 HYPRE_Int    interp_type,
                                  HYPRE_Int    Pmax);
 
 /**
  * Returns the number of iterations taken.
  **/
-HYPRE_Int HYPRE_ADSGetNumIterations(HYPRE_Solver  solver ,
+HYPRE_Int HYPRE_ADSGetNumIterations(HYPRE_Solver  solver,
                                     HYPRE_Int    *num_iterations);
 
 /**
  * Returns the norm of the final relative residual.
  **/
-HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver  solver ,
+HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                 HYPRE_Real   *rel_resid_norm);
 
 /**@}*/
@@ -2586,7 +2586,7 @@ HYPRE_Int HYPRE_ParCSRPCGSetTol(HYPRE_Solver solver,
                                 HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRPCGSetAbsoluteTol(HYPRE_Solver solver,
-                                  HYPRE_Real   tol);
+                                        HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRPCGSetMaxIter(HYPRE_Solver solver,
                                     HYPRE_Int    max_iter);
@@ -2738,7 +2738,7 @@ HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * Returns the residual.
  **/
 HYPRE_Int HYPRE_ParCSRGMRESGetResidual(HYPRE_Solver     solver,
-                                     HYPRE_ParVector *residual);
+                                       HYPRE_ParVector *residual);
 
 
 /* ParCSR CO-GMRES, author: KS */
@@ -2747,7 +2747,7 @@ HYPRE_Int HYPRE_ParCSRGMRESGetResidual(HYPRE_Solver     solver,
  * Create a solver object.
  **/
 HYPRE_Int HYPRE_ParCSRCOGMRESCreate(MPI_Comm      comm,
-                                  HYPRE_Solver *solver);
+                                    HYPRE_Solver *solver);
 
 /**
  * Destroy a solver object.
@@ -2755,64 +2755,64 @@ HYPRE_Int HYPRE_ParCSRCOGMRESCreate(MPI_Comm      comm,
 HYPRE_Int HYPRE_ParCSRCOGMRESDestroy(HYPRE_Solver solver);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetup(HYPRE_Solver       solver,
-                                 HYPRE_ParCSRMatrix A,
-                                 HYPRE_ParVector    b,
-                                 HYPRE_ParVector    x);
+                                   HYPRE_ParCSRMatrix A,
+                                   HYPRE_ParVector    b,
+                                   HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSolve(HYPRE_Solver       solver,
-                                 HYPRE_ParCSRMatrix A,
-                                 HYPRE_ParVector    b,
-                                 HYPRE_ParVector    x);
+                                   HYPRE_ParCSRMatrix A,
+                                   HYPRE_ParVector    b,
+                                   HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetKDim(HYPRE_Solver solver,
-                                   HYPRE_Int    k_dim);
+                                     HYPRE_Int    k_dim);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetUnroll(HYPRE_Solver solver,
-                                   HYPRE_Int    unroll);
+                                       HYPRE_Int    unroll);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS(HYPRE_Solver solver,
-                                   HYPRE_Int    cgs);
+                                    HYPRE_Int    cgs);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetTol(HYPRE_Solver solver,
-                                  HYPRE_Real   tol);
+                                    HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetAbsoluteTol(HYPRE_Solver solver,
-                                          HYPRE_Real   a_tol);
+                                            HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
  **/
 HYPRE_Int HYPRE_ParCSRCOGMRESSetMinIter(HYPRE_Solver solver,
-                                      HYPRE_Int    min_iter);
+                                        HYPRE_Int    min_iter);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetMaxIter(HYPRE_Solver solver,
-                                      HYPRE_Int    max_iter);
+                                        HYPRE_Int    max_iter);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetPrecond(HYPRE_Solver             solver,
-                                      HYPRE_PtrToParSolverFcn  precond,
-                                      HYPRE_PtrToParSolverFcn  precond_setup,
-                                      HYPRE_Solver             precond_solver);
+                                        HYPRE_PtrToParSolverFcn  precond,
+                                        HYPRE_PtrToParSolverFcn  precond_setup,
+                                        HYPRE_Solver             precond_solver);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESGetPrecond(HYPRE_Solver  solver,
-                                      HYPRE_Solver *precond_data);
+                                        HYPRE_Solver *precond_data);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetLogging(HYPRE_Solver solver,
-                                      HYPRE_Int    logging);
+                                        HYPRE_Int    logging);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetPrintLevel(HYPRE_Solver solver,
-                                         HYPRE_Int    print_level);
+                                           HYPRE_Int    print_level);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations(HYPRE_Solver  solver,
-                                            HYPRE_Int    *num_iterations);
+                                              HYPRE_Int    *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                        HYPRE_Real   *norm);
+                                                          HYPRE_Real   *norm);
 
 /**
  * Returns the residual.
  **/
 HYPRE_Int HYPRE_ParCSRCOGMRESGetResidual(HYPRE_Solver     solver,
-                                     HYPRE_ParVector *residual);
+                                         HYPRE_ParVector *residual);
 
 /* end of parCSR CO-GMRES */
 
@@ -2891,7 +2891,7 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver
                                                             HYPRE_Real   *norm);
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetResidual(HYPRE_Solver     solver,
-                                     HYPRE_ParVector *residual);
+                                           HYPRE_ParVector *residual);
 
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver           solver,
@@ -2974,7 +2974,7 @@ HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                          HYPRE_Real   *norm);
 
 HYPRE_Int HYPRE_ParCSRLGMRESGetResidual(HYPRE_Solver     solver,
-                                     HYPRE_ParVector *residual);
+                                        HYPRE_ParVector *residual);
 
 /**@}*/
 
@@ -3047,7 +3047,7 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                            HYPRE_Real   *norm);
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetResidual(HYPRE_Solver     solver,
-                                     HYPRE_ParVector *residual);
+                                          HYPRE_ParVector *residual);
 
 /**@}*/
 
@@ -3562,7 +3562,7 @@ HYPRE_ParCSRHybridSetNodal(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
-                           HYPRE_Int    keepT);
+                                   HYPRE_Int    keepT);
 
 /**
  * (Optional) Sets whether to use non-Galerkin option
@@ -3572,8 +3572,8 @@ HYPRE_ParCSRHybridSetKeepTranspose(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetNonGalerkinTol(HYPRE_Solver solver,
-                           HYPRE_Int   num_levels,
-                           HYPRE_Real *nongalerkin_tol);
+                                    HYPRE_Int   num_levels,
+                                    HYPRE_Real *nongalerkin_tol);
 
 /**
  * Retrieves the total number of iterations.
@@ -3743,22 +3743,22 @@ HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
  * @param x approximate solution of the linear system to be solved (Ignored by this function).
  **/
 HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      );
+                                      HYPRE_ParCSRMatrix A,
+                                      HYPRE_ParVector b,
+                                      HYPRE_ParVector x      );
 
- /**
- * Solve the system using DSUPERLU.
- *
- * @param solver [IN] solver or preconditioner object to be applied.
- * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
- * @param b [IN] right hand side of the linear system to be solved
- * @param x [OUT] approximated solution of the linear system to be solved
- **/
+/**
+* Solve the system using DSUPERLU.
+*
+* @param solver [IN] solver or preconditioner object to be applied.
+* @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
+* @param b [IN] right hand side of the linear system to be solved
+* @param x [OUT] approximated solution of the linear system to be solved
+**/
 HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      );
+                                      HYPRE_ParCSRMatrix A,
+                                      HYPRE_ParVector b,
+                                      HYPRE_ParVector x      );
 #endif
 
 /**
@@ -3782,24 +3782,24 @@ HYPRE_Int HYPRE_MGRDestroy( HYPRE_Solver solver );
  * @param x approximate solution of the linear system to be solved (Ignored by this function).
  **/
 HYPRE_Int HYPRE_MGRSetup( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      );
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector b,
+                          HYPRE_ParVector x      );
 
- /**
- * Solve the system or apply MGR as a preconditioner.
- * If used as a preconditioner, this function should be passed
- * to the iterative solver \e SetPrecond function.
- *
- * @param solver [IN] solver or preconditioner object to be applied.
- * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
- * @param b [IN] right hand side of the linear system to be solved
- * @param x [OUT] approximated solution of the linear system to be solved
- **/
+/**
+* Solve the system or apply MGR as a preconditioner.
+* If used as a preconditioner, this function should be passed
+* to the iterative solver \e SetPrecond function.
+*
+* @param solver [IN] solver or preconditioner object to be applied.
+* @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+* @param b [IN] right hand side of the linear system to be solved
+* @param x [OUT] approximated solution of the linear system to be solved
+**/
 HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      );
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector b,
+                          HYPRE_ParVector x      );
 
 /**
  * Set the block data assuming that the physical variables are ordered contiguously,
@@ -3812,11 +3812,11 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
  * @param block_coarse_indexes [IN] index for each block coarse point per level
  **/
 HYPRE_Int HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver,
-                         HYPRE_Int  block_size,
-                         HYPRE_Int max_num_levels,
-                         HYPRE_BigInt *idx_array,
-                         HYPRE_Int *num_block_coarse_points,
-                         HYPRE_Int  **block_coarse_indexes);
+                                                HYPRE_Int  block_size,
+                                                HYPRE_Int max_num_levels,
+                                                HYPRE_BigInt *idx_array,
+                                                HYPRE_Int *num_block_coarse_points,
+                                                HYPRE_Int  **block_coarse_indexes);
 
 /**
  * Set the block data (by grid points) and prescribe the coarse indexes per block
@@ -3829,10 +3829,10 @@ HYPRE_Int HYPRE_MGRSetCpointsByContiguousBlock( HYPRE_Solver solver,
  * @param block_coarse_indexes [IN] index for each block coarse point per level
  **/
 HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
-                         HYPRE_Int  block_size,
-                         HYPRE_Int max_num_levels,
-                         HYPRE_Int *num_block_coarse_points,
-                         HYPRE_Int  **block_coarse_indexes);
+                                      HYPRE_Int  block_size,
+                                      HYPRE_Int max_num_levels,
+                                      HYPRE_Int *num_block_coarse_points,
+                                      HYPRE_Int  **block_coarse_indexes);
 
 /*--------------------------------------------------------------------------
  * HYPRE_Int HYPRE_MGRSetCpointsByPointMarkerArray
@@ -3850,11 +3850,11 @@ HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
  * @param point_marker_array [IN] array of tags for the local degrees of freedom
  **/
 HYPRE_Int HYPRE_MGRSetCpointsByPointMarkerArray( HYPRE_Solver solver,
-                         HYPRE_Int  block_size,
-                         HYPRE_Int  max_num_levels,
-                         HYPRE_Int  *num_block_coarse_points,
-                         HYPRE_Int  **lvl_block_coarse_indexes,
-                         HYPRE_Int  *point_marker_array);
+                                                 HYPRE_Int  block_size,
+                                                 HYPRE_Int  max_num_levels,
+                                                 HYPRE_Int  *num_block_coarse_points,
+                                                 HYPRE_Int  **lvl_block_coarse_indexes,
+                                                 HYPRE_Int  *point_marker_array);
 
 /**
  * (Optional) Set non C-points to F-points.
@@ -4026,14 +4026,14 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
 
 
 HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
-                             HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
-                             HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
-                             HYPRE_Solver          fsolver );
+                              HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
+                              HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
+                              HYPRE_Solver          fsolver );
 
 HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
-                               HYPRE_Int *CF_marker,
-                               HYPRE_Int debug_flag,
-                               HYPRE_ParCSRMatrix *A_ff);
+                            HYPRE_Int *CF_marker,
+                            HYPRE_Int debug_flag,
+                            HYPRE_ParCSRMatrix *A_ff);
 
 /**
  * (Optional) Set the coarse grid solver.
@@ -4046,9 +4046,9 @@ HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
  * @param coarse_grid_solver [IN] BoomerAMG solver
  **/
 HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
-                             HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
-                             HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
-                             HYPRE_Solver          coarse_grid_solver );
+                                   HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
+                                   HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
+                                   HYPRE_Solver          coarse_grid_solver );
 
 /**
  * (Optional) Set the print level to print setup and solve information.
@@ -4064,11 +4064,11 @@ HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
-                        HYPRE_Int print_level );
+                              HYPRE_Int print_level );
 
 HYPRE_Int
 HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
-                        HYPRE_Int print_level );
+                                  HYPRE_Int print_level );
 
 /**
  * (Optional) Set the threshold to compress the coarse grid at each level
@@ -4078,7 +4078,7 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
-                        HYPRE_Real threshold);
+                                         HYPRE_Real threshold);
 
 
 /**
@@ -4189,23 +4189,23 @@ HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
  * @param x approximate solution of the linear system to be solved (Ignored by this function).
  **/
 HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      );
- /**
- * Solve the system or apply ILU as a preconditioner.
- * If used as a preconditioner, this function should be passed
- * to the iterative solver \e SetPrecond function.
- *
- * @param solver [IN] solver or preconditioner object to be applied.
- * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
- * @param b [IN] right hand side of the linear system to be solved
- * @param x [OUT] approximated solution of the linear system to be solved
- **/
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector b,
+                          HYPRE_ParVector x      );
+/**
+* Solve the system or apply ILU as a preconditioner.
+* If used as a preconditioner, this function should be passed
+* to the iterative solver \e SetPrecond function.
+*
+* @param solver [IN] solver or preconditioner object to be applied.
+* @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+* @param b [IN] right hand side of the linear system to be solved
+* @param x [OUT] approximated solution of the linear system to be solved
+**/
 HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x      );
+                          HYPRE_ParCSRMatrix A,
+                          HYPRE_ParVector b,
+                          HYPRE_ParVector x      );
 
 /**
  * (Optional) Set maximum number of iterations if used as a solver.

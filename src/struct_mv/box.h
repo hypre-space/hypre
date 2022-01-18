@@ -18,7 +18,7 @@
 #define HYPRE_MAXDIM 3
 #endif
 
-#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_RAJA) || defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 #define hypre_BoxLoopSetOneBlock()
 #else
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
@@ -127,7 +127,7 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_CCBoxIndexRank(box, index) 0
 #define hypre_CCBoxIndexRank_noargs() 0
 #define hypre_CCBoxOffsetDistance(box, index) 0
-  
+
 /*----- Avoid using these Box macros -----*/
 
 #define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)
@@ -595,8 +595,8 @@ hypre__ikstart##k = 0
 #if 0
 
 #define hypre_BoxLoop2Begin(loop_size,
-                            dbox1, start1, stride1, i1,
-                            dbox2, start2, stride2, i2)
+dbox1, start1, stride1, i1,
+       dbox2, start2, stride2, i2)
 {
    /* init hypre__i1start */
    HYPRE_Int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);
@@ -611,28 +611,28 @@ hypre__ikstart##k = 0
 #define hypre_BoxLoop2For(i, j, k, i1, i2)
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)
    {
-   /* set i and hypre__n */
-   hypre_BoxLoopSet(i, j, k);
-   /* set i1 */
-   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;
-   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;
-   for (k = 0; k < hypre__nz; k++)
-   {
-      for (j = 0; j < hypre__ny; j++)
+      /* set i and hypre__n */
+      hypre_BoxLoopSet(i, j, k);
+      /* set i1 */
+      i1 = hypre__i1start + i * hypre__sx1 + j * hypre__sy1 + k * hypre__sz1;
+      i2 = hypre__i2start + i * hypre__sx2 + j * hypre__sy2 + k * hypre__sz2;
+      for (k = 0; k < hypre__nz; k++)
       {
-         for (i = 0; i < hypre__nx; i++)
+         for (j = 0; j < hypre__ny; j++)
          {
+            for (i = 0; i < hypre__nx; i++)
+            {
 
 #define hypre_BoxLoop2End(i1, i2)
-            i1 += hypre__sx1;
-            i2 += hypre__sx2;
+               i1 += hypre__sx1;
+               i2 += hypre__sx2;
+            }
+            i1 += hypre__sy1 - hypre__nx * hypre__sx1;
+            i2 += hypre__sy2 - hypre__nx * hypre__sx2;
          }
-         i1 += hypre__sy1 - hypre__nx*hypre__sx1;
-         i2 += hypre__sy2 - hypre__nx*hypre__sx2;
+         i1 += hypre__sz1 - hypre__ny * hypre__sy1;
+         i2 += hypre__sz2 - hypre__ny * hypre__sy2;
       }
-      i1 += hypre__sz1 - hypre__ny*hypre__sy1;
-      i2 += hypre__sz2 - hypre__ny*hypre__sy2;
-   }
    }
 }
 
@@ -643,7 +643,7 @@ hypre__ikstart##k = 0
 N = 1;
 for (d = 0; d < ndim; d++)
 {
-   N *= n[d];
+N *= n[d];
    i[d] = 0;
    n[d] -= 2; /* this produces a simpler comparison below */
 }
@@ -651,9 +651,9 @@ i[ndim] = 0;
 n[ndim] = 0;
 for (I = 0; I < N; I++)
 {
-   /* loop body */
+/* loop body */
 
-   for (d = 0; i[d] > n[d]; d++)
+for (d = 0; i[d] > n[d]; d++)
    {
       i[d] = 0;
    }
@@ -669,7 +669,7 @@ for (I = 0; I < N; I++)
 N = 1;
 for (d = 1; d < ndim; d++)
 {
-   N *= n[d];
+N *= n[d];
    i[d] = 0;
    n[d] -= 2; /* this produces a simpler comparison below */
 }
@@ -677,7 +677,7 @@ i[ndim] = 0;
 n[ndim] = 0;
 for (J = 0; J < N; J++)
 {
-   for (I = 0; I < n[0]; I++)
+for (I = 0; I < n[0]; I++)
    {
       /* loop body */
 

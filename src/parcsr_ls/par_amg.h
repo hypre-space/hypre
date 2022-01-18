@@ -261,7 +261,7 @@ typedef struct
    HYPRE_BigInt  *F_points_marker;
 
 #ifdef HYPRE_USING_DSUPERLU
- /* Parameters and data for SuperLU_Dist */
+   /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
 #endif

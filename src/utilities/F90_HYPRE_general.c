@@ -14,14 +14,14 @@ extern "C" {
 
 void
 hypre_F90_IFACE(hypre_init, HYPRE_INIT)
-   (hypre_F90_Int *ierr)
+(hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_Init();
 }
 
 void
 hypre_F90_IFACE(hypre_finalize, HYPRE_FINALIZE)
-   (hypre_F90_Int *ierr)
+(hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_Finalize();
 }

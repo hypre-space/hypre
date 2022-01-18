@@ -60,7 +60,7 @@ done > ${TNAME}.perf.out
 
 # Make sure that the output file is reasonable
 RUNCOUNT=`echo $FILES | wc -w`
-OUTCOUNT=`grep "Complexity" ${TNAME}.out | wc -l`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
@@ -70,6 +70,10 @@ HOST=`hostname`
 case $HOST in
    lassen*)
       SavePerfExt="saved.lassen"
+      rtol=0.15
+      ;;
+   ray*)
+      SavePerfExt="saved.ray"
       rtol=0.15
       ;;
    *) SavePerfExt=""

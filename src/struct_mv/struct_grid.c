@@ -42,7 +42,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0, ndim);
    hypre_StructGridIDs(grid)         = NULL;
 
-   hypre_SetIndex(hypre_StructGridMaxDistance(grid),8);
+   hypre_SetIndex(hypre_StructGridMaxDistance(grid), 8);
 
    hypre_StructGridBoundingBox(grid) = NULL;
    hypre_StructGridLocalSize(grid)   = 0;
@@ -55,7 +55,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridPShifts(grid)     = NULL;
 
    hypre_StructGridGhlocalSize(grid)  = 0;
-   for (i = 0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       hypre_StructGridNumGhost(grid)[i] = 1;
    }
@@ -243,7 +243,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int *ids = NULL;
    HYPRE_Int  iperiodic, notcenter;
 
-   HYPRE_Int  sendbuf6[2*HYPRE_MAXDIM], recvbuf6[2*HYPRE_MAXDIM];
+   HYPRE_Int  sendbuf6[2 * HYPRE_MAXDIM], recvbuf6[2 * HYPRE_MAXDIM];
 
    hypre_Box  *box;
    hypre_Box  *ghostbox;
@@ -268,7 +268,9 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int           *numghost     = hypre_StructGridNumGhost(grid);
 
    if (!time_index)
+   {
       time_index = hypre_InitializeTiming("StructGridAssemble");
+   }
 
    hypre_BeginTiming(time_index);
 
@@ -293,7 +295,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    if (hypre_StructGridIDs(grid) == NULL)
    {
       ids = hypre_CTAlloc(HYPRE_Int,  num_local_boxes, HYPRE_MEMORY_HOST);
-      for (i=0; i< num_local_boxes; i++)
+      for (i = 0; i < num_local_boxes; i++)
       {
          ids[i] = i;
       }
@@ -434,15 +436,15 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       for (d = 0; d < ndim; d++)
       {
          sendbuf6[d] = hypre_BoxIMinD(bounding_box, d);
-         sendbuf6[d+ndim] = -hypre_BoxIMaxD(bounding_box, d);
+         sendbuf6[d + ndim] = -hypre_BoxIMaxD(bounding_box, d);
       }
-      hypre_MPI_Allreduce(sendbuf6, recvbuf6, 2*ndim, HYPRE_MPI_INT,
+      hypre_MPI_Allreduce(sendbuf6, recvbuf6, 2 * ndim, HYPRE_MPI_INT,
                           hypre_MPI_MIN, comm);
       /* unpack buffer */
       for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(bounding_box, d) = recvbuf6[d];
-         hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d+ndim];
+         hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d + ndim];
       }
 
       hypre_StructGridBoundingBox(grid) = bounding_box;
@@ -470,13 +472,13 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
                                myid, i, entry_info );
 
          /* now expand box by max_distance or larger and gather entries */
-         hypre_CopyBox(box ,grow_box);
+         hypre_CopyBox(box, grow_box);
          hypre_BoxGrowByIndex(grow_box, max_distance);
          hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box),
                                    hypre_BoxIMax(grow_box));
 
          /* now repeat for any periodic boxes - by shifting the grow_box*/
-         for (k=1; k < num_periods; k++) /* k=0 is original box */
+         for (k = 1; k < num_periods; k++) /* k=0 is original box */
          {
             hypre_CopyBox(grow_box, periodic_box);
             pshift = pshifts[k];
@@ -516,13 +518,13 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          box = hypre_BoxArrayBox(local_boxes, i);
 
          /* now expand box by max_distance or larger and gather entries */
-         hypre_CopyBox(box ,grow_box);
+         hypre_CopyBox(box, grow_box);
          hypre_BoxGrowByIndex(grow_box, max_distance);
          hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box),
                                    hypre_BoxIMax(grow_box));
 
          /* now repeat for any periodic boxes - by shifting the grow_box*/
-         for (k=1; k < num_periods; k++) /* k=0 is original box */
+         for (k = 1; k < num_periods; k++) /* k=0 is original box */
          {
             hypre_CopyBox(grow_box, periodic_box);
             pshift = pshifts[k];
@@ -596,8 +598,8 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    hypre_MPI_Comm_rank(comm, &my_rank);
 
    /* compute recvcounts and displs */
-   item_size = 2*ndim + 1;
-   sendcount = item_size*hypre_BoxArraySize(boxes);
+   item_size = 2 * ndim + 1;
+   sendcount = item_size * hypre_BoxArraySize(boxes);
    recvcounts =  hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    displs = hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&sendcount, 1, HYPRE_MPI_INT,
@@ -606,7 +608,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    recvbuf_size = recvcounts[0];
    for (p = 1; p < num_all_procs; p++)
    {
-      displs[p] = displs[p-1] + recvcounts[p-1];
+      displs[p] = displs[p - 1] + recvcounts[p - 1];
       recvbuf_size += recvcounts[p];
    }
 
@@ -671,8 +673,8 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
     *-----------------------------------------------------*/
 
    hypre_TFree(sendbuf, HYPRE_MEMORY_HOST);
-    hypre_TFree(recvbuf, HYPRE_MEMORY_HOST);
-    hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(recvbuf, HYPRE_MEMORY_HOST);
+   hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
    hypre_TFree(displs, HYPRE_MEMORY_HOST);
 
    *all_boxes_ptr   = all_boxes;
@@ -710,7 +712,7 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
    boxnums = hypre_TAlloc(HYPRE_Int,  num_boxes, HYPRE_MEMORY_HOST);
 
    p = -1;
-   for(b = 0; b < num_boxes; b++)
+   for (b = 0; b < num_boxes; b++)
    {
       /* start boxnum count at zero for each new process */
       if (procs[b] != p)
@@ -847,7 +849,7 @@ hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
 {
    HYPRE_Int  i, ndim = hypre_StructGridNDim(grid);
 
-   for (i = 0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       hypre_StructGridNumGhost(grid)[i] = num_ghost[i];
    }

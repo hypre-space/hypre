@@ -91,9 +91,9 @@ extern "C" {
 typedef enum _hypre_MemoryLocation
 {
    hypre_MEMORY_UNDEFINED = -1,
-   hypre_MEMORY_HOST          ,
-   hypre_MEMORY_HOST_PINNED   ,
-   hypre_MEMORY_DEVICE        ,
+   hypre_MEMORY_HOST,
+   hypre_MEMORY_HOST_PINNED,
+   hypre_MEMORY_DEVICE,
    hypre_MEMORY_UNIFIED
 } hypre_MemoryLocation;
 
@@ -259,7 +259,8 @@ void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
 void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
 void   hypre_Free(void *ptr, HYPRE_MemoryLocation location);
-void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst, HYPRE_MemoryLocation loc_src);
+void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst,
+                    HYPRE_MemoryLocation loc_src);
 void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocation location);
 
@@ -267,11 +268,13 @@ void * _hypre_MAlloc(size_t size, hypre_MemoryLocation location);
 void   _hypre_Free(void *ptr, hypre_MemoryLocation location);
 
 HYPRE_ExecutionPolicy hypre_GetExecPolicy1(HYPRE_MemoryLocation location);
-HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1, HYPRE_MemoryLocation location2);
+HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
+                                           HYPRE_MemoryLocation location2);
 
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_PrintMemoryTracker();
-HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin, size_t max_cached_bytes );
+HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin,
+                                   size_t max_cached_bytes );
 HYPRE_Int hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes);
 HYPRE_Int hypre_umpire_host_pooled_free(void *ptr);
 void *hypre_umpire_host_pooled_realloc(void *ptr, size_t size);
@@ -285,17 +288,18 @@ HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
 #ifdef HYPRE_USING_MEMORY_TRACKER
 hypre_MemoryTracker * hypre_MemoryTrackerCreate();
 void hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker);
-void hypre_MemoryTrackerInsert(const char *action, void *ptr, size_t nbytes, hypre_MemoryLocation memory_location, const char *filename, const char *function, HYPRE_Int line);
+void hypre_MemoryTrackerInsert(const char *action, void *ptr, size_t nbytes,
+                               hypre_MemoryLocation memory_location, const char *filename, const char *function, HYPRE_Int line);
 HYPRE_Int hypre_PrintMemoryTracker();
 #endif
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
 HYPRE_Int hypre_FinalizeMemoryDebugDML( void );
-char *hypre_MAllocDML( HYPRE_Int size , char *file , HYPRE_Int line );
-char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE_Int line );
-char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
-void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
+char *hypre_MAllocDML( HYPRE_Int size, char *file, HYPRE_Int line );
+char *hypre_CAllocDML( HYPRE_Int count, HYPRE_Int elt_size, char *file, HYPRE_Int line );
+char *hypre_ReAllocDML( char *ptr, HYPRE_Int size, char *file, HYPRE_Int line );
+void hypre_FreeDML( char *ptr, char *file, HYPRE_Int line );
 
 /* GPU malloc prototype */
 typedef void (*GPUMallocFunc)(void **, size_t);

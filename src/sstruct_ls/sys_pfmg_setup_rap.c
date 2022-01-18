@@ -9,7 +9,7 @@
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 hypre_SStructPMatrix *
 hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
                           hypre_SStructPMatrix *A,
@@ -40,7 +40,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    hypre_StructGrid      *cgrid;
 
-   HYPRE_Int              vi,vj;
+   HYPRE_Int              vi, vj;
 
    HYPRE_Int              sten_cntr;
 
@@ -72,7 +72,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
          P_s = hypre_SStructPMatrixSMatrix(P, vj, vj);
          sstencil_sizes[vj] = 0;
          if (A_s != NULL)
-         {         
+         {
             RAP_s = hypre_SemiCreateRAPOp(R_s, A_s, P_s,
                                           cgrid, cdir,
                                           P_stored_as_transpose);
@@ -82,11 +82,11 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
             shape = hypre_StructStencilShape(sstencil);
             sstencil_sizes[vj] = hypre_StructStencilSize(sstencil);
             stencil_size += sstencil_sizes[vj];
-            RAP_shapes[vj] = hypre_CTAlloc(hypre_Index, 
+            RAP_shapes[vj] = hypre_CTAlloc(hypre_Index,
                                            sstencil_sizes[vj], HYPRE_MEMORY_HOST);
             for (s = 0; s < sstencil_sizes[vj]; s++)
             {
-               hypre_CopyIndex(shape[s],RAP_shapes[vj][s]);
+               hypre_CopyIndex(shape[s], RAP_shapes[vj][s]);
             }
             hypre_StructMatrixDestroy(RAP_s);
          }
@@ -110,7 +110,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
    }
 
    /* create RAP Pmatrix */
-   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
+   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A),
                               coarse_grid, RAP_stencils, &RAP);
 
    hypre_TFree(RAP_shapes, HYPRE_MEMORY_HOST);
@@ -121,7 +121,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
                          hypre_SStructPMatrix *A,
@@ -132,7 +132,7 @@ hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
                          hypre_SStructPMatrix *Ac      )
 {
    HYPRE_Int               nvars;
-   HYPRE_Int               vi,vj;
+   HYPRE_Int               vi, vj;
 
    hypre_StructMatrix    *R_s;
    hypre_StructMatrix    *A_s;

@@ -49,7 +49,7 @@ hypre_SStructPartialPCopy( hypre_SStructPVector *px,
 
    for (var = 0; var < nvars; var++)
    {
-      boxes= array_boxes[var];
+      boxes = array_boxes[var];
       hypre_StructPartialCopy(hypre_SStructPVectorSVector(px, var),
                               hypre_SStructPVectorSVector(py, var),
                               boxes);
@@ -69,8 +69,8 @@ hypre_SStructCopy( hypre_SStructVector *x,
    HYPRE_Int nparts = hypre_SStructVectorNParts(x);
    HYPRE_Int part;
 
-   HYPRE_Int x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int x_object_type = hypre_SStructVectorObjectType(x);
+   HYPRE_Int y_object_type = hypre_SStructVectorObjectType(y);
 
    if (x_object_type != y_object_type)
    {
