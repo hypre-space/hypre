@@ -44,7 +44,7 @@ hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
                         HYPRE_Int *ghash_sizes,
                         HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (global_thread_id >= num_ghash)
    {
@@ -72,7 +72,7 @@ hypre_SpGemmGhashSize2( HYPRE_Int  num_rows,
                         HYPRE_Int *ghash_sizes,
                         HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1,1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
    if (i < num_rows)
    {
@@ -97,26 +97,27 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    hypre_assert(type == 2 || num_ghash <= num_rows);
 
    HYPRE_Int *ghash_i, ghash_size;
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
 
    if (type == 1)
    {
       ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_ghash, "thread", bDim);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_ghash, "thread", bDim);
       HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
                          num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
    else if (type == 2)
    {
       ghash_i = hypre_CTAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_rows, "thread", bDim);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
       HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
                          num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
 
    hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);
 
-   hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(&ghash_size, ghash_i + num_ghash, HYPRE_Int, 1, HYPRE_MEMORY_HOST,
+                 HYPRE_MEMORY_DEVICE);
 
    if (!ghash_size)
    {

@@ -34,8 +34,8 @@ static inline void*
 gpu_calloc(size_t num, size_t size)
 {
    void *ptr = NULL;
-   cudaMallocManaged(&ptr, num*size, cudaMemAttachGlobal);
-   cudaMemset(ptr, 0, num*size);
+   cudaMallocManaged(&ptr, num * size, cudaMemAttachGlobal);
+   cudaMemset(ptr, 0, num * size);
    return ptr;
 }
 

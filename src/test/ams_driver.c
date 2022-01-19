@@ -22,10 +22,10 @@
 void CheckIfFileExists(char *file)
 {
    FILE *test;
-   if (!(test = fopen(file,"r")))
+   if (!(test = fopen(file, "r")))
    {
       hypre_MPI_Finalize();
-      hypre_printf("Can't find the input file \"%s\"\n",file);
+      hypre_printf("Can't find the input file \"%s\"\n", file);
       exit(1);
    }
    fclose(test);
@@ -35,14 +35,14 @@ void AMSDriverMatrixRead(const char *file, HYPRE_ParCSRMatrix *A)
 {
    FILE *test;
    char file0[100];
-   sprintf(file0,"%s.D.0",file);
-   if (!(test = fopen(file0,"r")))
+   sprintf(file0, "%s.D.0", file);
+   if (!(test = fopen(file0, "r")))
    {
-      sprintf(file0,"%s.00000",file);
-      if (!(test = fopen(file0,"r")))
+      sprintf(file0, "%s.00000", file);
+      if (!(test = fopen(file0, "r")))
       {
          hypre_MPI_Finalize();
-         hypre_printf("Can't find the input file \"%s\"\n",file);
+         hypre_printf("Can't find the input file \"%s\"\n", file);
          exit(1);
       }
       else /* Read in IJ format*/
@@ -67,14 +67,14 @@ void AMSDriverVectorRead(const char *file, HYPRE_ParVector *x)
 {
    FILE *test;
    char file0[100];
-   sprintf(file0,"%s.0",file);
-   if (!(test = fopen(file0,"r")))
+   sprintf(file0, "%s.0", file);
+   if (!(test = fopen(file0, "r")))
    {
-      sprintf(file0,"%s.00000",file);
-      if (!(test = fopen(file0,"r")))
+      sprintf(file0, "%s.00000", file);
+      if (!(test = fopen(file0, "r")))
       {
          hypre_MPI_Finalize();
-         hypre_printf("Can't find the input file \"%s\"\n",file);
+         hypre_printf("Can't find the input file \"%s\"\n", file);
          exit(1);
       }
       else /* Read in IJ format*/
@@ -112,12 +112,12 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_Int blockSize;
    HYPRE_Solver solver, precond;
 
-   HYPRE_ParCSRMatrix A=0, G=0, Aalpha=0, Abeta=0, M=0;
-   HYPRE_ParVector x0=0, b=0;
-   HYPRE_ParVector Gx=0, Gy=0, Gz=0;
-   HYPRE_ParVector x=0, y=0, z=0;
+   HYPRE_ParCSRMatrix A = 0, G = 0, Aalpha = 0, Abeta = 0, M = 0;
+   HYPRE_ParVector x0 = 0, b = 0;
+   HYPRE_ParVector Gx = 0, Gy = 0, Gz = 0;
+   HYPRE_ParVector x = 0, y = 0, z = 0;
 
-   HYPRE_ParVector interior_nodes=0;
+   HYPRE_ParVector interior_nodes = 0;
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -156,9 +156,11 @@ hypre_int main (hypre_int argc, char *argv[])
    rlx_sweeps = 1;
    rlx_weight = 1.0; rlx_omega = 1.0;
 #if defined(HYPRE_USING_GPU)
-   cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8; coarse_rlx_type = 8, rlx_type = 2; /* PMIS */
+   cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8;
+   coarse_rlx_type = 8, rlx_type = 2; /* PMIS */
 #else
-   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8; coarse_rlx_type = 8, rlx_type = 2; /* HMIS-1 */
+   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8;
+   coarse_rlx_type = 8, rlx_type = 2; /* HMIS-1 */
 #endif
    /* cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 0; amg_rlx_type = 3; */ /* HMIS-0 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
@@ -306,7 +308,9 @@ hypre_int main (hypre_int argc, char *argv[])
       }
 
       if (argc == 1)
+      {
          print_usage = 1;
+      }
 
       if ((print_usage) && (myid == 0))
       {
@@ -364,7 +368,9 @@ hypre_int main (hypre_int argc, char *argv[])
       AMSDriverVectorRead("mfem.Gx", &Gx);
       AMSDriverVectorRead("mfem.Gy", &Gy);
       if (dim == 3)
+      {
          AMSDriverVectorRead("mfem.Gz", &Gz);
+      }
    }
 
    /* Vectors x, y and z */
@@ -373,7 +379,9 @@ hypre_int main (hypre_int argc, char *argv[])
       AMSDriverVectorRead("mfem.x", &x);
       AMSDriverVectorRead("mfem.y", &y);
       if (dim == 3)
+      {
          AMSDriverVectorRead("mfem.z", &z);
+      }
    }
 
    /* Poisson matrices */
@@ -391,7 +399,7 @@ hypre_int main (hypre_int argc, char *argv[])
    if (!myid)
    {
       hypre_printf("Problem size: %d\n\n",
-             hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)A));
+                   hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix*)A));
    }
 
    hypre_ParCSRMatrixMigrate(A,      hypre_HandleMemoryLocation(hypre_handle()));
@@ -490,11 +498,15 @@ hypre_int main (hypre_int argc, char *argv[])
 
       /* Vectors Gx, Gy and Gz */
       if (!coordinates)
-         HYPRE_AMSSetEdgeConstantVectors(solver,Gx,Gy,Gz);
+      {
+         HYPRE_AMSSetEdgeConstantVectors(solver, Gx, Gy, Gz);
+      }
 
       /* Vectors x, y and z */
       if (coordinates)
-         HYPRE_AMSSetCoordinateVectors(solver,x,y,z);
+      {
+         HYPRE_AMSSetCoordinateVectors(solver, x, y, z);
+      }
 
       /* Poisson matrices */
       if (h1_method)
@@ -504,12 +516,16 @@ hypre_int main (hypre_int argc, char *argv[])
       }
 
       if (singular_problem)
+      {
          HYPRE_AMSSetBetaPoissonMatrix(solver, NULL);
+      }
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(solver, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
-      HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
-      HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
+                                  amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
+                                 amg_interp_type, amg_Pmax);
       HYPRE_AMSSetAlphaAMGCoarseRelaxType(solver, coarse_rlx_type);
       HYPRE_AMSSetBetaAMGCoarseRelaxType(solver, coarse_rlx_type);
 
@@ -546,11 +562,17 @@ hypre_int main (hypre_int argc, char *argv[])
 
       /* Start timing */
       if (solver_id == 1)
+      {
          time_index = hypre_InitializeTiming("BoomerAMG-PCG Setup");
+      }
       else if (solver_id == 3)
+      {
          time_index = hypre_InitializeTiming("AMS-PCG Setup");
+      }
       else if (solver_id == 4)
+      {
          time_index = hypre_InitializeTiming("DS-PCG Setup");
+      }
       hypre_BeginTiming(time_index);
 
       /* Create solver */
@@ -600,16 +622,20 @@ hypre_int main (hypre_int argc, char *argv[])
             HYPRE_AMSSetInteriorNodes(precond, interior_nodes);
             HYPRE_AMSSetProjectionFrequency(precond, 5);
          }
-         HYPRE_PCGSetResidualTol(solver,rtol);
+         HYPRE_PCGSetResidualTol(solver, rtol);
          HYPRE_PCGSetRecomputeResidualP(solver, rr);
 
          /* Vectors Gx, Gy and Gz */
          if (!coordinates)
-            HYPRE_AMSSetEdgeConstantVectors(precond,Gx,Gy,Gz);
+         {
+            HYPRE_AMSSetEdgeConstantVectors(precond, Gx, Gy, Gz);
+         }
 
          /* Vectors x, y and z */
          if (coordinates)
-            HYPRE_AMSSetCoordinateVectors(precond,x,y,z);
+         {
+            HYPRE_AMSSetCoordinateVectors(precond, x, y, z);
+         }
 
          /* Poisson matrices */
          if (h1_method)
@@ -619,12 +645,16 @@ hypre_int main (hypre_int argc, char *argv[])
          }
 
          if (singular_problem)
+         {
             HYPRE_AMSSetBetaPoissonMatrix(precond, NULL);
+         }
 
          /* Smoothing and AMG options */
          HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
-         HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
-         HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+         HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
+                                     amg_interp_type, amg_Pmax);
+         HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
+                                    amg_interp_type, amg_Pmax);
          HYPRE_AMSSetAlphaAMGCoarseRelaxType(precond, coarse_rlx_type);
          HYPRE_AMSSetBetaAMGCoarseRelaxType(precond, coarse_rlx_type);
 
@@ -655,11 +685,17 @@ hypre_int main (hypre_int argc, char *argv[])
 
       /* Start timing again */
       if (solver_id == 1)
+      {
          time_index = hypre_InitializeTiming("BoomerAMG-PCG Solve");
+      }
       else if (solver_id == 3)
+      {
          time_index = hypre_InitializeTiming("AMS-PCG Solve");
+      }
       else if (solver_id == 4)
+      {
          time_index = hypre_InitializeTiming("DS-PCG Solve");
+      }
       hypre_BeginTiming(time_index);
 
       /* Solve */
@@ -685,9 +721,13 @@ hypre_int main (hypre_int argc, char *argv[])
       /* Destroy solver and preconditioner */
       HYPRE_ParCSRPCGDestroy(solver);
       if (solver_id == 1)
+      {
          HYPRE_BoomerAMGDestroy(precond);
+      }
       else if (solver_id == 3)
+      {
          HYPRE_AMSDestroy(precond);
+      }
    }
 
    if (solver_id == 5)
@@ -710,11 +750,15 @@ hypre_int main (hypre_int argc, char *argv[])
 
       /* Vectors Gx, Gy and Gz */
       if (!coordinates)
-         HYPRE_AMSSetEdgeConstantVectors(precond,Gx,Gy,Gz);
+      {
+         HYPRE_AMSSetEdgeConstantVectors(precond, Gx, Gy, Gz);
+      }
 
       /* Vectors x, y and z */
       if (coordinates)
-         HYPRE_AMSSetCoordinateVectors(precond,x,y,z);
+      {
+         HYPRE_AMSSetCoordinateVectors(precond, x, y, z);
+      }
 
       /* Poisson matrices */
       if (h1_method)
@@ -724,12 +768,16 @@ hypre_int main (hypre_int argc, char *argv[])
       }
 
       if (singular_problem)
+      {
          HYPRE_AMSSetBetaPoissonMatrix(precond, NULL);
+      }
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
-      HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
-      HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
+                                  amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
+                                 amg_interp_type, amg_Pmax);
       HYPRE_AMSSetAlphaAMGCoarseRelaxType(precond, coarse_rlx_type);
       HYPRE_AMSSetBetaAMGCoarseRelaxType(precond, coarse_rlx_type);
 
@@ -748,9 +796,13 @@ hypre_int main (hypre_int argc, char *argv[])
       HYPRE_AMESetMaxIter(solver, maxit); /* max iterations */
       HYPRE_AMESetTol(solver, tol); /* conv. tolerance */
       if (myid == 0)
-         HYPRE_AMESetPrintLevel(solver, 1); /* print solve info */
+      {
+         HYPRE_AMESetPrintLevel(solver, 1);   /* print solve info */
+      }
       else
+      {
          HYPRE_AMESetPrintLevel(solver, 0);
+      }
 
       /* Setup */
       HYPRE_AMESetup(solver);
@@ -787,21 +839,23 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_ParVectorDestroy(b);
    HYPRE_ParCSRMatrixDestroy(G);
 
-   if (M) HYPRE_ParCSRMatrixDestroy(M);
+   if (M) { HYPRE_ParCSRMatrixDestroy(M); }
 
-   if (Gx) HYPRE_ParVectorDestroy(Gx);
-   if (Gy) HYPRE_ParVectorDestroy(Gy);
-   if (Gz) HYPRE_ParVectorDestroy(Gz);
+   if (Gx) { HYPRE_ParVectorDestroy(Gx); }
+   if (Gy) { HYPRE_ParVectorDestroy(Gy); }
+   if (Gz) { HYPRE_ParVectorDestroy(Gz); }
 
-   if (x) HYPRE_ParVectorDestroy(x);
-   if (y) HYPRE_ParVectorDestroy(y);
-   if (z) HYPRE_ParVectorDestroy(z);
+   if (x) { HYPRE_ParVectorDestroy(x); }
+   if (y) { HYPRE_ParVectorDestroy(y); }
+   if (z) { HYPRE_ParVectorDestroy(z); }
 
-   if (Aalpha) HYPRE_ParCSRMatrixDestroy(Aalpha);
-   if (Abeta)  HYPRE_ParCSRMatrixDestroy(Abeta);
+   if (Aalpha) { HYPRE_ParCSRMatrixDestroy(Aalpha); }
+   if (Abeta) { HYPRE_ParCSRMatrixDestroy(Abeta); }
 
    if (zero_cond)
+   {
       HYPRE_ParVectorDestroy(interior_nodes);
+   }
 
    /* Finalize Hypre */
    HYPRE_Finalize();
@@ -810,7 +864,9 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Finalize();
 
    if (HYPRE_GetError() && !myid)
-      hypre_fprintf(stderr,"hypre_error_flag = %d\n", HYPRE_GetError());
+   {
+      hypre_fprintf(stderr, "hypre_error_flag = %d\n", HYPRE_GetError());
+   }
 
    return 0;
 }

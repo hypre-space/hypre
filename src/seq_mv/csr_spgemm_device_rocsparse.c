@@ -66,7 +66,7 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
    HYPRE_ROCSPARSE_CALL( rocsparse_set_pointer_mode(handle, rocsparse_pointer_mode_host) );
 
-   d_ic = hypre_TAlloc(HYPRE_Int, m+1, HYPRE_MEMORY_DEVICE);
+   d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
 
    // For rocsparse, we need an extra buffer for computing the
    // csrgemmnnz and the csrgemm

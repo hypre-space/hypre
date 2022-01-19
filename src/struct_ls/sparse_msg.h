@@ -21,7 +21,7 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
@@ -37,9 +37,9 @@ typedef struct
    HYPRE_Int             num_fine_relax; /* number of fine relaxation sweeps */
 
    HYPRE_Int             num_grids[3];   /* number of grids in each dim */
-   HYPRE_Int    		 num_all_grids;
-   HYPRE_Int    		 num_levels;
-                      
+   HYPRE_Int          num_all_grids;
+   HYPRE_Int          num_levels;
+
    hypre_StructGrid    **grid_array;
    hypre_StructGrid    **Px_grid_array;
    hypre_StructGrid    **Py_grid_array;

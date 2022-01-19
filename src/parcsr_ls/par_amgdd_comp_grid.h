@@ -29,7 +29,8 @@ typedef struct
    HYPRE_Int        ***num_recv_nodes; // number of nodes to recv on each composite level
 
    HYPRE_Int       ****send_flag; // flags which nodes to send after composite grid is built
-   HYPRE_Int       ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
+   HYPRE_Int
+   ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
    HYPRE_Int       ****recv_red_marker; // marker indicating a redundant recv
 
 } hypre_AMGDDCommPkg;
@@ -59,7 +60,8 @@ typedef struct
 {
    hypre_CSRMatrix      *owned_diag; // Domain: owned domain of mat. Range: owned range of mat.
    hypre_CSRMatrix      *owned_offd; // Domain: nonowned domain of mat. Range: owned range of mat.
-   hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
+   hypre_CSRMatrix
+   *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
    hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
 
    hypre_CSRMatrix      *real_real;  // Domain: nonowned real. Range: nonowned real.

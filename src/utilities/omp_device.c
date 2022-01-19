@@ -38,7 +38,8 @@ HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num,
 HYPRE_Int
 HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num)
 {
-   if (hypre__global_offload && !omp_target_is_present(p, device_num)) {
+   if (hypre__global_offload && !omp_target_is_present(p, device_num))
+   {
       printf("HYPRE mapping error: %p has not been mapped to device %d!\n", p, device_num);
       return 1;
    }
