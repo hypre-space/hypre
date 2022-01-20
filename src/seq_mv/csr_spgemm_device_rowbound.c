@@ -292,7 +292,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    HYPRE_Int num_warps = hypre_min(m, HYPRE_MAX_NUM_WARPS);
    dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, (size_t) m);
 
    const char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
