@@ -28,33 +28,38 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
    }
 
    /* symbolic */
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE,      HYPRE_WARP_SIZE, false>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE,      HYPRE_WARP_SIZE>
       (multiProcessorCount, &max_nblocks[0][5]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2, true>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2>
       (multiProcessorCount, &max_nblocks[0][6]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4, true>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4>
       (multiProcessorCount, &max_nblocks[0][7]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8, true>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8>
       (multiProcessorCount, &max_nblocks[0][8]);
-   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16, true>
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16>
       (multiProcessorCount, &max_nblocks[0][9]);
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32, HYPRE_WARP_SIZE * 32>
+      (multiProcessorCount, &max_nblocks[0][10]);
 
    /* numeric */
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  4, HYPRE_WARP_SIZE /  4, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  4, HYPRE_WARP_SIZE /  4>
       (multiProcessorCount, &max_nblocks[1][3]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  2, HYPRE_WARP_SIZE /  2, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE /  2, HYPRE_WARP_SIZE /  2>
       (multiProcessorCount, &max_nblocks[1][4]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE,      HYPRE_WARP_SIZE, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE,      HYPRE_WARP_SIZE>
       (multiProcessorCount, &max_nblocks[1][5]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2>
       (multiProcessorCount, &max_nblocks[1][6]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  4, HYPRE_WARP_SIZE *  4>
       (multiProcessorCount, &max_nblocks[1][7]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE *  8, HYPRE_WARP_SIZE *  8>
       (multiProcessorCount, &max_nblocks[1][8]);
-   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16, true>
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_WARP_SIZE * 16>
       (multiProcessorCount, &max_nblocks[1][9]);
+   hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 32, HYPRE_WARP_SIZE * 32>
+      (multiProcessorCount, &max_nblocks[1][10]);
 
+   /* this is just a heuristic; having more blocks (than max active) seems improving performance */
    for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] *= 5; max_nblocks[1][i] *= 5; }
    //for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] = max_nblocks[1][i] = 8192; }
 

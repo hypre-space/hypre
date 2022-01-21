@@ -189,10 +189,8 @@ hypre_spgemm_symbolic_binned( HYPRE_Int  m,
                                HYPRE_WARP_SIZE *  8, false, false); /* 4096,  256 */
    HYPRE_SPGEMM_ROWNNZ_BINNED( 9, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,
                                HYPRE_WARP_SIZE * 16, false, false); /* 8192,  512 */
-#if 0
    HYPRE_SPGEMM_ROWNNZ_BINNED(10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,
-                              HYPRE_WARP_SIZE * 32, true, false); /* 16384, 1024 */
-#endif
+                               HYPRE_WARP_SIZE * 32, true, false);  /* 16384, 1024 */
 
 #if defined(HYPRE_DEBUG)
    hypre_assert(_spgemm_nrows == m);

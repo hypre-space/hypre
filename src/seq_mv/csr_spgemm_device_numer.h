@@ -21,7 +21,7 @@
  * HashVals: assumed to be initialized as all 0's
  * Key:      assumed to be nonnegative
  */
-template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE>
+template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
@@ -31,7 +31,7 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
 {
    HYPRE_Int j = 0;
 
-#pragma unroll
+#pragma unroll(UNROLL_FACTOR)
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -95,7 +95,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
    return -1;
 }
 
-template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int GROUP_SIZE, bool HAS_GHASH>
+template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int GROUP_SIZE, bool HAS_GHASH, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 void
 hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
@@ -151,7 +151,7 @@ hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
             const HYPRE_Int     k_idx = read_only_load(jb + k);
             const HYPRE_Complex k_val = read_only_load(ab + k) * mult;
             /* first try to insert into shared memory hash table */
-            HYPRE_Int pos = hypre_spgemm_hash_insert_numer<SHMEM_HASH_SIZE, HASHTYPE>
+            HYPRE_Int pos = hypre_spgemm_hash_insert_numer<SHMEM_HASH_SIZE, HASHTYPE, UNROLL_FACTOR>
                             (s_HashKeys, s_HashVals, k_idx, k_val);
 
             if (HAS_GHASH && -1 == pos)
@@ -166,7 +166,7 @@ hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
    }
 }
 
-template <HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_GHASH>
+template <HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_GHASH, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int               lane_id,
@@ -182,7 +182,7 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int               lane_id,
    const HYPRE_Int STEP_SIZE = hypre_min(GROUP_SIZE, HYPRE_WARP_SIZE);
 
    /* copy shared memory hash table into C */
-#pragma unroll
+//#pragma unroll(UNROLL_FACTOR)
    for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
    {
       HYPRE_Int sum;
@@ -248,11 +248,19 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
    /* lane id inside the warp */
    volatile const HYPRE_Int warp_lane_id = get_warp_lane_id();
    /* shared memory hash table */
+#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+   extern __shared__ volatile HYPRE_Int shared_mem[];
+   volatile HYPRE_Int     *s_HashKeys = shared_mem;
+   volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
+#else
    __shared__ volatile HYPRE_Int     s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
    __shared__ volatile HYPRE_Complex s_HashVals[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
+#endif
    /* shared memory hash table for this group */
    volatile HYPRE_Int     *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *group_s_HashVals = s_HashVals + group_id * SHMEM_HASH_SIZE;
+
+   const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_NUMER_HASH_SIZE, SHMEM_HASH_SIZE);
 
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 
@@ -295,7 +303,7 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
       /* initialize group's shared memory hash table */
       if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
       {
-#pragma unroll
+#pragma unroll(UNROLL_FACTOR)
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -314,12 +322,9 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
                              GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane_id : lane_id);
 
       /* work with two hash tables */
-      hypre_spgemm_compute_row_numer<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH>(istart_a, iend_a,
-                                                                                       ja, aa, ib, jb, ab,
-                                                                                       group_s_HashKeys,
-                                                                                       group_s_HashVals,
-                                                                                       ghash_size,
-                                                                                       jg + istart_g, ag + istart_g);
+      hypre_spgemm_compute_row_numer<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, UNROLL_FACTOR>
+         (istart_a, iend_a, ja, aa, ib, jb, ab, group_s_HashKeys, group_s_HashVals, ghash_size,
+          jg + istart_g, ag + istart_g);
 
       if (GROUP_SIZE > HYPRE_WARP_SIZE)
       {
@@ -343,7 +348,7 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
                                 GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane_id : lane_id);
 #endif
 
-         jsum = hypre_spgemm_copy_from_hash_into_C_row<GROUP_SIZE, SHMEM_HASH_SIZE, HAS_GHASH>
+         jsum = hypre_spgemm_copy_from_hash_into_C_row<GROUP_SIZE, SHMEM_HASH_SIZE, HAS_GHASH, UNROLL_FACTOR>
                 (lane_id,
                  GROUP_SIZE >= HYPRE_WARP_SIZE || i < M ? group_s_HashKeys : NULL,
                  group_s_HashVals,
@@ -440,9 +445,15 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
 #ifdef HYPRE_SPGEMM_PRINTF
    printf0("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
            "exact_rownnz %d, need_ghash %d, ghash %p size %d\n",
-           __func__, __LINE__, BIN, m, k, n,
+           __FILE__, __LINE__, BIN, m, k, n,
            hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, exact_rownnz, need_ghash, d_ghash_i, ghash_size);
    printf0("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
+#endif
+
+#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+   const size_t shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
+#else
+   const size_t shmem_bytes = 0;
 #endif
 
    /* ---------------------------------------------------------------------------
@@ -456,38 +467,34 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    {
       if (ghash_size)
       {
-         HYPRE_CUDA_LAUNCH (
+         HYPRE_CUDA_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
-            gDim, bDim, /* shmem_size, */
-            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j,
-            d_ghash_a );
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else
       {
-         HYPRE_CUDA_LAUNCH (
+         HYPRE_CUDA_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
-            gDim, bDim, /* shmem_size, */
-            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j,
-            d_ghash_a );
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j, d_ghash_a );
       }
    }
    else
    {
       if (ghash_size)
       {
-         HYPRE_CUDA_LAUNCH (
+         HYPRE_CUDA_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
-            gDim, bDim, /* shmem_size, */
-            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j,
-            d_ghash_a );
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else
       {
-         HYPRE_CUDA_LAUNCH (
+         HYPRE_CUDA_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
-            gDim, bDim, /* shmem_size, */
-            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j,
-            d_ghash_a );
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j, d_ghash_a );
       }
    }
 
@@ -596,19 +603,38 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
+template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
                                                  HYPRE_Int *num_blocks_ptr )
 {
    const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
-   const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
    hypre_int numBlocksPerSm = 0;
-   hypre_int dynamic_shmem_size = GROUP_SIZE < 1024 ? 0 : shmem_bytes;
+#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+   const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
+   hypre_int dynamic_shmem_size = shmem_bytes;
+#else
+   hypre_int dynamic_shmem_size = 0;
+#endif
+
+#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, 'D', true>,
+         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, 'D', false>,
+         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+   /*
+   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, false, 'D', false>,
+         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+   */
+#endif
 
    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
          &numBlocksPerSm,
-         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, 'D', true>,
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, 'D', true>,
          block_size, dynamic_shmem_size);
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;

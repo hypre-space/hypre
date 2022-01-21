@@ -88,20 +88,23 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(BIN, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH)  \
-{                                                                                                         \
-   const HYPRE_Int p = h_bin_ptr[BIN - 1];                                                                \
-   const HYPRE_Int q = h_bin_ptr[BIN];                                                                    \
-   const HYPRE_Int bs = q - p;                                                                            \
-   if (bs)                                                                                                \
-   {                                                                                                      \
-      /* printf0("bin[%d]: %d rows\n", BIN, bs); */                                                       \
-      hypre_spgemm_numerical_with_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, true>                          \
-         (bs, d_rc_indice + p, k, n, GHASH, EXACT_ROWNNZ, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,         \
-          d_ic, d_jc, d_c);                                                                               \
-      HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                                                \
-   }                                                                                                      \
+#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED2(BIN, BIN2, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH)  \
+{                                                                                                                \
+   const HYPRE_Int p = h_bin_ptr[BIN - 1];                                                                       \
+   const HYPRE_Int q = h_bin_ptr[BIN];                                                                           \
+   const HYPRE_Int bs = q - p;                                                                                   \
+   if (bs)                                                                                                       \
+   {                                                                                                             \
+      /* printf0("bin[%d]: %d rows\n", BIN, bs); */                                                              \
+      hypre_spgemm_numerical_with_rownnz<BIN2, SHMEM_HASH_SIZE, GROUP_SIZE, true>                                \
+         (bs, d_rc_indice + p, k, n, GHASH, EXACT_ROWNNZ, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,                \
+          d_ic, d_jc, d_c);                                                                                      \
+      HYPRE_SPGEMM_ROW(_spgemm_nrows, bs);                                                                       \
+   }                                                                                                             \
 }
+
+#define HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(BIN, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH) \
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED2(BIN, BIN, SHMEM_HASH_SIZE, GROUP_SIZE, EXACT_ROWNNZ, GHASH)
 
 HYPRE_Int
 hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
@@ -190,10 +193,8 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
                                               HYPRE_WARP_SIZE *  8, exact_rownnz, false);  /* 2048,  256 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
                                               HYPRE_WARP_SIZE * 16, exact_rownnz, false);  /* 4096,  512 */
-#if 0
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(10,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 32,
-                                             HYPRE_WARP_SIZE * 32, true);   /* 8192, 1024 */
-#endif
+                                              HYPRE_WARP_SIZE * 32, exact_rownnz, true);   /* 8192, 1024 */
 
 #if defined(HYPRE_DEBUG)
    hypre_assert(_spgemm_nrows == m);

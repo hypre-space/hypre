@@ -23,7 +23,7 @@ hypre_spgemm_numerical_with_rownnz < 5, HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP
   HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
 template HYPRE_Int
-hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE, true>
+hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_WARP_SIZE>
 ( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
 
 template HYPRE_Int
