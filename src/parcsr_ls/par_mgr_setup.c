@@ -787,6 +787,7 @@ hypre_MGRSetup( void               *mgr_vdata,
     num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
     //wall_time = time_getWallclockSeconds();
+/*
     if (interp_type[lev] == 99)
     {
       hypre_MGRBuildInterp(A_array[lev], CF_marker, A_ff_inv, coarse_pnts_global, 1, dof_func_buff_data,
@@ -797,6 +798,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
                           debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     }
+*/
+    hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
+                        debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
     //wall_time = time_getWallclockSeconds() - wall_time;
     //hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
 
@@ -880,6 +884,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         //wall_time = time_getWallclockSeconds();
         //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
         RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
+        //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP_device");
         //char fname[256];
         //sprintf(fname, "RAP_%d", lev);
         //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
@@ -897,7 +902,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
     else
     {
-      hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, 0);
+      hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
     }
 #endif
     //wall_time = time_getWallclockSeconds() - wall_time;

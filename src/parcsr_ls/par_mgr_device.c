@@ -16,6 +16,20 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA)
+template<typename T>
+struct functor : public thrust::binary_function<T, T, T>
+{
+   T scale;
+
+   functor(T scale_) { scale = scale_; }
+
+   __host__ __device__
+   T operator()(T &x, T &y) const
+   {
+      return x + scale*(y - hypre_abs(x));
+   }
+};
+
 void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
 
 HYPRE_Int
@@ -34,7 +48,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
   hypre_CSRMatrix    *W_diag=NULL, *W_offd=NULL;
   HYPRE_Int           W_nr_of_rows, P_diag_nnz, nfpoints;
   HYPRE_Int          *P_diag_i=NULL, *P_diag_j=NULL, *P_offd_i=NULL;
-  HYPRE_Complex      *P_diag_data=NULL, *diag=NULL;
+  HYPRE_Complex      *P_diag_data=NULL, *diag=NULL, *diag1=NULL;
   HYPRE_BigInt        nC_global;
 
   hypre_MPI_Comm_size(comm, &num_procs);
@@ -55,12 +69,28 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
      diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, HYPRE_MEMORY_DEVICE);
      if (method == 1)
      {
-        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
+        // extract diag inverse sqrt
+//        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
+        
+        // L1-Jacobi-type interpolation
+        HYPRE_Complex scal = 1.0;
+        diag1 = hypre_CTAlloc(HYPRE_Complex, nfpoints, HYPRE_MEMORY_DEVICE);
+        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 0);
+        hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixDiag(A_FF), NULL, NULL, diag1, 1, 1.0, "set");
+        hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixDiag(A_FC), NULL, NULL, diag1, 1, 1.0, "add");
+        hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(A_FF), NULL, NULL, diag1, 1, 1.0, "add");
+        hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(A_FC), NULL, NULL, diag1, 1, 1.0, "add");
+        
+        HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag1, diag, functor<HYPRE_Complex>(scal));        
+        HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag, 1.0 / _1);
      }
      else if (method == 2)
      {
-        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 4);
+        // extract diag inverse
+        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 2);
      }
+
+     HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag, thrust::negate<HYPRE_Complex>() );
 
      hypre_Vector *D_FF_inv = hypre_SeqVectorCreate(nfpoints);
      hypre_VectorData(D_FF_inv) = diag;

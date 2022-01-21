@@ -19,6 +19,17 @@
 #include "dsuperlu.h"
 #endif
 
+#if defined(HYPRE_USING_CUDA)
+void hypre_NoGPUSupport(char *option)
+{
+  char msg[256];
+  hypre_sprintf(msg, "Error: Chosen %s option is not currently supported on GPU\n\n", option);
+  hypre_printf("%s ",msg);
+//  hypre_error_w_msg(1, msg);
+  hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
+}
+#endif  
+
 /* Create */
 void *
 hypre_MGRCreate()
@@ -3044,6 +3055,16 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
     {
       hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
       //hypre_ParCSRMatrixPrintIJ(P_ptr, 0, 0, "P_device");
+                      
+    /* MM-ext interp */
+//    hypre_BoomerAMGBuildModExtInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+//                      trunc_factor, max_elmts, &P_ptr);  
+
+//    hypre_BoomerAMGBuildModExtPIInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+//                      trunc_factor, max_elmts, &P_ptr);  
+                      
+//    hypre_BoomerAMGBuildModExtPEInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+//                      trunc_factor, max_elmts, &P_ptr);  
     }
 #endif
     /* Could do a few sweeps of Jacobi to further improve Jacobi interpolation P */
@@ -3060,19 +3081,54 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
   }
   else if (interp_type == 4)
   {
-    hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global, debug_flag, &P_ptr);
-    hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
+    if (exec == HYPRE_EXEC_HOST)
+    {
+       hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global, debug_flag, &P_ptr);
+       hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
+    }
+#if defined(HYPRE_USING_CUDA)
+    else
+    {
+       hypre_NoGPUSupport("interpolation");
+    }
+#endif    
   }
+/*  
   else if (interp_type == 99)
   {
-    hypre_MGRBuildInterpApproximateInverseExp(A, S, CF_marker, num_cpts_global, debug_flag, &P_ptr);
-    hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
+    if (exec == HYPRE_EXEC_HOST)
+    {
+       hypre_MGRBuildInterpApproximateInverseExp(A, S, CF_marker, num_cpts_global, debug_flag, &P_ptr);
+       hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
+    }
+#if defined(HYPRE_USING_CUDA)
+    else
+    {
+       hypre_NoGPUSupport("interpolation");
+    }
+#endif   
   }
+*/  
+  else if (interp_type == 5)
+  {
+     hypre_BoomerAMGBuildModExtInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+                      trunc_factor, max_elmts, &P_ptr); 
+  }
+  else if (interp_type == 6)
+  {
+     hypre_BoomerAMGBuildModExtPIInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+                      trunc_factor, max_elmts, &P_ptr); 
+  }
+  else if (interp_type == 7)
+  {
+     hypre_BoomerAMGBuildModExtPEInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+                      trunc_factor, max_elmts, &P_ptr); 
+  }     
   else
   {
     /* Classical modified interpolation */
     hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
-                      trunc_factor, max_elmts, &P_ptr);
+                      trunc_factor, max_elmts, &P_ptr);                   
   }
 
   /* set pointer to P */
