@@ -15,31 +15,22 @@
  * exact_rownnz: if d_rc is exact
  */
 HYPRE_Int
-hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
-                                                HYPRE_Int       k,
-                                                HYPRE_Int       n,
-                                                HYPRE_Int      *d_ia,
-                                                HYPRE_Int      *d_ja,
-                                                HYPRE_Complex  *d_a,
-                                                HYPRE_Int      *d_ib,
-                                                HYPRE_Int      *d_jb,
-                                                HYPRE_Complex  *d_b,
-                                                HYPRE_Int      *d_rc,
-                                                HYPRE_Int       exact_rownnz,
-                                                HYPRE_Int     **d_ic_out,
-                                                HYPRE_Int     **d_jc_out,
-                                                HYPRE_Complex **d_c_out,
-                                                HYPRE_Int      *nnzC_out )
+hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
+                                                     HYPRE_Int       k,
+                                                     HYPRE_Int       n,
+                                                     HYPRE_Int      *d_ia,
+                                                     HYPRE_Int      *d_ja,
+                                                     HYPRE_Complex  *d_a,
+                                                     HYPRE_Int      *d_ib,
+                                                     HYPRE_Int      *d_jb,
+                                                     HYPRE_Complex  *d_b,
+                                                     HYPRE_Int      *d_rc,
+                                                     HYPRE_Int       exact_rownnz,
+                                                     HYPRE_Int     **d_ic_out,
+                                                     HYPRE_Int     **d_jc_out,
+                                                     HYPRE_Complex **d_c_out,
+                                                     HYPRE_Int      *nnzC_out )
 {
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
-#endif
-
-#ifdef HYPRE_SPGEMM_NVTX
-   hypre_GpuProfilingPushRange("CSRSpGemmNumerBound");
-#endif
-
    const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
    const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE;
    const HYPRE_Int BIN = 5;
@@ -76,14 +67,6 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    *d_jc_out = d_jc;
    *d_c_out  = d_c;
    *nnzC_out = nnzC;
-
-#ifdef HYPRE_SPGEMM_NVTX
-   hypre_GpuProfilingPopRange();
-#endif
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
-#endif
 
    return hypre_error_flag;
 }
@@ -123,18 +106,6 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
                                                       HYPRE_Complex **d_c_out,
                                                       HYPRE_Int      *nnzC_out )
 {
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
-#endif
-
-#ifdef HYPRE_SPGEMM_NVTX
-   hypre_GpuProfilingPushRange("CSRSpGemmNumerBinned");
-#endif
-
-#ifdef HYPRE_SPGEMM_TIMING
-   HYPRE_Real t1, t2;
-#endif
-
    char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
    if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
    {
@@ -158,14 +129,14 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    /* create binning */
 #ifdef HYPRE_SPGEMM_TIMING
-   t1 = hypre_MPI_Wtime();
+   HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rc_indice, h_bin_ptr);
 
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
-   t2 = hypre_MPI_Wtime() - t1;
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    printf0("%s[%d]: Binning time %f\n", __func__, __LINE__, t2);
 #endif
 
@@ -211,6 +182,58 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    *nnzC_out = nnzC;
 
    hypre_TFree(d_rc_indice, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
+                                                HYPRE_Int       k,
+                                                HYPRE_Int       n,
+                                                HYPRE_Int      *d_ia,
+                                                HYPRE_Int      *d_ja,
+                                                HYPRE_Complex  *d_a,
+                                                HYPRE_Int      *d_ib,
+                                                HYPRE_Int      *d_jb,
+                                                HYPRE_Complex  *d_b,
+                                                HYPRE_Int      *d_rc,
+                                                HYPRE_Int       exact_rownnz,
+                                                HYPRE_Int     **d_ic_out,
+                                                HYPRE_Int     **d_jc_out,
+                                                HYPRE_Complex **d_c_out,
+                                                HYPRE_Int      *nnzC_out )
+
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmNumer");
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1 = hypre_MPI_Wtime();
+#endif
+
+   const HYPRE_Int binned = hypre_HandleSpgemmAlgorithmBinned(hypre_handle());
+
+   if (binned)
+   {
+      hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
+   }
+   else
+   {
+      hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
+   }
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
+   printf0("SpGemmNumerical time %f\n", t2);
+#endif
 
 #ifdef HYPRE_SPGEMM_NVTX
    hypre_GpuProfilingPopRange();

@@ -340,6 +340,10 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] -= hypre_MPI_Wtime();
 #endif
 
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1 = hypre_MPI_Wtime();
+#endif
+
    const HYPRE_Int num_warps_per_block =  16;
    const HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int BDIMX               =   2;
@@ -401,6 +405,12 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
       hypre_sprintf(msg, "Unknown row nnz estimation method %d! \n", row_est_mtd);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
    }
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
+   printf0("RownnzEst time %f\n", t2);
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] += hypre_MPI_Wtime();
