@@ -75,7 +75,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    {
       HYPRE_Int *d_rc = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
       const HYPRE_Int alg = hypre_HandleSpgemmAlgorithm(hypre_handle());
-      const HYPRE_Int row_est_mtd = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
 
       if (hypre_HandleSpgemmAlgorithmNumBin(hypre_handle()) == 0)
       {
@@ -90,8 +89,10 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
             (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
       }
-      else if (alg == 3)
+      else /* if (alg == 3) */
       {
+         const HYPRE_Int row_est_mtd = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
+
          hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, row_est_mtd);
 
          HYPRE_Int rownnz_exact;
