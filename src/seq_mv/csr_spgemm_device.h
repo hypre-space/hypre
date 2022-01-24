@@ -375,11 +375,6 @@ HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned(HYPRE_Int m, HYPR
                                                                HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int exact_rownnz, HYPRE_Int **d_ic_out,
                                                                HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
-HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                                       HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
-                                                       HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
-                                                       HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
-
 HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int m, char s, char t, char u, HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
 
 template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> 

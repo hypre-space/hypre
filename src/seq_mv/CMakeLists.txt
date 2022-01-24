@@ -18,8 +18,6 @@ set(SRCS
   csr_matvec_oomp.c
   csr_spadd_device.c
   csr_spgemm_device.c
-  csr_spgemm_device_attempt.c
-  csr_spgemm_device_confident.c
   csr_spgemm_device_cusparse.c
   csr_spgemm_device_rocsparse.c
   csr_spgemm_device_rowbound.c
@@ -51,8 +49,6 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     csr_matvec_oomp.c
     csr_spadd_device.c
     csr_spgemm_device.c
-    csr_spgemm_device_attempt.c
-    csr_spgemm_device_confident.c
     csr_spgemm_device_cusparse.c
     csr_spgemm_device_rocsparse.c
     csr_spgemm_device_rowbound.c

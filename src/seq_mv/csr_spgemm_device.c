@@ -127,29 +127,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          printf0("SpGemmNumerical time %f\n", t2);
 #endif
       }
-      else if (alg == 2)
-      {
-#ifdef HYPRE_SPGEMM_TIMING
-         t1 = hypre_MPI_Wtime();
-#endif
-         hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, row_est_mtd);
-#ifdef HYPRE_SPGEMM_TIMING
-         hypre_ForceSyncCudaComputeStream(hypre_handle());
-         t2 = hypre_MPI_Wtime() - t1;
-         printf0("RownnzEst time %f\n", t2);
-#endif
-
-#ifdef HYPRE_SPGEMM_TIMING
-         t1 = hypre_MPI_Wtime();
-#endif
-         hypreDevice_CSRSpGemmNumerWithRownnzEstimate(m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc,
-                                                      &d_ic, &d_jc, &d_c, &nnzC);
-#ifdef HYPRE_SPGEMM_TIMING
-         hypre_ForceSyncCudaComputeStream(hypre_handle());
-         t2 = hypre_MPI_Wtime() - t1;
-         printf0("SpGemmNumerical time %f\n", t2);
-#endif
-      }
       else if (alg == 3)
       {
 #ifdef HYPRE_SPGEMM_TIMING

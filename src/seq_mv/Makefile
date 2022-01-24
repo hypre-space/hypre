@@ -43,7 +43,6 @@ CUFILES =\
  csr_matvec_oomp.c\
  csr_spadd_device.c\
  csr_spgemm_device.c\
- csr_spgemm_device_attempt.c\
  csr_spgemm_device_cusparse.c\
  csr_spgemm_device_numblocks.c\
  csr_spgemm_device_numer.c\
