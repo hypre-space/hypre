@@ -838,6 +838,8 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
    hypre_StructStencil  *stencil        = hypre_StructMatrixStencil(matrix);
    HYPRE_Int             stencil_size   = hypre_StructStencilSize(stencil);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (data_space != NULL)
    {
       HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
@@ -873,6 +875,8 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       /* Set the data pointer */
       hypre_StructMatrixData(matrix) = data;
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
