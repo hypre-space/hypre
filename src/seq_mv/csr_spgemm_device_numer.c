@@ -38,7 +38,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0,      thrust::maximum<HYPRE_Int>());
    HYPRE_Int min_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, max_rc, thrust::minimum<HYPRE_Int>());
-   printf0("%s[%d]: max RC %d, min RC %d\n", __func__, __LINE__, max_rc, min_rc);
+   printf0("%s[%d]: max RC %d, min RC %d\n", __FILE__, __LINE__, max_rc, min_rc);
 #endif
 
    /* if rc contains exact rownnz: can allocate the final C=(ic,jc,c) directly;
@@ -51,7 +51,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
    hypre_create_ija(m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf0("%s[%d]: nnzC %d\n", __func__, __LINE__, nnzC);
+   printf0("%s[%d]: nnzC %d\n", __FILE__, __LINE__, nnzC);
 #endif
 
    /* even with exact rownnz, still may need global hash, since shared hash is smaller than symbol */

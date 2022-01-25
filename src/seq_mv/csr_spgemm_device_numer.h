@@ -579,7 +579,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
       hypre_create_ija(m, NULL, d_rc, d_ic_new, &d_jc_new, &d_c_new, &nnzC_new);
 
 #ifdef HYPRE_SPGEMM_PRINTF
-      printf0("%s[%d]: Post Copy: new nnzC %d\n", __func__, __LINE__, nnzC_new);
+      printf0("%s[%d]: Post Copy: new nnzC %d\n", __FILE__, __LINE__, nnzC_new);
 #endif
 
       /* copy to the final C */
