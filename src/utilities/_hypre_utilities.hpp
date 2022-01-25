@@ -283,6 +283,9 @@ struct hypre_DeviceData
 #else
    HYPRE_Int                         device;
 #endif
+
+   hypre_int                         device_max_shmem_per_block[2];
+
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) stream */
    HYPRE_Int                         compute_stream_num;
@@ -318,6 +321,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataCubUvmAllocator(data)                ((data) -> cub_uvm_allocator)
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
+#define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
 #define hypre_DeviceDataComputeStreamNum(data)               ((data) -> compute_stream_num)
 #define hypre_DeviceDataReduceBuffer(data)                   ((data) -> reduce_buffer)
 #define hypre_DeviceDataStructCommRecvBuffer(data)           ((data) -> struct_comm_recv_buffer)

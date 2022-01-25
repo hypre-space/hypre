@@ -472,6 +472,8 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    HYPRE_Init();
 
+   HYPRE_PrintDeviceInfo();
+
    /* for timing, sync after kernels */
    hypre_SetSyncCudaCompute(1);
 
