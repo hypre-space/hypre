@@ -28,6 +28,10 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
    }
 
    /* symbolic */
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4, HYPRE_WARP_SIZE /  4>
+      (multiProcessorCount, &max_nblocks[0][3]);
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2, HYPRE_WARP_SIZE /  2>
+      (multiProcessorCount, &max_nblocks[0][4]);
    hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE,      HYPRE_WARP_SIZE>
       (multiProcessorCount, &max_nblocks[0][5]);
    hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2, HYPRE_WARP_SIZE *  2>

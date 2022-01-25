@@ -412,15 +412,6 @@ static hypre_int printf0( const char * format, ... )
 #define printf0(...)
 #endif
 
-#if defined(HYPRE_DEBUG)
-#define HYPRE_SPGEMM_ROW(SUM, BIN_SIZE) \
-{                                       \
-   SUM += BIN_SIZE;                     \
-}
-#else
-#define HYPRE_SPGEMM_ROW(SUM, BIN_SIZE)
-#endif
-
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 #endif /* #ifndef CSR_SPGEMM_DEVICE_H */
 

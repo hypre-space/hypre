@@ -224,6 +224,11 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
                                   HYPRE_Int *d_rc_indice,
                                   HYPRE_Int *h_bin_ptr )
 {
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   HYPRE_Real t1 = hypre_MPI_Wtime();
+#endif
+
    HYPRE_Int  num_bins = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
    HYPRE_Int *d_bin_ptr = hypre_TAlloc(HYPRE_Int, num_bins + 1, HYPRE_MEMORY_DEVICE);
 
@@ -250,13 +255,19 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
                       thrust::make_counting_iterator(num_bins + 2),
                       d_bin_ptr );
 
-   hypre_TFree(d_bin_key, HYPRE_MEMORY_DEVICE);
-
    hypre_TMemcpy(h_bin_ptr, d_bin_ptr, HYPRE_Int, num_bins + 1, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
+
    hypre_assert(h_bin_ptr[num_bins] == m);
 
+   hypre_TFree(d_bin_key, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_bin_ptr, HYPRE_MEMORY_DEVICE);
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
+   printf0("%s[%d]: Binning time %f\n", __FILE__, __LINE__, t2);
+#endif
 
    return hypre_error_flag;
 }
