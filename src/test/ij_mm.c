@@ -450,7 +450,6 @@ main( hypre_int argc,
    HYPRE_Int          rowest_nsamples = -1; /* default */
    HYPRE_Real         rowest_mult = -1.0; /* default */
    HYPRE_Int          zero_mem_cost = 0;
-   char               hash_type = 'D';
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -614,11 +613,6 @@ main( hypre_int argc,
          arg_index++;
          job  = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-hash") == 0 )
-      {
-         arg_index++;
-         hash_type = argv[arg_index++][0];
-      }
       else if ( strcmp(argv[arg_index], "-zeromemcost") == 0 )
       {
          arg_index++;
@@ -699,8 +693,6 @@ main( hypre_int argc,
       errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
       hypre_assert(errcode == 0);
    }
-   errcode = hypre_SetSpGemmHashType(hash_type);
-   hypre_assert(errcode == 0);
    errcode = HYPRE_SetSpGemmUseCusparse(use_cusparse);
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);

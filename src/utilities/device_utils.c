@@ -1407,7 +1407,6 @@ hypre_DeviceDataCreate()
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
    hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
    hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
-   hypre_DeviceDataSpgemmHashType(data)                 = 'D';
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)

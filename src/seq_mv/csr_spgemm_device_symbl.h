@@ -328,11 +328,10 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
-   char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
-   if (hash_type != 'L' && hash_type != 'Q' && hash_type != 'D')
+   const char HASH_TYPE = HYPRE_SPGEMM_NUMER_HASH_TYPE;
+   if (HASH_TYPE != 'L' && HASH_TYPE != 'Q' && HASH_TYPE != 'D')
    {
       hypre_printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
-      hash_type = 'D';
    }
 
    /* ---------------------------------------------------------------------------
@@ -352,7 +351,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    printf0("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
            "can_fail %d, need_ghash %d, ghash %p size %d\n",
            __FILE__, __LINE__, BIN, m, k, n,
-           hash_type, SHMEM_HASH_SIZE, GROUP_SIZE, can_fail, need_ghash, d_ghash_i, ghash_size);
+           HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, can_fail, need_ghash, d_ghash_i, ghash_size);
    printf0("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
 #endif
 
@@ -375,14 +374,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
       if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH2(
-            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', true>),
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, true>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
          HYPRE_CUDA_LAUNCH2(
-            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, 'D', false>),
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
@@ -392,14 +391,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
       if (ghash_size)
       {
          HYPRE_CUDA_LAUNCH2(
-            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', true>),
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, true>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
          HYPRE_CUDA_LAUNCH2(
-            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, 'D', false>),
+            (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
@@ -415,6 +414,7 @@ template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
                                                 HYPRE_Int *num_blocks_ptr )
 {
+   const char HASH_TYPE = HYPRE_SPGEMM_NUMER_HASH_TYPE;
    const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
    hypre_int numBlocksPerSm = 0;
@@ -427,22 +427,31 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, 'D', true>,
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, 'D', false>,
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, false>,
          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, true>,
+         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, false>,
+         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
    /*
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, true, 'D', false>,
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, true, HASH_TYPE, false>,
          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
    */
 #endif
 
    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
          &numBlocksPerSm,
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, 'D', true>,
+         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
          block_size, dynamic_shmem_size);
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;

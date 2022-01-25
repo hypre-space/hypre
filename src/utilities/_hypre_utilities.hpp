@@ -305,7 +305,6 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
-   char                              spgemm_hash_type;
    /* cusparse */
    HYPRE_Int                         spmv_use_cusparse;
    HYPRE_Int                         sptrans_use_cusparse;
@@ -338,7 +337,6 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
-#define hypre_DeviceDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_DeviceDataDeviceAllocator(data)                ((data) -> device_allocator)
 #define hypre_DeviceDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 

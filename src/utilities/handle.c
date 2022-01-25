@@ -90,22 +90,6 @@ hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value )
    return hypre_error_flag;
 }
 
-HYPRE_Int
-hypre_SetSpGemmHashType( char value )
-{
-#if defined(HYPRE_USING_GPU)
-   if (value == 'L' || value == 'Q' || value == 'D')
-   {
-      hypre_HandleSpgemmHashType(hypre_handle()) = value;
-   }
-   else
-   {
-      hypre_error_in_arg(1);
-   }
-#endif
-   return hypre_error_flag;
-}
-
 /* GPU Rand */
 HYPRE_Int
 hypre_SetUseGpuRand( HYPRE_Int use_gpurand )

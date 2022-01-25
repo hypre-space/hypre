@@ -185,7 +185,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
    char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
 
    hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
-   (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
+      (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
 
    if (can_fail)
    {
