@@ -1529,6 +1529,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (num_functions > 1)
                {
                   hypre_IntArrayDestroy(coarse_dof_func);
+                  coarse_dof_func = NULL;
                }
                hypre_IntArrayDestroy(CF_marker_array[level]);
                CF_marker_array[level] = NULL;
@@ -2340,8 +2341,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorDestroy(F_array[level]);
             hypre_ParVectorDestroy(U_array[level]);
          }
-         hypre_IntArrayDestroy(dof_func_array[level + 1]);
-         dof_func_array[level + 1] = NULL;
+         if (level + 1 < max_levels)
+         {
+            hypre_IntArrayDestroy(dof_func_array[level + 1]);
+            dof_func_array[level + 1] = NULL;
+         }
 
          break;
       }

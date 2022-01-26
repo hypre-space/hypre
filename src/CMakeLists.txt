@@ -101,9 +101,11 @@ option(HYPRE_BUILD_TESTS             "Build tests" OFF)
 option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
 set(HYPRE_WITH_EXTRA_CFLAGS       "" CACHE STRING "Define extra C compile flags")
 set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flags")
-# CUDA options
+# GPU options
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
+option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
+# CUDA options
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
@@ -280,6 +282,52 @@ if (HYPRE_WITH_CUDA)
   endif (CMAKE_CUDA_COMPILER)
 endif (HYPRE_WITH_CUDA)
 
+# SYCL
+if (HYPRE_WITH_SYCL)
+  enable_language(CXX)
+  message(STATUS "Enabled support for CXX.")
+
+  # Enforce C++17
+  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
+    set(CMAKE_CXX_STANDARD 17)
+  endif ()
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
+
+  # Set CXX compiler to dpcpp
+  set(CMAKE_CXX_COMPILER "dpcpp")
+
+  # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
+  if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
+    string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS}>")
+  endif ()
+
+  set(HYPRE_USING_SYCL ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
+
+  if (HYPRE_ENABLE_UNIFIED_MEMORY)
+    set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
+  else ()
+    set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
+  endif ()
+
+  # Check if examples are enabled, but not unified memory
+  if (HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
+    message(WARNING "Running the examples on GPUs requires Unified Memory!
+      Examples will not be built!")
+    set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  endif ()
+
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
+
+  set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
+
+endif (HYPRE_WITH_SYCL)
+
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
 if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
   string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS "${HYPRE_WITH_EXTRA_CFLAGS}")
@@ -373,6 +421,11 @@ if (HYPRE_USING_CUDA)
   endif ()
 endif ()
 
+if (HYPRE_USING_CALIPER)
+  find_package(caliper REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC caliper)
+endif()
+
 # Configure a header file to pass CMake settings to the source code
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
@@ -397,7 +450,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   )
 
 if (HYPRE_USING_CUDA)
-  set_source_files_properties(${HYPRE_CUDA_SOURCES} PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
+endif ()
+
+if (HYPRE_USING_SYCL)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
 endif ()
 
 # Set MPI compile flags
@@ -459,7 +516,7 @@ install(TARGETS ${PROJECT_NAME}
   EXPORT HYPRETargets
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  RUNTIME DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
   INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 install(FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
@@ -491,5 +548,9 @@ export(EXPORT HYPRETargets
   FILE "${CMAKE_CURRENT_BINARY_DIR}/HYPRETargets.cmake"
   NAMESPACE HYPRE::
   )
+
+# Declare an alias so that consumers can depend on HYPRE::HYPRE target
+# also when using HYPRE via add_directory or FetchContent
+add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 export(PACKAGE ${PROJECT_NAME})

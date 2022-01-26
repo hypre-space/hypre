@@ -79,6 +79,11 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+/* WM: todo - I have a problem where I need to include this outside the extern "C++" {} block, so I'm doing this manually here for now */
+#if defined(HYPRE_USING_SYCL)
+#include <CL/sycl.hpp>
+#endif
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -90,9 +95,9 @@ extern "C++" {
 #===========================================================================
 
 cat device_allocator.h >> $INTERNAL_HEADER
-cat cuda_utils.h       >> $INTERNAL_HEADER
-cat cuda_reducer.h     >> $INTERNAL_HEADER
-cat cub_allocator.h    >> $INTERNAL_HEADER
+cat device_utils.h         >> $INTERNAL_HEADER
+cat device_reducer.h       >> $INTERNAL_HEADER
+cat cub_allocator.h        >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

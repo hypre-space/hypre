@@ -72,7 +72,7 @@ fi
 for tname in $tests
 do
    if [ "$tname" = "gpu" ]; then
-      make -j -f Makefile_gpu $mopt $tname
+      make -j "use_cuda=1" $mopt $tname
    else
       make $mopt $tname
    fi

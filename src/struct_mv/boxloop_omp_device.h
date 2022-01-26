@@ -576,4 +576,3 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 
 #endif /* #ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER */
 
-

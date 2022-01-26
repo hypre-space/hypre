@@ -33,14 +33,16 @@
 
       program ex5f
 
+      use, intrinsic :: iso_c_binding
+      use, intrinsic :: iso_fortran_env, only: int64
+      use cudaf
 
       implicit none
 
       include 'mpif.h'
       include 'HYPREf.h'
 
-      integer    MAX_LOCAL_SIZE
-      parameter  (MAX_LOCAL_SIZE=123000)
+      integer, parameter :: MAX_LOCAL_SIZE = 123000
 
       integer    ierr
       integer    num_procs, myid
@@ -49,14 +51,17 @@
       integer    nnz, ilower, iupper, i
       integer    precond_id;
       double precision h, h2
-      double precision rhs_values(MAX_LOCAL_SIZE)
-      double precision x_values(MAX_LOCAL_SIZE)
-      integer    rows(MAX_LOCAL_SIZE)
-      integer    cols(5)
-      integer    tmp(2)
-      double precision values(5)
 
-      integer    num_iterations
+      double precision, pointer :: rhs_values(:)
+      double precision, pointer :: x_values(:)
+      double precision, pointer :: values(:)
+      integer, pointer :: rows(:)
+      integer, pointer :: cols(:)
+      integer, pointer :: tmpi(:)
+
+      integer :: stat
+
+      integer num_iterations
       double precision final_res_norm, tol
 
       integer    mpi_comm
@@ -69,6 +74,30 @@
       integer*8  par_x
       integer*8  solver
       integer*8  precond
+
+      type(c_ptr) :: p_rhs_values
+      type(c_ptr) :: p_x_values
+      type(c_ptr) :: p_values
+      type(c_ptr) :: p_rows
+      type(c_ptr) :: p_cols
+      type(c_ptr) :: p_tmpi
+
+      stat = device_malloc_managed(int(MAX_LOCAL_SIZE * 8, int64),
+     1                             p_rhs_values)
+      stat = device_malloc_managed(int(MAX_LOCAL_SIZE * 8, int64),
+     1                             p_x_values)
+      stat = device_malloc_managed(int(5 * 8, int64), p_values)
+      stat = device_malloc_managed(int(MAX_LOCAL_SIZE * 4, int64),
+     1                             p_rows)
+      stat = device_malloc_managed(int(5 * 4, int64), p_cols)
+      stat = device_malloc_managed(int(2 * 4, int64), p_tmpi)
+
+      call c_f_pointer(p_rhs_values, rhs_values, [MAX_LOCAL_SIZE])
+      call c_f_pointer(p_x_values, x_values, [MAX_LOCAL_SIZE])
+      call c_f_pointer(p_values, values, [5])
+      call c_f_pointer(p_rows, rows, [MAX_LOCAL_SIZE])
+      call c_f_pointer(p_cols, cols, [5])
+      call c_f_pointer(p_tmpi, tmpi, [2])
 
 !-----------------------------------------------------------------------
 !     Initialize MPI
@@ -85,15 +114,6 @@
       call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)
 
       call HYPRE_SetSpGemmUseCusparse(0, ierr)
-
-!   Call omp target after HYPRE_Init()
-
-      !$omp target enter data map(alloc:rhs_values)
-      !$omp target enter data map(alloc:x_values)
-      !$omp target enter data map(alloc:rows)
-      !$omp target enter data map(alloc:cols)
-      !$omp target enter data map(alloc:values)
-      !$omp target enter data map(alloc:tmp)
 
 !   Default problem parameters
       n = 33
@@ -190,13 +210,10 @@
          endif
 
 !        Set the values for row i
-         tmp(1) = nnz - 1
-         tmp(2) = i
-         !$omp target update to(cols, values, tmp)
-         !$omp target data use_device_ptr(cols, values, tmp)
+         tmpi(1) = nnz-1
+         tmpi(2) = i
          call HYPRE_IJMatrixSetValues(
-     1        A, 1, tmp(1), tmp(2), cols, values, ierr)
-         !$omp end target data
+     1        A, 1, tmpi(1), tmpi(2), cols, values, ierr)
       enddo
 
 
@@ -225,14 +242,10 @@
          x_values(i) = 0.0
          rows(i) = ilower + i -1
       enddo
-
-      !$omp target update to(rhs_values, x_values, rows)
-      !$omp target data use_device_ptr(rows, rhs_values, x_values)
       call HYPRE_IJVectorSetValues(
      1     b, local_size, rows, rhs_values, ierr)
       call HYPRE_IJVectorSetValues(
      1     x, local_size, rows, x_values, ierr)
-      !$omp end target data
 
 
       call HYPRE_IJVectorAssemble(b, ierr)
@@ -487,12 +500,12 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      !$omp target exit data map(release:rhs_values)
-      !$omp target exit data map(release:x_values)
-      !$omp target exit data map(release:rows)
-      !$omp target exit data map(release:cols)
-      !$omp target exit data map(release:values)
-      !$omp target exit data map(release:tmp)
+      stat = device_free(p_rhs_values)
+      stat = device_free(p_x_values)
+      stat = device_free(p_rows)
+      stat = device_free(p_cols)
+      stat = device_free(p_tmpi)
+      stat = device_free(p_values)
 
       stop
       end

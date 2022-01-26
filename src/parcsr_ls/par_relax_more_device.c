@@ -153,8 +153,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    dim3 bDim, gDim;
 
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(A_num_rows, "warp", bDim);
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
                      gDim,
                      bDim,
@@ -377,6 +377,11 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       /*gamma = <r,Cr> */
       gamma_old = gamma;
       gamma     = hypre_ParVectorInnerProd(r, s);
+
+      if (gamma < HYPRE_REAL_EPSILON)
+      {
+         break;
+      }
 
       if (i == 0)
       {
