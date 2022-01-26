@@ -363,7 +363,6 @@ cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
-#if defined(HYPRE_USING_CUDA_STREAMS)
 #if defined(HYPRE_USING_CUDA)
 cudaStream_t        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 cudaStream_t        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
@@ -373,7 +372,6 @@ hipStream_t         hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_SYCL)
 sycl::queue*        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 sycl::queue*        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
-#endif
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
@@ -714,7 +712,11 @@ template <typename T>
 static __device__ __forceinline__
 T read_only_load( const T *ptr )
 {
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 350
    return __ldg( ptr );
+#else
+   return *ptr;
+#endif
 }
 
 /* exclusive prefix scan */

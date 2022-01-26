@@ -378,6 +378,11 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       gamma_old = gamma;
       gamma     = hypre_ParVectorInnerProd(r, s);
 
+      if (gamma < HYPRE_REAL_EPSILON)
+      {
+         break;
+      }
+
       if (i == 0)
       {
          beta = 1.0;

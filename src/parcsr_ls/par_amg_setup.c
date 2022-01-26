@@ -2298,6 +2298,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             dof_func_array[level + 1] = coarse_dof_func;
          }
+
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
       } /* end of if max_levels > 1 */
 

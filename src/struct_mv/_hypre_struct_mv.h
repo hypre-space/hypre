@@ -2626,7 +2626,6 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 
 #endif /* #ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER */
 
-
 /******************************************************************************
  * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

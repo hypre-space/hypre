@@ -8224,7 +8224,7 @@ ReadParVectorFromFile( HYPRE_Int            argc,
    }
    else
    {
-      hypre_printf("Error: No filename specified \n");
+      hypre_printf("  Error: No filename specified \n");
       exit(1);
    }
 
@@ -8234,7 +8234,7 @@ ReadParVectorFromFile( HYPRE_Int            argc,
 
    if (myid == 0)
    {
-      hypre_printf(" From ParFile: %s\n", filename);
+      hypre_printf("  From ParFile: %s\n", filename);
    }
 
    /*-----------------------------------------------------------
