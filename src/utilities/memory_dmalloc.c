@@ -63,9 +63,13 @@ hypre_MAllocDML( HYPRE_Int   size,
    char *ptr;
 
    if (size > 0)
+   {
       ptr = _malloc_leap(file, line, size);
+   }
    else
+   {
       ptr = NULL;
+   }
 
    return ptr;
 }
@@ -81,7 +85,7 @@ hypre_CAllocDML( HYPRE_Int   count,
                  HYPRE_Int   line    )
 {
    char *ptr;
-   HYPRE_Int   size = count*elt_size;
+   HYPRE_Int   size = count * elt_size;
 
    if (size > 0)
    {

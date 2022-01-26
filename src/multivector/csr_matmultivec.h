@@ -21,7 +21,7 @@ HYPRE_Int
 hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
                            hypre_Multivector *x, HYPRE_Complex beta,
                            hypre_Multivector *y);
-                            
+
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiMatvecT
@@ -35,7 +35,7 @@ HYPRE_Int
 hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
                             hypre_Multivector *x, HYPRE_Complex beta,
                             hypre_Multivector *y);
-                             
+
 #ifdef __cplusplus
 }
 #endif

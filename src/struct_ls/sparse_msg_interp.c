@@ -208,7 +208,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {
@@ -267,7 +267,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   hypre_IncFLOPCount(3*hypre_StructVectorGlobalSize(xc));
+   hypre_IncFLOPCount(3 * hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(interp_data -> time_index);
 
    return ierr;

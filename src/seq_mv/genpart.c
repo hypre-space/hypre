@@ -22,14 +22,14 @@ hypre_GeneratePartitioning(HYPRE_BigInt length, HYPRE_Int num_procs, HYPRE_BigIn
    HYPRE_Int size, rest;
    HYPRE_Int i;
 
-   part = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
+   part = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);
    size = (HYPRE_Int)(length / (HYPRE_BigInt)num_procs);
-   rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size*num_procs));
+   rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size * num_procs));
    part[0] = 0;
-   for (i=0; i < num_procs; i++)
+   for (i = 0; i < num_procs; i++)
    {
-	part[i+1] = part[i]+(HYPRE_BigInt)size;
-	if (i < rest) part[i+1]++;
+      part[i + 1] = part[i] + (HYPRE_BigInt)size;
+      if (i < rest) { part[i + 1]++; }
    }
 
    *part_ptr = part;
@@ -54,15 +54,15 @@ hypre_GenerateLocalPartitioning(HYPRE_BigInt   length,
    HYPRE_Int  size, rest;
 
    size = (HYPRE_Int)(length / (HYPRE_BigInt)num_procs);
-   rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size*num_procs));
+   rest = (HYPRE_Int)(length - (HYPRE_BigInt)(size * num_procs));
 
    /* first row I own */
-   part[0] = (HYPRE_BigInt)(size*myid);
+   part[0] = (HYPRE_BigInt)(size * myid);
    part[0] += (HYPRE_BigInt)(hypre_min(myid, rest));
 
    /* last row I own */
-   part[1] =  (HYPRE_BigInt)(size*(myid+1));
-   part[1] += (HYPRE_BigInt)(hypre_min(myid+1, rest));
+   part[1] =  (HYPRE_BigInt)(size * (myid + 1));
+   part[1] += (HYPRE_BigInt)(hypre_min(myid + 1, rest));
    part[1] = part[1] - 1;
 
    /* add 1 to last row since this is for "starts" vector */

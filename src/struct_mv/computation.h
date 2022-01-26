@@ -50,7 +50,7 @@ typedef struct hypre_ComputePkg_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ComputeInfo
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ComputeInfoCommInfo(info)     (info -> comm_info)
 #define hypre_ComputeInfoIndtBoxes(info)    (info -> indt_boxes)
 #define hypre_ComputeInfoDeptBoxes(info)    (info -> dept_boxes)
@@ -59,7 +59,7 @@ typedef struct hypre_ComputePkg_struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ComputePkg
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
 
 #define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)

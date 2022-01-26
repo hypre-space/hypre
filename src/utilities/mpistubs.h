@@ -246,61 +246,100 @@ typedef MPI_User_function    hypre_MPI_User_function;
  *--------------------------------------------------------------------------*/
 
 /* mpistubs.c */
-HYPRE_Int hypre_MPI_Init( hypre_int *argc , char ***argv );
+HYPRE_Int hypre_MPI_Init( hypre_int *argc, char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
-HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm , HYPRE_Int errorcode );
+HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm, HYPRE_Int errorcode );
 HYPRE_Real hypre_MPI_Wtime( void );
 HYPRE_Real hypre_MPI_Wtick( void );
 HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm , hypre_MPI_Group group , hypre_MPI_Comm *newcomm );
-HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm , hypre_MPI_Comm *newcomm );
+HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm, hypre_MPI_Group group,
+                                 hypre_MPI_Comm *newcomm );
+HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm, hypre_MPI_Comm *newcomm );
 hypre_MPI_Comm hypre_MPI_Comm_f2c( hypre_int comm );
-HYPRE_Int hypre_MPI_Comm_size( hypre_MPI_Comm comm , HYPRE_Int *size );
-HYPRE_Int hypre_MPI_Comm_rank( hypre_MPI_Comm comm , HYPRE_Int *rank );
+HYPRE_Int hypre_MPI_Comm_size( hypre_MPI_Comm comm, HYPRE_Int *size );
+HYPRE_Int hypre_MPI_Comm_rank( hypre_MPI_Comm comm, HYPRE_Int *rank );
 HYPRE_Int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );
-HYPRE_Int hypre_MPI_Comm_group( hypre_MPI_Comm comm , hypre_MPI_Group *group );
-HYPRE_Int hypre_MPI_Comm_split( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m, hypre_MPI_Comm * comms );
-HYPRE_Int hypre_MPI_Group_incl( hypre_MPI_Group group , HYPRE_Int n , HYPRE_Int *ranks , hypre_MPI_Group *newgroup );
+HYPRE_Int hypre_MPI_Comm_group( hypre_MPI_Comm comm, hypre_MPI_Group *group );
+HYPRE_Int hypre_MPI_Comm_split( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m,
+                                hypre_MPI_Comm * comms );
+HYPRE_Int hypre_MPI_Group_incl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks,
+                                hypre_MPI_Group *newgroup );
 HYPRE_Int hypre_MPI_Group_free( hypre_MPI_Group *group );
-HYPRE_Int hypre_MPI_Address( void *location , hypre_MPI_Aint *address );
-HYPRE_Int hypre_MPI_Get_count( hypre_MPI_Status *status , hypre_MPI_Datatype datatype , HYPRE_Int *count );
-HYPRE_Int hypre_MPI_Alltoall( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Allgather( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Allgatherv( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Gather( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Gatherv( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Scatter( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Scatterv( void *sendbuf , HYPRE_Int *sendcounts , HYPRE_Int *displs, hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Bcast( void *buffer , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int root , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Send( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Recv( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Status *status );
-HYPRE_Int hypre_MPI_Isend( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Request *request );
-HYPRE_Int hypre_MPI_Irecv( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Request *request );
-HYPRE_Int hypre_MPI_Send_init( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Request *request );
-HYPRE_Int hypre_MPI_Recv_init( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Request *request );
-HYPRE_Int hypre_MPI_Irsend( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Request *request );
-HYPRE_Int hypre_MPI_Startall( HYPRE_Int count , hypre_MPI_Request *array_of_requests );
-HYPRE_Int hypre_MPI_Probe( HYPRE_Int source , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Status *status );
-HYPRE_Int hypre_MPI_Iprobe( HYPRE_Int source , HYPRE_Int tag , hypre_MPI_Comm comm , HYPRE_Int *flag , hypre_MPI_Status *status );
-HYPRE_Int hypre_MPI_Test( hypre_MPI_Request *request , HYPRE_Int *flag , hypre_MPI_Status *status );
-HYPRE_Int hypre_MPI_Testall( HYPRE_Int count , hypre_MPI_Request *array_of_requests , HYPRE_Int *flag , hypre_MPI_Status *array_of_statuses );
-HYPRE_Int hypre_MPI_Wait( hypre_MPI_Request *request , hypre_MPI_Status *status );
-HYPRE_Int hypre_MPI_Waitall( HYPRE_Int count , hypre_MPI_Request *array_of_requests , hypre_MPI_Status *array_of_statuses );
-HYPRE_Int hypre_MPI_Waitany( HYPRE_Int count , hypre_MPI_Request *array_of_requests , HYPRE_Int *index , hypre_MPI_Status *status );
-HYPRE_Int hypre_MPI_Allreduce( void *sendbuf , void *recvbuf , HYPRE_Int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Reduce( void *sendbuf , void *recvbuf , HYPRE_Int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , HYPRE_Int root , hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Scan( void *sendbuf , void *recvbuf , HYPRE_Int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Address( void *location, hypre_MPI_Aint *address );
+HYPRE_Int hypre_MPI_Get_count( hypre_MPI_Status *status, hypre_MPI_Datatype datatype,
+                               HYPRE_Int *count );
+HYPRE_Int hypre_MPI_Alltoall( void *sendbuf, HYPRE_Int sendcount, hypre_MPI_Datatype sendtype,
+                              void *recvbuf, HYPRE_Int recvcount, hypre_MPI_Datatype recvtype, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Allgather( void *sendbuf, HYPRE_Int sendcount, hypre_MPI_Datatype sendtype,
+                               void *recvbuf, HYPRE_Int recvcount, hypre_MPI_Datatype recvtype, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Allgatherv( void *sendbuf, HYPRE_Int sendcount, hypre_MPI_Datatype sendtype,
+                                void *recvbuf, HYPRE_Int *recvcounts, HYPRE_Int *displs, hypre_MPI_Datatype recvtype,
+                                hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Gather( void *sendbuf, HYPRE_Int sendcount, hypre_MPI_Datatype sendtype,
+                            void *recvbuf, HYPRE_Int recvcount, hypre_MPI_Datatype recvtype, HYPRE_Int root,
+                            hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Gatherv( void *sendbuf, HYPRE_Int sendcount, hypre_MPI_Datatype sendtype,
+                             void *recvbuf, HYPRE_Int *recvcounts, HYPRE_Int *displs, hypre_MPI_Datatype recvtype,
+                             HYPRE_Int root, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Scatter( void *sendbuf, HYPRE_Int sendcount, hypre_MPI_Datatype sendtype,
+                             void *recvbuf, HYPRE_Int recvcount, hypre_MPI_Datatype recvtype, HYPRE_Int root,
+                             hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Scatterv( void *sendbuf, HYPRE_Int *sendcounts, HYPRE_Int *displs,
+                              hypre_MPI_Datatype sendtype, void *recvbuf, HYPRE_Int recvcount, hypre_MPI_Datatype recvtype,
+                              HYPRE_Int root, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Bcast( void *buffer, HYPRE_Int count, hypre_MPI_Datatype datatype,
+                           HYPRE_Int root, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Send( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype, HYPRE_Int dest,
+                          HYPRE_Int tag, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Recv( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype, HYPRE_Int source,
+                          HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Status *status );
+HYPRE_Int hypre_MPI_Isend( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype, HYPRE_Int dest,
+                           HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Irecv( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype,
+                           HYPRE_Int source, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Send_init( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype,
+                               HYPRE_Int dest, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Recv_init( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype,
+                               HYPRE_Int dest, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Irsend( void *buf, HYPRE_Int count, hypre_MPI_Datatype datatype, HYPRE_Int dest,
+                            HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Startall( HYPRE_Int count, hypre_MPI_Request *array_of_requests );
+HYPRE_Int hypre_MPI_Probe( HYPRE_Int source, HYPRE_Int tag, hypre_MPI_Comm comm,
+                           hypre_MPI_Status *status );
+HYPRE_Int hypre_MPI_Iprobe( HYPRE_Int source, HYPRE_Int tag, hypre_MPI_Comm comm, HYPRE_Int *flag,
+                            hypre_MPI_Status *status );
+HYPRE_Int hypre_MPI_Test( hypre_MPI_Request *request, HYPRE_Int *flag, hypre_MPI_Status *status );
+HYPRE_Int hypre_MPI_Testall( HYPRE_Int count, hypre_MPI_Request *array_of_requests, HYPRE_Int *flag,
+                             hypre_MPI_Status *array_of_statuses );
+HYPRE_Int hypre_MPI_Wait( hypre_MPI_Request *request, hypre_MPI_Status *status );
+HYPRE_Int hypre_MPI_Waitall( HYPRE_Int count, hypre_MPI_Request *array_of_requests,
+                             hypre_MPI_Status *array_of_statuses );
+HYPRE_Int hypre_MPI_Waitany( HYPRE_Int count, hypre_MPI_Request *array_of_requests,
+                             HYPRE_Int *index, hypre_MPI_Status *status );
+HYPRE_Int hypre_MPI_Allreduce( void *sendbuf, void *recvbuf, HYPRE_Int count,
+                               hypre_MPI_Datatype datatype, hypre_MPI_Op op, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Reduce( void *sendbuf, void *recvbuf, HYPRE_Int count,
+                            hypre_MPI_Datatype datatype, hypre_MPI_Op op, HYPRE_Int root, hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Scan( void *sendbuf, void *recvbuf, HYPRE_Int count,
+                          hypre_MPI_Datatype datatype, hypre_MPI_Op op, hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Request_free( hypre_MPI_Request *request );
-HYPRE_Int hypre_MPI_Type_contiguous( HYPRE_Int count , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );
-HYPRE_Int hypre_MPI_Type_vector( HYPRE_Int count , HYPRE_Int blocklength , HYPRE_Int stride , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );
-HYPRE_Int hypre_MPI_Type_hvector( HYPRE_Int count , HYPRE_Int blocklength , hypre_MPI_Aint stride , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );
-HYPRE_Int hypre_MPI_Type_struct( HYPRE_Int count , HYPRE_Int *array_of_blocklengths , hypre_MPI_Aint *array_of_displacements , hypre_MPI_Datatype *array_of_types , hypre_MPI_Datatype *newtype );
+HYPRE_Int hypre_MPI_Type_contiguous( HYPRE_Int count, hypre_MPI_Datatype oldtype,
+                                     hypre_MPI_Datatype *newtype );
+HYPRE_Int hypre_MPI_Type_vector( HYPRE_Int count, HYPRE_Int blocklength, HYPRE_Int stride,
+                                 hypre_MPI_Datatype oldtype, hypre_MPI_Datatype *newtype );
+HYPRE_Int hypre_MPI_Type_hvector( HYPRE_Int count, HYPRE_Int blocklength, hypre_MPI_Aint stride,
+                                  hypre_MPI_Datatype oldtype, hypre_MPI_Datatype *newtype );
+HYPRE_Int hypre_MPI_Type_struct( HYPRE_Int count, HYPRE_Int *array_of_blocklengths,
+                                 hypre_MPI_Aint *array_of_displacements, hypre_MPI_Datatype *array_of_types,
+                                 hypre_MPI_Datatype *newtype );
 HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
-HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
+                               hypre_MPI_Op *op );
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
+HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
+                                    hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif

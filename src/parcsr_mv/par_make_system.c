@@ -112,15 +112,15 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
    sys_prob = hypre_CTAlloc(HYPRE_ParCSR_System_Problem,  1, HYPRE_MEMORY_HOST);
 
    /* global number of variables */
-   n = L_n*(HYPRE_BigInt)dim;
+   n = L_n * (HYPRE_BigInt)dim;
 
    /* global row/col starts */
    A_row_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
    A_col_starts = hypre_CTAlloc(HYPRE_BigInt,  2, HYPRE_MEMORY_HOST);
-   for(i = 0; i < 2; i++)
+   for (i = 0; i < 2; i++)
    {
-      A_row_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
-      A_col_starts[i] = L_row_starts[i]*(HYPRE_BigInt)dim;
+      A_row_starts[i] = L_row_starts[i] * (HYPRE_BigInt)dim;
+      A_col_starts[i] = L_row_starts[i] * (HYPRE_BigInt)dim;
    }
 
    /***** first we will do the diag part ******/
@@ -135,12 +135,12 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
 
       /* assume m11 and m22 are nonzero */
       A_nnz_diag = L1_nnz_diag + L2_nnz_diag;
-      if (m12) A_nnz_diag +=  L2_nnz_diag;
-      if (m21) A_nnz_diag +=  L1_nnz_diag;
+      if (m12) { A_nnz_diag +=  L2_nnz_diag; }
+      if (m21) { A_nnz_diag +=  L1_nnz_diag; }
 
-      A_diag_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows +1, HYPRE_MEMORY_HOST);
+      A_diag_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows + 1, HYPRE_MEMORY_HOST);
       A_diag_j    = hypre_CTAlloc(HYPRE_Int,  A_nnz_diag, HYPRE_MEMORY_HOST);
-      A_diag_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_diag , HYPRE_MEMORY_HOST);
+      A_diag_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_diag, HYPRE_MEMORY_HOST);
 
       A_diag_i[0] = 0;
 
@@ -148,38 +148,38 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       L1_j_count = 0;
       L2_j_count = 0;
 
-      for (i=0; i< L_num_rows; i++)
+      for (i = 0; i < L_num_rows; i++)
       {
-         num1 = L1_diag_i[i+1] - L1_diag_i[i];
-         num2 = (L2_diag_i[i+1] - L2_diag_i[i]);
+         num1 = L1_diag_i[i + 1] - L1_diag_i[i];
+         num2 = (L2_diag_i[i + 1] - L2_diag_i[i]);
 
          /* unknown 1*/
          if (m12 == 0.0)
          {
-            A_diag_i[i*2 + 1] = num1 + A_diag_i[i*2];
+            A_diag_i[i * 2 + 1] = num1 + A_diag_i[i * 2];
 
-            for (k=0; k< num1; k++)
+            for (k = 0; k < num1; k++)
             {
-               A_diag_j[A_j_count + k] = dim*L1_diag_j[L1_j_count + k];
-               A_diag_data[A_j_count + k] = m11*L1_diag_data[L1_j_count + k];
+               A_diag_j[A_j_count + k] = dim * L1_diag_j[L1_j_count + k];
+               A_diag_data[A_j_count + k] = m11 * L1_diag_data[L1_j_count + k];
             }
             A_j_count += num1;
          }
          else /* m12 is nonzero */
          {
-            A_diag_i[i*2 + 1] = num1 + num2 + A_diag_i[i*2];
+            A_diag_i[i * 2 + 1] = num1 + num2 + A_diag_i[i * 2];
 
-            for (k=0; k< num1; k++)
+            for (k = 0; k < num1; k++)
             {
-               A_diag_j[A_j_count + k] = dim*L1_diag_j[L1_j_count + k];
-               A_diag_data[A_j_count + k] = m11*L1_diag_data[L1_j_count + k];
+               A_diag_j[A_j_count + k] = dim * L1_diag_j[L1_j_count + k];
+               A_diag_data[A_j_count + k] = m11 * L1_diag_data[L1_j_count + k];
             }
             A_j_count += num1;
 
-            for (k=0; k< num2; k++)
+            for (k = 0; k < num2; k++)
             {
-               A_diag_j[A_j_count + k] = 1 + dim*L2_diag_j[L2_j_count + k];
-               A_diag_data[A_j_count + k] = m12*L2_diag_data[L2_j_count + k];
+               A_diag_j[A_j_count + k] = 1 + dim * L2_diag_j[L2_j_count + k];
+               A_diag_data[A_j_count + k] = m12 * L2_diag_data[L2_j_count + k];
             }
             A_j_count += num2;
 
@@ -190,38 +190,38 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
          /* unknown 2*/
          if (m21 == 0.0)
          {
-            A_diag_i[i*2 + 2] = num2 + A_diag_i[i*2 + 1];
+            A_diag_i[i * 2 + 2] = num2 + A_diag_i[i * 2 + 1];
 
-            for (k=0; k< num2; k++)
+            for (k = 0; k < num2; k++)
             {
-               A_diag_j[A_j_count + k] = 1 + dim*L2_diag_j[L2_j_count + k];
-               A_diag_data[A_j_count + k] = m22*L2_diag_data[L2_j_count + k];
+               A_diag_j[A_j_count + k] = 1 + dim * L2_diag_j[L2_j_count + k];
+               A_diag_data[A_j_count + k] = m22 * L2_diag_data[L2_j_count + k];
             }
             A_j_count += num2;
          }
          else /* m21 is nonzero */
          {
 
-            A_diag_i[i*2 + 2] = num1 + num2 + A_diag_i[i*2 + 1];
+            A_diag_i[i * 2 + 2] = num1 + num2 + A_diag_i[i * 2 + 1];
 
-            for (k=0; k< num2; k++)
+            for (k = 0; k < num2; k++)
             {
-               A_diag_j[A_j_count+k] = 1 + dim*L2_diag_j[L2_j_count + k];
-               A_diag_data[A_j_count+k] = m22*L2_diag_data[L2_j_count + k];
+               A_diag_j[A_j_count + k] = 1 + dim * L2_diag_j[L2_j_count + k];
+               A_diag_data[A_j_count + k] = m22 * L2_diag_data[L2_j_count + k];
             }
             A_j_count += num2;
 
-            for (k=0; k< num1; k++)
+            for (k = 0; k < num1; k++)
             {
-               A_diag_j[A_j_count+k] = dim*L1_diag_j[L1_j_count + k];
-               A_diag_data[A_j_count+k] = m21*L1_diag_data[L1_j_count + k];
+               A_diag_j[A_j_count + k] = dim * L1_diag_j[L1_j_count + k];
+               A_diag_data[A_j_count + k] = m21 * L1_diag_data[L1_j_count + k];
             }
             A_j_count += num1;
 
 
          } /* end unknown 2 */
 
-         L1_j_count +=num1;
+         L1_j_count += num1;
          L2_j_count += num2;
 
 
@@ -242,14 +242,14 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       A_num_rows = L_num_rows * dim;
 
       A_nnz_offd = L1_nnz_offd + L2_nnz_offd;
-      if (m12) A_nnz_offd +=  L2_nnz_offd;
-      if (m21) A_nnz_offd +=  L1_nnz_offd;
+      if (m12) { A_nnz_offd +=  L2_nnz_offd; }
+      if (m21) { A_nnz_offd +=  L1_nnz_offd; }
 
       A_num_cols_offd = L1_num_cols_offd + L2_num_cols_offd;
 
-      A_offd_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows +1, HYPRE_MEMORY_HOST);
+      A_offd_i    = hypre_CTAlloc(HYPRE_Int,  A_num_rows + 1, HYPRE_MEMORY_HOST);
       A_offd_j    = hypre_CTAlloc(HYPRE_Int,  A_nnz_offd, HYPRE_MEMORY_HOST);
-      A_offd_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_offd , HYPRE_MEMORY_HOST);
+      A_offd_data = hypre_CTAlloc(HYPRE_Complex,  A_nnz_offd, HYPRE_MEMORY_HOST);
 
 
       A_col_map_offd =  hypre_CTAlloc(HYPRE_BigInt,  A_num_cols_offd, HYPRE_MEMORY_HOST);
@@ -270,8 +270,8 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
 
          if (L1_map_count < L1_num_cols_offd && L2_map_count < L2_num_cols_offd)
          {
-            ent1 = L1_col_map_offd[L1_map_count]*2;
-            ent2 = L2_col_map_offd[L2_map_count]*2 + 1;
+            ent1 = L1_col_map_offd[L1_map_count] * 2;
+            ent2 = L2_col_map_offd[L2_map_count] * 2 + 1;
             if (ent1 < ent2)
             {
                A_col_map_offd[i] = ent1;
@@ -285,13 +285,13 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
          }
          else if (L1_map_count >= L1_num_cols_offd)
          {
-            ent2 = L2_col_map_offd[L2_map_count]*2 + 1;
+            ent2 = L2_col_map_offd[L2_map_count] * 2 + 1;
             A_col_map_offd[i] = ent2;
             L2_map_to_new[L2_map_count++] = i;
          }
          else if (L2_map_count >= L2_num_cols_offd)
          {
-            ent1 = L1_col_map_offd[L1_map_count]*2;
+            ent1 = L1_col_map_offd[L1_map_count] * 2;
             A_col_map_offd[i] = ent1;
             L1_map_to_new[L1_map_count++] = i;
          }
@@ -310,21 +310,21 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       L2_j_count = 0;
 
       A_offd_i[0] = 0;
-      for (i=0; i< L_num_rows; i++)
+      for (i = 0; i < L_num_rows; i++)
       {
-         num1 = L1_offd_i[i+1] - L1_offd_i[i];
-         num2 = (L2_offd_i[i+1] - L2_offd_i[i]);
+         num1 = L1_offd_i[i + 1] - L1_offd_i[i];
+         num2 = (L2_offd_i[i + 1] - L2_offd_i[i]);
 
          /* unknown 1*/
          if (m12 == 0.0)
          {
-            A_offd_i[i*2 + 1] = num1 + A_offd_i[i*2];
+            A_offd_i[i * 2 + 1] = num1 + A_offd_i[i * 2];
 
-            for (k=0; k< num1; k++)
+            for (k = 0; k < num1; k++)
             {
                tmp_i = L1_offd_j[L1_j_count + k];
                A_offd_j[A_j_count + k] = L1_map_to_new[tmp_i];
-               A_offd_data[A_j_count + k] = m11*L1_offd_data[L1_j_count + k];
+               A_offd_data[A_j_count + k] = m11 * L1_offd_data[L1_j_count + k];
             }
             A_j_count += num1;
 
@@ -332,21 +332,21 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
          }
          else /* m12 is nonzero */
          {
-            A_offd_i[i*2 + 1] = num1 + num2 + A_offd_i[i*2];
+            A_offd_i[i * 2 + 1] = num1 + num2 + A_offd_i[i * 2];
 
-            for (k=0; k< num1; k++)
+            for (k = 0; k < num1; k++)
             {
                tmp_i = L1_offd_j[L1_j_count + k];
                A_offd_j[A_j_count + k] = L1_map_to_new[tmp_i];
-               A_offd_data[A_j_count + k] = m11*L1_offd_data[L1_j_count + k];
+               A_offd_data[A_j_count + k] = m11 * L1_offd_data[L1_j_count + k];
             }
             A_j_count += num1;
 
-            for (k=0; k< num2; k++)
+            for (k = 0; k < num2; k++)
             {
                tmp_i = L2_offd_j[L2_j_count + k];
                A_offd_j[A_j_count + k] =  L2_map_to_new[tmp_i];
-               A_offd_data[A_j_count + k] = m12*L2_offd_data[L2_j_count + k];
+               A_offd_data[A_j_count + k] = m12 * L2_offd_data[L2_j_count + k];
             }
             A_j_count += num2;
 
@@ -354,41 +354,41 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
          /* unknown 2*/
          if (m21 == 0.0)
          {
-            A_offd_i[i*2 + 2] = num2 + A_offd_i[i*2 + 1];
+            A_offd_i[i * 2 + 2] = num2 + A_offd_i[i * 2 + 1];
 
-            for (k=0; k< num2; k++)
+            for (k = 0; k < num2; k++)
             {
                tmp_i = L2_offd_j[L2_j_count + k];
                A_offd_j[A_j_count + k] =  L2_map_to_new[tmp_i];
-               A_offd_data[A_j_count + k] = m22*L2_offd_data[L2_j_count + k];
+               A_offd_data[A_j_count + k] = m22 * L2_offd_data[L2_j_count + k];
             }
             A_j_count += num2;
          }
          else /* m21 is nonzero */
          {
 
-             A_offd_i[i*2 + 2] = num1 + num2 + A_offd_i[i*2 + 1];
+            A_offd_i[i * 2 + 2] = num1 + num2 + A_offd_i[i * 2 + 1];
 
-            for (k=0; k< num2; k++)
+            for (k = 0; k < num2; k++)
             {
                tmp_i = L2_offd_j[L2_j_count + k];
                A_offd_j[A_j_count + k] =  L2_map_to_new[tmp_i];
-               A_offd_data[A_j_count + k] = m22*L2_offd_data[L2_j_count + k];
+               A_offd_data[A_j_count + k] = m22 * L2_offd_data[L2_j_count + k];
             }
             A_j_count += num2;
 
-            for (k=0; k< num1; k++)
+            for (k = 0; k < num1; k++)
             {
                tmp_i = L1_offd_j[L1_j_count + k];
                A_offd_j[A_j_count + k] = L1_map_to_new[tmp_i];
-               A_offd_data[A_j_count + k] = m21*L1_offd_data[L1_j_count + k];
+               A_offd_data[A_j_count + k] = m21 * L1_offd_data[L1_j_count + k];
             }
             A_j_count += num1;
 
 
          } /* end unknown 2 */
 
-         L1_j_count +=num1;
+         L1_j_count += num1;
          L2_j_count += num2;
 
 
@@ -435,12 +435,12 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       HYPRE_Complex  *b1_data = hypre_VectorData(b1_local);
       HYPRE_Complex  *b2_data = hypre_VectorData(b2_local);
 
-      b_data = hypre_CTAlloc(HYPRE_Complex,  size*2, HYPRE_MEMORY_HOST);
+      b_data = hypre_CTAlloc(HYPRE_Complex,  size * 2, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < size; i++)
       {
-         b_data[i*2] = b1_data[i];
-         b_data[i*2+1] = b2_data[i];
+         b_data[i * 2] = b1_data[i];
+         b_data[i * 2 + 1] = b2_data[i];
       }
 
       b = hypre_ParVectorCreate( comm, n, A_row_starts);
@@ -449,7 +449,7 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       hypre_TFree(hypre_VectorData(hypre_ParVectorLocalVector(b)), HYPRE_MEMORY_HOST);
       hypre_VectorData(hypre_ParVectorLocalVector(b)) = b_data;
 
-      hypre_ParVectorSetDataOwner(b,1);
+      hypre_ParVectorSetDataOwner(b, 1);
    }
 
    /* create x */
@@ -460,12 +460,12 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       HYPRE_Complex  *x1_data = hypre_VectorData(x1_local);
       HYPRE_Complex  *x2_data = hypre_VectorData(x2_local);
 
-      x_data = hypre_CTAlloc(HYPRE_Complex,  size*2, HYPRE_MEMORY_HOST);
+      x_data = hypre_CTAlloc(HYPRE_Complex,  size * 2, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < size; i++)
       {
-         x_data[i*2] = x1_data[i];
-         x_data[i*2+1] = x2_data[i];
+         x_data[i * 2] = x1_data[i];
+         x_data[i * 2 + 1] = x2_data[i];
       }
 
       x = hypre_ParVectorCreate( comm, n, A_row_starts);
@@ -474,7 +474,7 @@ HYPRE_Generate2DSystem(HYPRE_ParCSRMatrix H_L1, HYPRE_ParCSRMatrix H_L2,
       hypre_TFree(hypre_VectorData(hypre_ParVectorLocalVector(x)), HYPRE_MEMORY_HOST);
       hypre_VectorData(hypre_ParVectorLocalVector(x)) = x_data;
 
-      hypre_ParVectorSetDataOwner(x,1);
+      hypre_ParVectorSetDataOwner(x, 1);
    }
 
    sys_prob->A = A;
