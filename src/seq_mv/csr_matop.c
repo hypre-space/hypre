@@ -1932,7 +1932,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 3)
             {
-               d_i = 1.0 /(sqrt(A_data[j]));
+               d_i = 1.0 /(sqrt((HYPRE_Real)A_data[j]));
             }
             else if (type == 4)
             {
@@ -1996,6 +1996,51 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
       for (i = 0; i < k; i++)
       {
          data[i] *= scalar;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/* diagonal scaling A := diag(ld) * A * diag(rd) */
+HYPRE_Int
+hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
+                          hypre_Vector    *ld,
+                          hypre_Vector    *rd)
+{
+   HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
+   HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
+
+   if (!ldata && !rdata)
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
+                                                      hypre_VectorMemoryLocation(ld) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_CSRMatrixDiagScaleDevice(A, ld, rd);
+   }
+   else
+#endif
+   {
+      HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+      HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+      HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+      HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+      HYPRE_Int      i, j;
+
+      for (i = 0; i < nrows; i++)
+      {
+         HYPRE_Complex sl = ldata ? ldata[i] : 1.0;
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            HYPRE_Complex sr = rdata ? rdata[A_j[j]] : 1.0;
+            A_data[j] = sl * A_data[j] * sr;
+         }
       }
    }
 

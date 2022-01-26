@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -58,7 +57,7 @@ main( hypre_int argc,
   HYPRE_Int                 solver_id;
   HYPRE_Int                 print_system = 0;
   HYPRE_Int                 ierr = 0;
-  HYPRE_Int                 i; 
+  HYPRE_Int                 i;
   HYPRE_Int                 num_iterations;
   HYPRE_Real                final_res_norm;
   void                      *object;
@@ -71,9 +70,9 @@ main( hypre_int argc,
 
   /* CUB Allocator */
   hypre_uint mempool_bin_growth   = 8,
-             mempool_min_bin      = 3,    
-             mempool_max_bin      = 9;    
-  size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024; 
+             mempool_min_bin      = 3,
+             mempool_max_bin      = 9;
+  size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 
   HYPRE_IJMatrix      ij_A = NULL;
   //HYPRE_IJMatrix      ij_M = NULL;
@@ -99,7 +98,7 @@ main( hypre_int argc,
 #ifdef HAVE_DSUPERLU
   HYPRE_Int    dslu_threshold = -1;
 #endif
- 
+
   /* parameters for GMRES */
   HYPRE_Int     k_dim = 100;
   HYPRE_Real    tol = 1e-6;
@@ -116,7 +115,7 @@ main( hypre_int argc,
 
   HYPRE_BigInt  *mgr_idx_array = NULL;
   HYPRE_Int     *mgr_point_marker_array = NULL;
-  HYPRE_Int     *mgr_num_cindexes = NULL; 
+  HYPRE_Int     *mgr_num_cindexes = NULL;
   HYPRE_Int     **mgr_cindexes = NULL;
   HYPRE_BigInt  *mgr_reserved_coarse_indexes = NULL;
 
@@ -127,7 +126,7 @@ main( hypre_int argc,
   HYPRE_Int mgr_num_gsmooth_sweeps = 0;
 
   HYPRE_Int mgr_restrict_type = 0;
-  HYPRE_Int mgr_num_restrict_sweeps = 0;   
+  HYPRE_Int mgr_num_restrict_sweeps = 0;
   //HYPRE_Int *mgr_level_restrict_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   //mgr_level_restrict_type[0] = 0;
   //mgr_level_restrict_type[1] = 0;
@@ -175,11 +174,11 @@ main( hypre_int argc,
 
   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-  
+
   /*-----------------------------------------------------------
    * Set defaults
    *-----------------------------------------------------------*/
- 
+
   build_matrix_type = -1;
   build_matrix_arg_index = argc;
   build_rhs_type = 2;
@@ -190,7 +189,7 @@ main( hypre_int argc,
   /*-----------------------------------------------------------
    * Parse command line
    *-----------------------------------------------------------*/
- 
+
   print_usage = 0;
   arg_index = 1;
 
@@ -299,10 +298,12 @@ main( hypre_int argc,
   hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
                            mempool_max_bin, mempool_max_cached_bytes );
 
-  hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
+  HYPRE_SetMemoryLocation(memory_location);
+
+  HYPRE_SetExecutionPolicy(default_exec_policy);
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-  hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
-  hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
+  ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
 #endif
 
 
@@ -410,12 +411,12 @@ main( hypre_int argc,
     hypre_TFree(values_d, memory_location);
   }
 
-  if (indexList != NULL) 
+  if (indexList != NULL)
   {
     mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_BigInt, mgr_num_reserved_nodes, HYPRE_MEMORY_HOST);
     FILE* ifp;
     ifp = fopen(indexList,"r");
-    if (ifp == NULL) 
+    if (ifp == NULL)
     {
       fprintf(stderr, "Can't open input file for index list!\n");
       exit(1);
@@ -425,8 +426,8 @@ main( hypre_int argc,
     for (i = 0; i < mgr_num_reserved_nodes; i++) {
       fscanf(ifp, "%d", &mgr_reserved_coarse_indexes[i]);
     }
-  } 
-  else 
+  }
+  else
   {
     mgr_num_reserved_nodes = 0;
     mgr_reserved_coarse_indexes = NULL;
@@ -440,7 +441,7 @@ main( hypre_int argc,
     hypre_sprintf(fname, "%s.%05i", argv[build_block_cf_arg_index],myid);
     hypre_printf("Reading block CF indices from %s \n", fname);
     ifp = fopen(fname,"r");
-    if (ifp == NULL) 
+    if (ifp == NULL)
     {
       fprintf(stderr, "Can't open input file for block CF indices!\n");
       exit(1);
@@ -459,7 +460,7 @@ main( hypre_int argc,
     hypre_sprintf(fname, "%s.%05i", argv[build_marker_array_arg_index], myid);
     hypre_printf("Reading marker array from %s \n", fname);
     ifp = fopen(fname,"r");
-    if (ifp == NULL) 
+    if (ifp == NULL)
     {
       fprintf(stderr, "Can't open input file for block CF indices!\n");
       exit(1);
@@ -569,7 +570,7 @@ main( hypre_int argc,
     }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
+    hypre_SyncCudaDevice(hypre_handle());
 #endif
 
     // Setup main solver
@@ -585,7 +586,7 @@ main( hypre_int argc,
     hypre_ClearTiming();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
+    hypre_SyncCudaDevice(hypre_handle());
 #endif
 
     time_index = hypre_InitializeTiming("FlexGMRES Solve");
@@ -602,7 +603,7 @@ main( hypre_int argc,
     hypre_ClearTiming();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-    cudaDeviceSynchronize();
+    hypre_SyncCudaDevice(hypre_handle());
 #endif
 
     if (print_system)
@@ -657,34 +658,36 @@ main( hypre_int argc,
     // Test building MGR interpolation on device
     comm = hypre_ParCSRMatrixComm(parcsr_A);
     hypre_ParCSRMatrix *P = NULL;
-    HYPRE_Int *dof_func_buff = NULL;
+    hypre_IntArray *dof_func_buff = NULL;
     HYPRE_BigInt *coarse_pnts_global = NULL;
     HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(parcsr_A));
     HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(parcsr_A) );
 
-    HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
+    hypre_IntArray *CF_marker = hypre_IntArrayCreate(nloc);
+    hypre_IntArrayInitialize_v2(CF_marker, HYPRE_MEMORY_HOST);
+
     for (i = 0; i < nloc; i++)
     {
       if (i % 3 == 0)
       {
-        CF_marker[i] = 1;
+        hypre_IntArrayData(CF_marker)[i] = 1;
       }
       else
       {
-        CF_marker[i] = -1;
+        hypre_IntArrayData(CF_marker)[i] = -1;
       }
     }
 
     hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker, &dof_func_buff, &coarse_pnts_global);
     if (exec == HYPRE_EXEC_HOST)
     {
-      hypre_MGRBuildP(parcsr_A, CF_marker, coarse_pnts_global, 2, 0, &P);
-      hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P_host");
+       hypre_MGRBuildP(parcsr_A, hypre_IntArrayData(CF_marker), coarse_pnts_global, 2, 0, &P);
+       hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P_host");
     }
 #if defined(HYPRE_USING_CUDA)
     else
     {
-      hypre_MGRBuildPDevice(parcsr_A, CF_marker, coarse_pnts_global, 2, &P);
+      hypre_MGRBuildPDevice(parcsr_A, hypre_IntArrayData(CF_marker), coarse_pnts_global, 2, &P);
       hypre_ParCSRMatrixMigrate(P, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P_device");
     }
@@ -716,7 +719,7 @@ main( hypre_int argc,
   hypre_MPI_Finalize();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-  cudaDeviceReset();
+  hypre_ResetCudaDevice(hypre_handle());
 #endif
 
   return (0);

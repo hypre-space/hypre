@@ -1569,9 +1569,9 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA,
-                       HYPRE_ParVector    Hy,
-                       HYPRE_ParVector    Hx )
+hypre_ParCSRDiagScaleVector( HYPRE_ParCSRMatrix HA,
+                             HYPRE_ParVector    Hy,
+                             HYPRE_ParVector    Hx )
 {
    hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
    hypre_ParVector    *y = (hypre_ParVector *) Hy;
