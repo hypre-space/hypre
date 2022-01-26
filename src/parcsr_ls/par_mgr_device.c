@@ -83,6 +83,8 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
         
         HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag1, diag, functor<HYPRE_Complex>(scal));        
         HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag, 1.0 / _1);
+
+        hypre_TFree(diag1, HYPRE_MEMORY_DEVICE);
      }
      else if (method == 2)
      {

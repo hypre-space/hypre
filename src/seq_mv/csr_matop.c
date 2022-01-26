@@ -1932,7 +1932,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 3)
             {
-               d_i = 1.0 /(sqrt(A_data[j]));
+               d_i = 1.0 /(sqrt((HYPRE_Real)A_data[j]));
             }
             else if (type == 4)
             {
