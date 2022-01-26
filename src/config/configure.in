@@ -2224,7 +2224,7 @@ then
 
    if test "x$hypre_using_cuda_streams" = "xyes"
    then
-      AC_DEFINE([HYPRE_USING_CUDA_STREAMS], 1, [Define to 1 if using CUDA streams])
+      AC_DEFINE([HYPRE_USING_CUDA_STREAMS], 1, [Define to 1 if using streams])
    fi
 fi
 
@@ -2326,6 +2326,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
                ])
 
+        AS_IF([test x"$hypre_using_cuda_streams" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_CUDA_STREAMS, 1, [Define to 1 if using streams])
+               ])
+
       ]) dnl AS_IF([test x"$hypre_using_hip" == x"yes"]
 
 
@@ -2337,7 +2341,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
 
-	     LINK_CC=${CUCC}
+        LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
         if test "$hypre_user_chose_cuflags" = "no"
@@ -2367,7 +2371,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
 
         AS_IF([test x"$hypre_using_onemklblas" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ONEMKLBLAS, 1, [onemkl::BLAS being used])
-	            HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
                ])
 
@@ -2375,6 +2379,10 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+               ])
+
+        AS_IF([test x"$hypre_using_cuda_streams" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_CUDA_STREAMS, 1, [Define to 1 if using streams])
                ])
 
       ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]

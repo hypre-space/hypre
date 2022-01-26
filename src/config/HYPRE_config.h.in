@@ -163,7 +163,7 @@
 /* Define to 1 if executing on device with CUDA */
 #undef HYPRE_USING_CUDA
 
-/* Define to 1 if using CUDA streams */
+/* Define to 1 if using streams */
 #undef HYPRE_USING_CUDA_STREAMS
 
 /* Define to 1 if using cuRAND */

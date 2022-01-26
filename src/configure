@@ -9233,6 +9233,13 @@ $as_echo "#define HYPRE_USING_ROCTX 1" >>confdefs.h
 
 fi
 
+        if test x"$hypre_using_cuda_streams" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
+
+
+fi
+
 
 fi
 
@@ -9245,7 +9252,7 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
 
-	     LINK_CC=${CUCC}
+        LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
         if test "$hypre_user_chose_cuflags" = "no"
@@ -9279,7 +9286,7 @@ fi
 
 $as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
 
-	            HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
 
 fi
@@ -9290,6 +9297,13 @@ $as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
 
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/rng.hpp"
+
+fi
+
+        if test x"$hypre_using_cuda_streams" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
+
 
 fi
 
