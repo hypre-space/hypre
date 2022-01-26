@@ -16,13 +16,10 @@
 
 static const char HYPRE_SPGEMM_NUMER_HASH_TYPE = 'D';
 
-#if defined(HYPRE_USING_CUDA)
+/* default settings associated with bin 5 */
 #define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
-#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
-#endif
+#define HYPRE_SPGEMM_BASE_GROUP_SIZE 32
 
 #define HYPRE_SPGEMM_TIMING
 #define HYPRE_SPGEMM_PRINTF

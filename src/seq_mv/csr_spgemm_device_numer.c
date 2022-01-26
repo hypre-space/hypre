@@ -32,7 +32,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
                                                      HYPRE_Int      *nnzC_out )
 {
    const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
-   const HYPRE_Int GROUP_SIZE = HYPRE_WARP_SIZE;
+   const HYPRE_Int GROUP_SIZE = HYPRE_SPGEMM_BASE_GROUP_SIZE;
    const HYPRE_Int BIN = 5;
 
 #ifdef HYPRE_SPGEMM_PRINTF
@@ -60,7 +60,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
+      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
    }
 
    *d_ic_out = d_ic;
@@ -122,30 +122,30 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
 #if 0
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 1,  HYPRE_SPGEMM_NUMER_HASH_SIZE / 16,
-                                              HYPRE_WARP_SIZE / 16, exact_rownnz, false);  /* 16,      2 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE / 16, exact_rownnz, false);  /* 16,      2 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 2,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  8,
-                                              HYPRE_WARP_SIZE /  8, exact_rownnz, false);  /* 32,      4 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE /  8, exact_rownnz, false);  /* 32,      4 */
 #endif
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 3,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  4,
-                                              HYPRE_WARP_SIZE /  4, exact_rownnz, false);  /* 64,      8 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, exact_rownnz, false);  /* 64,      8 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 4,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  2,
-                                              HYPRE_WARP_SIZE /  2, exact_rownnz, false);  /* 128,    16 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE /  2, exact_rownnz, false);  /* 128,    16 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 5,  HYPRE_SPGEMM_NUMER_HASH_SIZE,
-                                              HYPRE_WARP_SIZE,      exact_rownnz, false);  /* 256,    32 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE,      exact_rownnz, false);  /* 256,    32 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 6,  HYPRE_SPGEMM_NUMER_HASH_SIZE *  2,
-                                              HYPRE_WARP_SIZE *  2, exact_rownnz, false);  /* 512,    64 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, exact_rownnz, false);  /* 512,    64 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 7,  HYPRE_SPGEMM_NUMER_HASH_SIZE *  4,
-                                              HYPRE_WARP_SIZE *  4, exact_rownnz, false);  /* 1024,  128 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, exact_rownnz, false);  /* 1024,  128 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 8,  HYPRE_SPGEMM_NUMER_HASH_SIZE *  8,
-                                              HYPRE_WARP_SIZE *  8, exact_rownnz, false);  /* 2048,  256 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, exact_rownnz, false);  /* 2048,  256 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
-                                              HYPRE_WARP_SIZE * 16, exact_rownnz, false);  /* 4096,  512 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, exact_rownnz, false);  /* 4096,  512 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(10,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 32,
-                                              HYPRE_WARP_SIZE * 32, exact_rownnz, true);   /* 8192, 1024 */
+                                              HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, exact_rownnz, true);   /* 8192, 1024 */
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_WARP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
+      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
    }
 
    *d_ic_out = d_ic;

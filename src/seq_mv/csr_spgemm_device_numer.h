@@ -583,7 +583,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
 #endif
 
       /* copy to the final C */
-      const HYPRE_Int num_groups_per_block  = hypre_min(16 * HYPRE_WARP_SIZE / GROUP_SIZE, 64);
+      const HYPRE_Int num_groups_per_block  = hypre_min(512 / GROUP_SIZE, 64);
       dim3 bDim(GROUP_SIZE, 1, num_groups_per_block);
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
