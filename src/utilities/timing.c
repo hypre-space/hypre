@@ -39,9 +39,9 @@ hypre_InitializeTiming( const char *name )
 {
    HYPRE_Int      time_index;
 
-   HYPRE_Real  *old_wall_time;
-   HYPRE_Real  *old_cpu_time;
-   HYPRE_Real  *old_flops;
+   hypre_double  *old_wall_time;
+   hypre_double  *old_cpu_time;
+   hypre_double  *old_flops;
    char   **old_name;
    HYPRE_Int     *old_state;
    HYPRE_Int     *old_num_regs;
@@ -105,11 +105,11 @@ hypre_InitializeTiming( const char *name )
          old_num_regs  = (hypre_global_timing_ref(threadid, num_regs));
 
          (hypre_global_timing_ref(threadid, wall_time)) =
-            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(hypre_double,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, cpu_time))  =
-            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(hypre_double,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, flops))     =
-            hypre_CTAlloc(HYPRE_Real,  (time_index + 1), HYPRE_MEMORY_HOST);
+            hypre_CTAlloc(hypre_double,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, name))      =
             hypre_CTAlloc(char *,  (time_index + 1), HYPRE_MEMORY_HOST);
          (hypre_global_timing_ref(threadid, state))     =
@@ -208,7 +208,7 @@ hypre_IncFLOPCount( HYPRE_BigInt inc )
       return ierr;
    }
 
-   hypre_TimingFLOPCount += (HYPRE_Real) (inc);
+   hypre_TimingFLOPCount += (hypre_double) (inc);
 
    return ierr;
 }
@@ -303,12 +303,12 @@ hypre_PrintTiming( const char     *heading,
 {
    HYPRE_Int  ierr = 0;
 
-   HYPRE_Real  local_wall_time;
-   HYPRE_Real  local_cpu_time;
-   HYPRE_Real  wall_time;
-   HYPRE_Real  cpu_time;
-   HYPRE_Real  wall_mflops;
-   HYPRE_Real  cpu_mflops;
+   hypre_double  local_wall_time;
+   hypre_double  local_cpu_time;
+   hypre_double  wall_time;
+   hypre_double  cpu_time;
+   hypre_double  wall_mflops;
+   hypre_double  cpu_mflops;
 
    HYPRE_Int     i;
    HYPRE_Int     myrank;
