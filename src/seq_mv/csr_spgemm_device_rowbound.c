@@ -24,7 +24,7 @@ template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash table */
-                       volatile HYPRE_Int  *HashKeys, /* assumed to be initialized as all -1's */
+                                volatile HYPRE_Int  *HashKeys, /* assumed to be initialized as all -1's */
                                 HYPRE_Int   key,      /* assumed to be nonnegative */
                                 HYPRE_Int  &count     /* increase by 1 if is a new entry */)
 {
@@ -44,7 +44,7 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
       }
 
       /* try to insert key+1 into slot j */
-      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys+j), -1, key);
+      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 
       if (old == -1)
       {
@@ -69,7 +69,7 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
                                 HYPRE_Int *ib,
                                 HYPRE_Int *jb,
                                 HYPRE_Int  s_HashSize,
-                       volatile HYPRE_Int *s_HashKeys,
+                                volatile HYPRE_Int *s_HashKeys,
                                 HYPRE_Int  g_HashSize,
                                 HYPRE_Int *g_HashKeys,
                                 hypre_int &failed )
@@ -109,18 +109,20 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
       HYPRE_Int tmp = 0;
       if (rowB != -1 && threadIdx.x < 2)
       {
-         tmp = read_only_load(ib+rowB+threadIdx.x);
+         tmp = read_only_load(ib + rowB + threadIdx.x);
       }
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
       const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
 
-      for (HYPRE_Int k = rowB_start + threadIdx.x; __any_sync(HYPRE_WARP_FULL_MASK, k < rowB_end); k += blockDim.x)
+      for (HYPRE_Int k = rowB_start + threadIdx.x; __any_sync(HYPRE_WARP_FULL_MASK, k < rowB_end);
+           k += blockDim.x)
       {
          if (k < rowB_end)
          {
             const HYPRE_Int k_idx = read_only_load(jb + k);
             /* first try to insert into shared memory hash table */
-            HYPRE_Int pos = hypre_spgemm_hash_insert_symbl<HashType>(s_HashSize, s_HashKeys, k_idx, num_new_insert);
+            HYPRE_Int pos = hypre_spgemm_hash_insert_symbl<HashType>(s_HashSize, s_HashKeys, k_idx,
+                                                                     num_new_insert);
 
             if (-1 == pos)
             {
@@ -290,7 +292,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    HYPRE_Int num_warps = hypre_min(m, HYPRE_MAX_NUM_WARPS);
    dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, (size_t) m);
 
    const char hash_type = hypre_HandleSpgemmHashType(hypre_handle());
 
@@ -311,17 +313,20 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>),
+                         gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>),
+                         gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>),
+                         gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else
@@ -353,7 +358,8 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 {
    const HYPRE_Int shmem_hash_size = HYPRE_SPGEMM_SYMBL_HASH_SIZE;
 
-   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
+   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc,
+                                                    d_rf);
 
    return hypre_error_flag;
 }
@@ -374,7 +380,8 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    /* a binary array to indicate if row nnz counting is failed for a row */
    HYPRE_Int *d_rf  = d_rc + m;
 
-   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc, d_rf);
+   hypre_spgemm_rownnz_attempt<shmem_hash_size, 1> (m, NULL, k, n, d_ia, d_ja, d_ib, d_jb, in_rc, d_rc,
+                                                    d_rf);
 
    /* row nnz is exact if no row failed */
    HYPRE_Int num_failed_rows = hypreDevice_IntegerReduceSum(m, d_rf);
@@ -386,16 +393,17 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
       HYPRE_Int *rf_ind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
       HYPRE_Int *new_end =
-      HYPRE_THRUST_CALL( copy_if,
-                         thrust::make_counting_iterator(0),
-                         thrust::make_counting_iterator(m),
-                         d_rf,
-                         rf_ind,
-                         thrust::identity<HYPRE_Int>() );
+         HYPRE_THRUST_CALL( copy_if,
+                            thrust::make_counting_iterator(0),
+                            thrust::make_counting_iterator(m),
+                            d_rf,
+                            rf_ind,
+                            thrust::identity<HYPRE_Int>() );
 
       hypre_assert(new_end - rf_ind == num_failed_rows);
 
-      hypre_spgemm_rownnz_attempt<shmem_hash_size, 2> (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib, d_jb, 1, d_rc, NULL);
+      hypre_spgemm_rownnz_attempt<shmem_hash_size, 2> (num_failed_rows, rf_ind, k, n, d_ia, d_ja, d_ib,
+                                                       d_jb, 1, d_rc, NULL);
 
       hypre_TFree(rf_ind, HYPRE_MEMORY_DEVICE);
    }

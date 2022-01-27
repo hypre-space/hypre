@@ -34,10 +34,10 @@
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)                               \

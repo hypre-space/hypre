@@ -74,6 +74,10 @@ int main (int argc, char *argv[])
 
    /* Print GPU info */
    /* HYPRE_PrintDeviceInfo(); */
+#if defined(HYPRE_USING_GPU)
+   /* use cuSPARSE for SpGEMM */
+   HYPRE_SetSpGemmUseCusparse(0);
+#endif
 
    /* Default problem parameters */
    n = 33;
@@ -145,22 +149,22 @@ int main (int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n < num_procs) n = sqrt(num_procs) + 1;
-   N = n*n; /* global number of rows */
-   h = 1.0/(n+1); /* mesh size*/
-   h2 = h*h;
+   if (n * n < num_procs) { n = sqrt(num_procs) + 1; }
+   N = n * n; /* global number of rows */
+   h = 1.0 / (n + 1); /* mesh size*/
+   h2 = h * h;
 
    /* Each processor knows only of its own rows - the range is denoted by ilower
       and upper.  Here we partition the rows. We account for the fact that
       N may not divide evenly by the number of processors. */
-   local_size = N/num_procs;
-   extra = N - local_size*num_procs;
+   local_size = N / num_procs;
+   extra = N - local_size * num_procs;
 
-   ilower = local_size*myid;
+   ilower = local_size * myid;
    ilower += my_min(myid, extra);
 
-   iupper = local_size*(myid+1);
-   iupper += my_min(myid+1, extra);
+   iupper = local_size * (myid + 1);
+   iupper += my_min(myid + 1, extra);
    iupper = iupper - 1;
 
    /* How many rows do I have? */
@@ -192,26 +196,26 @@ int main (int argc, char *argv[])
       double values[5];
       int cols[5];
       */
-      double *values = (double *) malloc(5*sizeof(double));
-      int *cols = (int *) malloc(5*sizeof(int));
-      int *tmp = (int *) malloc(2*sizeof(int));
+      double *values = (double *) malloc(5 * sizeof(double));
+      int *cols = (int *) malloc(5 * sizeof(int));
+      int *tmp = (int *) malloc(2 * sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
          nnz = 0;
 
          /* The left identity block:position i-n */
-         if ((i-n)>=0)
+         if ((i - n) >= 0)
          {
-            cols[nnz] = i-n;
+            cols[nnz] = i - n;
             values[nnz] = -1.0;
             nnz++;
          }
 
          /* The left -1: position i-1 */
-         if (i%n)
+         if (i % n)
          {
-            cols[nnz] = i-1;
+            cols[nnz] = i - 1;
             values[nnz] = -1.0;
             nnz++;
          }
@@ -222,17 +226,17 @@ int main (int argc, char *argv[])
          nnz++;
 
          /* The right -1: position i+1 */
-         if ((i+1)%n)
+         if ((i + 1) % n)
          {
-            cols[nnz] = i+1;
+            cols[nnz] = i + 1;
             values[nnz] = -1.0;
             nnz++;
          }
 
          /* The right identity block:position i+n */
-         if ((i+n)< N)
+         if ((i + n) < N)
          {
-            cols[nnz] = i+n;
+            cols[nnz] = i + n;
             values[nnz] = -1.0;
             nnz++;
          }
@@ -270,11 +274,11 @@ int main (int argc, char *argv[])
 
 
    /* Create the rhs and solution */
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&b);
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &b);
    HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(b);
 
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&x);
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &x);
    HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(x);
 
@@ -287,7 +291,7 @@ int main (int argc, char *argv[])
       x_values =  (double*) calloc(local_size, sizeof(double));
       rows = (int*) calloc(local_size, sizeof(int));
 
-      for (i=0; i<local_size; i++)
+      for (i = 0; i < local_size; i++)
       {
          rhs_values[i] = h2;
          x_values[i] = 0.0;
@@ -317,8 +321,8 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorGetObject(x, (void **) &par_x);
 
 
-  /*  Print out the system  - files names will be IJ.out.A.XXXXX
-       and IJ.out.b.XXXXX, where XXXXX = processor id */
+   /*  Print out the system  - files names will be IJ.out.A.XXXXX
+        and IJ.out.b.XXXXX, where XXXXX = processor id */
    if (print_system)
    {
       HYPRE_IJMatrixPrint(A, "IJ.out.A");
@@ -533,15 +537,17 @@ int main (int argc, char *argv[])
 
       /* Set the FlexGMRES preconditioner */
       HYPRE_FlexGMRESSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
+                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
 
 
       if (modify)
-      /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
-         is used - which does nothing.  Otherwise, you can define your own, similar to
-         the one used here */
-         HYPRE_FlexGMRESSetModifyPC( solver,
-                                     (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+      {
+         /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
+            is used - which does nothing.  Otherwise, you can define your own, similar to
+            the one used here */
+         HYPRE_FlexGMRESSetModifyPC(
+            solver, (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+      }
 
 
       /* Now setup and solve! */
@@ -566,7 +572,7 @@ int main (int argc, char *argv[])
    }
    else
    {
-      if (myid ==0) printf("Invalid solver id specified.\n");
+      if (myid == 0) { printf("Invalid solver id specified.\n"); }
    }
 
    /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
@@ -581,7 +587,9 @@ int main (int argc, char *argv[])
       double *values =  (double*) calloc(nvalues, sizeof(double));
 
       for (i = 0; i < nvalues; i++)
+      {
          rows[i] = ilower + i;
+      }
 
       /* get the local solution */
       HYPRE_IJVectorGetValues(x, nvalues, rows, values);
@@ -596,7 +604,9 @@ int main (int argc, char *argv[])
 
       /* save solution */
       for (i = 0; i < nvalues; i++)
+      {
          fprintf(file, "%.14e\n", values[i]);
+      }
 
       fflush(file);
       fclose(file);
@@ -606,7 +616,9 @@ int main (int argc, char *argv[])
 
       /* save global finite element mesh */
       if (myid == 0)
-         GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n-1);
+      {
+         GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n - 1);
+      }
 #endif
    }
 
@@ -621,7 +633,7 @@ int main (int argc, char *argv[])
    /* Finalize MPI*/
    MPI_Finalize();
 
-   return(0);
+   return (0);
 }
 
 /*--------------------------------------------------------------------------
@@ -635,7 +647,7 @@ int main (int argc, char *argv[])
  *--------------------------------------------------------------------------*/
 
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
-                                   double rel_residual_norm)
+                                      double rel_residual_norm)
 {
 
 

@@ -14,7 +14,7 @@
 
 #include <HYPRE_config.h>
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_EXAMPLE_USING_CUDA)
 
 #include <cuda_runtime.h>
 
@@ -34,15 +34,14 @@ static inline void*
 gpu_calloc(size_t num, size_t size)
 {
    void *ptr = NULL;
-   cudaMallocManaged(&ptr, num*size, cudaMemAttachGlobal);
-   cudaMemset(ptr, 0, num*size);
+   cudaMallocManaged(&ptr, num * size, cudaMemAttachGlobal);
+   cudaMemset(ptr, 0, num * size);
    return ptr;
 }
 
 #define malloc(size) gpu_malloc(size)
 #define calloc(num, size) gpu_calloc(num, size)
 #define free(ptr) ( cudaFree(ptr), ptr = NULL )
-#endif
-
-#endif
+#endif /* #if defined(HYPRE_EXAMPLE_USING_CUDA) */
+#endif /* #ifndef HYPRE_EXAMPLES_INCLUDES */
 

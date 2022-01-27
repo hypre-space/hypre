@@ -21,50 +21,50 @@ HYPRE_StructCycRedCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedDestroy( HYPRE_StructSolver solver )
 {
-   return( hypre_CyclicReductionDestroy( (void *) solver ) );
+   return ( hypre_CyclicReductionDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedSetup( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
                          HYPRE_StructVector x      )
 {
-   return( hypre_CyclicReductionSetup( (void *) solver,
-                                       (hypre_StructMatrix *) A,
-                                       (hypre_StructVector *) b,
-                                       (hypre_StructVector *) x ) );
+   return ( hypre_CyclicReductionSetup( (void *) solver,
+                                        (hypre_StructMatrix *) A,
+                                        (hypre_StructVector *) b,
+                                        (hypre_StructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedSolve( HYPRE_StructSolver solver,
                          HYPRE_StructMatrix A,
                          HYPRE_StructVector b,
                          HYPRE_StructVector x      )
 {
-   return( hypre_CyclicReduction( (void *) solver,
-                                  (hypre_StructMatrix *) A,
-                                  (hypre_StructVector *) b,
-                                  (hypre_StructVector *) x ) );
+   return ( hypre_CyclicReduction( (void *) solver,
+                                   (hypre_StructMatrix *) A,
+                                   (hypre_StructVector *) b,
+                                   (hypre_StructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_StructCycRedSetTDim( HYPRE_StructSolver solver,
                            HYPRE_Int          tdim )
 {
-   return( hypre_CyclicReductionSetCDir( (void *) solver, tdim ) );
+   return ( hypre_CyclicReductionSetCDir( (void *) solver, tdim ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -89,7 +89,7 @@ HYPRE_StructCycRedSetBase( HYPRE_StructSolver solver,
       hypre_IndexD(new_base_stride, d) = base_stride[d];
    }
 
-   return( hypre_CyclicReductionSetBase( (void *) solver,
-                                         new_base_index, new_base_stride ) );
+   return ( hypre_CyclicReductionSetBase( (void *) solver,
+                                          new_base_index, new_base_stride ) );
 }
 

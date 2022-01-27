@@ -153,11 +153,11 @@ hypre_SemiInterp( void               *interp_vdata,
    stencil       = hypre_StructMatrixStencil(P);
    stencil_shape = hypre_StructStencilShape(stencil);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(P);
-   hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
+   hypre_assert( constant_coefficient == 0 || constant_coefficient == 1 );
    /* ... constant_coefficient==2 for P shouldn't happen, see
       hypre_PFMGCreateInterpOp in pfmg_setup_interp.c */
 
-   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
+   if (constant_coefficient) { hypre_StructVectorClearBoundGhostValues(e, 0); }
 
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -182,7 +182,8 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_StructGridDataLocation(cgrid) = data_location_f;
       hypre_StructVectorInitialize(xc_tmp);
       hypre_StructVectorAssemble(xc_tmp);
-      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,
+                    hypre_StructVectorDataSize(xc), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -229,7 +230,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {
@@ -291,17 +292,17 @@ hypre_SemiInterp( void               *interp_vdata,
 
             if ( constant_coefficient )
             {
-               HYPRE_Complex Pp0val,Pp1val;
+               HYPRE_Complex Pp0val, Pp1val;
                Pi = hypre_CCBoxIndexRank( P_dbox, startc );
                Pp0val = Pp0[Pi];
-               Pp1val = Pp1[Pi+Pp1_offset];
+               Pp1val = Pp1[Pi + Pp1_offset];
 
 #define DEVICE_VAR is_device_ptr(ep)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
                {
-                  ep[ei] =  (Pp0val * ep[ei+ep0_offset] +
-                             Pp1val * ep[ei+ep1_offset]);
+                  ep[ei] =  (Pp0val * ep[ei + ep0_offset] +
+                             Pp1val * ep[ei + ep1_offset]);
                }
                hypre_BoxLoop1End(ei);
 #undef DEVICE_VAR
@@ -313,8 +314,8 @@ hypre_SemiInterp( void               *interp_vdata,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
                {
-                  ep[ei] =  (Pp0[Pi]            * ep[ei+ep0_offset] +
-                             Pp1[Pi+Pp1_offset] * ep[ei+ep1_offset]);
+                  ep[ei] =  (Pp0[Pi]            * ep[ei + ep0_offset] +
+                             Pp1[Pi + Pp1_offset] * ep[ei + ep1_offset]);
                }
                hypre_BoxLoop2End(Pi, ei);
 #undef DEVICE_VAR
@@ -333,7 +334,7 @@ hypre_SemiInterp( void               *interp_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   hypre_IncFLOPCount(3*hypre_StructVectorGlobalSize(xc));
+   hypre_IncFLOPCount(3 * hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(interp_data -> time_index);
 
    return hypre_error_flag;

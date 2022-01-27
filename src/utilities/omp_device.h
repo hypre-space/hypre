@@ -102,7 +102,8 @@ extern size_t hypre__target_dtoh_bytes;
    } \
 }
 
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1, const char *type2);
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1,
+                           const char *type2);
 HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
 HYPRE_Int HYPRE_OMPOffloadOn();
 HYPRE_Int HYPRE_OMPOffloadOff();

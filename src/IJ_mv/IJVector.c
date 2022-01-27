@@ -32,7 +32,9 @@ hypre_IJVectorDistribute( HYPRE_IJVector vector, const HYPRE_Int *vec_starts )
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
 
-      return( hypre_IJVectorDistributePar(vec, vec_starts) );
+   {
+      return ( hypre_IJVectorDistributePar(vec, vec_starts) );
+   }
 
    else
    {
@@ -70,7 +72,7 @@ hypre_IJVectorZeroValues( HYPRE_IJVector vector )
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      return( hypre_IJVectorZeroValuesPar(vec) );
+      return ( hypre_IJVectorZeroValuesPar(vec) );
    }
    else
    {

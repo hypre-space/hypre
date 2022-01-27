@@ -19,11 +19,12 @@
 #define HYPRE_NEWBOXLOOP_HEADER
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
 #include <Kokkos_Core.hpp>
-using namespace Kokkos;
+   using namespace Kokkos;
 
 #ifdef __cplusplus
 }
@@ -35,10 +36,10 @@ using namespace Kokkos;
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 
@@ -272,13 +273,13 @@ typedef struct hypre_Boxloop_struct
 
 
 
- #define hypre_BoxLoop1ReductionEnd(i1, HYPRE_BOX_REDUCTION)            \
+#define hypre_BoxLoop1ReductionEnd(i1, HYPRE_BOX_REDUCTION)            \
      }, HYPRE_BOX_REDUCTION);                                           \
      hypre_fence();                                                     \
      HYPRE_BOX_REDUCTION += __hypre_sum_tmp;                            \
  }
 
- #define hypre_BoxLoop2ReductionBegin(ndim, loop_size,                  \
+#define hypre_BoxLoop2ReductionBegin(ndim, loop_size,                  \
                                       dbox1, start1, stride1, i1,       \
                                       dbox2, start2, stride2, i2,       \
                                       HYPRE_BOX_REDUCTION)              \
@@ -295,7 +296,7 @@ typedef struct hypre_Boxloop_struct
          hypre_BoxLoopIncK(1,databox1,i1);                              \
          hypre_BoxLoopIncK(2,databox2,i2);                              \
 
- #define hypre_BoxLoop2ReductionEnd(i1, i2, HYPRE_BOX_REDUCTION)        \
+#define hypre_BoxLoop2ReductionEnd(i1, i2, HYPRE_BOX_REDUCTION)        \
      }, HYPRE_BOX_REDUCTION);                                           \
      hypre_fence();                                                     \
      HYPRE_BOX_REDUCTION += __hypre_sum_tmp;                            \

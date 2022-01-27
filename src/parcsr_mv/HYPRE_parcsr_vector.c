@@ -29,7 +29,7 @@ HYPRE_ParVectorCreate( MPI_Comm         comm,
       return hypre_error_flag;
    }
    *vector = (HYPRE_ParVector)
-      hypre_ParVectorCreate(comm, global_size, partitioning) ;
+             hypre_ParVectorCreate(comm, global_size, partitioning) ;
    return hypre_error_flag;
 }
 
@@ -50,7 +50,7 @@ HYPRE_ParMultiVectorCreate( MPI_Comm         comm,
       return hypre_error_flag;
    }
    *vector = (HYPRE_ParVector)
-      hypre_ParMultiVectorCreate( comm, global_size, partitioning, number_vectors );
+             hypre_ParMultiVectorCreate( comm, global_size, partitioning, number_vectors );
    return hypre_error_flag;
 }
 
@@ -215,7 +215,7 @@ HYPRE_VectorToParVector( MPI_Comm         comm,
       return hypre_error_flag;
    }
    *vector = (HYPRE_ParVector)
-      hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
+             hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
    return hypre_error_flag;
 }
 

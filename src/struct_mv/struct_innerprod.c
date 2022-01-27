@@ -62,7 +62,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
       HYPRE_Real box_sum = 0.0;
 #elif defined(HYPRE_USING_RAJA)
       ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> box_sum(0.0);
@@ -101,7 +101,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
-   hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
+   hypre_IncFLOPCount(2 * hypre_StructVectorGlobalSize(x));
 
    return final_innerprod_result;
 }

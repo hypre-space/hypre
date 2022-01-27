@@ -35,7 +35,7 @@ typedef struct hypre_IJVector_struct
 
    HYPRE_BigInt  global_first_row;  /* these for data items are necessary */
    HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global */
-                                    /* global partition */
+   /* global partition */
    HYPRE_Int     print_level;
 
 } hypre_IJVector;
