@@ -44,7 +44,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix)       = 1;
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixSortedJ(matrix)        = NULL;
    hypre_CSRMatrixSortedData(matrix)     = NULL;
    hypre_CSRMatrixCsrsvData(matrix)      = NULL;

@@ -1117,8 +1117,8 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int sync_stream;
-   hypre_GetSyncCudaCompute(&sync_stream);
-   hypre_SetSyncCudaCompute(0);
+   hypre_GetSyncDeviceCompute(&sync_stream);
+   hypre_SetSyncDeviceCompute(0);
 #endif
 
    /*-----------------------------------------------------------------
@@ -1144,8 +1144,8 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SetSyncDeviceCompute(sync_stream);
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
    return hypre_error_flag;

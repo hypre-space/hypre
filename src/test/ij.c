@@ -3416,7 +3416,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3776,7 +3776,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3814,7 +3814,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       hypre_EndTiming(time_index);
@@ -3875,7 +3875,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       tt = hypre_MPI_Wtime() - tt;
@@ -3907,7 +3907,7 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       tt = hypre_MPI_Wtime() - tt;

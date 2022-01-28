@@ -300,7 +300,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -488,7 +488,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -542,7 +542,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -596,7 +596,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -647,7 +647,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -704,7 +704,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -806,7 +806,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncDeviceComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

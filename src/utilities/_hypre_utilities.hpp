@@ -110,6 +110,11 @@ struct hypre_device_allocator
 
 #elif defined(HYPRE_USING_SYCL)
 
+typedef sycl::range<1> dim3;
+#define __global__
+#define __host__
+#define __device__
+
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
 
@@ -392,17 +397,39 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
+/* device_utils.c, some common functions for CUDA, SYCL, HIP */
+
+dim3 hypre_GetDefaultDeviceBlockDimension();
+
+dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
+					  dim3 bDim );
+
+HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                             HYPRE_Int *d_row_ind);
+
+HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
+
+HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
+
+HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
+                                             HYPRE_Int *d_row_ptr);
+
+HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+template <typename T>
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+
 #endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 
 /* device_utils.c */
 HYPRE_Int HYPRE_SetSYCLDevice(sycl::device user_device);
-sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
-
-sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
-                                                    sycl::range<1> bDim );
-
 #endif // #if defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -443,15 +470,15 @@ using namespace thrust::placeholders;
 
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#define GPU_LAUNCH_SYNC { hypre_SyncDeviceComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
+#define GPU_LAUNCH_SYNC { hypre_SyncDeviceComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
 #endif // defined(HYPRE_DEBUG)
 
-#define HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                 \
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                 \
 {                                                                                                                             \
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
@@ -467,7 +494,7 @@ using namespace thrust::placeholders;
    }                                                                                                                          \
 }
 
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
@@ -1007,10 +1034,6 @@ template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByT
                                                                                         T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
 
 template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
-
-template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
@@ -1020,22 +1043,6 @@ HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, 
                                      HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
                                      HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
                                      HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
-
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
-                                             HYPRE_Int *d_row_ind);
-
-HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
-
-HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
-                                             HYPRE_Int *d_row_ptr);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);
@@ -1061,6 +1068,482 @@ hypre_cub_CachingDeviceAllocator * hypre_DeviceDataCubCachingAllocatorCreate(hyp
 void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(HYPRE_USING_SYCL)
+
+#pragma once
+
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
+#include <dpct/dpl_extras/algorithm.h> // dpct::remove_if, remove_copy_if, copy_if, scatter_if
+
+#include <algorithm>
+#include <numeric>
+#include <functional>
+#include <iterator>
+
+#define __forceinline__ __inline__ __attribute__((always_inline))
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * macro for launching SYCL kernels, SYCL, oneDPL, oneMKL calls
+ *                    NOTE: IN HYPRE'S DEFAULT STREAM
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
+
+template <typename InputIter1, typename InputIter2,
+          typename OutputIter>
+OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
+                  InputIter2 input_first, OutputIter result) {
+  static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+                   std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<InputIter2>::iterator_category,
+              std::random_access_iterator_tag>::value &&
+          std::is_same<
+              typename std::iterator_traits<OutputIter>::iterator_category,
+              std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+  auto perm_begin =
+      oneapi::dpl::make_permutation_iterator(input_first, map_first);
+  const int n = ::std::distance(map_first, map_last);
+
+  return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+			   perm_begin, perm_begin + n, result);
+}
+
+#if defined(HYPRE_DEBUG)
+#if defined(HYPRE_USING_CUDA)
+#define GPU_LAUNCH_SYNC { hypre_SyncDeviceComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#endif
+#else // #if defined(HYPRE_DEBUG)
+#define GPU_LAUNCH_SYNC
+#endif // defined(HYPRE_DEBUG)
+
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]);                                                \
+     assert(0); exit(1);                                                                     \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+     hypre_HandleComputeStream(hypre_handle())->parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize), \
+        [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {        \
+           (kernel_name)(item, __VA_ARGS__);                                                 \
+     });                                                                                     \
+   }                                                                                         \
+}
+
+/* RL: TODO Want macro HYPRE_ONEDPL_CALL to return value but I don't know how to do it right
+ * The following one works OK for now */
+
+#define HYPRE_ONEDPL_CALL(func_name, ...) \
+  func_name(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+// /* return the number of threads in block */
+// template <hypre_int dim>
+// static __forceinline__
+// hypre_int hypre_gpu_get_num_threads()
+// {
+//    switch (dim)
+//    {
+//       case 1:
+//          return (blockDim.x);
+//       case 2:
+//          return (blockDim.x * blockDim.y);
+//       case 3:
+//          return (blockDim.x * blockDim.y * blockDim.z);
+//    }
+
+//    return -1;
+// }
+
+/* return the number of (sub_groups) warps in (work-group) block */
+template <hypre_int dim>
+static __forceinline__
+hypre_int hypre_gpu_get_num_warps(sycl::nd_item<dim>& item)
+{
+   return item.get_sub_group().get_group_range().get(0);
+}
+
+/* return the thread lane id in warp */
+template <hypre_int dim>
+static __forceinline__
+hypre_int hypre_gpu_get_lane_id(sycl::nd_item<dim>& item)
+{
+   return item.get_sub_group().get_local_linear_id();
+}
+
+// /* return the number of threads in grid */
+// template <hypre_int bdim, hypre_int gdim>
+// static __forceinline__
+// hypre_int hypre_gpu_get_grid_num_threads()
+// {
+//    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>();
+// }
+
+/* return the flattened work-item/thread id in global work space,
+ * Note: Since the use-cases always involved bdim = gdim = 1, the
+ * sycl:;nd_item<1> is only being used. SFINAE is used to prevent
+ * other dimensions (i.e., bdim != gdim != 1) */
+template < hypre_int bdim, hypre_int gdim >
+static __forceinline__
+hypre_int hypre_gpu_get_grid_thread_id(sycl::nd_item<1>& item)
+{
+   static_assert(bdim == 1 && gdim == 1);
+   return item.get_global_id(0);
+}
+
+// /* return the number of warps in grid */
+// template <hypre_int bdim, hypre_int gdim>
+// static __forceinline__
+// hypre_int hypre_gpu_get_grid_num_warps()
+// {
+//    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_warps<bdim>();
+// }
+
+/* return the flattened warp id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __forceinline__
+hypre_int hypre_gpu_get_grid_warp_id(sycl::nd_item<1>& item)
+{
+  return item.get_group(0) * hypre_gpu_get_num_warps<bdim>(item) +
+     item.get_sub_group().get_group_linear_id();
+}
+
+// #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 600
+// static __forceinline__
+// hypre_double atomicAdd(hypre_double* address, hypre_double val)
+// {
+//     hypre_ulonglongint* address_as_ull = (hypre_ulonglongint*) address;
+//     hypre_ulonglongint old = *address_as_ull, assumed;
+
+//     do {
+//         assumed = old;
+//         old = atomicCAS(address_as_ull, assumed,
+//                         __double_as_longlong(val +
+//                                __longlong_as_double(assumed)));
+
+//     // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+//     } while (assumed != old);
+
+//     return __longlong_as_double(old);
+// }
+// #endif
+
+template <typename T>
+static __forceinline__
+T read_only_load( const T *ptr )
+{
+   return *ptr;
+}
+
+// /* exclusive prefix scan */
+// template <typename T>
+// static __forceinline__
+// T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
+// {
+// #pragma unroll
+//    for (hypre_int d = 2; d <=HYPRE_WARP_SIZE; d <<= 1)
+//    {
+//       T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1);
+//       if ( (lane_id & (d - 1)) == (d - 1) )
+//       {
+//          in += t;
+//       }
+//    }
+
+//    all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, HYPRE_WARP_SIZE-1);
+
+//    if (lane_id == HYPRE_WARP_SIZE-1)
+//    {
+//       in = 0;
+//    }
+
+// #pragma unroll
+//    for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+//    {
+//       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+
+//       if ( (lane_id & (d - 1)) == (d - 1))
+//       {
+//         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
+//          {
+//             in += t;
+//          }
+//          else
+//          {
+//             in = t;
+//          }
+//       }
+//    }
+//    return in;
+// }
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_reduce_sum(T in, sycl::nd_item<DIM>& item)
+{
+  sycl::sub_group SG = item.get_sub_group();
+  //sycl::ext::oneapi::reduce(SG, in, std::plus<T>());
+#pragma unroll
+  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
+  {
+    in += SG.shuffle_down(in, d);
+  }
+  return in;  
+}
+
+// template <typename T>
+// static __forceinline__
+// T warp_allreduce_sum(T in)
+// {
+// #pragma unroll
+//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+//   {
+//     in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
+//   }
+//   return in;
+// }
+
+// template <typename T>
+// static __forceinline__
+// T warp_reduce_max(T in)
+// {
+// #pragma unroll
+//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+//   {
+//     in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+//   }
+//   return in;
+// }
+
+// template <typename T>
+// static __forceinline__
+// T warp_allreduce_max(T in)
+// {
+// #pragma unroll
+//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+//   {
+//     in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+//   }
+//   return in;
+// }
+
+// template <typename T>
+// static __forceinline__
+// T warp_reduce_min(T in)
+// {
+// #pragma unroll
+//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+//   {
+//     in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
+//   }
+//   return in;
+// }
+
+// template <typename T>
+// static __forceinline__
+// T warp_allreduce_min(T in)
+// {
+// #pragma unroll
+//   for (hypre_int d = HYPRE_WARP_SIZE/2; d > 0; d >>= 1)
+//   {
+//     in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
+//   }
+//   return in;
+// }
+
+// static __forceinline__
+// hypre_int next_power_of_2(hypre_int n)
+// {
+//    if (n <= 0)
+//    {
+//       return 0;
+//    }
+
+//    /* if n is power of 2, return itself */
+//    if ( (n & (n - 1)) == 0 )
+//    {
+//       return n;
+//    }
+
+//    n |= (n >>  1);
+//    n |= (n >>  2);
+//    n |= (n >>  4);
+//    n |= (n >>  8);
+//    n |= (n >> 16);
+//    n ^= (n >>  1);
+//    n  = (n <<  1);
+
+//    return n;
+// }
+
+// template<typename T>
+// struct absolute_value : public thrust::unary_function<T,T>
+// {
+//   T operator()(const T &x) const
+//   {
+//     return x < T(0) ? -x : x;
+//   }
+// };
+
+// template<typename T1, typename T2>
+// struct TupleComp2
+// {
+//    typedef thrust::tuple<T1, T2> Tuple;
+
+//    bool operator()(const Tuple& t1, const Tuple& t2)
+//    {
+//       if (thrust::get<0>(t1) < thrust::get<0>(t2))
+//       {
+//          return true;
+//       }
+//       if (thrust::get<0>(t1) > thrust::get<0>(t2))
+//       {
+//          return false;
+//       }
+//       return hypre_abs(thrust::get<1>(t1)) > hypre_abs(thrust::get<1>(t2));
+//    }
+// };
+
+// template<typename T1, typename T2>
+// struct TupleComp3
+// {
+//    typedef thrust::tuple<T1, T2> Tuple;
+
+//    bool operator()(const Tuple& t1, const Tuple& t2)
+//    {
+//       if (thrust::get<0>(t1) < thrust::get<0>(t2))
+//       {
+//          return true;
+//       }
+//       if (thrust::get<0>(t1) > thrust::get<0>(t2))
+//       {
+//          return false;
+//       }
+//       if (thrust::get<0>(t2) == thrust::get<1>(t2))
+//       {
+//          return false;
+//       }
+//       return thrust::get<0>(t1) == thrust::get<1>(t1) || thrust::get<1>(t1) < thrust::get<1>(t2);
+//    }
+// };
+
+// template<typename T>
+// struct is_negative : public thrust::unary_function<T,bool>
+// {
+//    bool operator()(const T &x)
+//    {
+//       return (x < 0);
+//    }
+// };
+
+// template<typename T>
+// struct is_positive : public thrust::unary_function<T,bool>
+// {
+//    bool operator()(const T &x)
+//    {
+//       return (x > 0);
+//    }
+// };
+
+// template<typename T>
+// struct is_nonnegative : public thrust::unary_function<T,bool>
+// {
+//    bool operator()(const T &x)
+//    {
+//       return (x >= 0);
+//    }
+// };
+
+template<typename T>
+struct in_range
+{
+   T low, up;
+   in_range(T low_, T up_) { low = low_; up = up_; }
+
+   bool operator()(const T &x) const { return (x >= low && x <= up); }
+};
+
+// template<typename T>
+// struct out_of_range : public thrust::unary_function<T,bool>
+// {
+//    T low, up;
+
+//    out_of_range(T low_, T up_) { low = low_; up = up_; }
+
+//    bool operator()(const T &x)
+//    {
+//       return (x < low || x > up);
+//    }
+// };
+
+#ifdef HYPRE_COMPLEX
+template<typename T,
+	 typename = typename std::enable_if<std::is_same<T, HYPRE_Complex>::value>::type>
+struct less_than
+{
+  T val;
+  less_than(T val_) { val = val_; }
+  bool operator()(const T &x) const { return (hypre_abs(x) < hypre_abs(val)); }
+};
+#else
+template<typename T,
+	 typename = typename std::enable_if<std::is_same<T, HYPRE_Real>::value>::type>
+struct less_than
+{
+  T val;
+  less_than(T val_) { val = val_; }
+  bool operator()(const T &x) const { return (x < val); }
+};
+#endif
+// template<typename T>
+// struct modulo : public thrust::unary_function<T,T>
+// {
+//    T val;
+
+//    modulo(T val_) { val = val_; }
+
+//    T operator()(const T &x)
+//    {
+//       return (x % val);
+//    }
+// };
+
+// template<typename T>
+// struct equal : public thrust::unary_function<T,bool>
+// {
+//    T val;
+
+//    equal(T val_) { val = val_; }
+
+//    bool operator()(const T &x)
+//    {
+//       return (x == val);
+//    }
+// };
+
+// struct print_functor
+// {
+//    void operator()(HYPRE_Real val)
+//    {
+//       printf("%f\n", val);
+//    }
+// };
+
+#endif // #if defined(HYPRE_USING_SYCL)
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(HYPRE_USING_CUSPARSE)
 
@@ -1340,7 +1823,7 @@ struct ReduceSum
          /* 2nd reduction with only *one* block */
          hypre_assert(nblocks >= 0 && nblocks <= 1024);
          const dim3 gDim(1), bDim(1024);
-         HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+         HYPRE_GPU_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
          hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
          val += init;
       }

@@ -287,11 +287,11 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
-   HYPRE_CUDA_LAUNCH( expdistfromuniform, gDim, bDim, nsamples * N, d_V1 );
+   HYPRE_GPU_LAUNCH( expdistfromuniform, gDim, bDim, nsamples * N, d_V1 );
 
    /* step-1: layer 3-2 */
    gDim.x = (K + bDim.z - 1) / bDim.z;
-   HYPRE_CUDA_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim,
+   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim,
                       bDim,
                       K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
 
@@ -301,7 +301,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    d_V3 = (T*) d_rc;
 
    gDim.x = (M + bDim.z - 1) / bDim.z;
-   HYPRE_CUDA_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim,
+   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim,
                       bDim,
                       M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
 
@@ -336,13 +336,13 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    if (row_est_mtd == 1)
    {
       /* naive overestimate */
-      HYPRE_CUDA_LAUNCH( (csr_spmm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (csr_spmm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
                          m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc );
    }
    else if (row_est_mtd == 2)
    {
       /* naive underestimate */
-      HYPRE_CUDA_LAUNCH( (csr_spmm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (csr_spmm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
                          m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL );
    }
    else if (row_est_mtd == 3)
@@ -361,7 +361,7 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       HYPRE_Int *d_low = d_low_upp;
       HYPRE_Int *d_upp = d_low_upp + m;
 
-      HYPRE_CUDA_LAUNCH( (csr_spmm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (csr_spmm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
                          m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp );
 
       /* Cohen's algorithm, stochastic approach */

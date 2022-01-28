@@ -506,7 +506,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>),
+      HYPRE_GPU_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>),
                           gDim, bDim, /* shmem_size, */
                           m, NULL, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash1_i, d_ghash1_j, d_ghash1_a,
                           d_rc, d_rf );
@@ -542,7 +542,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       dim3 gDim( (num_failed_rows + bDim.z - 1) / bDim.z );
 
-      HYPRE_CUDA_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>),
+      HYPRE_GPU_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>),
                           gDim, bDim, /* shmem_size, */
                           num_failed_rows, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j,
                           d_ghash2_a,
@@ -563,7 +563,7 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>), gDim,
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>), gDim,
                          bDim,
                          m, d_rf,
                          d_js, d_as,
