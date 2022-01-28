@@ -12,168 +12,168 @@ extern "C" {
 	lda, doublereal *d__, doublereal *e, doublereal *tauq, doublereal *
 	taup, doublereal *work, integer *lwork, integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DGEBRD reduces a general real M-by-N matrix A to upper or lower   
-    bidiagonal form B by an orthogonal transformation: Q**T * A * P = B.   
+    DGEBRD reduces a general real M-by-N matrix A to upper or lower
+    bidiagonal form B by an orthogonal transformation: Q**T * A * P = B.
 
-    If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.   
+    If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    M       (input) INTEGER   
-            The number of rows in the matrix A.  M >= 0.   
+    M       (input) INTEGER
+            The number of rows in the matrix A.  M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns in the matrix A.  N >= 0.   
+    N       (input) INTEGER
+            The number of columns in the matrix A.  N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the M-by-N general matrix to be reduced.   
-            On exit,   
-            if m >= n, the diagonal and the first superdiagonal are   
-              overwritten with the upper bidiagonal matrix B; the   
-              elements below the diagonal, with the array TAUQ, represent   
-              the orthogonal matrix Q as a product of elementary   
-              reflectors, and the elements above the first superdiagonal,   
-              with the array TAUP, represent the orthogonal matrix P as   
-              a product of elementary reflectors;   
-            if m < n, the diagonal and the first subdiagonal are   
-              overwritten with the lower bidiagonal matrix B; the   
-              elements below the first subdiagonal, with the array TAUQ,   
-              represent the orthogonal matrix Q as a product of   
-              elementary reflectors, and the elements above the diagonal,   
-              with the array TAUP, represent the orthogonal matrix P as   
-              a product of elementary reflectors.   
-            See Further Details.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the M-by-N general matrix to be reduced.
+            On exit,
+            if m >= n, the diagonal and the first superdiagonal are
+              overwritten with the upper bidiagonal matrix B; the
+              elements below the diagonal, with the array TAUQ, represent
+              the orthogonal matrix Q as a product of elementary
+              reflectors, and the elements above the first superdiagonal,
+              with the array TAUP, represent the orthogonal matrix P as
+              a product of elementary reflectors;
+            if m < n, the diagonal and the first subdiagonal are
+              overwritten with the lower bidiagonal matrix B; the
+              elements below the first subdiagonal, with the array TAUQ,
+              represent the orthogonal matrix Q as a product of
+              elementary reflectors, and the elements above the diagonal,
+              with the array TAUP, represent the orthogonal matrix P as
+              a product of elementary reflectors.
+            See Further Details.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
-    D       (output) DOUBLE PRECISION array, dimension (min(M,N))   
-            The diagonal elements of the bidiagonal matrix B:   
-            D(i) = A(i,i).   
+    D       (output) DOUBLE PRECISION array, dimension (min(M,N))
+            The diagonal elements of the bidiagonal matrix B:
+            D(i) = A(i,i).
 
-    E       (output) DOUBLE PRECISION array, dimension (min(M,N)-1)   
-            The off-diagonal elements of the bidiagonal matrix B:   
-            if m >= n, E(i) = A(i,i+1) for i = 1,2,...,n-1;   
-            if m < n, E(i) = A(i+1,i) for i = 1,2,...,m-1.   
+    E       (output) DOUBLE PRECISION array, dimension (min(M,N)-1)
+            The off-diagonal elements of the bidiagonal matrix B:
+            if m >= n, E(i) = A(i,i+1) for i = 1,2,...,n-1;
+            if m < n, E(i) = A(i+1,i) for i = 1,2,...,m-1.
 
-    TAUQ    (output) DOUBLE PRECISION array dimension (min(M,N))   
-            The scalar factors of the elementary reflectors which   
-            represent the orthogonal matrix Q. See Further Details.   
+    TAUQ    (output) DOUBLE PRECISION array dimension (min(M,N))
+            The scalar factors of the elementary reflectors which
+            represent the orthogonal matrix Q. See Further Details.
 
-    TAUP    (output) DOUBLE PRECISION array, dimension (min(M,N))   
-            The scalar factors of the elementary reflectors which   
-            represent the orthogonal matrix P. See Further Details.   
+    TAUP    (output) DOUBLE PRECISION array, dimension (min(M,N))
+            The scalar factors of the elementary reflectors which
+            represent the orthogonal matrix P. See Further Details.
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The length of the array WORK.  LWORK >= max(1,M,N).   
-            For optimum performance LWORK >= (M+N)*NB, where NB   
-            is the optimal blocksize.   
+    LWORK   (input) INTEGER
+            The length of the array WORK.  LWORK >= max(1,M,N).
+            For optimum performance LWORK >= (M+N)*NB, where NB
+            is the optimal blocksize.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value.   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value.
 
-    Further Details   
-    ===============   
+    Further Details
+    ===============
 
-    The matrices Q and P are represented as products of elementary   
-    reflectors:   
+    The matrices Q and P are represented as products of elementary
+    reflectors:
 
-    If m >= n,   
+    If m >= n,
 
-       Q = H(1) H(2) . . . H(n)  and  P = G(1) G(2) . . . G(n-1)   
+       Q = H(1) H(2) . . . H(n)  and  P = G(1) G(2) . . . G(n-1)
 
-    Each H(i) and G(i) has the form:   
+    Each H(i) and G(i) has the form:
 
-       H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'   
+       H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'
 
-    where tauq and taup are real scalars, and v and u are real vectors;   
-    v(1:i-1) = 0, v(i) = 1, and v(i+1:m) is stored on exit in A(i+1:m,i);   
-    u(1:i) = 0, u(i+1) = 1, and u(i+2:n) is stored on exit in A(i,i+2:n);   
-    tauq is stored in TAUQ(i) and taup in TAUP(i).   
+    where tauq and taup are real scalars, and v and u are real vectors;
+    v(1:i-1) = 0, v(i) = 1, and v(i+1:m) is stored on exit in A(i+1:m,i);
+    u(1:i) = 0, u(i+1) = 1, and u(i+2:n) is stored on exit in A(i,i+2:n);
+    tauq is stored in TAUQ(i) and taup in TAUP(i).
 
-    If m < n,   
+    If m < n,
 
-       Q = H(1) H(2) . . . H(m-1)  and  P = G(1) G(2) . . . G(m)   
+       Q = H(1) H(2) . . . H(m-1)  and  P = G(1) G(2) . . . G(m)
 
-    Each H(i) and G(i) has the form:   
+    Each H(i) and G(i) has the form:
 
-       H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'   
+       H(i) = I - tauq * v * v'  and G(i) = I - taup * u * u'
 
-    where tauq and taup are real scalars, and v and u are real vectors;   
-    v(1:i) = 0, v(i+1) = 1, and v(i+2:m) is stored on exit in A(i+2:m,i);   
-    u(1:i-1) = 0, u(i) = 1, and u(i+1:n) is stored on exit in A(i,i+1:n);   
-    tauq is stored in TAUQ(i) and taup in TAUP(i).   
+    where tauq and taup are real scalars, and v and u are real vectors;
+    v(1:i) = 0, v(i+1) = 1, and v(i+2:m) is stored on exit in A(i+2:m,i);
+    u(1:i-1) = 0, u(i) = 1, and u(i+1:n) is stored on exit in A(i,i+1:n);
+    tauq is stored in TAUQ(i) and taup in TAUP(i).
 
-    The contents of A on exit are illustrated by the following examples:   
+    The contents of A on exit are illustrated by the following examples:
 
-    m = 6 and n = 5 (m > n):          m = 5 and n = 6 (m < n):   
+    m = 6 and n = 5 (m > n):          m = 5 and n = 6 (m < n):
 
-      (  d   e   u1  u1  u1 )           (  d   u1  u1  u1  u1  u1 )   
-      (  v1  d   e   u2  u2 )           (  e   d   u2  u2  u2  u2 )   
-      (  v1  v2  d   e   u3 )           (  v1  e   d   u3  u3  u3 )   
-      (  v1  v2  v3  d   e  )           (  v1  v2  e   d   u4  u4 )   
-      (  v1  v2  v3  v4  d  )           (  v1  v2  v3  e   d   u5 )   
-      (  v1  v2  v3  v4  v5 )   
+      (  d   e   u1  u1  u1 )           (  d   u1  u1  u1  u1  u1 )
+      (  v1  d   e   u2  u2 )           (  e   d   u2  u2  u2  u2 )
+      (  v1  v2  d   e   u3 )           (  v1  e   d   u3  u3  u3 )
+      (  v1  v2  v3  d   e  )           (  v1  v2  e   d   u4  u4 )
+      (  v1  v2  v3  v4  d  )           (  v1  v2  v3  e   d   u5 )
+      (  v1  v2  v3  v4  v5 )
 
-    where d and e denote diagonal and off-diagonal elements of B, vi   
-    denotes an element of the vector defining H(i), and ui an element of   
-    the vector defining G(i).   
+    where d and e denote diagonal and off-diagonal elements of B, vi
+    denotes an element of the vector defining H(i), and ui an element of
+    the vector defining G(i).
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input parameters   
+       Test the input parameters
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__3 = 3;
-    static integer c__2 = 2;
-    static doublereal c_b21 = -1.;
-    static doublereal c_b22 = 1.;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__3 = 3;
+    integer c__2 = 2;
+    doublereal c_b21 = -1.;
+    doublereal c_b22 = 1.;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
-    static integer i__, j;
-    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
-	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+    integer i__, j;
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *,
+	    integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *);
-    static integer nbmin, iinfo, minmn;
-    extern /* Subroutine */ integer dgebd2_(integer *, integer *, doublereal *, 
+    integer nbmin, iinfo, minmn;
+    extern /* Subroutine */ integer dgebd2_(integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, integer *);
-    static integer nb;
-    extern /* Subroutine */ integer dlabrd_(integer *, integer *, integer *, 
+    integer nb;
+    extern /* Subroutine */ integer dlabrd_(integer *, integer *, integer *,
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, doublereal *, integer *, doublereal *, integer *);
-    static integer nx;
-    static doublereal ws;
+    integer nx;
+    doublereal ws;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *, const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *, const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    static integer ldwrkx, ldwrky, lwkopt;
-    static logical lquery;
+    integer ldwrkx, ldwrky, lwkopt;
+    logical lquery;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -230,7 +230,7 @@ extern "C" {
 
     if (nb > 1 && nb < minmn) {
 
-/*        Set the crossover point NX.   
+/*        Set the crossover point NX.
 
    Computing MAX */
 	i__1 = nb, i__2 = ilaenv_(&c__3, "DGEBRD", " ", m, n, &c_n1, &c_n1, (
@@ -243,7 +243,7 @@ extern "C" {
 	    ws = (doublereal) ((*m + *n) * nb);
 	    if ((doublereal) (*lwork) < ws) {
 
-/*              Not enough work space for the optimal NB, consider using   
+/*              Not enough work space for the optimal NB, consider using
                 a smaller block size. */
 
 		nbmin = ilaenv_(&c__2, "DGEBRD", " ", m, n, &c_n1, &c_n1, (
@@ -264,17 +264,17 @@ extern "C" {
     i__2 = nb;
     for (i__ = 1; i__2 < 0 ? i__ >= i__1 : i__ <= i__1; i__ += i__2) {
 
-/*        Reduce rows and columns i:i+nb-1 to bidiagonal form and return   
-          the matrices X and Y which are needed to update the unreduced   
+/*        Reduce rows and columns i:i+nb-1 to bidiagonal form and return
+          the matrices X and Y which are needed to update the unreduced
           part of the matrix */
 
 	i__3 = *m - i__ + 1;
 	i__4 = *n - i__ + 1;
-	dlabrd_(&i__3, &i__4, &nb, &a_ref(i__, i__), lda, &d__[i__], &e[i__], 
-		&tauq[i__], &taup[i__], &work[1], &ldwrkx, &work[ldwrkx * nb 
+	dlabrd_(&i__3, &i__4, &nb, &a_ref(i__, i__), lda, &d__[i__], &e[i__],
+		&tauq[i__], &taup[i__], &work[1], &ldwrkx, &work[ldwrkx * nb
 		+ 1], &ldwrky);
 
-/*        Update the trailing submatrix A(i+nb:m,i+nb:n), using an update   
+/*        Update the trailing submatrix A(i+nb:m,i+nb:n), using an update
           of the form  A := A - V*Y' - X*U' */
 
 	i__3 = *m - i__ - nb + 1;

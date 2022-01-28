@@ -13,8 +13,8 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ integer dsyr2_(const char *uplo, integer *n, doublereal *alpha, 
-	doublereal *x, integer *incx, doublereal *y, integer *incy, 
+/* Subroutine */ integer dsyr2_(const char *uplo, integer *n, doublereal *alpha,
+	doublereal *x, integer *incx, doublereal *y, integer *incy,
 	doublereal *a, integer *lda)
 {
 
@@ -22,110 +22,110 @@ extern "C" {
     /* System generated locals */
 
     /* Local variables */
-    static integer info;
-    static doublereal temp1, temp2;
-    static integer i, j;
+    integer info;
+    doublereal temp1, temp2;
+    integer i, j;
     extern logical lsame_(const char *,const char *);
-    static integer ix, iy, jx, jy, kx, ky;
+    integer ix, iy, jx, jy, kx, ky;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
-/*  Purpose   
-    =======   
+/*  Purpose
+    =======
 
-    DSYR2  performs the symmetric rank 2 operation   
+    DSYR2  performs the symmetric rank 2 operation
 
-       A := alpha*x*y' + alpha*y*x' + A,   
+       A := alpha*x*y' + alpha*y*x' + A,
 
-    where alpha is a scalar, x and y are n element vectors and A is an n 
-  
-    by n symmetric matrix.   
+    where alpha is a scalar, x and y are n element vectors and A is an n
 
-    Parameters   
-    ==========   
+    by n symmetric matrix.
 
-    UPLO   - CHARACTER*1.   
-             On entry, UPLO specifies whether the upper or lower   
-             triangular part of the array A is to be referenced as   
-             follows:   
+    Parameters
+    ==========
 
-                UPLO = 'U' or 'u'   Only the upper triangular part of A   
-                                    is to be referenced.   
+    UPLO   - CHARACTER*1.
+             On entry, UPLO specifies whether the upper or lower
+             triangular part of the array A is to be referenced as
+             follows:
 
-                UPLO = 'L' or 'l'   Only the lower triangular part of A   
-                                    is to be referenced.   
+                UPLO = 'U' or 'u'   Only the upper triangular part of A
+                                    is to be referenced.
 
-             Unchanged on exit.   
+                UPLO = 'L' or 'l'   Only the lower triangular part of A
+                                    is to be referenced.
 
-    N      - INTEGER.   
-             On entry, N specifies the order of the matrix A.   
-             N must be at least zero.   
-             Unchanged on exit.   
+             Unchanged on exit.
 
-    ALPHA  - DOUBLE PRECISION.   
-             On entry, ALPHA specifies the scalar alpha.   
-             Unchanged on exit.   
+    N      - INTEGER.
+             On entry, N specifies the order of the matrix A.
+             N must be at least zero.
+             Unchanged on exit.
 
-    X      - DOUBLE PRECISION array of dimension at least   
-             ( 1 + ( n - 1 )*abs( INCX ) ).   
-             Before entry, the incremented array X must contain the n   
-             element vector x.   
-             Unchanged on exit.   
+    ALPHA  - DOUBLE PRECISION.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
 
-    INCX   - INTEGER.   
-             On entry, INCX specifies the increment for the elements of   
-             X. INCX must not be zero.   
-             Unchanged on exit.   
+    X      - DOUBLE PRECISION array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCX ) ).
+             Before entry, the incremented array X must contain the n
+             element vector x.
+             Unchanged on exit.
 
-    Y      - DOUBLE PRECISION array of dimension at least   
-             ( 1 + ( n - 1 )*abs( INCY ) ).   
-             Before entry, the incremented array Y must contain the n   
-             element vector y.   
-             Unchanged on exit.   
+    INCX   - INTEGER.
+             On entry, INCX specifies the increment for the elements of
+             X. INCX must not be zero.
+             Unchanged on exit.
 
-    INCY   - INTEGER.   
-             On entry, INCY specifies the increment for the elements of   
-             Y. INCY must not be zero.   
-             Unchanged on exit.   
+    Y      - DOUBLE PRECISION array of dimension at least
+             ( 1 + ( n - 1 )*abs( INCY ) ).
+             Before entry, the incremented array Y must contain the n
+             element vector y.
+             Unchanged on exit.
 
-    A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).   
-             Before entry with  UPLO = 'U' or 'u', the leading n by n   
-             upper triangular part of the array A must contain the upper 
-  
-             triangular part of the symmetric matrix and the strictly   
-             lower triangular part of A is not referenced. On exit, the   
-             upper triangular part of the array A is overwritten by the   
-             upper triangular part of the updated matrix.   
-             Before entry with UPLO = 'L' or 'l', the leading n by n   
-             lower triangular part of the array A must contain the lower 
-  
-             triangular part of the symmetric matrix and the strictly   
-             upper triangular part of A is not referenced. On exit, the   
-             lower triangular part of the array A is overwritten by the   
-             lower triangular part of the updated matrix.   
+    INCY   - INTEGER.
+             On entry, INCY specifies the increment for the elements of
+             Y. INCY must not be zero.
+             Unchanged on exit.
 
-    LDA    - INTEGER.   
-             On entry, LDA specifies the first dimension of A as declared 
-  
-             in the calling (sub) program. LDA must be at least   
-             max( 1, n ).   
-             Unchanged on exit.   
+    A      - DOUBLE PRECISION array of DIMENSION ( LDA, n ).
+             Before entry with  UPLO = 'U' or 'u', the leading n by n
+             upper triangular part of the array A must contain the upper
 
+             triangular part of the symmetric matrix and the strictly
+             lower triangular part of A is not referenced. On exit, the
+             upper triangular part of the array A is overwritten by the
+             upper triangular part of the updated matrix.
+             Before entry with UPLO = 'L' or 'l', the leading n by n
+             lower triangular part of the array A must contain the lower
 
-    Level 2 Blas routine.   
+             triangular part of the symmetric matrix and the strictly
+             upper triangular part of A is not referenced. On exit, the
+             lower triangular part of the array A is overwritten by the
+             lower triangular part of the updated matrix.
 
-    -- Written on 22-October-1986.   
-       Jack Dongarra, Argonne National Lab.   
-       Jeremy Du Croz, Nag Central Office.   
-       Sven Hammarling, Nag Central Office.   
-       Richard Hanson, Sandia National Labs.   
+    LDA    - INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+
+             in the calling (sub) program. LDA must be at least
+             max( 1, n ).
+             Unchanged on exit.
 
 
+    Level 2 Blas routine.
 
-       Test the input parameters.   
+    -- Written on 22-October-1986.
+       Jack Dongarra, Argonne National Lab.
+       Jeremy Du Croz, Nag Central Office.
+       Sven Hammarling, Nag Central Office.
+       Richard Hanson, Sandia National Labs.
 
-    
-   Parameter adjustments   
+
+
+       Test the input parameters.
+
+
+   Parameter adjustments
        Function Body */
 #define X(I) x[(I)-1]
 #define Y(I) y[(I)-1]
@@ -155,8 +155,8 @@ extern "C" {
 	return 0;
     }
 
-/*     Set up the start points in X and Y if the increments are not both 
-  
+/*     Set up the start points in X and Y if the increments are not both
+
        unity. */
 
     if (*incx != 1 || *incy != 1) {
@@ -174,8 +174,8 @@ extern "C" {
 	jy = ky;
     }
 
-/*     Start the operations. In this version the elements of A are   
-       accessed sequentially with one pass through the triangular part   
+/*     Start the operations. In this version the elements of A are
+       accessed sequentially with one pass through the triangular part
        of A. */
 
     if (lsame_(uplo, "U")) {
@@ -188,7 +188,7 @@ extern "C" {
 		    temp1 = *alpha * Y(j);
 		    temp2 = *alpha * X(j);
 		    for (i = 1; i <= j; ++i) {
-			A(i,j) = A(i,j) + X(i) * temp1 
+			A(i,j) = A(i,j) + X(i) * temp1
 				+ Y(i) * temp2;
 /* L10: */
 		    }
@@ -203,7 +203,7 @@ extern "C" {
 		    ix = kx;
 		    iy = ky;
 		    for (i = 1; i <= j; ++i) {
-			A(i,j) = A(i,j) + X(ix) * temp1 
+			A(i,j) = A(i,j) + X(ix) * temp1
 				+ Y(iy) * temp2;
 			ix += *incx;
 			iy += *incy;
@@ -225,7 +225,7 @@ extern "C" {
 		    temp1 = *alpha * Y(j);
 		    temp2 = *alpha * X(j);
 		    for (i = j; i <= *n; ++i) {
-			A(i,j) = A(i,j) + X(i) * temp1 
+			A(i,j) = A(i,j) + X(i) * temp1
 				+ Y(i) * temp2;
 /* L50: */
 		    }
@@ -240,7 +240,7 @@ extern "C" {
 		    ix = jx;
 		    iy = jy;
 		    for (i = j; i <= *n; ++i) {
-			A(i,j) = A(i,j) + X(ix) * temp1 
+			A(i,j) = A(i,j) + X(ix) * temp1
 				+ Y(iy) * temp2;
 			ix += *incx;
 			iy += *incy;

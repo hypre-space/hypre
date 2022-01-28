@@ -10,44 +10,44 @@ extern "C" {
 
 integer ieeeck_(integer *ispec, real *zero, real *one)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1998   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1998
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    IEEECK is called from the ILAENV to verify that Infinity and   
-    possibly NaN arithmetic is safe (i.e. will not trap).   
+    IEEECK is called from the ILAENV to verify that Infinity and
+    possibly NaN arithmetic is safe (i.e. will not trap).
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    ISPEC   (input) INTEGER   
-            Specifies whether to test just for inifinity arithmetic   
-            or whether to test for infinity and NaN arithmetic.   
-            = 0: Verify infinity arithmetic only.   
-            = 1: Verify infinity and NaN arithmetic.   
+    ISPEC   (input) INTEGER
+            Specifies whether to test just for inifinity arithmetic
+            or whether to test for infinity and NaN arithmetic.
+            = 0: Verify infinity arithmetic only.
+            = 1: Verify infinity and NaN arithmetic.
 
-    ZERO    (input) REAL   
-            Must contain the value 0.0   
-            This is passed to prevent the compiler from optimizing   
-            away this code.   
+    ZERO    (input) REAL
+            Must contain the value 0.0
+            This is passed to prevent the compiler from optimizing
+            away this code.
 
-    ONE     (input) REAL   
-            Must contain the value 1.0   
-            This is passed to prevent the compiler from optimizing   
-            away this code.   
+    ONE     (input) REAL
+            Must contain the value 1.0
+            This is passed to prevent the compiler from optimizing
+            away this code.
 
-    RETURN VALUE:  INTEGER   
-            = 0:  Arithmetic failed to produce the correct answers   
+    RETURN VALUE:  INTEGER
+            = 0:  Arithmetic failed to produce the correct answers
             = 1:  Arithmetic produced the correct answers */
     /* System generated locals */
     integer ret_val;
     /* Local variables */
-    static real neginf, posinf, negzro, newzro, nan1, nan2, nan3, nan4, nan5, 
+    real neginf, posinf, negzro, newzro, nan1, nan2, nan3, nan4, nan5,
 	    nan6;
 
 
