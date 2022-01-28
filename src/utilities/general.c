@@ -163,6 +163,11 @@ hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
    cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
 #endif
 
+#if defined(HYPRE_USING_HIP)
+   hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
+   //hipDeviceGetAttribute(&max_size_optin, hipDeviceAttributeMaxSharedMemoryPerBlockOptin, device_id);
+#endif
+
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[1] = max_size_optin;
 
@@ -301,11 +306,13 @@ HYPRE_Init()
    hypre_SetDevice(device_id, _hypre_handle);
    hypre_GetDeviceMaxShmemSize(device_id, _hypre_handle);
 
+#if defined(HYPRE_USING_CUDA)
 #if CUDA_VERSION >= CUDA_MALLOCASYNC_VERSION
    cudaMemPool_t mempool;
    cudaDeviceGetDefaultMemPool(&mempool, device_id);
    uint64_t threshold = UINT64_MAX;
    cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
+#endif
 #endif
 
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */

@@ -18,7 +18,13 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
 
    hypre_HandleSpgemmAlgorithmNumBin(hypre_handle()) = num_bins;
 
+#if defined(HYPRE_USING_CUDA)
    cudaDeviceGetAttribute(&multiProcessorCount, cudaDevAttrMultiProcessorCount, hypre_HandleDevice(hypre_handle()));
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   hipDeviceGetAttribute(&multiProcessorCount, hipDeviceAttributeMultiprocessorCount, hypre_HandleDevice(hypre_handle()));
+#endif
 
    auto max_nblocks = hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle());
 
@@ -68,9 +74,12 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
    //for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] = max_nblocks[1][i] = 8192; }
 
 #if defined(HYPRE_SPGEMM_PRINTF)
+   printf0("=========================================================================\n");
+   printf0("SM count %d\n", multiProcessorCount);
    printf0("Bin: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%5d ", i); } printf0("\n");
    printf0("Sym: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%5d ", max_nblocks[0][i]); } printf0("\n");
    printf0("Num: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { printf0("%5d ", max_nblocks[1][i]); } printf0("\n");
+   printf0("=========================================================================\n");
 #endif
 
    return hypre_error_flag;

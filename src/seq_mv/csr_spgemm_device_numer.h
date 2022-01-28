@@ -31,7 +31,7 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
 {
    HYPRE_Int j = 0;
 
-#pragma unroll(UNROLL_FACTOR)
+#pragma unroll UNROLL_FACTOR
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -182,7 +182,7 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int               lane_id,
    const HYPRE_Int STEP_SIZE = hypre_min(GROUP_SIZE, HYPRE_WARP_SIZE);
 
    /* copy shared memory hash table into C */
-//#pragma unroll(UNROLL_FACTOR)
+//#pragma unroll UNROLL_FACTOR
    for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
    {
       HYPRE_Int sum;
@@ -303,7 +303,7 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
       /* initialize group's shared memory hash table */
       if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
       {
-#pragma unroll(UNROLL_FACTOR)
+#pragma unroll UNROLL_FACTOR
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -619,6 +619,7 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
@@ -642,10 +643,45 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
    */
 #endif
 
+
+#if 0// defined(HYPRE_USING_HIP)
+   HYPRE_CUDA_CALL( hipFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+         hipFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   HYPRE_CUDA_CALL( hipFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, false>,
+         hipFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   HYPRE_CUDA_CALL( hipFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, true>,
+         hipFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   HYPRE_CUDA_CALL( hipFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, HASH_TYPE, false>,
+         hipFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+
+   /*
+   HYPRE_CUDA_CALL( hipFuncSetAttribute(
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, false, HASH_TYPE, false>,
+         hipFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+   */
+#endif
+#endif
+
+#if defined(HYPRE_USING_CUDA)
    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
          &numBlocksPerSm,
          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
          block_size, dynamic_shmem_size);
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   hipOccupancyMaxActiveBlocksPerMultiprocessor(
+         &numBlocksPerSm,
+         hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+         block_size, dynamic_shmem_size);
+#endif
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;
 
