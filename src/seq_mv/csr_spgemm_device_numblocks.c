@@ -34,6 +34,8 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
    }
 
    /* symbolic */
+   hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE /  8, HYPRE_SPGEMM_BASE_GROUP_SIZE /  8>
+      (multiProcessorCount, &max_nblocks[0][2]);
    hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4, HYPRE_SPGEMM_BASE_GROUP_SIZE /  4>
       (multiProcessorCount, &max_nblocks[0][3]);
    hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2, HYPRE_SPGEMM_BASE_GROUP_SIZE /  2>
@@ -71,7 +73,6 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
 
    /* this is just a heuristic; having more blocks (than max active) seems improving performance */
    for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] *= 5; max_nblocks[1][i] *= 5; }
-   //for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] = max_nblocks[1][i] = 8192; }
 
 #if defined(HYPRE_SPGEMM_PRINTF)
    printf0("=========================================================================\n");

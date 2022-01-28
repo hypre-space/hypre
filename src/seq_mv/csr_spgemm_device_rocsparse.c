@@ -59,7 +59,7 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
 
    /* For rocSPARSE, the CSR SpGEMM implementation does not require the columns to be sorted! */
    /* RL: for matrices with long rows, it seemed that the sorting is still needed */
-#if 1
+#if 0
    hypre_SortCSRRocsparse(m, k, nnzA, descrA, d_ia, d_ja_sorted, d_a_sorted);
    hypre_SortCSRRocsparse(k, n, nnzB, descrB, d_ib, d_jb_sorted, d_b_sorted);
 #endif
