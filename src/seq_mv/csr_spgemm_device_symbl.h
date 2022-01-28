@@ -328,7 +328,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    // number of active groups
    HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
 
-   const char HASH_TYPE = HYPRE_SPGEMM_NUMER_HASH_TYPE;
+   const char HASH_TYPE = HYPRE_SPGEMM_HASH_TYPE;
    if (HASH_TYPE != 'L' && HASH_TYPE != 'Q' && HASH_TYPE != 'D')
    {
       hypre_printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
@@ -414,7 +414,7 @@ template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
                                                 HYPRE_Int *num_blocks_ptr )
 {
-   const char HASH_TYPE = HYPRE_SPGEMM_NUMER_HASH_TYPE;
+   const char HASH_TYPE = HYPRE_SPGEMM_HASH_TYPE;
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
 #endif

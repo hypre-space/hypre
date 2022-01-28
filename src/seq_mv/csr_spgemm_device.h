@@ -14,7 +14,7 @@
 
 #define COHEN_USE_SHMEM 0
 
-static const char HYPRE_SPGEMM_NUMER_HASH_TYPE = 'D';
+static const char HYPRE_SPGEMM_HASH_TYPE = 'D';
 
 /* default settings associated with bin 5 */
 #define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
