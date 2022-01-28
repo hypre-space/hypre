@@ -954,18 +954,6 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   /* Sanity check */
-#if defined(HYPRE_USING_OPENMP) && \
-   (defined(HYPRE_USING_HYPRE_LAPACK) || defined(HYPRE_USING_HYPRE_BLAS))
-   char  msg[512];    /* Warning message */
-
-   hypre_sprintf(msg, "Threaded FSAI requires linking to external blas/LAPACK. Using Jacobi.");
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
-
-   /* Compute Jacobi instead */
-   hypre_ParFSAIDataMaxSteps(fsai_data) = 0;
-#endif
-
    /* Create and initialize work vectors used in the solve phase */
    r_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
    z_work = hypre_ParVectorCreate(comm, num_rows_A, row_starts_A);
@@ -1066,14 +1054,14 @@ hypre_FSAIPrintStats( void *fsai_vdata,
       hypre_printf("*************************\n\n");
 
       hypre_printf("+---------------------------+\n");
-      hypre_printf("| No. MPI tasks:   %8d |\n", nprocs);
-      hypre_printf("| No. threads:     %8d |\n", hypre_NumThreads());
-      hypre_printf("| Algorithm type:  %8d |\n", algo_type);
-      hypre_printf("| Max no. steps:   %8d |\n", max_steps);
-      hypre_printf("| Max step size:   %8d |\n", max_step_size);
+      hypre_printf("| No. MPI tasks:     %6d |\n", nprocs);
+      hypre_printf("| No. threads:       %6d |\n", hypre_NumThreads());
+      hypre_printf("| Algorithm type:    %6d |\n", algo_type);
+      hypre_printf("| Max no. steps:     %6d |\n", max_steps);
+      hypre_printf("| Max step size:     %6d |\n", max_step_size);
       hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
       hypre_printf("| Prec. density:   %8.3f |\n", density);
-      hypre_printf("| Eig max iters:   %8d |\n", eig_max_iters);
+      hypre_printf("| Eig max iters:     %6d |\n", eig_max_iters);
       hypre_printf("| Omega factor:    %8.3f |\n", hypre_ParFSAIDataOmega(fsai_data));
       hypre_printf("+---------------------------+\n");
 

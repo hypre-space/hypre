@@ -894,6 +894,10 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
  * (Optional) Enables the use of more complex smoothers.
  * The following options exist for \e smooth_type:
  *
+ *    - 4 : FSAI (routines needed to set: HYPRE_BoomerAMGSetFSAIMaxSteps,
+ *          HYPRE_BoomerAMGSetFSAIMaxStepSize, HYPRE_BoomerAMGSetFSAIEigMaxIters,
+ *          HYPRE_BoomerAMGSetFSAIKapTolerance)
+ *    - 5 : ParILUK (routines needed to set: HYPRE_ILUSetLevelOfFill, HYPRE_ILUSetType)
  *    - 6 : Schwarz (routines needed to set: HYPRE_BoomerAMGSetDomainType,
  *          HYPRE_BoomerAMGSetOverlap, HYPRE_BoomerAMGSetVariant,
  *          HYPRE_BoomerAMGSetSchwarzRlxWeight)
@@ -903,7 +907,6 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
  *          HYPRE_BoomerAMGSetLevel, HYPRE_BoomerAMGSetFilter,
  *          HYPRE_BoomerAMGSetThreshold)
  *    - 9 : Euclid (routines needed to set: HYPRE_BoomerAMGSetEuclidFile)
- *    - 5 : ParILUK (routines needed to set: HYPRE_ILUSetLevelOfFill, HYPRE_ILUSetType)
  *
  * The default is 6.  Also, if no smoother parameters are set via the routines
  * mentioned in the table above, default values are used.
