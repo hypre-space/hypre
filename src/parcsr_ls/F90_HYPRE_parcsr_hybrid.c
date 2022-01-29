@@ -248,7 +248,10 @@ hypre_F90_IFACE(hypre_parcsrhybridsetprecond, HYPRE_PARCSRHYBRIDSETPRECOND)
     * 2 - use amg preconditioner
     * 3 - use pilut preconditioner
     * 4 - use parasails preconditioner
+    * 5 - use Euclid preconditioner
+    * 6 - use MGR preconditioner
     *---------------------------------------------------------------*/
+
    if (*precond_id == 0)
    {
       *ierr = 0;
@@ -297,6 +300,15 @@ hypre_F90_IFACE(hypre_parcsrhybridsetprecond, HYPRE_PARCSRHYBRIDSETPRECOND)
                   HYPRE_EuclidSolve,
                   HYPRE_EuclidSetup,
                   (HYPRE_Solver)          * precond_solver ));
+   }
+   else if (*precond_id == 6)
+   {
+      *ierr = (hypre_F90_Int)
+              ( HYPRE_ParCSRHybridSetPrecond(
+                   hypre_F90_PassObj (HYPRE_Solver, solver),
+                   HYPRE_MGRSolve,
+                   HYPRE_MGRSetup,
+                   (HYPRE_Solver)       * precond_solver ) );
    }
    else
    {
