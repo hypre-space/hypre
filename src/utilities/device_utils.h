@@ -226,9 +226,7 @@ struct hypre_DeviceData
 #else
    HYPRE_Int                         device;
 #endif
-
    hypre_int                         device_max_shmem_per_block[2];
-
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) stream */
    HYPRE_Int                         compute_stream_num;
@@ -244,7 +242,7 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_algorithm_binned;
    HYPRE_Int                         spgemm_algorithm_num_bin;
-   HYPRE_Int                         spgemm_algorithm_max_num_blocks[2][HYPRE_SPGEMM_MAX_NBIN + 1];
+   HYPRE_Int                         spgemm_algorithm_max_num_blocks[4][HYPRE_SPGEMM_MAX_NBIN + 1];
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;

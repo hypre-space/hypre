@@ -17,7 +17,7 @@ hypre_spgemm_numerical_with_rownnz< 6, HYPRE_SPGEMM_NUMER_HASH_SIZE * 2, HYPRE_S
   HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
 template HYPRE_Int hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 2, HYPRE_SPGEMM_BASE_GROUP_SIZE * 2>
-( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
+( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 

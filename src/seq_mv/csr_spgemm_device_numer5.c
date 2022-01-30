@@ -24,7 +24,7 @@ hypre_spgemm_numerical_with_rownnz < 5, HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_SPGE
 
 template HYPRE_Int
 hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_SPGEMM_BASE_GROUP_SIZE>
-( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
+( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 template HYPRE_Int
 hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>

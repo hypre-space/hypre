@@ -116,16 +116,16 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
    HYPRE_Int  num_bins = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
-   const char s = 8, t = 3, u = num_bins;
+   const char s = 8, t = 2, u = num_bins;
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 
 #if 0
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 1,  HYPRE_SPGEMM_NUMER_HASH_SIZE / 16,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE / 16, exact_rownnz, false);  /* 16,      2 */
+#endif
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 2,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  8,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  8, exact_rownnz, false);  /* 32,      4 */
-#endif
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 3,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  4,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, exact_rownnz, false);  /* 64,      8 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 4,  HYPRE_SPGEMM_NUMER_HASH_SIZE /  2,

@@ -380,15 +380,26 @@ HYPRE_Int hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, H
                                               HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
-HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
+HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
-HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr );
+HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks();
 
 template <HYPRE_Int GROUP_SIZE> HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int m,
                                                                               HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);
+
+template <HYPRE_Int GROUP_SIZE>
+static constexpr HYPRE_Int
+hypre_spgemm_get_num_groups_per_block()
+{
+#if defined(HYPRE_USING_CUDA)
+   return hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
+#elif defined(HYPRE_USING_HIP)
+   return hypre_max(512 / GROUP_SIZE, 1);
+#endif
+}
 
 #if defined(HYPRE_SPGEMM_PRINTF) || defined(HYPRE_SPGEMM_TIMING)
 static hypre_int printf0( const char * format, ... )

@@ -310,7 +310,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
                               bool       can_fail,
                               char      *d_rf  /* output: if symbolic mult. failed for each row  */ )
 {
-   const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 256);
+   const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int BDIMX                = 2;
 #elif defined(HYPRE_USING_HIP)
@@ -412,15 +412,11 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
 HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
-                                                HYPRE_Int *num_blocks_ptr )
+                                                HYPRE_Int *num_blocks_ptr,
+                                                HYPRE_Int *block_size_ptr )
 {
    const char HASH_TYPE = HYPRE_SPGEMM_HASH_TYPE;
-#if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int num_groups_per_block = hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
-#endif
-#if defined(HYPRE_USING_HIP)
-   const HYPRE_Int num_groups_per_block = hypre_max(512 / GROUP_SIZE, 1);
-#endif
+   const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
    hypre_int numBlocksPerSm = 0;
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
@@ -471,6 +467,7 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #endif
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;
+   *block_size_ptr = block_size;
 
    return hypre_error_flag;
 }

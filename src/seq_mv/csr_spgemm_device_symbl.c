@@ -240,15 +240,26 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                    HYPRE_Int  in_rc,
                                    HYPRE_Int *d_rc )
 {
-   const bool need_ghash = in_rc > 0;
-   const bool can_fail = in_rc < 2;
+   const char s = 32, t = 1, u = 5;
+   HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
+   HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
+   char      *d_rf = hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE);
 
-   char *d_rf = can_fail ? hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE) : NULL;
+   hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, 1);
 
-   hypre_spgemm_symbolic_rownnz<5, HYPRE_SPGEMM_SYMBL_HASH_SIZE, HYPRE_SPGEMM_BASE_GROUP_SIZE, false>
-      (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
+   hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 
-   if (can_fail)
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 1, HYPRE_SPGEMM_SYMBL_HASH_SIZE / 16,
+                                  HYPRE_SPGEMM_BASE_GROUP_SIZE / 16, false, false); /*  32,  2 */
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 2, HYPRE_SPGEMM_SYMBL_HASH_SIZE /  8,
+                                  HYPRE_SPGEMM_BASE_GROUP_SIZE /  8, false, false); /*  64,  4 */
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 3, HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4,
+                                  HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, false, false); /* 128,  8 */
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 4, HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2,
+                                  HYPRE_SPGEMM_BASE_GROUP_SIZE /  2, false, false); /* 256, 16 */
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 5, HYPRE_SPGEMM_SYMBL_HASH_SIZE,
+                                  HYPRE_SPGEMM_BASE_GROUP_SIZE,      false,  true); /* 512, 32 */
+
    {
       HYPRE_Int num_failed_rows =
          HYPRE_THRUST_CALL( reduce,
@@ -261,8 +272,6 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
          printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
                  num_failed_rows, num_failed_rows / (m + 0.0) );
 #endif
-         HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
-
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
                                thrust::make_counting_iterator(0),
@@ -274,28 +283,25 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
          hypre_assert(new_end - d_rind == num_failed_rows);
 
          /* Binning (bins 6-10) with d_rc which is a **rownnz-bound** now */
-         HYPRE_Int h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
-         const char s = 32, t = 6, u = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
-         const bool CAN_FAIL = false;
+         const char t = 6, u = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
 
          hypre_SpGemmCreateBins(num_failed_rows, s, t, u, d_rc, true, d_rind, h_bin_ptr);
 
          HYPRE_SPGEMM_ROWNNZ_BINNED( 6, HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2,
-                                     HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, false, CAN_FAIL); /* 1024,   64 */
+                                        HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, false, false); /* 1024,   64 */
          HYPRE_SPGEMM_ROWNNZ_BINNED( 7, HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4,
-                                     HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, false, CAN_FAIL); /* 2048,  128 */
+                                        HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, false, false); /* 2048,  128 */
          HYPRE_SPGEMM_ROWNNZ_BINNED( 8, HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8,
-                                     HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, false, CAN_FAIL); /* 4096,  256 */
+                                        HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, false, false); /* 4096,  256 */
          HYPRE_SPGEMM_ROWNNZ_BINNED( 9, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,
-                                     HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, false, CAN_FAIL); /* 8192,  512 */
+                                        HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, false, false); /* 8192,  512 */
          HYPRE_SPGEMM_ROWNNZ_BINNED(10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,
-                                     HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, true, CAN_FAIL);  /* 16384, 1024 */
-
-         hypre_TFree(d_rind, HYPRE_MEMORY_DEVICE);
+                                        HYPRE_SPGEMM_BASE_GROUP_SIZE * 32,  true, false); /* 16384, 1024 */
       }
    }
 
-   hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_rind, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_rf,   HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

@@ -46,6 +46,8 @@ CUFILES =\
  csr_spgemm_device_cusparse.c\
  csr_spgemm_device_numblocks.c\
  csr_spgemm_device_numer.c\
+ csr_spgemm_device_numer1.c\
+ csr_spgemm_device_numer2.c\
  csr_spgemm_device_numer3.c\
  csr_spgemm_device_numer4.c\
  csr_spgemm_device_numer5.c\
@@ -57,6 +59,7 @@ CUFILES =\
  csr_spgemm_device_rocsparse.c \
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_symbl.c\
+ csr_spgemm_device_symbl1.c\
  csr_spgemm_device_symbl2.c\
  csr_spgemm_device_symbl3.c\
  csr_spgemm_device_symbl4.c\
