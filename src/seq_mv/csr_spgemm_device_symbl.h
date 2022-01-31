@@ -312,9 +312,9 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 {
    const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
 #if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int BDIMX                = 2;
+   const HYPRE_Int BDIMX                = hypre_min(4, GROUP_SIZE);
 #elif defined(HYPRE_USING_HIP)
-   const HYPRE_Int BDIMX                = 4;
+   const HYPRE_Int BDIMX                = hypre_min(4, GROUP_SIZE);
 #endif
    const HYPRE_Int BDIMY                = GROUP_SIZE / BDIMX;
 
