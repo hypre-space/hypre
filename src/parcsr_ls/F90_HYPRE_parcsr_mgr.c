@@ -149,7 +149,7 @@ hypre_F90_IFACE(hypre_mgrdirectsolversolve, HYPRE_MGRDIRECTSOLVERSOLVE)
   hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int)
-           ( HYPRE_MGRDirectSolverSolver(
+           ( HYPRE_MGRDirectSolverSolve(
                 hypre_F90_PassObj (HYPRE_Solver, solver),
                 hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
                 hypre_F90_PassObj (HYPRE_ParVector, b),
