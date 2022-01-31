@@ -296,7 +296,6 @@ main( hypre_int argc,
    HYPRE_Int  spgemm_rowest_mtd = 3;
    HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
-   char       spgemm_hash_type = 'D';
 #endif
 
    /* for CGC BM Aug 25, 2006 */
@@ -1214,11 +1213,6 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_rowest_nsamples  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-spgemm_hash") == 0 )
-      {
-         arg_index++;
-         spgemm_hash_type  = argv[arg_index++][0];
       }
       else if ( strcmp(argv[arg_index], "-use_curand") == 0 )
       {
@@ -2323,7 +2317,6 @@ main( hypre_int argc,
    ierr = hypre_SetSpGemmRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
    if (spgemm_rowest_nsamples > 0) { ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0); }
    if (spgemm_rowest_mult > 0.0) { ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0); }
-   ierr = hypre_SetSpGemmHashType(spgemm_hash_type); hypre_assert(ierr == 0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
 #endif
