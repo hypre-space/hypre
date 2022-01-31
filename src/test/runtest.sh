@@ -129,6 +129,10 @@ function MpirunString
          shift
          RunString="srun -n$*"
          ;;
+      node*)
+         shift
+         RunString="srun -n$*"
+         ;;
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then

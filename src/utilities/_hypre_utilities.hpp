@@ -735,7 +735,11 @@ template <typename T>
 static __device__ __forceinline__
 T read_only_load( const T *ptr )
 {
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 350
    return __ldg( ptr );
+#else
+   return *ptr;
+#endif
 }
 
 /* exclusive prefix scan */

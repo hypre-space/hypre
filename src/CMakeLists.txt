@@ -573,4 +573,8 @@ export(EXPORT HYPRETargets
   NAMESPACE HYPRE::
   )
 
+# Declare an alias so that consumers can depend on HYPRE::HYPRE target
+# also when using HYPRE via add_directory or FetchContent
+add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
 export(PACKAGE ${PROJECT_NAME})
