@@ -172,14 +172,14 @@ hypre_F90_IFACE(hypre_mgrsetcptsbyctgblock, HYPRE_MGRSETCPTSBYCTGBLOCK)
   hypre_F90_IntArrayArray *block_coarse_indexes,
   hypre_F90_Int           *ierr )
 {
-  *ierr = (hypre_F90_Int)
-          ( HYPRE_MGRSetCpointsByContiguousBlock(
-               hypre_F90_PassObj (HYPRE_Solver, solver),
-               hypre_F90_PassInt (block_size),
-               hypre_F90_PassInt (max_num_levels),
-               hypre_F90_PassBigIntArray (idx_array),
-               hypre_F90_PassIntArray (block_num_coarse_points),
-               hypre_F90_PassIntArrayArray (block_coarse_indexes) ) );
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_MGRSetCpointsByContiguousBlock(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (block_size),
+                hypre_F90_PassInt (max_num_levels),
+                hypre_F90_PassBigIntArray (idx_array),
+                hypre_F90_PassIntArray (block_num_coarse_points),
+                hypre_F90_PassIntArrayArray (block_coarse_indexes) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -195,13 +195,13 @@ hypre_F90_IFACE(hypre_mgrsetcpointsbyblock, HYPRE_MGRSETCPOINTSBYBLOCK)
   hypre_F90_IntArrayArray *block_coarse_indexes,
   hypre_F90_Int           *ierr )
 {
-  *ierr = (hypre_F90_Int)
-          ( HYPRE_MGRSetCpointsByBlock(
-               hypre_F90_PassObj (HYPRE_Solver, solver),
-               hypre_F90_PassInt (block_size),
-               hypre_F90_PassInt (max_num_levels),
-               hypre_F90_PassIntArray (block_num_coarse_points),
-               hypre_F90_PassIntArrayArray (block_coarse_indexes) ) );
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_MGRSetCpointsByBlock(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (block_size),
+                hypre_F90_PassInt (max_num_levels),
+                hypre_F90_PassIntArray (block_num_coarse_points),
+                hypre_F90_PassIntArrayArray (block_coarse_indexes) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -218,14 +218,14 @@ hypre_F90_IFACE(hypre_mgrsetcptsbymarkerarray, HYPRE_MGRSETCPTSBYMARKERARRAY)
   hypre_F90_IntArray      *point_marker_array,
   hypre_F90_Int           *ierr )
 {
-  *ierr = (hypre_F90_Int)
-          ( HYPRE_MGRSetCpointsByPointMarkerArray(
-               hypre_F90_PassObj (HYPRE_Solver, solver),
-               hypre_F90_PassInt (block_size),
-               hypre_F90_PassInt (max_num_levels),
-               hypre_F90_PassIntArray (num_block_coarse_points),
-               hypre_F90_PassIntArrayArray (lvl_block_coarse_indexes),
-               hypre_F90_PassIntArray (point_marker_array) ) );
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_MGRSetCpointsByPointMarkerArray(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (block_size),
+                hypre_F90_PassInt (max_num_levels),
+                hypre_F90_PassIntArray (num_block_coarse_points),
+                hypre_F90_PassIntArrayArray (lvl_block_coarse_indexes),
+                hypre_F90_PassIntArray (point_marker_array) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -272,7 +272,7 @@ hypre_F90_IFACE(hypre_mgrsetfsolver, HYPRE_MGRSETFSOLVER)
                    hypre_F90_PassObj (HYPRE_Solver, solver),
                    (HYPRE_PtrToParSolverFcn) HYPRE_BoomerAMGSolve,
                    (HYPRE_PtrToParSolverFcn) HYPRE_BoomerAMGSetup,
-                   (HYPRE_Solver) *fsolver) );
+                   (HYPRE_Solver) * fsolver) );
    }
    else
    {
@@ -328,7 +328,7 @@ hypre_F90_IFACE(hypre_mgrsetcoarsesolver, HYPRE_MGRSETCOARSESOLVER)
                    hypre_F90_PassObj (HYPRE_Solver, solver),
                    (HYPRE_PtrToParSolverFcn) HYPRE_BoomerAMGSolve,
                    (HYPRE_PtrToParSolverFcn) HYPRE_BoomerAMGSetup,
-                   (HYPRE_Solver) *csolver) );
+                   (HYPRE_Solver) * csolver) );
    }
    else
    {
@@ -379,11 +379,11 @@ hypre_F90_IFACE(hypre_mgrsetreservedcoarsenodes, HYPRE_MGRSETRESERVEDCOARSENODES
   hypre_F90_BigIntArray *reserved_coarse_indexes,
   hypre_F90_Int         *ierr )
 {
-  *ierr = (hypre_F90_Int)
-          ( HYPRE_MGRSetReservedCoarseNodes(
-               hypre_F90_PassObj (HYPRE_Solver, solver),
-               hypre_F90_PassInt (reserved_coarse_size),
-               hypre_F90_PassBigIntArray (reserved_coarse_indexes) ) );
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_MGRSetReservedCoarseNodes(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (reserved_coarse_size),
+                hypre_F90_PassBigIntArray (reserved_coarse_indexes) ) );
 }
 
 /*--------------------------------------------------------------------------
