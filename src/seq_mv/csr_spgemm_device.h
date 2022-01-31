@@ -151,43 +151,49 @@ template <typename T, HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
 T group_reduce_sum(T in)
 {
-   if (GROUP_SIZE < HYPRE_WARP_SIZE)
-   {
+#if defined(HYPRE_DEBUG)
+   hypre_device_assert(GROUP_SIZE <= HYPRE_WARP_SIZE);
+#endif
+
 #pragma unroll
-      for (hypre_int d = GROUP_SIZE / 2; d > 0; d >>= 1)
-      {
-         in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
-      }
-      return in;
-   }
-   else
+   for (hypre_int d = GROUP_SIZE / 2; d > 0; d >>= 1)
    {
-      T out = warp_reduce_sum(in);
-
-      if (GROUP_SIZE > HYPRE_WARP_SIZE)
-      {
-         __shared__ volatile T s_WarpData[NUM_GROUPS_PER_BLOCK * GROUP_SIZE / HYPRE_WARP_SIZE];
-         const HYPRE_Int warp_lane_id = get_warp_lane_id();
-         const HYPRE_Int warp_id = get_warp_id();
-
-         if (warp_lane_id == 0)
-         {
-            s_WarpData[warp_id] = out;
-         }
-
-         __syncthreads();
-
-         if (get_warp_in_group_id<GROUP_SIZE>() == 0)
-         {
-            const T a = warp_lane_id < GROUP_SIZE / HYPRE_WARP_SIZE ? s_WarpData[warp_id + warp_lane_id] : 0.0;
-            out = warp_reduce_sum(a);
-         }
-
-         __syncthreads();
-      }
-
-      return out;
+      in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
+
+   return in;
+}
+
+/* s_WarpData[NUM_GROUPS_PER_BLOCK * GROUP_SIZE / HYPRE_WARP_SIZE] */
+template <typename T, HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE>
+static __device__ __forceinline__
+T group_reduce_sum(T in, volatile T *s_WarpData)
+{
+#if defined(HYPRE_DEBUG)
+   hypre_device_assert(GROUP_SIZE > HYPRE_WARP_SIZE);
+#endif
+
+   T out = warp_reduce_sum(in);
+
+   const HYPRE_Int warp_lane_id = get_warp_lane_id();
+   const HYPRE_Int warp_id = get_warp_id();
+
+   if (warp_lane_id == 0)
+   {
+      s_WarpData[warp_id] = out;
+   }
+
+   __syncthreads();
+
+   if (get_warp_in_group_id<GROUP_SIZE>() == 0)
+   {
+      const T a = warp_lane_id < GROUP_SIZE / HYPRE_WARP_SIZE ? s_WarpData[warp_id + warp_lane_id] : 0.0;
+      out = warp_reduce_sum(a);
+   }
+
+   __syncthreads();
+
+   return out;
 }
 
 /* GROUP_SIZE must <= HYPRE_WARP_SIZE */

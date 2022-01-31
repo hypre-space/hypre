@@ -271,13 +271,30 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
       hypre_device_assert(CAN_FAIL || failed == 0);
 #endif
 
-      /* num of nonzeros of this row (an upper bound) */
-      jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(jsum);
+      /* num of nonzeros of this row (an upper bound)
+       * use s_HashKeys as shared memory workspace */
+      if (GROUP_SIZE <= HYPRE_WARP_SIZE)
+      {
+         jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(jsum);
+      }
+      else
+      {
+         __syncthreads();
+
+         jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(jsum, s_HashKeys);
+      }
 
       /* if this row failed */
       if (CAN_FAIL)
       {
-         failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed);
+         if (GROUP_SIZE <= HYPRE_WARP_SIZE)
+         {
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed);
+         }
+         else
+         {
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed, s_HashKeys);
+         }
       }
 
       if ((GROUP_SIZE >= HYPRE_WARP_SIZE || i < M) && lane_id == 0)
@@ -308,7 +325,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
                               HYPRE_Int *d_jb,
                               HYPRE_Int *d_rc,
                               bool       can_fail,
-                              char      *d_rf  /* output: if symbolic mult. failed for each row  */ )
+                              char      *d_rf  /* output: if symbolic mult. failed for each row */ )
 {
    const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
 #if defined(HYPRE_USING_CUDA)
