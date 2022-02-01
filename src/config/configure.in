@@ -2471,7 +2471,7 @@ then
 
    if test "$hypre_using_gpu_profiling" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_NVTX, 1, [NVTX being used])
+      AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
    fi
 
    AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Define to 1 if executing on device with OpenMP])

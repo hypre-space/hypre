@@ -792,13 +792,10 @@ enable_rocblas
 enable_rocrand
 enable_gpu_profiling
 enable_gpu_aware_mpi
-<<<<<<< HEAD
-with_cxxstandard
-=======
 enable_onemklsparse
 enable_onemklblas
 enable_onemklrand
->>>>>>> a7bb784a4554718a4c9c2febd39757de975c6c51
+with_cxxstandard
 with_LD
 with_LDFLAGS
 with_extra_CFLAGS
@@ -2797,9 +2794,9 @@ hypre_using_um=no
 hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
-hypre_using_cusparse=no
+hypre_using_cusparse=yes
 hypre_using_cublas=no
-hypre_using_curand=no
+hypre_using_curand=yes
 hypre_using_device_pool=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
@@ -3133,7 +3130,7 @@ if test "${enable_cuda_streams+set}" = set; then :
   enableval=$enable_cuda_streams; case "${enableval}" in
     yes) hypre_using_cuda_streams=yes ;;
     no)  hypre_using_cuda_streams=no ;;
-    *)   hypre_using_cuda_streams=no ;;
+    *)   hypre_using_cuda_streams=yes ;;
  esac
 else
   hypre_using_cuda_streams=yes
@@ -3146,7 +3143,7 @@ if test "${enable_cusparse+set}" = set; then :
   enableval=$enable_cusparse; case "${enableval}" in
     yes) hypre_using_cusparse=yes ;;
     no)  hypre_using_cusparse=no ;;
-    *)   hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=yes ;;
  esac
 else
   hypre_using_cusparse=yes
@@ -3185,7 +3182,7 @@ if test "${enable_curand+set}" = set; then :
   enableval=$enable_curand; case "${enableval}" in
     yes) hypre_using_curand=yes ;;
     no)  hypre_using_curand=no ;;
-    *)   hypre_using_curand=no ;;
+    *)   hypre_using_curand=yes ;;
  esac
 else
   hypre_using_curand=yes
@@ -3200,7 +3197,7 @@ if test "${enable_rocsparse+set}" = set; then :
   enableval=$enable_rocsparse; case "${enableval}" in
     yes) hypre_using_rocsparse=yes ;;
     no)  hypre_using_rocsparse=no ;;
-    *)   hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=yes ;;
  esac
 else
   hypre_using_rocsparse=yes
@@ -3226,7 +3223,7 @@ if test "${enable_rocrand+set}" = set; then :
   enableval=$enable_rocrand; case "${enableval}" in
     yes) hypre_using_rocrand=yes ;;
     no)  hypre_using_rocrand=no ;;
-    *)   hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=yes ;;
  esac
 else
   hypre_using_rocrand=yes
@@ -9301,11 +9298,7 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
 
-<<<<<<< HEAD
-        LINK_CC=${CUCC}
-=======
-        	     LINK_CC=${CUCC}
->>>>>>> a7bb784a4554718a4c9c2febd39757de975c6c51
+                LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
         SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
@@ -9352,12 +9345,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
 
-<<<<<<< HEAD
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
-
-=======
->>>>>>> a7bb784a4554718a4c9c2febd39757de975c6c51
 fi
 
         if test x"$hypre_using_onemklrand" == x"yes"; then :
@@ -9441,6 +9428,17 @@ fi
 
 if test "$hypre_using_device_openmp" = "yes"
 then
+
+$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
+
+
+   if test "$hypre_using_gpu_profiling" = "yes"
+   then
+
+$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
+
+   fi
+
 
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
