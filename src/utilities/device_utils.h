@@ -47,6 +47,14 @@
 
 #include <hip/hip_runtime.h>
 
+#if defined(HYPRE_USING_ROCSPARSE)
+#include <rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+#include <rocrand.h>
+#endif
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          sycl includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -55,16 +63,17 @@
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+#include <oneapi/mkl/spblas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLBLAS)
+#include <oneapi/mkl/blas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLRAND)
+#include <oneapi/mkl/rng.hpp>
+#endif
 
 #endif // defined(HYPRE_USING_CUDA)
-
-#if defined(HYPRE_USING_ROCSPARSE)
-#include <rocsparse.h>
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-#include <rocrand.h>
-#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
@@ -106,6 +115,29 @@
                    __FILE__, __LINE__);                                                      \
       assert(0); exit(1);                                                                    \
    }
+
+#define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
+  func_name(oneapi::dpl::execution::make_device_policy(                                      \
+           *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+#define HYPRE_SYCL_LAUNCH(kernel_name, gridsize, blocksize, ...)                             \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]);                                                \
+     assert(0); exit(1);                                                                     \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -310,6 +342,10 @@ struct hypre_CsrsvData
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info info_L;
    rocsparse_mat_info info_U;
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   /* WM: todo - placeholders */
+   char info_L;
+   char info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
@@ -331,10 +367,15 @@ struct hypre_GpuMatData
    rocsparse_mat_descr   mat_descr;
    rocsparse_mat_info    mat_info;
 #endif
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+   oneapi::mkl::sparse::matrix_handle_t mat_handle;
+#endif
 };
 
 #define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
+#define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
 #endif //#if defined(HYPRE_USING_GPU)
@@ -388,9 +429,9 @@ using namespace thrust::placeholders;
 
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC

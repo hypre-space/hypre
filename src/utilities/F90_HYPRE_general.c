@@ -28,24 +28,24 @@ hypre_F90_IFACE(hypre_finalize, HYPRE_FINALIZE)
 
 void
 hypre_F90_IFACE(hypre_setmemorylocation, HYPRE_SETMEMORYLOCATION)
-   (hypre_F90_Int *memory_location, hypre_F90_Int *ierr)
+(hypre_F90_Int *memory_location, hypre_F90_Int *ierr)
 {
-   HYPRE_MemoryLocation loc = (HYPRE_MemoryLocation) *memory_location;
+   HYPRE_MemoryLocation loc = (HYPRE_MemoryLocation) * memory_location;
    *ierr = (hypre_F90_Int) HYPRE_SetMemoryLocation(loc);
 }
 
 void
 hypre_F90_IFACE(hypre_setexecutionpolicy, HYPRE_SETEXECUTIONPOLICY)
-   (hypre_F90_Int *exec_policy, hypre_F90_Int *ierr)
+(hypre_F90_Int *exec_policy, hypre_F90_Int *ierr)
 {
-   HYPRE_ExecutionPolicy exec = (HYPRE_ExecutionPolicy) *exec_policy;
+   HYPRE_ExecutionPolicy exec = (HYPRE_ExecutionPolicy) * exec_policy;
 
    *ierr = (hypre_F90_Int) HYPRE_SetExecutionPolicy(exec);
 }
 
 void
 hypre_F90_IFACE(hypre_setspgemmusecusparse, HYPRE_SETSPGEMMUSECUSPARSE)
-   (hypre_F90_Int *use_cusparse, hypre_F90_Int *ierr)
+(hypre_F90_Int *use_cusparse, hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_SetSpGemmUseCusparse(*use_cusparse);
 }
