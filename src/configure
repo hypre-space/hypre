@@ -9141,7 +9141,7 @@ $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
         LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        SYCLFLAGS="-D_GLIBCXX_USE_TBB_PAR_BACKEND=0 -std=c++17 -sycl-std=2020 -fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        SYCLFLAGS="-Wunknown-pragmas -Wunused-local-typedef -Wunused-lambda-capture -D_GLIBCXX_USE_TBB_PAR_BACKEND=0 -std=c++17 -sycl-std=2020 -fsycl -fsycl-unnamed-lambda -I/home/abagusetty/build/oneDPL/build_sycl/include"
 	if test "$hypre_using_debug" = "yes"
 	then
 	   SYCLFLAGS="-O0 -Wall -g -fno-sycl-early-optimizations ${SYCLFLAGS}"
