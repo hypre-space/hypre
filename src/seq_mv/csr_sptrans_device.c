@@ -138,7 +138,7 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
    *d_ac_out = csc_a;
 
 #ifdef HYPRE_PROFILE
-   hypre_SyncCudaDevice(hypre_handle())
+   hypre_SyncDevice(hypre_handle())
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
 #endif
 

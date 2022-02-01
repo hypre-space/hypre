@@ -11,7 +11,7 @@
 
 //#define HYPRE_SPGEMM_TIMING
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
@@ -152,10 +152,17 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                                d_rc + m);
 
          /* row nnz is exact if no row failed */
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_Int rownnz_exact = !HYPRE_ONEDPL_CALL( std::any_of,
+                                                      d_rc + m,
+                                                      d_rc + 2 * m,
+                                                      oneapi::dpl::identity() );
+#else
          HYPRE_Int rownnz_exact = !HYPRE_THRUST_CALL( any_of,
                                                       d_rc + m,
                                                       d_rc + 2 * m,
                                                       thrust::identity<HYPRE_Int>() );
+#endif
 #ifdef HYPRE_SPGEMM_TIMING
          hypre_SyncComputeStream(hypre_handle());
          t2 = hypre_MPI_Wtime() - t1;
@@ -196,5 +203,5 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_GPU */
 

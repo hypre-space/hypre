@@ -106,6 +106,9 @@ option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
 # CUDA options
+option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKLSPARSE" OFF)
+option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKLBLAS" OFF)
+option(HYPRE_ENABLE_ONEMKLRNG        "Use oneMKLRNG" ON)
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
@@ -289,7 +292,7 @@ endif (HYPRE_WITH_CUDA)
 # SYCL
 if (HYPRE_WITH_SYCL)
   enable_language(CXX)
-  message(STATUS "Enabled support for CXX.")
+  message(STATUS "Enabled support for SYCL.")
 
   # Enforce C++17
   if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
@@ -299,17 +302,14 @@ if (HYPRE_WITH_SYCL)
 
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 
-  # Set CXX compiler to dpcpp
-  set(CMAKE_CXX_COMPILER "dpcpp")
-
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
     string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
     add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS}>")
   endif ()
 
-  set(HYPRE_USING_SYCL ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_SYCL         ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_GPU          ON CACHE BOOL "" FORCE)
 
   if (HYPRE_ENABLE_UNIFIED_MEMORY)
     set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
@@ -324,12 +324,17 @@ if (HYPRE_WITH_SYCL)
     set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   endif ()
 
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-D_GLIBCXX_USE_TBB_PAR_BACKEND=0>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-sycl-std=2020>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-only>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
+#  include(HYPRE_SetupSYCLToolkit)
+#  set(CMAKE_CXX_FLAGS "-I/home/abagusetty/build/oneDPL/build_sycl/include ${CMAKE_CXX_FLAGS}")
 endif (HYPRE_WITH_SYCL)
 
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
@@ -475,10 +480,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if (HYPRE_USING_CUDA)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
-endif ()
-
-if (HYPRE_USING_SYCL)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
 endif ()
 
 # Set MPI compile flags

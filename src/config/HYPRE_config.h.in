@@ -220,8 +220,8 @@
 /* onemkl::BLAS being used */
 #undef HYPRE_USING_ONEMKLBLAS
 
-/* onemkl::rng being used */
-#undef HYPRE_USING_ONEMKLRAND
+/* onemkl::rng::device being used */
+#undef HYPRE_USING_ONEMKLRNG
 
 /* onemkl::SPARSE being used */
 #undef HYPRE_USING_ONEMKLSPARSE

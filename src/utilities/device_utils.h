@@ -61,6 +61,16 @@
 
 #elif defined(HYPRE_USING_SYCL)
 
+using dim3 = sycl::range<1>;
+#define __global__
+#define __host__
+#define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
+
+using sycl::rint;
+using sycl::min;
+using sycl::max;
+
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
 #if defined(HYPRE_USING_ONEMKLSPARSE)
@@ -70,7 +80,7 @@
 #include <oneapi/mkl/blas.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
-#include <oneapi/mkl/rng.hpp>
+#include <oneapi/dpl/random>
 #endif
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -116,28 +126,31 @@
       assert(0); exit(1);                                                                    \
    }
 
+#define HYPRE_ONEMKL_CALL(call)                                                              \
+   try                                                                                       \
+   {                                                                                         \
+      call;                                                                                  \
+   }                                                                                         \
+   catch (oneapi::mkl::exception const &ex)                                                  \
+   {                                                                                         \
+      hypre_printf("ONEMKL ERROR (code = %s) at %s:%d\n", ex.what(),                         \
+                   __FILE__, __LINE__);                                                      \
+      assert(0); exit(1);                                                                    \
+   }
+
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
            *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
-#define HYPRE_SYCL_LAUNCH(kernel_name, gridsize, blocksize, ...)                             \
-{                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
-   {                                                                                         \
-     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
-                  __FILE__, __LINE__,                                                        \
-                  gridsize[0], blocksize[0]);                                                \
-     assert(0); exit(1);                                                                     \
-   }                                                                                         \
-   else                                                                                      \
-   {                                                                                         \
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
-         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
-         });                                                                                 \
-      }).wait_and_throw();                                                                   \
-   }                                                                                         \
-}
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) \
+  ({                                                            \
+    hypre_HandleComputeStream(hypre_handle())->parallel_for(    \
+      sycl::nd_range(((gridsize) * (blocksize)), (blocksize))   \
+      , [=] (auto item)                                         \
+      [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {         \
+        (kernel_name)(item, __VA_ARGS__);                       \
+      });                                                       \
+  })
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -209,9 +222,7 @@ struct hypre_DeviceData
 {
 #if defined(HYPRE_USING_CURAND)
    curandGenerator_t                 curand_generator;
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
+#elif defined(HYPRE_USING_ROCRAND)
    rocrand_generator                 curand_generator;
 #endif
 
@@ -221,9 +232,7 @@ struct hypre_DeviceData
 
 #if defined(HYPRE_USING_CUSPARSE)
    cusparseHandle_t                  cusparse_handle;
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
+#elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_handle                  cusparse_handle;
 #endif
 
@@ -302,9 +311,7 @@ void                hypre_DeviceDataDestroy(hypre_DeviceData* data);
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
+#elif defined(HYPRE_USING_ROCRAND)
 rocrand_generator   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
@@ -314,9 +321,7 @@ cublasHandle_t      hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
+#elif defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
@@ -376,17 +381,75 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
+/* device_utils.c, some common functions for CUDA, SYCL, HIP */
+
+dim3 hypre_GetDefaultDeviceBlockDimension();
+
+dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
+                                          dim3 bDim );
+
+HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+template <typename T>
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+
+static __device__ __forceinline__
+hypre_int next_power_of_2(hypre_int n)
+{
+   if (n <= 0)
+   {
+      return 0;
+   }
+
+   /* if n is power of 2, return itself */
+   if ( (n & (n - 1)) == 0 )
+   {
+      return n;
+   }
+
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   n ^= (n >>  1);
+   n  = (n <<  1);
+
+   return n;
+}
+
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
+   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
+
+template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
+                                      HYPRE_Int opt);
+
+template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
+                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+
+template <typename T>
+HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
+
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
+                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
+                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
+                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
+                                    char *work);
+
 #endif //#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 
 /* device_utils.c */
 HYPRE_Int HYPRE_SetSYCLDevice(sycl::device user_device);
-sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
-
-sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
-                                                    sycl::range<1> bDim );
-
 #endif // #if defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -435,7 +498,7 @@ using namespace thrust::placeholders;
 #define GPU_LAUNCH_SYNC
 #endif // defined(HYPRE_DEBUG)
 
-#define HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                 \
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                 \
 {                                                                                                                             \
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
@@ -451,7 +514,7 @@ using namespace thrust::placeholders;
    }                                                                                                                          \
 }
 
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
@@ -799,31 +862,6 @@ T warp_allreduce_min(T in)
    return in;
 }
 
-static __device__ __forceinline__
-hypre_int next_power_of_2(hypre_int n)
-{
-   if (n <= 0)
-   {
-      return 0;
-   }
-
-   /* if n is power of 2, return itself */
-   if ( (n & (n - 1)) == 0 )
-   {
-      return n;
-   }
-
-   n |= (n >>  1);
-   n |= (n >>  2);
-   n |= (n >>  4);
-   n |= (n >>  8);
-   n |= (n >> 16);
-   n ^= (n >>  1);
-   n  = (n <<  1);
-
-   return n;
-}
-
 template<typename T>
 struct absolute_value : public thrust::unary_function<T, T>
 {
@@ -976,43 +1014,8 @@ struct print_functor
 };
 
 /* device_utils.c */
-dim3 hypre_GetDefaultDeviceBlockDimension();
-
-dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
-
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
-   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
-
-template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt);
-
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
-                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
-
-template <typename T>
-HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
-                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
-
-template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
-
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
                                 HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
-                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
-                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
-                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
-                                    char *work);
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
@@ -1035,6 +1038,596 @@ hypre_cub_CachingDeviceAllocator * hypre_DeviceDataCubCachingAllocatorCreate(hyp
 void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(HYPRE_USING_SYCL)
+
+#pragma once
+
+#include <oneapi/dpl/execution>
+#include <oneapi/dpl/algorithm>
+#include <oneapi/dpl/numeric>
+#include <oneapi/dpl/iterator>
+#include <oneapi/dpl/functional>
+
+
+template <typename T, sycl::access::address_space addressSpace =
+          sycl::access::address_space::global_space>
+using relaxed_atomic_ref =
+   sycl::atomic_ref< T,
+   sycl::memory_order::seq_cst,
+   sycl::memory_scope::device,
+   addressSpace>;
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * macro for launching SYCL kernels, SYCL, oneDPL, oneMKL calls
+ *                    NOTE: IN HYPRE'S DEFAULT STREAM
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
+namespace internal
+{
+
+//[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
+template <typename T, typename Predicate, typename Operator>
+struct transform_if_unary_zip_mask_fun
+{
+   transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
+   template <typename _T>
+   void operator()(_T&& t) const
+   {
+      using std::get;
+      if (pred(get<1>(t)))
+      {
+         get<2>(t) = op(get<0>(t));
+      }
+   }
+
+private:
+   Predicate pred;
+   Operator op;
+};
+
+template <typename T> struct sequence_fun
+{
+   using result_type = T;
+   sequence_fun(T _init, T _step) : init(_init), step(_step) {}
+
+   template <typename _T> result_type operator()(_T &&i) const
+   {
+      return static_cast<T>(init + step * i);
+   }
+
+private:
+   const T init;
+   const T step;
+};
+
+// Functor evaluates second element of tied sequence with predicate.
+// Used by: copy_if, remove_copy_if, stable_partition_copy
+// Lambda:
+template <typename Predicate> struct predicate_key_fun
+{
+   typedef bool result_of;
+   predicate_key_fun(Predicate _pred) : pred(_pred) {}
+
+   template <typename _T1> result_of operator()(_T1 &&a) const
+   {
+      using std::get;
+      return pred(get<1>(a));
+   }
+
+private:
+   Predicate pred;
+};
+
+} // namespace internal
+
+template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
+Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
+                        Iter3 result, Pred pred)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
+      std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   auto ret_val = std::copy_if(
+                     oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+                     oneapi::dpl::make_zip_iterator(first, mask),
+                     oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
+                     oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
+                     internal::predicate_key_fun<Pred>(pred));
+   return std::get<0>(ret_val.base());
+}
+
+template <class Iter, class T>
+void hypreSycl_iota(Iter first, Iter last, T init, T step = 1)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<Iter>::iterator_category,
+      std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   using DiffSize = typename std::iterator_traits<Iter>::difference_type;
+   std::transform(
+      oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+      oneapi::dpl::counting_iterator<DiffSize>(0),
+      oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
+      first, internal::sequence_fun<T>(init, step));
+}
+
+template <class Iter1, class Iter2, class Iter3,
+          class UnaryOperation, class Pred>
+Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
+                             Iter3 result, UnaryOperation unary_op, Pred pred)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
+      std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   using T = typename std::iterator_traits<Iter1>::value_type;
+   const auto n = std::distance(first, last);
+   std::for_each(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(
+                                                               hypre_handle())),
+                 oneapi::dpl::make_zip_iterator(first, mask, result),
+                 oneapi::dpl::make_zip_iterator(first, mask, result) + n,
+                 internal::transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(
+                    pred, unary_op));
+   return result + n;
+}
+
+template <typename InputIter1, typename InputIter2,
+          typename InputIter3, typename OutputIter, typename Predicate>
+void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
+                          InputIter2 map, InputIter3 mask, OutputIter result,
+                          Predicate pred)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter2>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter3>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<OutputIter>::iterator_category,
+      std::random_access_iterator_tag >::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   hypreSycl_transform_if(first, last, mask,
+                          oneapi::dpl::make_permutation_iterator(result, map),
+   [ = ](auto &&v) { return v; }, [ = ](auto &&m) { return pred(m); });
+}
+
+template <typename InputIter1, typename InputIter2,
+          typename OutputIter>
+OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
+                            InputIter2 input_first, OutputIter result)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter2>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<OutputIter>::iterator_category,
+      std::random_access_iterator_tag >::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   auto perm_begin =
+      oneapi::dpl::make_permutation_iterator(input_first, map_first);
+   const int n = ::std::distance(map_first, map_last);
+   return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(
+                                                                          hypre_handle())),
+                            perm_begin, perm_begin + n, result);
+}
+
+#if defined(HYPRE_DEBUG)
+#if defined(HYPRE_USING_CUDA)
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#endif
+#else // #if defined(HYPRE_DEBUG)
+#define GPU_LAUNCH_SYNC
+#endif // defined(HYPRE_DEBUG)
+
+/* RL: TODO Want macro HYPRE_ONEDPL_CALL to return value but I don't know how to do it right
+ * The following one works OK for now */
+
+// /* return the number of threads in block */
+// template <hypre_int dim>
+// static __forceinline__
+// hypre_int hypre_gpu_get_num_threads()
+// {
+//    switch (dim)
+//    {
+//       case 1:
+//          return (blockDim.x);
+//       case 2:
+//          return (blockDim.x * blockDim.y);
+//       case 3:
+//          return (blockDim.x * blockDim.y * blockDim.z);
+//    }
+
+//    return -1;
+// }
+
+/* return the number of (sub_groups) warps in (work-group) block */
+template <hypre_int dim>
+static __forceinline__
+hypre_int hypre_gpu_get_num_warps(sycl::nd_item<dim>& item)
+{
+   return item.get_sub_group().get_group_range().get(0);
+}
+
+/* return the thread lane id in warp */
+static __forceinline__
+hypre_int hypre_gpu_get_lane_id(sycl::sub_group& sg)
+{
+   return sg.get_local_linear_id();
+}
+
+// /* return the number of threads in grid */
+// template <hypre_int bdim, hypre_int gdim>
+// static __forceinline__
+// hypre_int hypre_gpu_get_grid_num_threads()
+// {
+//    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>();
+// }
+
+/* return the flattened work-item/thread id in global work space,
+ * Note: Since the use-cases always involved bdim = gdim = 1, the
+ * sycl::nd_item<1> is only being used. SFINAE is used to prevent
+ * other dimensions (i.e., bdim != gdim != 1) */
+template < hypre_int bdim, hypre_int gdim >
+static __forceinline__
+hypre_int hypre_gpu_get_grid_thread_id(sycl::nd_item<1>& item)
+{
+   static_assert(bdim == 1 && gdim == 1);
+   return item.get_global_id(0);
+}
+
+// /* return the number of warps in grid */
+// template <hypre_int bdim, hypre_int gdim>
+// static __forceinline__
+// hypre_int hypre_gpu_get_grid_num_warps()
+// {
+//    return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_warps<bdim>();
+// }
+
+/* return the flattened warp id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __forceinline__
+hypre_int hypre_gpu_get_grid_warp_id(sycl::nd_item<1>& item)
+{
+   return item.get_group(0) * hypre_gpu_get_num_warps<bdim>(item) +
+          item.get_sub_group().get_group_linear_id();
+}
+
+template <typename T>
+static __forceinline__
+T atomicCAS(T* address, T expected, T val)
+{
+   sycl::atomic_ref< T,
+        sycl::memory_order::relaxed,
+        sycl::memory_scope::device,
+        sycl::access::address_space::local_space >
+        atomicCAS_ref( *address );
+   return static_cast<T>( atomicCAS_ref.compare_exchange_strong(expected, val) );
+}
+
+template <typename T>
+static __forceinline__
+T atomicAdd(T* address, T val)
+{
+   sycl::atomic_ref< T,
+        sycl::memory_order::relaxed,
+        sycl::memory_scope::device,
+        sycl::access::address_space::local_space >
+        atomicAdd_ref( *address );
+   return atomicAdd_ref.fetch_add(val);
+}
+
+template <typename T>
+static __forceinline__
+T read_only_load( const T *ptr )
+{
+   return *ptr;
+}
+
+/* exclusive prefix scan */
+template <typename T, int DIM>
+static __forceinline__
+T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<DIM>& item)
+{
+   //sycl::exclusive_scan_over_group(item.get_sub_group(), in, std::plus<>());
+
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
+
+#pragma unroll
+   for (hypre_int d = 2; d <= warp_size; d <<= 1)
+   {
+      T t = SG.shuffle(in, d >> 1);
+      if ( (lane_id & (d - 1)) == (d - 1) )
+      {
+         in += t;
+      }
+   }
+
+   all_sum = SG.shuffle(in, warp_size - 1);
+
+   if (lane_id == warp_size - 1)
+   {
+      in = 0;
+   }
+
+#pragma unroll
+   for (hypre_int d = warp_size / 2; d > 0; d >>= 1)
+   {
+      T t = SG.shuffle_xor(in, d);
+
+      if ( (lane_id & (d - 1)) == (d - 1))
+      {
+         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
+         {
+            in += t;
+         }
+         else
+         {
+            in = t;
+         }
+      }
+   }
+   return in;
+}
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_reduce_sum(T in, sycl::nd_item<DIM>& item)
+{
+   return sycl::reduce_over_group(item.get_sub_group(), in, std::plus<>());
+}
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_allreduce_sum(T in, sycl::nd_item<DIM>& item)
+{
+   sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+   for (hypre_int d = SG.get_local_range().get(0) / 2; d > 0; d >>= 1)
+   {
+      in += SG.shuffle_xor(in, d);
+   }
+   return in;
+}
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_reduce_max(T in, sycl::nd_item<DIM>& item)
+{
+   return sycl::reduce_over_group(item.get_sub_group(), in, sycl::maximum<>());
+}
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_allreduce_max(T in, sycl::nd_item<DIM>& item)
+{
+   sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+   for (hypre_int d = SG.get_local_range().get(0) / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, SG.shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_reduce_min(T in, sycl::nd_item<DIM>& item)
+{
+   return sycl::reduce_over_group(item.get_sub_group(), in, sycl::minimum<>());
+}
+
+template <typename T, int DIM>
+static __forceinline__
+T warp_allreduce_min(T in, sycl::nd_item<DIM>& item)
+{
+   sycl::sub_group SG = item.get_sub_group();
+#pragma unroll
+   for (hypre_int d = SG.get_local_range().get(0) / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, SG.shuffle_xor(in, d));
+   }
+   return in;
+}
+
+// static __forceinline__
+// hypre_int next_power_of_2(hypre_int n)
+// {
+//    if (n <= 0)
+//    {
+//       return 0;
+//    }
+
+//    /* if n is power of 2, return itself */
+//    if ( (n & (n - 1)) == 0 )
+//    {
+//       return n;
+//    }
+
+//    n |= (n >>  1);
+//    n |= (n >>  2);
+//    n |= (n >>  4);
+//    n |= (n >>  8);
+//    n |= (n >> 16);
+//    n ^= (n >>  1);
+//    n  = (n <<  1);
+
+//    return n;
+// }
+
+// template<typename T>
+// struct absolute_value : public thrust::unary_function<T,T>
+// {
+//   T operator()(const T &x) const
+//   {
+//     return x < T(0) ? -x : x;
+//   }
+// };
+
+template<typename... T>
+struct TupleComp2
+{
+   typedef std::tuple<T...> Tuple;
+   bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (std::get<0>(t1) < std::get<0>(t2))
+      {
+         return true;
+      }
+      if (std::get<0>(t1) > std::get<0>(t2))
+      {
+         return false;
+      }
+      return hypre_abs(std::get<1>(t1)) > hypre_abs(std::get<1>(t2));
+   }
+};
+
+template<typename... T>
+struct TupleComp3
+{
+   typedef std::tuple<T...> Tuple;
+   bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (std::get<0>(t1) < std::get<0>(t2))
+      {
+         return true;
+      }
+      if (std::get<0>(t1) > std::get<0>(t2))
+      {
+         return false;
+      }
+      if (std::get<0>(t2) == std::get<1>(t2))
+      {
+         return false;
+      }
+      return std::get<0>(t1) == std::get<1>(t1) || std::get<1>(t1) < std::get<1>(t2);
+   }
+};
+
+// template<typename T>
+// struct is_negative : public thrust::unary_function<T,bool>
+// {
+//    bool operator()(const T &x)
+//    {
+//       return (x < 0);
+//    }
+// };
+
+// template<typename T>
+// struct is_positive : public thrust::unary_function<T,bool>
+// {
+//    bool operator()(const T &x)
+//    {
+//       return (x > 0);
+//    }
+// };
+
+// template<typename T>
+// struct is_nonnegative : public thrust::unary_function<T,bool>
+// {
+//    bool operator()(const T &x)
+//    {
+//       return (x >= 0);
+//    }
+// };
+
+template<typename T>
+struct in_range
+{
+   T low, up;
+   in_range(T low_, T up_) { low = low_; up = up_; }
+
+   bool operator()(const T &x) const { return (x >= low && x <= up); }
+};
+
+// template<typename T>
+// struct out_of_range : public thrust::unary_function<T,bool>
+// {
+//    T low, up;
+
+//    out_of_range(T low_, T up_) { low = low_; up = up_; }
+
+//    bool operator()(const T &x)
+//    {
+//       return (x < low || x > up);
+//    }
+// };
+
+#ifdef HYPRE_COMPLEX
+template<typename T,
+         typename = typename std::enable_if<std::is_same<T, HYPRE_Complex>::value>::type>
+struct less_than
+{
+   T val;
+   less_than(T val_) { val = val_; }
+   bool operator()(const T &x) const { return (hypre_abs(x) < hypre_abs(val)); }
+};
+#else
+template<typename T,
+         typename = typename std::enable_if<std::is_same<T, HYPRE_Real>::value>::type>
+struct less_than
+{
+   T val;
+   less_than(T val_) { val = val_; }
+   bool operator()(const T &x) const { return (x < val); }
+};
+#endif
+// template<typename T>
+// struct modulo : public thrust::unary_function<T,T>
+// {
+//    T val;
+
+//    modulo(T val_) { val = val_; }
+
+//    T operator()(const T &x)
+//    {
+//       return (x % val);
+//    }
+// };
+
+// template<typename T>
+// struct equal : public thrust::unary_function<T,bool>
+// {
+//    T val;
+
+//    equal(T val_) { val = val_; }
+
+//    bool operator()(const T &x)
+//    {
+//       return (x == val);
+//    }
+// };
+
+// struct print_functor
+// {
+//    void operator()(HYPRE_Real val)
+//    {
+//       printf("%f\n", val);
+//    }
+// };
+
+#endif // #if defined(HYPRE_USING_SYCL)
+
+////////////////////////////////////////////////////////////////////////////////////////
 
 #if defined(HYPRE_USING_CUSPARSE)
 

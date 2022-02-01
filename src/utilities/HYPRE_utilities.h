@@ -83,7 +83,15 @@ typedef double HYPRE_Real;
 #endif
 
 #if defined(HYPRE_COMPLEX)
+
+#if defined(HYPRE_USING_SYCL)
+typedef std::complex<double> HYPRE_Complex;
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+typedef thrust::complex<double> HYPRE_Complex;
+#else
 typedef double _Complex HYPRE_Complex;
+#endif
+
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
 
 #else  /* default */
@@ -177,11 +185,15 @@ HYPRE_Int HYPRE_AssumedPartitionCheck();
  * HYPRE memory location
  *--------------------------------------------------------------------------*/
 
+// ABB: HYPRE_MEMORY_UNIFIED for the case of allocating SHARED memory
+//      specifically at some locations and everywhere as can be enabled
+//      with HYPRE_USING_UNIFIED_MEMORY macro
 typedef enum _HYPRE_MemoryLocation
 {
    HYPRE_MEMORY_UNDEFINED = -1,
    HYPRE_MEMORY_HOST,
-   HYPRE_MEMORY_DEVICE
+   HYPRE_MEMORY_DEVICE,
+   HYPRE_MEMORY_UNIFIED
 } HYPRE_MemoryLocation;
 
 HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);

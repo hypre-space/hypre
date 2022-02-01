@@ -10,42 +10,9 @@
 
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#ifdef HYPRE_USING_GPU
 
 #define COHEN_USE_SHMEM 0
-
-/* these are under the assumptions made in spgemm on block sizes: only use in spmm routines
- * where we assume CUDA block is 3D and blockDim.x * blockDim.y = WARP_SIZE
- */
-static __device__ __forceinline__
-hypre_int get_block_size()
-{
-   //return (blockDim.x * blockDim.y * blockDim.z);           // in general cases
-   return (HYPRE_WARP_SIZE * blockDim.z);                     // if blockDim.x * blockDim.y = WARP_SIZE
-}
-
-static __device__ __forceinline__
-hypre_int get_thread_id()
-{
-   //return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x); // in general cases
-   return (threadIdx.z * HYPRE_WARP_SIZE + threadIdx.y * blockDim.x +
-           threadIdx.x);           // if blockDim.x * blockDim.y = WARP_SIZE
-}
-
-static __device__ __forceinline__
-hypre_int get_warp_id()
-{
-   // return get_thread_id() >> HYPRE_WARP_BITSHIFT;        // in general cases
-   return threadIdx.z;                                      // if blockDim.x * blockDim.y = WARP_SIZE
-}
-
-static __device__ __forceinline__
-hypre_int get_lane_id()
-{
-   // return get_thread_id() & (WARP_SIZE-1);               // in general cases
-   return threadIdx.y * blockDim.x + threadIdx.x;           // if blockDim.x * blockDim.y = WARP_SIZE
-}
-
 
 /* Hash functions */
 static __device__ __forceinline__
@@ -89,5 +56,76 @@ HYPRE_Int hypre_SpGemmCreateGlobalHashTable( HYPRE_Int num_rows, HYPRE_Int *row_
                                              HYPRE_Int num_ghash, HYPRE_Int *row_sizes, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int **ghash_i_ptr,
                                              HYPRE_Int **ghash_j_ptr, HYPRE_Complex **ghash_a_ptr, HYPRE_Int *ghash_size_ptr, HYPRE_Int type);
 
+#endif // HYPRE_USING_GPU
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(HYPRE_USING_SYCL)
+
+static __forceinline__
+hypre_int get_block_size(sycl::nd_item<3>& item)
+{
+   return (item.get_sub_group().get_local_range().get(0) * item.get_local_range(0));
+}
+
+static __forceinline__
+hypre_int get_thread_id(sycl::nd_item<3>& item)
+{
+   return (item.get_local_id(0) * item.get_sub_group().get_local_range().get(0) + item.get_local_id(
+              1) * item.get_local_range(2) +
+           item.get_local_id(2));
+}
+
+static __forceinline__
+hypre_int get_warp_id(sycl::nd_item<3>& item)
+{
+   return item.get_local_id(0);
+}
+
+static __forceinline__
+hypre_int get_lane_id(sycl::nd_item<3>& item)
+{
+   return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);
+}
+
+#endif // HYPRE_USING_SYCL
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/* these are under the assumptions made in spgemm on block sizes: only use in spmm routines
+ * where we assume CUDA block is 3D and blockDim.x * blockDim.y = WARP_SIZE
+ */
+static __device__ __forceinline__
+hypre_int get_block_size()
+{
+   //return (blockDim.x * blockDim.y * blockDim.z);           // in general cases
+   return (HYPRE_WARP_SIZE * blockDim.z);                     // if blockDim.x * blockDim.y = WARP_SIZE
+}
+
+static __device__ __forceinline__
+hypre_int get_thread_id()
+{
+   //return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x); // in general cases
+   return (threadIdx.z * HYPRE_WARP_SIZE + threadIdx.y * blockDim.x +
+           threadIdx.x);           // if blockDim.x * blockDim.y = WARP_SIZE
+}
+
+static __device__ __forceinline__
+hypre_int get_warp_id()
+{
+   // return get_thread_id() >> HYPRE_WARP_BITSHIFT;        // in general cases
+   return threadIdx.z;                                      // if blockDim.x * blockDim.y = WARP_SIZE
+}
+
+static __device__ __forceinline__
+hypre_int get_lane_id()
+{
+   // return get_thread_id() & (WARP_SIZE-1);               // in general cases
+   return threadIdx.y * blockDim.x + threadIdx.x;           // if blockDim.x * blockDim.y = WARP_SIZE
+}
+
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
-#endif
+
+#endif // CSR_SPGEMM_DEVICE_H

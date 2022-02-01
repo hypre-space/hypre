@@ -437,7 +437,7 @@ main( hypre_int  argc,
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   hypre_ResetCudaDevice(hypre_handle());
+   hypre_ResetGpuDevice(hypre_handle());
 #endif
 
    return (0);
@@ -678,7 +678,7 @@ test_Set(MPI_Comm             comm,
    chunk_size = nrows / nchunks;
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -707,7 +707,7 @@ test_Set(MPI_Comm             comm,
    HYPRE_IJMatrixAssemble(ij_A);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif
@@ -831,7 +831,7 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    chunk_size = nrows / nchunks;
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #endif
 
    time_index = hypre_InitializeTiming("Test SetValues OffProc");
@@ -862,7 +862,7 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    //cudaProfilerStop();
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #endif
 
    hypre_EndTiming(time_index);
@@ -945,7 +945,7 @@ test_SetSet(MPI_Comm             comm,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -996,7 +996,7 @@ test_SetSet(MPI_Comm             comm,
    HYPRE_IJMatrixAssemble(ij_A);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif
@@ -1072,7 +1072,7 @@ test_AddSet(MPI_Comm             comm,
 #endif
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -1120,7 +1120,7 @@ test_AddSet(MPI_Comm             comm,
    HYPRE_IJMatrixAssemble(ij_A);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif
@@ -1178,7 +1178,7 @@ test_SetAddSet(MPI_Comm             comm,
    chunk_size = nrows / nchunks;
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -1244,7 +1244,7 @@ test_SetAddSet(MPI_Comm             comm,
    HYPRE_IJMatrixAssemble(ij_A);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif

@@ -72,7 +72,13 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
+   // In debug mode, hypre_TFree() checks the pointer location, which requires the
+   // hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
+#if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL)
+   free(hypre_handle_);
+#else
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
+#endif
 
    return hypre_error_flag;
 }
@@ -94,62 +100,48 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
-#if defined(HYPRE_USING_SYCL)
-      if (!hypre_HandleDevice(hypre_handle_))
+      HYPRE_Int nDevices = 0;
+      hypre_GetDeviceCount(&nDevices);
+      if (device_id > nDevices)
       {
-         /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
-         sycl::platform platform(sycl::gpu_selector{});
-         auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-         HYPRE_Int n_devices = 0;
-         hypre_GetDeviceCount(&n_devices);
-         if (device_id >= n_devices)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "ERROR: SYCL device-ID exceed the number of devices on-node\n");
-         }
-
-         HYPRE_Int local_n_devices = 0;
-         HYPRE_Int i;
-         for (i = 0; i < gpu_devices.size(); i++)
-         {
-            /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
-            // multi-tile GPUs
-            /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-            /* { */
-            /*    auto subDevicesDomainNuma = */
-            /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
-            /*       (sycl::info::partition_affinity_domain::numa); */
-            /*    for (auto &tile : subDevicesDomainNuma) */
-            /*    { */
-            /*       if (local_n_devices == device_id) */
-            /*       { */
-            /*          hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
-            /*       } */
-            /*       local_n_devices++; */
-            /*    } */
-            /* } */
-            /* // single-tile GPUs */
-            /* else */
-            {
-               if (local_n_devices == device_id)
-               {
-                  hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
-               }
-               local_n_devices++;
-            }
-         }
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ERROR: SYCL device-ID exceed the number of devices on-node\n");
       }
-      hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
-         hypre_DeviceDataDevice(hypre_HandleDeviceData(
-                                   hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
-#else
-      hypre_HandleDevice(hypre_handle_) = device_id;
-#endif // #if defined(HYPRE_USING_SYCL)
+
+      sycl::platform platform(sycl::gpu_selector{});
+      auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
+      HYPRE_Int local_nDevices = 0;
+      for (int i = 0; i < gpu_devices.size(); i++)
+      {
+         // multi-tile GPUs
+         /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) { */
+         /*   auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa); */
+         /*   for (auto &tile : subDevicesDomainNuma) { */
+         /*     if (local_nDevices == device_id) { */
+         /*       hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
+         /*     } */
+         /*     local_nDevices++; */
+         /*   } */
+         /* } */
+         /* // single-tile GPUs */
+         /* else */
+         /* { */
+         if (local_nDevices == device_id)
+         {
+            hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
+         }
+         local_nDevices++;
+         /* } */
+      }
    }
-#endif // # if defined(HYPRE_USING_GPU)
+#endif
+
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
+   hypre_HandleDevice(hypre_handle_) = device_id;
+#endif
 
    return hypre_error_flag;
 }
@@ -206,7 +198,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
    HYPRE_Int i;
    for (i = 0; i < gpu_devices.size(); i++)
    {
-      /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
+      /* /\* WM: commenting out multi-tile GPU stuff for now as it is not yet working *\/ */
       /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
       /* { */
       /*    auto subDevicesDomainNuma = */
@@ -214,10 +206,10 @@ hypre_GetDeviceCount(hypre_int *device_count)
       /*       (sycl::info::partition_affinity_domain::numa); */
       /*    (*device_count) += subDevicesDomainNuma.size(); */
       /* } */
-      /* else */
-      {
-         (*device_count)++;
-      }
+      /* /\* else *\/ */
+      /* { */
+      (*device_count)++;
+      /* } */
    }
 #endif
 
@@ -285,7 +277,7 @@ HYPRE_Init()
     * that was in effect when you created the stream.
     * So, we should first set the device and create the streams
     */
-   hypre_int device_id;
+   hypre_int device_id = 0;
    hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
 
@@ -650,4 +642,3 @@ HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
-

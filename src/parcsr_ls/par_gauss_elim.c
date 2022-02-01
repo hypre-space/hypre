@@ -424,7 +424,7 @@ HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real
    dim3 bDim(BLOCK_SIZE, 1, 1);
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(m, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
 
    return hypre_error_flag;
 }
