@@ -141,22 +141,22 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    if (abs_soc)
    {
       HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
    else
    {
       HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
 
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_diag_i);

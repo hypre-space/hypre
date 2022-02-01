@@ -72,8 +72,8 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
-// In debug mode, hypre_TFree() checks the pointer location, which requires the
-// hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
+   // In debug mode, hypre_TFree() checks the pointer location, which requires the
+   // hypre_handle_'s compute queue if using sycl. But this was just destroyed above.
 #if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL)
    free(hypre_handle_);
 #else
@@ -101,37 +101,41 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   if (hypre_handle_) {
-     HYPRE_Int nDevices=0;
-     hypre_GetDeviceCount(&nDevices);
-     if (device_id > nDevices) {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                         "ERROR: SYCL device-ID exceed the number of devices on-node\n");
-     }
+   if (hypre_handle_)
+   {
+      HYPRE_Int nDevices = 0;
+      hypre_GetDeviceCount(&nDevices);
+      if (device_id > nDevices)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ERROR: SYCL device-ID exceed the number of devices on-node\n");
+      }
 
-     sycl::platform platform(sycl::gpu_selector{});
-     auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-     HYPRE_Int local_nDevices=0;
-     for (int i = 0; i < gpu_devices.size(); i++) {
-       // multi-tile GPUs
-       /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) { */
-       /*   auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa); */
-       /*   for (auto &tile : subDevicesDomainNuma) { */
-       /*     if (local_nDevices == device_id) { */
-       /*       hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
-       /*     } */
-       /*     local_nDevices++; */
-       /*   } */
-       /* } */
-       /* // single-tile GPUs */
-       /* else */
-       /* { */
-         if (local_nDevices == device_id) {
-           hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
+      sycl::platform platform(sycl::gpu_selector{});
+      auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
+      HYPRE_Int local_nDevices = 0;
+      for (int i = 0; i < gpu_devices.size(); i++)
+      {
+         // multi-tile GPUs
+         /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) { */
+         /*   auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa); */
+         /*   for (auto &tile : subDevicesDomainNuma) { */
+         /*     if (local_nDevices == device_id) { */
+         /*       hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
+         /*     } */
+         /*     local_nDevices++; */
+         /*   } */
+         /* } */
+         /* // single-tile GPUs */
+         /* else */
+         /* { */
+         if (local_nDevices == device_id)
+         {
+            hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
          }
          local_nDevices++;
-       /* } */
-     }
+         /* } */
+      }
    }
 #endif
 
@@ -204,7 +208,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
       /* } */
       /* /\* else *\/ */
       /* { */
-         (*device_count)++;
+      (*device_count)++;
       /* } */
    }
 #endif

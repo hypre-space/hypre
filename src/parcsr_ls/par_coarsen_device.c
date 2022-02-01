@@ -332,7 +332,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    /* init CF_marker_diag and measure_diag: remove some special nodes */
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
-                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
+                     num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
    HYPRE_THRUST_CALL(gather,
@@ -495,16 +495,16 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
-                      gDim, bDim,
-                      graph_diag_size,
-                      graph_diag,
-                      S_diag_i,
-                      S_diag_j,
-                      S_offd_i,
-                      S_offd_j,
-                      measure_diag,
-                      CF_marker_diag,
-                      CF_marker_offd );
+                     gDim, bDim,
+                     graph_diag_size,
+                     graph_diag,
+                     S_diag_i,
+                     S_diag_j,
+                     S_offd_i,
+                     S_offd_j,
+                     measure_diag,
+                     CF_marker_diag,
+                     CF_marker_offd );
 
    hypre_ParCSRCommHandle *comm_handle;
 

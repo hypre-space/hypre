@@ -44,23 +44,28 @@ hypre_spgemm_hash_insert_attempt( HYPRE_Int      HashSize,      /* capacity of t
       /* try to insert key+1 into slot j */
       HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #ifdef HYPRE_USING_SYCL
-      if (old == 1 /* true */) {
+      if (old == 1 /* true */)
+      {
 #else
-      if (old == -1 || old == key) {
+      if (old == -1 || old == key)
+      {
 #endif
-        /* new insertion, increase counter */
+         /* new insertion, increase counter */
 #ifdef HYPRE_USING_SYCL
-      if (old == 0 /* false */) {
+         if (old == 0 /* false */)
+         {
 #else
-        if (old == -1) {
+         if (old == -1)
+         {
 #endif
-	  count++;
-	}
-	/* this slot was open or contained 'key', update value */
-	if (!warp_failed) {
-	  atomicAdd((HYPRE_Complex*)(HashVals + j), val);
-	}
-	return j;
+            count++;
+         }
+         /* this slot was open or contained 'key', update value */
+         if (!warp_failed)
+         {
+            atomicAdd((HYPRE_Complex*)(HashVals + j), val);
+         }
+         return j;
       }
    }
 
@@ -86,9 +91,9 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
                                   HYPRE_Complex *g_HashVals,
                                   hypre_int     &failed
 #ifdef HYPRE_USING_SYCL
-				  , sycl::nd_item<3>& item
+                                  , sycl::nd_item<3>& item
 #endif
-  )
+                                )
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -201,9 +206,9 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
             if (!warp_failed)
             {
 #ifdef HYPRE_USING_SYCL
-	       warp_failed = warp_allreduce_sum(failed, item);
+               warp_failed = warp_allreduce_sum(failed, item);
 #else
-	       warp_failed = warp_allreduce_sum(failed);
+               warp_failed = warp_allreduce_sum(failed);
 #endif
             }
          }
@@ -235,7 +240,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
                       HYPRE_Int* s_HashKeys,    /* shared */
                       HYPRE_Complex* s_HashVals /* shared */
 #endif
-  )
+                    )
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -277,7 +282,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    extern __shared__ volatile HYPRE_Int shared_mem[];
    volatile HYPRE_Int *s_HashKeys = shared_mem;
    volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_WARPS_PER_BLOCK *
-									       SHMEM_HASH_SIZE];
+                                                                                                   SHMEM_HASH_SIZE];
 #endif // #if 1
 
    /* shared memory hash table for this warp */
@@ -365,7 +370,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 #ifdef HYPRE_USING_SYCL
                                                               , item
 #endif
-	);
+                                                             );
 
 #if defined(HYPRE_DEBUG)
       if (ATTEMPT == 2)
@@ -427,7 +432,7 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int      lane_id,
 #ifdef HYPRE_USING_SYCL
                                         , sycl::nd_item<3>& item
 #endif
-  )
+                                      )
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -488,21 +493,21 @@ template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE>
 __global__ void
 hypre_spgemm_copy_from_hash_into_C(
 #ifdef HYPRE_USING_SYCL
-                                    sycl::nd_item<3>& item,
+   sycl::nd_item<3>& item,
 #endif
-                                    HYPRE_Int      M,
-                                    HYPRE_Int     *rf,
-                                    HYPRE_Int     *js,
-                                    HYPRE_Complex *as,
-                                    HYPRE_Int     *ig1,
-                                    HYPRE_Int     *jg1,
-                                    HYPRE_Complex *ag1,
-                                    HYPRE_Int     *ig2,
-                                    HYPRE_Int     *jg2,
-                                    HYPRE_Complex *ag2,
-                                    HYPRE_Int     *ic,
-                                    HYPRE_Int     *jc,
-                                    HYPRE_Complex *ac )
+   HYPRE_Int      M,
+   HYPRE_Int     *rf,
+   HYPRE_Int     *js,
+   HYPRE_Complex *as,
+   HYPRE_Int     *ig1,
+   HYPRE_Int     *jg1,
+   HYPRE_Complex *ag1,
+   HYPRE_Int     *ig2,
+   HYPRE_Int     *jg2,
+   HYPRE_Complex *ag2,
+   HYPRE_Int     *ic,
+   HYPRE_Int     *jc,
+   HYPRE_Complex *ac )
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -585,7 +590,7 @@ hypre_spgemm_copy_from_hash_into_C(
 #ifdef HYPRE_USING_SYCL
           , item
 #endif
-           );
+         );
 
 #ifdef HYPRE_DEBUG
       hypre_device_assert(istart_c + j == ic[i + 1]);
@@ -667,30 +672,33 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       sycl::range<3> gDim( 1, 1, (m + bDim[0] - 1) / bDim[0] );
 
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
+      {
 
-	  sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
-	  sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
-			 sycl::target::local> s_HashKeys_acc(shared_range, cgh);
-	  sycl::accessor<HYPRE_Complex, 1, sycl::access_mode::read_write,
-			 sycl::target::local> s_HashVals_acc(shared_range, cgh);
+         sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
+         sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
+              sycl::target::local> s_HashKeys_acc(shared_range, cgh);
+         sycl::accessor<HYPRE_Complex, 1, sycl::access_mode::read_write,
+              sycl::target::local> s_HashVals_acc(shared_range, cgh);
 
-	  cgh.parallel_for(
-	    sycl::nd_range<3>(gDim*bDim, bDim), [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-	      hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>(
-		m, NULL, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash1_i, d_ghash1_j, d_ghash1_a,
-		d_rc, d_rf,
-		item, s_HashKeys_acc.get_pointer(), s_HashVals_acc.get_pointer() );
-	    });
-	});
+         cgh.parallel_for(
+            sycl::nd_range<3>(gDim * bDim,
+                              bDim), [ = ] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]
+         {
+            hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>(
+               m, NULL, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash1_i, d_ghash1_j, d_ghash1_a,
+               d_rc, d_rf,
+               item, s_HashKeys_acc.get_pointer(), s_HashVals_acc.get_pointer() );
+         });
+      });
 #else
       // for cases where one WARP works on a row
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
       HYPRE_GPU_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 1, hash_type>),
-                          gDim, bDim, /* shmem_size, */
-                          m, NULL, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash1_i, d_ghash1_j, d_ghash1_a,
-                          d_rc, d_rf );
+                         gDim, bDim, /* shmem_size, */
+                         m, NULL, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash1_i, d_ghash1_j, d_ghash1_a,
+                         d_rc, d_rf );
 #endif
    }
 
@@ -731,32 +739,35 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       // for cases where one WARP works on a row
       sycl::range<3> gDim( 1, 1, (num_failed_rows + bDim[0] - 1) / bDim[0] );
 
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
+      {
 
-          sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
-          sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
-                         sycl::target::local> s_HashKeys_acc(shared_range, cgh);
-          sycl::accessor<HYPRE_Complex, 1, sycl::access_mode::read_write,
-                         sycl::target::local> s_HashVals_acc(shared_range, cgh);
+         sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
+         sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
+              sycl::target::local> s_HashKeys_acc(shared_range, cgh);
+         sycl::accessor<HYPRE_Complex, 1, sycl::access_mode::read_write,
+              sycl::target::local> s_HashVals_acc(shared_range, cgh);
 
-          cgh.parallel_for(
-            sycl::nd_range<3>(gDim*bDim, bDim), [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-              hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>(
-                num_failed_rows, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j,
-                d_ghash2_a,
-                d_rc, NULL,
-                item, s_HashKeys_acc.get_pointer(), s_HashVals_acc.get_pointer() );
-            });
-        });
+         cgh.parallel_for(
+            sycl::nd_range<3>(gDim * bDim,
+                              bDim), [ = ] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]
+         {
+            hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>(
+               num_failed_rows, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j,
+               d_ghash2_a,
+               d_rc, NULL,
+               item, s_HashKeys_acc.get_pointer(), s_HashVals_acc.get_pointer() );
+         });
+      });
 #else
       // for cases where one WARP works on a row
       dim3 gDim( (num_failed_rows + bDim.z - 1) / bDim.z );
 
       HYPRE_GPU_LAUNCH ( (hypre_spgemm_attempt<num_warps_per_block, shmem_hash_size, 2, hash_type>),
-                          gDim, bDim, /* shmem_size, */
-                          num_failed_rows, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j,
-                          d_ghash2_a,
-                          d_rc, NULL );
+                         gDim, bDim, /* shmem_size, */
+                         num_failed_rows, rf_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_js, d_as, d_ghash2_i, d_ghash2_j,
+                         d_ghash2_a,
+                         d_rc, NULL );
 #endif
    }
 
@@ -778,12 +789,12 @@ hypre_spgemm_numerical_with_rowest( HYPRE_Int       m,
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 #endif
       HYPRE_GPU_LAUNCH( (hypre_spgemm_copy_from_hash_into_C<num_warps_per_block, shmem_hash_size>), gDim,
-                         bDim,
-                         m, d_rf,
-                         d_js, d_as,
-                         d_ghash1_i, d_ghash1_j, d_ghash1_a,
-                         d_ghash2_i, d_ghash2_j, d_ghash2_a,
-                         d_ic, d_jc, d_c );
+                        bDim,
+                        m, d_rf,
+                        d_js, d_as,
+                        d_ghash1_i, d_ghash1_j, d_ghash1_a,
+                        d_ghash2_i, d_ghash2_j, d_ghash2_a,
+                        d_ic, d_jc, d_c );
    }
 
    hypre_TFree(d_ghash1_i, HYPRE_MEMORY_DEVICE);

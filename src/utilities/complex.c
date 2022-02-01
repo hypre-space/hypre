@@ -13,11 +13,11 @@ HYPRE_Complex
 hypre_conj( HYPRE_Complex value )
 {
 #ifdef HYPRE_USING_SYCL
-  return std::conj(value);
+   return std::conj(value);
 #elif defined(HYPRE_USING_GPU)
-  return thrust::conj(value);
+   return thrust::conj(value);
 #else
-  return conj(value);
+   return conj(value);
 #endif
 }
 
@@ -25,11 +25,11 @@ HYPRE_Real
 hypre_cabs( HYPRE_Complex value )
 {
 #ifdef HYPRE_USING_SYCL
-  return std::abs(value);
+   return std::abs(value);
 #elif defined(HYPRE_USING_GPU)
-  return thrust::abs(value);
+   return thrust::abs(value);
 #else
-  return cabs(value);
+   return cabs(value);
 #endif
 }
 
@@ -37,11 +37,11 @@ HYPRE_Real
 hypre_creal( HYPRE_Complex value )
 {
 #ifdef HYPRE_USING_SYCL
-  return std::real(value);
+   return std::real(value);
 #elif defined(HYPRE_USING_GPU)
-  return thrust::real(value);
+   return thrust::real(value);
 #else
-  return creal(value);
+   return creal(value);
 #endif
 }
 
@@ -49,11 +49,11 @@ HYPRE_Real
 hypre_cimag( HYPRE_Complex value )
 {
 #ifdef HYPRE_USING_SYCL
-  return std::imag(value);
+   return std::imag(value);
 #elif defined(HYPRE_USING_GPU)
-  return thrust::imag(value);
+   return thrust::imag(value);
 #else
-  return cimag(value);
+   return cimag(value);
 #endif
 }
 

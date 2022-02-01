@@ -25,7 +25,7 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
 #ifdef HYPRE_USING_SYCL
                        , sycl::nd_item<3>& item
 #endif
-  )
+                      )
 {
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
@@ -71,10 +71,10 @@ template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
 void csr_spmm_rownnz_naive(
 #ifdef HYPRE_USING_SYCL
-  sycl::nd_item<3>& item,
+   sycl::nd_item<3>& item,
 #endif
-  HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
-  HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
+   HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
+   HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -110,9 +110,9 @@ void csr_spmm_rownnz_naive(
 
       rownnz_naive_rowi<type>(i, lane_id, ia, ja, ib, jU, jL
 #ifdef HYPRE_USING_SYCL
-                       , item
+                              , item
 #endif
-        );
+                             );
 
       if (type == 'U' || type == 'B')
       {
@@ -154,9 +154,9 @@ void csr_spmm_rownnz_naive(
 __global__
 void expdistfromuniform(
 #ifdef HYPRE_USING_SYCL
-  sycl::nd_item<3>& item,
+   sycl::nd_item<3>& item,
 #endif
-  HYPRE_Int n, float *x)
+   HYPRE_Int n, float *x)
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG   = item.get_sub_group();
@@ -185,10 +185,10 @@ template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WA
 __global__
 void cohen_rowest_kernel(
 #ifdef HYPRE_USING_SYCL
-  sycl::nd_item<3>& item,
+   sycl::nd_item<3>& item,
 #endif
-  HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
-  HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
+   HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
+   HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
@@ -374,7 +374,8 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 #ifdef HYPRE_USING_SYCL
    sycl::range<3> bDim(NUM_WARPS_PER_BLOCK, BDIMY, BDIMX);
    hypre_assert(bDim[2] * bDim[1] == HYPRE_WARP_SIZE);
-   sycl::range<3> gDim( 1, 1, (nsamples * N + bDim[0] * HYPRE_WARP_SIZE - 1) / (bDim[0] * HYPRE_WARP_SIZE) );
+   sycl::range<3> gDim( 1, 1, (nsamples * N + bDim[0] * HYPRE_WARP_SIZE - 1) /
+                        (bDim[0] * HYPRE_WARP_SIZE) );
    sycl::range<3> gDim_step1( 1, 1, (K + bDim[0] - 1) / bDim[0] );
    sycl::range<3> gDim_step2( 1, 1, (M + bDim[0] - 1) / bDim[0] );
 #else
@@ -398,8 +399,8 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 
    /* step-1: layer 3-2 */
    HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim_step1,
-                      bDim,
-                      K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
+                     bDim,
+                     K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
 
    //hypre_TFree(d_V1, HYPRE_MEMORY_DEVICE);
 
@@ -407,8 +408,8 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    d_V3 = (T*) d_rc;
 
    HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim_step2,
-                      bDim,
-                      M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
+                     bDim,
+                     M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
    /* done */
    //hypre_TFree(d_V2, HYPRE_MEMORY_DEVICE);
 }
@@ -448,13 +449,13 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    {
       /* naive overestimate */
       HYPRE_GPU_LAUNCH( (csr_spmm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
-                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc );
+                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc );
    }
    else if (row_est_mtd == 2)
    {
       /* naive underestimate */
       HYPRE_GPU_LAUNCH( (csr_spmm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
-                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL );
+                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL );
    }
    else if (row_est_mtd == 3)
    {
@@ -473,7 +474,7 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       HYPRE_Int *d_upp = d_low_upp + m;
 
       HYPRE_GPU_LAUNCH( (csr_spmm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
-                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp );
+                        m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp );
 
       /* Cohen's algorithm, stochastic approach */
       csr_spmm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>

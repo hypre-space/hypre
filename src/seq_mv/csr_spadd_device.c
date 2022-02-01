@@ -114,7 +114,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    else
    {
 #ifdef HYPRE_USING_SYCL
-      HYPRE_ONEDPL_CALL( std::transform, d_aa, d_aa + nnzA, d_at, [=](auto _1) {return alpha * _1;} );
+      HYPRE_ONEDPL_CALL( std::transform, d_aa, d_aa + nnzA, d_at, [ = ](auto _1) {return alpha * _1;} );
 #else
       HYPRE_THRUST_CALL( transform, d_aa, d_aa + nnzA, d_at, alpha * _1 );
 #endif
@@ -127,7 +127,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    else
    {
 #ifdef HYPRE_USING_SYCL
-      HYPRE_ONEDPL_CALL( std::transform, d_ab, d_ab + nnzB, d_at + nnzA, [=](auto _1) {return beta * _1;} );
+      HYPRE_ONEDPL_CALL( std::transform, d_ab, d_ab + nnzB, d_at + nnzA, [ = ](auto _1) {return beta * _1;} );
 #else
       HYPRE_THRUST_CALL( transform, d_ab, d_ab + nnzB, d_at + nnzA, beta * _1 );
 #endif

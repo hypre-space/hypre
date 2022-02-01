@@ -491,7 +491,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
                                             y_data, 1).wait() );
 #else
    HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size,
-                      y_data, [=](auto _1) {return alpha * _1;} );
+   y_data, [ = ](auto _1) {return alpha * _1;} );
 #endif // #if defined(HYPRE_USING_ONEMKL)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

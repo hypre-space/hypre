@@ -43,14 +43,14 @@ hypre_create_ija( HYPRE_Int       m,
 __global__ void
 hypre_SpGemmGhashSize1(
 #ifdef HYPRE_USING_SYCL
-  sycl::nd_item<1>& item,
+   sycl::nd_item<1>& item,
 #endif
-  HYPRE_Int  num_rows,
-  HYPRE_Int *row_id,
-  HYPRE_Int  num_ghash,
-  HYPRE_Int *row_sizes,
-  HYPRE_Int *ghash_sizes,
-  HYPRE_Int  SHMEM_HASH_SIZE )
+   HYPRE_Int  num_rows,
+   HYPRE_Int *row_id,
+   HYPRE_Int  num_ghash,
+   HYPRE_Int *row_sizes,
+   HYPRE_Int *ghash_sizes,
+   HYPRE_Int  SHMEM_HASH_SIZE )
 {
 #ifdef HYPRE_USING_SYCL
    const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
@@ -79,14 +79,14 @@ hypre_SpGemmGhashSize1(
 __global__ void
 hypre_SpGemmGhashSize2(
 #ifdef HYPRE_USING_SYCL
-  sycl::nd_item<1>& item,
+   sycl::nd_item<1>& item,
 #endif
-  HYPRE_Int  num_rows,
-  HYPRE_Int *row_id,
-  HYPRE_Int  num_ghash,
-  HYPRE_Int *row_sizes,
-  HYPRE_Int *ghash_sizes,
-  HYPRE_Int  SHMEM_HASH_SIZE )
+   HYPRE_Int  num_rows,
+   HYPRE_Int *row_id,
+   HYPRE_Int  num_ghash,
+   HYPRE_Int *row_sizes,
+   HYPRE_Int *ghash_sizes,
+   HYPRE_Int  SHMEM_HASH_SIZE )
 {
 #ifdef HYPRE_USING_SYCL
    const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
@@ -124,14 +124,14 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
       ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_ghash, "thread", bDim);
       HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
-                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
+                        num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
    else if (type == 2)
    {
       ghash_i = hypre_CTAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
       HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
-                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
+                        num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
 
    hypreDevice_IntegerExclusiveScan(num_ghash + 1, ghash_i);

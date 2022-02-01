@@ -93,19 +93,19 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
 #ifdef HYPRE_USING_SYCL
                                 , sycl::nd_item<3>& item
 #endif
-  )
+                              )
 {
 #ifdef HYPRE_USING_SYCL
-  sycl::sub_group SG = item.get_sub_group();
-  HYPRE_Int threadIdx_x = item.get_local_id(2);
-  HYPRE_Int threadIdx_y = item.get_local_id(1);
-  HYPRE_Int blockDim_y = item.get_local_range(1);
-  HYPRE_Int blockDim_x = item.get_local_range(2);
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int threadIdx_x = item.get_local_id(2);
+   HYPRE_Int threadIdx_y = item.get_local_id(1);
+   HYPRE_Int blockDim_y = item.get_local_range(1);
+   HYPRE_Int blockDim_x = item.get_local_range(2);
 #else
-  HYPRE_Int threadIdx_x = threadIdx.x;
-  HYPRE_Int threadIdx_y = threadIdx.y;
-  HYPRE_Int blockDim_y = blockDim.y;
-  HYPRE_Int blockDim_x = blockDim.x;
+   HYPRE_Int threadIdx_x = threadIdx.x;
+   HYPRE_Int threadIdx_y = threadIdx.y;
+   HYPRE_Int blockDim_y = blockDim.y;
+   HYPRE_Int blockDim_x = blockDim.x;
 #endif
 
    /* load the start and end position of row i of A */
@@ -287,7 +287,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                        , sycl::nd_item<3>& item,
                        HYPRE_Int *s_HashKeys // shared
 #endif
-  )
+                     )
 {
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG   = item.get_sub_group();
@@ -391,9 +391,9 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                                                    SHMEM_HASH_SIZE, warp_s_HashKeys,
                                                    ghash_size, jg + istart_g, failed
 #ifdef HYPRE_USING_SYCL
-       , item
+                                                   , item
 #endif
-       );
+                                                  );
 
 #if defined(HYPRE_DEBUG)
       if (ATTEMPT == 2)
@@ -497,64 +497,68 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * On output, it provides an upper bound of nnz in rows of C
     * ---------------------------------------------------------------------------*/
 #ifdef HYPRE_USING_SYCL
-   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {
+   hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
+   {
 
-       sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
-       sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
-                      sycl::target::local> s_HashKeys_acc(shared_range, cgh);
+      sycl::range<1> shared_range(num_warps_per_block * shmem_hash_size);
+      sycl::accessor<HYPRE_Int, 1, sycl::access_mode::read_write,
+           sycl::target::local> s_HashKeys_acc(shared_range, cgh);
 
-       if (hash_type == 'L')
-       {
-         cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-                            hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>(
-                              m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
-                              item, s_HashKeys_acc.get_pointer() );
-                          });
-       }
-       else if (hash_type == 'Q')
-       {
-         cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-                            hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>(
-                              m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
-                              item, s_HashKeys_acc.get_pointer() );
-                          });
-       }
-       else if (hash_type == 'D')
-       {
-         cgh.parallel_for(sycl::nd_range<3>(gDim*bDim, bDim),
-                          [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {
-                            hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>(
-                              m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
-                              item, s_HashKeys_acc.get_pointer() );
-                          });
-       }
-       else
-       {
+      if (hash_type == 'L')
+      {
+         cgh.parallel_for(sycl::nd_range<3>(gDim * bDim, bDim),
+                          [ = ] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]
+         {
+            hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>(
+               m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
+               item, s_HashKeys_acc.get_pointer() );
+         });
+      }
+      else if (hash_type == 'Q')
+      {
+         cgh.parallel_for(sycl::nd_range<3>(gDim * bDim, bDim),
+                          [ = ] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]
+         {
+            hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>(
+               m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
+               item, s_HashKeys_acc.get_pointer() );
+         });
+      }
+      else if (hash_type == 'D')
+      {
+         cgh.parallel_for(sycl::nd_range<3>(gDim * bDim, bDim),
+                          [ = ] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]
+         {
+            hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>(
+               m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf,
+               item, s_HashKeys_acc.get_pointer() );
+         });
+      }
+      else
+      {
          printf("Unrecognized hash type ... [L(inear), Q(uadratic), D(ouble)]\n");
          exit(0);
-       }
+      }
 
-     });
+   });
 #else
    if (hash_type == 'L')
    {
       HYPRE_GPU_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>),
-                         gDim, bDim,
-                         m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+                        gDim, bDim,
+                        m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
       HYPRE_GPU_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>),
-                         gDim, bDim,
-                         m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+                        gDim, bDim,
+                        m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
       HYPRE_GPU_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>),
-                         gDim, bDim,
-                         m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
+                        gDim, bDim,
+                        m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else
    {

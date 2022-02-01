@@ -628,13 +628,13 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nnz, "thread", bDim);
 
             HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
-                               F2V_diag_nnz, 3, F2V_diag_J, Pi_diag_J );
+                              F2V_diag_nnz, 3, F2V_diag_J, Pi_diag_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nrows, "warp", bDim);
 
             HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
-                               F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
-                               Pi_diag_data );
+                              F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
+                              Pi_diag_data );
          }
          else
 #endif
@@ -694,13 +694,13 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nnz, "thread", bDim);
 
             HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
-                               F2V_offd_nnz, 3, F2V_offd_J, Pi_offd_J );
+                              F2V_offd_nnz, 3, F2V_offd_J, Pi_offd_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nrows, "warp", bDim);
 
             HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
-                               F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
-                               Pi_offd_data );
+                              F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
+                              Pi_offd_data );
          }
          else
 #endif
@@ -908,8 +908,8 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_diag_nrows, "warp", bDim);
 
             HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
-                               Pix_diag_data, Piy_diag_data, Piz_diag_data );
+                              F2V_diag_nrows, 3, F2V_diag_I, NULL, RT100_data, RT010_data, RT001_data,
+                              Pix_diag_data, Piy_diag_data, Piz_diag_data );
          }
          else
 #endif
@@ -988,8 +988,8 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(F2V_offd_nrows, "warp", bDim);
 
             HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
-                               Pix_offd_data, Piy_offd_data, Piz_offd_data );
+                              F2V_offd_nrows, 3, F2V_offd_I, NULL, RT100_data, RT010_data, RT001_data,
+                              Pix_offd_data, Piy_offd_data, Piz_offd_data );
          }
          else
 #endif

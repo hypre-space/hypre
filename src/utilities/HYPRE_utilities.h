@@ -85,11 +85,11 @@ typedef double HYPRE_Real;
 #if defined(HYPRE_COMPLEX)
 
 #if defined(HYPRE_USING_SYCL)
-  typedef std::complex<double> HYPRE_Complex;
+typedef std::complex<double> HYPRE_Complex;
 #elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-  typedef thrust::complex<double> HYPRE_Complex;
+typedef thrust::complex<double> HYPRE_Complex;
 #else
-  typedef double _Complex HYPRE_Complex;
+typedef double _Complex HYPRE_Complex;
 #endif
 
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */

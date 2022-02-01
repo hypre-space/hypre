@@ -386,7 +386,7 @@ struct hypre_GpuMatData
 dim3 hypre_GetDefaultDeviceBlockDimension();
 
 dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
-					  dim3 bDim );
+                                          dim3 bDim );
 
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 
@@ -1055,163 +1055,179 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 template <typename T, sycl::access::address_space addressSpace =
           sycl::access::address_space::global_space>
 using relaxed_atomic_ref =
-  sycl::atomic_ref< T,
-                    sycl::memory_order::seq_cst,
-                    sycl::memory_scope::device,
-                    addressSpace>;
+   sycl::atomic_ref< T,
+   sycl::memory_order::seq_cst,
+   sycl::memory_scope::device,
+   addressSpace>;
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * macro for launching SYCL kernels, SYCL, oneDPL, oneMKL calls
  *                    NOTE: IN HYPRE'S DEFAULT STREAM
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-namespace internal {
+namespace internal
+{
 
 //[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
-  template <typename T, typename Predicate, typename Operator>
-  struct transform_if_unary_zip_mask_fun {
-    transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
-    template <typename _T>
-    void operator()(_T&& t) const {
+template <typename T, typename Predicate, typename Operator>
+struct transform_if_unary_zip_mask_fun
+{
+   transform_if_unary_zip_mask_fun(Predicate _pred, Operator _op) : pred(_pred), op(_op) {}
+   template <typename _T>
+   void operator()(_T&& t) const
+   {
       using std::get;
       if (pred(get<1>(t)))
-        get<2>(t) = op(get<0>(t));
-    }
+      {
+         get<2>(t) = op(get<0>(t));
+      }
+   }
 
-  private:
-    Predicate pred;
-    Operator op;
-  };
+private:
+   Predicate pred;
+   Operator op;
+};
 
-  template <typename T> struct sequence_fun {
-    using result_type = T;
-    sequence_fun(T _init, T _step) : init(_init), step(_step) {}
+template <typename T> struct sequence_fun
+{
+   using result_type = T;
+   sequence_fun(T _init, T _step) : init(_init), step(_step) {}
 
-    template <typename _T> result_type operator()(_T &&i) const {
+   template <typename _T> result_type operator()(_T &&i) const
+   {
       return static_cast<T>(init + step * i);
-    }
+   }
 
-  private:
-    const T init;
-    const T step;
-  };
+private:
+   const T init;
+   const T step;
+};
 
 // Functor evaluates second element of tied sequence with predicate.
 // Used by: copy_if, remove_copy_if, stable_partition_copy
 // Lambda:
-  template <typename Predicate> struct predicate_key_fun {
-    typedef bool result_of;
-    predicate_key_fun(Predicate _pred) : pred(_pred) {}
+template <typename Predicate> struct predicate_key_fun
+{
+   typedef bool result_of;
+   predicate_key_fun(Predicate _pred) : pred(_pred) {}
 
-    template <typename _T1> result_of operator()(_T1 &&a) const {
+   template <typename _T1> result_of operator()(_T1 &&a) const
+   {
       using std::get;
       return pred(get<1>(a));
-    }
+   }
 
-  private:
-    Predicate pred;
-  };
+private:
+   Predicate pred;
+};
 
 } // namespace internal
 
 template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
 Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
-                        Iter3 result, Pred pred) {
-  static_assert(
+                        Iter3 result, Pred pred)
+{
+   static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
-                   std::random_access_iterator_tag>::value &&
-          std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
-                       std::random_access_iterator_tag>::value &&
-          std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
-                       std::random_access_iterator_tag>::value,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
+      std::random_access_iterator_tag>::value,
       "Iterators passed to algorithms must be random-access iterators.");
-  auto ret_val = std::copy_if(
-    oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
-    oneapi::dpl::make_zip_iterator(first, mask),
-    oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
-    oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
-    internal::predicate_key_fun<Pred>(pred));
-  return std::get<0>(ret_val.base());
+   auto ret_val = std::copy_if(
+                     oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+                     oneapi::dpl::make_zip_iterator(first, mask),
+                     oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
+                     oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
+                     internal::predicate_key_fun<Pred>(pred));
+   return std::get<0>(ret_val.base());
 }
 
 template <class Iter, class T>
-void hypreSycl_iota(Iter first, Iter last, T init, T step=1) {
-  static_assert(
+void hypreSycl_iota(Iter first, Iter last, T init, T step = 1)
+{
+   static_assert(
       std::is_same<typename std::iterator_traits<Iter>::iterator_category,
-                   std::random_access_iterator_tag>::value,
+      std::random_access_iterator_tag>::value,
       "Iterators passed to algorithms must be random-access iterators.");
-  using DiffSize = typename std::iterator_traits<Iter>::difference_type;
-  std::transform(
-    oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
-    oneapi::dpl::counting_iterator<DiffSize>(0),
-    oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
-    first, internal::sequence_fun<T>(init, step));
+   using DiffSize = typename std::iterator_traits<Iter>::difference_type;
+   std::transform(
+      oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
+      oneapi::dpl::counting_iterator<DiffSize>(0),
+      oneapi::dpl::counting_iterator<DiffSize>(std::distance(first, last)),
+      first, internal::sequence_fun<T>(init, step));
 }
 
 template <class Iter1, class Iter2, class Iter3,
           class UnaryOperation, class Pred>
 Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
-                             Iter3 result, UnaryOperation unary_op, Pred pred) {
-  static_assert(
+                             Iter3 result, UnaryOperation unary_op, Pred pred)
+{
+   static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
-                   std::random_access_iterator_tag>::value &&
-          std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
-                       std::random_access_iterator_tag>::value &&
-          std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
-                       std::random_access_iterator_tag>::value,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter3>::iterator_category,
+      std::random_access_iterator_tag>::value,
       "Iterators passed to algorithms must be random-access iterators.");
-  using T = typename std::iterator_traits<Iter1>::value_type;
-  const auto n = std::distance(first, last);
-  std::for_each(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
-                oneapi::dpl::make_zip_iterator(first, mask, result),
-                oneapi::dpl::make_zip_iterator(first, mask, result) + n,
-                internal::transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(
-                pred, unary_op));
-  return result + n;
+   using T = typename std::iterator_traits<Iter1>::value_type;
+   const auto n = std::distance(first, last);
+   std::for_each(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(
+                                                               hypre_handle())),
+                 oneapi::dpl::make_zip_iterator(first, mask, result),
+                 oneapi::dpl::make_zip_iterator(first, mask, result) + n,
+                 internal::transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(
+                    pred, unary_op));
+   return result + n;
 }
 
 template <typename InputIter1, typename InputIter2,
           typename InputIter3, typename OutputIter, typename Predicate>
 void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
                           InputIter2 map, InputIter3 mask, OutputIter result,
-                          Predicate pred) {
-  static_assert(
+                          Predicate pred)
+{
+   static_assert(
       std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
-                   std::random_access_iterator_tag>::value &&
-          std::is_same<
-              typename std::iterator_traits<InputIter2>::iterator_category,
-              std::random_access_iterator_tag>::value &&
-          std::is_same<
-              typename std::iterator_traits<InputIter3>::iterator_category,
-              std::random_access_iterator_tag>::value &&
-          std::is_same<
-              typename std::iterator_traits<OutputIter>::iterator_category,
-              std::random_access_iterator_tag>::value,
+      std::random_access_iterator_tag>::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter2>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter3>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<OutputIter>::iterator_category,
+      std::random_access_iterator_tag >::value,
       "Iterators passed to algorithms must be random-access iterators.");
-  hypreSycl_transform_if(first, last, mask,
-                         oneapi::dpl::make_permutation_iterator(result, map),
-                         [=](auto &&v) { return v; }, [=](auto &&m) { return pred(m); });
+   hypreSycl_transform_if(first, last, mask,
+                          oneapi::dpl::make_permutation_iterator(result, map),
+   [ = ](auto &&v) { return v; }, [ = ](auto &&m) { return pred(m); });
 }
 
 template <typename InputIter1, typename InputIter2,
           typename OutputIter>
 OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
-                            InputIter2 input_first, OutputIter result) {
-  static_assert(
+                            InputIter2 input_first, OutputIter result)
+{
+   static_assert(
       std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
-                   std::random_access_iterator_tag>::value &&
-          std::is_same<
-              typename std::iterator_traits<InputIter2>::iterator_category,
-              std::random_access_iterator_tag>::value &&
-          std::is_same<
-              typename std::iterator_traits<OutputIter>::iterator_category,
-              std::random_access_iterator_tag>::value,
+      std::random_access_iterator_tag>::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter2>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<OutputIter>::iterator_category,
+      std::random_access_iterator_tag >::value,
       "Iterators passed to algorithms must be random-access iterators.");
-  auto perm_begin =
+   auto perm_begin =
       oneapi::dpl::make_permutation_iterator(input_first, map_first);
-  const int n = ::std::distance(map_first, map_last);
-  return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
-                           perm_begin, perm_begin + n, result);
+   const int n = ::std::distance(map_first, map_last);
+   return oneapi::dpl::copy(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(
+                                                                          hypre_handle())),
+                            perm_begin, perm_begin + n, result);
 }
 
 #if defined(HYPRE_DEBUG)
@@ -1291,32 +1307,32 @@ template <hypre_int bdim, hypre_int gdim>
 static __forceinline__
 hypre_int hypre_gpu_get_grid_warp_id(sycl::nd_item<1>& item)
 {
-  return item.get_group(0) * hypre_gpu_get_num_warps<bdim>(item) +
-     item.get_sub_group().get_group_linear_id();
+   return item.get_group(0) * hypre_gpu_get_num_warps<bdim>(item) +
+          item.get_sub_group().get_group_linear_id();
 }
 
 template <typename T>
 static __forceinline__
 T atomicCAS(T* address, T expected, T val)
 {
-  sycl::atomic_ref< T,
-                    sycl::memory_order::relaxed,
-                    sycl::memory_scope::device,
-                    sycl::access::address_space::local_space >
-      atomicCAS_ref( *address );
-  return static_cast<T>( atomicCAS_ref.compare_exchange_strong(expected, val) );
+   sycl::atomic_ref< T,
+        sycl::memory_order::relaxed,
+        sycl::memory_scope::device,
+        sycl::access::address_space::local_space >
+        atomicCAS_ref( *address );
+   return static_cast<T>( atomicCAS_ref.compare_exchange_strong(expected, val) );
 }
 
 template <typename T>
 static __forceinline__
 T atomicAdd(T* address, T val)
 {
-  sycl::atomic_ref< T,
-                    sycl::memory_order::relaxed,
-                    sycl::memory_scope::device,
-                    sycl::access::address_space::local_space >
-    atomicAdd_ref( *address );
-    return atomicAdd_ref.fetch_add(val);
+   sycl::atomic_ref< T,
+        sycl::memory_order::relaxed,
+        sycl::memory_scope::device,
+        sycl::access::address_space::local_space >
+        atomicAdd_ref( *address );
+   return atomicAdd_ref.fetch_add(val);
 }
 
 template <typename T>
@@ -1331,13 +1347,13 @@ template <typename T, int DIM>
 static __forceinline__
 T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<DIM>& item)
 {
-  //sycl::exclusive_scan_over_group(item.get_sub_group(), in, std::plus<>());
+   //sycl::exclusive_scan_over_group(item.get_sub_group(), in, std::plus<>());
 
    sycl::sub_group SG = item.get_sub_group();
    HYPRE_Int warp_size = SG.get_local_range().get(0);
 
 #pragma unroll
-   for (hypre_int d = 2; d <=warp_size; d <<= 1)
+   for (hypre_int d = 2; d <= warp_size; d <<= 1)
    {
       T t = SG.shuffle(in, d >> 1);
       if ( (lane_id & (d - 1)) == (d - 1) )
@@ -1346,21 +1362,21 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum, sycl::nd_item<DIM>& item)
       }
    }
 
-   all_sum = SG.shuffle(in, warp_size-1);
+   all_sum = SG.shuffle(in, warp_size - 1);
 
-   if (lane_id == warp_size-1)
+   if (lane_id == warp_size - 1)
    {
       in = 0;
    }
 
 #pragma unroll
-   for (hypre_int d = warp_size/2; d > 0; d >>= 1)
+   for (hypre_int d = warp_size / 2; d > 0; d >>= 1)
    {
       T t = SG.shuffle_xor(in, d);
 
       if ( (lane_id & (d - 1)) == (d - 1))
       {
-        if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
+         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
          {
             in += t;
          }
@@ -1377,60 +1393,60 @@ template <typename T, int DIM>
 static __forceinline__
 T warp_reduce_sum(T in, sycl::nd_item<DIM>& item)
 {
-  return sycl::reduce_over_group(item.get_sub_group(), in, std::plus<>());
+   return sycl::reduce_over_group(item.get_sub_group(), in, std::plus<>());
 }
 
 template <typename T, int DIM>
 static __forceinline__
 T warp_allreduce_sum(T in, sycl::nd_item<DIM>& item)
 {
-  sycl::sub_group SG = item.get_sub_group();
+   sycl::sub_group SG = item.get_sub_group();
 #pragma unroll
-  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
-  {
-    in += SG.shuffle_xor(in, d);
-  }
-  return in;
+   for (hypre_int d = SG.get_local_range().get(0) / 2; d > 0; d >>= 1)
+   {
+      in += SG.shuffle_xor(in, d);
+   }
+   return in;
 }
 
 template <typename T, int DIM>
 static __forceinline__
 T warp_reduce_max(T in, sycl::nd_item<DIM>& item)
 {
-  return sycl::reduce_over_group(item.get_sub_group(), in, sycl::maximum<>());
+   return sycl::reduce_over_group(item.get_sub_group(), in, sycl::maximum<>());
 }
 
 template <typename T, int DIM>
 static __forceinline__
 T warp_allreduce_max(T in, sycl::nd_item<DIM>& item)
 {
-  sycl::sub_group SG = item.get_sub_group();
+   sycl::sub_group SG = item.get_sub_group();
 #pragma unroll
-  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
-  {
-    in = std::max(in, SG.shuffle_xor(in, d));
-  }
-  return in;
+   for (hypre_int d = SG.get_local_range().get(0) / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, SG.shuffle_xor(in, d));
+   }
+   return in;
 }
 
 template <typename T, int DIM>
 static __forceinline__
 T warp_reduce_min(T in, sycl::nd_item<DIM>& item)
 {
-  return sycl::reduce_over_group(item.get_sub_group(), in, sycl::minimum<>());
+   return sycl::reduce_over_group(item.get_sub_group(), in, sycl::minimum<>());
 }
 
 template <typename T, int DIM>
 static __forceinline__
 T warp_allreduce_min(T in, sycl::nd_item<DIM>& item)
 {
-  sycl::sub_group SG = item.get_sub_group();
+   sycl::sub_group SG = item.get_sub_group();
 #pragma unroll
-  for (hypre_int d = SG.get_local_range().get(0)/2; d > 0; d >>= 1)
-  {
-    in = std::min(in, SG.shuffle_xor(in, d));
-  }
-  return in;
+   for (hypre_int d = SG.get_local_range().get(0) / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, SG.shuffle_xor(in, d));
+   }
+   return in;
 }
 
 // static __forceinline__
@@ -1558,21 +1574,21 @@ struct in_range
 
 #ifdef HYPRE_COMPLEX
 template<typename T,
-	 typename = typename std::enable_if<std::is_same<T, HYPRE_Complex>::value>::type>
+         typename = typename std::enable_if<std::is_same<T, HYPRE_Complex>::value>::type>
 struct less_than
 {
-  T val;
-  less_than(T val_) { val = val_; }
-  bool operator()(const T &x) const { return (hypre_abs(x) < hypre_abs(val)); }
+   T val;
+   less_than(T val_) { val = val_; }
+   bool operator()(const T &x) const { return (hypre_abs(x) < hypre_abs(val)); }
 };
 #else
 template<typename T,
-	 typename = typename std::enable_if<std::is_same<T, HYPRE_Real>::value>::type>
+         typename = typename std::enable_if<std::is_same<T, HYPRE_Real>::value>::type>
 struct less_than
 {
-  T val;
-  less_than(T val_) { val = val_; }
-  bool operator()(const T &x) const { return (x < val); }
+   T val;
+   less_than(T val_) { val = val_; }
+   bool operator()(const T &x) const { return (x < val); }
 };
 #endif
 // template<typename T>

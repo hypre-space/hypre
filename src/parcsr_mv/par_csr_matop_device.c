@@ -629,19 +629,19 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    const dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A_diag), "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_ConcatDiagAndOffd,
-                      gDim, bDim,
-                      hypre_CSRMatrixNumRows(A_diag),
-                      hypre_CSRMatrixNumCols(A_diag),
-                      hypre_CSRMatrixI(A_diag),
-                      hypre_CSRMatrixJ(A_diag),
-                      hypre_CSRMatrixData(A_diag),
-                      hypre_CSRMatrixI(A_offd),
-                      hypre_CSRMatrixJ(A_offd),
-                      hypre_CSRMatrixData(A_offd),
-                      NULL,
-                      hypre_CSRMatrixI(B),
-                      hypre_CSRMatrixJ(B),
-                      hypre_CSRMatrixData(B) );
+                     gDim, bDim,
+                     hypre_CSRMatrixNumRows(A_diag),
+                     hypre_CSRMatrixNumCols(A_diag),
+                     hypre_CSRMatrixI(A_diag),
+                     hypre_CSRMatrixJ(A_diag),
+                     hypre_CSRMatrixData(A_diag),
+                     hypre_CSRMatrixI(A_offd),
+                     hypre_CSRMatrixJ(A_offd),
+                     hypre_CSRMatrixData(A_offd),
+                     NULL,
+                     hypre_CSRMatrixI(B),
+                     hypre_CSRMatrixJ(B),
+                     hypre_CSRMatrixData(B) );
 
    return B;
 }
@@ -746,19 +746,19 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_ParCSRMatrixNumRows(A), "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_ConcatDiagAndOffd,
-                      gDim, bDim,
-                      hypre_CSRMatrixNumRows(A_diag),
-                      hypre_CSRMatrixNumCols(A_diag),
-                      hypre_CSRMatrixI(A_diag),
-                      hypre_CSRMatrixJ(A_diag),
-                      hypre_CSRMatrixData(A_diag),
-                      hypre_CSRMatrixI(A_offd),
-                      hypre_CSRMatrixJ(A_offd),
-                      hypre_CSRMatrixData(A_offd),
-                      cols_offd_map,
-                      hypre_CSRMatrixI(B),
-                      hypre_CSRMatrixJ(B),
-                      hypre_CSRMatrixData(B) );
+                     gDim, bDim,
+                     hypre_CSRMatrixNumRows(A_diag),
+                     hypre_CSRMatrixNumCols(A_diag),
+                     hypre_CSRMatrixI(A_diag),
+                     hypre_CSRMatrixJ(A_diag),
+                     hypre_CSRMatrixData(A_diag),
+                     hypre_CSRMatrixI(A_offd),
+                     hypre_CSRMatrixJ(A_offd),
+                     hypre_CSRMatrixData(A_offd),
+                     cols_offd_map,
+                     hypre_CSRMatrixI(B),
+                     hypre_CSRMatrixJ(B),
+                     hypre_CSRMatrixData(B) );
 
    hypre_TFree(cols_offd_map, HYPRE_MEMORY_DEVICE);
 
@@ -778,19 +778,19 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    hypre_assert(hypre_CSRMatrixNumCols(E_diag) == hypre_CSRMatrixNumCols(A_diag));
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_ConcatDiagAndOffd,
-                      gDim, bDim,
-                      hypre_CSRMatrixNumRows(E_diag),
-                      hypre_CSRMatrixNumCols(E_diag),
-                      hypre_CSRMatrixI(E_diag),
-                      hypre_CSRMatrixJ(E_diag),
-                      hypre_CSRMatrixData(E_diag),
-                      hypre_CSRMatrixI(E_offd),
-                      hypre_CSRMatrixJ(E_offd),
-                      hypre_CSRMatrixData(E_offd),
-                      NULL,
-                      hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A),
-                      hypre_CSRMatrixJ(B),
-                      hypre_CSRMatrixData(B) );
+                     gDim, bDim,
+                     hypre_CSRMatrixNumRows(E_diag),
+                     hypre_CSRMatrixNumCols(E_diag),
+                     hypre_CSRMatrixI(E_diag),
+                     hypre_CSRMatrixJ(E_diag),
+                     hypre_CSRMatrixData(E_diag),
+                     hypre_CSRMatrixI(E_offd),
+                     hypre_CSRMatrixJ(E_offd),
+                     hypre_CSRMatrixData(E_offd),
+                     NULL,
+                     hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A),
+                     hypre_CSRMatrixJ(B),
+                     hypre_CSRMatrixData(B) );
 
    hypre_CSRMatrixDestroy(E_diag);
    hypre_CSRMatrixDestroy(E_offd);
@@ -1212,23 +1212,23 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    if (type == -1)
    {
       HYPRE_GPU_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols < -1 >, gDim, bDim,
-                         hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
-                         hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
-                         hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+                        hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
+                        hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
+                        hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
    }
    if (type == 1)
    {
       HYPRE_GPU_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<1>, gDim, bDim,
-                         hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
-                         hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
-                         hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+                        hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
+                        hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
+                        hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
    }
    if (type == 2)
    {
       HYPRE_GPU_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<2>, gDim, bDim,
-                         hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
-                         hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
-                         hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+                        hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
+                        hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
+                        hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
    }
 
    /* drop entries from diag and offd CSR matrices */
