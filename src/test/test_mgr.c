@@ -242,9 +242,9 @@ main( hypre_int argc,
    hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
 #endif
 
-      // Get number of iterations and residual
-      HYPRE_GMRESGetNumIterations(krylov_solver, &num_iterations);
-      HYPRE_GMRESGetFinalRelativeResidualNorm(krylov_solver, &final_res_norm);
+   // Get number of iterations and residual
+   HYPRE_GMRESGetNumIterations(krylov_solver, &num_iterations);
+   HYPRE_GMRESGetFinalRelativeResidualNorm(krylov_solver, &final_res_norm);
 
    /*-----------------------------------------------------------
    * Setup the matrix
@@ -575,23 +575,25 @@ main( hypre_int argc,
    /* set the MGR coarse solver. Comment out to use default CG solver (with BoomerAMG) in MGR */
    HYPRE_MGRSetCoarseSolver( krylov_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
 
-      if(mgr_cindexes)
+   if (mgr_cindexes)
+   {
+      for ( i = 0; i < mgr_nlevels; i++)
       {
-        for( i=0; i<mgr_nlevels; i++)
-        {
-        if(mgr_cindexes[i])
-          hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
-        }
-        hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
-        mgr_cindexes = NULL;
+         if (mgr_cindexes[i])
+         {
+            hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
+         }
       }
-      */
-      HYPRE_BoomerAMGDestroy(aff_solver);
-      HYPRE_BoomerAMGDestroy(amg_solver);
-      HYPRE_MGRDestroy(mgr_solver_flow);
-      HYPRE_MGRDestroy(pcg_precond);
-      HYPRE_ParCSRGMRESDestroy(gmres_flow);
-      HYPRE_ParCSRMatrixDestroy(A_ff);
+      hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
+      mgr_cindexes = NULL;
+   }
+   * /
+   HYPRE_BoomerAMGDestroy(aff_solver);
+   HYPRE_BoomerAMGDestroy(amg_solver);
+   HYPRE_MGRDestroy(mgr_solver_flow);
+   HYPRE_MGRDestroy(pcg_precond);
+   HYPRE_ParCSRGMRESDestroy(gmres_flow);
+   HYPRE_ParCSRMatrixDestroy(A_ff);
 
    /* Create Krylov solver */
    if (solver_id == 72)
