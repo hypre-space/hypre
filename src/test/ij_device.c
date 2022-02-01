@@ -26,7 +26,9 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
+#ifdef HYPRE_USING_CUDA
 #include "cuda_profiler_api.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -336,7 +338,7 @@ final:
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   hypre_ResetCudaDevice(hypre_handle());
+   hyre_ResetGpuDevice(hypre_handle());
 #endif
 
    return (0);

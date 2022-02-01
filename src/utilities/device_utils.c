@@ -1603,12 +1603,13 @@ hypre_SyncDevice(hypre_Handle *hypre_handle)
 }
 
 HYPRE_Int
-hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+hyre_ResetGpuDevice(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();
 #elif defined(HYPRE_USING_HIP)
    hipDeviceReset();
+#elif defined(HYPRE_USING_SYCL)
 #endif
    return hypre_error_flag;
 }
