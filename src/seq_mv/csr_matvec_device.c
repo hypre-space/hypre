@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
+#include "seq_mv.hpp"
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_GPU)
