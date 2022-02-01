@@ -15,7 +15,7 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData*
 hypre_CsrsvDataCreate()
 {
@@ -82,7 +82,31 @@ hypre_GpuMatDataCreate()
    hypre_GpuMatDataMatInfo(data) = info;
 #endif
 
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+   oneapi::mkl::sparse::matrix_handle_t mat_handle;
+   HYPRE_SYCL_CALL( oneapi::mkl::sparse::init_matrix_handle(&mat_handle) );
+   hypre_GpuMatDataMatHandle(data) = mat_handle;
+#endif
+
    return data;
+}
+
+void
+hypre_GPUMatDataSetCSRData( hypre_GpuMatData *data,
+                            hypre_CSRMatrix *matrix)
+{
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+   oneapi::mkl::sparse::matrix_handle_t mat_handle = hypre_GpuMatDataMatHandle(data);
+   HYPRE_SYCL_CALL( oneapi::mkl::sparse::set_csr_data(mat_handle,
+                                                      hypre_CSRMatrixNumRows(matrix),
+                                                      hypre_CSRMatrixNumCols(matrix),
+                                                      oneapi::mkl::index_base::zero,
+                                                      hypre_CSRMatrixI(matrix),
+                                                      hypre_CSRMatrixJ(matrix),
+                                                      hypre_CSRMatrixData(matrix)) );
+#endif
+
 }
 
 void
@@ -101,6 +125,10 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 #if defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_descr(hypre_GpuMatDataMatDecsr(data)) );
    HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
+#endif
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+   HYPRE_SYCL_CALL( oneapi::mkl::sparse::release_matrix_handle(&hypre_GpuMatDataMatHandle(data)) );
 #endif
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
@@ -151,7 +179,7 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
    hypre_CSRMatrixData(C) = C_data;
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return C;
 }
@@ -174,7 +202,7 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
    hypreDevice_CSRSpGemm(A, B, &C);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return C;
 }
@@ -326,7 +354,7 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
    *B_ext_diag_ptr = B_ext_diag;
    *B_ext_offd_ptr = B_ext_offd;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return ierr;
 }
@@ -576,7 +604,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
    hypre_CSRMatrixData(C) = C_data;
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return C;
 }
@@ -618,7 +646,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    hypre_TFree(reduced_col_indices, HYPRE_MEMORY_DEVICE);
    hypre_TFree(reduced_col_nnz,     HYPRE_MEMORY_DEVICE);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
@@ -681,7 +709,7 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMoveDiagFirst, gDim, bDim,
                      nrows, A_i, A_j, A_data);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
@@ -725,7 +753,7 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return ierr;
 }
@@ -822,7 +850,7 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return ierr;
 }
@@ -917,7 +945,7 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 #endif
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return ierr;
 }
@@ -1113,7 +1141,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
                          row_sum, scal, set_or_add[0] == 's' );
    }
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 }
 
 /* type 0: diag
@@ -1206,7 +1234,7 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 }
 
 /* return C = [A; B] */
@@ -1530,9 +1558,6 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 #elif defined(HYPRE_USING_ROCSPARSE)
       hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
                                       data);
-#elif defined(HYPRE_USING_ONEMKLSPARSE)
-      hypreDevice_CSRSpTransOnemklsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
-                                         data);
 #else
       hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
@@ -1546,7 +1571,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 
    *AT_ptr = C;
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }

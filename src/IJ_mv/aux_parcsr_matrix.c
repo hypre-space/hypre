@@ -264,12 +264,15 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix,
       return 0;
    }
 
+   /* WM: Q - added the macro guards here (since IJ assembly not yet ported to sycl)... is this OK/correct? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (memory_location != HYPRE_MEMORY_HOST)
    {
       /* GPU assembly */
       hypre_AuxParCSRMatrixNeedAux(matrix) = 1;
    }
    else
+#endif
    {
       /* CPU assembly */
       /* allocate stash for setting or adding off processor values */
