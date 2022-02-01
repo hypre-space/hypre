@@ -209,7 +209,7 @@ dnl *********************************************************************
 hypre_using_sycl=no
 hypre_using_onemklsparse=no
 hypre_using_onemklblas=no
-hypre_using_onemklrng=yes
+hypre_using_onemklrand=yes
 
 hypre_found_mkl=no
 

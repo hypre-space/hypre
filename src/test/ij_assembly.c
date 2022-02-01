@@ -437,7 +437,7 @@ main( hypre_int  argc,
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   hyre_ResetGpuDevice(hypre_handle());
+   hypre_ResetGpuDevice(hypre_handle());
 #endif
 
    return (0);

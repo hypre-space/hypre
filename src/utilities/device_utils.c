@@ -1283,12 +1283,12 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 		 "oneMKL: rng/uniform: T is not supported");
 
    hypre_HandleComputeStream(hypre_handle())->parallel_for(
-     sycl::range<1>(n), [=](sycl::item<1> idx) {
-       std::uint64_t offset = idx.get_linear_id();
-       oneapi::dpl::default_engine engine(1234ULL, offset);
-       oneapi::dpl::uniform_real_distribution<T> distr(0., 1.);
-       urand[idx] = distr(engine);
-     }).wait();
+      sycl::range<1>(n), [=](sycl::item<1> idx) {
+         std::uint64_t offset = idx.get_linear_id();
+         oneapi::dpl::default_engine engine(1234ULL, offset);
+         oneapi::dpl::uniform_real_distribution<T> distr(0., 1.);
+         urand[idx] = distr(engine);
+      }).wait();
 
    return hypre_error_flag;
 }
@@ -1638,7 +1638,7 @@ hypre_SyncDevice(hypre_Handle *hypre_handle)
 }
 
 HYPRE_Int
-hyre_ResetGpuDevice(hypre_Handle *hypre_handle)
+hypre_ResetGpuDevice(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();

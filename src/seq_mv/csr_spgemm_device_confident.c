@@ -592,7 +592,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    HYPRE_Int num_warps = hypre_min(m, HYPRE_MAX_NUM_WARPS);
    sycl::range<3> gDim( 1, 1, (num_warps + bDim[0] - 1) / bDim[0] );
    // number of active warps
-   HYPRE_Int num_act_warps = hypre_min(bDim[0] * gDim[2], m);
+   HYPRE_Int num_act_warps = hypre_min(bDim[0] * gDim[2], (size_t) m);
 #else
    /* CUDA kernel configurations */
    dim3 bDim(BDIMX, BDIMY, num_warps_per_block);
@@ -602,6 +602,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
    HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, (size_t) m);
+#endif // HYPRE_USING_SYCL
 
    /* ---------------------------------------------------------------------------
     * build hash table
