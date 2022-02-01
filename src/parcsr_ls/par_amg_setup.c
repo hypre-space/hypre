@@ -643,6 +643,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
    }
 
+   /* WM: debug - copy A to host (trying to get working without unified memory) */
+   hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
    A_array[0] = A;
 
    /* interp vectors setup */
@@ -921,7 +923,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          S = NULL;
          CF_marker_array[level] = hypre_IntArrayCreate(local_size);
-         hypre_IntArrayInitialize(CF_marker_array[level]);
+         /* WM: debug */
+         hypre_IntArrayInitialize_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+         /* hypre_IntArrayInitialize(CF_marker_array[level]); */
          hypre_IntArraySetConstantValues(CF_marker_array[level], 1);
          coarse_size = fine_size;
       }
@@ -1016,7 +1020,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /* Allocate CF_marker for the current level */
          CF_marker_array[level] = hypre_IntArrayCreate(local_num_vars);
-         hypre_IntArrayInitialize(CF_marker_array[level]);
+         /* WM: debug */
+         hypre_IntArrayInitialize_v2(CF_marker_array[level], HYPRE_MEMORY_HOST);
+         /* hypre_IntArrayInitialize(CF_marker_array[level]); */
          CF_marker = hypre_IntArrayData(CF_marker_array[level]);
 
          /* Set isolated fine points (SF_PT) given by the user */
@@ -3647,5 +3653,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   /* WM: debug - migrate all back to the device */
+   for (level = 0; level < num_levels; level++)
+   {
+      hypre_ParCSRMatrixMigrate(A_array[level], HYPRE_MEMORY_DEVICE);
+
+
+      if (level < num_levels - 1)
+      {
+         hypre_Vector *new_l1 = hypre_SeqVectorCloneDeep_v2(hypre_ParAMGDataL1Norms(amg_data)[level], HYPRE_MEMORY_DEVICE);
+         hypre_SeqVectorDestroy(hypre_ParAMGDataL1Norms(amg_data)[level]);
+         hypre_ParAMGDataL1Norms(amg_data)[level] = new_l1;
+
+         hypre_ParCSRMatrixMigrate(P_array[level], HYPRE_MEMORY_DEVICE);
+      }
+   }
    return (hypre_error_flag);
 }

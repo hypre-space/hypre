@@ -374,7 +374,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          * Do the relaxation num_sweep times
          *-----------------------------------------------------------------*/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-         for (jj = 0; jj < cg_num_sweep; jj++)
          {
             if (smooth_num_levels > level && smooth_type > 9)
             {

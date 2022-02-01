@@ -302,11 +302,34 @@ hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_loc
 
       hypre_TFree(hypre_ParCSRMatrixRowindices(A), old_memory_location);
       hypre_TFree(hypre_ParCSRMatrixRowvalues(A), old_memory_location);
+
+      if (hypre_ParCSRMatrixDiagT(A))
+      {
+         hypre_CSRMatrix *A_diagT = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiagT(A), 1, memory_location);
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiagT(A));
+         hypre_ParCSRMatrixDiagT(A) = A_diagT;
+      }
+
+      if (hypre_ParCSRMatrixOffdT(A))
+      {
+         hypre_CSRMatrix *A_offdT = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffdT(A), 1, memory_location);
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffdT(A));
+         hypre_ParCSRMatrixOffdT(A) = A_offdT;
+      }  
+
    }
    else
    {
       hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) = memory_location;
       hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(A)) = memory_location;
+      if (hypre_ParCSRMatrixDiagT(A))
+      {
+         hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiagT(A)) = memory_location;
+      }
+      if (hypre_ParCSRMatrixOffdT(A))
+      {
+         hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffdT(A)) = memory_location;
+      }
    }
 
    return hypre_error_flag;

@@ -2901,8 +2901,11 @@ main( hypre_int argc,
       /* RHS */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize_v2(ij_b, memory_location);
-      HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
+      /* WM: debug */
+      HYPRE_IJVectorInitialize_v2(ij_b, HYPRE_MEMORY_HOST);
+      /* HYPRE_IJVectorInitialize_v2(ij_b, memory_location); */
+      HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_h);
+      /* HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d); */
       HYPRE_IJVectorAssemble(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -2911,11 +2914,17 @@ main( hypre_int argc,
       /* Initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize_v2(ij_x, memory_location);
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
+      /* WM: debug */
+      HYPRE_IJVectorInitialize_v2(ij_x, HYPRE_MEMORY_HOST);
+      /* HYPRE_IJVectorInitialize_v2(ij_x, memory_location); */
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_h);
+      /* HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d); */
       HYPRE_IJVectorAssemble(ij_x);
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+      /* WM: debug */
+      hypre_ParVectorMigrate(b, HYPRE_MEMORY_DEVICE);
+      hypre_ParVectorMigrate(x, HYPRE_MEMORY_DEVICE);
 
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
