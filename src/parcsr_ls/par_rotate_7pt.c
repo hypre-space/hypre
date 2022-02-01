@@ -36,7 +36,7 @@ GenerateRotate7pt( MPI_Comm       comm,
 
    HYPRE_Real *value;
    HYPRE_Real ac, bc, cc, s, c, pi, x;
-   HYPRE_BigInt *global_part;
+   HYPRE_BigInt global_part[2];
    HYPRE_BigInt ix, iy;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows;
@@ -80,7 +80,6 @@ GenerateRotate7pt( MPI_Comm       comm,
 
    local_num_rows = nx_local * ny_local;
 
-   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = ny_part[q] * nx + nx_part[p] * ny_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
 
@@ -393,7 +392,6 @@ GenerateRotate7pt( MPI_Comm       comm,
    hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
    hypre_TFree(value,   HYPRE_MEMORY_HOST);
-   hypre_TFree(global_part, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }

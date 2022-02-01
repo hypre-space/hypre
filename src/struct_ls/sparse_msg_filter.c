@@ -367,7 +367,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       data_indices_d  = hypre_TAlloc(HYPRE_Int,   stencil_size * nboxes, HYPRE_MEMORY_DEVICE);
       stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size,        HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size * nboxes,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
       hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_HOST);
    }

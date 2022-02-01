@@ -568,7 +568,7 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *P_offd_j = NULL;
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
-   HYPRE_BigInt    *f_pts_starts = NULL;
+   HYPRE_BigInt     f_pts_starts[2];
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
    HYPRE_BigInt     total_global_cpts;
@@ -608,7 +608,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt big_Fpts;
       big_Fpts = num_points;
 
-      f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
       if (my_id == num_procs - 1)
@@ -621,7 +620,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    }
    else
    {
-      f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       f_pts_starts[0] = 0;
       f_pts_starts[1] = num_points;
       total_global_fpts = f_pts_starts[1];
@@ -817,7 +815,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    hypre_TFree(big_convert, HYPRE_MEMORY_HOST);
    hypre_TFree(big_convert_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(big_buf_data, HYPRE_MEMORY_HOST);
-   hypre_TFree(f_pts_starts, HYPRE_MEMORY_HOST);
 
    hypre_MatvecCommPkgCreate(P);
    *P_ptr = P;
@@ -895,7 +892,7 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *Q_offd_j = NULL;
    HYPRE_Int       *fine_to_coarse;
    HYPRE_Int       *fine_to_coarse_offd = NULL;
-   HYPRE_BigInt    *f_pts_starts = NULL;
+   HYPRE_BigInt     f_pts_starts[2];
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_fpts;
    HYPRE_BigInt     total_global_cpts;
@@ -937,7 +934,6 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt big_Fpts;
       big_Fpts = num_points;
 
-      f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
       if (my_id == num_procs - 1)
@@ -950,7 +946,6 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    }
    else
    {
-      f_pts_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       f_pts_starts[0] = 0;
       f_pts_starts[1] = num_points;
       total_global_fpts = f_pts_starts[1];
@@ -1259,7 +1254,6 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    //hypre_TFree(row_sums, HYPRE_MEMORY_HOST);
    hypre_TFree(row_sums_C, HYPRE_MEMORY_HOST);
    hypre_TFree(w_row_sum, HYPRE_MEMORY_HOST);
-   hypre_TFree(f_pts_starts, HYPRE_MEMORY_HOST);
 
    *Pi_ptr = Pi;
 

@@ -1332,7 +1332,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               }
                            }
                         }  /* if ((rank <= cupper_ranks[part][var]) &&
-                        (rank >= clower_ranks[part][var])) */
+(rank >= clower_ranks[part][var])) */
                      }
 
                      hypre_SerialBoxLoop0End();
@@ -1428,7 +1428,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               }
                            }
                         }  /* if ((rank <= cupper_ranks[part][var]) &&
-                        (rank >= clower_ranks[part][var])) */
+(rank >= clower_ranks[part][var])) */
                      }
 
                      hypre_SerialBoxLoop0End();
@@ -1525,7 +1525,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               }
                            }
                         }  /* if ((rank <= cupper_ranks[part][var]) &&
-                        (rank >= clower_ranks[part][var])) */
+(rank >= clower_ranks[part][var])) */
                      }
                      hypre_SerialBoxLoop0End();
                   }  /* hypre_ForBoxI(i, cboxes) */

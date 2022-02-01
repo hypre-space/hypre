@@ -21,19 +21,19 @@ static HYPRE_Real rs_l = 3.0;
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix
-GenerateRSVarDifConv( MPI_Comm comm,
-                      HYPRE_BigInt   nx,
-                      HYPRE_BigInt   ny,
-                      HYPRE_BigInt   nz,
-                      HYPRE_Int      P,
-                      HYPRE_Int      Q,
-                      HYPRE_Int      R,
-                      HYPRE_Int      p,
-                      HYPRE_Int      q,
-                      HYPRE_Int      r,
-                      HYPRE_Real eps,
+GenerateRSVarDifConv( MPI_Comm         comm,
+                      HYPRE_BigInt     nx,
+                      HYPRE_BigInt     ny,
+                      HYPRE_BigInt     nz,
+                      HYPRE_Int        P,
+                      HYPRE_Int        Q,
+                      HYPRE_Int        R,
+                      HYPRE_Int        p,
+                      HYPRE_Int        q,
+                      HYPRE_Int        r,
+                      HYPRE_Real       eps,
                       HYPRE_ParVector *rhs_ptr,
-                      HYPRE_Int type)
+                      HYPRE_Int        type)
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -51,7 +51,7 @@ GenerateRSVarDifConv( MPI_Comm comm,
    HYPRE_BigInt *big_offd_j;
    HYPRE_Real *offd_data;
 
-   HYPRE_BigInt *global_part;
+   HYPRE_BigInt global_part[2];
    HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows;
@@ -96,8 +96,6 @@ GenerateRSVarDifConv( MPI_Comm comm,
 
    local_num_rows = nx_local * ny_local * nz_local;
 
-
-   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = nz_part[r] * nx * ny + (ny_part[q] * nx + nx_part[p] * ny_local) * nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
 

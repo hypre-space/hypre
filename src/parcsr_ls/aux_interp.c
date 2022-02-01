@@ -604,7 +604,8 @@ HYPRE_Int hypre_exchange_interp_data(
 
    hypre_ParCSRCommHandle *comm_handle_a_idx, *comm_handle_a_data;
    *A_ext         = hypre_ParCSRMatrixExtractBExt_Overlap(A, A, 1, &comm_handle_a_idx,
-                                                          &comm_handle_a_data, CF_marker, *CF_marker_offd, skip_fine_or_same_sign, skip_fine_or_same_sign);
+                                                          &comm_handle_a_data,
+                                                          CF_marker, *CF_marker_offd, skip_fine_or_same_sign, skip_fine_or_same_sign);
    HYPRE_Int *A_ext_i        = hypre_CSRMatrixI(*A_ext);
    HYPRE_BigInt *A_ext_j        = hypre_CSRMatrixBigJ(*A_ext);
    HYPRE_Int  A_ext_rows     = hypre_CSRMatrixNumRows(*A_ext);

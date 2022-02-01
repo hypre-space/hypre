@@ -168,13 +168,13 @@ main( HYPRE_Int   argc,
          build_matrix_type      = 4;
          matrix_arg_index = index;
       }
-      /*
-            else if  ( strcmp(argv[index], "-nopreload") == 0 )
-            {
-               index++;
-               preload = 0;
-            }
-      */
+#if 0
+      else if  ( strcmp(argv[index], "-nopreload") == 0 )
+      {
+         index++;
+         preload = 0;
+      }
+#endif
       else if  ( strcmp(argv[index], "-loop") == 0 )
       {
          index++;

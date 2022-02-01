@@ -73,7 +73,8 @@ hypre_SeqVectorMassAxpy8( HYPRE_Complex *alpha,
       for (i = 0; i < size; i++)
       {
          y_data[i] += alpha[k - 3] * x_data[jstart + i] + alpha[k - 2] * x_data[jstart + size + i] + alpha[k
-                                                                                                           - 1] * x_data[(k - 1) * size + i];
+                                                                                                           - 1] *
+                      x_data[(k - 1) * size + i];
       }
    }
    else if (restk == 4)
@@ -195,7 +196,8 @@ hypre_SeqVectorMassAxpy4( HYPRE_Complex *alpha,
       for (i = 0; i < size; i++)
       {
          y_data[i] += alpha[k - 3] * x_data[jstart + i] + alpha[k - 2] * x_data[jstart + size + i] + alpha[k
-                                                                                                           - 1] * x_data[(k - 1) * size + i];
+                                                                                                           - 1] *
+                      x_data[(k - 1) * size + i];
       }
    }
 

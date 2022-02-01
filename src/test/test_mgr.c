@@ -150,8 +150,11 @@ main( hypre_int argc,
 
    build_matrix_type = -1;
    build_matrix_arg_index = argc;
+   build_precond_type = 0;
+   build_precond_arg_index = argc;
    build_rhs_type = 2;
    build_rhs_arg_index = argc;
+   debug_flag = 0;
 
    solver_id = 72;
    example_id = 0;
@@ -177,39 +180,7 @@ main( hypre_int argc,
          build_rhs_type      = 0;
          build_rhs_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-markerArray") == 0)
-      {
-         arg_index++;
-         use_point_marker_array = 1;
-         build_marker_array_arg_index = arg_index;
-      }
-      else if ( strcmp(argv[arg_index], "-gmres") == 0 )
-      {
-         arg_index++;
-         solver_id = 72;
-      }
-      else if ( strcmp(argv[arg_index], "-fgmres") == 0 )
-      {
-         arg_index++;
-         solver_id = 73;
-      }
-      else if ( strcmp(argv[arg_index], "-bicgstab") == 0 )
-      {
-         arg_index++;
-         solver_id = 74;
-      }
-      /*
-      else if ( strcmp(argv[arg_index], "-solver") == 0 )
-      {
-        arg_index++;
-        solver_id = atoi(argv[arg_index++]);
-      }
-      */
-      else if ( strcmp(argv[arg_index], "-example") == 0 )
-      {
-         arg_index++;
-         example_id = atoi(argv[arg_index++]);
-      }
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
@@ -271,6 +242,9 @@ main( hypre_int argc,
    hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
 #endif
 
+      // Get number of iterations and residual
+      HYPRE_GMRESGetNumIterations(krylov_solver, &num_iterations);
+      HYPRE_GMRESGetFinalRelativeResidualNorm(krylov_solver, &final_res_norm);
 
    /*-----------------------------------------------------------
    * Setup the matrix
@@ -601,6 +575,23 @@ main( hypre_int argc,
    /* set the MGR coarse solver. Comment out to use default CG solver (with BoomerAMG) in MGR */
    HYPRE_MGRSetCoarseSolver( krylov_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
 
+      if(mgr_cindexes)
+      {
+        for( i=0; i<mgr_nlevels; i++)
+        {
+        if(mgr_cindexes[i])
+          hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
+        }
+        hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
+        mgr_cindexes = NULL;
+      }
+      */
+      HYPRE_BoomerAMGDestroy(aff_solver);
+      HYPRE_BoomerAMGDestroy(amg_solver);
+      HYPRE_MGRDestroy(mgr_solver_flow);
+      HYPRE_MGRDestroy(pcg_precond);
+      HYPRE_ParCSRGMRESDestroy(gmres_flow);
+      HYPRE_ParCSRMatrixDestroy(A_ff);
 
    /* Create Krylov solver */
    if (solver_id == 72)
@@ -689,6 +680,42 @@ main( hypre_int argc,
          hypre_printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_MGRSetup(mgr_solver, parcsr_A, b, x);
+      HYPRE_MGRSolve(mgr_solver, parcsr_A, b, x);
+#endif
+
+      /* free memory */
+      if (mgr_num_cindexes)
+      {
+         hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
+      }
+      mgr_num_cindexes = NULL;
+
+      if (mgr_reserved_coarse_indexes)
+      {
+         hypre_TFree(mgr_reserved_coarse_indexes, HYPRE_MEMORY_HOST);
+      }
+      mgr_reserved_coarse_indexes = NULL;
+
+      if (mgr_cindexes)
+      {
+         for ( i = 0; i < mgr_nlevels; i++)
+         {
+            if (mgr_cindexes[i])
+            {
+               hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
+            }
+         }
+         hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
+         mgr_cindexes = NULL;
+      }
+
+      HYPRE_BoomerAMGDestroy(amg_solver);
+      HYPRE_MGRDestroy(mgr_solver);
    }
    else if (solver_id == 73)
    {

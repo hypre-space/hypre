@@ -31,10 +31,7 @@ HYPRE_PCGSetup( HYPRE_Solver solver,
                 HYPRE_Vector b,
                 HYPRE_Vector x )
 {
-   return ( hypre_PCGSetup( solver,
-                            A,
-                            b,
-                            x ) );
+   return ( hypre_PCGSetup( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -47,10 +44,7 @@ HYPRE_PCGSolve( HYPRE_Solver solver,
                 HYPRE_Vector b,
                 HYPRE_Vector x )
 {
-   return ( hypre_PCGSolve( (void *) solver,
-                            (void *) A,
-                            (void *) b,
-                            (void *) x ) );
+   return ( hypre_PCGSolve( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------

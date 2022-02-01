@@ -16,11 +16,13 @@ FILES="\
  ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
+ ${TNAME}.out.5f\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
  ${TNAME}.out.9\
  ${TNAME}.out.12\
+ ${TNAME}.out.12f\
  ${TNAME}.out.13\
  ${TNAME}.out.14\
 "
@@ -34,7 +36,7 @@ do
 done > ${TNAME}.out
 
 # Make sure that the output file is reasonable
-RUNCOUNT=7
+RUNCOUNT=8
 OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2

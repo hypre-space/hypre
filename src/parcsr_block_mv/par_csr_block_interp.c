@@ -5969,7 +5969,7 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
    if (full_off_procNodes)
    {
       ahat_offd = hypre_CTAlloc(HYPRE_Real,  full_off_procNodes * bnnz,
-                                HYPRE_MEMORY_HOST); /* this is data array */
+                                HYPRE_MEMORY_HOST);  /* this is data array */
       ihat_offd = hypre_CTAlloc(HYPRE_Int,  full_off_procNodes, HYPRE_MEMORY_HOST);
       ipnt_offd = hypre_CTAlloc(HYPRE_Int,  full_off_procNodes, HYPRE_MEMORY_HOST);
    }

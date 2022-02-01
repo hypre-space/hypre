@@ -620,7 +620,7 @@ hypre_ParCSRMatrixToParChordMatrix(
          }
       };
    rdof_toprocessor = hypre_CTAlloc( HYPRE_Int*,  num_toprocessors, HYPRE_MEMORY_HOST);
-   for ( qto = 0; qto < num_toprocessors; ++qto )  /*if (qto!=my_q)*/
+   for ( qto = 0; qto < num_toprocessors; ++qto ) /*if (qto!=my_q)*/
    {
       hypre_assert( qto < len_num_rdofs_toprocessor );
       rdof_toprocessor[qto] = hypre_CTAlloc( HYPRE_Int,  num_rdofs_toprocessor[qto], HYPRE_MEMORY_HOST);
@@ -658,7 +658,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    /* fix up overestimate of num_rdofs_toprocessor.  We're not going to
       bother to fix the excessive size which has been allocated to
       rdof_toprocessor... */
-   for ( qto = 0; qto < num_toprocessors; ++qto )  /*if (qto!=my_q)*/
+   for ( qto = 0; qto < num_toprocessors; ++qto ) /*if (qto!=my_q)*/
    {
       num_rdofs_toprocessor[qto] = chordto[qto] - 1;
    }

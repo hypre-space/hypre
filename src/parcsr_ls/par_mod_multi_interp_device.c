@@ -339,8 +339,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       cnt_old = cnt;
 
       {
-         dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-         dim3 gDim = hypre_GetDefaultCUDAGridDimension(remaining, "warp", bDim);
+         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+         dim3 gDim = hypre_GetDefaultDeviceGridDimension(remaining, "warp", bDim);
 
          /* output diag_shifts is 0/1 indicating if points_left_dev[i] is picked in this pass */
          HYPRE_CUDA_LAUNCH( hypreCUDAKernel_pass_order_count,
@@ -435,8 +435,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    row_sums = hypre_CTAlloc(HYPRE_Real, n_fine, HYPRE_MEMORY_DEVICE);
 
    {
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(n_fine, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_cfmarker_masked_rowsum, gDim, bDim,
                          n_fine, A_diag_i, A_diag_j, A_diag_data,
@@ -588,8 +588,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       HYPRE_Int num_points = pass_starts[p + 2] - pass_starts[p + 1];
 
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_insert_remaining_weights, gDim, bDim,
                          pass_starts[p + 1], pass_starts[p + 2], pass_order,
@@ -651,8 +651,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          HYPRE_BigInt *col_map_offd_Pi = hypre_ParCSRMatrixDeviceColMapOffd(Pi[p]);
 
          HYPRE_Int npoints = pass_starts[p + 2] - pass_starts[p + 1];
-         dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-         dim3 gDim = hypre_GetDefaultCUDAGridDimension(npoints, "warp", bDim);
+         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+         dim3 gDim = hypre_GetDefaultDeviceGridDimension(npoints, "warp", bDim);
 
          HYPRE_CUDA_LAUNCH( hypreCUDAKernel_populate_big_P_offd_j, gDim, bDim,
                             pass_starts[p + 1],
@@ -890,8 +890,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
 
    /* generate P_diag_i and P_offd_i */
    {
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_i_Poffd_i, gDim, bDim,
                          num_points, color, pass_order, pass_marker, pass_marker_offd,
@@ -918,8 +918,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    P_offd_data = hypre_TAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
 
    {
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_j_Poffd_j, gDim, bDim,
                          num_points,
@@ -1141,8 +1141,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
 
    /* generate Q_diag_i and Q_offd_i */
    {
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Pdiag_i_Poffd_i, gDim, bDim,
                          num_points, color, pass_order, pass_marker, pass_marker_offd,
@@ -1170,8 +1170,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    w_row_sum   = hypre_TAlloc(HYPRE_Real, num_points, HYPRE_MEMORY_DEVICE);
 
    {
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_generate_Qdiag_j_Qoffd_j, gDim, bDim,
                          num_points,
@@ -1241,8 +1241,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    Pi_offd_i = hypre_CSRMatrixI(Pi_offd);
 
    {
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_points, "warp", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_mutli_pi_rowsum, gDim, bDim,
                          num_points, pass_order, A_diag_i, A_diag_data,

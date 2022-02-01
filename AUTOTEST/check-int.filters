@@ -12,5 +12,5 @@ long-range interpolation
 monstrously long
 get a long msg
 long rows
-utilities/hopscotch_hash.h:  //return _InterlockedCompareExchange
-utilities/hopscotch_hash.h:  //return _InterlockedExchangeAdd
+return _InterlockedCompareExchange
+return _InterlockedExchangeAdd

@@ -423,9 +423,9 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    /* CUDA V100 */
    hypre_int v1, v2;
    cudaDeviceGetAttribute(&v1, cudaDevAttrMaxSharedMemoryPerBlock,
-                          hypre_HandleCudaDevice(hypre_handle()));
+                          hypre_HandleDevice(hypre_handle()));
    cudaDeviceGetAttribute(&v2, cudaDevAttrMaxSharedMemoryPerBlockOptin,
-                          hypre_HandleCudaDevice(hypre_handle()));
+                          hypre_HandleDevice(hypre_handle()));
 
    if (shmem_maxbytes > 49152)
    {
@@ -442,7 +442,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    HYPRE_Int num_warps = hypre_min(m, HYPRE_MAX_NUM_WARPS);
    dim3 gDim( (num_warps + bDim.z - 1) / bDim.z );
    // number of active warps
-   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_warps = hypre_min(bDim.z * gDim.x, (size_t) m);
 
    /* ---------------------------------------------------------------------------
     * build hash table

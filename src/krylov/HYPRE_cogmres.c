@@ -34,10 +34,7 @@ HYPRE_COGMRESSetup( HYPRE_Solver solver,
                     HYPRE_Vector b,
                     HYPRE_Vector x      )
 {
-   return ( hypre_COGMRESSetup( solver,
-                                A,
-                                b,
-                                x ) );
+   return ( hypre_COGMRESSetup( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -50,10 +47,7 @@ HYPRE_COGMRESSolve( HYPRE_Solver solver,
                     HYPRE_Vector b,
                     HYPRE_Vector x      )
 {
-   return ( hypre_COGMRESSolve( solver,
-                                A,
-                                b,
-                                x ) );
+   return ( hypre_COGMRESSolve( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -3479,7 +3479,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
 
    /* start forming parCSR matrix S */
 
-   HYPRE_BigInt   S_total_rows, *S_row_starts;
+   HYPRE_BigInt   S_total_rows, S_row_starts[2];
    HYPRE_BigInt   big_m = (HYPRE_BigInt)m;
    hypre_MPI_Allreduce( &big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
@@ -3487,13 +3487,11 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
    {
       {
          HYPRE_BigInt global_start;
-         S_row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
          hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          S_row_starts[0] = global_start - m;
          S_row_starts[1] = global_start;
       }
 
-      S_row_starts = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
       S_row_starts[1] = S_total_rows;
       S_row_starts[0] = S_total_rows - m;
       hypre_MPI_Allreduce(&m, &S_total_rows, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
@@ -3508,9 +3506,6 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
 
       /* memroy leak here */
       hypre_ParCSRMatrixDiag(S) = SLU;
-
-      /* free memory */
-      hypre_TFree(S_row_starts, HYPRE_MEMORY_HOST);
    }
 
    *matSptr       = S;

@@ -96,7 +96,8 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    if (hypre_BoxArraySize(data_space) > 0)
    {
       mask_data_indices[0] = hypre_TAlloc(HYPRE_Int,
-                                          num_stencil_indices * hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
+                                          num_stencil_indices * hypre_BoxArraySize(data_space),
+                                          HYPRE_MEMORY_HOST);
    }
 
    hypre_ForBoxI(i, data_space)
