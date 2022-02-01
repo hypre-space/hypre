@@ -104,21 +104,19 @@ struct hypre_device_allocator
 
 #include <hip/hip_runtime.h>
 
+#if defined(HYPRE_USING_ROCSPARSE)
+#include <rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+#include <rocrand.h>
+#endif
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          sycl includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #elif defined(HYPRE_USING_SYCL)
-
-#if defined(HYPRE_USING_ONEMKLSPARSE)
-#include <oneapi/mkl/spblas.hpp>
-#endif
-#if defined(HYPRE_USING_ONEMKLBLAS)
-#include <oneapi/mkl/blas.hpp>
-#endif
-#if defined(HYPRE_USING_ONEMKLRNG)
-#include <oneapi/dpl/random>
-#endif
 
 using dim3 = sycl::range<1>;
 #define __global__
@@ -132,16 +130,17 @@ using sycl::max;
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+#include <oneapi/mkl/spblas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLBLAS)
+#include <oneapi/mkl/blas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLRAND)
+#include <oneapi/dpl/random>
+#endif
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
-#if defined(HYPRE_USING_ROCSPARSE)
-#include <rocsparse.h>
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-#include <rocrand.h>
-#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
@@ -195,6 +194,20 @@ using sycl::max;
                    __FILE__, __LINE__);                                                      \
       assert(0); exit(1);                                                                    \
    }
+
+#define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
+  func_name(oneapi::dpl::execution::make_device_policy(                                      \
+           *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) \
+  ({                                                            \
+    hypre_HandleComputeStream(hypre_handle())->parallel_for(    \
+      sycl::nd_range(((gridsize) * (blocksize)), (blocksize))   \
+      , [=] (auto item)                                         \
+      [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {         \
+        (kernel_name)(item, __VA_ARGS__);                       \
+      });                                                       \
+  })
 
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -389,6 +402,10 @@ struct hypre_CsrsvData
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info info_L;
    rocsparse_mat_info info_U;
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   /* WM: todo - placeholders */
+   char info_L;
+   char info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
@@ -410,10 +427,15 @@ struct hypre_GpuMatData
    rocsparse_mat_descr   mat_descr;
    rocsparse_mat_info    mat_info;
 #endif
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+   oneapi::mkl::sparse::matrix_handle_t mat_handle;
+#endif
 };
 
 #define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
+#define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
 /* device_utils.c, some common functions for CUDA, SYCL, HIP */
@@ -786,7 +808,11 @@ template <typename T>
 static __device__ __forceinline__
 T read_only_load( const T *ptr )
 {
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 350
    return __ldg( ptr );
+#else
+   return *ptr;
+#endif
 }
 
 /* exclusive prefix scan */
@@ -1092,6 +1118,15 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 #include <oneapi/dpl/iterator>
 #include <oneapi/dpl/functional>
 
+
+template <typename T, sycl::access::address_space addressSpace =
+          sycl::access::address_space::global_space>
+using relaxed_atomic_ref =
+  sycl::atomic_ref< T,
+                    sycl::memory_order::seq_cst,
+                    sycl::memory_scope::device,
+                    addressSpace>;
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * macro for launching SYCL kernels, SYCL, oneDPL, oneMKL calls
  *                    NOTE: IN HYPRE'S DEFAULT STREAM
@@ -1254,21 +1289,8 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
 #define GPU_LAUNCH_SYNC
 #endif // defined(HYPRE_DEBUG)
 
-#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) \
-  ({                                                            \
-    hypre_HandleComputeStream(hypre_handle())->parallel_for(    \
-      sycl::nd_range(((gridsize) * (blocksize)), (blocksize))   \
-      , [=] (auto item)                                         \
-      [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]] {         \
-        (kernel_name)(item, __VA_ARGS__);                       \
-      });                                                       \
-  })
-
 /* RL: TODO Want macro HYPRE_ONEDPL_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
-
-#define HYPRE_ONEDPL_CALL(func_name, ...) \
-  func_name(oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
 // /* return the number of threads in block */
 // template <hypre_int dim>
@@ -1344,23 +1366,23 @@ template <typename T>
 static __forceinline__
 T atomicCAS(T* address, T expected, T val)
 {
-    sycl::ext::oneapi::atomic_ref< T,
-                                   sycl::ext::oneapi::memory_order::relaxed,
-                                   sycl::ext::oneapi::memory_scope::device,
-                                   sycl::access::address_space::local_space >
+  sycl::atomic_ref< T,
+                    sycl::memory_order::relaxed,
+                    sycl::memory_scope::device,
+                    sycl::access::address_space::local_space >
       atomicCAS_ref( *address );
-    return static_cast<T>( atomicCAS_ref.compare_exchange_strong(expected, val) );
+  return static_cast<T>( atomicCAS_ref.compare_exchange_strong(expected, val) );
 }
 
 template <typename T>
 static __forceinline__
 T atomicAdd(T* address, T val)
 {
-    sycl::ext::oneapi::atomic_ref< T,
-                                   sycl::ext::oneapi::memory_order::relaxed,
-                                   sycl::ext::oneapi::memory_scope::device,
-                                   sycl::access::address_space::local_space >
-      atomicAdd_ref( *address );
+  sycl::atomic_ref< T,
+                    sycl::memory_order::relaxed,
+                    sycl::memory_scope::device,
+                    sycl::access::address_space::local_space >
+    atomicAdd_ref( *address );
     return atomicAdd_ref.fetch_add(val);
 }
 

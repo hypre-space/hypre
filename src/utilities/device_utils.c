@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
@@ -55,10 +56,11 @@ hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
    HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_row_ind, d_row_ind + nnz,
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                      count,
+                      count + nrows + 1,
                       d_row_ptr);
 #else
    HYPRE_THRUST_CALL( lower_bound,
@@ -76,10 +78,11 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                                    HYPRE_Int *d_row_ptr)
 {
 #if defined(HYPRE_USING_SYCL)
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_row_ind, d_row_ind + nnz,
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(nrows + 1),
+                      count,
+                      count + nrows + 1,
                       d_row_ptr);
 #else
    HYPRE_THRUST_CALL( lower_bound,
@@ -309,7 +312,7 @@ hypreGPUKernel_IVAXPY(
   HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
 {
 #ifdef HYPRE_USING_SYCL
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -345,7 +348,7 @@ hypreGPUKernel_IVAXPYMarked(
   HYPRE_Int *marker, HYPRE_Int marker_val)
 {
 #ifdef HYPRE_USING_SYCL
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -751,6 +754,25 @@ struct hypre_empty_row_functor
    }
 };
 
+/*
+void
+hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
+                              HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < nrows)
+   {
+      HYPRE_Int row_start = d_row_ptr[i];
+      HYPRE_Int row_end = d_row_ptr[i + 1];
+      if (row_start != row_end)
+      {
+         d_row_ind[row_start] = i;
+      }
+   }
+}
+*/
+
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                    HYPRE_Int *d_row_ind)
@@ -770,9 +792,13 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                                                                hypre_empty_row_functor() ),
                          d_row_ind,
                          oneapi::dpl::identity() );
+   
+   /* sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension(); */
+   /* sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);    */
+   /* HYPRE_GPU_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind ); */
 
-   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
-                      sycl::maximum<HYPRE_Int>() );
+   HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+                      oneapi::dpl::maximum<HYPRE_Int>());
 
    return hypre_error_flag;
 }
@@ -1597,7 +1623,16 @@ hypre_SyncDevice(hypre_Handle *hypre_handle)
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
 #elif defined(HYPRE_USING_SYCL)
-   HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+   try
+   {
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+   }
+   catch (sycl::exception const &exc)
+   {
+      std::cerr << exc.what() << "Exception caught at file:" << __FILE__
+                << ", line:" << __LINE__ << std::endl;
+      std::exit(1);
+   }
 #endif
    return hypre_error_flag;
 }
@@ -1623,8 +1658,8 @@ hyre_ResetGpuDevice(hypre_Handle *hypre_handle)
  */
 HYPRE_Int
 hypre_SyncComputeStream_core(HYPRE_Int     action,
-                                   hypre_Handle *hypre_handle,
-                                   HYPRE_Int    *device_compute_stream_sync_ptr)
+                             hypre_Handle *hypre_handle,
+                             HYPRE_Int    *device_compute_stream_sync_ptr)
 {
    /* with UVM the default is to sync at kernel completions, since host is also able to
     * touch GPU memory */

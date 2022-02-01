@@ -13,7 +13,6 @@
 
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
-#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_GPU)
 
@@ -53,8 +52,6 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemlksparse implementation is in
-#elif defined(HYPRE_USING_SYCL)
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -328,7 +325,29 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
                                    hypre_Vector    *y,
                                    HYPRE_Int        offset )
 {
-   /* WM: TODO */
+   sycl::queue *compute_queue = hypre_HandleComputeStream(hypre_handle());
+   hypre_CSRMatrix *AT;
+   oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
+
+   if (trans)
+   {
+      hypre_CSRMatrixTransposeDevice(A, &AT, 1);
+      matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
+   }
+
+   HYPRE_SYCL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
+                                              oneapi::mkl::transpose::nontrans,
+                                              alpha,
+                                              matA_handle,
+                                              hypre_VectorData(x),
+                                              beta,
+                                              hypre_VectorData(y) + offset).wait() );
+
+   if (trans)
+   {
+      hypre_CSRMatrixDestroy(AT);
+   }
+
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)

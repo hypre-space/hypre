@@ -88,7 +88,7 @@ Final GMRES Relative Residual Norm = 6.828913e-09
 
 # Output file: smoother.out.19
 Iterations = 7
-Final Relative Residual Norm = 8.750911e-09
+Final Relative Residual Norm = 8.750335e-09
 
 # Output file: smoother.out.20
 Iterations = 12

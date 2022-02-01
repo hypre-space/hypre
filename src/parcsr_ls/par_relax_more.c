@@ -308,6 +308,11 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
       gamma_old = gamma;
       gamma = hypre_ParVectorInnerProd(r, s);
 
+      if (gamma < HYPRE_REAL_EPSILON)
+      {
+         break;
+      }
+
       if (i == 0)
       {
          beta = 1.0;
@@ -368,7 +373,7 @@ hypre_ParCSRMaxEigEstimateCGHost( hypre_ParCSRMatrix *A,     /* matrix to relax 
       /* don't need */
 
       /* r = r - alpha*s */
-      hypre_ParVectorAxpy( -alpha, s, r);
+      hypre_ParVectorAxpy(-alpha, s, r);
 
       i++;
    }

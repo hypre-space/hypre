@@ -792,6 +792,9 @@ enable_rocblas
 enable_rocrand
 enable_gpu_profiling
 enable_gpu_aware_mpi
+enable_onemklsparse
+enable_onemklblas
+enable_onemklrand
 with_LD
 with_LDFLAGS
 with_extra_CFLAGS
@@ -1520,6 +1523,9 @@ Optional Features:
   --enable-rocrand        Use rocRAND (default is YES).
   --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
+  --enable-onemklsparse   Use oneMKL sparse (default is YES).
+  --enable-onemklblas     Use oneMKL blas (default is YES).
+  --enable-onemklrand     Use oneMKL rand (default is YES).
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2817,8 +2823,9 @@ hypre_found_hip=no
 hypre_using_sycl=no
 hypre_using_onemklsparse=no
 hypre_using_onemklblas=no
-hypre_using_onemklrng=yes
+hypre_using_onemklrand=yes
 
+hypre_found_mkl=no
 
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
@@ -3243,6 +3250,45 @@ if test "${enable_gpu_aware_mpi+set}" = set; then :
  esac
 else
   hypre_gpu_mpi=no
+
+fi
+
+
+# Check whether --enable-onemklsparse was given.
+if test "${enable_onemklsparse+set}" = set; then :
+  enableval=$enable_onemklsparse; case "${enableval}" in
+    yes) hypre_using_onemklsparse=yes ;;
+    no)  hypre_using_onemklsparse=no ;;
+    *)   hypre_using_onemklsparse=yes ;;
+ esac
+else
+  hypre_using_onemklsparse=yes
+
+fi
+
+
+# Check whether --enable-onemklblas was given.
+if test "${enable_onemklblas+set}" = set; then :
+  enableval=$enable_onemklblas; case "${enableval}" in
+    yes) hypre_using_onemklblas=yes ;;
+    no)  hypre_using_onemklblas=no ;;
+    *)   hypre_using_onemklblas=yes ;;
+ esac
+else
+  hypre_using_onemklblas=yes
+
+fi
+
+
+# Check whether --enable-onemklrand was given.
+if test "${enable_onemklrand+set}" = set; then :
+  enableval=$enable_onemklrand; case "${enableval}" in
+    yes) hypre_using_onemklrand=yes ;;
+    no)  hypre_using_onemklrand=no ;;
+    *)   hypre_using_onemklrand=yes ;;
+ esac
+else
+  hypre_using_onemklrand=yes
 
 fi
 
@@ -9129,51 +9175,64 @@ fi
 
 fi
 
-if test x"$hypre_using_sycl" == x"yes"; then :
+if test x"$hypre_using_sycl" == x"yes";
+then :
+     $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+     $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
+     LINK_CC=${CUCC}
+     LINK_CXX=${CUCC}
 
-$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+     SYCLFLAGS="-Wunknown-pragmas -Wunused-local-typedef -Wunused-lambda-capture -D_GLIBCXX_USE_TBB_PAR_BACKEND=0 -std=c++17 -sycl-std=2020 -fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel -I/home/abagusetty/build/oneDPL/build_sycl/include"
+     if test "$hypre_using_debug" = "yes"
+     then
+         SYCLFLAGS="-O0 -Wall -g -fno-sycl-early-optimizations ${SYCLFLAGS}"
+     else
+         SYCLFLAGS="-g -O2 ${SYCLFLAGS}"
+     fi
 
+     if test "$hypre_user_chose_cuflags" = "no"
+     then
+         CUFLAGS="${SYCLFLAGS}"
+     fi
 
-$as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
+     if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes";
+     then :
+          for ac_header in "${MKLROOT}/include/mkl.h"
+          do :
+             as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+             ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+             if eval test \"x\$"$as_ac_Header"\" = x"yes";
+             then :
+                  cat >>confdefs.h <<_ACEOF
+                  #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+                  _ACEOF
+                  hypre_found_mkl=yes
+             else
+                 as_fn_error $? "unable to find oneMKL ... Ensure that MKLROOT is set" "$LINENO" 5
+             fi
 
+          done
 
-        LINK_CC=${CUCC}
-        LINK_CXX=${CUCC}
+          HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+          HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include"
 
-        SYCLFLAGS="-Wunknown-pragmas -Wunused-local-typedef -Wunused-lambda-capture -D_GLIBCXX_USE_TBB_PAR_BACKEND=0 -std=c++17 -sycl-std=2020 -fsycl -fsycl-unnamed-lambda -I/home/abagusetty/build/oneDPL/build_sycl/include"
-	if test "$hypre_using_debug" = "yes"
-	then
-	   SYCLFLAGS="-O0 -Wall -g -fno-sycl-early-optimizations ${SYCLFLAGS}"
-	else
-	   SYCLFLAGS="-g -O2 ${SYCLFLAGS}"
-	fi
-	CXXFLAGS="$SYCLFLAGS $CXXFLAGS"
-        CUFLAGS="$SYCLFLAGS"
+     fi
 
-        if test x"$hypre_using_onemklsparse" == x"yes"; then :
+     if test x"$hypre_using_onemklsparse" == x"yes";
+     then :
+          $as_echo "#define HYPRE_USING_ONEMKLSPARSE 1" >>confdefs.h
+     fi
 
-$as_echo "#define HYPRE_USING_ONEMKLSPARSE 1" >>confdefs.h
+     if test x"$hypre_using_onemklblas" == x"yes";
+     then :
+          $as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
+     fi
 
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/mkl/spblas.hpp"
-
-fi
-
-        if test x"$hypre_using_onemklblas" == x"yes"; then :
-
-$as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
-
-	            HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
-
-fi
-
-        if test x"$hypre_using_onemklrng" == x"yes"; then :
-
-$as_echo "#define HYPRE_USING_ONEMKLRNG 1" >>confdefs.h
-fi
-
+     if test x"$hypre_using_onemklrand" == x"yes";
+     then :
+          $as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
+     fi
 
 fi
 
