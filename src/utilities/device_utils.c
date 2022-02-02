@@ -1272,7 +1272,7 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
    return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
 }
 
-#if defined(HYPRE_USING_ONEMKLRNG)
+#if defined(HYPRE_USING_ONEMKLRAND)
 /* T = float or hypre_double */
 template <typename T>
 HYPRE_Int
@@ -1297,7 +1297,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 
    return hypre_error_flag;
 }
-#endif /* #if defined(HYPRE_USING_ONEMKLRNG) */
+#endif /* #if defined(HYPRE_USING_ONEMKLRAND) */
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
@@ -1410,7 +1410,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 }
 #endif /* #if defined(HYPRE_USING_ROCRAND) */
 
-#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRNG)
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND)
 
 HYPRE_Int
 hypre_CurandUniform( HYPRE_Int          n,
@@ -1434,7 +1434,7 @@ hypre_CurandUniformSingle( HYPRE_Int          n,
    return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
 }
 
-#endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRNG)*/
+#endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND)*/
 
 #if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t

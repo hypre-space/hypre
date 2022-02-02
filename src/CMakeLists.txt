@@ -108,7 +108,7 @@ option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memo
 # CUDA options
 option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKLSPARSE" OFF)
 option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKLBLAS" OFF)
-option(HYPRE_ENABLE_ONEMKLRNG        "Use oneMKLRNG" ON)
+option(HYPRE_ENABLE_ONEMKLRAND        "Use oneMKLRNG" ON)
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)

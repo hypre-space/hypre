@@ -221,7 +221,7 @@
 #undef HYPRE_USING_ONEMKLBLAS
 
 /* onemkl::rng::device being used */
-#undef HYPRE_USING_ONEMKLRNG
+#undef HYPRE_USING_ONEMKLRAND
 
 /* onemkl::SPARSE being used */
 #undef HYPRE_USING_ONEMKLSPARSE

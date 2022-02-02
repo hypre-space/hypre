@@ -29,11 +29,11 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    HYPRE_Int        *d_jb = hypre_CSRMatrixJ(B);
    HYPRE_Int         n    = hypre_CSRMatrixNumCols(B);
    HYPRE_Int         nnzb = hypre_CSRMatrixNumNonzeros(B);
-   HYPRE_Complex    *d_c;
-   HYPRE_Int        *d_ic;
-   HYPRE_Int        *d_jc;
+   HYPRE_Complex    *d_c  = NULL;
+   HYPRE_Int        *d_ic = NULL;
+   HYPRE_Int        *d_jc = NULL;
    HYPRE_Int         nnzC;
-   hypre_CSRMatrix  *C;
+   hypre_CSRMatrix  *C    = NULL;
 #ifdef HYPRE_SPGEMM_TIMING
    HYPRE_Real        t1, t2;
    HYPRE_Real        ta, tb;
