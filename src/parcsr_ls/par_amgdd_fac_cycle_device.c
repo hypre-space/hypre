@@ -39,7 +39,7 @@ hypre_BoomerAMGDD_FAC_JacobiDevice( void     *amgdd_vdata,
 
       for (i = 0; i < hypre_AMGDDCompGridNumOwnedNodes(compGrid); i++)
       {
-         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
             // hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
@@ -52,12 +52,13 @@ hypre_BoomerAMGDD_FAC_JacobiDevice( void     *amgdd_vdata,
       diag = hypre_AMGDDCompGridMatrixNonOwnedDiag(A);
       for (i = 0; i < hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid); i++)
       {
-         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
             // hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
             {
-               hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] = hypre_CSRMatrixData(diag)[j];
+               hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(
+                                                       compGrid)] = hypre_CSRMatrixData(diag)[j];
             }
          }
       }
@@ -98,8 +99,10 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    hypre_ParAMGDDData    *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid   *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_Real             relax_weight    = hypre_ParAMGDDDataFACRelaxWeight(amgdd_data);
-   hypre_Vector          *owned_u         = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(compGrid));
-   hypre_Vector          *nonowned_u      = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(compGrid));
+   hypre_Vector          *owned_u         = hypre_AMGDDCompGridVectorOwned(hypre_AMGDDCompGridU(
+                                                                              compGrid));
+   hypre_Vector          *nonowned_u      = hypre_AMGDDCompGridVectorNonOwned(hypre_AMGDDCompGridU(
+                                                                                 compGrid));
    HYPRE_Int              num_owned       = hypre_AMGDDCompGridNumOwnedNodes(compGrid);
    HYPRE_Int              num_nonowned    = hypre_AMGDDCompGridNumNonOwnedNodes(compGrid);
    HYPRE_Int              num_nonowned_r  = hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid);

@@ -55,8 +55,8 @@ typedef struct hypre_StructGrid_struct *HYPRE_StructGrid;
  * Create an <em>ndim</em>-dimensional grid object.
  **/
 HYPRE_Int HYPRE_StructGridCreate(MPI_Comm          comm,
-                           HYPRE_Int         ndim,
-                           HYPRE_StructGrid *grid);
+                                 HYPRE_Int         ndim,
+                                 HYPRE_StructGrid *grid);
 
 /**
  * Destroy a grid object.  An object should be explicitly destroyed using this
@@ -346,7 +346,7 @@ HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
                                                 HYPRE_Int         *entries );
 
 /**
- * Set the ghost layer in the matrix 
+ * Set the ghost layer in the matrix
  **/
 HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
                                         HYPRE_Int          *num_ghost);

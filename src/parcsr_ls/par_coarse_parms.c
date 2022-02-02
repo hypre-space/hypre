@@ -59,7 +59,7 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm          comm,
                                hypre_IntArray   *dof_func,
                                hypre_IntArray   *CF_marker,
                                hypre_IntArray  **coarse_dof_func_ptr,
-                               HYPRE_BigInt    **coarse_pnts_global_ptr) 
+                               HYPRE_BigInt    **coarse_pnts_global_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_COARSE_PARAMS] -= hypre_MPI_Wtime();
@@ -75,7 +75,7 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm          comm,
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    for (i = 0; i < local_num_variables; i++)
    {
@@ -133,7 +133,7 @@ hypre_BoomerAMGCoarseParms(MPI_Comm          comm,
                            hypre_IntArray   *dof_func,
                            hypre_IntArray   *CF_marker,
                            hypre_IntArray  **coarse_dof_func_ptr,
-                           HYPRE_BigInt    **coarse_pnts_global_ptr) 
+                           HYPRE_BigInt    **coarse_pnts_global_ptr)
 {
    HYPRE_Int ierr = 0;
 
@@ -141,18 +141,19 @@ hypre_BoomerAMGCoarseParms(MPI_Comm          comm,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(CF_marker));
    if (num_functions > 1)
    {
-      exec = hypre_GetExecPolicy2(hypre_IntArrayMemoryLocation(CF_marker), hypre_IntArrayMemoryLocation(dof_func));
+      exec = hypre_GetExecPolicy2(hypre_IntArrayMemoryLocation(CF_marker),
+                                  hypre_IntArrayMemoryLocation(dof_func));
    }
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGCoarseParmsDevice(comm, local_num_variables, num_functions, dof_func, 
+      ierr = hypre_BoomerAMGCoarseParmsDevice(comm, local_num_variables, num_functions, dof_func,
                                               CF_marker, coarse_dof_func_ptr, coarse_pnts_global_ptr);
    }
    else
 #endif
    {
-      ierr = hypre_BoomerAMGCoarseParmsHost(comm, local_num_variables, num_functions, dof_func, 
+      ierr = hypre_BoomerAMGCoarseParmsHost(comm, local_num_variables, num_functions, dof_func,
                                             CF_marker, coarse_dof_func_ptr, coarse_pnts_global_ptr);
    }
 
