@@ -800,6 +800,7 @@ with_LD
 with_LDFLAGS
 with_extra_CFLAGS
 with_extra_CXXFLAGS
+with_extra_CUFLAGS
 with_extra_BUILDFLAGS
 with_extra_incpath
 with_extra_ldpath
@@ -1541,6 +1542,10 @@ Optional Packages:
                           directories.
   --with-extra-CXXFLAGS=ARG
                           Define extra C++ compile flag, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          directories.
+  --with-extra-CUFLAGS=ARG
+                          Define extra CUDA compile flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
   --with-extra-BUILDFLAGS=ARG
@@ -3417,6 +3422,14 @@ fi
 # Check whether --with-extra-CXXFLAGS was given.
 if test "${with_extra_CXXFLAGS+set}" = set; then :
   withval=$with_extra_CXXFLAGS; EXTRA_CXXFLAGS=$withval
+
+fi
+
+
+
+# Check whether --with-extra-CUFLAGS was given.
+if test "${with_extra_CUFLAGS+set}" = set; then :
+  withval=$with_extra_CUFLAGS; EXTRA_CUFLAGS=$withval
 
 fi
 
@@ -9495,6 +9508,8 @@ then
 $as_echo "#define HYPRE_WITH_GPU_AWARE_MPI 1" >>confdefs.h
 
 fi
+
+CUFLAGS="${CUFLAGS} ${EXTRA_CUFLAGS}"
 
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"

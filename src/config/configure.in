@@ -701,6 +701,13 @@ AS_HELP_STRING([--with-extra-CXXFLAGS=ARG],
 [EXTRA_CXXFLAGS=$withval]
 )
 
+AC_ARG_WITH(extra-CUFLAGS,
+AS_HELP_STRING([--with-extra-CUFLAGS=ARG],
+               [Define extra CUDA compile flag, where ARG is a space-separated
+                list (enclosed in quotes) of directories.]),
+[EXTRA_CUFLAGS=$withval]
+)
+
 AC_ARG_WITH(extra-BUILDFLAGS,
 AS_HELP_STRING([--with-extra-BUILDFLAGS=ARG],
                [Define extra library build flag, where ARG is a space-separated
@@ -2529,6 +2536,8 @@ if test "$hypre_gpu_mpi" = "yes"
 then
    AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[Define to 1 if using GPU aware MPI])
 fi
+
+CUFLAGS="${CUFLAGS} ${EXTRA_CUFLAGS}"
 
 dnl *********************************************************************
 dnl * Set installation directories
