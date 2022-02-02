@@ -115,7 +115,7 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ############################
 # CUDA 11 build (only) tests
 ############################
-co="--with-cuda --enable-unified-memory --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 module load cuda/11
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda11
