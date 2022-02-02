@@ -499,7 +499,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 #ifdef HYPRE_DEBUG
    hypre_MemoryLocation tmp;
    hypre_GetPointerLocation(ptr, &tmp);
