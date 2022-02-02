@@ -258,6 +258,10 @@ hypre_GetDeviceLastError()
 HYPRE_Int
 HYPRE_Init()
 {
+#if defined(HYPRE_USING_UNIFIED_MEMORY) && defined(HYPRE_USING_DEVICE_OPENMP)
+#pragma omp requires unified_shared_memory
+#endif
+
 #ifdef HYPRE_USING_MEMORY_TRACKER
    if (!_hypre_memory_tracker)
    {
