@@ -9429,17 +9429,6 @@ fi
 if test "$hypre_using_device_openmp" = "yes"
 then
 
-$as_echo "#define HYPRE_USING_CUSPARSE 1" >>confdefs.h
-
-
-   if test "$hypre_using_gpu_profiling" = "yes"
-   then
-
-$as_echo "#define HYPRE_USING_NVTX 1" >>confdefs.h
-
-   fi
-
-
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
 
