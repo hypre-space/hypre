@@ -135,8 +135,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    }
 
    /* count the row nnz of S */
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(num_variables, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_variables, "warp", bDim);
 
    if (abs_soc)
    {

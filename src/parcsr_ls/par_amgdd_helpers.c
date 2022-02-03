@@ -2305,8 +2305,8 @@ hypre_BoomerAMGDD_PackSendBuffer( hypre_ParAMGDDData *amgdd_data,
 
                if (nonowned_coarse_index >= 0)
                {
-                  send_buffer[cnt++] = hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid[level +
-                                                                                         1])[ nonowned_coarse_index ];
+                  send_buffer[cnt++] = hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid[level
+                                                                                         + 1])[ nonowned_coarse_index ];
                }
                else if (nonowned_coarse_index == -1)
                {
@@ -2618,12 +2618,14 @@ hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo( hypre_ParAMGDDData* amgdd_data
          for (proc = 0; proc < num_recv_procs; proc++)
          {
             hypre_MPI_Irecv(&(recv_sizes[2 * proc]), 2, HYPRE_MPI_INT, recv_procs[proc], 1,
-                            hypre_MPI_COMM_WORLD, &(size_requests[request_cnt++]));
+                            hypre_MPI_COMM_WORLD,
+                            &(size_requests[request_cnt++]));
          }
          for (proc = 0; proc < num_send_procs; proc++)
          {
             hypre_MPI_Isend(&(send_sizes[2 * proc]), 2, HYPRE_MPI_INT, send_procs[proc], 1,
-                            hypre_MPI_COMM_WORLD, &(size_requests[request_cnt++]));
+                            hypre_MPI_COMM_WORLD,
+                            &(size_requests[request_cnt++]));
          }
 
          ////////////////////////////////////

@@ -30,6 +30,7 @@ HEADERS =\
  mpistubs.h\
  threading.h\
  timing.h\
+ _hypre_onedpl.hpp\
  _hypre_utilities.h\
  _hypre_utilities.hpp
 
@@ -61,12 +62,12 @@ FILES =\
  timing.c
 
 CUFILES=\
- cuda_utils.c\
+ device_utils.c\
  general.c\
  handle.c\
  int_array.c\
  memory.c\
- omp_device.c \
+ omp_device.c\
  nvtx.c
 
 COBJS = ${FILES:.c=.o}
@@ -81,6 +82,7 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include

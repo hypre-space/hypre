@@ -1281,7 +1281,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
    if (debug_flag == 4) { wall_time = time_getWallclockSeconds(); }
 
-   if (num_cols_A_offd) { CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_HOST); }
+   if (num_cols_A_offd) { CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST); }
 
    if (!comm_pkg)
    {
@@ -1298,12 +1298,12 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
    {
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
-      {
-         int_buf_data[index++] = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
-      }
+         int_buf_data[index++]
+            = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
    }
 
-   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, CF_marker_offd);
+   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
+                                               CF_marker_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    if (debug_flag == 4)
@@ -1405,8 +1405,8 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
    }
 
    /*-----------------------------------------------------------------------
-   *  Allocate  arrays.
-   *-----------------------------------------------------------------------*/
+    *  Allocate  arrays.
+    *-----------------------------------------------------------------------*/
    for (i = 0; i < num_threads - 1; i++)
    {
       coarse_counter[i + 1] += coarse_counter[i];
@@ -1493,7 +1493,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
       comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data,
                                        fine_to_coarse_offd);
 
-      hypre_ParCSRCommHandleDestroy(comm_handle);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
    */
    if (debug_flag == 4)
    {
@@ -1745,7 +1745,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
-   //hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
+   // hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
@@ -1810,6 +1810,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int        n_fine  = hypre_CSRMatrixNumRows(A_diag);
 
+<<<<<<< HEAD
    HYPRE_Int       *fine_to_coarse;
    //HYPRE_BigInt             *fine_to_coarse_offd;
    HYPRE_Int       *coarse_counter;
@@ -4804,6 +4805,7 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
    {
       diaginv = hypre_CTAlloc(HYPRE_Real,  inv_size, HYPRE_MEMORY_HOST);
    }
+<<<<<<< HEAD
 
    /*-----------------------------------------------------------------
    * Get all the diagonal sub-blocks
@@ -4882,6 +4884,86 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
             diaginv[i] = 1.0 / diaginv[i];
          }
       }
+=======
+
+   /*-----------------------------------------------------------------
+   * Get all the diagonal sub-blocks
+   *-----------------------------------------------------------------*/
+   for (i = 0; i < n_block; i++)
+   {
+      bidxm1 = i * blk_size;
+      bidxp1 = (i + 1) * blk_size;
+      //printf("bidxm1 = %d,bidxp1 = %d\n",bidxm1,bidxp1);
+
+      for (k = 0; k < blk_size; k++)
+      {
+         for (j = 0; j < blk_size; j++)
+         {
+            bidx = i * nb2 + k * blk_size + j;
+            diaginv[bidx] = 0.0;
+         }
+
+         for (ii = A_diag_i[bidxm1 + k]; ii < A_diag_i[bidxm1 + k + 1]; ii++)
+         {
+            jj = A_diag_j[ii];
+            if (jj >= bidxm1 && jj < bidxp1 && fabs(A_diag_data[ii]) > SMALLREAL)
+            {
+               bidx = i * nb2 + k * blk_size + jj - bidxm1;
+               //printf("jj = %d,val = %e, bidx = %d\n",jj,A_diag_data[ii],bidx);
+               diaginv[bidx] = A_diag_data[ii];
+            }
+         }
+      }
+   }
+
+   for (i = 0; i < left_size; i++)
+   {
+      bidxm1 = n_block * nb2 + i * blk_size;
+      bidxp1 = n_block * nb2 + (i + 1) * blk_size;
+      for (j = 0; j < left_size; j++)
+      {
+         bidx = n_block * nb2 + i * blk_size + j;
+         diaginv[bidx] = 0.0;
+      }
+
+      for (ii = A_diag_i[n_block * blk_size + i]; ii < A_diag_i[n_block * blk_size + i + 1]; ii++)
+      {
+         jj = A_diag_j[ii];
+         if (jj > n_block * blk_size)
+         {
+            bidx = n_block * nb2 + i * blk_size + jj - n_block * blk_size;
+            diaginv[bidx] = A_diag_data[ii];
+         }
+      }
+   }
+
+
+   /*-----------------------------------------------------------------
+   * compute the inverses of all the diagonal sub-blocks
+   *-----------------------------------------------------------------*/
+   if (blk_size > 1)
+   {
+      for (i = 0; i < n_block; i++)
+      {
+         hypre_blas_mat_inv(diaginv + i * nb2, blk_size);
+      }
+      hypre_blas_mat_inv(diaginv + (HYPRE_Int)(blk_size * nb2), left_size);
+   }
+   else
+   {
+      for (i = 0; i < n; i++)
+      {
+         // FIX-ME: zero-diagonal should be tested previously
+         if (fabs(diaginv[i]) < SMALLREAL)
+         {
+            diaginv[i] = 0.0;
+         }
+         else
+         {
+            diaginv[i] = 1.0 / diaginv[i];
+         }
+      }
+>>>>>>> master
    }
 
    *diaginvptr = diaginv;

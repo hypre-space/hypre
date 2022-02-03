@@ -633,6 +633,8 @@ SUPERLU_LIBS
 SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
+HYPRE_SYCL_LIBS
+HYPRE_SYCL_INCL
 HYPRE_HIP_LIBS
 HYPRE_HIP_INCL
 HYPRE_CUDA_LIBS
@@ -790,10 +792,14 @@ enable_rocblas
 enable_rocrand
 enable_gpu_profiling
 enable_gpu_aware_mpi
+enable_onemklsparse
+enable_onemklblas
+enable_onemklrand
 with_LD
 with_LDFLAGS
 with_extra_CFLAGS
 with_extra_CXXFLAGS
+with_extra_CUFLAGS
 with_extra_BUILDFLAGS
 with_extra_incpath
 with_extra_ldpath
@@ -830,6 +836,7 @@ with_mli
 with_MPI
 with_cuda
 with_hip
+with_sycl
 with_cuda_home
 with_gpu_arch
 with_raja
@@ -1517,6 +1524,9 @@ Optional Features:
   --enable-rocrand        Use rocRAND (default is YES).
   --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
+  --enable-onemklsparse   Use oneMKL sparse (default is YES).
+  --enable-onemklblas     Use oneMKL blas (default is YES).
+  --enable-onemklrand     Use oneMKL rand (default is YES).
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1530,6 +1540,10 @@ Optional Packages:
                           directories.
   --with-extra-CXXFLAGS=ARG
                           Define extra C++ compile flag, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          directories.
+  --with-extra-CUFLAGS=ARG
+                          Define extra CUDA compile flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
   --with-extra-BUILDFLAGS=ARG
@@ -1635,6 +1649,7 @@ Optional Packages:
   --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
   --with-hip              Use HIP for AMD GPUs. (default is NO).
+  --with-sycl             Use SYCL for Intel GPUs. (default is NO).
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
   --with-gpu-arch=ARG     User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
@@ -2810,6 +2825,12 @@ hypre_using_rocrand=no
 hypre_found_hip=no
 
 
+hypre_using_sycl=no
+hypre_using_onemklsparse=no
+hypre_using_onemklblas=no
+hypre_using_onemklrand=no
+
+hypre_found_mkl=no
 
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
@@ -3238,6 +3259,45 @@ else
 fi
 
 
+# Check whether --enable-onemklsparse was given.
+if test "${enable_onemklsparse+set}" = set; then :
+  enableval=$enable_onemklsparse; case "${enableval}" in
+    yes) hypre_using_onemklsparse=yes ;;
+    no)  hypre_using_onemklsparse=no ;;
+    *)   hypre_using_onemklsparse=yes ;;
+ esac
+else
+  hypre_using_onemklsparse=yes
+
+fi
+
+
+# Check whether --enable-onemklblas was given.
+if test "${enable_onemklblas+set}" = set; then :
+  enableval=$enable_onemklblas; case "${enableval}" in
+    yes) hypre_using_onemklblas=yes ;;
+    no)  hypre_using_onemklblas=no ;;
+    *)   hypre_using_onemklblas=yes ;;
+ esac
+else
+  hypre_using_onemklblas=yes
+
+fi
+
+
+# Check whether --enable-onemklrand was given.
+if test "${enable_onemklrand+set}" = set; then :
+  enableval=$enable_onemklrand; case "${enableval}" in
+    yes) hypre_using_onemklrand=yes ;;
+    no)  hypre_using_onemklrand=no ;;
+    *)   hypre_using_onemklrand=yes ;;
+ esac
+else
+  hypre_using_onemklrand=yes
+
+fi
+
+
 
 if test "x$CC" = "x"
 then
@@ -3344,6 +3404,14 @@ fi
 # Check whether --with-extra-CXXFLAGS was given.
 if test "${with_extra_CXXFLAGS+set}" = set; then :
   withval=$with_extra_CXXFLAGS; EXTRA_CXXFLAGS=$withval
+
+fi
+
+
+
+# Check whether --with-extra-CUFLAGS was given.
+if test "${with_extra_CUFLAGS+set}" = set; then :
+  withval=$with_extra_CUFLAGS; EXTRA_CUFLAGS=$withval
 
 fi
 
@@ -4010,6 +4078,21 @@ else
   hypre_using_hip=no
 
 fi
+
+
+
+# Check whether --with-sycl was given.
+if test "${with_sycl+set}" = set; then :
+  withval=$with_sycl; case "$withval" in
+    yes) hypre_using_sycl=yes ;;
+    no)  hypre_using_sycl=no ;;
+    *)   hypre_using_sycl=no ;;
+esac
+else
+  hypre_using_sycl=no
+
+fi
+
 
 
 
@@ -5039,6 +5122,52 @@ test -n "$CUCC" || CUCC=""""
    if test "$hypre_using_hip" = "yes"
    then
       for ac_prog in hipcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUCC" && break
+done
+
+   fi
+
+   if test "$hypre_using_sycl" = "yes"
+   then
+      for ac_prog in dpcpp
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8592,9 +8721,9 @@ fi
 
 if test "x$hypre_using_um" = "xyes"
 then
-   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes"
+   if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes" && test "x$hypre_using_sycl" != "xyes"
    then
-      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, or device OpenMP!" "$LINENO" 5
+      as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!" "$LINENO" 5
    fi
 fi
 if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes"
@@ -8798,8 +8927,6 @@ fi
 done
 
 fi
-
-
 
 if test "x$hypre_using_raja" = "xyes"
 then
@@ -9061,7 +9188,72 @@ fi
 
 fi
 
+if test x"$hypre_using_sycl" == x"yes"; then :
 
+
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
+
+
+$as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
+
+
+                LINK_CC=${CUCC}
+        LINK_CXX=${CUCC}
+
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        if test "$hypre_using_debug" = "yes"
+        then
+           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+        else
+           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
+        fi
+
+                if test "$hypre_user_chose_cuflags" = "no"
+        then
+           CUFLAGS="${SYCLFLAGS}"
+        fi
+
+        if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"; then :
+  for ac_header in "${MKLROOT}/include/mkl.h"
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ hypre_found_mkl=yes
+else
+  as_fn_error $? "unable to find oneMKL ... Ensure that MKLROOT is set" "$LINENO" 5
+fi
+
+done
+
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include"
+
+fi
+
+        if test x"$hypre_using_onemklsparse" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ONEMKLSPARSE 1" >>confdefs.h
+
+fi
+
+        if test x"$hypre_using_onemklblas" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
+
+fi
+
+        if test x"$hypre_using_onemklrand" == x"yes"; then :
+
+$as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
+
+fi
+
+
+fi
 
 if test "$hypre_using_um" != "yes"
 then
@@ -9090,6 +9282,19 @@ $as_echo "$as_me: It only works for structured solvers and selected unstructured
 $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************************" >&5
 $as_echo "$as_me: ***********************************************************************" >&6;}
+   fi
+   if test "$hypre_using_sycl" = "yes"
+   then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-sycl=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-sycl=yes without unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
    fi
    if test "$hypre_using_device_openmp" = "yes"
    then
@@ -9187,7 +9392,7 @@ then
 $as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
 
 else
-   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes"
+   if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes" || test "x$hypre_using_hip" = "xyes" || test "x$hypre_using_sycl" = "xyes"
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h
@@ -9205,6 +9410,8 @@ then
 $as_echo "#define HYPRE_WITH_GPU_AWARE_MPI 1" >>confdefs.h
 
 fi
+
+CUFLAGS="${CUFLAGS} ${EXTRA_CUFLAGS}"
 
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"
@@ -9322,6 +9529,9 @@ $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
+
+
 
 
 

@@ -141,6 +141,9 @@ HYPRE_Int hypre_CSRMatrixMatvecOMPOffload (HYPRE_Int trans, HYPRE_Complex alpha,
                                            hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 HYPRE_Int hypre_CSRMatrixMatvecRocsparse (HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A,
                                           hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecOnemklsparse (HYPRE_Int trans, HYPRE_Complex alpha,
+                                             hypre_CSRMatrix *A,
+                                             hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int offset );
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_BigInt length, HYPRE_Int num_procs,
@@ -276,6 +279,10 @@ HYPRE_Int hypreDevice_CSRSpTransRocsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nn
                                           HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
                                           HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
 
+HYPRE_Int hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA,
+                                             HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,
+                                             HYPRE_Complex **d_ac_out, HYPRE_Int want_data);
+
 HYPRE_Int hypreDevice_CSRSpGemm(hypre_CSRMatrix *A, hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
 
 HYPRE_Int hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
@@ -310,14 +317,16 @@ HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 hypre_GpuMatData* hypre_GpuMatDataCreate();
+void hypre_GPUMatDataSetCSRData(hypre_GpuMatData *data, hypre_CSRMatrix *matrix);
 void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatInfo(matrix)        ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
+#define hypre_CSRMatrixGPUMatHandle(matrix)      ( hypre_GpuMatDataMatHandle (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);

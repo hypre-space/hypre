@@ -276,11 +276,13 @@ int main (int argc, char *argv[])
          element's center.  See the Reference Manual for more details. */
       {
          int part = myid;
-         int ordering[12] = { 0, -1, -1,    /*    [3]------[2] */
-                              0, +1, -1,    /*    /        /   */
-                              0, +1, +1,    /*   /        /    */
-                              0, -1, +1
-                            };  /* [0]------[1]    */
+         int ordering[12] =
+         {
+            0, -1, -1,    /*    [3]------[2] */
+            0, +1, -1,    /*    /        /   */
+            0, +1, +1,    /*   /        /    */
+            0, -1, +1     /* [0]------[1]    */
+         };
 
          HYPRE_SStructGridSetFEMOrdering(grid, part, ordering);
       }

@@ -978,7 +978,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S, HYPRE_Int *vertexran
          hypre_MPI_Irecv (pointrange_nonlocal + 2 * i, 2, HYPRE_MPI_INT, recv_procs[i], tag_pointrange, comm,
                           &recvrequest[2 * i]);
          hypre_MPI_Irecv (vertexrange_nonlocal + 2 * i, 2, HYPRE_MPI_INT, recv_procs[i], tag_vertexrange,
-                          comm, &recvrequest[2 * i + 1]);
+                          comm,
+                          &recvrequest[2 * i + 1]);
       }
       for (i = 0; i < num_sends; i++)
       {
@@ -1299,8 +1300,8 @@ HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G, HYPRE_Int *vertexrange, HYPRE_
       fflush(stdout);
 #endif
 
-      (*coarse)[processor[choice]] = choice +
-                                     1; /* add one because coarsegrid indexing starts with 1, not 0 */
+      (*coarse)[processor[choice]] = choice
+                                     + 1; /* add one because coarsegrid indexing starts with 1, not 0 */
       /* new maximal weight */
       new_measure = measure + 1;
       for (i = vertexrange[processor[choice]]; i < vertexrange[processor[choice] + 1]; i++)

@@ -51,6 +51,8 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ROCSPARSE)
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -113,7 +115,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
    }
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -170,7 +172,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                                    &beta,
                                                    vecY,
                                                    data_type,
-#if CUSPARSE_SPMV_CSR_ALG2 >= 11200
+#if CUSPARSE_VERSION >= 11400
                                                    CUSPARSE_SPMV_CSR_ALG2,
 #else
                                                    CUSPARSE_CSRMV_ALG2,
@@ -190,14 +192,14 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      &beta,
                                      vecY,
                                      data_type,
-#if CUSPARSE_SPMV_CSR_ALG2 >= 11200
+#if CUSPARSE_VERSION >= 11400
                                      CUSPARSE_SPMV_CSR_ALG2,
 #else
                                      CUSPARSE_CSRMV_ALG2,
 #endif
                                      dBuffer) );
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    if (trans)
    {
@@ -308,6 +310,43 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
    if (trans)
    {
       hypre_CSRMatrixDestroy(B);
+   }
+
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_ROCSPARSE)
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+HYPRE_Int
+hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
+                                   HYPRE_Complex    alpha,
+                                   hypre_CSRMatrix *A,
+                                   hypre_Vector    *x,
+                                   HYPRE_Complex    beta,
+                                   hypre_Vector    *y,
+                                   HYPRE_Int        offset )
+{
+   sycl::queue *compute_queue = hypre_HandleComputeStream(hypre_handle());
+   hypre_CSRMatrix *AT;
+   oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
+
+   if (trans)
+   {
+      hypre_CSRMatrixTransposeDevice(A, &AT, 1);
+      matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
+   }
+
+   HYPRE_SYCL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
+                                              oneapi::mkl::transpose::nontrans,
+                                              alpha,
+                                              matA_handle,
+                                              hypre_VectorData(x),
+                                              beta,
+                                              hypre_VectorData(y) + offset).wait() );
+
+   if (trans)
+   {
+      hypre_CSRMatrixDestroy(AT);
    }
 
    return hypre_error_flag;

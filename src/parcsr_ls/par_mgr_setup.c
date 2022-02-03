@@ -39,7 +39,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    hypre_IntArray      *dof_func_buff = NULL;
    HYPRE_Int           *dof_func_buff_data = NULL;
-   HYPRE_BigInt        *coarse_pnts_global = NULL;
+   HYPRE_BigInt         coarse_pnts_global[2];
    hypre_Vector       **l1_norms = NULL;
 
    hypre_ParVector     *Ztemp;
@@ -1312,8 +1312,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       /* check if last level */
-      wall_time_lev = time_getWallclockSeconds() - wall_time_lev;
-      if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Setup time: %f\n", lev, my_id, wall_time_lev); }
+//      wall_time_lev = time_getWallclockSeconds() - wall_time_lev;
+//      if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Setup time: %f\n", lev, my_id, wall_time_lev); }
 
       if (last_level) { break; }
    }
@@ -1358,11 +1358,11 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 
    /* setup coarse grid solver */
-   wall_time = time_getWallclockSeconds();
+/   wall_time = time_getWallclockSeconds();
    coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels],
                             U_array[num_c_levels]);
-   wall_time = time_getWallclockSeconds() - wall_time;
-   if (my_id == 0) { hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time); }
+//   wall_time = time_getWallclockSeconds() - wall_time;
+//   if (my_id == 0) { hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time); }
 
    /* Setup smoother for fine grid */
    if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
@@ -1475,7 +1475,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
       level_coarse_size = NULL;
    }
-   hypre_TFree(coarse_pnts_global, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1504,7 +1503,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
    HYPRE_Int local_size;
    HYPRE_BigInt coarse_size;
 
-   HYPRE_BigInt    *coarse_pnts_global_lvl = NULL;
+   HYPRE_BigInt     coarse_pnts_global_lvl[2];
    hypre_IntArray  *coarse_dof_func_lvl    = NULL;
    hypre_IntArray  *dof_func               = NULL;
    HYPRE_Int       *dof_func_data          = NULL;
@@ -1698,9 +1697,12 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
       hypre_BoomerAMGCoarseParms(comm, local_size,
                                  num_functions, dof_func_array[lev_local], CF_marker_array_local[lev_local],
-                                 &coarse_dof_func_lvl, &coarse_pnts_global_lvl);
+                                 &coarse_dof_func_lvl, coarse_pnts_global_lvl);
 
-      if (my_id == (num_procs - 1)) { coarse_size = coarse_pnts_global_lvl[1]; }
+      if (my_id == (num_procs - 1))
+      {
+         coarse_size = coarse_pnts_global_lvl[1];
+      }
       hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
       //hypre_printf("Coarse size = %d \n", coarse_size);
       if (coarse_size == 0) // stop coarsening
@@ -1736,7 +1738,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
             hypre_IntArrayDestroy(CF_marker_array_local[lev_local]);
             CF_marker_array_local[lev_local] = NULL;
          }
-         hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
          break;
       }
 
@@ -1794,7 +1795,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       S_local = NULL;
       if ( (lev_local == max_local_lvls - 1) || (coarse_size <= max_local_coarse_size) )
       {
-         hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
          not_finished = 0;
       }
 

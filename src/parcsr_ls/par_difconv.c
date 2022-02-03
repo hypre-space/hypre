@@ -37,7 +37,7 @@ GenerateDifConv( MPI_Comm comm,
    HYPRE_BigInt *big_offd_j = NULL;
    HYPRE_Real *offd_data = NULL;
 
-   HYPRE_BigInt *global_part;
+   HYPRE_BigInt global_part[2];
    HYPRE_BigInt ix, iy, iz;
    HYPRE_Int ip, iq, ir;
    HYPRE_Int cnt, o_cnt;
@@ -75,7 +75,6 @@ GenerateDifConv( MPI_Comm comm,
    iq = q;
    ir = r;
 
-   global_part = hypre_CTAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_HOST);
    global_part[0] = nz_part[ir] * nx * ny + (ny_part[iq] * nx + nx_part[ip] * ny_local) * nz_local;
    global_part[1] = global_part[0] + (HYPRE_BigInt)local_num_rows;
 
@@ -339,7 +338,6 @@ GenerateDifConv( MPI_Comm comm,
    hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
    hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
    hypre_TFree(big_offd_j, HYPRE_MEMORY_HOST);
-   hypre_TFree(global_part, HYPRE_MEMORY_HOST);
 
    return (HYPRE_ParCSRMatrix) A;
 }

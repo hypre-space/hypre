@@ -249,8 +249,8 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                            &new_sora, &new_data);
 
       /* set/add to local vector */
-      dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-      dim3 gDim = hypre_GetDefaultCUDAGridDimension(new_nnz, "thread", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
       HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
                          vec_start, new_sora,
                          hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );

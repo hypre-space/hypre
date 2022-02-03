@@ -1,3 +1,10 @@
+/******************************************************************************
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* Save a structured n x n mesh of square elements on the unit square into a
    GLVis mesh file with the given name. */
 #include <math.h>

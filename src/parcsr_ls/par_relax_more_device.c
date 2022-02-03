@@ -153,8 +153,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    dim3 bDim, gDim;
 
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(A_num_rows, "warp", bDim);
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
                      gDim,
                      bDim,
@@ -169,7 +169,7 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
                      rowsums_upper,
                      scale);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0,
                              thrust::minimum<HYPRE_Real>());
@@ -323,7 +323,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    /* set residual to random */
    hypre_CurandUniform(local_size, r_data, 0, 0, 0, 0);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    HYPRE_THRUST_CALL(transform,
                      r_data, r_data + local_size, r_data,
@@ -377,6 +377,11 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       /*gamma = <r,Cr> */
       gamma_old = gamma;
       gamma     = hypre_ParVectorInnerProd(r, s);
+
+      if (gamma < HYPRE_REAL_EPSILON)
+      {
+         break;
+      }
 
       if (i == 0)
       {

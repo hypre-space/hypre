@@ -34,10 +34,7 @@ HYPRE_FlexGMRESSetup( HYPRE_Solver solver,
                       HYPRE_Vector b,
                       HYPRE_Vector x      )
 {
-   return ( hypre_FlexGMRESSetup( solver,
-                                  A,
-                                  b,
-                                  x ) );
+   return ( hypre_FlexGMRESSetup( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -50,10 +47,7 @@ HYPRE_FlexGMRESSolve( HYPRE_Solver solver,
                       HYPRE_Vector b,
                       HYPRE_Vector x      )
 {
-   return ( hypre_FlexGMRESSolve( solver,
-                                  A,
-                                  b,
-                                  x ) );
+   return ( hypre_FlexGMRESSolve( solver, A, b, x ) );
 }
 
 /*--------------------------------------------------------------------------

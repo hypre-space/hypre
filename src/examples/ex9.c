@@ -195,9 +195,11 @@ int main (int argc, char *argv[])
       {
          int i;
          int nvars = 2;
-         HYPRE_SStructVariable vartypes[2] = {HYPRE_SSTRUCT_VARIABLE_CELL,
-                                              HYPRE_SSTRUCT_VARIABLE_CELL
-                                             };
+         HYPRE_SStructVariable vartypes[2] =
+         {
+            HYPRE_SSTRUCT_VARIABLE_CELL,
+            HYPRE_SSTRUCT_VARIABLE_CELL
+         };
 
          for (i = 0; i < nparts; i++)
          {

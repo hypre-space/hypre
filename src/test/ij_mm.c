@@ -225,13 +225,12 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_Real   strong_threshold = 0.25;
    HYPRE_Real   max_row_sum = 1.0;
    HYPRE_Real   fnorm, rfnorm, fnorm0;
-   HYPRE_Int    local_num_vars, *coarse_pnts_global;
+   HYPRE_Int    local_num_vars, coarse_pnts_global[2];
    HYPRE_Int    num_procs, myid;
    HYPRE_Int    time_index, i;
    char         fname[1024];
 
    hypre_IntArray    *CF_marker         = NULL;
-   hypre_IntArray    *coarse_dof_func   = NULL;
    HYPRE_ParCSRMatrix parcsr_S          = NULL;
    HYPRE_ParCSRMatrix parcsr_P          = NULL;
    HYPRE_ParCSRMatrix parcsr_Q          = NULL;
@@ -252,11 +251,9 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    hypre_BoomerAMGCoarsenPMIS(parcsr_S, parcsr_A, measure_type, debug_flag, &CF_marker);
 
    local_num_vars = hypre_ParCSRMatrixNumRows(parcsr_A);
-   coarse_dof_func = NULL;
-   coarse_pnts_global = NULL;
 
    hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_vars, num_functions, NULL,
-                              CF_marker, &coarse_dof_func, &coarse_pnts_global);
+                              CF_marker, NULL, coarse_pnts_global);
 
    /* generate P */
    hypre_BoomerAMGBuildExtPIInterp(parcsr_A, hypre_IntArrayData(CF_marker), parcsr_S,
@@ -391,8 +388,6 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    }
 
    hypre_IntArrayDestroy(CF_marker);
-   hypre_TFree(coarse_dof_func, HYPRE_MEMORY_HOST);
-
    hypre_ParCSRMatrixDestroy(parcsr_S);
    hypre_ParCSRMatrixDestroy(parcsr_P);
    hypre_ParCSRMatrixDestroy(parcsr_Q);
@@ -769,15 +764,13 @@ main( hypre_int argc,
 
 final:
 
+   hypre_TFree(gpu_ptr, HYPRE_MEMORY_DEVICE);
+
    /* Finalize Hypre */
    HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
-
-   hypre_printf("Done ...\n");
-
-   hypre_TFree(gpu_ptr, HYPRE_MEMORY_DEVICE);
 
    return (0);
 }
