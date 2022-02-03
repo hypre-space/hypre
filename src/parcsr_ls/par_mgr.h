@@ -171,7 +171,7 @@ typedef struct
 #define FPT(i, bsize) (((i) % (bsize)) == FMRK)
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
-#define SMALLREAL 1e-20
-#define DIVIDE_TOL 1e-32
+//#define SMALLREAL 1e-20
+//#define DIVIDE_TOL 1e-32
 
 #endif

@@ -889,7 +889,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Get global coarse sizes. Note that we assume num_functions = 1
        * so dof_func arrays are NULL */
       hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_array[lev], &dof_func_buff,
-                                 &coarse_pnts_global);
+                                 coarse_pnts_global);
       if (dof_func_buff)
       {
          dof_func_buff_data = hypre_IntArrayData(dof_func_buff);
@@ -1358,7 +1358,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 
    /* setup coarse grid solver */
-/   wall_time = time_getWallclockSeconds();
+//   wall_time = time_getWallclockSeconds();
    coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels],
                             U_array[num_c_levels]);
 //   wall_time = time_getWallclockSeconds() - wall_time;
