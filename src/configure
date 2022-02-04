@@ -9366,12 +9366,9 @@ $as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
 
 fi
 
-        if test x"$hypre_using_cuda_streams" == x"yes"; then :
 
 $as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
 
-
-fi
 
 
 fi

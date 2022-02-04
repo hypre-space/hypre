@@ -2182,7 +2182,7 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Set cuda options
+dnl * Set CUDA options
 dnl *********************************************************************
 if test "$hypre_using_cuda" = "yes"
 then
@@ -2414,9 +2414,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
 
         AS_IF([test x"$hypre_using_onemklrand" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLRAND, 1, [onemkl::rng being used])])
 
-        AS_IF([test x"$hypre_using_cuda_streams" == x"yes"],
-              [AC_DEFINE(HYPRE_USING_CUDA_STREAMS, 1, [Define to 1 if using streams])
-               ])
+        dnl SYCL should always use streams
+        AC_DEFINE(HYPRE_USING_CUDA_STREAMS, 1, [Define to 1 if using streams])
 
       ]) dnl AS_IF([test x"$hypre_using_sycl" == x"yes"]
 
