@@ -910,8 +910,6 @@ hypre_ExtendWtoPHost(HYPRE_Int      P_nr_of_rows,
 
    HYPRE_Int             *fine_to_coarse = NULL;
    HYPRE_Int              coarse_counter;
-   HYPRE_BigInt              total_global_cpts;
-   HYPRE_Int              num_cols_P_offd;
 
    HYPRE_Int              i, jj;
 
@@ -1009,7 +1007,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
 
    hypre_ParCSRMatrix *A_FF = NULL, *A_FC = NULL, *P = NULL;
    hypre_CSRMatrix    *W_diag = NULL, *W_offd = NULL;
-   HYPRE_Int           W_nr_of_rows, P_diag_nnz, nfpoints;
+   HYPRE_Int           P_diag_nnz, nfpoints;
    HYPRE_Int          *P_diag_i = NULL, *P_diag_j = NULL, *P_offd_i = NULL;
    HYPRE_Complex      *P_diag_data = NULL, *diag = NULL, *diag1 = NULL;
    HYPRE_BigInt        nC_global;
@@ -1088,8 +1086,6 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
       }
       hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
-
-   W_nr_of_rows = hypre_CSRMatrixNumRows(W_diag);
 
    /* Construct P from matrix product W_diag */
    P_diag_nnz  = hypre_CSRMatrixNumNonzeros(W_diag) + hypre_CSRMatrixNumCols(W_diag);
@@ -3065,18 +3061,13 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
    HYPRE_Int             *P_diag_i;
    HYPRE_Int             *P_diag_j;
    HYPRE_Int             *P_offd_i;
-   HYPRE_Int              P_diag_nnz, P_offd_size;
-   HYPRE_Int              jj_counter, jj_counter_offd;
-   HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
+   HYPRE_Int              P_diag_nnz;
    HYPRE_Int              n_fine = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int             *fine_to_coarse = NULL;
-   HYPRE_Int              coarse_counter;
    HYPRE_BigInt              total_global_cpts;
    HYPRE_Int              num_cols_P_offd;
 
    HYPRE_Int              i;
 
-   HYPRE_Real       one  = 1.0;
    HYPRE_Real      m_one = -1.0;
 
    HYPRE_Int              my_id;
@@ -3113,9 +3104,6 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
    HYPRE_Int       *W_diag_j = hypre_CSRMatrixJ(W_diag);
 
    hypre_CSRMatrix *W_offd         = hypre_ParCSRMatrixOffd(W);
-   HYPRE_Real      *W_offd_data    = hypre_CSRMatrixData(W_offd);
-   HYPRE_Int             *W_offd_i = hypre_CSRMatrixI(W_offd);
-   HYPRE_Int             *W_offd_j = hypre_CSRMatrixJ(W_offd);
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -3187,7 +3175,6 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
 
    *P_ptr = P;
 
-   //  hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(C_marker, HYPRE_MEMORY_HOST);
    hypre_TFree(F_marker, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixDestroy(A_ff);
