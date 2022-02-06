@@ -3099,9 +3099,6 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
    //  hypre_ParCSRMatrixPrintIJ(W, 1, 1, "Wp");
 
    hypre_CSRMatrix *W_diag = hypre_ParCSRMatrixDiag(W);
-   //  HYPRE_Real      *W_diag_data = hypre_CSRMatrixData(W_diag);
-   HYPRE_Int       *W_diag_i = hypre_CSRMatrixI(W_diag);
-   HYPRE_Int       *W_diag_j = hypre_CSRMatrixJ(W_diag);
 
    hypre_CSRMatrix *W_offd         = hypre_ParCSRMatrixOffd(W);
 
