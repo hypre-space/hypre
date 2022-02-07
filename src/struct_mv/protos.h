@@ -251,6 +251,8 @@ HYPRE_Int HYPRE_StructVectorGetBoxValues ( HYPRE_StructVector vector, HYPRE_Int 
 HYPRE_Int HYPRE_StructVectorAssemble ( HYPRE_StructVector vector );
 HYPRE_Int HYPRE_StructVectorPrint ( const char *filename, HYPRE_StructVector vector,
                                     HYPRE_Int all );
+HYPRE_Int HYPRE_StructVectorRead ( MPI_Comm comm, const char *filename,
+                                   HYPRE_Int *num_ghost, HYPRE_StructVector *vector );
 HYPRE_Int HYPRE_StructVectorSetNumGhost ( HYPRE_StructVector vector, HYPRE_Int *num_ghost );
 HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x, HYPRE_StructVector y );
 HYPRE_Int HYPRE_StructVectorSetConstantValues ( HYPRE_StructVector vector, HYPRE_Complex values );
@@ -366,6 +368,8 @@ HYPRE_Int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix, HYP
 HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename, hypre_StructMatrix *matrix,
                                     HYPRE_Int all );
+HYPRE_Int HYPRE_StructMatrixRead ( MPI_Comm comm, const char *filename,
+                                   HYPRE_Int *num_ghost, HYPRE_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix,
                                       hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead ( MPI_Comm comm, const char *filename,
