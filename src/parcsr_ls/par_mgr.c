@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_lapack.h"
 #include "par_amg.h"
 #include "par_mgr.h"
 
@@ -974,14 +975,13 @@ hypre_MGRBuildPFromWp( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int        my_id;
    HYPRE_Int        num_procs;
-   HYPRE_Int        num_threads;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
    //num_threads = hypre_NumThreads();
    // Temporary fix, disable threading
    // TODO: enable threading
-   num_threads = 1;
+   //HYPRE_Int      num_threads = 1;
    P_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    Wp_diag = hypre_ParCSRMatrixDiag(Wp);
@@ -2351,7 +2351,7 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix    *A,
                    hypre_ParCSRMatrix    **A_CF_ptr)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int i, j, jj, jj1, offset;
+   HYPRE_Int i, j, jj, jj1;
    HYPRE_Int jj_counter, cpts_cnt;
    hypre_ParCSRMatrix *A_CF = NULL;
    hypre_CSRMatrix *A_CF_diag = NULL;
@@ -2446,9 +2446,9 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix    *A,
    }
    nnz_diag_new = jj_counter;
 
-   HYPRE_Int *A_CF_diag_i = hypre_CTAlloc(HYPRE_Int, cpts_cnt + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int *A_CF_diag_j = hypre_CTAlloc(HYPRE_Int, nnz_diag_new, HYPRE_MEMORY_HOST);
-   HYPRE_Complex *A_CF_diag_data = hypre_CTAlloc(HYPRE_Complex, nnz_diag_new, HYPRE_MEMORY_HOST);
+   HYPRE_Int *A_CF_diag_i = hypre_CTAlloc(HYPRE_Int, cpts_cnt + 1, memory_location);
+   HYPRE_Int *A_CF_diag_j = hypre_CTAlloc(HYPRE_Int, nnz_diag_new, memory_location);
+   HYPRE_Complex *A_CF_diag_data = hypre_CTAlloc(HYPRE_Complex, nnz_diag_new, memory_location);
    A_CF_diag_i[cpts_cnt] = nnz_diag_new;
 
    jj_counter = 0;
@@ -2510,7 +2510,6 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix    *A_CF,
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A_CF);
    hypre_CSRMatrix *A_CF_diag = hypre_ParCSRMatrixDiag(A_CF);
-   hypre_CSRMatrix *A_CF_offd = hypre_ParCSRMatrixOffd(A_CF);
 
    HYPRE_Int *A_CF_diag_i = hypre_CSRMatrixI(A_CF_diag);
    HYPRE_Int *A_CF_diag_j = hypre_CSRMatrixJ(A_CF_diag);
@@ -2537,9 +2536,9 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix    *A_CF,
    }
    nnz_diag_new = jj_counter;
 
-   HYPRE_Int *A_CF_diag_i_new = hypre_CTAlloc(HYPRE_Int, num_rows + 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int *A_CF_diag_j_new = hypre_CTAlloc(HYPRE_Int, nnz_diag_new, HYPRE_MEMORY_HOST);
-   HYPRE_Complex *A_CF_diag_data_new = hypre_CTAlloc(HYPRE_Complex, nnz_diag_new, HYPRE_MEMORY_HOST);
+   HYPRE_Int *A_CF_diag_i_new = hypre_CTAlloc(HYPRE_Int, num_rows + 1, memory_location);
+   HYPRE_Int *A_CF_diag_j_new = hypre_CTAlloc(HYPRE_Int, nnz_diag_new, memory_location);
+   HYPRE_Complex *A_CF_diag_data_new = hypre_CTAlloc(HYPRE_Complex, nnz_diag_new, memory_location);
 
    jj_counter = 0;
    for (i = 0; i < num_rows; i++)
@@ -2607,8 +2606,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    hypre_ParCSRMatrix *A_h_correction = NULL;
    HYPRE_Int  max_elmts = Pmax;
    HYPRE_Real alpha = 1.0;
-   HYPRE_Real wall_time = 0.;
-   HYPRE_Real wall_time_1 = 0.;
+//   HYPRE_Real wall_time = 0.;
+//   HYPRE_Real wall_time_1 = 0.;
 
    HYPRE_Int my_id;
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
@@ -2660,14 +2659,14 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    else if (method == 2 || method == 3)
    {
       // extract the diagonal of A_cf
-      wall_time_1 = time_getWallclockSeconds();
+      // wall_time_1 = time_getWallclockSeconds();
       hypre_ParCSRMatrix *A_cf_truncated = NULL;
       /*
       hypre_MGRGetSubBlock(A, c_marker, f_marker, 0, &A_cf);
       hypre_MGRTruncateAcfCPR(A_cf, &A_cf_truncated);
       */
       hypre_MGRGetAcfCPR(A, c_marker, f_marker, &A_cf_truncated);
-      wall_time_1 = time_getWallclockSeconds() - wall_time_1;
+      // wall_time_1 = time_getWallclockSeconds() - wall_time_1;
       //hypre_ParCSRMatrixPrintIJ(A_cf_truncated, 0, 0, "A_cf_truncated_new");
       //if (my_id == 0) hypre_printf("Proc = %d, compute and truncate A_cf time: %1.5f\n", my_id, wall_time_1);
 
@@ -3790,14 +3789,13 @@ HYPRE_Int hypre_MGRGetBlockDiagInv(  hypre_ParCSRMatrix  *A,
    HYPRE_Int         *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int         *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
-   hypre_ParCSRMatrix   *B;
+//   hypre_ParCSRMatrix   *B;
 
-   hypre_CSRMatrix *B_diag;
-   HYPRE_Real      *B_diag_data;
-   HYPRE_Int       *B_diag_i;
-   HYPRE_Int       *B_diag_j;
+//   hypre_CSRMatrix *B_diag;
+//   HYPRE_Real      *B_diag_data;
+//   HYPRE_Int       *B_diag_i;
+//   HYPRE_Int       *B_diag_j;
 
-   hypre_CSRMatrix *B_offd;
    HYPRE_Int       i, j, k;
    HYPRE_Int       ii, jj;
 
@@ -3837,11 +3835,11 @@ HYPRE_Int hypre_MGRGetBlockDiagInv(  hypre_ParCSRMatrix  *A,
       diaginv = hypre_CTAlloc(HYPRE_Real, inv_size, HYPRE_MEMORY_HOST);
    }
 
-   B_diag_i    = hypre_CTAlloc(HYPRE_Int,  n + 1, HYPRE_MEMORY_HOST);
-   B_diag_j    = hypre_CTAlloc(HYPRE_Int,  inv_size, HYPRE_MEMORY_HOST);
-   B_diag_data = hypre_CTAlloc(HYPRE_Real,  inv_size, HYPRE_MEMORY_HOST);
+//   B_diag_i    = hypre_CTAlloc(HYPRE_Int,  n + 1, HYPRE_MEMORY_HOST);
+//   B_diag_j    = hypre_CTAlloc(HYPRE_Int,  inv_size, HYPRE_MEMORY_HOST);
+//   B_diag_data = hypre_CTAlloc(HYPRE_Real,  inv_size, HYPRE_MEMORY_HOST);
 
-   B_diag_i[n] = inv_size;
+//   B_diag_i[n] = inv_size;
 
    /*-----------------------------------------------------------------
    * Get all the diagonal sub-blocks
@@ -4432,7 +4430,7 @@ hypre_ParCSRMatrixGetBlockDiagInv(hypre_ParCSRMatrix   *A,
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
    HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
 
-   HYPRE_Int             i, j, k;
+   HYPRE_Int             i;
    HYPRE_Int             ii, jj;
    HYPRE_Int             bidx, bidxm1, bidxp1, ridx, didx;
    HYPRE_Int             num_procs, my_id;
@@ -4600,10 +4598,10 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int         num_procs,  my_id;
 
-   hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Real        *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int         *A_diag_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int         *A_diag_j = hypre_CSRMatrixJ(A_diag);
+//   hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
+//   HYPRE_Real        *A_diag_data = hypre_CSRMatrixData(A_diag);
+//   HYPRE_Int         *A_diag_i = hypre_CSRMatrixI(A_diag);
+//   HYPRE_Int         *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
    hypre_ParCSRMatrix   *B;
 
@@ -4614,13 +4612,12 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrix *B_offd;
    HYPRE_Int       i, j, k;
-   HYPRE_Int       ii, jj;
 
    HYPRE_Int n_block, left_size, inv_size;
    HYPRE_Int blk_diag_nlocal_rows;
    HYPRE_BigInt blk_diag_total_global_nrows;
 
-   HYPRE_Int        bidx, bidxm1, bidxp1;
+   HYPRE_Int        bidx;
    HYPRE_Real       *diaginv = NULL;
    HYPRE_Real       *diaginv_local = NULL;
    HYPRE_BigInt     *blk_diag_row_starts;
@@ -4628,7 +4625,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
    const HYPRE_Int nb2 = blk_size * blk_size;
    HYPRE_Real wall_time;
 
-   HYPRE_Int nrows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    if (nrows < blk_size)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Input matrix is smaller than block size.");

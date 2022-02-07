@@ -122,7 +122,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( memory_location );
    HYPRE_Real truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
    HYPRE_Real wall_time;
-   HYPRE_Real wall_time_lev;
+//   HYPRE_Real wall_time_lev;
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -825,7 +825,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* loop over levels of coarsening */
    for (lev = 0; lev < num_coarsening_levs; lev++)
    {
-      wall_time_lev = time_getWallclockSeconds();
+     // wall_time_lev = time_getWallclockSeconds();
       /* check if this is the last level */
       last_level = ((lev == num_coarsening_levs - 1));
 

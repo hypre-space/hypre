@@ -37,7 +37,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int            max_iter = (mgr_data -> max_iter);
    HYPRE_Real           *norms = (mgr_data -> rel_res_norms);
    hypre_ParVector      *Vtemp = (mgr_data -> Vtemp);
-   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
+//   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
    hypre_ParVector      *residual;
 
    HYPRE_Real           alpha = -1.0;
@@ -64,7 +64,7 @@ hypre_MGRSolve( void               *mgr_vdata,
                                                     void*) = (mgr_data -> coarse_grid_solver_solve);
    //HYPRE_Real   wall_time = 0.0;
 
-   HYPRE_Int    i;
+//   HYPRE_Int    i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    if (logging > 1)
@@ -899,7 +899,6 @@ hypre_MGRCycle( void               *mgr_vdata,
          //wall_time = time_getWallclockSeconds() - wall_time;
          //if (my_id == 0) hypre_printf("F-relaxation solve level %d: %f\n", coarse_grid, wall_time);
 
-         //wall_time = time_getWallclockSeconds();
          // Update residual and compute coarse-grid rhs
          alpha = -1.0;
          beta = 1.0;

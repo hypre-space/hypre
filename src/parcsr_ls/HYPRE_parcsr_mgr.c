@@ -354,7 +354,7 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 HYPRE_Int
 HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int *nsweeps )
 {
-   return hypre_MGRSetLevelNumRelaxSweeps(solver, *nsweeps);
+   return hypre_MGRSetLevelNumRelaxSweeps(solver, nsweeps);
 }
 
 /*--------------------------------------------------------------------------
