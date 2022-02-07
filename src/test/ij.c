@@ -4517,17 +4517,16 @@ main( hypre_int argc,
          /* create AMG coarse grid solver */
 
          HYPRE_BoomerAMGCreate(&amg_solver);
-         /* BM Aug 25, 2006 */
-         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+#if defined(HYPRE_USING_GPU)
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+#else
          HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
          HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
          HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
-         /* note: log is written to standard output, not to file */
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
          HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
          HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
          HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
          if (relax_down > -1)
          {
@@ -4541,12 +4540,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
          }
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
          HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+#endif
+         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
+         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
          HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
@@ -6634,17 +6638,16 @@ main( hypre_int argc,
          /* create AMG coarse grid solver */
 
          HYPRE_BoomerAMGCreate(&amg_solver);
-         /* BM Aug 25, 2006 */
-         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+#if defined(HYPRE_USING_GPU)
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+#else
          HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
          HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
          HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
-         /* note: log is written to standard output, not to file */
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
          HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
          HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
          HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
          if (relax_down > -1)
          {
@@ -6658,12 +6661,17 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
          }
-         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
          HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+#endif
+         HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
+         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
          HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
@@ -7098,16 +7106,27 @@ main( hypre_int argc,
          /* create AMG coarse grid solver */
 
          HYPRE_BoomerAMGCreate(&amg_solver);
-         HYPRE_BoomerAMGSetTol(amg_solver, pc_tol);
-         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
-
+#if defined(HYPRE_USING_GPU)
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+#else
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
          HYPRE_BoomerAMGSetCycleType(amg_solver, 1);
-         HYPRE_BoomerAMGSetNumSweeps(amg_solver, 1);
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 1);
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 2);
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 9, 3);
+#endif
+         HYPRE_BoomerAMGSetTol(amg_solver, pc_tol);
+         HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, 1);
+         HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
          HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
 
@@ -7808,16 +7827,16 @@ main( hypre_int argc,
       /* create AMG coarse grid solver */
 
       HYPRE_BoomerAMGCreate(&amg_solver);
-      /* BM Aug 25, 2006 */
-      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+#if defined(HYPRE_USING_GPU)
+      HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+      HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+      HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+#else
       HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
       HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-      HYPRE_BoomerAMGSetTol(amg_solver, tol);
-      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-      HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
       if (relax_down > -1)
       {
@@ -7831,10 +7850,15 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
       }
-      HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
-      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
       HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
+#endif
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
+      HYPRE_BoomerAMGSetTol(amg_solver, tol);
+      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
+      HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+      HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
+      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       if (mgr_nlevels < 1 || mgr_bsize < 2)
       {
          HYPRE_BoomerAMGSetMaxIter(amg_solver, max_iter);
