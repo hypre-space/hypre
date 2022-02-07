@@ -1008,7 +1008,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       PC_i,
                       P_diag_j );
 
-   hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, 1.0);
+   hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, (HYPRE_Complex) 1.0);
 
    hypre_TFree(PC_i, HYPRE_MEMORY_DEVICE);
 }

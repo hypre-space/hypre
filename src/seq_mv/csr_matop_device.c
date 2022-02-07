@@ -1607,13 +1607,13 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
  * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
  */
 void
-hypre_SortCSRCusparse(       HYPRE_Int      n,
-                             HYPRE_Int      m,
-                             HYPRE_Int      nnzA,
-                             cusparseMatDescr_t descrA,
-                             const HYPRE_Int     *d_ia,
-                             HYPRE_Int     *d_ja_sorted,
-                             HYPRE_Complex *d_a_sorted )
+hypre_SortCSRCusparse( HYPRE_Int           n,
+                       HYPRE_Int           m,
+                       HYPRE_Int           nnzA,
+                       cusparseMatDescr_t  descrA,
+                       const HYPRE_Int     *d_ia,
+                       HYPRE_Int           *d_ja_sorted,
+                       HYPRE_Complex       *d_a_sorted )
 {
    cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
 
@@ -1623,10 +1623,8 @@ hypre_SortCSRCusparse(       HYPRE_Int      n,
    csru2csrInfo_t sortInfoA;
    HYPRE_CUSPARSE_CALL( cusparseCreateCsru2csrInfo(&sortInfoA) );
 
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   if (isDoublePrecision)
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    {
       HYPRE_CUSPARSE_CALL( cusparseDcsru2csr_bufferSizeExt(cusparsehandle,
                                                            n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted,
@@ -1638,18 +1636,20 @@ hypre_SortCSRCusparse(       HYPRE_Int      n,
                                              n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted,
                                              sortInfoA, pBuffer) );
    }
-   else if (isSinglePrecision)
+#elif defined(HYPRE_SINGLE)
    {
       HYPRE_CUSPARSE_CALL( cusparseScsru2csr_bufferSizeExt(cusparsehandle,
-                                                           n, m, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted,
+                                                           n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted,
                                                            sortInfoA, &pBufferSizeInBytes));
 
       pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
 
       HYPRE_CUSPARSE_CALL( cusparseScsru2csr(cusparsehandle,
-                                             n, m, nnzA, descrA, (float *)d_a_sorted, d_ia, d_ja_sorted,
+                                             n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted,
                                              sortInfoA, pBuffer) );
    }
+#endif
+#endif
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
@@ -1743,8 +1743,15 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       {
          HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&hypre_CsrsvDataInfoL(csrsv_data)) );
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                          nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+#elif defined(HYPRE_SINGLE)
+         HYPRE_CUSPARSE_CALL( cusparseScsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                         nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+#endif
+#endif
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -1755,10 +1762,19 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                        nrow, nnzA, descr, A_sa, A_i, A_sj,
                                                        hypre_CsrsvDataInfoL(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
+#elif defined(HYPRE_SINGLE)
+         HYPRE_CUSPARSE_CALL( cusparseScsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                       nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                       hypre_CsrsvDataInfoL(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                       hypre_CsrsvDataBuffer(csrsv_data)) );
+#endif
+#endif
 
          cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoL(csrsv_data),
                                                              &structural_zero);
@@ -1772,11 +1788,21 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
          }
       }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
       HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                  nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
                                                  hypre_CsrsvDataInfoL(csrsv_data), f_data, u_data,
                                                  CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                  hypre_CsrsvDataBuffer(csrsv_data)) );
+#elif defined(HYPRE_SINGLE)
+      HYPRE_CUSPARSE_CALL( cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                 nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                 hypre_CsrsvDataInfoL(csrsv_data), f_data, u_data,
+                                                 CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                 hypre_CsrsvDataBuffer(csrsv_data)) );
+#endif
+#endif
    }
    else
    {
@@ -1786,8 +1812,15 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       {
          HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&hypre_CsrsvDataInfoU(csrsv_data)) );
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                          nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+#elif defined(HYPRE_SINGLE)
+         HYPRE_CUSPARSE_CALL( cusparseScsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                         nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+#endif
+#endif
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -1798,10 +1831,19 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
          HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                        nrow, nnzA, descr, A_sa, A_i, A_sj,
                                                        hypre_CsrsvDataInfoU(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
+#elif defined(HYPRE_SINGLE)
+         HYPRE_CUSPARSE_CALL( cusparseScsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                       nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                       hypre_CsrsvDataInfoU(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                       hypre_CsrsvDataBuffer(csrsv_data)) );
+#endif
+#endif
 
          cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoU(csrsv_data),
                                                              &structural_zero);
@@ -1811,15 +1853,24 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
             hypre_sprintf(msg, "hypre_CSRMatrixTriLowerUpperSolveCusparse A(%d,%d) is missing\n",
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
-            //hypre_assert(0);
          }
       }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
       HYPRE_CUSPARSE_CALL( cusparseDcsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                  nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
                                                  hypre_CsrsvDataInfoU(csrsv_data), f_data, u_data,
                                                  CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                  hypre_CsrsvDataBuffer(csrsv_data)) );
+#elif defined(HYPRE_SINGLE)
+      HYPRE_CUSPARSE_CALL( cusparseScsrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                 nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                 hypre_CsrsvDataInfoU(csrsv_data), f_data, u_data,
+                                                 CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                 hypre_CsrsvDataBuffer(csrsv_data)) );
+#endif
+#endif
    }
 
    return hypre_error_flag;
@@ -2008,22 +2059,19 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
  * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
  */
 void
-hypre_SortCSRRocsparse(       HYPRE_Int      n,
-                              HYPRE_Int      m,
-                              HYPRE_Int      nnzA,
-                              rocsparse_mat_descr descrA,
-                              const HYPRE_Int     *d_ia,
-                              HYPRE_Int     *d_ja_sorted,
-                              HYPRE_Complex *d_a_sorted )
+hypre_SortCSRRocsparse( HYPRE_Int            n,
+                        HYPRE_Int            m,
+                        HYPRE_Int            nnzA,
+                        rocsparse_mat_descr  descrA,
+                        const HYPRE_Int     *d_ia,
+                        HYPRE_Int           *d_ja_sorted,
+                        HYPRE_Complex       *d_a_sorted )
 {
    rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
 
    size_t pBufferSizeInBytes = 0;
    void *pBuffer = NULL;
    HYPRE_Int *P = NULL;
-
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
 
    // FIXME: There is not in-place version of csr sort in rocSPARSE currently, so we make
    //        a temporary copy of the data for gthr, sort that, and then copy the sorted values
@@ -2042,16 +2090,19 @@ hypre_SortCSRRocsparse(       HYPRE_Int      n,
    HYPRE_ROCSPARSE_CALL( rocsparse_csrsort(handle, n, m, nnzA, descrA, d_ia, d_ja_sorted, P,
                                            pBuffer) );
 
-   if (isDoublePrecision)
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    {
       HYPRE_ROCSPARSE_CALL( rocsparse_dgthr(handle, nnzA, d_a_sorted, d_a_tmp, P,
                                             rocsparse_index_base_zero) );
    }
-   else if (isSinglePrecision)
+#elif defined(HYPRE_SINGLE)
    {
-      HYPRE_ROCSPARSE_CALL( rocsparse_sgthr(handle, nnzA, (float *) d_a_sorted, (float *) d_a_tmp, P,
+      HYPRE_ROCSPARSE_CALL( rocsparse_sgthr(handle, nnzA, d_a_sorted, d_a_tmp, P,
                                             rocsparse_index_base_zero) );
    }
+#endif
+#endif
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    hypre_TFree(P, HYPRE_MEMORY_DEVICE);
