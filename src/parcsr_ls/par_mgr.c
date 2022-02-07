@@ -1047,7 +1047,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
 
          for (i = 0; i < nfpoints; i++)
          {
-            HYPRE_Complex dsum = diag[i] + scal * (diag1[i] - hypre_abs(diag[i]));
+            HYPRE_Complex dsum = diag[i] + scal * (diag1[i] - hypre_cabs(diag[i]));
             diag[i] = 1. / dsum;
          }
          hypre_TFree(diag1, memory_location_P);
