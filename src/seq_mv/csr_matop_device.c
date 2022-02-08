@@ -1635,7 +1635,7 @@ hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRDiagScale, gDim, bDim,
                      nrows, A_i, A_j, A_data, ldata, rdata);
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
