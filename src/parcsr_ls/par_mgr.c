@@ -12,13 +12,20 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "_hypre_lapack.h"
 #include "par_amg.h"
 #include "par_mgr.h"
 
 #ifdef HYPRE_USING_DSUPERLU
 #include "dsuperlu.h"
 #endif
+
+/* Need to define these hypre_lapack protos here instead of including _hypre_lapack.h to avoid conflicts with
+ * dsuperlu.h on some lapack functions. Alternative is to move superLU related functions to a separate file.
+*/
+/* dgetrf.c */
+HYPRE_Int hypre_dgetrf ( HYPRE_Int *m , HYPRE_Int *n , HYPRE_Real *a , HYPRE_Int *lda , HYPRE_Int *ipiv , HYPRE_Int *info );
+/* dgetri.c */
+HYPRE_Int hypre_dgetri ( HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *ipiv, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 /* Create */
 void *
