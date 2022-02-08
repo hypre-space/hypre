@@ -8,7 +8,9 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_DEVICE_USE_DSHMEM
+#endif
 
 #include <csr_spgemm_device_symbl.h>
 

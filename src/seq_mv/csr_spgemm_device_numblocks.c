@@ -74,11 +74,15 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
       (multiProcessorCount, &max_nblocks[1][8], &max_nblocks[3][8]);
    hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_SPGEMM_BASE_GROUP_SIZE * 16>
       (multiProcessorCount, &max_nblocks[1][9], &max_nblocks[3][9]);
+#if defined(HYPRE_USING_CUDA)
    hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32>
       (multiProcessorCount, &max_nblocks[1][10], &max_nblocks[3][10]);
+#endif
 
    /* this is just a heuristic; having more blocks (than max active) seems improving performance */
+#if defined(HYPRE_USING_CUDA)
    for (HYPRE_Int i = 0; i < num_bins + 1; i++) { max_nblocks[0][i] *= 5; max_nblocks[1][i] *= 5; }
+#endif
 
 #if defined(HYPRE_SPGEMM_PRINTF)
    printf0("=======================================================================\n");
