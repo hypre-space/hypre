@@ -861,6 +861,8 @@ HYPRE_Int HYPRE_SStructMatrixSetObjectType ( HYPRE_SStructMatrix matrix, HYPRE_I
 HYPRE_Int HYPRE_SStructMatrixGetObject ( HYPRE_SStructMatrix matrix, void **object );
 HYPRE_Int HYPRE_SStructMatrixPrint ( const char *filename, HYPRE_SStructMatrix matrix,
                                      HYPRE_Int all );
+HYPRE_Int HYPRE_SStructMatrixRead ( MPI_Comm comm, const char *filename,
+                                    HYPRE_SStructMatrix *matrix_ptr );
 HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha, HYPRE_SStructMatrix A,
                                       HYPRE_SStructVector x, HYPRE_Complex beta, HYPRE_SStructVector y );
 
@@ -899,6 +901,8 @@ HYPRE_Int HYPRE_SStructVectorSetObjectType ( HYPRE_SStructVector vector, HYPRE_I
 HYPRE_Int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector, void **object );
 HYPRE_Int HYPRE_SStructVectorPrint ( const char *filename, HYPRE_SStructVector vector,
                                      HYPRE_Int all );
+HYPRE_Int HYPRE_SStructVectorRead ( MPI_Comm comm, const char *filename,
+                                    HYPRE_SStructVector *vector );
 HYPRE_Int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x, HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructVectorScale ( HYPRE_Complex alpha, HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x, HYPRE_SStructVector y,
@@ -983,6 +987,8 @@ HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box, hypre_Index offset, hyp
                                          HYPRE_Int *valid );
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
                                        hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
+HYPRE_Int hypre_SStructGridPrint ( FILE *file , hypre_SStructGrid *grid );
+HYPRE_Int hypre_SStructGridRead ( MPI_Comm comm , FILE *file , hypre_SStructGrid **grid_ptr );
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px, hypre_SStructPVector *py,
@@ -1089,7 +1095,6 @@ HYPRE_Int hypre_SStructVectorParRestore ( hypre_SStructVector *vector, hypre_Par
 HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
-
 
 #ifdef __cplusplus
 }
