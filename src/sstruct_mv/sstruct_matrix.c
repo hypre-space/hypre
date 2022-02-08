@@ -632,6 +632,39 @@ hypre_SStructPMatrixPrint( const char           *filename,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+#if 0
+
+HYPRE_Int
+hypre_SStructPMatrixRead( const char           *filename,
+                          hypre_SStructPMatrix *pmatrix,
+                          HYPRE_Int             all )
+{
+   HYPRE_Int           nvars = hypre_SStructPMatrixNVars(pmatrix);
+   hypre_StructMatrix *smatrix;
+   HYPRE_Int           vi, vj;
+   char                new_filename[255];
+
+   for (vi = 0; vi < nvars; vi++)
+   {
+      for (vj = 0; vj < nvars; vj++)
+      {
+         smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+         if (smatrix != NULL)
+         {
+            hypre_sprintf(new_filename, "%s.%02d.%02d", filename, vi, vj);
+            hypre_StructMatrixRead(new_filename, smatrix);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+#endif
+
 /*==========================================================================
  * SStructUMatrix routines
  *==========================================================================*/
