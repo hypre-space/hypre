@@ -86,6 +86,6 @@ libHYPRE_krylov.a: ${OBJS}
 libHYPRE_krylov.so libHYPRE_krylov.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
