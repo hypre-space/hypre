@@ -21,8 +21,8 @@ static const char HYPRE_SPGEMM_HASH_TYPE = 'D';
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
 #define HYPRE_SPGEMM_BASE_GROUP_SIZE 32
 
-#define HYPRE_SPGEMM_TIMING
-#define HYPRE_SPGEMM_PRINTF
+//#define HYPRE_SPGEMM_TIMING
+//#define HYPRE_SPGEMM_PRINTF
 //#define HYPRE_SPGEMM_NVTX
 
 /* ----------------------------------------------------------------------------------------------- *
