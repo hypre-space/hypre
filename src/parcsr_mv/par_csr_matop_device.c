@@ -569,7 +569,7 @@ hypreCUDAKernel_ConcatDiagAndOffd(HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
 
    /* lane id inside the warp */
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int i, j, k, p, istart, iend, bstart;
+   HYPRE_Int i, j = 0, k = 0, p, istart, iend, bstart;
 
    /* diag part */
    if (lane_id < 2)
@@ -1086,7 +1086,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
+   HYPRE_Int p_diag = 0, p_offd = 0, q_diag, q_offd;
 
    /* sum row norm over diag part */
    if (lane < 2)

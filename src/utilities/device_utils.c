@@ -226,7 +226,7 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
 
    /* lane id inside the warp */
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int i, j, k, p, row, istart, iend, bstart;
+   HYPRE_Int i, j = 0, k = 0, p, row, istart, iend, bstart;
 
    /* diag part */
    if (lane_id < 2)
