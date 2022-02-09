@@ -916,6 +916,8 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       PWoffset,
                       is_nonnegative<HYPRE_Int>() );
 
+   hypre_Memset(PWoffset + P_nr_of_rows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+
    HYPRE_THRUST_CALL( exclusive_scan,
                       PWoffset,
                       &PWoffset[P_nr_of_rows + 1],
