@@ -197,6 +197,10 @@ test_mgr: test_mgr.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
+test_mgr_gpu: test_mgr_gpu.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
 # RDF: Keep these for now
 
 hypre_set_precond: hypre_set_precond.o
