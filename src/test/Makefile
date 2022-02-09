@@ -37,11 +37,17 @@ F77_COMPILE_FLAGS = \
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
-# WM: currently have to add the absolute path to libHYPRE.a when building sycl code
+LIBFLAGS = ${LDFLAGS} ${LIBS}
+
+# WM: currently have to add the absolute path to libHYPRE.a when building sycl code; RL: reorg
 ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
-	LIBFLAGS = ${LDFLAGS} ${LIBS} ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicx)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicpx)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
 else
-	LIBFLAGS = ${LDFLAGS} ${LIBS}
+   LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
 endif
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
@@ -51,7 +57,7 @@ else
 endif
 
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib -lHYPRE\
+ $(LIBHYPRE)\
  ${XLINK}\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
