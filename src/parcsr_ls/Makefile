@@ -164,7 +164,8 @@ CUFILES =\
  par_amgdd_fac_cycle_device.c\
  par_2s_interp_device.c\
  par_relax_device.c\
- par_mod_multi_interp_device.c
+ par_mod_multi_interp_device.c\
+ par_mgr_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
@@ -205,6 +206,6 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 libHYPRE_parcsr_ls.so libHYPRE_parcsr_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
