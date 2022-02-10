@@ -11,6 +11,7 @@
  *
  *****************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp" //RL: TODO par_csr_matvec_device.c, include cuda there
 
@@ -240,6 +241,12 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                          hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                          locl_data,
+                         send_data );
+#elif defined(HYPRE_USING_SYCL)
+      auto permuted_source = oneapi::dpl::make_permutation_iterator(locl_data, hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg));
+      HYPRE_ONEDPL_CALL( std::copy,
+                         permuted_source,
+                         permuted_source + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                          send_data );
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       /* pack send data on device */
