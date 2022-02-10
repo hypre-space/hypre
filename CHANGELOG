@@ -7,6 +7,15 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.24.0 released 2022/02/11
+
+- Added SYCL support
+- Enabled GPU setup for MGR solver
+- Added GPU examples for Fortran users ('ex5f.f' and 'ex12f.f')
+- Added source file indentation with Artistic Style (astyle).
+- Various bug fixes.
+
+#====================================
 Version 2.23.0 released 2021/10/01
 
 - Added GPU support for multipass interpolation.
