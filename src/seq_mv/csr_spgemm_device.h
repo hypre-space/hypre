@@ -422,6 +422,8 @@ static hypre_int printf0( const char * format, ... )
       va_end (args);
    }
 
+   fflush(stdout);
+
    return ret;
 }
 #else

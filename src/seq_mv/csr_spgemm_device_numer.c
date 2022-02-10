@@ -78,7 +78,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
    const HYPRE_Int bs = q - p;                                                                                   \
    if (bs)                                                                                                       \
    {                                                                                                             \
-      /* printf0("bin[%d]: %d rows\n", BIN, bs); */                                                              \
+      printf0("bin[%d]: %d rows, p %d, q %d\n", BIN, bs, p, q);                                                  \
       hypre_spgemm_numerical_with_rownnz<BIN2, SHMEM_HASH_SIZE, GROUP_SIZE, true>                                \
          (bs, d_rind + p, k, n, GHASH, EXACT_ROWNNZ, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c);   \
    }                                                                                                             \
