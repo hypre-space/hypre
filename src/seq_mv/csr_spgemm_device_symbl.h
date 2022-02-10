@@ -202,11 +202,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
    /* shared memory hash table for this group */
    volatile HYPRE_Int *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
 
-#if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_SYMBL_HASH_SIZE, SHMEM_HASH_SIZE);
-#else
-   const HYPRE_Int UNROLL_FACTOR = 1;
-#endif
+   const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_SYMBL_UNROLL, SHMEM_HASH_SIZE);
 
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 

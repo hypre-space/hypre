@@ -260,11 +260,7 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
    volatile HYPRE_Int     *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *group_s_HashVals = s_HashVals + group_id * SHMEM_HASH_SIZE;
 
-#if defined(HYPRE_USING_CUDA)
-   const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_NUMER_HASH_SIZE, SHMEM_HASH_SIZE);
-#else
-   const HYPRE_Int UNROLL_FACTOR = 1;
-#endif
+   const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_NUMER_UNROLL, SHMEM_HASH_SIZE);
 
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 
