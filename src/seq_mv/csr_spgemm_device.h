@@ -408,26 +408,9 @@ hypre_spgemm_get_num_groups_per_block()
 }
 
 #if defined(HYPRE_SPGEMM_PRINTF) || defined(HYPRE_SPGEMM_TIMING)
-static hypre_int printf0( const char * format, ... )
-{
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   hypre_int ret = 0;
-
-   if (!myid)
-   {
-      va_list args;
-      va_start (args, format);
-      ret = vprintf (format, args);
-      va_end (args);
-   }
-
-   fflush(stdout);
-
-   return ret;
-}
+hypre_int hypre_printf0( const char * format, ... );
 #else
-#define printf0(...)
+#define hypre_printf0(...)
 #endif
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */

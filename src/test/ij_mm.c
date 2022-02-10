@@ -629,7 +629,7 @@ main( hypre_int argc,
 #ifdef HYPRE_USING_CUDA
       total_size = 15LL * 1024 * 1024 * 1024;
 #elif defined(HYPRE_USING_HIP)
-      total_size = 31LL * 1024 * 1024 * 1024;
+      total_size = 20LL * 1024 * 1024 * 1024;
 #endif
       gpu_ptr = hypre_TAlloc(char, total_size, HYPRE_MEMORY_DEVICE);
       hypre_SetUserDeviceMalloc(gpu_alloc);

@@ -17,7 +17,7 @@
    const HYPRE_Int bs = q - p;                                                             \
    if (bs)                                                                                 \
    {                                                                                       \
-      /* printf0("bin[%d]: %d rows\n", BIN, bs); */                                        \
+      /* hypre_printf0("bin[%d]: %d rows\n", BIN, bs); */                                        \
       hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, true>                 \
          ( bs, d_rind + p, k, n, GHASH, d_ia, d_ja, d_ib, d_jb, d_rc, CAN_FAIL, RF );      \
    }                                                                                       \
@@ -145,7 +145,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
-   printf0("RownnzBound time %f\n", t2);
+   hypre_printf0("RownnzBound time %f\n", t2);
 #endif
 
 #ifdef HYPRE_SPGEMM_NVTX
@@ -197,7 +197,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
       if (num_failed_rows)
       {
 #ifdef HYPRE_SPGEMM_PRINTF
-         printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
+         hypre_printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
                  num_failed_rows, num_failed_rows / (m + 0.0) );
 #endif
          HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
@@ -271,7 +271,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
       if (num_failed_rows)
       {
 #ifdef HYPRE_SPGEMM_PRINTF
-         printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
+         hypre_printf0("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
                  num_failed_rows, num_failed_rows / (m + 0.0) );
 #endif
          HYPRE_Int *new_end =
@@ -348,7 +348,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
-   printf0("Rownnz time %f\n", t2);
+   hypre_printf0("Rownnz time %f\n", t2);
 #endif
 
 #ifdef HYPRE_SPGEMM_NVTX

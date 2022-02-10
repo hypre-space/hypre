@@ -293,7 +293,7 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
    t2 = hypre_MPI_Wtime() - t1;
-   printf0("Curand time %f\n", t2);
+   hypre_printf0("Curand time %f\n", t2);
 #endif
 
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
@@ -409,7 +409,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
-   printf0("RownnzEst time %f\n", t2);
+   hypre_printf0("RownnzEst time %f\n", t2);
 #endif
 
 #ifdef HYPRE_PROFILE

@@ -260,7 +260,11 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
    volatile HYPRE_Int     *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *group_s_HashVals = s_HashVals + group_id * SHMEM_HASH_SIZE;
 
+#if defined(HYPRE_USING_CUDA)
    const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_NUMER_HASH_SIZE, SHMEM_HASH_SIZE);
+#else
+   const HYPRE_Int UNROLL_FACTOR = 1;
+#endif
 
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 
@@ -443,11 +447,11 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    }
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   printf0("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
+   hypre_printf0("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
            "exact_rownnz %d, need_ghash %d, ghash %p size %d\n",
            __FILE__, __LINE__, BIN, m, k, n,
            HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, exact_rownnz, need_ghash, d_ghash_i, ghash_size);
-   printf0("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
+   hypre_printf0("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
@@ -579,7 +583,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
       hypre_create_ija(m, NULL, d_rc, d_ic_new, &d_jc_new, &d_c_new, &nnzC_new);
 
 #ifdef HYPRE_SPGEMM_PRINTF
-      printf0("%s[%d]: Post Copy: new nnzC %d\n", __FILE__, __LINE__, nnzC_new);
+      hypre_printf0("%s[%d]: Post Copy: new nnzC %d\n", __FILE__, __LINE__, nnzC_new);
 #endif
 
       /* copy to the final C */
