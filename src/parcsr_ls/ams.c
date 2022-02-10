@@ -3455,8 +3455,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                {
                   GGt = hypre_ParCSRMatMat(ams_data -> G, Gt);
                }
-#endif
                else
+#endif
                {
                   GGt = hypre_ParMatmul(ams_data -> G, Gt);
                }
