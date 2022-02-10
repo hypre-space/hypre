@@ -9,9 +9,11 @@
 
 Version 2.24.0 released 2022/02/11
 
-- Added SYCL support
-- Enabled GPU setup for MGR solver
-- Added GPU examples for Fortran users ('ex5f.f' and 'ex12f.f')
+- Added SYCL support.
+- Enabled GPU setup for the MGR solver.
+- Enabled new interpolation options for MGR (L1-Jacobi, MM-ext, MM-ext+i,
+  MM-ext+e) for both CPU and GPU.
+- Added GPU examples for Fortran users ('ex5f.f' and 'ex12f.f').
 - Added source file indentation with Artistic Style (astyle).
 - Various bug fixes.
 
