@@ -13,6 +13,8 @@
 
 #include "_hypre_parcsr_block_mv.h"
 
+#define LB_VERSION 0
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -1737,4 +1739,3 @@ HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
 
    return (0);
 }
-
