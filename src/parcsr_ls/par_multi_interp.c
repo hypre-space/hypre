@@ -13,17 +13,17 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
-                               HYPRE_Int           *CF_marker,
-                               hypre_ParCSRMatrix  *S,
-                               HYPRE_BigInt        *num_cpts_global,
-                               HYPRE_Int            num_functions,
-                               HYPRE_Int           *dof_func,
-                               HYPRE_Int            debug_flag,
-                               HYPRE_Real           trunc_factor,
-                               HYPRE_Int            P_max_elmts,
-                               HYPRE_Int            weight_option,
-                               hypre_ParCSRMatrix **P_ptr )
+hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
+                                   HYPRE_Int           *CF_marker,
+                                   hypre_ParCSRMatrix  *S,
+                                   HYPRE_BigInt        *num_cpts_global,
+                                   HYPRE_Int            num_functions,
+                                   HYPRE_Int           *dof_func,
+                                   HYPRE_Int            debug_flag,
+                                   HYPRE_Real           trunc_factor,
+                                   HYPRE_Int            P_max_elmts,
+                                   HYPRE_Int            weight_option,
+                                   hypre_ParCSRMatrix **P_ptr )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
@@ -148,9 +148,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    HYPRE_Int        j_start;
    HYPRE_Int        j_end;
 
-   HYPRE_Int        i,i1;
-   HYPRE_Int        j,j1;
-   HYPRE_Int        k,k1,k2,k3;
+   HYPRE_Int        i, i1;
+   HYPRE_Int        j, j1;
+   HYPRE_Int        k, k1, k2, k3;
    HYPRE_BigInt     big_k1;
    HYPRE_Int        pass_array_size;
    HYPRE_BigInt     global_pass_array_size;
@@ -190,7 +190,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    max_num_threads[0] = hypre_NumThreads();
    cnt_nz_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
    cnt_nz_offd_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
-   for(i=0; i < max_num_threads[0]; i++)
+   for (i = 0; i < max_num_threads[0]; i++)
    {
       cnt_nz_offd_per_thread[i] = 0;
       cnt_nz_per_thread[i] = 0;
@@ -201,13 +201,13 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
     *  Access the CSR vectors for A and S. Also get size of fine grid.
     *-----------------------------------------------------------------------*/
 
-   hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    my_first_cpt = num_cpts_global[0];
    /*   total_global_cpts = 0; */
-   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs-1, comm);
+   if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {
@@ -230,7 +230,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    }
 
    if (num_cols_offd)
+   {
       S_offd_j    = hypre_CSRMatrixJ(S_offd);
+   }
 
    n_fine = hypre_CSRMatrixNumRows(A_diag);
 
@@ -238,29 +240,29 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   if (n_fine) fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
+   if (n_fine) { fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
 
    n_coarse = 0;
    n_SF = 0;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:n_coarse,n_SF ) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:n_coarse,n_SF ) HYPRE_SMP_SCHEDULE
 #endif
-   for (i=0; i < n_fine; i++)
-      if (CF_marker[i] == 1) n_coarse++;
-      else if (CF_marker[i] == -3) n_SF++;
+   for (i = 0; i < n_fine; i++)
+      if (CF_marker[i] == 1) { n_coarse++; }
+      else if (CF_marker[i] == -3) { n_SF++; }
 
-   pass_array_size = n_fine-n_coarse-n_SF;
-   if (pass_array_size) pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST);
-   pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes+1, HYPRE_MEMORY_HOST);
-   if (n_fine) assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1, HYPRE_MEMORY_DEVICE);
-   if (n_coarse) C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST);
+   pass_array_size = n_fine - n_coarse - n_SF;
+   if (pass_array_size) { pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST); }
+   pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes + 1, HYPRE_MEMORY_HOST);
+   if (n_fine) { assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_HOST);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_HOST);
+   if (n_coarse) { C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); }
 
    if (num_cols_offd)
    {
       CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
-      if (num_functions > 1) dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      if (num_functions > 1) { dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST); }
    }
 
    if (num_procs > 1)
@@ -281,11 +283,13 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
 
    index = 0;
-   for (i=0; i < num_sends; i++)
+   for (i = 0; i < num_sends; i++)
    {
       start = send_map_start[i];
-      for (j = start; j < send_map_start[i+1]; j++)
+      for (j = start; j < send_map_start[i + 1]; j++)
+      {
          int_buf_data[index++] = CF_marker[send_map_elmt[j]];
+      }
    }
    if (num_procs > 1)
    {
@@ -297,11 +301,13 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    if (num_functions > 1)
    {
       index = 0;
-      for (i=0; i < num_sends; i++)
+      for (i = 0; i < num_sends; i++)
       {
          start = send_map_start[i];
-         for (j = start; j < send_map_start[i+1]; j++)
+         for (j = start; j < send_map_start[i + 1]; j++)
+         {
             int_buf_data[index++] = dof_func[send_map_elmt[j]];
+         }
       }
       if (num_procs > 1)
       {
@@ -314,11 +320,11 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    n_coarse_offd = 0;
    n_SF_offd = 0;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:n_coarse_offd,n_SF_offd) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:n_coarse_offd,n_SF_offd) HYPRE_SMP_SCHEDULE
 #endif
-   for (i=0; i < num_cols_offd; i++)
-      if (CF_marker_offd[i] == 1) n_coarse_offd++;
-      else if (CF_marker_offd[i] == -3) n_SF_offd++;
+   for (i = 0; i < num_cols_offd; i++)
+      if (CF_marker_offd[i] == 1) { n_coarse_offd++; }
+      else if (CF_marker_offd[i] == -3) { n_SF_offd++; }
 
    if (num_cols_offd)
    {
@@ -356,7 +362,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
 
    cnt = 0;
-   p_cnt = pass_array_size-1;
+   p_cnt = pass_array_size - 1;
    P_diag_i[0] = 0;
    P_offd_i[0] = 0;
    for (i = 0; i < n_fine; i++)
@@ -368,35 +374,37 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                      and in column of P */
          C_array[cnt++] = i;
          assigned[i] = 0;
-         P_diag_i[i+1] = 1; /* one element in row i1 of P */
-         P_offd_i[i+1] = 0;
+         P_diag_i[i + 1] = 1; /* one element in row i1 of P */
+         P_offd_i[i + 1] = 0;
       }
       else if (CF_marker[i] == -1)
       {
          pass_array[p_cnt--] = i;
-         P_diag_i[i+1] = 0;
-         P_offd_i[i+1] = 0;
+         P_diag_i[i + 1] = 0;
+         P_offd_i[i + 1] = 0;
          assigned[i] = -1;
          fine_to_coarse[i] = -1;
       }
       else
       {
-         P_diag_i[i+1] = 0;
-         P_offd_i[i+1] = 0;
+         P_diag_i[i + 1] = 0;
+         P_offd_i[i + 1] = 0;
          assigned[i] = -1;
          fine_to_coarse[i] = -1;
       }
    }
 
    index = 0;
-   for (i=0; i < num_sends; i++)
+   for (i = 0; i < num_sends; i++)
    {
       start = send_map_start[i];
-      for (j = start; j < send_map_start[i+1]; j++)
+      for (j = start; j < send_map_start[i + 1]; j++)
       {
          big_buf_data[index] = (HYPRE_BigInt)fine_to_coarse[send_map_elmt[j]];
          if (big_buf_data[index] > -1)
+         {
             big_buf_data[index] += my_first_cpt;
+         }
          index++;
       }
    }
@@ -407,16 +415,18 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommHandleDestroy(comm_handle);
    }
 
-   new_recv_vec_start = hypre_CTAlloc(HYPRE_Int, num_recvs+1, HYPRE_MEMORY_HOST);
+   new_recv_vec_start = hypre_CTAlloc(HYPRE_Int, num_recvs + 1, HYPRE_MEMORY_HOST);
 
    if (n_coarse_offd)
+   {
       C_array_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd, HYPRE_MEMORY_HOST);
+   }
 
    cnt = 0;
    new_recv_vec_start[0] = 0;
    for (j = 0; j < num_recvs; j++)
    {
-      for (i = recv_vec_start[j]; i < recv_vec_start[j+1]; i++)
+      for (i = recv_vec_start[j]; i < recv_vec_start[j + 1]; i++)
       {
          if (CF_marker_offd[i] == 1)
          {
@@ -431,7 +441,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             map_S_to_new[i] = -1;
          }
       }
-      new_recv_vec_start[j+1] = cnt;
+      new_recv_vec_start[j + 1] = cnt;
    }
 
    cnt = 0;
@@ -450,25 +460,25 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    cnt_offd = 0;
    cnt_nz = 0;
    cnt_nz_offd = 0;
-   for (i = pass_array_size-1; i > cnt-1; i--)
+   for (i = pass_array_size - 1; i > cnt - 1; i--)
    {
       i1 = pass_array[i];
-      for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+      for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
       {
          j1 = S_diag_j[j];
          if (CF_marker[j1] == 1)
          {
-            P_diag_i[i1+1]++;
+            P_diag_i[i1 + 1]++;
             cnt_nz++;
             assigned[i1] = 1;
          }
       }
-      for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+      for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
       {
          j1 = S_offd_j[j];
          if (CF_marker_offd[j1] == 1)
          {
-            P_offd_i[i1+1]++;
+            P_offd_i[i1 + 1]++;
             cnt_nz_offd++;
             assigned[i1] = 1;
          }
@@ -488,10 +498,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    index = 0;
-   for (i=0; i < num_sends; i++)
+   for (i = 0; i < num_sends; i++)
    {
       start = send_map_start[i];
-      for (j = start; j < send_map_start[i+1]; j++)
+      for (j = start; j < send_map_start[i + 1]; j++)
       {    int_buf_data[index++] = assigned[send_map_elmt[j]]; }
    }
    if (num_procs > 1)
@@ -512,14 +522,14 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                        hypre_MPI_SUM, comm);
    while (global_pass_array_size && pass < max_num_passes)
    {
-      for (i = pass_array_size-1; i > cnt-1; i--)
+      for (i = pass_array_size - 1; i > cnt - 1; i--)
       {
          i1 = pass_array[i];
          no_break = 1;
-         for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+         for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
          {
             j1 = S_diag_j[j];
-            if (assigned[j1] == pass-1)
+            if (assigned[j1] == pass - 1)
             {
                pass_array[i++] = pass_array[cnt];
                pass_array[cnt++] = i1;
@@ -530,10 +540,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          }
          if (no_break)
          {
-            for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+            for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
             {
                j1 = S_offd_j[j];
-               if (assigned_offd[j1] == pass-1)
+               if (assigned_offd[j1] == pass - 1)
                {
                   pass_array[i++] = pass_array[cnt];
                   pass_array[cnt++] = i1;
@@ -552,10 +562,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       hypre_MPI_Allreduce(&local_pass_array_size, &global_pass_array_size, 1, HYPRE_MPI_BIG_INT,
                           hypre_MPI_SUM, comm);
       index = 0;
-      for (i=0; i < num_sends; i++)
+      for (i = 0; i < num_sends; i++)
       {
          start = send_map_start[i];
-         for (j = start; j < send_map_start[i+1]; j++)
+         for (j = start; j < send_map_start[i + 1]; j++)
          {   int_buf_data[index++] = assigned[send_map_elmt[j]]; }
       }
       if (num_procs > 1)
@@ -571,7 +581,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    num_passes = pass;
 
-   P_diag_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST); /* P_diag_pass[i] will contain
+   P_diag_pass = hypre_CTAlloc(HYPRE_Int*, num_passes,
+                               HYPRE_MEMORY_HOST); /* P_diag_pass[i] will contain
                                                                               all column numbers for points of pass i */
 
    P_diag_pass[1] = hypre_CTAlloc(HYPRE_Int, cnt_nz, HYPRE_MEMORY_HOST);
@@ -587,13 +598,17 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       P_offd_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
 
       if (cnt_nz_offd)
+      {
          P_offd_pass[1] = hypre_CTAlloc(HYPRE_Int, cnt_nz_offd, HYPRE_MEMORY_HOST);
+      }
       else
+      {
          P_offd_pass[1] = NULL;
+      }
 
       new_elmts = hypre_CTAlloc(HYPRE_BigInt*, num_passes, HYPRE_MEMORY_HOST);
 
-      new_counter = hypre_CTAlloc(HYPRE_Int,  num_passes+1, HYPRE_MEMORY_HOST);
+      new_counter = hypre_CTAlloc(HYPRE_Int,  num_passes + 1, HYPRE_MEMORY_HOST);
 
       new_counter[0] = 0;
       new_counter[1] = n_coarse_offd;
@@ -609,18 +624,18 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    cnt_nz = 0;
    cnt_nz_offd = 0;
    /* JBS: Possible candidate for threading */
-   for (i=pass_pointer[1]; i < pass_pointer[2]; i++)
+   for (i = pass_pointer[1]; i < pass_pointer[2]; i++)
    {
       i1 = pass_array[i];
       P_diag_start[i1] = cnt_nz;
       P_offd_start[i1] = cnt_nz_offd;
-      for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+      for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
       {
          j1 = S_diag_j[j];
          if (CF_marker[j1] == 1)
          {   P_diag_pass[1][cnt_nz++] = fine_to_coarse[j1]; }
       }
-      for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+      for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
       {
          j1 = S_offd_j[j];
          if (CF_marker_offd[j1] == 1)
@@ -638,49 +653,51 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       Pext_send_map_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
       Pext_recv_vec_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
       Pext_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
-      Pext_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd+1, HYPRE_MEMORY_HOST);
-      if (num_cols_offd) Pext_start = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      Pext_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd + 1, HYPRE_MEMORY_HOST);
+      if (num_cols_offd) { Pext_start = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST); }
       if (send_map_start[num_sends])
+      {
          P_ncols = hypre_CTAlloc(HYPRE_Int, send_map_start[num_sends], HYPRE_MEMORY_HOST);
+      }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < num_cols_offd+1; i++)
+      for (i = 0; i < num_cols_offd + 1; i++)
       {   Pext_i[i] = 0; }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < send_map_start[num_sends]; i++)
+      for (i = 0; i < send_map_start[num_sends]; i++)
       {   P_ncols[i] = 0; }
    }
 
    old_Pext_send_size = 0;
    old_Pext_recv_size = 0;
-   for (pass=2; pass < num_passes; pass++)
+   for (pass = 2; pass < num_passes; pass++)
    {
 
       if (num_procs > 1)
       {
-         Pext_send_map_start[pass] = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
-         Pext_recv_vec_start[pass] = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
+         Pext_send_map_start[pass] = hypre_CTAlloc(HYPRE_Int,  num_sends + 1, HYPRE_MEMORY_HOST);
+         Pext_recv_vec_start[pass] = hypre_CTAlloc(HYPRE_Int,  num_recvs + 1, HYPRE_MEMORY_HOST);
          Pext_send_size = 0;
          Pext_send_map_start[pass][0] = 0;
 
-         for (i=0; i < num_sends; i++)
+         for (i = 0; i < num_sends; i++)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j,j1) reduction(+:Pext_send_size) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(j,j1) reduction(+:Pext_send_size) HYPRE_SMP_SCHEDULE
 #endif
-            for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
+            for (j = send_map_start[i]; j < send_map_start[i + 1]; j++)
             {
                j1 = send_map_elmt[j];
-               if (assigned[j1] == pass-1)
+               if (assigned[j1] == pass - 1)
                {
-                  P_ncols[j] = P_diag_i[j1+1] + P_offd_i[j1+1];
+                  P_ncols[j] = P_diag_i[j1 + 1] + P_offd_i[j1 + 1];
                   Pext_send_size += P_ncols[j];
                }
             }
-            Pext_send_map_start[pass][i+1] = Pext_send_size;
+            Pext_send_map_start[pass][i + 1] = Pext_send_size;
          }
 
          comm_handle = hypre_ParCSRCommHandleCreate (11, comm_pkg,
@@ -696,31 +713,31 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       }
 
       cnt_offd = 0;
-      for (i=0; i < num_sends; i++)
+      for (i = 0; i < num_sends; i++)
       {
-         for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
+         for (j = send_map_start[i]; j < send_map_start[i + 1]; j++)
          {
             j1 = send_map_elmt[j];
-            if (assigned[j1] == pass-1)
+            if (assigned[j1] == pass - 1)
             {
                j_start = P_diag_start[j1];
-               j_end = j_start+P_diag_i[j1+1];
-               for (k=j_start; k < j_end; k++)
+               j_end = j_start + P_diag_i[j1 + 1];
+               for (k = j_start; k < j_end; k++)
                {
                   Pext_send_buffer[cnt_offd++] = my_first_cpt
-                     + (HYPRE_BigInt) P_diag_pass[pass-1][k];
+                                                 + (HYPRE_BigInt) P_diag_pass[pass - 1][k];
                }
                j_start = P_offd_start[j1];
-               j_end = j_start+P_offd_i[j1+1];
-               for (k=j_start; k < j_end; k++)
+               j_end = j_start + P_offd_i[j1 + 1];
+               for (k = j_start; k < j_end; k++)
                {
-                  k1 = P_offd_pass[pass-1][k];
+                  k1 = P_offd_pass[pass - 1][k];
                   k3 = 0;
-                  while (k3 < pass-1)
+                  while (k3 < pass - 1)
                   {
-                     if (k1 < new_counter[k3+1])
+                     if (k1 < new_counter[k3 + 1])
                      {
-                        k2 = k1-new_counter[k3];
+                        k2 = k1 - new_counter[k3];
                         Pext_send_buffer[cnt_offd++] = new_elmts[k3][k2];
                         break;
                      }
@@ -736,18 +753,18 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          Pext_recv_size = 0;
          Pext_recv_vec_start[pass][0] = 0;
          cnt_offd = 0;
-         for (i=0; i < num_recvs; i++)
+         for (i = 0; i < num_recvs; i++)
          {
-            for (j=recv_vec_start[i]; j<recv_vec_start[i+1]; j++)
+            for (j = recv_vec_start[i]; j < recv_vec_start[i + 1]; j++)
             {
-               if (assigned_offd[j] == pass-1)
+               if (assigned_offd[j] == pass - 1)
                {
                   Pext_start[j] = cnt_offd;
-                  cnt_offd += Pext_i[j+1];
+                  cnt_offd += Pext_i[j + 1];
                }
             }
             Pext_recv_size = cnt_offd;
-            Pext_recv_vec_start[pass][i+1] = Pext_recv_size;
+            Pext_recv_vec_start[pass][i + 1] = Pext_recv_size;
          }
 
          hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
@@ -763,12 +780,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          if (Pext_recv_size)
          {
             Pext_pass[pass] = hypre_CTAlloc(HYPRE_Int,  Pext_recv_size, HYPRE_MEMORY_HOST);
-            new_elmts[pass-1] = hypre_CTAlloc(HYPRE_BigInt, Pext_recv_size, HYPRE_MEMORY_HOST);
+            new_elmts[pass - 1] = hypre_CTAlloc(HYPRE_BigInt, Pext_recv_size, HYPRE_MEMORY_HOST);
          }
          else
          {
             Pext_pass[pass] = NULL;
-            new_elmts[pass-1] = NULL;
+            new_elmts[pass - 1] = NULL;
          }
 
          if (Pext_recv_size > old_Pext_recv_size)
@@ -788,26 +805,26 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       cnt_new = 0;
       cnt_offd = 0;
       /* JBS: Possible candidate for threading */
-      for (i=0; i < num_recvs; i++)
+      for (i = 0; i < num_recvs; i++)
       {
-         for (j=recv_vec_start[i]; j < recv_vec_start[i+1]; j++)
+         for (j = recv_vec_start[i]; j < recv_vec_start[i + 1]; j++)
          {
-            if (assigned_offd[j] == pass-1)
+            if (assigned_offd[j] == pass - 1)
             {
-               for (j1 = cnt_offd; j1 < cnt_offd+Pext_i[j+1]; j1++)
+               for (j1 = cnt_offd; j1 < cnt_offd + Pext_i[j + 1]; j1++)
                {
                   big_k1 = big_temp_pass[j1];
                   k2 = (HYPRE_Int)(big_k1 - my_first_cpt);
                   if (k2 > -1 && k2 < n_coarse)
-                  {  Pext_pass[pass][j1] = -k2-1; }
+                  {  Pext_pass[pass][j1] = -k2 - 1; }
                   else
                   {
                      not_found = 1;
                      k3 = 0;
-                     while (k3 < pass-1 && not_found)
+                     while (k3 < pass - 1 && not_found)
                      {
                         k2 = hypre_BigBinarySearch(new_elmts[k3], big_k1,
-                                                (new_counter[k3+1]-new_counter[k3]));
+                                                   (new_counter[k3 + 1] - new_counter[k3]));
                         if (k2 > -1)
                         {
                            Pext_pass[pass][j1] = k2 + new_counter[k3];
@@ -820,43 +837,45 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                      }
                      if (not_found)
                      {
-                        new_elmts[pass-1][cnt_new] = big_k1;
+                        new_elmts[pass - 1][cnt_new] = big_k1;
                         loc[cnt_new++] = j1;
                      }
                   }
                }
-               cnt_offd += Pext_i[j+1];
+               cnt_offd += Pext_i[j + 1];
             }
          }
       }
 
       if (cnt_new)
       {
-         hypre_BigQsortbi(new_elmts[pass-1],loc,0,cnt_new-1);
+         hypre_BigQsortbi(new_elmts[pass - 1], loc, 0, cnt_new - 1);
          cnt = 0;
-         local_index = new_counter[pass-1];
+         local_index = new_counter[pass - 1];
          Pext_pass[pass][loc[0]] = local_index;
 
-         for (i=1; i < cnt_new; i++)
+         for (i = 1; i < cnt_new; i++)
          {
-            if (new_elmts[pass-1][i] > new_elmts[pass-1][cnt])
+            if (new_elmts[pass - 1][i] > new_elmts[pass - 1][cnt])
             {
-               new_elmts[pass-1][++cnt] = new_elmts[pass-1][i];
+               new_elmts[pass - 1][++cnt] = new_elmts[pass - 1][i];
                local_index++;
             }
             Pext_pass[pass][loc[i]] = local_index;
          }
-         new_counter[pass] = local_index+1;
+         new_counter[pass] = local_index + 1;
       }
       else if (num_procs > 1)
-         new_counter[pass] = new_counter[pass-1];
+      {
+         new_counter[pass] = new_counter[pass - 1];
+      }
 
-      if (new_num_cols_offd < local_index+1)
-      {    new_num_cols_offd = local_index+1; }
+      if (new_num_cols_offd < local_index + 1)
+      {    new_num_cols_offd = local_index + 1; }
 
-      pass_length = pass_pointer[pass+1] - pass_pointer[pass];
+      pass_length = pass_pointer[pass + 1] - pass_pointer[pass];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i,my_thread_num,num_threads,thread_start,thread_stop,cnt_nz,cnt_nz_offd,i1,j,j1,j_start,j_end,k1,k,P_marker,P_marker_offd)
+      #pragma omp parallel private(i,my_thread_num,num_threads,thread_start,thread_stop,cnt_nz,cnt_nz_offd,i1,j,j1,j_start,j_end,k1,k,P_marker,P_marker_offd)
 #endif
       {
          /* Thread by computing the sparsity structure for this pass only over
@@ -867,11 +886,11 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          my_thread_num = hypre_GetThreadNum();
          num_threads = hypre_NumActiveThreads();
-         thread_start = (pass_length/num_threads)*my_thread_num;
-         if (my_thread_num == num_threads-1)
+         thread_start = (pass_length / num_threads) * my_thread_num;
+         if (my_thread_num == num_threads - 1)
          {  thread_stop = pass_length; }
          else
-         {  thread_stop = (pass_length/num_threads)*(my_thread_num+1); }
+         {  thread_stop = (pass_length / num_threads) * (my_thread_num + 1); }
          thread_start += pass_pointer[pass];
          thread_stop += pass_pointer[pass];
 
@@ -881,19 +900,20 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          /* This block of code is to go to the top of the parallel region starting before
           * the loop over num_passes. */
-         P_marker = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); /* marks points to see if they're counted */
-         for (i=0; i < n_coarse; i++)
+         P_marker = hypre_CTAlloc(HYPRE_Int,  n_coarse,
+                                  HYPRE_MEMORY_HOST); /* marks points to see if they're counted */
+         for (i = 0; i < n_coarse; i++)
          {   P_marker[i] = -1; }
-         if (new_num_cols_offd == local_index+1)
+         if (new_num_cols_offd == local_index + 1)
          {
             P_marker_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST);
-            for (i=0; i < new_num_cols_offd; i++)
+            for (i = 0; i < new_num_cols_offd; i++)
             {   P_marker_offd[i] = -1; }
          }
          else if (n_coarse_offd)
          {
             P_marker_offd = hypre_CTAlloc(HYPRE_Int,  n_coarse_offd, HYPRE_MEMORY_HOST);
-            for (i=0; i < n_coarse_offd; i++)
+            for (i = 0; i < n_coarse_offd; i++)
             {   P_marker_offd[i] = -1; }
          }
 
@@ -904,66 +924,66 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
           * P_diag_i, P_offd_i: data parallel here, and require no special treatment
           * P_diag_start, P_offd_start: are not data parallel, require special treatment
           */
-         for (i=thread_start; i < thread_stop; i++)
+         for (i = thread_start; i < thread_stop; i++)
          {
             i1 = pass_array[i];
             P_diag_start[i1] = cnt_nz;
             P_offd_start[i1] = cnt_nz_offd;
-            for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+            for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
             {
                j1 = S_diag_j[j];
-               if (assigned[j1] == pass-1)
+               if (assigned[j1] == pass - 1)
                {
                   j_start = P_diag_start[j1];
-                  j_end = j_start+P_diag_i[j1+1];
-                  for (k=j_start; k < j_end; k++)
+                  j_end = j_start + P_diag_i[j1 + 1];
+                  for (k = j_start; k < j_end; k++)
                   {
-                     k1 = P_diag_pass[pass-1][k];
+                     k1 = P_diag_pass[pass - 1][k];
                      if (P_marker[k1] != i1)
                      {
                         cnt_nz++;
-                        P_diag_i[i1+1]++;
+                        P_diag_i[i1 + 1]++;
                         P_marker[k1] = i1;
                      }
                   }
                   j_start = P_offd_start[j1];
-                  j_end = j_start+P_offd_i[j1+1];
-                  for (k=j_start; k < j_end; k++)
+                  j_end = j_start + P_offd_i[j1 + 1];
+                  for (k = j_start; k < j_end; k++)
                   {
-                     k1 = P_offd_pass[pass-1][k];
+                     k1 = P_offd_pass[pass - 1][k];
                      if (P_marker_offd[k1] != i1)
                      {
                         cnt_nz_offd++;
-                        P_offd_i[i1+1]++;
+                        P_offd_i[i1 + 1]++;
                         P_marker_offd[k1] = i1;
                      }
                   }
                }
             }
             j_start = 0;
-            for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+            for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
             {
                j1 = S_offd_j[j];
-               if (assigned_offd[j1] == pass-1)
+               if (assigned_offd[j1] == pass - 1)
                {
                   j_start = Pext_start[j1];
-                  j_end = j_start+Pext_i[j1+1];
-                  for (k=j_start; k < j_end; k++)
+                  j_end = j_start + Pext_i[j1 + 1];
+                  for (k = j_start; k < j_end; k++)
                   {
                      k1 = Pext_pass[pass][k];
                      if (k1 < 0)
                      {
-                        if (P_marker[-k1-1] != i1)
+                        if (P_marker[-k1 - 1] != i1)
                         {
                            cnt_nz++;
-                           P_diag_i[i1+1]++;
-                           P_marker[-k1-1] = i1;
+                           P_diag_i[i1 + 1]++;
+                           P_marker[-k1 - 1] = i1;
                         }
                      }
                      else if (P_marker_offd[k1] != i1)
                      {
                         cnt_nz_offd++;
-                        P_offd_i[i1+1]++;
+                        P_offd_i[i1 + 1]++;
                         P_marker_offd[k1] = i1;
                      }
                   }
@@ -973,40 +993,40 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          /* Update P_diag_start, P_offd_start with cumulative
           * nonzero counts over all threads */
-         if(my_thread_num == 0)
+         if (my_thread_num == 0)
          {   max_num_threads[0] = num_threads; }
          cnt_nz_offd_per_thread[my_thread_num] = cnt_nz_offd;
          cnt_nz_per_thread[my_thread_num] = cnt_nz;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+         #pragma omp barrier
 #endif
-         if(my_thread_num == 0)
+         if (my_thread_num == 0)
          {
-            for(i = 1; i < max_num_threads[0]; i++)
+            for (i = 1; i < max_num_threads[0]; i++)
             {
-               cnt_nz_offd_per_thread[i] += cnt_nz_offd_per_thread[i-1];
-               cnt_nz_per_thread[i] += cnt_nz_per_thread[i-1];
+               cnt_nz_offd_per_thread[i] += cnt_nz_offd_per_thread[i - 1];
+               cnt_nz_per_thread[i] += cnt_nz_per_thread[i - 1];
             }
          }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+         #pragma omp barrier
 #endif
-         if(my_thread_num > 0)
+         if (my_thread_num > 0)
          {
             /* update this thread's section of P_diag_start and P_offd_start
              * with the num of nz's counted by previous threads */
-            for (i=thread_start; i < thread_stop; i++)
+            for (i = thread_start; i < thread_stop; i++)
             {
                i1 = pass_array[i];
-               P_diag_start[i1] += cnt_nz_per_thread[my_thread_num-1];
-               P_offd_start[i1] += cnt_nz_offd_per_thread[my_thread_num-1];
+               P_diag_start[i1] += cnt_nz_per_thread[my_thread_num - 1];
+               P_offd_start[i1] += cnt_nz_offd_per_thread[my_thread_num - 1];
             }
          }
          else /* if my_thread_num == 0 */
          {
             /* Grab the nz count for all threads */
-            cnt_nz = cnt_nz_per_thread[max_num_threads[0]-1];
-            cnt_nz_offd = cnt_nz_offd_per_thread[max_num_threads[0]-1];
+            cnt_nz = cnt_nz_per_thread[max_num_threads[0] - 1];
+            cnt_nz_offd = cnt_nz_offd_per_thread[max_num_threads[0] - 1];
 
             /* Updated total nz count */
             total_nz += cnt_nz;
@@ -1015,20 +1035,24 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             /* Allocate P_diag_pass and P_offd_pass for all threads */
             P_diag_pass[pass] = hypre_CTAlloc(HYPRE_Int,  cnt_nz, HYPRE_MEMORY_HOST);
             if (cnt_nz_offd)
+            {
                P_offd_pass[pass] = hypre_CTAlloc(HYPRE_Int,  cnt_nz_offd, HYPRE_MEMORY_HOST);
+            }
             else if (num_procs > 1)
+            {
                P_offd_pass[pass] = NULL;
+            }
          }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
+         #pragma omp barrier
 #endif
 
          /* offset cnt_nz and cnt_nz_offd to point to the starting
           * point in P_diag_pass and P_offd_pass for each thread */
-         if(my_thread_num > 0)
+         if (my_thread_num > 0)
          {
-            cnt_nz = cnt_nz_per_thread[my_thread_num-1];
-            cnt_nz_offd = cnt_nz_offd_per_thread[my_thread_num-1];
+            cnt_nz = cnt_nz_per_thread[my_thread_num - 1];
+            cnt_nz_offd = cnt_nz_offd_per_thread[my_thread_num - 1];
          }
          else
          {
@@ -1037,60 +1061,60 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          }
 
          /* Set P_diag_pass and P_offd_pass */
-         for (i=thread_start; i < thread_stop; i++)
+         for (i = thread_start; i < thread_stop; i++)
          {
             i1 = pass_array[i];
-            for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+            for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
             {
                j1 = S_diag_j[j];
-               if (assigned[j1] == pass-1)
+               if (assigned[j1] == pass - 1)
                {
                   j_start = P_diag_start[j1];
-                  j_end = j_start+P_diag_i[j1+1];
-                  for (k=j_start; k < j_end; k++)
+                  j_end = j_start + P_diag_i[j1 + 1];
+                  for (k = j_start; k < j_end; k++)
                   {
-                     k1 = P_diag_pass[pass-1][k];
-                     if (P_marker[k1] != -i1-1)
+                     k1 = P_diag_pass[pass - 1][k];
+                     if (P_marker[k1] != -i1 - 1)
                      {
                         P_diag_pass[pass][cnt_nz++] = k1;
-                        P_marker[k1] = -i1-1;
+                        P_marker[k1] = -i1 - 1;
                      }
                   }
                   j_start = P_offd_start[j1];
-                  j_end = j_start+P_offd_i[j1+1];
-                  for (k=j_start; k < j_end; k++)
+                  j_end = j_start + P_offd_i[j1 + 1];
+                  for (k = j_start; k < j_end; k++)
                   {
-                     k1 = P_offd_pass[pass-1][k];
-                     if (P_marker_offd[k1] != -i1-1)
+                     k1 = P_offd_pass[pass - 1][k];
+                     if (P_marker_offd[k1] != -i1 - 1)
                      {
                         P_offd_pass[pass][cnt_nz_offd++] = k1;
-                        P_marker_offd[k1] = -i1-1;
+                        P_marker_offd[k1] = -i1 - 1;
                      }
                   }
                }
             }
-            for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+            for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
             {
                j1 = S_offd_j[j];
-               if (assigned_offd[j1] == pass-1)
+               if (assigned_offd[j1] == pass - 1)
                {
                   j_start = Pext_start[j1];
-                  j_end = j_start+Pext_i[j1+1];
-                  for (k=j_start; k < j_end; k++)
+                  j_end = j_start + Pext_i[j1 + 1];
+                  for (k = j_start; k < j_end; k++)
                   {
                      k1 = Pext_pass[pass][k];
                      if (k1 < 0)
                      {
-                        if (P_marker[-k1-1] != -i1-1)
+                        if (P_marker[-k1 - 1] != -i1 - 1)
                         {
-                           P_diag_pass[pass][cnt_nz++] = -k1-1;
-                           P_marker[-k1-1] = -i1-1;
+                           P_diag_pass[pass][cnt_nz++] = -k1 - 1;
+                           P_marker[-k1 - 1] = -i1 - 1;
                         }
                      }
-                     else if (P_marker_offd[k1] != -i1-1)
+                     else if (P_marker_offd[k1] != -i1 - 1)
                      {
                         P_offd_pass[pass][cnt_nz_offd++] = k1;
-                        P_marker_offd[k1] = -i1-1;
+                        P_marker_offd[k1] = -i1 - 1;
                      }
                   }
                }
@@ -1098,7 +1122,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          }
 
          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
-         if ( (n_coarse_offd) || (new_num_cols_offd  == local_index+1) )
+         if ( (n_coarse_offd) || (new_num_cols_offd  == local_index + 1) )
          {    hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST); }
 
       } /* End parallel region */
@@ -1114,28 +1138,28 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_TFree(cnt_nz_offd_per_thread, HYPRE_MEMORY_HOST);
    hypre_TFree(max_num_threads, HYPRE_MEMORY_HOST);
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_DEVICE);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_HOST);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_HOST);
 
 
    if (total_nz_offd)
    {
-      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_DEVICE);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_DEVICE);
+      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_HOST);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_HOST);
    }
 
-   for (i=0; i < n_fine; i++)
+   for (i = 0; i < n_fine; i++)
    {
-      P_diag_i[i+1] += P_diag_i[i];
-      P_offd_i[i+1] += P_offd_i[i];
+      P_diag_i[i + 1] += P_diag_i[i];
+      P_offd_i[i + 1] += P_offd_i[i];
    }
 
-/* determine P for coarse points */
+   /* determine P for coarse points */
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,i1) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i,i1) HYPRE_SMP_SCHEDULE
 #endif
-   for (i=0; i < n_coarse; i++)
+   for (i = 0; i < n_coarse; i++)
    {
       i1 = C_array[i];
       P_diag_j[P_diag_i[i1]] = fine_to_coarse[i1];
@@ -1148,9 +1172,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                         accordingly */
    {
 
-      pass_length = pass_pointer[2]-pass_pointer[1];
+      pass_length = pass_pointer[2] - pass_pointer[1];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,P_marker,P_marker_offd,i,i1,sum_C_pos,sum_C_neg,sum_N_pos,sum_N_neg,j_start,j_end,j,k1,cnt,j1,cnt_offd,diagonal,alfa,beta)
+      #pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,P_marker,P_marker_offd,i,i1,sum_C_pos,sum_C_neg,sum_N_pos,sum_N_neg,j_start,j_end,j,k1,cnt,j1,cnt_offd,diagonal,alfa,beta)
 #endif
       {
          /* Sparsity structure is now finished.  Next, calculate interpolation
@@ -1159,26 +1183,28 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
           * up evenly amongst the threads. */
 
          P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
-         for (i=0; i < n_fine; i++)
+         for (i = 0; i < n_fine; i++)
          {   P_marker[i] = -1; }
          if (num_cols_offd)
          {
             P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
-            for (i=0; i < num_cols_offd; i++)
+            for (i = 0; i < num_cols_offd; i++)
+            {
                P_marker_offd[i] = -1;
+            }
          }
 
          /* Compute this thread's range of pass_length */
          my_thread_num = hypre_GetThreadNum();
          num_threads = hypre_NumActiveThreads();
-         thread_start = pass_pointer[1] + (pass_length/num_threads)*my_thread_num;
-         if (my_thread_num == num_threads-1)
+         thread_start = pass_pointer[1] + (pass_length / num_threads) * my_thread_num;
+         if (my_thread_num == num_threads - 1)
          {  thread_stop = pass_pointer[1] + pass_length; }
          else
-         {  thread_stop = pass_pointer[1] + (pass_length/num_threads)*(my_thread_num+1); }
+         {  thread_stop = pass_pointer[1] + (pass_length / num_threads) * (my_thread_num + 1); }
 
          /* determine P for points of pass 1, i.e. neighbors of coarse points */
-         for (i=thread_start; i < thread_stop; i++)
+         for (i = thread_start; i < thread_stop; i++)
          {
             i1 = pass_array[i];
             sum_C_pos = 0;
@@ -1186,76 +1212,100 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             sum_N_pos = 0;
             sum_N_neg = 0;
             j_start = P_diag_start[i1];
-            j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
-            for (j=j_start; j < j_end; j++)
+            j_end = j_start + P_diag_i[i1 + 1] - P_diag_i[i1];
+            for (j = j_start; j < j_end; j++)
             {
                k1 = P_diag_pass[1][j];
                P_marker[C_array[k1]] = i1;
             }
             cnt = P_diag_i[i1];
-            for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+            for (j = A_diag_i[i1] + 1; j < A_diag_i[i1 + 1]; j++)
             {
                j1 = A_diag_j[j];
                if (CF_marker[j1] != -3 &&
                    (num_functions == 1 || dof_func[i1] == dof_func[j1]))
                {
                   if (A_diag_data[j] < 0)
+                  {
                      sum_N_neg += A_diag_data[j];
+                  }
                   else
+                  {
                      sum_N_pos += A_diag_data[j];
+                  }
                }
                if (j1 != -1 && P_marker[j1] == i1)
                {
                   P_diag_data[cnt] = A_diag_data[j];
                   P_diag_j[cnt++] = fine_to_coarse[j1];
                   if (A_diag_data[j] < 0)
+                  {
                      sum_C_neg += A_diag_data[j];
+                  }
                   else
+                  {
                      sum_C_pos += A_diag_data[j];
+                  }
                }
             }
             j_start = P_offd_start[i1];
-            j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
-            for (j=j_start; j < j_end; j++)
+            j_end = j_start + P_offd_i[i1 + 1] - P_offd_i[i1];
+            for (j = j_start; j < j_end; j++)
             {
                k1 = P_offd_pass[1][j];
                P_marker_offd[C_array_offd[k1]] = i1;
             }
             cnt_offd = P_offd_i[i1];
-            for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+            for (j = A_offd_i[i1]; j < A_offd_i[i1 + 1]; j++)
             {
                j1 = A_offd_j[j];
                if (CF_marker_offd[j1] != -3 &&
                    (num_functions == 1 || dof_func[i1] == dof_func_offd[j1]))
                {
                   if (A_offd_data[j] < 0)
+                  {
                      sum_N_neg += A_offd_data[j];
+                  }
                   else
+                  {
                      sum_N_pos += A_offd_data[j];
+                  }
                }
                if (j1 != -1 && P_marker_offd[j1] == i1)
                {
                   P_offd_data[cnt_offd] = A_offd_data[j];
                   P_offd_j[cnt_offd++] = map_S_to_new[j1];
                   if (A_offd_data[j] < 0)
+                  {
                      sum_C_neg += A_offd_data[j];
+                  }
                   else
+                  {
                      sum_C_pos += A_offd_data[j];
+                  }
                }
             }
             diagonal = A_diag_data[A_diag_i[i1]];
-            if (sum_C_neg*diagonal != 0) alfa = -sum_N_neg/(sum_C_neg*diagonal);
-            if (sum_C_pos*diagonal != 0) beta = -sum_N_pos/(sum_C_pos*diagonal);
-            for (j=P_diag_i[i1]; j < cnt; j++)
+            if (sum_C_neg * diagonal != 0) { alfa = -sum_N_neg / (sum_C_neg * diagonal); }
+            if (sum_C_pos * diagonal != 0) { beta = -sum_N_pos / (sum_C_pos * diagonal); }
+            for (j = P_diag_i[i1]; j < cnt; j++)
                if (P_diag_data[j] < 0)
+               {
                   P_diag_data[j] *= alfa;
+               }
                else
+               {
                   P_diag_data[j] *= beta;
-            for (j=P_offd_i[i1]; j < cnt_offd; j++)
+               }
+            for (j = P_offd_i[i1]; j < cnt_offd; j++)
                if (P_offd_data[j] < 0)
+               {
                   P_offd_data[j] *= alfa;
+               }
                else
+               {
                   P_offd_data[j] *= beta;
+               }
          }
 
          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
@@ -1266,10 +1316,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       old_Pext_send_size = 0;
       old_Pext_recv_size = 0;
 
-      if (n_coarse) hypre_TFree(C_array, HYPRE_MEMORY_HOST);
+      if (n_coarse) { hypre_TFree(C_array, HYPRE_MEMORY_HOST); }
       hypre_TFree(C_array_offd, HYPRE_MEMORY_HOST);
       hypre_TFree(P_diag_pass[1], HYPRE_MEMORY_HOST);
-      if (num_procs > 1) hypre_TFree(P_offd_pass[1], HYPRE_MEMORY_HOST);
+      if (num_procs > 1) { hypre_TFree(P_offd_pass[1], HYPRE_MEMORY_HOST); }
 
 
       for (pass = 2; pass < num_passes; pass++)
@@ -1286,20 +1336,20 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             old_Pext_send_size = Pext_send_size;
 
             cnt_offd = 0;
-            for (i=0; i < num_sends; i++)
+            for (i = 0; i < num_sends; i++)
             {
-               for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
+               for (j = send_map_start[i]; j < send_map_start[i + 1]; j++)
                {
                   j1 = send_map_elmt[j];
-                  if (assigned[j1] == pass-1)
+                  if (assigned[j1] == pass - 1)
                   {
                      j_start = P_diag_i[j1];
-                     j_end = P_diag_i[j1+1];
-                     for (k=j_start; k < j_end; k++)
+                     j_end = P_diag_i[j1 + 1];
+                     for (k = j_start; k < j_end; k++)
                      {   Pext_send_data[cnt_offd++] = P_diag_data[k]; }
                      j_start = P_offd_i[j1];
-                     j_end = P_offd_i[j1+1];
-                     for (k=j_start; k < j_end; k++)
+                     j_end = P_offd_i[j1 + 1];
+                     for (k = j_start; k < j_end; k++)
                      {  Pext_send_data[cnt_offd++] = P_offd_data[k]; }
                   }
                }
@@ -1329,9 +1379,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             hypre_TFree(Pext_recv_vec_start[pass], HYPRE_MEMORY_HOST);
          }
 
-         pass_length = pass_pointer[pass+1]-pass_pointer[pass];
+         pass_length = pass_pointer[pass + 1] - pass_pointer[pass];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,P_marker,P_marker_offd,i,i1,sum_C_neg,sum_C_pos,sum_N_neg,sum_N_pos,j_start,j_end,cnt,j,k1,cnt_offd,j1,k,alfa,beta,diagonal,C_array,C_array_offd)
+         #pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,P_marker,P_marker_offd,i,i1,sum_C_neg,sum_C_pos,sum_N_neg,sum_N_pos,j_start,j_end,cnt,j,k1,cnt_offd,j1,k,alfa,beta,diagonal,C_array,C_array_offd)
 #endif
          {
             /* Sparsity structure is now finished.  Next, calculate interpolation
@@ -1340,13 +1390,15 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              * up evenly amongst the threads. */
 
             P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
-            for (i=0; i < n_fine; i++)
+            for (i = 0; i < n_fine; i++)
             {   P_marker[i] = -1; }
             if (num_cols_offd)
             {
                P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
-               for (i=0; i < num_cols_offd; i++)
+               for (i = 0; i < num_cols_offd; i++)
+               {
                   P_marker_offd[i] = -1;
+               }
             }
 
             C_array = NULL;
@@ -1361,14 +1413,14 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             /* Compute this thread's range of pass_length */
             my_thread_num = hypre_GetThreadNum();
             num_threads = hypre_NumActiveThreads();
-            thread_start = pass_pointer[pass] + (pass_length/num_threads)*my_thread_num;
-            if (my_thread_num == num_threads-1)
+            thread_start = pass_pointer[pass] + (pass_length / num_threads) * my_thread_num;
+            if (my_thread_num == num_threads - 1)
             {  thread_stop = pass_pointer[pass] + pass_length; }
             else
-            {  thread_stop = pass_pointer[pass] + (pass_length/num_threads)*(my_thread_num+1); }
+            {  thread_stop = pass_pointer[pass] + (pass_length / num_threads) * (my_thread_num + 1); }
 
             /* Loop over each thread's row-range */
-            for (i=thread_start; i < thread_stop; i++)
+            for (i = thread_start; i < thread_stop; i++)
             {
                i1 = pass_array[i];
                sum_C_neg = 0;
@@ -1376,9 +1428,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                sum_N_neg = 0;
                sum_N_pos = 0;
                j_start = P_diag_start[i1];
-               j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
+               j_end = j_start + P_diag_i[i1 + 1] - P_diag_i[i1];
                cnt = P_diag_i[i1];
-               for (j=j_start; j < j_end; j++)
+               for (j = j_start; j < j_end; j++)
                {
                   k1 = P_diag_pass[pass][j];
                   C_array[k1] = cnt;
@@ -1386,36 +1438,40 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   P_diag_j[cnt++] = k1;
                }
                j_start = P_offd_start[i1];
-               j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
+               j_end = j_start + P_offd_i[i1 + 1] - P_offd_i[i1];
                cnt_offd = P_offd_i[i1];
-               for (j=j_start; j < j_end; j++)
+               for (j = j_start; j < j_end; j++)
                {
                   k1 = P_offd_pass[pass][j];
                   C_array_offd[k1] = cnt_offd;
                   P_offd_data[cnt_offd] = 0;
                   P_offd_j[cnt_offd++] = k1;
                }
-               for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+               for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
                {
                   j1 = S_diag_j[j];
-                  if (assigned[j1] == pass-1)
+                  if (assigned[j1] == pass - 1)
+                  {
                      P_marker[j1] = i1;
+                  }
                }
-               for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+               for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
                {
                   j1 = S_offd_j[j];
-                  if (assigned_offd[j1] == pass-1)
+                  if (assigned_offd[j1] == pass - 1)
+                  {
                      P_marker_offd[j1] = i1;
+                  }
                }
-               for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+               for (j = A_diag_i[i1] + 1; j < A_diag_i[i1 + 1]; j++)
                {
                   j1 = A_diag_j[j];
                   if (P_marker[j1] == i1)
                   {
-                     for (k=P_diag_i[j1]; k < P_diag_i[j1+1]; k++)
+                     for (k = P_diag_i[j1]; k < P_diag_i[j1 + 1]; k++)
                      {
                         k1 = P_diag_j[k];
-                        alfa = A_diag_data[j]*P_diag_data[k];
+                        alfa = A_diag_data[j] * P_diag_data[k];
                         P_diag_data[C_array[k1]] += alfa;
                         if (alfa < 0)
                         {
@@ -1428,10 +1484,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                            sum_N_pos += alfa;
                         }
                      }
-                     for (k=P_offd_i[j1]; k < P_offd_i[j1+1]; k++)
+                     for (k = P_offd_i[j1]; k < P_offd_i[j1 + 1]; k++)
                      {
                         k1 = P_offd_j[k];
-                        alfa = A_diag_data[j]*P_offd_data[k];
+                        alfa = A_diag_data[j] * P_offd_data[k];
                         P_offd_data[C_array_offd[k1]] += alfa;
                         if (alfa < 0)
                         {
@@ -1451,28 +1507,36 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                          (num_functions == 1 || dof_func[i1] == dof_func[j1]))
                      {
                         if (A_diag_data[j] < 0)
+                        {
                            sum_N_neg += A_diag_data[j];
+                        }
                         else
+                        {
                            sum_N_pos += A_diag_data[j];
+                        }
                      }
                   }
                }
-               for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+               for (j = A_offd_i[i1]; j < A_offd_i[i1 + 1]; j++)
                {
                   j1 = A_offd_j[j];
 
                   if (j1 > -1 && P_marker_offd[j1] == i1)
                   {
                      j_start = Pext_start[j1];
-                     j_end = j_start+Pext_i[j1+1];
-                     for (k=j_start; k < j_end; k++)
+                     j_end = j_start + Pext_i[j1 + 1];
+                     for (k = j_start; k < j_end; k++)
                      {
                         k1 = Pext_pass[pass][k];
-                        alfa = A_offd_data[j]*Pext_data[k];
+                        alfa = A_offd_data[j] * Pext_data[k];
                         if (k1 < 0)
-                           P_diag_data[C_array[-k1-1]] += alfa;
+                        {
+                           P_diag_data[C_array[-k1 - 1]] += alfa;
+                        }
                         else
+                        {
                            P_offd_data[C_array_offd[k1]] += alfa;
+                        }
                         if (alfa < 0)
                         {
                            sum_C_neg += alfa;
@@ -1491,26 +1555,38 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                          (num_functions == 1 || dof_func_offd[j1] == dof_func[i1]))
                      {
                         if ( A_offd_data[j] < 0)
+                        {
                            sum_N_neg += A_offd_data[j];
+                        }
                         else
+                        {
                            sum_N_pos += A_offd_data[j];
+                        }
                      }
                   }
                }
                diagonal = A_diag_data[A_diag_i[i1]];
-               if (sum_C_neg*diagonal != 0) alfa = -sum_N_neg/(sum_C_neg*diagonal);
-               if (sum_C_pos*diagonal != 0) beta = -sum_N_pos/(sum_C_pos*diagonal);
+               if (sum_C_neg * diagonal != 0) { alfa = -sum_N_neg / (sum_C_neg * diagonal); }
+               if (sum_C_pos * diagonal != 0) { beta = -sum_N_pos / (sum_C_pos * diagonal); }
 
-               for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
+               for (j = P_diag_i[i1]; j < P_diag_i[i1 + 1]; j++)
                   if (P_diag_data[j] < 0)
+                  {
                      P_diag_data[j] *= alfa;
+                  }
                   else
+                  {
                      P_diag_data[j] *= beta;
-               for (j=P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
+                  }
+               for (j = P_offd_i[i1]; j < P_offd_i[i1 + 1]; j++)
                   if (P_offd_data[j] < 0)
+                  {
                      P_offd_data[j] *= alfa;
+                  }
                   else
+                  {
                      P_offd_data[j] *= beta;
+                  }
             }
 
             hypre_TFree(C_array, HYPRE_MEMORY_HOST);
@@ -1532,9 +1608,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    else /* no distinction between positive and negative offdiagonal element */
    {
 
-      pass_length = pass_pointer[2]-pass_pointer[1];
+      pass_length = pass_pointer[2] - pass_pointer[1];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,k,k1,i,i1,j,j1,sum_C,sum_N,j_start,j_end,cnt,tmp_marker,tmp_marker_offd,cnt_offd,diagonal,alfa)
+      #pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,k,k1,i,i1,j,j1,sum_C,sum_N,j_start,j_end,cnt,tmp_marker,tmp_marker_offd,cnt_offd,diagonal,alfa)
 #endif
       {
          /* Sparsity structure is now finished.  Next, calculate interpolation
@@ -1549,40 +1625,42 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          tmp_marker_offd = NULL;
          if (num_cols_offd)
          {   tmp_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
-         for (i=0; i < n_fine; i++)
+         for (i = 0; i < n_fine; i++)
          {   tmp_marker[i] = -1; }
-         for (i=0; i < num_cols_offd; i++)
+         for (i = 0; i < num_cols_offd; i++)
          {   tmp_marker_offd[i] = -1; }
 
          /* Compute this thread's range of pass_length */
          my_thread_num = hypre_GetThreadNum();
          num_threads = hypre_NumActiveThreads();
-         thread_start = pass_pointer[1] + (pass_length/num_threads)*my_thread_num;
-         if (my_thread_num == num_threads-1)
+         thread_start = pass_pointer[1] + (pass_length / num_threads) * my_thread_num;
+         if (my_thread_num == num_threads - 1)
          {  thread_stop = pass_pointer[1] + pass_length; }
          else
-         {  thread_stop = pass_pointer[1] + (pass_length/num_threads)*(my_thread_num+1); }
+         {  thread_stop = pass_pointer[1] + (pass_length / num_threads) * (my_thread_num + 1); }
 
          /* determine P for points of pass 1, i.e. neighbors of coarse points */
-         for (i=thread_start; i < thread_stop; i++)
+         for (i = thread_start; i < thread_stop; i++)
          {
             i1 = pass_array[i];
             sum_C = 0;
             sum_N = 0;
             j_start = P_diag_start[i1];
-            j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
-            for (j=j_start; j < j_end; j++)
+            j_end = j_start + P_diag_i[i1 + 1] - P_diag_i[i1];
+            for (j = j_start; j < j_end; j++)
             {
                k1 = P_diag_pass[1][j];
                tmp_marker[C_array[k1]] = i1;
             }
             cnt = P_diag_i[i1];
-            for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+            for (j = A_diag_i[i1] + 1; j < A_diag_i[i1 + 1]; j++)
             {
                j1 = A_diag_j[j];
                if (CF_marker[j1] != -3 &&
                    (num_functions == 1 || dof_func[i1] == dof_func[j1]))
+               {
                   sum_N += A_diag_data[j];
+               }
                if (j1 != -1 && tmp_marker[j1] == i1)
                {
                   P_diag_data[cnt] = A_diag_data[j];
@@ -1591,19 +1669,21 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                }
             }
             j_start = P_offd_start[i1];
-            j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
-            for (j=j_start; j < j_end; j++)
+            j_end = j_start + P_offd_i[i1 + 1] - P_offd_i[i1];
+            for (j = j_start; j < j_end; j++)
             {
                k1 = P_offd_pass[1][j];
                tmp_marker_offd[C_array_offd[k1]] = i1;
             }
             cnt_offd = P_offd_i[i1];
-            for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+            for (j = A_offd_i[i1]; j < A_offd_i[i1 + 1]; j++)
             {
                j1 = A_offd_j[j];
                if (CF_marker_offd[j1] != -3 &&
                    (num_functions == 1 || dof_func[i1] == dof_func_offd[j1]))
+               {
                   sum_N += A_offd_data[j];
+               }
                if (j1 != -1 && tmp_marker_offd[j1] == i1)
                {
                   P_offd_data[cnt_offd] = A_offd_data[j];
@@ -1612,11 +1692,15 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                }
             }
             diagonal = A_diag_data[A_diag_i[i1]];
-            if (sum_C*diagonal != 0) alfa = -sum_N/(sum_C*diagonal);
-            for (j=P_diag_i[i1]; j < cnt; j++)
+            if (sum_C * diagonal != 0) { alfa = -sum_N / (sum_C * diagonal); }
+            for (j = P_diag_i[i1]; j < cnt; j++)
+            {
                P_diag_data[j] *= alfa;
-            for (j=P_offd_i[i1]; j < cnt_offd; j++)
+            }
+            for (j = P_offd_i[i1]; j < cnt_offd; j++)
+            {
                P_offd_data[j] *= alfa;
+            }
          }
          hypre_TFree(tmp_marker, HYPRE_MEMORY_HOST);
          hypre_TFree(tmp_marker_offd, HYPRE_MEMORY_HOST);
@@ -1625,10 +1709,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       old_Pext_send_size = 0;
       old_Pext_recv_size = 0;
 
-      if (n_coarse) hypre_TFree(C_array, HYPRE_MEMORY_HOST);
+      if (n_coarse) { hypre_TFree(C_array, HYPRE_MEMORY_HOST); }
       hypre_TFree(C_array_offd, HYPRE_MEMORY_HOST);
       hypre_TFree(P_diag_pass[1], HYPRE_MEMORY_HOST);
-      if (num_procs > 1) hypre_TFree(P_offd_pass[1], HYPRE_MEMORY_HOST);
+      if (num_procs > 1) { hypre_TFree(P_offd_pass[1], HYPRE_MEMORY_HOST); }
 
       for (pass = 2; pass < num_passes; pass++)
       {
@@ -1644,22 +1728,22 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             old_Pext_send_size = Pext_send_size;
 
             cnt_offd = 0;
-            for (i=0; i < num_sends; i++)
+            for (i = 0; i < num_sends; i++)
             {
-               for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
+               for (j = send_map_start[i]; j < send_map_start[i + 1]; j++)
                {
                   j1 = send_map_elmt[j];
-                  if (assigned[j1] == pass-1)
+                  if (assigned[j1] == pass - 1)
                   {
                      j_start = P_diag_i[j1];
-                     j_end = P_diag_i[j1+1];
-                     for (k=j_start; k < j_end; k++)
+                     j_end = P_diag_i[j1 + 1];
+                     for (k = j_start; k < j_end; k++)
                      {
                         Pext_send_data[cnt_offd++] = P_diag_data[k];
                      }
                      j_start = P_offd_i[j1];
-                     j_end = P_offd_i[j1+1];
-                     for (k=j_start; k < j_end; k++)
+                     j_end = P_offd_i[j1 + 1];
+                     for (k = j_start; k < j_end; k++)
                      {
                         Pext_send_data[cnt_offd++] = P_offd_data[k];
                      }
@@ -1691,9 +1775,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             hypre_TFree(Pext_recv_vec_start[pass], HYPRE_MEMORY_HOST);
          }
 
-         pass_length = pass_pointer[pass+1]-pass_pointer[pass];
+         pass_length = pass_pointer[pass + 1] - pass_pointer[pass];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,k,k1,i,i1,j,j1,sum_C,sum_N,j_start,j_end,cnt,tmp_marker,tmp_marker_offd,cnt_offd,diagonal,alfa,tmp_array,tmp_array_offd)
+         #pragma omp parallel private(thread_start,thread_stop,my_thread_num,num_threads,k,k1,i,i1,j,j1,sum_C,sum_N,j_start,j_end,cnt,tmp_marker,tmp_marker_offd,cnt_offd,diagonal,alfa,tmp_array,tmp_array_offd)
 #endif
          {
             /* Sparsity structure is now finished.  Next, calculate interpolation
@@ -1716,29 +1800,29 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST); }
             else
             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd, HYPRE_MEMORY_HOST);}
-            for (i=0; i < n_fine; i++)
+            for (i = 0; i < n_fine; i++)
             {    tmp_marker[i] = -1; }
-            for (i=0; i < num_cols_offd; i++)
+            for (i = 0; i < num_cols_offd; i++)
             {    tmp_marker_offd[i] = -1; }
 
             /* Compute this thread's range of pass_length */
             my_thread_num = hypre_GetThreadNum();
             num_threads = hypre_NumActiveThreads();
-            thread_start = pass_pointer[pass] + (pass_length/num_threads)*my_thread_num;
-            if (my_thread_num == num_threads-1)
+            thread_start = pass_pointer[pass] + (pass_length / num_threads) * my_thread_num;
+            if (my_thread_num == num_threads - 1)
             {  thread_stop = pass_pointer[pass] + pass_length; }
             else
-            {  thread_stop = pass_pointer[pass] + (pass_length/num_threads)*(my_thread_num+1); }
+            {  thread_stop = pass_pointer[pass] + (pass_length / num_threads) * (my_thread_num + 1); }
 
-            for (i=thread_start; i < thread_stop; i++)
+            for (i = thread_start; i < thread_stop; i++)
             {
                i1 = pass_array[i];
                sum_C = 0;
                sum_N = 0;
                j_start = P_diag_start[i1];
-               j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
+               j_end = j_start + P_diag_i[i1 + 1] - P_diag_i[i1];
                cnt = P_diag_i[i1];
-               for (j=j_start; j < j_end; j++)
+               for (j = j_start; j < j_end; j++)
                {
                   k1 = P_diag_pass[pass][j];
                   tmp_array[k1] = cnt;
@@ -1746,44 +1830,48 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   P_diag_j[cnt++] = k1;
                }
                j_start = P_offd_start[i1];
-               j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
+               j_end = j_start + P_offd_i[i1 + 1] - P_offd_i[i1];
                cnt_offd = P_offd_i[i1];
-               for (j=j_start; j < j_end; j++)
+               for (j = j_start; j < j_end; j++)
                {
                   k1 = P_offd_pass[pass][j];
                   tmp_array_offd[k1] = cnt_offd;
                   P_offd_data[cnt_offd] = 0;
                   P_offd_j[cnt_offd++] = k1;
                }
-               for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+               for (j = S_diag_i[i1]; j < S_diag_i[i1 + 1]; j++)
                {
                   j1 = S_diag_j[j];
-                  if (assigned[j1] == pass-1)
+                  if (assigned[j1] == pass - 1)
+                  {
                      tmp_marker[j1] = i1;
+                  }
                }
-               for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+               for (j = S_offd_i[i1]; j < S_offd_i[i1 + 1]; j++)
                {
                   j1 = S_offd_j[j];
-                  if (assigned_offd[j1] == pass-1)
+                  if (assigned_offd[j1] == pass - 1)
+                  {
                      tmp_marker_offd[j1] = i1;
+                  }
                }
-               for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+               for (j = A_diag_i[i1] + 1; j < A_diag_i[i1 + 1]; j++)
                {
                   j1 = A_diag_j[j];
                   if (tmp_marker[j1] == i1)
                   {
-                     for (k=P_diag_i[j1]; k < P_diag_i[j1+1]; k++)
+                     for (k = P_diag_i[j1]; k < P_diag_i[j1 + 1]; k++)
                      {
                         k1 = P_diag_j[k];
-                        alfa = A_diag_data[j]*P_diag_data[k];
+                        alfa = A_diag_data[j] * P_diag_data[k];
                         P_diag_data[tmp_array[k1]] += alfa;
                         sum_C += alfa;
                         sum_N += alfa;
                      }
-                     for (k=P_offd_i[j1]; k < P_offd_i[j1+1]; k++)
+                     for (k = P_offd_i[j1]; k < P_offd_i[j1 + 1]; k++)
                      {
                         k1 = P_offd_j[k];
-                        alfa = A_diag_data[j]*P_offd_data[k];
+                        alfa = A_diag_data[j] * P_offd_data[k];
                         P_offd_data[tmp_array_offd[k1]] += alfa;
                         sum_C += alfa;
                         sum_N += alfa;
@@ -1793,25 +1881,31 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   {
                      if (CF_marker[j1] != -3 &&
                          (num_functions == 1 || dof_func[i1] == dof_func[j1]))
+                     {
                         sum_N += A_diag_data[j];
+                     }
                   }
                }
-               for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+               for (j = A_offd_i[i1]; j < A_offd_i[i1 + 1]; j++)
                {
                   j1 = A_offd_j[j];
 
                   if (j1 > -1 && tmp_marker_offd[j1] == i1)
                   {
                      j_start = Pext_start[j1];
-                     j_end = j_start+Pext_i[j1+1];
-                     for (k=j_start; k < j_end; k++)
+                     j_end = j_start + Pext_i[j1 + 1];
+                     for (k = j_start; k < j_end; k++)
                      {
                         k1 = Pext_pass[pass][k];
-                        alfa = A_offd_data[j]*Pext_data[k];
+                        alfa = A_offd_data[j] * Pext_data[k];
                         if (k1 < 0)
-                           P_diag_data[tmp_array[-k1-1]] += alfa;
+                        {
+                           P_diag_data[tmp_array[-k1 - 1]] += alfa;
+                        }
                         else
+                        {
                            P_offd_data[tmp_array_offd[k1]] += alfa;
+                        }
                         sum_C += alfa;
                         sum_N += alfa;
                      }
@@ -1820,16 +1914,22 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                   {
                      if (CF_marker_offd[j1] != -3 &&
                          (num_functions == 1 || dof_func_offd[j1] == dof_func[i1]))
+                     {
                         sum_N += A_offd_data[j];
+                     }
                   }
                }
                diagonal = A_diag_data[A_diag_i[i1]];
-               if (sum_C*diagonal != 0.0) alfa = -sum_N/(sum_C*diagonal);
+               if (sum_C * diagonal != 0.0) { alfa = -sum_N / (sum_C * diagonal); }
 
-               for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
+               for (j = P_diag_i[i1]; j < P_diag_i[i1 + 1]; j++)
+               {
                   P_diag_data[j] *= alfa;
-               for (j=P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
+               }
+               for (j = P_offd_i[i1]; j < P_offd_i[i1 + 1]; j++)
+               {
                   P_offd_data[j] *= alfa;
+               }
             }
             hypre_TFree(tmp_marker, HYPRE_MEMORY_HOST);
             hypre_TFree(tmp_marker_offd, HYPRE_MEMORY_HOST);
@@ -1865,7 +1965,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_TFree(pass_pointer, HYPRE_MEMORY_HOST);
    hypre_TFree(pass_array, HYPRE_MEMORY_HOST);
    hypre_TFree(map_S_to_new, HYPRE_MEMORY_HOST);
-   if (num_procs > 1) hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
+   if (num_procs > 1) { hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST); }
 
    P = hypre_ParCSRMatrixCreate(comm,
                                 hypre_ParCSRMatrixGlobalNumRows(A),
@@ -1907,13 +2007,13 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       else
       {   P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < new_num_cols_offd; i++)
+      for (i = 0; i < new_num_cols_offd; i++)
       {   P_marker_offd[i] = 0; }
 
       num_cols_offd_P = 0;
-      for (i=0; i < P_offd_size; i++)
+      for (i = 0; i < P_offd_size; i++)
       {
          index = P_offd_j[i];
          if (!P_marker_offd[index])
@@ -1924,52 +2024,58 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       }
 
       col_map_offd_P = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_P, HYPRE_MEMORY_HOST);
-      permute = hypre_CTAlloc(HYPRE_Int,  new_counter[num_passes-1], HYPRE_MEMORY_HOST);
-      big_permute = hypre_CTAlloc(HYPRE_BigInt,  new_counter[num_passes-1], HYPRE_MEMORY_HOST);
+      permute = hypre_CTAlloc(HYPRE_Int,  new_counter[num_passes - 1], HYPRE_MEMORY_HOST);
+      big_permute = hypre_CTAlloc(HYPRE_BigInt,  new_counter[num_passes - 1], HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < new_counter[num_passes-1]; i++)
+      for (i = 0; i < new_counter[num_passes - 1]; i++)
+      {
          big_permute[i] = -1;
+      }
 
       cnt = 0;
-      for (i=0; i < num_passes-1; i++)
+      for (i = 0; i < num_passes - 1; i++)
       {
-         for (j=new_counter[i]; j < new_counter[i+1]; j++)
+         for (j = new_counter[i]; j < new_counter[i + 1]; j++)
          {
             if (P_marker_offd[j])
             {
-               col_map_offd_P[cnt] = new_elmts[i][j-(HYPRE_BigInt)new_counter[i]];
+               col_map_offd_P[cnt] = new_elmts[i][j - (HYPRE_BigInt)new_counter[i]];
                big_permute[j] = col_map_offd_P[cnt++];
             }
          }
       }
 
-      hypre_BigQsort0(col_map_offd_P,0,num_cols_offd_P-1);
+      hypre_BigQsort0(col_map_offd_P, 0, num_cols_offd_P - 1);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,big_k1) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i,big_k1) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < new_counter[num_passes-1]; i++)
+      for (i = 0; i < new_counter[num_passes - 1]; i++)
       {
          big_k1 = big_permute[i];
          if (big_k1 != -1)
-            permute[i] = hypre_BigBinarySearch(col_map_offd_P,big_k1,num_cols_offd_P);
+         {
+            permute[i] = hypre_BigBinarySearch(col_map_offd_P, big_k1, num_cols_offd_P);
+         }
       }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < P_offd_size; i++)
+      for (i = 0; i < P_offd_size; i++)
       {   P_offd_j[i] = permute[P_offd_j[i]]; }
 
       hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST);
    }
    if (num_procs > 1)
    {
-      for (i=0; i < num_passes-1; i++)
+      for (i = 0; i < num_passes - 1; i++)
+      {
          hypre_TFree(new_elmts[i], HYPRE_MEMORY_HOST);
+      }
    }
    hypre_TFree(permute, HYPRE_MEMORY_HOST);
    hypre_TFree(big_permute, HYPRE_MEMORY_HOST);
@@ -1985,10 +2091,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    if (n_SF)
    {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i=0; i < n_fine; i++)
-         if (CF_marker[i] == -3) CF_marker[i] = -1;
+      for (i = 0; i < n_fine; i++)
+         if (CF_marker[i] == -3) { CF_marker[i] = -1; }
    }
 
    if (num_procs > 1)
@@ -2013,5 +2119,52 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] += hypre_MPI_Wtime();
 #endif
 
-   return(0);
+   return (0);
 }
+
+HYPRE_Int
+hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
+                               HYPRE_Int           *CF_marker,
+                               hypre_ParCSRMatrix  *S,
+                               HYPRE_BigInt        *num_cpts_global,
+                               HYPRE_Int            num_functions,
+                               HYPRE_Int           *dof_func,
+                               HYPRE_Int            debug_flag,
+                               HYPRE_Real           trunc_factor,
+                               HYPRE_Int            P_max_elmts,
+                               HYPRE_Int            weight_option,
+                               hypre_ParCSRMatrix **P_ptr )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("MultipassInterp");
+#endif
+
+   HYPRE_Int ierr = 0;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParCSRMatrixMemoryLocation(S) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      /* Notice: call the mod version on GPUs */
+      ierr = hypre_BoomerAMGBuildModMultipassDevice( A, CF_marker, S, num_cpts_global,
+                                                     trunc_factor, P_max_elmts, 9,
+                                                     num_functions, dof_func,
+                                                     P_ptr );
+   }
+   else
+#endif
+   {
+      ierr = hypre_BoomerAMGBuildMultipassHost( A, CF_marker, S, num_cpts_global,
+                                                num_functions, dof_func, debug_flag,
+                                                trunc_factor, P_max_elmts, weight_option,
+                                                P_ptr );
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return ierr;
+}
+

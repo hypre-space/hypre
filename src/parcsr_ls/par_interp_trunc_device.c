@@ -19,7 +19,7 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
                                   HYPRE_Real *P_a)
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
 
    if (row >= nrows)
    {
@@ -101,7 +101,8 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
  * RL: To be consistent with the CPU version, max_elmts == 0 means no limit on rownnz
  */
 HYPRE_Int
-hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_factor, HYPRE_Int max_elmts )
+hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_factor,
+                                       HYPRE_Int max_elmts )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_INTERP_TRUNC] -= hypre_MPI_Wtime();
@@ -125,7 +126,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    HYPRE_Int       *P_i         = hypre_TAlloc(HYPRE_Int,  nnz_P,   HYPRE_MEMORY_DEVICE);
    HYPRE_Int       *P_j         = hypre_TAlloc(HYPRE_Int,  nnz_P,   HYPRE_MEMORY_DEVICE);
    HYPRE_Real      *P_a         = hypre_TAlloc(HYPRE_Real, nnz_P,   HYPRE_MEMORY_DEVICE);
-   HYPRE_Int       *P_rowptr    = hypre_TAlloc(HYPRE_Int,  nrows+1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int       *P_rowptr    = hypre_TAlloc(HYPRE_Int,  nrows + 1, HYPRE_MEMORY_DEVICE);
    HYPRE_Int       *tmp_rowid   = hypre_TAlloc(HYPRE_Int,  nnz_P,   HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int        new_nnz_diag = 0, new_nnz_offd = 0;
@@ -147,8 +148,10 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    /* offd col id := -2 - offd col id */
    HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag, -_1 - 2);
 
-   hypre_TMemcpy(P_a,            P_diag_a, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(P_a + nnz_diag, P_offd_a, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(P_a,            P_diag_a, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(P_a + nnz_diag, P_offd_a, HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
 
    /* sort rows based on (rowind, abs(P_a)) */
    hypreDevice_StableSortByTupleKey(nnz_P, P_i, P_a, P_j, 1);
@@ -156,8 +159,8 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    hypreDevice_CsrRowIndicesToPtrs_v2(nrows, nnz_P, P_i, P_rowptr);
 
    /* truncate P, unwanted entries are marked -1 in P_j */
-   dim3 bDim = hypre_GetDefaultCUDABlockDimension();
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(nrows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_InterpTruncation, gDim, bDim,
                       nrows, trunc_factor, max_elmts, P_rowptr, P_j, P_a );
@@ -166,12 +169,12 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    if (nnz_diag)
    {
       auto new_end = HYPRE_THRUST_CALL(
-            copy_if,
-            thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
-            thrust::make_zip_iterator(thrust::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
-            P_j,
-            thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_diag_j,  P_diag_a)),
-            is_nonnegative<HYPRE_Int>() );
+                        copy_if,
+                        thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
+                        thrust::make_zip_iterator(thrust::make_tuple(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P)),
+                        P_j,
+                        thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_diag_j,  P_diag_a)),
+                        is_nonnegative<HYPRE_Int>() );
 
       new_nnz_diag = thrust::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;
 
@@ -184,12 +187,12 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    {
       less_than<HYPRE_Int> pred(-1);
       auto new_end = HYPRE_THRUST_CALL(
-            copy_if,
-            thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
-            thrust::make_zip_iterator(thrust::make_tuple(P_i+nnz_P, P_j+nnz_P, P_a+nnz_P)),
-            P_j,
-            thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_offd_j,  P_offd_a)),
-            pred );
+                        copy_if,
+                        thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
+                        thrust::make_zip_iterator(thrust::make_tuple(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P)),
+                        P_j,
+                        thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_offd_j,  P_offd_a)),
+                        pred );
 
       new_nnz_offd = thrust::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;
 
@@ -205,10 +208,14 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    printf("nnz_offd %d, new nnz_offd %d\n", nnz_offd, new_nnz_offd);
    */
 
-   hypre_CSRMatrixJ   (P_diag) = hypre_TReAlloc_v2(P_diag_j, HYPRE_Int,  nnz_diag, HYPRE_Int,  new_nnz_diag, memory_location);
-   hypre_CSRMatrixData(P_diag) = hypre_TReAlloc_v2(P_diag_a, HYPRE_Real, nnz_diag, HYPRE_Real, new_nnz_diag, memory_location);
-   hypre_CSRMatrixJ   (P_offd) = hypre_TReAlloc_v2(P_offd_j, HYPRE_Int,  nnz_offd, HYPRE_Int,  new_nnz_offd, memory_location);
-   hypre_CSRMatrixData(P_offd) = hypre_TReAlloc_v2(P_offd_a, HYPRE_Real, nnz_offd, HYPRE_Real, new_nnz_offd, memory_location);
+   hypre_CSRMatrixJ   (P_diag) = hypre_TReAlloc_v2(P_diag_j, HYPRE_Int,  nnz_diag, HYPRE_Int,
+                                                   new_nnz_diag, memory_location);
+   hypre_CSRMatrixData(P_diag) = hypre_TReAlloc_v2(P_diag_a, HYPRE_Real, nnz_diag, HYPRE_Real,
+                                                   new_nnz_diag, memory_location);
+   hypre_CSRMatrixJ   (P_offd) = hypre_TReAlloc_v2(P_offd_j, HYPRE_Int,  nnz_offd, HYPRE_Int,
+                                                   new_nnz_offd, memory_location);
+   hypre_CSRMatrixData(P_offd) = hypre_TReAlloc_v2(P_offd_a, HYPRE_Real, nnz_offd, HYPRE_Real,
+                                                   new_nnz_offd, memory_location);
    hypre_CSRMatrixNumNonzeros(P_diag) = new_nnz_diag;
    hypre_CSRMatrixNumNonzeros(P_offd) = new_nnz_offd;
 

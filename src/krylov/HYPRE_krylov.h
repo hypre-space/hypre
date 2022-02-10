@@ -66,15 +66,15 @@ typedef struct hypre_Vector_struct *HYPRE_Vector;
 #endif
 
 typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
-                                    HYPRE_Matrix,
-                                    HYPRE_Vector,
-                                    HYPRE_Vector);
+                                          HYPRE_Matrix,
+                                          HYPRE_Vector,
+                                          HYPRE_Vector);
 
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
-                                      HYPRE_Int,
-                                      HYPRE_Real);
+                                            HYPRE_Int,
+                                            HYPRE_Real);
 
 #endif
 /**@}*/
@@ -282,7 +282,7 @@ HYPRE_Int HYPRE_PCGGetPrintLevel(HYPRE_Solver  solver,
 /**
  **/
 HYPRE_Int HYPRE_PCGGetConverged(HYPRE_Solver  solver,
-                          HYPRE_Int          *converged);
+                                HYPRE_Int          *converged);
 
 /**@}*/
 
@@ -319,10 +319,10 @@ HYPRE_Int HYPRE_GMRESSetTol(HYPRE_Solver solver,
                             HYPRE_Real   tol);
 
 /**
- * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * (Optional) Set the absolute convergence tolerance (default is 0).
  * If one desires
  * the convergence test to check the absolute convergence tolerance \e only, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * set the relative convergence tolerance to 0.0.  (The convergence test is
  * \f$\|r\| \leq\f$ max(relative\f$\_\f$tolerance\f$\ast \|b\|\f$, absolute\f$\_\f$tolerance).)
  *
  **/
@@ -431,7 +431,7 @@ HYPRE_Int HYPRE_GMRESGetConvergenceFactorTol(HYPRE_Solver solver,
                                              HYPRE_Real  *cf_tol);
 
 /*
- * OBSOLETE 
+ * OBSOLETE
  **/
 HYPRE_Int HYPRE_GMRESGetStopCrit(HYPRE_Solver solver,
                                  HYPRE_Int   *stop_crit);
@@ -512,10 +512,10 @@ HYPRE_Int HYPRE_FlexGMRESSetTol(HYPRE_Solver solver,
                                 HYPRE_Real   tol);
 
 /**
- * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * (Optional) Set the absolute convergence tolerance (default is 0).
  * If one desires
  * the convergence test to check the absolute convergence tolerance \e only, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * set the relative convergence tolerance to 0.0.  (The convergence test is
  * \f$\|r\| \leq\f$ max(relative\f$\_\f$tolerance\f$\ast \|b\|\f$, absolute\f$\_\f$tolerance).)
  *
  **/
@@ -680,10 +680,10 @@ HYPRE_Int HYPRE_LGMRESSolve(HYPRE_Solver solver,
 HYPRE_Int HYPRE_LGMRESSetTol(HYPRE_Solver solver,
                              HYPRE_Real   tol);
 /**
- * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * (Optional) Set the absolute convergence tolerance (default is 0).
  * If one desires
  * the convergence test to check the absolute convergence tolerance \e only, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * set the relative convergence tolerance to 0.0.  (The convergence test is
  * \f$\|r\| \leq\f$ max(relative\f$\_\f$tolerance\f$\ast \|b\|\f$, absolute\f$\_\f$tolerance).)
  *
  **/
@@ -849,10 +849,10 @@ HYPRE_Int HYPRE_COGMRESSetTol(HYPRE_Solver solver,
                               HYPRE_Real   tol);
 
 /**
- * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * (Optional) Set the absolute convergence tolerance (default is 0).
  * If one desires
  * the convergence test to check the absolute convergence tolerance \e only, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * set the relative convergence tolerance to 0.0.  (The convergence test is
  * \f$\|r\| \leq\f$ max(relative\f$\_\f$tolerance\f$\ast \|b\|\f$, absolute\f$\_\f$tolerance).)
  *
  **/
@@ -884,7 +884,7 @@ HYPRE_Int HYPRE_COGMRESSetKDim(HYPRE_Solver solver,
                                HYPRE_Int    k_dim);
 
 /**
- * (Optional) Set number of unrolling in mass funcyions in COGMRES 
+ * (Optional) Set number of unrolling in mass funcyions in COGMRES
  * Can be 4 or 8. Default: no unrolling.
  **/
 HYPRE_Int HYPRE_COGMRESSetUnroll(HYPRE_Solver solver,
@@ -1046,10 +1046,10 @@ HYPRE_Int HYPRE_BiCGSTABSetTol(HYPRE_Solver solver,
                                HYPRE_Real   tol);
 
 /**
- * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * (Optional) Set the absolute convergence tolerance (default is 0).
  * If one desires
  * the convergence test to check the absolute convergence tolerance \e only, then
- * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * set the relative convergence tolerance to 0.0.  (The convergence test is
  * \f$\|r\| \leq\f$ max(relative\f$\_\f$tolerance \f$\ast \|b\|\f$, absolute\f$\_\f$tolerance).)
  *
  **/

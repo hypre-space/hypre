@@ -32,7 +32,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> dxyz)[2]          = 0.0;
    (pfmg_data -> relax_type)       = 1;     /* weighted Jacobi */
    (pfmg_data -> jacobi_weight)    = 0.0;
-   (pfmg_data -> usr_jacobi_weight)= 0;     /* no user Jacobi weight */
+   (pfmg_data -> usr_jacobi_weight) = 0;    /* no user Jacobi weight */
    (pfmg_data -> rap_type)         = 0;
    (pfmg_data -> num_pre_relax)    = 1;
    (pfmg_data -> num_post_relax)   = 1;
@@ -95,12 +95,12 @@ hypre_PFMGDestroy( void *pfmg_vdata )
          hypre_StructVectorDestroy(pfmg_data -> x_l[0]);
          for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
          {
-            hypre_StructGridDestroy(pfmg_data -> grid_l[l+1]);
-            hypre_StructMatrixDestroy(pfmg_data -> A_l[l+1]);
+            hypre_StructGridDestroy(pfmg_data -> grid_l[l + 1]);
+            hypre_StructMatrixDestroy(pfmg_data -> A_l[l + 1]);
             hypre_StructMatrixDestroy(pfmg_data -> P_l[l]);
-            hypre_StructVectorDestroy(pfmg_data -> b_l[l+1]);
-            hypre_StructVectorDestroy(pfmg_data -> x_l[l+1]);
-            hypre_StructVectorDestroy(pfmg_data -> tx_l[l+1]);
+            hypre_StructVectorDestroy(pfmg_data -> b_l[l + 1]);
+            hypre_StructVectorDestroy(pfmg_data -> x_l[l + 1]);
+            hypre_StructVectorDestroy(pfmg_data -> tx_l[l + 1]);
          }
          hypre_TFree(pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
          hypre_TFree(pfmg_data -> active_l, HYPRE_MEMORY_HOST);
@@ -281,7 +281,7 @@ hypre_PFMGSetJacobiWeight( void       *pfmg_vdata,
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
    (pfmg_data -> jacobi_weight)    = weight;
-   (pfmg_data -> usr_jacobi_weight)= 1;
+   (pfmg_data -> usr_jacobi_weight) = 1;
 
    return hypre_error_flag;
 }
@@ -569,7 +569,7 @@ hypre_PFMGGetFinalRelativeResidualNorm( void       *pfmg_vdata,
       }
       else if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {

@@ -58,6 +58,14 @@ spack load    $spackspec
 spackdir=`spack location -i $spackspec`
 test.sh basic.sh ../src -co: -mo: -spack $spackdir -ro: -superlu
 ./renametest.sh basic $output_dir/basic-dsuperlu
+
+# Clean-up spack build
+spack spec --yaml $spackspec > test.yaml
+grep ' hash:' test.yaml | sed -e 's/^.*: /\//' | xargs spack mark -e
+spack gc -y
+grep ' hash:' test.yaml | sed -e 's/^.*: /\//' | xargs spack mark -i
+rm -f test.yaml
+spack clean --all
 spack uninstall -yR $superludistspec
 
 # Echo to stderr all nonempty error files in $output_dir

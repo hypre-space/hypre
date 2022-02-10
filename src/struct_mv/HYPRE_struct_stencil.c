@@ -23,9 +23,9 @@ HYPRE_StructStencilCreate( HYPRE_Int            dim,
                            HYPRE_StructStencil *stencil )
 {
    hypre_Index  *shape;
- 
+
    shape = hypre_CTAlloc(hypre_Index,  size, HYPRE_MEMORY_HOST);
- 
+
    *stencil = hypre_StructStencilCreate(dim, size, shape);
 
    return hypre_error_flag;
@@ -43,7 +43,7 @@ HYPRE_StructStencilSetEntry( HYPRE_StructStencil  stencil,
    hypre_Index  *shape;
    HYPRE_Int     d;
    HYPRE_Int     is_diag = 1;
- 
+
    shape = hypre_StructStencilShape(stencil);
    hypre_SetIndex(shape[entry], 0);
    for (d = 0; d < hypre_StructStencilNDim(stencil); d++)
@@ -86,4 +86,3 @@ HYPRE_StructStencilDestroy( HYPRE_StructStencil stencil )
 {
    return ( hypre_StructStencilDestroy(stencil) );
 }
-

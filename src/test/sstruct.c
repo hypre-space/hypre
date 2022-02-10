@@ -612,12 +612,15 @@ main( hypre_int argc,
          arg_index++;
 
 	 /* begin lobpcg */
-	 if ( strcmp(argv[arg_index], "none") == 0 ) {
+	 if ( strcmp(argv[arg_index], "none") == 0 )
+         {
             solver_id = NO_SOLVER;
             arg_index++;
 	 }
 	 else /* end lobpcg */
+         {
             solver_id = atoi(argv[arg_index++]);
+         }
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -777,8 +780,8 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
          arg_index++;
-         jacobi_weight= atof(argv[arg_index++]);
-         usr_jacobi_weight= 1; /* flag user weight */
+         jacobi_weight = atof(argv[arg_index++]);
+         usr_jacobi_weight = 1; /* flag user weight */
       }
       else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
       {
@@ -867,7 +870,8 @@ main( hypre_int argc,
          verbosity = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-vrand") == 0 )
-      {                         /* lobpcg: block size */
+      {
+         /* lobpcg: block size */
          arg_index++;
          blockSize = atoi(argv[arg_index++]);
       }
@@ -942,10 +946,10 @@ main( hypre_int argc,
 #ifdef HYPRE_DEVELOP_STRING
 #ifdef HYPRE_DEVELOP_BRANCH
       hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (main development branch %s)\n\n",
-         HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
+                   HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
 #else
       hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch)\n\n",
-         HYPRE_DEVELOP_STRING);
+                   HYPRE_DEVELOP_STRING);
 #endif
 #endif
    }
@@ -1207,7 +1211,7 @@ main( hypre_int argc,
                      k *= pdata.graph_index_signs[box][i];
 #if 0 /* the following does not work with some Intel compilers with -O2 */
                      to_index[j] = pdata.graph_to_ilowers[box][j] +
-                        k * pdata.graph_to_strides[box][j];
+                                   k * pdata.graph_to_strides[box][j];
 #else
                      to_index[j] = pdata.graph_to_ilowers[box][j];
                      to_index[j] += k * pdata.graph_to_strides[box][j];
@@ -1740,9 +1744,10 @@ main( hypre_int argc,
    if (gradient_matrix)
    {
       HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_NODE};
-      HYPRE_Int offsets[3][2][3] = { {{0,0,0}, {-1,0,0}},
-                                     {{0,0,0}, {0,-1,0}},
-                                     {{0,0,0}, {0,0,-1}} };
+      HYPRE_Int offsets[3][2][3] = { {{0, 0, 0}, {-1, 0, 0}},
+         {{0, 0, 0}, {0, -1, 0}},
+         {{0, 0, 0}, {0, 0, -1}}
+      };
       HYPRE_Real stencil_values[2] = {1.0, -1.0};
 
       /* Set up the domain grid */
@@ -2347,9 +2352,12 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    if ( lobpcgFlag && ( solver_id < 10 || solver_id >= 20 ) && verbosity )
+   {
       hypre_printf("\nLOBPCG works with solvers 10, 11, 13 and 18 only\n");
+   }
 
-   if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) ) {
+   if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) )
+   {
 
       interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
 
@@ -2491,7 +2499,9 @@ main( hypre_int argc,
             utilities_FortranMatrixAdd( -1, identity, gramXX, gramXX );
             nonOrthF = utilities_FortranMatrixFNorm( gramXX );
             if ( myid == 0 )
+            {
                hypre_printf("Non-orthonormality of eigenvectors: %12.5e\n", nonOrthF);
+            }
 
             utilities_FortranMatrixDestroy( gramXX );
             utilities_FortranMatrixDestroy( identity );
@@ -2627,7 +2637,9 @@ main( hypre_int argc,
          else if (solver_id != NO_SOLVER )
          {
             if ( verbosity )
+            {
                hypre_printf("Solver ID not recognized - running LOBPCG without preconditioner\n\n");
+            }
          }
 
          HYPRE_LOBPCGSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
@@ -2749,7 +2761,7 @@ main( hypre_int argc,
          hypre_TFree(eigenvalues, HYPRE_MEMORY_HOST);
       }
 
-      hypre_TFree( interpreter , HYPRE_MEMORY_HOST);
+      hypre_TFree(interpreter, HYPRE_MEMORY_HOST);
    }
    /* end lobpcg */
 
@@ -3727,8 +3739,8 @@ main( hypre_int argc,
       hypre_ParVectorInitialize(par_x2);
       hypre_ParVectorCopy(par_x, par_x2);
 
-      HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
-      HYPRE_ParCSRHybridSolve(par_solver,par_A,par_b,par_x);
+      HYPRE_ParCSRHybridSetup(par_solver, par_A, par_b, par_x);
+      HYPRE_ParCSRHybridSolve(par_solver, par_A, par_b, par_x);
 
       hypre_ParVectorCopy(par_x2, par_x);
 #endif
@@ -3738,7 +3750,7 @@ main( hypre_int argc,
 #endif
       //cudaProfilerStart();
 
-      HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
+      HYPRE_ParCSRHybridSetup(par_solver, par_A, par_b, par_x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -3748,7 +3760,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("Hybrid Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRHybridSolve(par_solver,par_A,par_b,par_x);
+      HYPRE_ParCSRHybridSolve(par_solver, par_A, par_b, par_x);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -4024,8 +4036,8 @@ main( hypre_int argc,
       }
 
       HYPRE_PCGSetup
-         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
-           (HYPRE_Vector)sx );
+      ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+        (HYPRE_Vector)sx );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4036,8 +4048,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_PCGSolve
-         ( (HYPRE_Solver) struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
-           (HYPRE_Vector)sx);
+      ( (HYPRE_Solver) struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+        (HYPRE_Vector)sx);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -4248,8 +4260,8 @@ main( hypre_int argc,
       }
 
       HYPRE_GMRESSetup
-         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
-           (HYPRE_Vector)sx );
+      ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+        (HYPRE_Vector)sx );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4260,8 +4272,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_GMRESSolve
-         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
-           (HYPRE_Vector)sx);
+      ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+        (HYPRE_Vector)sx);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -4369,8 +4381,8 @@ main( hypre_int argc,
       }
 
       HYPRE_BiCGSTABSetup
-         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
-           (HYPRE_Vector)sx );
+      ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+        (HYPRE_Vector)sx );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4381,8 +4393,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BiCGSTABSolve
-         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
-           (HYPRE_Vector)sx);
+      ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+        (HYPRE_Vector)sx);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -4887,7 +4899,7 @@ main( hypre_int argc,
                size = 1;
                for (j = 0; j < data.ndim; j++)
                {
-                  size*= (iupper[j] - ilower[j] + 1);
+                  size *= (iupper[j] - ilower[j] + 1);
                }
                for (j = 0; j < size; j++)
                {
@@ -4987,7 +4999,7 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("solver relnorm = %16.14e\n", final_res_norm);
          hypre_printf("check  relnorm = %16.14e, bnorm = %16.14e, rnorm = %16.14e\n",
-                      (rnorm/bnorm), bnorm, rnorm);
+                      (rnorm / bnorm), bnorm, rnorm);
          hypre_printf("\n");
       }
 

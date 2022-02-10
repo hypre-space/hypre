@@ -58,11 +58,11 @@ typedef HYPRE_Int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
 #define HYPRE_MODIFYPC
 /* if pc not defined, then may need HYPRE_SOLVER also */
 
- #ifndef HYPRE_SOLVER_STRUCT
- #define HYPRE_SOLVER_STRUCT
- struct hypre_Solver_struct;
- typedef struct hypre_Solver_struct *HYPRE_Solver;
- #endif
+#ifndef HYPRE_SOLVER_STRUCT
+#define HYPRE_SOLVER_STRUCT
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+#endif
 
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
@@ -719,7 +719,7 @@ HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
  * (Optional) Set maximum number of FAC levels.
  **/
 HYPRE_Int
-HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver ,
+HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver,
                               HYPRE_Int           max_levels );
 /**
  * (Optional) Set the convergence tolerance.

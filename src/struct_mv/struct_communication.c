@@ -192,7 +192,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
          num_boxes++;
       }
    }
-   hypre_qsort3i(comm_boxes_p, comm_boxes_i, comm_boxes_j, 0, num_boxes-1);
+   hypre_qsort3i(comm_boxes_p, comm_boxes_i, comm_boxes_j, 0, num_boxes - 1);
 
    /* count cb_num_entries */
    cb_num_entries = hypre_TAlloc(HYPRE_Int, num_boxes, HYPRE_MEMORY_HOST);
@@ -382,7 +382,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
          num_boxes++;
       }
    }
-   hypre_qsort3i(comm_boxes_p, comm_boxes_i, comm_boxes_j, 0, num_boxes-1);
+   hypre_qsort3i(comm_boxes_p, comm_boxes_i, comm_boxes_j, 0, num_boxes - 1);
 
    /* compute comm_types */
 
@@ -749,7 +749,7 @@ hypre_CommBlockSetEntry( hypre_CommBlock  *comm_block,
    {
       if (dir[i] < 0)
       {
-         offset += (length_array[i] - 1)*stride_array[i];
+         offset += (length_array[i] - 1) * stride_array[i];
          stride_array[i] = -stride_array[i];
       }
    }
@@ -772,12 +772,12 @@ hypre_CommBlockSetEntry( hypre_CommBlock  *comm_block,
    i = 0;
    while ((dim > 1) && (i < dim)) /* make sure dim is at least one */
    {
-      if(length_array[i] == 1)
+      if (length_array[i] == 1)
       {
-         for(j = i; j < dim; j++)
+         for (j = i; j < dim; j++)
          {
-            length_array[j] = length_array[j+1];
-            stride_array[j] = stride_array[j+1];
+            length_array[j] = length_array[j + 1];
+            stride_array[j] = stride_array[j + 1];
          }
          length_array[dim] = 1;
          stride_array[dim] = 1;
@@ -791,19 +791,19 @@ hypre_CommBlockSetEntry( hypre_CommBlock  *comm_block,
 
 #if 0
    /* sort the array according to length_array (largest to smallest) */
-   for (i = (dim-1); i > 0; i--)
+   for (i = (dim - 1); i > 0; i--)
    {
       for (j = 0; j < i; j++)
       {
-         if (length_array[j] < length_array[j+1])
+         if (length_array[j] < length_array[j + 1])
          {
             i_tmp             = length_array[j];
-            length_array[j]   = length_array[j+1];
-            length_array[j+1] = i_tmp;
+            length_array[j]   = length_array[j + 1];
+            length_array[j + 1] = i_tmp;
 
             i_tmp             = stride_array[j];
-            stride_array[j]   = stride_array[j+1];
-            stride_array[j+1] = i_tmp;
+            stride_array[j]   = stride_array[j + 1];
+            stride_array[j + 1] = i_tmp;
          }
       }
    }
@@ -1440,7 +1440,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
    hypre_TFree(recv_bufsizes, HYPRE_MEMORY_HOST);
 
-   for(i = 0; i < num_sends; i++)
+   for (i = 0; i < num_sends; i++)
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
       hypre_MPI_Isend(send_buffers[i], send_bufsizes[i]*sizeof(HYPRE_Complex),

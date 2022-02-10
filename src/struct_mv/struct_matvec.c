@@ -355,7 +355,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    stencil_size  = hypre_StructStencilSize(stencil);
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {
@@ -651,7 +651,7 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
    xp = hypre_StructVectorBoxData(x, box_id);
    yp = hypre_StructVectorBoxData(y, box_id);
 
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8)
+#define DEVICE_VAR is_device_ptr(yp,xp)
    switch (nentries)
    {
       case 9:
@@ -840,7 +840,6 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
  *
  * Note: This function computes -A*x.
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
                                    hypre_StructVector *x,

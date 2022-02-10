@@ -106,7 +106,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    {
       /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
-      eps = tol*tol;
+      eps = tol * tol;
 
       /* if rhs is zero, return a zero solution */
       if (!(b_dot_b > 0.0))
@@ -167,7 +167,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
             }
             else
             {
@@ -176,17 +176,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          /* always do at least 1 V-cycle */
-         if ((r_dot_r/b_dot_b < eps) && (i > 0))
+         if ((r_dot_r / b_dot_b < eps) && (i > 0))
          {
-            if (rel_change)
-            {
-               if ((e_dot_e/x_dot_x) < eps)
-               {
-                  HYPRE_ANNOTATE_MGLEVEL_END(0);
-                  break;
-               }
-            }
-            else
+            if ( ((rel_change) && (e_dot_e / x_dot_x) < eps) || (!rel_change) )
             {
                HYPRE_ANNOTATE_MGLEVEL_END(0);
                break;
@@ -285,6 +277,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 #ifdef DEBUG_SOLVE
          hypre_sprintf(filename, "pfmg_xbottom.i%02d.l%02d", i, l);
          hypre_StructVectorPrint(filename, x_l[l], 0);
+         hypre_printf("Level %d: <x_l, x_l> = %.30e\n", l, hypre_StructInnerProd(x_l[l], x_l[l]));
 #endif
 
          /*--------------------------------------------------
@@ -316,6 +309,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorPrint(filename, e_l[l], 0);
             hypre_sprintf(filename, "pfmg_xup.i%02d.l%02d", i, l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
+            hypre_printf("Level %d: <x_l, x_l> = %.15e\n", l, hypre_StructInnerProd(x_l[l], x_l[l]));
 #endif
 
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);

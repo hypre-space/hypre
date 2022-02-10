@@ -57,8 +57,8 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
       found = 1;
       for (d = 0; d < ndim; d++)
       {
-         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d)-1)) ||
-              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d)+1)) )
+         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d) - 1)) ||
+              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d) + 1)) )
          {
             /* not in this box */
             found = 0;
@@ -68,10 +68,10 @@ hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
       if (found)
       {
          vol = 0;
-         for (d = (ndim-1); d > -1; d--)
+         for (d = (ndim - 1); d > -1; d--)
          {
-            vol = vol*(hypre_BoxSizeD(box, d) + 2) +
-               (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
+            vol = vol * (hypre_BoxSizeD(box, d) + 2) +
+                  (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
          }
          *rank += (HYPRE_BigInt)vol;
          return hypre_error_flag;
@@ -124,19 +124,19 @@ hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
    hypre_BoxManGetEntry(boxman, proc, boxi, &boxman_entry);
 
    sgrid = hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
-   box   = hypre_StructGridBox(sgrid, boxi);
+   box  = hypre_StructGridBox(sgrid, boxi);
 
    /* get the global rank of the endpt corner of box boxi */
    if (endpt < 1)
    {
-       hypre_SStructBoxManEntryGetGlobalRank(
-          boxman_entry, hypre_BoxIMin(box), &rank, type);
+      hypre_SStructBoxManEntryGetGlobalRank(
+         boxman_entry, hypre_BoxIMin(box), &rank, type);
    }
 
    else
    {
-       hypre_SStructBoxManEntryGetGlobalRank(
-          boxman_entry, hypre_BoxIMax(box), &rank, type);
+      hypre_SStructBoxManEntryGetGlobalRank(
+         boxman_entry, hypre_BoxIMax(box), &rank, type);
    }
 
    if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)

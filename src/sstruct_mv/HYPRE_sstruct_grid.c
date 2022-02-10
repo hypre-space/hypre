@@ -305,7 +305,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
    if (ordering == NULL)
    {
       clean = 1;
-      ordering = hypre_TAlloc(HYPRE_Int, (1+ndim)*fem_nvars, HYPRE_MEMORY_HOST);
+      ordering = hypre_TAlloc(HYPRE_Int, (1 + ndim) * fem_nvars, HYPRE_MEMORY_HOST);
       j = 0;
       for (i = 0; i < nvars; i++)
       {
@@ -318,17 +318,17 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
                loop[d] = 1;
             }
          }
-         for (off[2] = -loop[2]; off[2] <= loop[2]; off[2]+=2)
+         for (off[2] = -loop[2]; off[2] <= loop[2]; off[2] += 2)
          {
-            for (off[1] = -loop[1]; off[1] <= loop[1]; off[1]+=2)
+            for (off[1] = -loop[1]; off[1] <= loop[1]; off[1] += 2)
             {
-               for (off[0] = -loop[0]; off[0] <= loop[0]; off[0]+=2)
+               for (off[0] = -loop[0]; off[0] <= loop[0]; off[0] += 2)
                {
-                  block = &ordering[(1+ndim)*j];
+                  block = &ordering[(1 + ndim) * j];
                   block[0] = i;
                   for (d = 0; d < ndim; d++)
                   {
-                     block[1+d] = off[d];
+                     block[1 + d] = off[d];
                   }
                   j++;
                }
@@ -341,13 +341,13 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
    fem_offsets = hypre_TAlloc(hypre_Index, fem_nvars, HYPRE_MEMORY_HOST);
    for (i = 0; i < fem_nvars; i++)
    {
-      block = &ordering[(1+ndim)*i];
+      block = &ordering[(1 + ndim) * i];
       fem_vars[i] = block[0];
       hypre_SetIndex(fem_offsets[i], 0);
       for (d = 0; d < ndim; d++)
       {
          /* modify the user offsets to contain only 0's and -1's */
-         if (block[1+d] < 0)
+         if (block[1 + d] < 0)
          {
             hypre_IndexD(fem_offsets[i], d) = -1;
          }
@@ -539,7 +539,7 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
       /* Map the offset to the neighbor part and adjust ilower_mapped so that
        * NeighborILower is a direct mapping of NeighborBoxIMin.  This allows us
        * to eliminate shared_offset. */
-      offset_mapped[dd] = offset[d]*dir[d];
+      offset_mapped[dd] = offset[d] * dir[d];
       if (offset_mapped[dd] != shared_offset[dd])
       {
          hypre_IndexD(ilower_mapped, dd) -= offset_mapped[dd];

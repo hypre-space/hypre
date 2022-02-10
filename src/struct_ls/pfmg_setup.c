@@ -360,7 +360,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_PFMGRelaxSetType(relax_data_l[l], 0);
          /* do no more work on the coarsest grid than the cost of a V-cycle
           * (estimating roughly 4 communications per V-cycle level) */
-         maxwork = 4*num_levels;
+         maxwork = 4 * num_levels;
          /* do sweeps proportional to the coarsest grid size */
          maxiter = hypre_min(maxwork, cmaxsize);
 #if 0

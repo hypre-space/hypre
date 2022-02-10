@@ -77,8 +77,8 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
    HYPRE_Real   presult;
    HYPRE_Int    part;
 
-   HYPRE_Int    x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int    y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int    x_object_type = hypre_SStructVectorObjectType(x);
+   HYPRE_Int    y_object_type = hypre_SStructVectorObjectType(y);
 
    if (x_object_type != y_object_type)
    {
@@ -113,8 +113,6 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
 
       result = hypre_ParVectorInnerProd(x_par, y_par);
    }
-
-   hypre_IncFLOPCount(2*hypre_SStructVectorGlobalSize(x));
 
    *result_ptr = result;
 

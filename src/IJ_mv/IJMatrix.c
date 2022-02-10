@@ -28,19 +28,22 @@ The ijmatrix to be pointed to.
 */
 
 HYPRE_Int
-hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix ,
+hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix,
                                   HYPRE_BigInt **row_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (!ijmatrix)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Variable ijmatrix is NULL -- hypre_IJMatrixGetRowPartitioning\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Variable ijmatrix is NULL -- hypre_IJMatrixGetRowPartitioning\n");
       return hypre_error_flag;
    }
 
    if ( hypre_IJMatrixRowPartitioning(ijmatrix))
+   {
       *row_partitioning = hypre_IJMatrixRowPartitioning(ijmatrix);
+   }
    else
    {
       hypre_error(HYPRE_ERROR_GENERIC);
@@ -62,19 +65,22 @@ The ijmatrix to be pointed to.
 */
 
 HYPRE_Int
-hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
+hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix,
                                   HYPRE_BigInt **col_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (!ijmatrix)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Variable ijmatrix is NULL -- hypre_IJMatrixGetColPartitioning\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Variable ijmatrix is NULL -- hypre_IJMatrixGetColPartitioning\n");
       return hypre_error_flag;
    }
 
    if ( hypre_IJMatrixColPartitioning(ijmatrix))
+   {
       *col_partitioning = hypre_IJMatrixColPartitioning(ijmatrix);
+   }
    else
    {
       hypre_error(HYPRE_ERROR_GENERIC);

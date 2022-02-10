@@ -9,13 +9,13 @@
  *
  * NOTE: The following routines are currently only used as follows in hypre, and
  * also appear in '_hypre_struct_mv.h':
- * 
+ *
  * hypre_BoxBoundaryG
  * struct_mv/box_boundary.c
  * struct_mv/struct_vector.c
  * sstruct_ls/maxwell_grad.c
  * sstruct_ls/maxwell_TV_setup.c
- * 
+ *
  * hypre_BoxBoundaryDG
  * struct_mv/box_boundary.c
  * sstruct_ls/maxwell_grad.c
@@ -103,7 +103,7 @@ hypre_BoxBoundaryG( hypre_Box *box,
    HYPRE_Int       ndim = hypre_BoxNDim(box);
    hypre_BoxArray *boundary_d;
    HYPRE_Int       d;
- 
+
    boundary_d = hypre_BoxArrayCreate(0, ndim);
    for (d = 0; d < ndim; d++)
    {
@@ -202,4 +202,3 @@ hypre_GeneralBoxBoundaryIntersect( hypre_Box        *box,
 
    return hypre_error_flag;
 }
-

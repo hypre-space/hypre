@@ -207,6 +207,65 @@ typedef struct
    });                                                              \
 }
 
+#elif defined(HYPRE_USING_SYCL)
+
+#define hypre_RedBlackLoopInit()
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,                  \
+                                Astart,Ani,Anj,Ai,                  \
+                                bstart,bni,bnj,bi,                  \
+                                xstart,xni,xnj,xi)                  \
+{                                                                   \
+   HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)            \
+   {                                                                \
+      HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();      \
+      HYPRE_Int idx_local = idx;                                    \
+      HYPRE_Int ii,jj,kk,Ai,bi,xi;                                  \
+      HYPRE_Int local_ii;                                           \
+      kk = idx_local % nk;                                          \
+      idx_local = idx_local / nk;                                   \
+      jj = idx_local % nj;                                          \
+      idx_local = idx_local / nj;                                   \
+      local_ii = (kk + jj + redblack) % 2;                          \
+      ii = 2*idx_local + local_ii;                                  \
+      if (ii < ni)                                                  \
+      {                                                             \
+         Ai = Astart + kk*Anj*Ani + jj*Ani + ii;                    \
+         bi = bstart + kk*bnj*bni + jj*bni + ii;                    \
+         xi = xstart + kk*xnj*xni + jj*xni + ii;                    \
+
+#define hypre_RedBlackLoopEnd()                                     \
+      }                                                             \
+   });                                                              \
+}
+
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,      \
+                                            bstart,bni,bnj,bi,      \
+                                            xstart,xni,xnj,xi)      \
+{                                                                   \
+   HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)            \
+   {                                                                \
+      HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();      \
+      HYPRE_Int idx_local = idx;                                    \
+      HYPRE_Int ii,jj,kk,bi,xi;                                     \
+      HYPRE_Int local_ii;                                           \
+      kk = idx_local % nk;                                          \
+      idx_local = idx_local / nk;                                   \
+      jj = idx_local % nj;                                          \
+      idx_local = idx_local / nj;                                   \
+      local_ii = (kk + jj + redblack) % 2;                          \
+      ii = 2*idx_local + local_ii;                                  \
+      if (ii < ni)                                                  \
+      {                                                             \
+         bi = bstart + kk*bnj*bni + jj*bni + ii;                    \
+         xi = xstart + kk*xnj*xni + jj*xni + ii;                    \
+
+#define hypre_RedBlackConstantcoefLoopEnd()                         \
+      }                                                             \
+   });                                                              \
+}
+
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
 
 /* BEGIN OF OMP 4.5 */

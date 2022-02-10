@@ -54,11 +54,11 @@ typedef HYPRE_Int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_MODIFYPC
 /* if pc not defined, then may need HYPRE_SOLVER also */
 
- #ifndef HYPRE_SOLVER_STRUCT
- #define HYPRE_SOLVER_STRUCT
- struct hypre_Solver_struct;
- typedef struct hypre_Solver_struct *HYPRE_Solver;
- #endif
+#ifndef HYPRE_SOLVER_STRUCT
+#define HYPRE_SOLVER_STRUCT
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+#endif
 
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
@@ -738,7 +738,7 @@ HYPRE_Int HYPRE_StructGMRESGetFinalRelativeResidualNorm(HYPRE_StructSolver  solv
                                                         HYPRE_Real         *norm);
 
 HYPRE_Int HYPRE_StructGMRESGetResidual(HYPRE_StructSolver   solver,
-                                      void               **residual);
+                                       void               **residual);
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -778,10 +778,10 @@ HYPRE_Int HYPRE_StructFlexGMRESSetTol(HYPRE_StructSolver solver,
                                       HYPRE_Real         tol);
 
 HYPRE_Int HYPRE_StructFlexGMRESSetAbsoluteTol(HYPRE_StructSolver solver,
-                                             HYPRE_Real         tol);
+                                              HYPRE_Real         tol);
 
 HYPRE_Int HYPRE_StructFlexGMRESSetMaxIter(HYPRE_StructSolver solver,
-                                         HYPRE_Int          max_iter);
+                                          HYPRE_Int          max_iter);
 
 HYPRE_Int HYPRE_StructFlexGMRESSetKDim(HYPRE_StructSolver solver,
                                        HYPRE_Int          k_dim);
@@ -851,7 +851,7 @@ HYPRE_Int HYPRE_StructLGMRESSetAbsoluteTol(HYPRE_StructSolver solver,
                                            HYPRE_Real         tol);
 
 HYPRE_Int HYPRE_StructLGMRESSetMaxIter(HYPRE_StructSolver solver,
-                                      HYPRE_Int          max_iter);
+                                       HYPRE_Int          max_iter);
 
 HYPRE_Int HYPRE_StructLGMRESSetKDim(HYPRE_StructSolver solver,
                                     HYPRE_Int          k_dim);
@@ -984,7 +984,7 @@ HYPRE_Int HYPRE_StructHybridSolve(HYPRE_StructSolver solver,
  * (Optional) Set the convergence tolerance.
  **/
 HYPRE_Int HYPRE_StructHybridSetTol(HYPRE_StructSolver solver,
-                             HYPRE_Real         tol);
+                                   HYPRE_Real         tol);
 
 /**
  * (Optional) Set an accepted convergence tolerance for diagonal scaling (DS).
@@ -1158,4 +1158,3 @@ HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 #endif
 
 #endif
-

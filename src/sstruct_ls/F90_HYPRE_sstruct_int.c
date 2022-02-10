@@ -18,20 +18,20 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructSetRandomValues
  *--------------------------------------------------------------------------*/
 
 void
 hypre_F90_IFACE(hypre_sstructsetrandomvalues, HYPRE_SSTRUCTSETRANDOMVALUES)
-   (hypre_F90_Obj *v,
-    hypre_F90_Int *seed,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *v,
+ hypre_F90_Int *seed,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( hypre_SStructSetRandomValues(
-           (void *) v, hypre_F90_PassInt (seed) )); 
+           ( hypre_SStructSetRandomValues(
+                (void *) v, hypre_F90_PassInt (seed) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -40,12 +40,12 @@ hypre_F90_IFACE(hypre_sstructsetrandomvalues, HYPRE_SSTRUCTSETRANDOMVALUES)
 
 void
 hypre_F90_IFACE(hypre_sstructsetupinterpreter, HYPRE_SSTRUCTSETUPINTERPRETER)
-   (hypre_F90_Obj *i,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *i,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SStructSetupInterpreter(
-           (mv_InterfaceInterpreter *) i ));
+           ( HYPRE_SStructSetupInterpreter(
+                (mv_InterfaceInterpreter *) i ));
 }
 
 /*--------------------------------------------------------------------------
@@ -54,12 +54,12 @@ hypre_F90_IFACE(hypre_sstructsetupinterpreter, HYPRE_SSTRUCTSETUPINTERPRETER)
 
 void
 hypre_F90_IFACE(hypre_sstructsetupmatvec, HYPRE_SSTRUCTSETUPMATVEC)
-   (hypre_F90_Obj *mv,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *mv,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SStructSetupMatvec(
-           hypre_F90_PassObjRef (HYPRE_MatvecFunctions, mv)));
+           ( HYPRE_SStructSetupMatvec(
+                hypre_F90_PassObjRef (HYPRE_MatvecFunctions, mv)));
 }
 
 #ifdef __cplusplus

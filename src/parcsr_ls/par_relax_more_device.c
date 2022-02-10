@@ -102,8 +102,8 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
 
       if (scale)
       {
-        lower /= hypre_abs(diag_value);
-        upper /= hypre_abs(diag_value);
+         lower /= hypre_abs(diag_value);
+         upper /= hypre_abs(diag_value);
       }
 
       row_sum_upper[row_i] = upper;
@@ -139,8 +139,10 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    A_num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
-   HYPRE_Real *rowsums_lower = hypre_TAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-   HYPRE_Real *rowsums_upper = hypre_TAlloc(HYPRE_Real, A_num_rows, hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Real *rowsums_lower = hypre_TAlloc(HYPRE_Real, A_num_rows,
+                                            hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_Real *rowsums_upper = hypre_TAlloc(HYPRE_Real, A_num_rows,
+                                            hypre_ParCSRMatrixMemoryLocation(A));
 
    A_diag_i    = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    A_diag_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A));
@@ -151,8 +153,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    dim3 bDim, gDim;
 
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(A_num_rows, "warp", bDim);
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
                      gDim,
                      bDim,
@@ -169,8 +171,10 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    hypre_SyncCudaComputeStream(hypre_handle());
 
-   e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0, thrust::minimum<HYPRE_Real>());
-   e_max = HYPRE_THRUST_CALL(reduce, rowsums_upper, rowsums_upper + A_num_rows, (HYPRE_Real)0, thrust::maximum<HYPRE_Real>());
+   e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0,
+                             thrust::minimum<HYPRE_Real>());
+   e_max = HYPRE_THRUST_CALL(reduce, rowsums_upper, rowsums_upper + A_num_rows, (HYPRE_Real)0,
+                             thrust::maximum<HYPRE_Real>());
 
    /* Same as hypre_ParCSRMaxEigEstimateHost */
 
@@ -180,7 +184,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
    send_buf[0] = -e_min;
    send_buf[1] = e_max;
 
-   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
+   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX,
+                       hypre_ParCSRMatrixComm(A));
 
    /* return */
    if ( hypre_abs(e_min) > hypre_abs(e_max) )
@@ -316,13 +321,13 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 #endif
 
    /* set residual to random */
-  hypre_CurandUniform(local_size, r_data, 0, 0, 0, 0);
+   hypre_CurandUniform(local_size, r_data, 0, 0, 0, 0);
 
-  hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncCudaComputeStream(hypre_handle());
 
-  HYPRE_THRUST_CALL(transform,
-                    r_data, r_data + local_size, r_data,
-                    2.0 * _1 - 1.0);
+   HYPRE_THRUST_CALL(transform,
+                     r_data, r_data + local_size, r_data,
+                     2.0 * _1 - 1.0);
 
 #if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange(); /*CPUAlloc_Random*/

@@ -136,20 +136,20 @@ int main (int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n*n < num_procs) n = sqrt(num_procs) + 1;
-   N = n*n; /* global number of rows */
+   if (n * n < num_procs) { n = sqrt(num_procs) + 1; }
+   N = n * n; /* global number of rows */
 
    /* Each processor knows only of its own rows - the range is denoted by ilower
       and iupper.  Here we partition the rows. We account for the fact that
       N may not divide evenly by the number of processors. */
-   local_size = N/num_procs;
-   extra = N - local_size*num_procs;
+   local_size = N / num_procs;
+   extra = N - local_size * num_procs;
 
-   ilower = local_size*myid;
+   ilower = local_size * myid;
    ilower += my_min(myid, extra);
 
-   iupper = local_size*(myid+1);
-   iupper += my_min(myid+1, extra);
+   iupper = local_size * (myid + 1);
+   iupper += my_min(myid + 1, extra);
    iupper = iupper - 1;
 
    /* How many rows do I have? */
@@ -179,25 +179,25 @@ int main (int argc, char *argv[])
       int nnz;
       /* double values[5];
        * int cols[5]; OK to use constant-length arrays for CPUs */
-      double *values = (double *) malloc(5*sizeof(double));
-      int *cols = (int *) malloc(5*sizeof(int));
+      double *values = (double *) malloc(5 * sizeof(double));
+      int *cols = (int *) malloc(5 * sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
          nnz = 0;
 
          /* The left identity block:position i-n */
-         if ((i-n)>=0)
+         if ((i - n) >= 0)
          {
-            cols[nnz] = i-n;
+            cols[nnz] = i - n;
             values[nnz] = -1.0;
             nnz++;
          }
 
          /* The left -1: position i-1 */
-         if (i%n)
+         if (i % n)
          {
-            cols[nnz] = i-1;
+            cols[nnz] = i - 1;
             values[nnz] = -1.0;
             nnz++;
          }
@@ -208,17 +208,17 @@ int main (int argc, char *argv[])
          nnz++;
 
          /* The right -1: position i+1 */
-         if ((i+1)%n)
+         if ((i + 1) % n)
          {
-            cols[nnz] = i+1;
+            cols[nnz] = i + 1;
             values[nnz] = -1.0;
             nnz++;
          }
 
          /* The right identity block:position i+n */
-         if ((i+n)< N)
+         if ((i + n) < N)
          {
-            cols[nnz] = i+n;
+            cols[nnz] = i + n;
             values[nnz] = -1.0;
             nnz++;
          }
@@ -237,13 +237,13 @@ int main (int argc, char *argv[])
    HYPRE_IJMatrixGetObject(A, (void**) &parcsr_A);
 
    /* Create sample rhs and solution vectors */
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&b);
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &b);
    HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(b);
    HYPRE_IJVectorAssemble(b);
    HYPRE_IJVectorGetObject(b, (void **) &par_b);
 
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&x);
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &x);
    HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(x);
    HYPRE_IJVectorAssemble(x);
@@ -274,7 +274,9 @@ int main (int argc, char *argv[])
       double *eigenvalues = NULL;
 
       if (myid != 0)
+      {
          verbosity = 0;
+      }
 
       /* define an interpreter for the ParCSR interface */
       interpreter = (mv_InterfaceInterpreter *) calloc(1, sizeof(mv_InterfaceInterpreter));
@@ -338,7 +340,7 @@ int main (int argc, char *argv[])
 
       /* get the local solution */
       values = hypre_VectorData(hypre_ParVectorLocalVector(
-                                   (hypre_ParVector*)pvx[blockSize-1]));
+                                   (hypre_ParVector*)pvx[blockSize - 1]));
 
       sprintf(filename, "%s.%06d", "vis/ex11.sol", myid);
       if ((file = fopen(filename, "w")) == NULL)
@@ -350,14 +352,18 @@ int main (int argc, char *argv[])
 
       /* save solution */
       for (i = 0; i < nvalues; i++)
+      {
          fprintf(file, "%.14e\n", values[i]);
+      }
 
       fflush(file);
       fclose(file);
 
       /* save global finite element mesh */
       if (myid == 0)
-         GLVis_PrintGlobalSquareMesh("vis/ex11.mesh", n-1);
+      {
+         GLVis_PrintGlobalSquareMesh("vis/ex11.mesh", n - 1);
+      }
 #endif
    }
 
@@ -372,5 +378,5 @@ int main (int argc, char *argv[])
    /* Finalize MPI*/
    MPI_Finalize();
 
-   return(0);
+   return (0);
 }

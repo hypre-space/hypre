@@ -269,7 +269,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
     * one to set shared coefficients correctly, but not exactly one? */
    for (d = 0; d < ndim; d++)
    {
-      num_ghost[2*d] = num_ghost[2*d+1] = 1;
+      num_ghost[2 * d] = num_ghost[2 * d + 1] = 1;
    }
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
@@ -520,7 +520,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
 
    hypre_StructMatrix    *smatrix;
    hypre_Index            varoffset;
-   HYPRE_Int              num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int              num_ghost[2 * HYPRE_MAXDIM];
    hypre_StructGrid      *sgrid;
    HYPRE_Int              vi, vj, d;
 
@@ -551,7 +551,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
             hypre_SStructVariableGetOffset(vartypes[vi], ndim, varoffset);
             for (d = 0; d < ndim; d++)
             {
-               num_ghost[2*d] = num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
+               num_ghost[2 * d] = num_ghost[2 * d + 1] = hypre_IndexD(varoffset, d);
             }
 
             /* accumulate values from AddTo */
@@ -855,7 +855,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
          /* TODO: For now, assume stencil is full/complete */
          if (hypre_SStructMatrixSymmetric(matrix))
          {
-            nnzs = 2*nnzs - 1;
+            nnzs = 2 * nnzs - 1;
          }
 #endif
          boxes = hypre_StructGridBoxes(sgrid);
@@ -872,7 +872,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             hypre_BoxGetSize(box, loop_size);
             hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
             {
-               row_sizes[m+mi] = nnzs;
+               row_sizes[m + mi] = nnzs;
             }
             hypre_BoxLoop1End(mi);
 
@@ -965,7 +965,9 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 
    /* if not local, check neighbors */
    if (boxman_entry == NULL)
+   {
       hypre_SStructGridFindNborBoxManEntry(grid, part, index, var, &boxman_entry);
+   }
 
    if (boxman_entry == NULL)
    {
@@ -1011,7 +1013,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
          if (boxman_entry != NULL)
          {
             hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, to_index,
-                                                  &col_coords[ncoeffs],matrix_type);
+                                                  &col_coords[ncoeffs], matrix_type);
 
             coeffs[ncoeffs] = values[i];
             ncoeffs++;
@@ -1143,11 +1145,11 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
       map_vbox = hypre_BoxCreate(ndim);
 
       nrows       = hypre_BoxVolume(set_box);
-      ncols       = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
-      rows        = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
-      row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
-      cols        = hypre_CTAlloc(HYPRE_BigInt, nrows*nentries, HYPRE_MEMORY_DEVICE);
-      ijvalues    = hypre_CTAlloc(HYPRE_Complex, nrows*nentries, HYPRE_MEMORY_DEVICE);
+      ncols       = hypre_CTAlloc(HYPRE_Int,     nrows,          HYPRE_MEMORY_DEVICE);
+      rows        = hypre_CTAlloc(HYPRE_BigInt,  nrows,          HYPRE_MEMORY_DEVICE);
+      row_indexes = hypre_CTAlloc(HYPRE_Int,     nrows,          HYPRE_MEMORY_DEVICE);
+      cols        = hypre_CTAlloc(HYPRE_BigInt,  nrows * nentries, HYPRE_MEMORY_DEVICE);
+      ijvalues    = hypre_CTAlloc(HYPRE_Complex, nrows * nentries, HYPRE_MEMORY_DEVICE);
 
       hypre_SetIndex(stride, 1);
 
@@ -1175,7 +1177,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
          for (i = 0; i < nrows; i++)
          {
             ncols[i] = 0;
-            row_indexes[i] = i*nentries;
+            row_indexes[i] = i * nentries;
          }
 
          for (ei = 0; ei < nentries; ei++)
@@ -1227,15 +1229,15 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                   hypre_BoxLoopGetIndex(loop_index);
                   hypre_assert((mi >= 0) && (vi >= 0));
 
-                  ci = mi*nentries + ncols[mi];
+                  ci = mi * nentries + ncols[mi];
                   rows[mi] = row_base;
                   cols[ci] = col_base;
                   for (d = 0; d < ndim; d++)
                   {
-                     rows[mi] += loop_index[d]*rs[d]*dom_stride[d];
-                     cols[ci] += loop_index[d]*cs[d];
+                     rows[mi] += loop_index[d] * rs[d] * dom_stride[d];
+                     cols[ci] += loop_index[d] * cs[d];
                   }
-                  ijvalues[ci] = values[ei + vi*nentries];
+                  ijvalues[ci] = values[ei + vi * nentries];
                   ncols[mi]++;
                }
                hypre_BoxLoop2End(mi, vi);
@@ -1726,7 +1728,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                          ibox1, start, stride, mi,
                                          value_box,  start, stride, vi);
                      {
-                        tvalues[mi] = values[ei + vi*nentries];
+                        tvalues[mi] = values[ei + vi * nentries];
                      }
                      hypre_BoxLoop2End(mi, vi);
 
@@ -1752,7 +1754,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                          ibox1, start, stride, mi,
                                          value_box,  start, stride, vi);
                      {
-                        values[ei + vi*nentries] = tvalues[mi];
+                        values[ei + vi * nentries] = tvalues[mi];
                      }
                      hypre_BoxLoop2End(mi, vi);
 

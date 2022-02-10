@@ -9,7 +9,8 @@
 #include "temp_multivector.h"
 
 HYPRE_Int
-hypre_StructSetRandomValues( void* v, HYPRE_Int seed ) {
+hypre_StructSetRandomValues( void* v, HYPRE_Int seed )
+{
 
    return hypre_StructVectorSetRandomValues( (hypre_StructVector*)v, seed );
 }

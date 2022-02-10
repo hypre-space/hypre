@@ -78,7 +78,7 @@ typedef struct
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-  HYPRE_Int             devicelevel;
+   HYPRE_Int             devicelevel;
 #endif
 
 } hypre_PFMGData;

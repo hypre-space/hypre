@@ -766,9 +766,9 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       recv_var  = hypre_SStructCommInfoRecvVar(vnbor_comm_info[ci]);
 
       send_matrix = hypre_SStructPMatrixSMatrix(
-         hypre_SStructMatrixPMatrix(matrix, send_part), send_var, send_var);
+                       hypre_SStructMatrixPMatrix(matrix, send_part), send_var, send_var);
       recv_matrix = hypre_SStructPMatrixSMatrix(
-         hypre_SStructMatrixPMatrix(matrix, recv_part), recv_var, recv_var);
+                       hypre_SStructMatrixPMatrix(matrix, recv_part), recv_var, recv_var);
 
       if ((send_matrix != NULL) && (recv_matrix != NULL))
       {
@@ -1163,7 +1163,7 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
       part = var = 0;
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
       smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
-     *object  = smatrix;
+      *object = smatrix;
    }
 
    return hypre_error_flag;

@@ -426,9 +426,8 @@ HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
 /**
  * Indicate whether the transpose coefficients should also be stored.
  **/
-HYPRE_Int
-HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
-                                HYPRE_Int           transpose );
+HYPRE_Int HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
+                                          HYPRE_Int           transpose );
 
 /**
  * Set the ghost layer in the matrix
@@ -710,4 +709,3 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
 #endif
 
 #endif
-

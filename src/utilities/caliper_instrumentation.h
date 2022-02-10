@@ -19,7 +19,8 @@
 #ifdef HYPRE_USING_CALIPER
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
 #include <caliper/cali.h>

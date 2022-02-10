@@ -38,8 +38,9 @@ LicStr='SPDX-License-Identifier: \(Apache-2.0 OR MIT\)'
 
 # Remove these files from the list of all files without 'SPDX'
 
-egrep -LR "$LicStr" . | egrep -v '[.](o|a|filters|pdf|svg|gif)$' |
+egrep -LR "$LicStr" . | egrep -v '[.](o|obj|a|filters|pdf|svg|gif)$' |
   egrep -v '[.]/[.]git' |
+  egrep -v '[.]/.*HYPRE_config[.]h' |
   egrep -v '[.]/src/(blas|lapack)/.*[.]c' |
   egrep -v '[.]/src/examples/docs' |
   egrep -v '[.]/src/test/TEST_.*'    > check-license.files
@@ -78,7 +79,6 @@ cat > check-license.remove <<EOF
 ./src/docs/usr-manual/_static/custom.css
 ./src/docs/usr-manual/conf.py
 ./src/docs/usr-manual/zREADME
-./src/examples/vis.c
 ./src/utilities/cub_allocator.h
 ./src/lapack/COPYING
 ./src/nopoe

@@ -33,7 +33,7 @@ HYPRE_StructMatrixCreate( MPI_Comm             comm,
 HYPRE_Int
 HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixDestroy(matrix) );
+   return ( hypre_StructMatrixDestroy(matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -243,9 +243,8 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Complex     *values )
 {
    hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
-                                       stencil_indices, values, 0);
+                                       stencil_indices, values, 0 );
 
-   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -339,7 +338,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Complex     *values )
 {
    hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
-                                       stencil_indices, values, 1);
+                                       stencil_indices, values, 1 );
 
    return hypre_error_flag;
 }
@@ -350,7 +349,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
 HYPRE_Int
 HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixAssemble(matrix) );
+   return ( hypre_StructMatrixAssemble(matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -490,5 +489,5 @@ HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
 HYPRE_Int
 HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixClearBoundary(matrix) );
+   return ( hypre_StructMatrixClearBoundary(matrix) );
 }

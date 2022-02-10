@@ -6,19 +6,33 @@
  ******************************************************************************/
 
 /* assumed_part.c */
-HYPRE_Int hypre_APSubdivideRegion ( hypre_Box *region , HYPRE_Int dim , HYPRE_Int level , hypre_BoxArray *box_array , HYPRE_Int *num_new_boxes );
-HYPRE_Int hypre_APFindMyBoxesInRegions ( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , HYPRE_Int **p_count_array , HYPRE_Real **p_vol_array );
-HYPRE_Int hypre_APGetAllBoxesInRegions ( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , HYPRE_Int **p_count_array , HYPRE_Real **p_vol_array , MPI_Comm comm );
-HYPRE_Int hypre_APShrinkRegions ( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , MPI_Comm comm );
-HYPRE_Int hypre_APPruneRegions ( hypre_BoxArray *region_array , HYPRE_Int **p_count_array , HYPRE_Real **p_vol_array );
-HYPRE_Int hypre_APRefineRegionsByVol ( hypre_BoxArray *region_array , HYPRE_Real *vol_array , HYPRE_Int max_regions , HYPRE_Real gamma , HYPRE_Int dim , HYPRE_Int *return_code , MPI_Comm comm );
-HYPRE_Int hypre_StructAssumedPartitionCreate ( HYPRE_Int dim , hypre_Box *bounding_box , HYPRE_Real global_boxes_size , HYPRE_Int global_num_boxes , hypre_BoxArray *local_boxes , HYPRE_Int max_regions , HYPRE_Int max_refinements , HYPRE_Real gamma , MPI_Comm comm , hypre_StructAssumedPart **p_assumed_partition );
+HYPRE_Int hypre_APSubdivideRegion ( hypre_Box *region, HYPRE_Int dim, HYPRE_Int level,
+                                    hypre_BoxArray *box_array, HYPRE_Int *num_new_boxes );
+HYPRE_Int hypre_APFindMyBoxesInRegions ( hypre_BoxArray *region_array, hypre_BoxArray *my_box_array,
+                                         HYPRE_Int **p_count_array, HYPRE_Real **p_vol_array );
+HYPRE_Int hypre_APGetAllBoxesInRegions ( hypre_BoxArray *region_array, hypre_BoxArray *my_box_array,
+                                         HYPRE_Int **p_count_array, HYPRE_Real **p_vol_array, MPI_Comm comm );
+HYPRE_Int hypre_APShrinkRegions ( hypre_BoxArray *region_array, hypre_BoxArray *my_box_array,
+                                  MPI_Comm comm );
+HYPRE_Int hypre_APPruneRegions ( hypre_BoxArray *region_array, HYPRE_Int **p_count_array,
+                                 HYPRE_Real **p_vol_array );
+HYPRE_Int hypre_APRefineRegionsByVol ( hypre_BoxArray *region_array, HYPRE_Real *vol_array, HYPRE_Int max_regions,
+                                       HYPRE_Real gamma, HYPRE_Int dim, HYPRE_Int *return_code, MPI_Comm comm );
+HYPRE_Int hypre_StructAssumedPartitionCreate ( HYPRE_Int dim, hypre_Box *bounding_box, HYPRE_Real global_boxes_size,
+                                               HYPRE_Int global_num_boxes, hypre_BoxArray *local_boxes,
+                                               HYPRE_Int max_regions, HYPRE_Int max_refinements, HYPRE_Real gamma,
+                                               MPI_Comm comm, hypre_StructAssumedPart **p_assumed_partition );
 HYPRE_Int hypre_StructAssumedPartitionDestroy ( hypre_StructAssumedPart *assumed_part );
-HYPRE_Int hypre_APFillResponseStructAssumedPart ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
-HYPRE_Int hypre_StructAssumedPartitionGetRegionsFromProc ( hypre_StructAssumedPart *assumed_part , HYPRE_Int proc_id , hypre_BoxArray *assumed_regions );
-HYPRE_Int hypre_StructAssumedPartitionGetProcsFromBox ( hypre_StructAssumedPart *assumed_part , hypre_Box *box , HYPRE_Int *num_proc_array , HYPRE_Int *size_alloc_proc_array , HYPRE_Int **p_proc_array );
-HYPRE_Int hypre_StructAssumedPartitionPrint ( const char *filename , hypre_StructAssumedPart *ap );
-HYPRE_Int hypre_StructCoarsenAP ( hypre_StructAssumedPart *ap , hypre_Index origin , hypre_Index stride , hypre_StructAssumedPart **new_ap_ptr );
+HYPRE_Int hypre_APFillResponseStructAssumedPart ( void *p_recv_contact_buf, HYPRE_Int contact_size, HYPRE_Int contact_proc,
+                                                  void *ro, MPI_Comm comm, void **p_send_response_buf, HYPRE_Int *response_message_size );
+HYPRE_Int hypre_StructAssumedPartitionGetRegionsFromProc ( hypre_StructAssumedPart *assumed_part, HYPRE_Int proc_id,
+                                                           hypre_BoxArray *assumed_regions );
+HYPRE_Int hypre_StructAssumedPartitionGetProcsFromBox ( hypre_StructAssumedPart *assumed_part, hypre_Box *box,
+                                                        HYPRE_Int *num_proc_array, HYPRE_Int *size_alloc_proc_array,
+                                                        HYPRE_Int **p_proc_array );
+HYPRE_Int hypre_StructAssumedPartitionPrint ( const char *filename, hypre_StructAssumedPart *ap );
+HYPRE_Int hypre_StructCoarsenAP ( hypre_StructAssumedPart *ap, hypre_Index origin, hypre_Index stride,
+                                  hypre_StructAssumedPart **new_ap_ptr );
 
 /* box_algebra.c */
 HYPRE_Int hypre_BoxSplit ( hypre_Box *box , hypre_Index index , hypre_Box **lbox_ptr , hypre_Box **rbox_ptr );
@@ -124,17 +138,27 @@ HYPRE_Int hypre_BoxManDeleteMultipleEntriesAndInfo ( hypre_BoxManager *manager ,
 HYPRE_Int hypre_BoxManCreate ( HYPRE_Int max_nentries , HYPRE_Int info_size , HYPRE_Int dim , hypre_Box *bounding_box , MPI_Comm comm , hypre_BoxManager **manager_ptr );
 HYPRE_Int hypre_BoxManIncSize ( hypre_BoxManager *manager , HYPRE_Int inc_size );
 HYPRE_Int hypre_BoxManDestroy ( hypre_BoxManager *manager );
-HYPRE_Int hypre_BoxManAddEntry ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax , HYPRE_Int proc_id , HYPRE_Int box_id , void *info );
-HYPRE_Int hypre_BoxManGetEntry ( hypre_BoxManager *manager , HYPRE_Int proc , HYPRE_Int id , hypre_BoxManEntry **entry_ptr );
-HYPRE_Int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , HYPRE_Int *num_entries , hypre_BoxManEntry **entries );
-HYPRE_Int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
-HYPRE_Int hypre_BoxManGetLocalEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
-HYPRE_Int hypre_BoxManGetAllEntriesBoxesProc ( hypre_BoxManager *manager , hypre_BoxArray *boxes , HYPRE_Int **procs_ptr );
-HYPRE_Int hypre_BoxManGatherEntries ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax );
+HYPRE_Int hypre_BoxManAddEntry ( hypre_BoxManager *manager, hypre_Index imin, hypre_Index imax,
+                                 HYPRE_Int proc_id, HYPRE_Int box_id, void *info );
+HYPRE_Int hypre_BoxManGetEntry ( hypre_BoxManager *manager, HYPRE_Int proc, HYPRE_Int id,
+                                 hypre_BoxManEntry **entry_ptr );
+HYPRE_Int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager, HYPRE_Int *num_entries,
+                                      hypre_BoxManEntry **entries );
+HYPRE_Int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager, hypre_BoxArray *boxes );
+HYPRE_Int hypre_BoxManGetLocalEntriesBoxes ( hypre_BoxManager *manager, hypre_BoxArray *boxes );
+HYPRE_Int hypre_BoxManGetAllEntriesBoxesProc ( hypre_BoxManager *manager, hypre_BoxArray *boxes,
+                                               HYPRE_Int **procs_ptr );
+HYPRE_Int hypre_BoxManGatherEntries ( hypre_BoxManager *manager, hypre_Index imin,
+                                      hypre_Index imax );
 HYPRE_Int hypre_BoxManAssemble ( hypre_BoxManager *manager );
-HYPRE_Int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower , hypre_Index iupper , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
-HYPRE_Int hypre_FillResponseBoxManAssemble1 ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
-HYPRE_Int hypre_FillResponseBoxManAssemble2 ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
+HYPRE_Int hypre_BoxManIntersect ( hypre_BoxManager *manager, hypre_Index ilower, hypre_Index iupper,
+                                  hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
+HYPRE_Int hypre_FillResponseBoxManAssemble1 ( void *p_recv_contact_buf, HYPRE_Int contact_size,
+                                              HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf,
+                                              HYPRE_Int *response_message_size );
+HYPRE_Int hypre_FillResponseBoxManAssemble2 ( void *p_recv_contact_buf, HYPRE_Int contact_size,
+                                              HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf,
+                                              HYPRE_Int *response_message_size );
 
 /* coarsen.c */
 HYPRE_Int hypre_MapToCoarseIndex ( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
@@ -169,15 +193,22 @@ HYPRE_Int hypre_CreateCommInfoFromNumGhost ( hypre_StructGrid *grid , HYPRE_Int 
 HYPRE_Int hypre_CreateCommInfoFromGrids ( hypre_StructGrid *from_grid , hypre_StructGrid *to_grid , hypre_CommInfo **comm_info_ptr );
 
 /* computation.c */
-HYPRE_Int hypre_ComputeInfoCreate ( hypre_CommInfo *comm_info , hypre_BoxArrayArray *indt_boxes , hypre_BoxArrayArray *dept_boxes , hypre_ComputeInfo **compute_info_ptr );
-HYPRE_Int hypre_ComputeInfoProjectSend ( hypre_ComputeInfo *compute_info , hypre_Index index , hypre_Index stride );
-HYPRE_Int hypre_ComputeInfoProjectRecv ( hypre_ComputeInfo *compute_info , hypre_Index index , hypre_Index stride );
-HYPRE_Int hypre_ComputeInfoProjectComp ( hypre_ComputeInfo *compute_info , hypre_Index index , hypre_Index stride );
+HYPRE_Int hypre_ComputeInfoCreate ( hypre_CommInfo *comm_info, hypre_BoxArrayArray *indt_boxes,
+                                    hypre_BoxArrayArray *dept_boxes, hypre_ComputeInfo **compute_info_ptr );
+HYPRE_Int hypre_ComputeInfoProjectSend ( hypre_ComputeInfo *compute_info, hypre_Index index,
+                                         hypre_Index stride );
+HYPRE_Int hypre_ComputeInfoProjectRecv ( hypre_ComputeInfo *compute_info, hypre_Index index,
+                                         hypre_Index stride );
+HYPRE_Int hypre_ComputeInfoProjectComp ( hypre_ComputeInfo *compute_info, hypre_Index index,
+                                         hypre_Index stride );
 HYPRE_Int hypre_ComputeInfoDestroy ( hypre_ComputeInfo *compute_info );
-HYPRE_Int hypre_CreateComputeInfo ( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_ComputeInfo **compute_info_ptr );
-HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info , hypre_BoxArray *data_space , HYPRE_Int num_values , hypre_StructGrid *grid , hypre_ComputePkg **compute_pkg_ptr );
+HYPRE_Int hypre_CreateComputeInfo ( hypre_StructGrid *grid, hypre_StructStencil *stencil,
+                                    hypre_ComputeInfo **compute_info_ptr );
+HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space,
+                                   HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
-HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg , HYPRE_Complex *data , hypre_CommHandle **comm_handle_ptr );
+HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg, HYPRE_Complex *data,
+                                             hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeIndtComputations ( hypre_CommHandle *comm_handle );
 
 /* project.c */
@@ -204,16 +235,17 @@ HYPRE_Int hypre_ExchangeLocalData ( hypre_CommPkg *comm_pkg , HYPRE_Complex **se
 HYPRE_Int hypre_CommPkgDestroy ( hypre_CommPkg *comm_pkg );
 
 /* struct_copy.c */
-HYPRE_Int hypre_StructCopy ( hypre_StructVector *x , hypre_StructVector *y );
-HYPRE_Int hypre_StructPartialCopy ( hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *array_boxes );
+HYPRE_Int hypre_StructCopy ( hypre_StructVector *x, hypre_StructVector *y );
+HYPRE_Int hypre_StructPartialCopy ( hypre_StructVector *x, hypre_StructVector *y,
+                                    hypre_BoxArrayArray *array_boxes );
 
 /* struct_data.c */
 HYPRE_Int hypre_StructDataCopy ( HYPRE_Complex *fr_data , hypre_BoxArray *fr_data_space , HYPRE_Int *fr_ids , HYPRE_Complex *to_data , hypre_BoxArray *to_data_space , HYPRE_Int *to_ids , HYPRE_Int ndim , HYPRE_Int nval );
 HYPRE_Int hypre_StructNumGhostFromStencil ( hypre_StructStencil *stencil , HYPRE_Int **num_ghost_ptr );
 
 /* struct_grid.c */
-HYPRE_Int hypre_StructGridCreate ( MPI_Comm comm , HYPRE_Int dim , hypre_StructGrid **grid_ptr );
-HYPRE_Int hypre_StructGridRef ( hypre_StructGrid *grid , hypre_StructGrid **grid_ref );
+HYPRE_Int hypre_StructGridCreate ( MPI_Comm comm, HYPRE_Int dim, hypre_StructGrid **grid_ptr );
+HYPRE_Int hypre_StructGridRef ( hypre_StructGrid *grid, hypre_StructGrid **grid_ref );
 HYPRE_Int hypre_StructGridDestroy ( hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridSetPeriodic ( hypre_StructGrid *grid , hypre_Index periodic );
 HYPRE_Int hypre_StructGridSetExtents ( hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper );
@@ -231,9 +263,10 @@ HYPRE_Int hypre_StructGridPrintVTK ( const char *filename, hypre_StructGrid *gri
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
-HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location );
+HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid,
+                                           HYPRE_MemoryLocation data_location );
 #endif
 /* struct_innerprod.c */
 HYPRE_Real hypre_StructInnerProdLocal ( hypre_StructVector *x , hypre_StructVector *y );
@@ -241,8 +274,6 @@ HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y
 
 /* struct_io.c */
 HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int *value_ids , HYPRE_Int dim , HYPRE_Complex *data );
-HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_offsets , HYPRE_Int dim , HYPRE_Complex *data );
-HYPRE_Int hypre_PrintCCBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
@@ -305,11 +336,19 @@ HYPRE_Int hypre_StructMatrixForget ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data );
 HYPRE_Int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
-HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
-HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix , hypre_Box *set_box , hypre_Box *value_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
-HYPRE_Int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action );
-HYPRE_Int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Int boxnum , HYPRE_Int outside );
-HYPRE_Int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix , hypre_Box *clear_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Int boxnum , HYPRE_Int outside );
+HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix, hypre_Index grid_index,
+                                        HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Complex *values, HYPRE_Int action,
+                                        HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix, hypre_Box *set_box,
+                                           hypre_Box *value_box, HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices,
+                                           HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix,
+                                                HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Complex *values,
+                                                HYPRE_Int action );
+HYPRE_Int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix, hypre_Index grid_index,
+                                          HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix, hypre_Box *clear_box,
+                                             HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices, HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix , HYPRE_Int nentries , HYPRE_Int *entries );
 HYPRE_Int hypre_StructMatrixSetTranspose ( hypre_StructMatrix *matrix , HYPRE_Int transpose , HYPRE_Int *resize );
@@ -323,7 +362,8 @@ HYPRE_Int hypre_StructMatrixClearBoundary ( hypre_StructMatrix *matrix);
 HYPRE_Int hypre_StructMatrixGetDiagonal ( hypre_StructMatrix *matrix , hypre_StructVector *diag );
 
 /* struct_matrix_mask.c */
-hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices );
+hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix,
+                                                   HYPRE_Int num_stencil_indices, HYPRE_Int *stencil_indices );
 
 /* struct_matvec.c */
 void *hypre_StructMatvecCreate ( void );
@@ -338,10 +378,11 @@ HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hyp
 HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 
 /* struct_scale.c */
-HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha , hypre_StructVector *y );
+HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha, hypre_StructVector *y );
 
 /* struct_stencil.c */
-hypre_StructStencil *hypre_StructStencilCreate ( HYPRE_Int dim , HYPRE_Int size , hypre_Index *shape );
+hypre_StructStencil *hypre_StructStencilCreate ( HYPRE_Int dim, HYPRE_Int size,
+                                                 hypre_Index *shape );
 hypre_StructStencil *hypre_StructStencilRef ( hypre_StructStencil *stencil );
 HYPRE_Int hypre_StructStencilDestroy ( hypre_StructStencil *stencil );
 HYPRE_Int hypre_StructStencilOffsetEntry ( hypre_StructStencil *stencil , hypre_Index stencil_offset );
@@ -367,13 +408,19 @@ HYPRE_Int hypre_StructVectorForget ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeShell ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeData ( hypre_StructVector *vector , HYPRE_Complex *data );
 HYPRE_Int hypre_StructVectorInitialize ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index grid_index , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
-HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *set_box , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
-HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Index grid_index , HYPRE_Int boxnum , HYPRE_Int outside );
-HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , HYPRE_Int boxnum , HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector, hypre_Index grid_index,
+                                        HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector, hypre_Box *set_box,
+                                           hypre_Box *value_box, HYPRE_Complex *values, HYPRE_Int action, HYPRE_Int boxnum,
+                                           HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector, hypre_Index grid_index,
+                                          HYPRE_Int boxnum, HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector, hypre_Box *clear_box,
+                                             HYPRE_Int boxnum, HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int *data_size, HYPRE_Int *data_host_size);
+HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector, HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector, HYPRE_Int *data_size,
+                                        HYPRE_Int *data_host_size);
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , HYPRE_Complex value );

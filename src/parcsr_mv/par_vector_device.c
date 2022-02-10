@@ -33,7 +33,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
       if (ierr)
       {
          hypre_error_in_arg(3);
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Index out of range! -- hypre_ParVectorGetValues.");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Index out of range! -- hypre_ParVectorGetValues.");
          hypre_printf(" error: %d indices out of range! -- hypre_ParVectorGetValues\n", ierr);
 
          HYPRE_THRUST_CALL( gather_if,

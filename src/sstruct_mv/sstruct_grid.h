@@ -93,7 +93,6 @@ typedef struct
    HYPRE_Int     type;
    HYPRE_BigInt  offset;
    HYPRE_BigInt  ghoffset;
-
 } hypre_SStructBoxManInfo;
 
 typedef struct
@@ -162,11 +161,10 @@ typedef struct hypre_SStructGrid_struct
 
    HYPRE_Int                  ref_count;
 
- /* GEC0902 additions for ghost expansion of boxes */
+   /* GEC0902 additions for ghost expansion of boxes */
    // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
-
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------

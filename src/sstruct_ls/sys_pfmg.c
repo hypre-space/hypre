@@ -32,7 +32,7 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
    (sys_pfmg_data -> dxyz)[2]          = 0.0;
    (sys_pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
    (sys_pfmg_data -> jacobi_weight)    = 0.0;
-   (sys_pfmg_data -> usr_jacobi_weight)= 0;
+   (sys_pfmg_data -> usr_jacobi_weight) = 0;
    (sys_pfmg_data -> num_pre_relax)    = 1;
    (sys_pfmg_data -> num_post_relax)   = 1;
    (sys_pfmg_data -> skip_relax)       = 1;
@@ -88,13 +88,13 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
          hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[0]);
          for (l = 0; l < ((sys_pfmg_data -> num_levels) - 1); l++)
          {
-            hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[l+1]);
-            hypre_SStructPGridDestroy(sys_pfmg_data -> P_grid_l[l+1]);
-            hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[l+1]);
+            hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[l + 1]);
+            hypre_SStructPGridDestroy(sys_pfmg_data -> P_grid_l[l + 1]);
+            hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[l + 1]);
             hypre_SStructPMatrixDestroy(sys_pfmg_data -> P_l[l]);
-            hypre_SStructPVectorDestroy(sys_pfmg_data -> b_l[l+1]);
-            hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[l+1]);
-            hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[l+1]);
+            hypre_SStructPVectorDestroy(sys_pfmg_data -> b_l[l + 1]);
+            hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[l + 1]);
+            hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[l + 1]);
          }
          hypre_TFree(sys_pfmg_data -> data, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
@@ -195,7 +195,7 @@ hypre_SysPFMGSetJacobiWeight( void       *sys_pfmg_vdata,
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
 
    (sys_pfmg_data -> jacobi_weight)    = weight;
-   (sys_pfmg_data -> usr_jacobi_weight)= 1;
+   (sys_pfmg_data -> usr_jacobi_weight) = 1;
 
    return hypre_error_flag;
 }

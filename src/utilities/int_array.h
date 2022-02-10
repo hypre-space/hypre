@@ -18,9 +18,9 @@
  * hypre_IntArray
  *--------------------------------------------------------------------------*/
 
-typedef struct 
+typedef struct
 {
-   /* pointer to data and size of data */ 
+   /* pointer to data and size of data */
    HYPRE_Int            *data;
    HYPRE_Int             size;
 

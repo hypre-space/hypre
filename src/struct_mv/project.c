@@ -186,4 +186,3 @@ hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
 
    return hypre_error_flag;
 }
-

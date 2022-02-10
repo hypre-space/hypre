@@ -119,7 +119,7 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
                                HYPRE_Int           **symm_entries_ptr )
 {
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
+   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil);
 
    hypre_StructStencil  *symm_stencil;
    hypre_Index          *symm_stencil_shape;
@@ -128,13 +128,13 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
 
    HYPRE_Int             no_symmetric_stencil_entry, symmetric;
    HYPRE_Int             i, j, d, ndim;
-                       
+
    /*------------------------------------------------------
     * Copy stencil entrys into 'symm_stencil_shape'
     *------------------------------------------------------*/
 
    ndim = hypre_StructStencilNDim(stencil);
-   symm_stencil_shape = hypre_CTAlloc(hypre_Index, 2*stencil_size, HYPRE_MEMORY_HOST);
+   symm_stencil_shape = hypre_CTAlloc(hypre_Index, 2 * stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_CopyIndex(stencil_shape[i], symm_stencil_shape[i]);
@@ -144,9 +144,11 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
     * Create symmetric stencil entries and 'symm_entries'
     *------------------------------------------------------*/
 
-   symm_entries = hypre_CTAlloc(HYPRE_Int, 2*stencil_size, HYPRE_MEMORY_HOST);
-   for (i = 0; i < 2*stencil_size; i++)
+   symm_entries = hypre_CTAlloc(HYPRE_Int, 2 * stencil_size, HYPRE_MEMORY_HOST);
+   for (i = 0; i < 2 * stencil_size; i++)
+   {
       symm_entries[i] = -1;
+   }
 
    symm_stencil_size = stencil_size;
    for (i = 0; i < stencil_size; i++)
@@ -186,7 +188,6 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
                hypre_IndexD(symm_stencil_shape[symm_stencil_size], d) =
                   -hypre_IndexD(symm_stencil_shape[i], d);
             }
-               
             symm_entries[symm_stencil_size] = i;
             symm_stencil_size++;
          }
@@ -202,4 +203,3 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
 
    return hypre_error_flag;
 }
-

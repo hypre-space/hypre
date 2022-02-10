@@ -89,8 +89,8 @@ target_sources(${PROJECT_NAME}
           ${HDRS}
 )
 
-if (HYPRE_USING_CUDA)
-  set(CUDA_SRCS
+if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
+  set(GPU_SRCS
     fac_amr_fcoarsen.c
     fac_amr_rap.c
     fac_restrict2.c
@@ -98,8 +98,8 @@ if (HYPRE_USING_CUDA)
     fac_zero_stencilcoef.c
     node_relax.c
   )
-  convert_filenames_to_full_paths(CUDA_SRCS)
-  set(HYPRE_CUDA_SOURCES ${HYPRE_CUDA_SOURCES} ${CUDA_SRCS} PARENT_SCOPE)
+  convert_filenames_to_full_paths(GPU_SRCS)
+  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
 endif ()
 
 convert_filenames_to_full_paths(HDRS)

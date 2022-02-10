@@ -145,7 +145,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
     * plus one, to have space for the remainder box.
     *------------------------------------------------------*/
 
-   maxboxes = 2*ndim;
+   maxboxes = 2 * ndim;
 
    size = hypre_BoxArraySize(box_array);
    hypre_BoxArraySetSize(box_array, (size + maxboxes + 1));
@@ -178,7 +178,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
             hypre_CopyBox(rembox, box);
             hypre_BoxIMaxD(box, d) = hypre_BoxIMinD(box2, d) - 1;
             hypre_BoxIMinD(rembox, d) = hypre_BoxIMinD(box2, d);
-            if ( hypre_BoxVolume(box) > 0 ) size++;
+            if ( hypre_BoxVolume(box) > 0 ) { size++; }
          }
          if ( hypre_BoxIMaxD(box2, d) < hypre_BoxIMaxD(rembox, d) )
          {
@@ -186,7 +186,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
             hypre_CopyBox(rembox, box);
             hypre_BoxIMinD(box, d) = hypre_BoxIMaxD(box2, d) + 1;
             hypre_BoxIMaxD(rembox, d) = hypre_BoxIMaxD(box2, d);
-            if ( hypre_BoxVolume(box) > 0 ) size++;
+            if ( hypre_BoxVolume(box) > 0 ) { size++; }
          }
       }
    }
@@ -325,7 +325,7 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
    block_sz[0] = 0;
    for (d = 1; d < 3; d++)
    {
-      block_index[d] = block_index[d-1] + i_tmp0;
+      block_index[d] = block_index[d - 1] + i_tmp0;
       block_sz[d] = 0;
    }
 
@@ -347,7 +347,9 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
                if (iminmax[i] <= block_index[d][j])
                {
                   if (iminmax[i] == block_index[d][j])
+                  {
                      index_not_there = 0;
+                  }
                   break;
                }
             }
@@ -356,7 +358,9 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
             if (index_not_there)
             {
                for (k = block_sz[d]; k > j; k--)
-                  block_index[d][k] = block_index[d][k-1];
+               {
+                  block_index[d][k] = block_index[d][k - 1];
+               }
                block_index[d][j] = iminmax[i];
                block_sz[d]++;
             }
@@ -365,7 +369,9 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
    }
 
    for (d = 0; d < 3; d++)
+   {
       block_sz[d]--;
+   }
    block_volume = block_sz[0] * block_sz[1] * block_sz[2];
 
    /*------------------------------------------------------
@@ -392,11 +398,15 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
          j = 0;
 
          while (hypre_BoxIMinD(box, d) != block_index[d][j])
+         {
             j++;
+         }
          imin[d] = j;
 
          while (hypre_BoxIMaxD(box, d) + 1 != block_index[d][j])
+         {
             j++;
+         }
          imax[d] = j;
       }
 
@@ -427,7 +437,7 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
 
    for (d = 0; d < 3; d++)
    {
-      switch(d)
+      switch (d)
       {
          case 0: /* join in x */
             dd[0] = 0;
@@ -471,7 +481,9 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
                      join  = 1;
                   }
                   else
+                  {
                      join = 0;
+                  }
                }
             }
          }
@@ -486,7 +498,9 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
    for (index = 0; index < block_volume; index++)
    {
       if (block[index])
+      {
          size++;
+      }
    }
    hypre_BoxArraySetSize(boxes, size);
 

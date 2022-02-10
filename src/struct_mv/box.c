@@ -551,7 +551,7 @@ hypre_BoxRankIndex( hypre_Box   *box,
 
    r = rank;
    s = hypre_BoxVolume(box);
-   for (d = ndim-1; d >= 0; d--)
+   for (d = ndim - 1; d >= 0; d--)
    {
       s = s / hypre_BoxSizeD(box, d);
       hypre_IndexD(index, d) = r / s;
@@ -703,8 +703,8 @@ hypre_BoxGrowByArray( hypre_Box  *box,
 
    for (d = 0; d < ndim; d++)
    {
-      imin[d] -= array[2*d];
-      imax[d] += array[2*d+1];
+      imin[d] -= array[2 * d];
+      imax[d] += array[2 * d + 1];
    }
 
    return hypre_error_flag;
@@ -1250,7 +1250,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
 
    for (i = index; i < hypre_BoxArraySize(box_array) - 1; i++)
    {
-      hypre_CopyBox(hypre_BoxArrayBox(box_array, i+1),
+      hypre_CopyBox(hypre_BoxArrayBox(box_array, i + 1),
                     hypre_BoxArrayBox(box_array, i));
       hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i+1);
    }
@@ -1285,16 +1285,16 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
    {
       if (j < num)
       {
-         while ((i+j) == indices[j]) /* see if deleting consecutive items */
+         while ((i + j) == indices[j]) /* see if deleting consecutive items */
          {
             j++; /*increase the shift*/
-            if (j == num) break;
+            if (j == num) { break; }
          }
       }
 
-      if ( (i+j) < array_size)  /* if deleting the last item then no moving */
+      if ((i + j) < array_size) /* if deleting the last item then no moving */
       {
-         hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
+         hypre_CopyBox(hypre_BoxArrayBox(box_array, i + j),
                        hypre_BoxArrayBox(box_array, i));
          hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i+j);
       }
@@ -1407,7 +1407,7 @@ hypre_BoxArrayArrayClone( hypre_BoxArrayArray *box_array_array )
 
    new_size = hypre_BoxArrayArraySize(box_array_array);
    new_box_array_array = hypre_BoxArrayArrayCreate(
-      new_size, hypre_BoxArrayArrayNDim(box_array_array));
+                            new_size, hypre_BoxArrayArrayNDim(box_array_array));
 
    if (new_size)
    {
