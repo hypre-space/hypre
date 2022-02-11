@@ -9,7 +9,8 @@
 
 Version 2.24.0 released 2022/02/11
 
-- Added SYCL support.
+- Added SYCL support for the structured interface and solvers
+- Added SYCL support for AMG solve phase.
 - Enabled GPU setup for the MGR solver.
 - Enabled new interpolation options for MGR (L1-Jacobi, MM-ext, MM-ext+i,
   MM-ext+e) for both CPU and GPU.
