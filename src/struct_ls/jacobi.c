@@ -151,7 +151,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    HYPRE_Real              weight           = (jacobi_data -> weight);
    hypre_StructVector     *r                = (jacobi_data -> r);
    HYPRE_Real              tol              = (jacobi_data -> tol);
-   HYPRE_Real              tol2             = tol*tol;
+   HYPRE_Real              tol2             = tol * tol;
    HYPRE_Int               ndim             = hypre_StructMatrixNDim(A);
 
    hypre_BoxArray         *boxes;
@@ -195,7 +195,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
       return hypre_error_flag;
    }
 
-//   hypre_StructVectorClearBoundGhostValues(x, 0); /* RDF: Shouldn't need this */
+   //   hypre_StructVectorClearBoundGhostValues(x, 0); /* RDF: Shouldn't need this */
 
    rsumsq = 0.0;
    if (tol > 0.0)
@@ -267,7 +267,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          hypre_StructCopy(b, r);
          hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, r);
          rsumsq = hypre_StructInnerProd(r, r);
-         if ( (rsumsq/bsumsq) < tol2 )
+         if ( (rsumsq / bsumsq) < tol2 )
          {
             max_iter = iter; /* converged; reset max_iter to prevent more iterations */
          }
@@ -338,7 +338,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          hypre_StructCopy(b, r);
          hypre_StructMatvecCompute(matvec_data, -1.0, A, x, 1.0, r);
          rsumsq = hypre_StructInnerProd(r, r);
-         if ( (rsumsq/bsumsq) < tol2 )
+         if ( (rsumsq / bsumsq) < tol2 )
          {
             break;
          }
@@ -347,7 +347,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
 
    if ( tol > 0.0 )
    {
-      (jacobi_data -> rresnorm) = sqrt(rsumsq/bsumsq);
+      (jacobi_data -> rresnorm) = sqrt(rsumsq / bsumsq);
    }
    (jacobi_data -> num_iterations) = iter;
 

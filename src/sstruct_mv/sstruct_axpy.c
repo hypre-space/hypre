@@ -140,9 +140,9 @@ hypre_SStructVectorElmdivpy( HYPRE_Complex       *alpha,
    HYPRE_Int  nparts = hypre_SStructVectorNParts(x);
    HYPRE_Int  part;
 
-   HYPRE_Int  x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int  y_object_type= hypre_SStructVectorObjectType(y);
-   HYPRE_Int  z_object_type= hypre_SStructVectorObjectType(z);
+   HYPRE_Int  x_object_type = hypre_SStructVectorObjectType(x);
+   HYPRE_Int  y_object_type = hypre_SStructVectorObjectType(y);
+   HYPRE_Int  z_object_type = hypre_SStructVectorObjectType(z);
 
    hypre_ParVector *x_par;
    hypre_ParVector *y_par;
@@ -180,7 +180,7 @@ hypre_SStructVectorElmdivpy( HYPRE_Complex       *alpha,
 
       if ((alpha[0] != 1.0) || (beta[0] != 1.0))
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"{alpha, beta} != 1.0 not implemented!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "{alpha, beta} != 1.0 not implemented!");
          return hypre_error_flag;
       }
 

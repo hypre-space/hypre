@@ -143,7 +143,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    /* compute dxyz */
    for (i = 0; i < nvars; i++)
    {
-      smatrix = hypre_SStructPMatrixSMatrix(A,i,i);
+      smatrix = hypre_SStructPMatrixSMatrix(A, i, i);
       hypre_PFMGComputeDxyz(smatrix, sys_dxyz[i], &dxyz_flag);
 
       for (d = 0; d < 3; d++)

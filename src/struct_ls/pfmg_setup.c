@@ -155,8 +155,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, num_levels, HYPRE_MEMORY_HOST);
    A_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels, HYPRE_MEMORY_HOST);
-   P_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels-1, HYPRE_MEMORY_HOST);
-   RT_l   = hypre_TAlloc(hypre_StructMatrix *, num_levels-1, HYPRE_MEMORY_HOST);
+   P_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   RT_l   = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
    b_l    = hypre_TAlloc(hypre_StructVector *, num_levels, HYPRE_MEMORY_HOST);
    x_l    = hypre_TAlloc(hypre_StructVector *, num_levels, HYPRE_MEMORY_HOST);
    tx_l   = hypre_TAlloc(hypre_StructVector *, num_levels, HYPRE_MEMORY_HOST);
@@ -173,9 +173,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructVectorInitialize(tx_l[0]);
    hypre_StructVectorAssemble(tx_l[0]);
 
-//   /* RDF AP Debug */
-//   hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
-//                                        hypre_StructGridBoxMan(grid_l[0])));
+   //   /* RDF AP Debug */
+   //   hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
+   //                                        hypre_StructGridBoxMan(grid_l[0])));
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -213,46 +213,46 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          if (RT_l[l] != P_l[l])
          {
             /* If restriction is not the same as interpolation, compute RAP */
-            hypre_StructMatrixRTtAP(RT_l[l], A_l[l], P_l[l], &A_l[l+1]);
+            hypre_StructMatrixRTtAP(RT_l[l], A_l[l], P_l[l], &A_l[l + 1]);
          }
          else
          {
-            hypre_StructMatrixPtAP(A_l[l], P_l[l], &A_l[l+1]);
+            hypre_StructMatrixPtAP(A_l[l], P_l[l], &A_l[l + 1]);
          }
-         hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l+1]), &grid_l[l+1]);
+         hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l + 1]), &grid_l[l + 1]);
       }
       else
       {
          /* RDF: The coarse grid should be computed in CreateRAPOp() */
          hypre_PFMGSetCIndex(cdir, cindex);
          hypre_PFMGSetStride(cdir, stride);
-         hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-         hypre_StructGridAssemble(grid_l[l+1]);
+         hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
+         hypre_StructGridAssemble(grid_l[l + 1]);
 
-         A_l[l+1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l+1], cdir, rap_type);
-         hypre_StructMatrixInitialize(A_l[l+1]);
-         hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l+1]);
+         A_l[l + 1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l + 1], cdir, rap_type);
+         hypre_StructMatrixInitialize(A_l[l + 1]);
+         hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l + 1]);
       }
       HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
-//      /* RDF AP Debug */
-//      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
-//                                           hypre_StructGridBoxMan(grid_l[l+1])));
+      //      /* RDF AP Debug */
+      //      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
+      //                                           hypre_StructGridBoxMan(grid_l[l+1])));
 
-      b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
-      hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
-      hypre_StructVectorInitialize(b_l[l+1]);
-      hypre_StructVectorAssemble(b_l[l+1]);
+      b_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetNumGhost(b_l[l + 1], b_num_ghost);
+      hypre_StructVectorInitialize(b_l[l + 1]);
+      hypre_StructVectorAssemble(b_l[l + 1]);
 
-      x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
-      hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
-      hypre_StructVectorInitialize(x_l[l+1]);
-      hypre_StructVectorAssemble(x_l[l+1]);
+      x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);
+      hypre_StructVectorInitialize(x_l[l + 1]);
+      hypre_StructVectorAssemble(x_l[l + 1]);
 
-      tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
-      hypre_StructVectorSetNumGhost(tx_l[l+1], x_num_ghost);
-      hypre_StructVectorInitialize(tx_l[l+1]);
-      hypre_StructVectorAssemble(tx_l[l+1]);
+      tx_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetNumGhost(tx_l[l + 1], x_num_ghost);
+      hypre_StructVectorInitialize(tx_l[l + 1]);
+      hypre_StructVectorAssemble(tx_l[l + 1]);
 
       HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
@@ -288,7 +288,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* set up the interpolation routine */
       interp_data_l[l] = hypre_StructMatvecCreate();
-      hypre_StructMatvecSetup(interp_data_l[l], P_l[l], x_l[l+1]);
+      hypre_StructMatvecSetup(interp_data_l[l], P_l[l], x_l[l + 1]);
 
       /* set up the restriction routine */
       restrict_data_l[l] = hypre_StructMatvecCreate();
@@ -400,8 +400,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    if ((pfmg_data -> logging) > 0)
    {
-      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
-      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
+      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    }
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -424,7 +424,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructMatrixPrint(filename, P_l[l], 0);
 
          /* Check if P interpolates vector of ones */
-         HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l+1]), &ones);
+         HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(A_l[l + 1]), &ones);
          HYPRE_StructVectorInitialize(ones);
          HYPRE_StructVectorSetConstantValues(ones, 1.0);
          HYPRE_StructVectorAssemble(ones);
@@ -568,7 +568,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
             for (d = 0; d < ndim; d++)
             {
                cxyz[d]   += tcxyz[d];
-               sqcxyz[d] += tcxyz[d]*tcxyz[d];
+               sqcxyz[d] += tcxyz[d] * tcxyz[d];
             }
          }
          else
@@ -576,10 +576,10 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
             for (d = 0; d < ndim; d++)
             {
                cxyz[d]   -= tcxyz[d];
-               sqcxyz[d] += tcxyz[d]*tcxyz[d];
+               sqcxyz[d] += tcxyz[d] * tcxyz[d];
             }
          }
-       }
+      }
 
       /* constant_coefficient==0, all coefficients vary with space */
       else
@@ -616,7 +616,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                for (d = 0; d < ndim; d++)
                {
                   cxyz[d]   += tcxyz[d];
-                  sqcxyz[d] += tcxyz[d]*tcxyz[d];
+                  sqcxyz[d] += tcxyz[d] * tcxyz[d];
                }
             }
             else
@@ -624,7 +624,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                for (d = 0; d < ndim; d++)
                {
                   cxyz[d]   -= tcxyz[d];
-                  sqcxyz[d] += tcxyz[d]*tcxyz[d];
+                  sqcxyz[d] += tcxyz[d] * tcxyz[d];
                }
             }
          }
@@ -644,7 +644,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
 HYPRE_Int
 hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                        HYPRE_Real         *dxyz,
-                       HYPRE_Int          *dxyz_flag)
+                       HYPRE_Int          *dxyz_flag )
 {
    MPI_Comm           comm = hypre_StructMatrixComm(A);
    hypre_StructGrid  *grid = hypre_StructMatrixGrid(A);
@@ -712,8 +712,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    for (d = 0; d < ndim; d++)
    {
-      mean[d] = cxyz[d]/(HYPRE_Real) global_size;
-      deviation[d] = sqcxyz[d]/(HYPRE_Real) global_size;
+      mean[d] = cxyz[d] / (HYPRE_Real) global_size;
+      deviation[d] = sqcxyz[d] / (HYPRE_Real) global_size;
    }
 
    cxyz_max = 0.0;
@@ -735,8 +735,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    /* Set dxyz values that are scaled appropriately for the coarsening routine */
    for (d = 0; d < ndim; d++)
    {
-      HYPRE_Real max_anisotropy = HYPRE_REAL_MAX/1000;
-      if (cxyz[d] > (cxyz_max/max_anisotropy))
+      HYPRE_Real max_anisotropy = HYPRE_REAL_MAX / 1000;
+      if (cxyz[d] > (cxyz_max / max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
@@ -759,8 +759,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    *dxyz_flag = 0;
    for (d = 0; d < ndim; d++)
    {
-      deviation[d] -= mean[d]*mean[d];
-      if ( deviation[d] > 0.1*(mean[d]*mean[d]) )
+      deviation[d] -= mean[d] * mean[d];
+      if ( deviation[d] > 0.1 * (mean[d]*mean[d]) )
       {
          *dxyz_flag = 1;
          break;
@@ -850,7 +850,7 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
                    HYPRE_Int    **cdir_l_ptr,
                    HYPRE_Int    **active_l_ptr,
                    HYPRE_Real   **relax_weights_ptr,
-                   HYPRE_Int     *num_levels)
+                   HYPRE_Int     *num_levels )
 {
    HYPRE_Int      ndim = hypre_BoxNDim(cbox);
    HYPRE_Int     *cdir_l;
@@ -893,7 +893,7 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
             min_dxyz = dxyz[d];
             cdir = d;
          }
-         alpha += 1.0/(dxyz[d]*dxyz[d]);
+         alpha += 1.0 / (dxyz[d] * dxyz[d]);
       }
       relax_weights[l] = 1.0;
 
@@ -903,7 +903,7 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
       {
          if (dxyz_flag || (ndim == 1))
          {
-            relax_weights[l] = 2.0/3.0;
+            relax_weights[l] = 2.0 / 3.0;
          }
          else
          {
@@ -911,12 +911,12 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
             {
                if (d != cdir)
                {
-                  beta += 1.0/(dxyz[d]*dxyz[d]);
+                  beta += 1.0 / (dxyz[d] * dxyz[d]);
                }
             }
 
             /* determine level Jacobi weights */
-            relax_weights[l] = 2.0/(3.0 - beta/alpha);
+            relax_weights[l] = 2.0 / (3.0 - beta / alpha);
          }
 
          /*    don't coarsen if a periodic direction and not divisible by 2

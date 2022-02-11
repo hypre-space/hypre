@@ -66,8 +66,8 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
          Uvboxes[part][var]  = hypre_BoxCreate(ndim);
          for (d = 0; d < ndim; d++)
          {
-            hypre_BoxIMinD(Uvboxes[part][var], d) = HYPRE_INT_MAX/2;
-            hypre_BoxIMaxD(Uvboxes[part][var], d) = HYPRE_INT_MIN/2;
+            hypre_BoxIMinD(Uvboxes[part][var], d) = HYPRE_INT_MAX / 2;
+            hypre_BoxIMaxD(Uvboxes[part][var], d) = HYPRE_INT_MIN / 2;
          }
          for (d = ndim; d < HYPRE_MAXDIM; d++)
          {

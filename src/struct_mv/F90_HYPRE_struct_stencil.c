@@ -41,15 +41,15 @@ hypre_F90_IFACE(hypre_structstencilcreate, HYPRE_STRUCTSTENCILCREATE)
 
 void
 hypre_F90_IFACE(hypre_structstencilsetentry, HYPRE_STRUCTSTENCILSETENTRY)
-   ( hypre_F90_Obj *stencil,
-     hypre_F90_Int *entry,
-     hypre_F90_IntArray *offset,
-     hypre_F90_Int *ierr          )
+( hypre_F90_Obj *stencil,
+  hypre_F90_Int *entry,
+  hypre_F90_IntArray *offset,
+  hypre_F90_Int *ierr          )
 {
    *ierr = (hypre_F90_Int) HYPRE_StructStencilSetEntry(
-      hypre_F90_PassObj (HYPRE_StructStencil, stencil),
-      hypre_F90_PassInt (entry),
-      hypre_F90_PassIntArray (offset)       );
+              hypre_F90_PassObj (HYPRE_StructStencil, stencil),
+              hypre_F90_PassInt (entry),
+              hypre_F90_PassIntArray (offset)       );
 }
 
 /*--------------------------------------------------------------------------

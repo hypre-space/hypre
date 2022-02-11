@@ -110,7 +110,7 @@ hypre_StructNumGhostFromStencil( hypre_StructStencil  *stencil,
    hypre_IndexRef  stencil_offset;
    HYPRE_Int       s, d, m;
 
-   num_ghost = hypre_CTAlloc(HYPRE_Int, 2*ndim, HYPRE_MEMORY_HOST);
+   num_ghost = hypre_CTAlloc(HYPRE_Int, 2 * ndim, HYPRE_MEMORY_HOST);
 
    for (s = 0; s < hypre_StructStencilSize(stencil); s++)
    {
@@ -122,11 +122,11 @@ hypre_StructNumGhostFromStencil( hypre_StructStencil  *stencil,
 
          if (m < 0)
          {
-            num_ghost[2*d]     = hypre_max(num_ghost[2*d],    -m);
+            num_ghost[2 * d]     = hypre_max(num_ghost[2 * d],    -m);
          }
          else if (m > 0)
          {
-            num_ghost[2*d + 1] = hypre_max(num_ghost[2*d + 1], m);
+            num_ghost[2 * d + 1] = hypre_max(num_ghost[2 * d + 1], m);
          }
       }
    }

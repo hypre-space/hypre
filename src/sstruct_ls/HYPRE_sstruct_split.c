@@ -319,8 +319,8 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
 
    if ((solver -> logging) > 0)
    {
-      (solver -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
-      (solver -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter+1, HYPRE_MEMORY_HOST);
+      (solver -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
+      (solver -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------
@@ -386,7 +386,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    {
       /* eps = (tol^2) */
       hypre_SStructInnerProd(b, b, &b_dot_b);
-      eps = tol*tol;
+      eps = tol * tol;
 
       /* if rhs is zero, return a zero solution */
       if (!(b_dot_b > 0.0))
@@ -410,15 +410,14 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          /* compute fine grid residual (r = b - Ax) */
          hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, y);
          hypre_SStructInnerProd(y, y, &r_dot_r);
-         (solver -> rel_norm) = sqrt(r_dot_r / b_dot_b);
 
          if (logging > 0)
          {
             norms[iter]     = sqrt(r_dot_r);
-            rel_norms[iter] = sqrt(r_dot_r/b_dot_b);
+            rel_norms[iter] = sqrt(r_dot_r / b_dot_b);
          }
 
-         if (r_dot_r/b_dot_b < eps)
+         if (r_dot_r / b_dot_b < eps)
          {
             break;
          }
@@ -603,7 +602,7 @@ HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver  solver )
       hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
       for (i = 1; i <= num_iterations; i++)
       {
-         convr = norms[i] / norms[i-1];
+         convr = norms[i] / norms[i - 1];
          hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 
@@ -611,8 +610,8 @@ HYPRE_SStructSplitPrintLogging( HYPRE_SStructSolver  solver )
       {
          if (rel_norms[0] > 0.)
          {
-            avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
-                            (1.0/(HYPRE_Real) num_iterations));
+            avg_convr = pow((rel_norms[num_iterations] / rel_norms[0]),
+                            (1.0 / (HYPRE_Real) num_iterations));
             hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
          }
       }
@@ -641,7 +640,7 @@ HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
       }
       else if (num_iterations == max_iter)
       {
-         *norm = rel_norms[num_iterations-1];
+         *norm = rel_norms[num_iterations - 1];
       }
       else
       {

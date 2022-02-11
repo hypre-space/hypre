@@ -316,7 +316,7 @@ hypre_BoxBTStackInsert( hypre_BoxBTNode    *btnode,
    /* Double the capacity if limit is reached */
    if (size == capacity)
    {
-      capacity = hypre_max(1, 2*capacity);
+      capacity = hypre_max(1, 2 * capacity);
       if (capacity < 0)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Integer overflow! Using capacity=INT_MAX");
@@ -352,7 +352,7 @@ hypre_BoxBTStackDelete( hypre_BoxBTStack    *btstack,
    }
    else
    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Empty stack!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Empty stack!");
       *btnode_ptr = NULL;
    }
 

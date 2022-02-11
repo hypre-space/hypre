@@ -604,3 +604,4 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);
 #endif
 
 #endif
+

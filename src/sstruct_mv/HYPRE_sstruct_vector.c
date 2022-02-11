@@ -102,11 +102,11 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
           * ijvector does not use the owndata flag in the data structure
           * unlike the structvector                               */
 
-	 /* GEC if data has been allocated then free the pointer */
+         /* GEC if data has been allocated then free the pointer */
          hypre_TFree(hypre_SStructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
 
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
-	 {
+         {
             hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_HOST);
          }
 
@@ -790,7 +790,7 @@ HYPRE_SStructVectorPrint( const char          *filename,
 
    for (part = 0; part < nparts; part++)
    {
-//      hypre_sprintf(new_filename, "%s.p%02d", filename, part);
+      //      hypre_sprintf(new_filename, "%s.p%02d", filename, part);
       hypre_sprintf(new_filename, "%s.%02d", filename, part);
       hypre_SStructPVectorPrint(new_filename,
                                 hypre_SStructVectorPVector(vector, part),

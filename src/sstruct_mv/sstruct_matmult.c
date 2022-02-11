@@ -684,8 +684,8 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
    }
 
    /* Set column bounds of the unstructured matrix component */
-   ijmatrix = hypre_SStructMatrixIJMatrix(matrices[terms[nterms-1]]);
-   if (trans[nterms-1])
+   ijmatrix = hypre_SStructMatrixIJMatrix(matrices[terms[nterms - 1]]);
+   if (trans[nterms - 1])
    {
       jlower = hypre_IJMatrixRowPartitioning(ijmatrix)[0];
       jupper = hypre_IJMatrixRowPartitioning(ijmatrix)[1] - 1;
@@ -860,7 +860,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       /* Convert sA_n to IJMatrix */
       if (ij_sA[m] == NULL)
       {
-         graph = hypre_SStructMatrixGraph(matrices[terms[t+1]]);
+         graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
          grid  = hypre_SStructGraphGrid(graph);
 
          hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);

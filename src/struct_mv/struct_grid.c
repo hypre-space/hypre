@@ -270,7 +270,8 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    HYPRE_Int            info_size;
    HYPRE_Int            num_periods;
    HYPRE_Int            d, k, p, i;
-   HYPRE_Int            sendbuf6[2*HYPRE_MAXDIM], recvbuf6[2*HYPRE_MAXDIM];
+   HYPRE_Int            sendbuf6[2 * HYPRE_MAXDIM];
+   HYPRE_Int            recvbuf6[2 * HYPRE_MAXDIM];
 
    hypre_Box           *box;
    hypre_Box           *ghost_box;
@@ -822,8 +823,8 @@ hypre_StructGridPrintVTK( const char       *filename,
    hypre_Box       *box;
    hypre_BoxArray  *boxes;
    hypre_Index     index, coords, partial_volume, loop_size;
-   HYPRE_Int       growth_array[2*HYPRE_MAXDIM];
-   HYPRE_Int       shrink_array[2*HYPRE_MAXDIM];
+   HYPRE_Int       growth_array[2 * HYPRE_MAXDIM];
+   HYPRE_Int       shrink_array[2 * HYPRE_MAXDIM];
    HYPRE_Int       cell_type, cell_nnodes;
    HYPRE_Int       offset;
 
@@ -845,16 +846,16 @@ hypre_StructGridPrintVTK( const char       *filename,
    offset_id = offset_id - hypre_BoxArraySize(boxes);
 
    /* Temporary stuff */
-   for(d = 0; d < ndim; d++)
+   for (d = 0; d < ndim; d++)
    {
-      growth_array[2*d]   = 0;
-      growth_array[2*d+1] = 1;
-      shrink_array[2*d]   = 0;
-      shrink_array[2*d+1] = -1;
+      growth_array[2 * d]   = 0;
+      growth_array[2 * d + 1] = 1;
+      shrink_array[2 * d]   = 0;
+      shrink_array[2 * d + 1] = -1;
    }
 
    /* Set VTK cell type */
-   switch(ndim)
+   switch (ndim)
    {
       case 1:
          cell_type   = 4;  /* VTK_POLY_LINE */
@@ -877,17 +878,18 @@ hypre_StructGridPrintVTK( const char       *filename,
    }
 
    /* Write VTK XML data file */
-   hypre_sprintf(vtkfile,"%s.vtu.%05d", filename, my_id);
+   hypre_sprintf(vtkfile, "%s.vtu.%05d", filename, my_id);
    fp = fopen(vtkfile, "w");
    hypre_fprintf(fp, "<?xml version=\"1.0\"?>\n");
    hypre_fprintf(fp, "<VTKFile type=\"UnstructuredGrid\" ");
    hypre_fprintf(fp, "version=\"0.1\" ");
    hypre_fprintf(fp, "byte_order=\"LittleEndian\">\n");
    hypre_fprintf(fp, "\t<UnstructuredGrid>\n");
-   hypre_fprintf(fp, "\t\t<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", grid_nnodes, grid_volume);
+   hypre_fprintf(fp, "\t\t<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", grid_nnodes,
+                 grid_volume);
    hypre_fprintf(fp, "\t\t\t<Points>\n");
    hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" NumberOfComponents=\"3\" format=\"ascii\">\n");
-   switch(ndim)
+   switch (ndim)
    {
       case 1:
          hypre_ForBoxI(i, boxes)
@@ -952,7 +954,7 @@ hypre_StructGridPrintVTK( const char       *filename,
    hypre_fprintf(fp, "\t\t\t<Cells>\n");
    hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n");
    offset = 0;
-   switch(ndim)
+   switch (ndim)
    {
       case 1:
          hypre_ForBoxI(i, boxes)
@@ -998,7 +1000,7 @@ hypre_StructGridPrintVTK( const char       *filename,
 
                hypre_fprintf(fp, "\t\t\t\t\t");
                hypre_fprintf(fp, "%d", n[0]);
-               for(j = 1; j < cell_nnodes; j++) hypre_fprintf(fp, " %d", n[j]);
+               for (j = 1; j < cell_nnodes; j++) { hypre_fprintf(fp, " %d", n[j]); }
                hypre_fprintf(fp, "\n");
             }
             hypre_SerialBoxLoop0End();
@@ -1022,7 +1024,7 @@ hypre_StructGridPrintVTK( const char       *filename,
 
                n[0]  = hypre_BoxOffsetDistance(box, index) + offset;
                n[0] += hypre_IndexD(index, 1);
-               n[0] += hypre_IndexD(index, 2)*(partial_volume[0] + hypre_BoxSizeD(box, 1));
+               n[0] += hypre_IndexD(index, 2) * (partial_volume[0] + hypre_BoxSizeD(box, 1));
                n[1]  = n[0] + 1;
                n[2]  = n[0] + partial_volume[0];
                n[3]  = n[2] + 1;
@@ -1033,7 +1035,7 @@ hypre_StructGridPrintVTK( const char       *filename,
 
                hypre_fprintf(fp, "\t\t\t\t\t");
                hypre_fprintf(fp, "%d", n[0]);
-               for(j = 1; j < cell_nnodes; j++) hypre_fprintf(fp, " %d", n[j]);
+               for (j = 1; j < cell_nnodes; j++) { hypre_fprintf(fp, " %d", n[j]); }
                hypre_fprintf(fp, "\n");
             }
             hypre_SerialBoxLoop0End();
@@ -1043,13 +1045,13 @@ hypre_StructGridPrintVTK( const char       *filename,
    }
    hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
    hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n");
-   for(i = 1; i <= grid_volume; i++)
+   for (i = 1; i <= grid_volume; i++)
    {
-      hypre_fprintf(fp, "\t\t\t\t\t%d\n", cell_nnodes*i);
+      hypre_fprintf(fp, "\t\t\t\t\t%d\n", cell_nnodes * i);
    }
    hypre_fprintf(fp, "\t\t\t\t</DataArray>\n");
    hypre_fprintf(fp, "\t\t\t\t<DataArray type=\"Int32\" Name=\"types\" format=\"ascii\">\n");
-   for(i = 0; i < grid_volume; i++)
+   for (i = 0; i < grid_volume; i++)
    {
       hypre_fprintf(fp, "\t\t\t\t\t%d\n", cell_type);
    }
@@ -1062,7 +1064,7 @@ hypre_StructGridPrintVTK( const char       *filename,
       box = hypre_BoxArrayBox(boxes, i);
       box_id = hypre_StructGridID(grid, i);
       box_volume = hypre_BoxVolume(box);
-      for(j = 0; j < box_volume; j++)
+      for (j = 0; j < box_volume; j++)
       {
          hypre_fprintf(fp, "\t\t\t\t\t%d\n", box_id + offset_id);
       }
@@ -1075,9 +1077,9 @@ hypre_StructGridPrintVTK( const char       *filename,
    fclose(fp);
 
    /* Master process writes the parallel unstructured grid file */
-   if(my_id == 0)
+   if (my_id == 0)
    {
-      hypre_sprintf(vtkfile,"%s.pvtu", filename);
+      hypre_sprintf(vtkfile, "%s.pvtu", filename);
       fp = fopen(vtkfile, "w");
       hypre_fprintf(fp, "<?xml version=\"1.0\"?>\n");
       hypre_fprintf(fp, "<VTKFile type=\"PUnstructuredGrid\" ");
@@ -1090,7 +1092,7 @@ hypre_StructGridPrintVTK( const char       *filename,
       hypre_fprintf(fp, "\t\t<PPoints>\n");
       hypre_fprintf(fp, "\t\t\t<PDataArray type=\"Int32\" NumberOfComponents=\"3\" format=\"ascii\"/>\n");
       hypre_fprintf(fp, "\t\t</PPoints>\n");
-      for(i = 0; i < num_procs; i++)
+      for (i = 0; i < num_procs; i++)
       {
          hypre_fprintf(fp, "\t\t<Piece Source=\"%s.vtu.%05d\"/>\n", filename, i);
       }

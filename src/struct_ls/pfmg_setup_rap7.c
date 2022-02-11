@@ -80,7 +80,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
                 *--------------------------------------------------------------*/
                if (i * j == 0 && i * k == 0 && j * k == 0)
                {
-                  hypre_SetIndex3(index_temp,i, j, k);
+                  hypre_SetIndex3(index_temp, i, j, k);
                   MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
                   stencil_entry++;
                }

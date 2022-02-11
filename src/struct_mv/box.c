@@ -376,7 +376,7 @@ hypre_BoxPartialVolume( hypre_Box   *box,
    partial_volume[0] = hypre_BoxSizeD(box, 0);
    for (d = 1; d < ndim; d++)
    {
-      partial_volume[d] = partial_volume[d-1]*hypre_BoxSizeD(box, d);
+      partial_volume[d] = partial_volume[d - 1] * hypre_BoxSizeD(box, d);
    }
 
    return hypre_error_flag;
@@ -938,7 +938,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             dir = direction[d];
             for (i = 0; i < hypre_BoxSizeD(box, dir); i++)
             {
-               if (signature[dir][i+1] == 0)
+               if (signature[dir][i + 1] == 0)
                {
                   hypre_IndexD(cut, dir) = i + hypre_BoxIMinD(box, dir);
                   splitdir = dir;
@@ -963,17 +963,17 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             {
                for (i = 1; i < hypre_BoxSizeD(box, d) + 1; i++)
                {
-                  laplacian[d][i-1] = signature[d][i-1] +
-                                      signature[d][i+1] -
-                                      2*signature[d][i];
+                  laplacian[d][i - 1] = signature[d][i - 1] +
+                                        signature[d][i + 1] -
+                                        2 * signature[d][i];
                }
 
                /* Look for largest change in the current direction */
                for (i = 0; i < hypre_BoxSizeD(box, d) - 1; i++)
                {
-                  if ((laplacian[d][i+1] >= 0) != (laplacian[d][i] >= 0))
+                  if ((laplacian[d][i + 1] >= 0) != (laplacian[d][i] >= 0))
                   {
-                     change = hypre_abs(laplacian[d][i+1] - laplacian[d][i]);
+                     change = hypre_abs(laplacian[d][i + 1] - laplacian[d][i]);
                      if (change > hypre_IndexD(sign, d))
                      {
                         hypre_IndexD(sign, d) = change;
@@ -1252,7 +1252,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
    {
       hypre_CopyBox(hypre_BoxArrayBox(box_array, i + 1),
                     hypre_BoxArrayBox(box_array, i));
-      hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i+1);
+      hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i + 1);
    }
 
    hypre_BoxArraySize(box_array) --;
@@ -1296,7 +1296,7 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
       {
          hypre_CopyBox(hypre_BoxArrayBox(box_array, i + j),
                        hypre_BoxArrayBox(box_array, i));
-         hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i+j);
+         hypre_BoxArrayID(box_array, i) = hypre_BoxArrayID(box_array, i + j);
       }
    }
 

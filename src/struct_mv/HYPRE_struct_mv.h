@@ -663,8 +663,8 @@ HYPRE_Int HYPRE_StructVectorInnerProd( HYPRE_StructVector  x,
                                        HYPRE_Real         *result );
 
 /* Revisit these interface routines */
-HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector , HYPRE_Complex factor );
-HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x , HYPRE_StructVector y );
+HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector, HYPRE_Complex factor );
+HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x, HYPRE_StructVector y );
 
 /*@}*/
 /*@}*/

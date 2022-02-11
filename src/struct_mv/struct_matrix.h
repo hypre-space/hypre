@@ -87,9 +87,9 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int             symmetric;      /* Is the matrix symmetric */
    HYPRE_Int            *symm_entries;   /* Which entries are "symmetric" */
    HYPRE_Int             transpose;      /* Transpose stored also? */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Min num ghost layers */
-   HYPRE_Int             sym_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for symmetric */
-   HYPRE_Int             trn_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for transpose */
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Min num ghost layers */
+   HYPRE_Int             sym_ghost[2 * HYPRE_MAXDIM]; /* Ghost layers for symmetric */
+   HYPRE_Int             trn_ghost[2 * HYPRE_MAXDIM]; /* Ghost layers for transpose */
 
    HYPRE_BigInt          global_size;  /* Total number of nonzero coeffs */
 

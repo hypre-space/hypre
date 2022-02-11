@@ -1640,7 +1640,6 @@ main( HYPRE_Int   argc,
 #else
    HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
    HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
->>>>>>> master
 #endif
 
    for (part = 0; part < data.nparts; part++)

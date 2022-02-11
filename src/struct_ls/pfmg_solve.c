@@ -244,7 +244,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
             /* restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
-            hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l+1]);
+            hypre_StructMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0, b_l[l + 1]);
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 
 #ifdef DEBUG_SOLVE
@@ -252,8 +252,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "pfmg_rdown.i%02d.l%02d", i, l);
             hypre_StructVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", i, l+1);
-            hypre_StructVectorPrint(filename, b_l[l+1], 0);
+            hypre_sprintf(filename, "pfmg_b.i%02d.l%02d", i, l + 1);
+            hypre_StructVectorPrint(filename, b_l[l + 1], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
@@ -299,7 +299,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
             /* interpolate error and correct (x = x + Pe_c) */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-            hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l+1], 0.0, e_l[l]);
+            hypre_StructMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l + 1], 0.0, e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);

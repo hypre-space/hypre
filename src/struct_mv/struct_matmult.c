@@ -89,7 +89,7 @@ hypre_StructMatmultCreate( HYPRE_Int                  nmatrices_in,
    comm_data_a = hypre_TAlloc(HYPRE_Complex **, nmatrices + 1, HYPRE_MEMORY_HOST);
 
    /* Initialize mtypes to fine data spaces */
-   mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices+1, HYPRE_MEMORY_HOST);
+   mtypes = hypre_CTAlloc(HYPRE_Int, nmatrices + 1, HYPRE_MEMORY_HOST);
 
    /* Initialize data members */
    (mmdata -> nmatrices)       = nmatrices;
@@ -440,8 +440,8 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    (mmdata -> a) = a;
 
    /* Allocate memory for communication stencils */
-   comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices+1, HYPRE_MEMORY_HOST);
-   for (m = 0; m < nmatrices+1; m++)
+   comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices + 1, HYPRE_MEMORY_HOST);
+   for (m = 0; m < nmatrices + 1; m++)
    {
       comm_stencils[m] = hypre_CommStencilCreate(ndim);
    }
@@ -539,8 +539,8 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    /* HYPRE_StructMatrixSetSymmetric(M, sym); */
 #if 1 /* This should be set through the matmult interface somehow */
    {
-      HYPRE_Int num_ghost[2*HYPRE_MAXDIM];
-      for (i = 0; i < 2*HYPRE_MAXDIM; i++)
+      HYPRE_Int num_ghost[2 * HYPRE_MAXDIM];
+      for (i = 0; i < 2 * HYPRE_MAXDIM; i++)
       {
          num_ghost[i] = 0;
       }
@@ -570,7 +570,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    if (nconst == size || !(hypre_StructGridNumBoxes(grid) > 0))
    {
       /* Free up memory */
-      for (m = 0; m < nmatrices+1; m++)
+      for (m = 0; m < nmatrices + 1; m++)
       {
          hypre_CommStencilDestroy(comm_stencils[m]);
       }
@@ -625,7 +625,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    }
 
    /* Compute initial data spaces for each matrix */
-   data_spaces = hypre_CTAlloc(hypre_BoxArray *, nmatrices+1, HYPRE_MEMORY_HOST);
+   data_spaces = hypre_CTAlloc(hypre_BoxArray *, nmatrices + 1, HYPRE_MEMORY_HOST);
    for (m = 0; m < nmatrices; m++)
    {
       HYPRE_Int  *num_ghost;
@@ -643,8 +643,8 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
           * a result of how stencils are stored when the domain is coarse. */
          for (d = 0; d < ndim; d++)
          {
-            num_ghost[2*d]   += dom_stride[d] - 1;
-            num_ghost[2*d+1] += dom_stride[d] - 1;
+            num_ghost[2 * d]   += dom_stride[d] - 1;
+            num_ghost[2 * d + 1] += dom_stride[d] - 1;
          }
       }
       hypre_StructMatrixComputeDataSpace(matrix, num_ghost, &data_spaces[m]);
@@ -667,7 +667,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    /* Compute fine and coarse data spaces */
    fdata_space = NULL;
    cdata_space = NULL;
-   for (m = 0; m < nmatrices+1; m++)
+   for (m = 0; m < nmatrices + 1; m++)
    {
       data_space = data_spaces[m];
       if (data_space != NULL) /* This can be NULL when there is no bit mask */
@@ -853,7 +853,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    /* Free memory */
    hypre_BoxDestroy(loop_box);
    hypre_TFree(data_spaces, HYPRE_MEMORY_HOST);
-   for (m = 0; m < nmatrices+1; m++)
+   for (m = 0; m < nmatrices + 1; m++)
    {
       hypre_CommStencilDestroy(comm_stencils[m]);
    }
@@ -1088,17 +1088,17 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                case 0: /* variable coefficient on fine data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
-                     hypre_BoxIndexRank(fdbox, tdstart);
+                                  hypre_BoxIndexRank(fdbox, tdstart);
                   a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
-                     hypre_BoxIndexRank(fdbox, tdstart);
+                                    hypre_BoxIndexRank(fdbox, tdstart);
                   break;
 
                case 1: /* variable coefficient on coarse data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
-                     hypre_BoxIndexRank(cdbox, tdstart);
+                                  hypre_BoxIndexRank(cdbox, tdstart);
                   a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
-                     hypre_BoxIndexRank(cdbox, tdstart);
+                                    hypre_BoxIndexRank(cdbox, tdstart);
                   break;
 
                case 2: /* constant coefficient - point to bit mask */
@@ -1110,9 +1110,9 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   }
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
-                     hypre_BoxIndexRank(fdbox, tdstart);
+                                  hypre_BoxIndexRank(fdbox, tdstart);
                   a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
-                     hypre_BoxIndexRank(fdbox, tdstart);
+                                    hypre_BoxIndexRank(fdbox, tdstart);
                   break;
             }
          }
@@ -2034,7 +2034,7 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultHelper *a,
          a[i].mptr[Mi] += prod;
       }
    }
-   hypre_BoxLoop3End(Mi,fi,ci);
+   hypre_BoxLoop3End(Mi, fi, ci);
 
    return hypre_error_flag;
 }
@@ -2100,7 +2100,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1D(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -2117,7 +2117,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1D(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -2133,7 +2133,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1D(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -2148,7 +2148,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1D(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -2163,7 +2163,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -2177,7 +2177,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -2190,7 +2190,7 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -2202,11 +2202,11 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -2281,7 +2281,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DB(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -2298,7 +2298,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -2314,7 +2314,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -2329,7 +2329,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -2344,7 +2344,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -2358,7 +2358,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -2371,7 +2371,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -2383,11 +2383,11 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -2460,7 +2460,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DBB(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -2477,7 +2477,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DBB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -2493,7 +2493,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DBB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -2508,7 +2508,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1DBB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -2523,7 +2523,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -2537,7 +2537,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -2550,7 +2550,7 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -2562,11 +2562,11 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -2642,7 +2642,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2D(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 6:
@@ -2659,7 +2659,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2D(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 5:
@@ -2675,7 +2675,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2D(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 4:
@@ -2691,7 +2691,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 3:
@@ -2706,7 +2706,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 2:
@@ -2720,7 +2720,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 1:
@@ -2733,11 +2733,11 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -2815,7 +2815,7 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2DB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 6:
@@ -2832,7 +2832,7 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2DB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 5:
@@ -2848,7 +2848,7 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2DB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 4:
@@ -2864,7 +2864,7 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 3:
@@ -2879,7 +2879,7 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 2:
@@ -2893,7 +2893,7 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 1:
@@ -2906,11 +2906,11 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -2983,7 +2983,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1T(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -3000,7 +3000,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1T(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -3016,7 +3016,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1T(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -3031,7 +3031,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1T(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -3046,7 +3046,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -3060,7 +3060,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -3073,7 +3073,7 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -3085,11 +3085,11 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -3166,7 +3166,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TB(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -3183,7 +3183,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -3199,7 +3199,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -3214,7 +3214,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -3229,7 +3229,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -3243,7 +3243,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -3256,7 +3256,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -3268,11 +3268,11 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -3349,7 +3349,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBB(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -3366,7 +3366,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -3382,7 +3382,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -3397,7 +3397,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -3412,7 +3412,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -3426,7 +3426,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -3439,7 +3439,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -3451,11 +3451,11 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -3528,7 +3528,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBBB(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 7:
@@ -3545,7 +3545,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBBB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
@@ -3561,7 +3561,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBBB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
@@ -3576,7 +3576,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_1TBBB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
@@ -3591,7 +3591,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
@@ -3605,7 +3605,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
@@ -3618,7 +3618,7 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
@@ -3630,11 +3630,11 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi,gi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -3715,7 +3715,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2T(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 6:
@@ -3732,7 +3732,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2T(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 5:
@@ -3748,7 +3748,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2T(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 4:
@@ -3764,7 +3764,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 3:
@@ -3779,7 +3779,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 2:
@@ -3793,7 +3793,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 1:
@@ -3806,11 +3806,11 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -3894,7 +3894,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2TB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 6:
@@ -3911,7 +3911,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2TB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 5:
@@ -3927,7 +3927,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2TB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 4:
@@ -3943,7 +3943,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 3:
@@ -3958,7 +3958,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 2:
@@ -3972,7 +3972,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 1:
@@ -3985,11 +3985,11 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -4071,7 +4071,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2ETB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 6:
@@ -4088,7 +4088,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2ETB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 5:
@@ -4104,7 +4104,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2ETB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 4:
@@ -4120,7 +4120,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 3:
@@ -4135,7 +4135,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 2:
@@ -4149,7 +4149,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 1:
@@ -4162,11 +4162,11 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;
@@ -4242,7 +4242,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2TBB(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 6:
@@ -4259,7 +4259,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2TBB(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 5:
@@ -4275,7 +4275,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2TBB(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 4:
@@ -4291,7 +4291,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 3:
@@ -4306,7 +4306,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 2:
@@ -4320,7 +4320,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
          case 1:
@@ -4333,11 +4333,11 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi,gi,hi);
+            hypre_BoxLoop3End(Mi, gi, hi);
             break;
 
-          default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Unsupported depth of loop unrolling!");
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
 
             HYPRE_ANNOTATE_FUNC_END;
             return hypre_error_flag;

@@ -281,9 +281,9 @@ HYPRE_SStructSSAMGDestroy(HYPRE_SStructSolver solver);
  **/
 HYPRE_Int
 HYPRE_SStructSSAMGSetup(HYPRE_SStructSolver solver,
-                          HYPRE_SStructMatrix A,
-                          HYPRE_SStructVector b,
-                          HYPRE_SStructVector x);
+                        HYPRE_SStructMatrix A,
+                        HYPRE_SStructVector b,
+                        HYPRE_SStructVector x);
 
 /**
  * Solve the system.

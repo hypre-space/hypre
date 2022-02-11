@@ -77,7 +77,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
              *--------------------------------------------------------------*/
             if (i * j == 0)
             {
-               hypre_SetIndex3(index_temp,i, j, 0);
+               hypre_SetIndex3(index_temp, i, j, 0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
                stencil_entry++;
             }

@@ -1297,10 +1297,10 @@ hypre_StructAssumedPartitionCreate(
       boxes and then pass the array only (not the structure) to exchange data. */
    box_count = count;
 
-   contact_boxinfo = hypre_CTAlloc(HYPRE_Int, box_count*(2*ndim), HYPRE_MEMORY_HOST);
+   contact_boxinfo = hypre_CTAlloc(HYPRE_Int, box_count * (2 * ndim), HYPRE_MEMORY_HOST);
 
    proc_array = hypre_TReAlloc(proc_array, HYPRE_Int, box_count, HYPRE_MEMORY_HOST);
-   proc_array_starts = hypre_CTAlloc(HYPRE_Int, box_count+1, HYPRE_MEMORY_HOST);
+   proc_array_starts = hypre_CTAlloc(HYPRE_Int, box_count + 1, HYPRE_MEMORY_HOST);
    proc_array_starts[0] = 0;
 
    proc_count = 0;
@@ -1369,7 +1369,7 @@ hypre_StructAssumedPartitionCreate(
    max_response_size = 0; /* No response data - just confirmation */
 
    hypre_DataExchangeList(proc_count, proc_array, contact_boxinfo, proc_array_starts,
-                          (2*ndim)*sizeof(HYPRE_Int), sizeof(HYPRE_Int),
+                          (2 * ndim)*sizeof(HYPRE_Int), sizeof(HYPRE_Int),
                           &response_obj, max_response_size, 1, comm,
                           (void**) &response_buf, &response_buf_starts);
 
@@ -1882,7 +1882,7 @@ hypre_StructAssumedPartitionPrint(const char               *filename,
             hypre_fprintf(file, " %d", hypre_IndexD(index, d));
          }
          hypre_fprintf(file, " )");
-         hypre_fprintf(file, " ;  procs = %d %d", proc_partitions[i], proc_partitions[i+1]-1);
+         hypre_fprintf(file, " ;  procs = %d %d", proc_partitions[i], proc_partitions[i + 1] - 1);
          hypre_fprintf(file, " ;  division = ");
          index = hypre_StructAssumedPartDivision(ap, i);
          for (d = 0; d < ndim; d++)

@@ -325,8 +325,8 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
       data_box = hypre_BoxArrayBox(data_space, i);
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-         hypre_BoxIMaxD(data_box, d) += num_ghost[2*d+1];
+         hypre_BoxIMinD(data_box, d) -= num_ghost[2 * d];
+         hypre_BoxIMaxD(data_box, d) += num_ghost[2 * d + 1];
       }
       hypre_StructVectorMapDataBox(vector, data_box);
    }
@@ -1014,7 +1014,7 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    HYPRE_Int      i;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < data_size; i++)
    {
@@ -1189,7 +1189,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxGetSize(box, loop_size);
 
       /* TODO: generate on host and copy to device. FIX? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       HYPRE_Int loop_n = 1, ii;
       for (ii = 0; ii < hypre_StructVectorNDim(vector); ii++)
       {
@@ -1200,9 +1200,9 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_DEVICE);
 
       ii = 0;
-      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector),loop_size)
+      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector), loop_size)
       {
-         rand_host[ii++] = 2.0*hypre_Rand() - 1.0;
+         rand_host[ii++] = 2.0 * hypre_Rand() - 1.0;
       }
       hypre_SerialBoxLoop0End()
       hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, loop_n,
@@ -1213,16 +1213,16 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           dbox, start, unit_stride, vi);
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
          vp[vi] = rand_device[idx];
 #else
-         vp[vi] = 2.0*hypre_Rand() - 1.0;
+         vp[vi] = 2.0 * hypre_Rand() - 1.0;
 #endif
       }
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
       hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
       hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
 #endif
@@ -1639,7 +1639,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
 
    ndim = hypre_StructVectorNDim(vector);
    boxes = hypre_StructVectorDataSpace(vector);
-   if ( hypre_BoxArraySize(boxes)!=1 )
+   if ( hypre_BoxArraySize(boxes) != 1 )
    {
       /* if more than one box, the return system max_xyz_index is too simple
          if needed, fix later */
@@ -1709,7 +1709,7 @@ hypre_StructVectorClone( hypre_StructVector *x )
 
    for (i = 0; i < data_space_size; i++)
    {
-       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+      hypre_StructVectorDataIndices(y)[i] = data_indices[i];
    }
 
    hypre_StructVectorCopy(x, y);

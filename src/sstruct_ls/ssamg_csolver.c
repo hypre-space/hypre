@@ -53,7 +53,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       {
          /* do no more work on the coarsest grid than the cost of a V-cycle
           * (estimating roughly 4 communications per V-cycle level) */
-         max_work = 4*num_levels;
+         max_work = 4 * num_levels;
 
          /* do sweeps proportional to the coarsest grid size */
          cmax_size = 0;

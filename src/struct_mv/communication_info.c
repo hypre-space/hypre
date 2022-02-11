@@ -113,12 +113,12 @@ hypre_CommStencilCreateNumGhost( hypre_CommStencil  *comm_stencil,
    HYPRE_Int      *pgrow  = hypre_CommStencilPGrow(comm_stencil);
    HYPRE_Int       d;
 
-   num_ghost = hypre_CTAlloc(HYPRE_Int, 2*ndim, HYPRE_MEMORY_HOST);
+   num_ghost = hypre_CTAlloc(HYPRE_Int, 2 * ndim, HYPRE_MEMORY_HOST);
 
    for (d = 0; d < ndim; d++)
    {
-      num_ghost[2*d]     = mgrow[d];
-      num_ghost[2*d + 1] = pgrow[d];
+      num_ghost[2 * d]     = mgrow[d];
+      num_ghost[2 * d + 1] = pgrow[d];
    }
 
    *num_ghost_ptr = num_ghost;
@@ -345,25 +345,25 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
    {
       switch (k)
       {
-        case 0: /* Clone send info */
-           comm_boxes      = hypre_CommInfoSendBoxes(comm_info);
-           comm_stride     = hypre_CommInfoSendStride(comm_info);
-           clone_stride    = hypre_CommInfoSendStride(clone); /* Needs to be here, not below */
-           comm_processes  = hypre_CommInfoSendProcesses(comm_info);
-           comm_rboxnums   = hypre_CommInfoSendRBoxnums(comm_info);
-           comm_rboxes     = hypre_CommInfoSendRBoxes(comm_info);
-           comm_transforms = hypre_CommInfoSendTransforms(comm_info);
-           break;
+         case 0: /* Clone send info */
+            comm_boxes      = hypre_CommInfoSendBoxes(comm_info);
+            comm_stride     = hypre_CommInfoSendStride(comm_info);
+            clone_stride    = hypre_CommInfoSendStride(clone); /* Needs to be here, not below */
+            comm_processes  = hypre_CommInfoSendProcesses(comm_info);
+            comm_rboxnums   = hypre_CommInfoSendRBoxnums(comm_info);
+            comm_rboxes     = hypre_CommInfoSendRBoxes(comm_info);
+            comm_transforms = hypre_CommInfoSendTransforms(comm_info);
+            break;
 
-        case 1: /* Clone recv info */
-           comm_boxes      = hypre_CommInfoRecvBoxes(comm_info);
-           comm_stride     = hypre_CommInfoRecvStride(comm_info);
-           clone_stride    = hypre_CommInfoRecvStride(clone); /* Needs to be here, not below */
-           comm_processes  = hypre_CommInfoRecvProcesses(comm_info);
-           comm_rboxnums   = hypre_CommInfoRecvRBoxnums(comm_info);
-           comm_rboxes     = hypre_CommInfoRecvRBoxes(comm_info);
-           comm_transforms = hypre_CommInfoRecvTransforms(comm_info);
-           break;
+         case 1: /* Clone recv info */
+            comm_boxes      = hypre_CommInfoRecvBoxes(comm_info);
+            comm_stride     = hypre_CommInfoRecvStride(comm_info);
+            clone_stride    = hypre_CommInfoRecvStride(clone); /* Needs to be here, not below */
+            comm_processes  = hypre_CommInfoRecvProcesses(comm_info);
+            comm_rboxnums   = hypre_CommInfoRecvRBoxnums(comm_info);
+            comm_rboxes     = hypre_CommInfoRecvRBoxes(comm_info);
+            comm_transforms = hypre_CommInfoRecvTransforms(comm_info);
+            break;
       }
 
       size_aa = hypre_BoxArrayArraySize(comm_boxes);
@@ -413,21 +413,21 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
 
       switch (k)
       {
-        case 0: /* Clone send info */
-           hypre_CommInfoSendBoxes(clone)      = clone_boxes;
-           hypre_CommInfoSendProcesses(clone)  = clone_processes;
-           hypre_CommInfoSendRBoxnums(clone)   = clone_rboxnums;
-           hypre_CommInfoSendRBoxes(clone)     = clone_rboxes;
-           hypre_CommInfoSendTransforms(clone) = clone_transforms;
-           break;
+         case 0: /* Clone send info */
+            hypre_CommInfoSendBoxes(clone)      = clone_boxes;
+            hypre_CommInfoSendProcesses(clone)  = clone_processes;
+            hypre_CommInfoSendRBoxnums(clone)   = clone_rboxnums;
+            hypre_CommInfoSendRBoxes(clone)     = clone_rboxes;
+            hypre_CommInfoSendTransforms(clone) = clone_transforms;
+            break;
 
-        case 1: /* Clone recv info */
-           hypre_CommInfoRecvBoxes(clone)      = clone_boxes;
-           hypre_CommInfoRecvProcesses(clone)  = clone_processes;
-           hypre_CommInfoRecvRBoxnums(clone)   = clone_rboxnums;
-           hypre_CommInfoRecvRBoxes(clone)     = clone_rboxes;
-           hypre_CommInfoRecvTransforms(clone) = clone_transforms;
-           break;
+         case 1: /* Clone recv info */
+            hypre_CommInfoRecvBoxes(clone)      = clone_boxes;
+            hypre_CommInfoRecvProcesses(clone)  = clone_processes;
+            hypre_CommInfoRecvRBoxnums(clone)   = clone_rboxnums;
+            hypre_CommInfoRecvRBoxes(clone)     = clone_rboxes;
+            hypre_CommInfoRecvTransforms(clone) = clone_transforms;
+            break;
       }
    }
 
@@ -679,8 +679,8 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
       hypre_CopyBox(box, extend_box);
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(extend_box, d) -= hypre_max(mgrow[d],pgrow[d]);
-         hypre_BoxIMaxD(extend_box, d) += hypre_max(mgrow[d],pgrow[d]);
+         hypre_BoxIMinD(extend_box, d) -= hypre_max(mgrow[d], pgrow[d]);
+         hypre_BoxIMaxD(extend_box, d) += hypre_max(mgrow[d], pgrow[d]);
       }
 
       /*------------------------------------------------
@@ -1016,8 +1016,8 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    }
    for (d = 0; d < ndim; d++)
    {
-      mgrow[d] = num_ghost[2*d];
-      pgrow[d] = num_ghost[2*d + 1];
+      mgrow[d] = num_ghost[2 * d];
+      pgrow[d] = num_ghost[2 * d + 1];
    }
 
    hypre_CreateCommInfo(grid, comm_stencil, comm_info_ptr);

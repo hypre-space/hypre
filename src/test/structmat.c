@@ -131,7 +131,7 @@ ReadData( char  *filename,
          if ((sdata_size + maxline) > s)
          {
             sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk), HYPRE_MEMORY_HOST);
-            s= sdata_size + memchunk;
+            s = sdata_size + memchunk;
          }
 
          /* read the next input line */
@@ -275,7 +275,7 @@ MapIndex( Index     index,
    }
    for (d = 0; d < ndim; d++)
    {
-      index[d] = stride[d]*index[d] + (stride[d]-1)*i;
+      index[d] = stride[d] * index[d] + (stride[d] - 1) * i;
    }
 
    return 0;
@@ -336,7 +336,7 @@ DistributeData( Data       global_data,
    {
       div = s;
       rem = pid;
-      for (d = ndim-1; d >= 0; d--)
+      for (d = ndim - 1; d >= 0; d--)
       {
          div /= m[d];
          p[d] = rem / div;
@@ -360,8 +360,8 @@ DistributeData( Data       global_data,
          /* Shift */
          for (d = 0; d < ndim; d++)
          {
-            data.ilowers[box][d] = data.ilowers[box][d] + p[d]*n[d];
-            data.iuppers[box][d] = data.iuppers[box][d] + p[d]*n[d];
+            data.ilowers[box][d] = data.ilowers[box][d] + p[d] * n[d];
+            data.iuppers[box][d] = data.iuppers[box][d] + p[d] * n[d];
          }
       }
    }
@@ -375,7 +375,7 @@ DistributeData( Data       global_data,
    }
    if (s > 1)
    {
-      size = s*data.nboxes;
+      size = s * data.nboxes;
       data.ilowers = hypre_TReAlloc(data.ilowers, Index, size, HYPRE_MEMORY_HOST);
       data.iuppers = hypre_TReAlloc(data.iuppers, Index, size, HYPRE_MEMORY_HOST);
       data.boxsizes = hypre_TReAlloc(data.boxsizes, HYPRE_Int, size, HYPRE_MEMORY_HOST);
@@ -403,13 +403,13 @@ DistributeData( Data       global_data,
          {
             for (d = 0; d < ndim; d++)
             {
-               data.ilowers[i][d] = data.ilowers[box][d] + p[d]*n[d];
-               data.iuppers[i][d] = data.iuppers[box][d] + p[d]*n[d];
+               data.ilowers[i][d] = data.ilowers[box][d] + p[d] * n[d];
+               data.iuppers[i][d] = data.iuppers[box][d] + p[d] * n[d];
             }
             i += data.nboxes;
 
             /* update p */
-            for (d = 0; (d < ndim-1) && (p[d] == m[d]-1); d++)
+            for (d = 0; (d < ndim - 1) && (p[d] == m[d] - 1); d++)
             {
                p[d] = 0;
             }
@@ -434,7 +434,7 @@ DistributeData( Data       global_data,
    /* refine periodicity */
    for (d = 0; d < ndim; d++)
    {
-      data.periodic[d] *= refine[d]*block[d]*distribute[d];
+      data.periodic[d] *= refine[d] * block[d] * distribute[d];
    }
 
    if (data.nboxes == 0)
@@ -511,13 +511,13 @@ SetCosineVector( HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * cos((i+j+k)/10.0);
+            values[count] = scale * cos((i + j + k) / 10.0);
             count++;
          }
       }
    }
 
-   return(0);
+   return (0);
 }
 
 /*--------------------------------------------------------------------------
@@ -791,8 +791,8 @@ main( hypre_int  argc,
    HYPRE_StructGridSetPeriodic(grid, data.periodic);
 #if 1 /* Remove eventually */
    {
-      HYPRE_Int num_ghost[2*MAXDIM];
-      for (i = 0; i < 2*MAXDIM; i++)
+      HYPRE_Int num_ghost[2 * MAXDIM];
+      for (i = 0; i < 2 * MAXDIM; i++)
       {
          num_ghost[i] = 0;
       }
@@ -932,10 +932,10 @@ main( hypre_int  argc,
 #if DEBUG
       /* First, set num_ghost to zero for both x and y */
       {
-         HYPRE_Int        num_ghost[2*MAXDIM];
+         HYPRE_Int        num_ghost[2 * MAXDIM];
          hypre_BoxArray  *data_space;
 
-         for (i = 0; i < 2*MAXDIM; i++)
+         for (i = 0; i < 2 * MAXDIM; i++)
          {
             num_ghost[i] = 0;
          }

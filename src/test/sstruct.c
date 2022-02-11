@@ -340,10 +340,10 @@ main( hypre_int argc,
    HYPRE_Real            tol;
 
    /* parameters for GMRES */
-   HYPRE_Int	         k_dim;
+   HYPRE_Int            k_dim;
 
    /* parameters for LGMRES */
-   HYPRE_Int	         aug_dim;
+   HYPRE_Int            aug_dim;
 
    /* Misc */
    HYPRE_Int             vis;
@@ -477,7 +477,7 @@ main( hypre_int argc,
    relax[1] = -1; /* Relax up */
    relax[2] = -1; /* Relax down */
    relax[3] = -1; /* Relax coarse */
-   usr_jacobi_weight= 0;
+   usr_jacobi_weight = 0;
    solver_type = 1;
    recompute_res = 0;   /* What should be the default here? */
    cf_tol = 0.90;
@@ -611,13 +611,13 @@ main( hypre_int argc,
       {
          arg_index++;
 
-	 /* begin lobpcg */
-	 if ( strcmp(argv[arg_index], "none") == 0 )
+         /* begin lobpcg */
+         if ( strcmp(argv[arg_index], "none") == 0 )
          {
             solver_id = NO_SOLVER;
             arg_index++;
-	 }
-	 else /* end lobpcg */
+         }
+         else /* end lobpcg */
          {
             solver_id = atoi(argv[arg_index++]);
          }
@@ -1085,10 +1085,10 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.nboxes; box++)
       {
-//         hypre_printf("Part %02d | Box %02d: (%d, %d, %d) x (%d, %d, %d)\n",
-//                      part, box,
-//                      pdata.ilowers[box][0], pdata.ilowers[box][1], pdata.ilowers[box][2],
-//                      pdata.iuppers[box][0], pdata.iuppers[box][1], pdata.iuppers[box][2]);
+         //         hypre_printf("Part %02d | Box %02d: (%d, %d, %d) x (%d, %d, %d)\n",
+         //                      part, box,
+         //                      pdata.ilowers[box][0], pdata.ilowers[box][1], pdata.ilowers[box][2],
+         //                      pdata.iuppers[box][0], pdata.iuppers[box][1], pdata.iuppers[box][2]);
          HYPRE_SStructGridSetExtents(grid, part,
                                      pdata.ilowers[box], pdata.iuppers[box]);
       }
@@ -1219,9 +1219,9 @@ main( hypre_int argc,
                   }
 #if DEBUG_SSGRAPH
                   hypre_printf("index: [%d](%d, %d, %d) - to_index: [%d](%d, %d, %d)\n",
-                                  part, index[0], index[1], index[2],
-                                  pdata.graph_to_parts[box], to_index[0],
-                                  to_index[1], to_index[2]);
+                               part, index[0], index[1], index[2],
+                               pdata.graph_to_parts[box], to_index[0],
+                               to_index[1], to_index[2]);
 #endif
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[box],
@@ -1327,7 +1327,7 @@ main( hypre_int argc,
           *                  values_ilower, values_iupper, values);
           */
 
-/* since we have already tested SetBoxValues above, use SetValues here */
+         /* since we have already tested SetBoxValues above, use SetValues here */
 #if 0
          for (j = 0; j < pdata.graph_boxsizes[box]; j++)
          {
@@ -1369,11 +1369,11 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.matset_nboxes; box++)
       {
-         size= 1;
+         size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.matset_iuppers[box][j] -
-                    pdata.matset_ilowers[box][j] + 1);
+            size *= (pdata.matset_iuppers[box][j] -
+                     pdata.matset_ilowers[box][j] + 1);
          }
          for (j = 0; j < size; j++)
          {
@@ -1397,8 +1397,8 @@ main( hypre_int argc,
          size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.matadd_iuppers[box][j] -
-                    pdata.matadd_ilowers[box][j] + 1);
+            size *= (pdata.matadd_iuppers[box][j] -
+                     pdata.matadd_ilowers[box][j] + 1);
          }
 
          for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
@@ -1542,8 +1542,8 @@ main( hypre_int argc,
          size = 1;
          for (j = 0; j < 3; j++)
          {
-            size*= (pdata.rhsadd_iuppers[box][j] -
-                    pdata.rhsadd_ilowers[box][j] + 1);
+            size *= (pdata.rhsadd_iuppers[box][j] -
+                     pdata.rhsadd_ilowers[box][j] + 1);
          }
 
          for (j = 0; j < size; j++)
@@ -1606,11 +1606,11 @@ main( hypre_int argc,
             pdata = data.pdata[part];
             for (var = 0; var < pdata.nvars; var++)
             {
-               scale = (part + 1.0)*(var + 1.0);
+               scale = (part + 1.0) * (var + 1.0);
                for (box = 0; box < pdata.nboxes; box++)
                {
-               /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                                 pdata.vartypes[var], ilower, iupper); */
+                  /* GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                                    pdata.vartypes[var], ilower, iupper); */
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  var, ilower, iupper);
                   SetCosineVector(scale, ilower, iupper, values);
@@ -1628,45 +1628,45 @@ main( hypre_int argc,
 
    HYPRE_SStructVectorAssemble(x);
 
-//   /*-----------------------------------------------------------
-//    * RDF: Temporary test in case SStructMatrixMatvec still has a bug...
-//    *
-//    * Get the objects out
-//    * NOTE: This should go after the cosine part, but for the bug
-//    *-----------------------------------------------------------*/
-//
-//   if (object_type == HYPRE_PARCSR)
-//   {
-//      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
-//      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
-//      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
-//   }
-//   else if (object_type == HYPRE_STRUCT)
-//   {
-//      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
-//      HYPRE_SStructVectorGetObject(b, (void **) &sb);
-//      HYPRE_SStructVectorGetObject(x, (void **) &sx);
-//   }
-//
-//   if (sol_type == 0 || sol_type == 1)
-//   {
-//      /* This if/else is due to a bug in SStructMatvec */
-//      if (object_type == HYPRE_SSTRUCT)
-//      {
-//         /* Apply A to x to yield righthand side */
-//         hypre_SStructMatvec(1.0, A, x, 0.0, b);
-//      }
-//      else if (object_type == HYPRE_PARCSR)
-//      {
-//         /* Apply A to x to yield righthand side */
-//         HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
-//      }
-//      else if (object_type == HYPRE_STRUCT)
-//      {
-//         /* Apply A to x to yield righthand side */
-//         hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
-//      }
-//   }
+   //   /*-----------------------------------------------------------
+   //    * RDF: Temporary test in case SStructMatrixMatvec still has a bug...
+   //    *
+   //    * Get the objects out
+   //    * NOTE: This should go after the cosine part, but for the bug
+   //    *-----------------------------------------------------------*/
+   //
+   //   if (object_type == HYPRE_PARCSR)
+   //   {
+   //      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
+   //      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
+   //      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
+   //   }
+   //   else if (object_type == HYPRE_STRUCT)
+   //   {
+   //      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
+   //      HYPRE_SStructVectorGetObject(b, (void **) &sb);
+   //      HYPRE_SStructVectorGetObject(x, (void **) &sx);
+   //   }
+   //
+   //   if (sol_type == 0 || sol_type == 1)
+   //   {
+   //      /* This if/else is due to a bug in SStructMatvec */
+   //      if (object_type == HYPRE_SSTRUCT)
+   //      {
+   //         /* Apply A to x to yield righthand side */
+   //         hypre_SStructMatvec(1.0, A, x, 0.0, b);
+   //      }
+   //      else if (object_type == HYPRE_PARCSR)
+   //      {
+   //         /* Apply A to x to yield righthand side */
+   //         HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
+   //      }
+   //      else if (object_type == HYPRE_STRUCT)
+   //      {
+   //         /* Apply A to x to yield righthand side */
+   //         hypre_StructMatvec(1.0, sA, sx, 0.0, sb);
+   //      }
+   //   }
 
    if (sol_type == 0 || sol_type == 1)
    {
@@ -2839,7 +2839,7 @@ main( hypre_int argc,
       {
          /* use ParaSails as preconditioner */
          HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
-	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
          HYPRE_PCGSetPrecond( par_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
@@ -3098,8 +3098,8 @@ main( hypre_int argc,
       {
          /* use ParaSails as preconditioner */
          HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
-	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
-	 HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
+         HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
          HYPRE_GMRESSetPrecond( par_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
@@ -3347,8 +3347,8 @@ main( hypre_int argc,
       {
          /* use ParaSails as preconditioner */
          HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
-	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
-	 HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
+         HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
          HYPRE_BiCGSTABSetPrecond( par_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
                                    (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
@@ -4436,7 +4436,7 @@ main( hypre_int argc,
       }
       else
       {
-         interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1, HYPRE_MEMORY_HOST);
+         interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
          HYPRE_SStructSetupInterpreter(interpreter);
          HYPRE_SStructSetupMatvec(&matvec_fn);
 
@@ -4557,7 +4557,7 @@ main( hypre_int argc,
                {
                   hypre_printf("Solver ID not recognized. ");
                   hypre_printf("Running inner PCG iterations without preconditioner\n\n");
-	       }
+               }
             }
 
             hypre_EndTiming(time_index);
@@ -4592,7 +4592,7 @@ main( hypre_int argc,
             HYPRE_SStructPCGDestroy(solver);
 
             if ((solver_id == 10) || (solver_id == 11))
-	    {
+            {
                HYPRE_SStructSplitDestroy(precond);
             }
             else if (solver_id == 13)
@@ -4631,7 +4631,7 @@ main( hypre_int argc,
                }
                else if (solver_id == 11)
                {
-	          HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+                  HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
                }
                HYPRE_LOBPCGSetPrecond((HYPRE_Solver) solver,
                                       (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
@@ -4703,7 +4703,7 @@ main( hypre_int argc,
                   hypre_printf("Solver ID not recognized. ");
                   hypre_printf("Running inner PCG iterations without preconditioner\n\n");
                }
-	    }
+            }
 
             HYPRE_LOBPCGSetup((HYPRE_Solver) solver, (HYPRE_Matrix) A,
                               (HYPRE_Vector) b, (HYPRE_Vector) x);
@@ -4736,7 +4736,7 @@ main( hypre_int argc,
             }
             else if (solver_id == 14)
             {
-                HYPRE_SStructSSAMGDestroy(precond);
+               HYPRE_SStructSSAMGDestroy(precond);
             }
          }
 
@@ -4860,7 +4860,7 @@ main( hypre_int argc,
       real_res_norm = sqrt(real_res_norm);
       if (rhs_norm > 0)
       {
-         real_res_norm = real_res_norm/rhs_norm;
+         real_res_norm = real_res_norm / rhs_norm;
       }
    }
 

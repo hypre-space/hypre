@@ -253,9 +253,9 @@ void hypre_qsortND( HYPRE_Int **v,
       return;
    }
 
-   hypre_swapND(v, ndim, left, (left+right)/2);
+   hypre_swapND(v, ndim, left, (left + right) / 2);
    last = left;
-   for (i = left+1; i <= right; i++)
+   for (i = left + 1; i <= right; i++)
    {
       for (d = ndim - 1; d >= 0; d--)
       {
@@ -272,8 +272,8 @@ void hypre_qsortND( HYPRE_Int **v,
       }
    }
    hypre_swapND(v, ndim, left, last);
-   hypre_qsortND(v, ndim, left, last-1);
-   hypre_qsortND(v, ndim, last+1, right);
+   hypre_qsortND(v, ndim, left, last - 1);
+   hypre_qsortND(v, ndim, last + 1, right);
 }
 
 /*--------------------------------------------------------------------------

@@ -164,7 +164,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       centries[vi]     = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
-         centries[vi][vj]     = hypre_TAlloc(HYPRE_Int , size, HYPRE_MEMORY_HOST);
+         centries[vi][vj]     = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
          symmetric[vi][vj]    = 0;
          num_centries[vi][vj] = 0;
       }
@@ -258,10 +258,10 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
    HYPRE_Int          ***centries     = hypre_SStructPMatrixCEntries(pmatrix);
    hypre_IndexRef        dom_stride   = hypre_SStructPMatrixDomainStride(pmatrix);
    hypre_IndexRef        ran_stride   = hypre_SStructPMatrixRangeStride(pmatrix);
-//   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];
+   //   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];
    hypre_StructMatrix   *smatrix;
    HYPRE_Int             vi, vj;
-//   HYPRE_Int             d, ndim;
+   //   HYPRE_Int             d, ndim;
 
 #if 0
    ndim = hypre_SStructPMatrixNDim(pmatrix);
@@ -273,7 +273,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
    }
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
-      num_ghost[2*d] = num_ghost[2*d+1] = 0;
+      num_ghost[2 * d] = num_ghost[2 * d + 1] = 0;
    }
 #endif
    for (vi = 0; vi < nvars; vi++)
@@ -289,7 +289,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
                                                  num_centries[vi][vj],
                                                  centries[vi][vj]);
             HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
-//            HYPRE_StructMatrixSetNumGhost(smatrix, num_ghost);
+            //            HYPRE_StructMatrixSetNumGhost(smatrix, num_ghost);
             hypre_StructMatrixInitialize(smatrix);
             /* needed to get AddTo accumulation correct between processors */
             hypre_StructMatrixClearGhostValues(smatrix);
@@ -537,7 +537,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
 
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
-      num_ghost[2*d] = num_ghost[2*d+1] = 0;
+      num_ghost[2 * d] = num_ghost[2 * d + 1] = 0;
    }
    for (vi = 0; vi < nvars; vi++)
    {
@@ -739,7 +739,7 @@ hypre_SStructPMatrixPrint( const char           *filename,
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
          if (smatrix != NULL)
          {
-//            hypre_sprintf(new_filename, "%s.v%1d%1d", filename, vi, vj);
+            //            hypre_sprintf(new_filename, "%s.v%1d%1d", filename, vi, vj);
             hypre_sprintf(new_filename, "%s.%1d%1d", filename, vi, vj);
             hypre_StructMatrixPrint(new_filename, smatrix, all);
          }
@@ -1172,7 +1172,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 
          nrows = hypre_BoxVolume(box);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < nrows; i++)
          {
@@ -1879,7 +1879,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 
          hypre_ForBoxI(i, grid_boxes)
          {
-            grid_box = hypre_BoxArrayBox(grid_boxes,i);
+            grid_box = hypre_BoxArrayBox(grid_boxes, i);
 
             hypre_SStructGridIntersect(grid, part, var, grid_box, -1,
                                        &boxman_entries, &nboxman_entries);
@@ -1934,7 +1934,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                         row = 0;
                         for (d = 0; d < ndim; d++)
                         {
-                           row += loop_index[d]*rs[d]*dom_stride[d];
+                           row += loop_index[d] * rs[d] * dom_stride[d];
                         }
                         hypre_assert(row < nrows);
 
@@ -1958,13 +1958,13 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 
    max_size = 1;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for reduction(max:max_size)
+   #pragma omp parallel for reduction(max:max_size)
 #endif
    for (i = 0; i < nrows; i++)
    {
       max_size = hypre_max(max_size, row_sizes[i]);
    }
-   nvalues = max_size*nrows;
+   nvalues = max_size * nrows;
 
    /* Free/Allocate memory */
    hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
@@ -1979,7 +1979,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
       cols   = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < nrows; i++)
       {
@@ -2028,7 +2028,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
          grid_boxes = hypre_StructGridBoxes(sgrid);
          hypre_ForBoxI(i, grid_boxes)
          {
-            grid_box = hypre_BoxArrayBox(grid_boxes,i);
+            grid_box = hypre_BoxArrayBox(grid_boxes, i);
 
             /* GET values from this box */
             hypre_SStructPMatrixSetBoxValues(pmatrix, grid_box, var,
@@ -2279,7 +2279,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                      row_sizes[m + mi] = nnzs;
                   }
                   hypre_BoxLoop1End(mi);
-                  nvalues += nnzs*hypre_BoxVolume(convert_box);
+                  nvalues += nnzs * hypre_BoxVolume(convert_box);
                } /* Loop over convert_boxa */
 
                m += hypre_BoxVolume(ghost_box);
@@ -2293,7 +2293,7 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                hypre_ForBoxI(j, convert_boxa)
                {
                   convert_box = hypre_BoxArrayBox(convert_boxa, j);
-                  nvalues += nnzs*hypre_BoxVolume(convert_box);
+                  nvalues += nnzs * hypre_BoxVolume(convert_box);
                }
                /* TODO: Update rowsizes for non-stencil couplings */
             } /* if (convert_box_id) */

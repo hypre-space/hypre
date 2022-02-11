@@ -273,9 +273,9 @@ hypre_SSAMGRelaxSetNumNodesets( void      *relax_vdata,
 
    /* alloc new nodeset memory */
    (relax_data -> num_nodesets)    = num_nodesets;
-   (relax_data -> nodeset_sizes)   = hypre_TAlloc(HYPRE_Int    , num_nodesets, HYPRE_MEMORY_HOST);
-   (relax_data -> nodeset_ranks)   = hypre_TAlloc(HYPRE_Int    , num_nodesets, HYPRE_MEMORY_HOST);
-   (relax_data -> nodeset_strides) = hypre_TAlloc(hypre_Index  , num_nodesets, HYPRE_MEMORY_HOST);
+   (relax_data -> nodeset_sizes)   = hypre_TAlloc(HYPRE_Int, num_nodesets, HYPRE_MEMORY_HOST);
+   (relax_data -> nodeset_ranks)   = hypre_TAlloc(HYPRE_Int, num_nodesets, HYPRE_MEMORY_HOST);
+   (relax_data -> nodeset_strides) = hypre_TAlloc(hypre_Index, num_nodesets, HYPRE_MEMORY_HOST);
    (relax_data -> nodeset_indices) = hypre_TAlloc(hypre_Index *, num_nodesets, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_nodesets; i++)
    {
@@ -555,15 +555,15 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
     *----------------------------------------------------------*/
    // TODO: Why nthreads is used in all TAllocs?
    nvars = 1;
-   x_loc = hypre_TAlloc(HYPRE_Real  , hypre_NumThreads()*nvars, HYPRE_MEMORY_HOST);
-   A_loc = hypre_TAlloc(HYPRE_Real *, hypre_NumThreads()*nvars, HYPRE_MEMORY_HOST);
+   x_loc = hypre_TAlloc(HYPRE_Real, hypre_NumThreads() * nvars, HYPRE_MEMORY_HOST);
+   A_loc = hypre_TAlloc(HYPRE_Real *, hypre_NumThreads() * nvars, HYPRE_MEMORY_HOST);
 
    // nvars*nvars is probably not needed here!
-   A_loc[0] = hypre_TAlloc(HYPRE_Real  , hypre_NumThreads()*nvars*nvars, HYPRE_MEMORY_HOST);
+   A_loc[0] = hypre_TAlloc(HYPRE_Real, hypre_NumThreads() * nvars * nvars, HYPRE_MEMORY_HOST);
 
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
-      A_loc[vi] = A_loc[0] + vi*nvars;
+      A_loc[vi] = A_loc[0] + vi * nvars;
    }
 
    /* Allocate pointers for vector and matrix */
@@ -1071,7 +1071,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
 
                for (compute_i = 0; compute_i < 2; compute_i++)
                {
-                  switch(compute_i)
+                  switch (compute_i)
                   {
                      case 0:
                      {

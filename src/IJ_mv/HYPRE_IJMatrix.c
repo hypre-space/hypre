@@ -161,9 +161,9 @@ HYPRE_IJMatrixPartialClone( HYPRE_IJMatrix  matrix_in,
    hypre_IJMatrixGlobalNumRows(ijmatrix_out)      = hypre_IJMatrixGlobalNumRows(ijmatrix_in);
    hypre_IJMatrixGlobalNumCols(ijmatrix_out)      = hypre_IJMatrixGlobalNumCols(ijmatrix_in);
    hypre_IJMatrixRowPartitioning(ijmatrix_out)[0] = ilower;
-   hypre_IJMatrixRowPartitioning(ijmatrix_out)[1] = iupper+1;
+   hypre_IJMatrixRowPartitioning(ijmatrix_out)[1] = iupper + 1;
    hypre_IJMatrixColPartitioning(ijmatrix_out)[0] = jlower;
-   hypre_IJMatrixColPartitioning(ijmatrix_out)[1] = jupper+1;
+   hypre_IJMatrixColPartitioning(ijmatrix_out)[1] = jupper + 1;
 
    *matrix_out = (HYPRE_IJMatrix) ijmatrix_out;
 

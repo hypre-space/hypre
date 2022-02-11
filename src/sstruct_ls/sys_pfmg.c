@@ -340,7 +340,7 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata )
       hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
       for (i = 1; i <= num_iterations; i++)
       {
-         convr = norms[i] / norms[i-1];
+         convr = norms[i] / norms[i - 1];
          hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 
@@ -348,8 +348,8 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata )
       {
          if (rel_norms[0] > 0.)
          {
-            avg_convr = pow((rel_norms[num_iterations]/rel_norms[0]),
-                            (1.0/(HYPRE_Real) num_iterations));
+            avg_convr = pow((rel_norms[num_iterations] / rel_norms[0]),
+                            (1.0 / (HYPRE_Real) num_iterations));
             hypre_printf("\nAverage convergence factor = %f\n", avg_convr);
          }
       }

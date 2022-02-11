@@ -128,7 +128,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
 
          norms[0] = sqrt(r_dot_r);
-         rel_norms[0] = sqrt(r_dot_r/b_dot_b);
+         rel_norms[0] = sqrt(r_dot_r / b_dot_b);
       }
    }
 
@@ -238,8 +238,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "zout_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "zout_b.%02d", l+1);
-            hypre_SStructPVectorPrint(filename, b_l[l+1], 0);
+            hypre_sprintf(filename, "zout_b.%02d", l + 1);
+            hypre_SStructPVectorPrint(filename, b_l[l + 1], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
@@ -322,11 +322,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          {
             hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
 
-            norms[i+1] = sqrt(r_dot_r);
-            rel_norms[i+1] = sqrt(r_dot_r/b_dot_b);
+            norms[i + 1] = sqrt(r_dot_r);
+            rel_norms[i + 1] = sqrt(r_dot_r / b_dot_b);
          }
 
-         if (print_level > 1 && !((i + 1)%print_freq))
+         if (print_level > 1 && !((i + 1) % print_freq))
          {
             /* Print solution */
             hypre_sprintf(filename, "sys_pfmg_x.i%02d", (i + 1));
@@ -349,9 +349,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       /* convergence check */
       if (tol > 0.0)
       {
-         if (r_dot_r/b_dot_b < eps)
+         if (r_dot_r / b_dot_b < eps)
          {
-            if (((rel_change) && (e_dot_e/x_dot_x) < eps) || (!rel_change))
+            if (((rel_change) && (e_dot_e / x_dot_x) < eps) || (!rel_change))
             {
                break;
             }

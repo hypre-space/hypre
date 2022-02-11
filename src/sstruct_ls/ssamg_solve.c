@@ -93,7 +93,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    {
       /* eps = (tol^2) */
       hypre_SStructInnerProd(b_l[0], b_l[0], &b_dot_b);
-      eps = tol*tol;
+      eps = tol * tol;
 
       if (logging > 0)
       {
@@ -163,15 +163,15 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
          if (logging > 0)
          {
             norms[i]     = sqrt(r_dot_r);
-            rel_norms[i] = sqrt(r_dot_r/b_dot_b);
+            rel_norms[i] = sqrt(r_dot_r / b_dot_b);
          }
 
          /* always do at least 1 V-cycle */
-         if ((r_dot_r/b_dot_b < eps) && (i > 0))
+         if ((r_dot_r / b_dot_b < eps) && (i > 0))
          {
             if (rel_change)
             {
-               if ((e_dot_e/x_dot_x) < eps)
+               if ((e_dot_e / x_dot_x) < eps)
                {
                   HYPRE_ANNOTATE_MGLEVEL_END(0);
                   break;
@@ -229,15 +229,15 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             /* restrict residual */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Restriction");
             hypre_SStructMatvecCompute(restrict_data_l[l], 1.0,
-                                       RT_l[l], r_l[l], 0.0, b_l[l+1], b_l[l+1]);
+                                       RT_l[l], r_l[l], 0.0, b_l[l + 1], b_l[l + 1]);
             HYPRE_ANNOTATE_REGION_END("%s", "Restriction");
 #ifdef DEBUG_SOLVE
             hypre_sprintf(filename, "ssamg_xdown.i%02d.l%02d", i, l);
             HYPRE_SStructVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "ssamg_rdown.i%02d.l%02d", i, l);
             HYPRE_SStructVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "ssamg_b.i%02d.l%02d", i, l+1);
-            HYPRE_SStructVectorPrint(filename, b_l[l+1], 0);
+            hypre_sprintf(filename, "ssamg_b.i%02d.l%02d", i, l + 1);
+            HYPRE_SStructVectorPrint(filename, b_l[l + 1], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_END(l);
          }
@@ -265,7 +265,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
             /* TODO: Can we simplify the next two calls? */
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
             hypre_SStructMatvecCompute(interp_data_l[l], 1.0,
-                                       P_l[l], x_l[l+1], 0.0, e_l[l], e_l[l]);
+                                       P_l[l], x_l[l + 1], 0.0, e_l[l], e_l[l]);
             hypre_SStructAxpy(1.0, e_l[l], x_l[l]);
             HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
@@ -351,7 +351,7 @@ hypre_SSAMGSolve( void                 *ssamg_vdata,
    {
       hypre_printf("b_dot_x: %e\n", b_dot_x);
       hypre_printf("b_dot_b: %e\n", b_dot_b);
-      hypre_printf("b_dot_x/b_dot_b: %e\n", b_dot_x/b_dot_b);
+      hypre_printf("b_dot_x/b_dot_b: %e\n", b_dot_x / b_dot_b);
 
       hypre_sprintf(filename, "ssamg_b.negdot");
       HYPRE_SStructVectorPrint(filename, b, 0);

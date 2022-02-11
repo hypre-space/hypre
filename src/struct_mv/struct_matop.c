@@ -47,7 +47,7 @@ hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
          cdepth = vdepth = 0;
          for (k = 0; k < depth; k++)
          {
-            if (hypre_StructMatrixConstEntry(A, si +k))
+            if (hypre_StructMatrixConstEntry(A, si + k))
             {
                csi[cdepth++] = si + k;
             }
@@ -344,9 +344,9 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri)
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0] +
-                         Ap3[0]*Ap3[0] + Ap4[0]*Ap4[0] + Ap5[0]*Ap5[0] +
-                         Ap6[0]*Ap6[0] + Ap7[0]*Ap7[0] + Ap8[0]*Ap8[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0] +
+                         Ap3[0] * Ap3[0] + Ap4[0] * Ap4[0] + Ap5[0] * Ap5[0] +
+                         Ap6[0] * Ap6[0] + Ap7[0] * Ap7[0] + Ap8[0] * Ap8[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -356,9 +356,9 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
                                 rdbox, start, ustride, ri);
 
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0] +
-                         Ap3[0]*Ap3[0] + Ap4[0]*Ap4[0] + Ap5[0]*Ap5[0] +
-                         Ap6[0]*Ap6[0] + Ap7[0]*Ap7[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0] +
+                         Ap3[0] * Ap3[0] + Ap4[0] * Ap4[0] + Ap5[0] * Ap5[0] +
+                         Ap6[0] * Ap6[0] + Ap7[0] * Ap7[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -367,9 +367,9 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0] +
-                         Ap3[0]*Ap3[0] + Ap4[0]*Ap4[0] + Ap5[0]*Ap5[0] +
-                         Ap6[0]*Ap6[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0] +
+                         Ap3[0] * Ap3[0] + Ap4[0] * Ap4[0] + Ap5[0] * Ap5[0] +
+                         Ap6[0] * Ap6[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -378,8 +378,8 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0] +
-                         Ap3[0]*Ap3[0] + Ap4[0]*Ap4[0] + Ap5[0]*Ap5[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0] +
+                         Ap3[0] * Ap3[0] + Ap4[0] * Ap4[0] + Ap5[0] * Ap5[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -388,8 +388,8 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0] +
-                         Ap3[0]*Ap3[0] + Ap4[0]*Ap4[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0] +
+                         Ap3[0] * Ap3[0] + Ap4[0] * Ap4[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -398,8 +398,8 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0] +
-                         Ap3[0]*Ap3[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0] +
+                         Ap3[0] * Ap3[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -408,7 +408,7 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0] + Ap2[0]*Ap2[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0] + Ap2[0] * Ap2[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -417,7 +417,7 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0] + Ap1[0]*Ap1[0];
+               rp[ri] += Ap0[0] * Ap0[0] + Ap1[0] * Ap1[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -426,7 +426,7 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
             hypre_BoxLoop1Begin(ndim, loop_size,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[0]*Ap0[0];
+               rp[ri] += Ap0[0] * Ap0[0];
             }
             hypre_BoxLoop1End(ri);
             break;
@@ -732,9 +732,9 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri)
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai] +
-                         Ap3[Ai]*Ap3[Ai] + Ap4[Ai]*Ap4[Ai] + Ap5[Ai]*Ap5[Ai] +
-                         Ap6[Ai]*Ap6[Ai] + Ap7[Ai]*Ap7[Ai] + Ap8[Ai]*Ap8[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai] +
+                         Ap3[Ai] * Ap3[Ai] + Ap4[Ai] * Ap4[Ai] + Ap5[Ai] * Ap5[Ai] +
+                         Ap6[Ai] * Ap6[Ai] + Ap7[Ai] * Ap7[Ai] + Ap8[Ai] * Ap8[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -745,9 +745,9 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 rdbox, start, ustride, ri);
 
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai] +
-                         Ap3[Ai]*Ap3[Ai] + Ap4[Ai]*Ap4[Ai] + Ap5[Ai]*Ap5[Ai] +
-                         Ap6[Ai]*Ap6[Ai] + Ap7[Ai]*Ap7[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai] +
+                         Ap3[Ai] * Ap3[Ai] + Ap4[Ai] * Ap4[Ai] + Ap5[Ai] * Ap5[Ai] +
+                         Ap6[Ai] * Ap6[Ai] + Ap7[Ai] * Ap7[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -757,9 +757,9 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai] +
-                         Ap3[Ai]*Ap3[Ai] + Ap4[Ai]*Ap4[Ai] + Ap5[Ai]*Ap5[Ai] +
-                         Ap6[Ai]*Ap6[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai] +
+                         Ap3[Ai] * Ap3[Ai] + Ap4[Ai] * Ap4[Ai] + Ap5[Ai] * Ap5[Ai] +
+                         Ap6[Ai] * Ap6[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -769,8 +769,8 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai] +
-                         Ap3[Ai]*Ap3[Ai] + Ap4[Ai]*Ap4[Ai] + Ap5[Ai]*Ap5[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai] +
+                         Ap3[Ai] * Ap3[Ai] + Ap4[Ai] * Ap4[Ai] + Ap5[Ai] * Ap5[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -780,8 +780,8 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai] +
-                         Ap3[Ai]*Ap3[Ai] + Ap4[Ai]*Ap4[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai] +
+                         Ap3[Ai] * Ap3[Ai] + Ap4[Ai] * Ap4[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -791,8 +791,8 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai] +
-                         Ap3[Ai]*Ap3[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai] +
+                         Ap3[Ai] * Ap3[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -802,7 +802,7 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai] + Ap2[Ai]*Ap2[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai] + Ap2[Ai] * Ap2[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -812,7 +812,7 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai] + Ap1[Ai]*Ap1[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai] + Ap1[Ai] * Ap1[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;
@@ -822,7 +822,7 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
                                 Adbox, start, ustride, Ai,
                                 rdbox, start, ustride, ri);
             {
-               rp[ri] += Ap0[Ai]*Ap0[Ai];
+               rp[ri] += Ap0[Ai] * Ap0[Ai];
             }
             hypre_BoxLoop2End(Ai, ri);
             break;

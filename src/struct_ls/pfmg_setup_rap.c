@@ -96,7 +96,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
          nentries -= 1;
          for (i = stencil_diag_entry; i < nentries; i++)
          {
-            entries[i] = entries[i+1];
+            entries[i] = entries[i + 1];
          }
       }
       hypre_StructMatrixSetConstantEntries(RAP, nentries, entries);

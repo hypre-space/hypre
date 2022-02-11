@@ -238,7 +238,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
 
    RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
 
-   stencil_entry= 0;
+   stencil_entry = 0;
    for (i = 0; i < RAP_marker_size; i++)
    {
       if (RAP_marker[i] != 0)

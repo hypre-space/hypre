@@ -2359,13 +2359,16 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
    HYPRE_Int            ncells;
    HYPRE_Int            nvertices;
    HYPRE_Int            nelements;
-   HYPRE_Int            element_id = 2*ndim-1;
+   HYPRE_Int            element_id = 2 * ndim - 1;
    HYPRE_Int            use_trans = (trans != NULL && origin != NULL);
    HYPRE_Real           coords[HYPRE_MAXDIM];
-   HYPRE_Int            vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
-                                      {1, 1, 0}, {0, 1, 0},
-                                      {0, 0, 1}, {1, 0, 1},
-                                      {1, 1, 1}, {0, 1, 1}};
+   HYPRE_Int            vinc[8][3] =
+   {
+      {0, 0, 0}, {1, 0, 0},
+      {1, 1, 0}, {0, 1, 0},
+      {0, 0, 1}, {1, 0, 1},
+      {1, 1, 1}, {0, 1, 1}
+   };
 
    /* Local data */
    char                 msg[512];
@@ -2399,11 +2402,11 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
    }
    else
    {
-      T = hypre_CTAlloc(HYPRE_Real, ndim*ndim, HYPRE_MEMORY_HOST);
+      T = hypre_CTAlloc(HYPRE_Real, ndim * ndim, HYPRE_MEMORY_HOST);
       O = hypre_CTAlloc(HYPRE_Real, ndim, HYPRE_MEMORY_HOST);
       for (d = 0; d < ndim; d++)
       {
-         T[ndim*d + d] = 1.0;
+         T[ndim * d + d] = 1.0;
       }
    }
 
@@ -2420,7 +2423,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
          box = hypre_BoxArrayBox(boxes, i);
 
          ncells     = hypre_BoxVolume(box);
-         nvertices += ncells*cellNV;
+         nvertices += ncells * cellNV;
          nelements += ncells;
       }
    }
@@ -2498,7 +2501,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
                   coords[d] = O[d];
                   for (dd = 0; dd < ndim; dd++)
                   {
-                     coords[d] += T[d*ndim + dd]*(index[dd] + vinc[v][dd]);
+                     coords[d] += T[d * ndim + dd] * (index[dd] + vinc[v][dd]);
                   }
                   hypre_fprintf(file, "%.14e ", coords[d]);
                }
@@ -2511,7 +2514,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
 
       if (use_trans)
       {
-         T += ndim*ndim;
+         T += ndim * ndim;
          O += ndim;
       }
    }
@@ -2566,7 +2569,7 @@ hypre_SStructGridPrint( hypre_SStructGrid *grid,
       {
          for (vj = 0; vj < nvars; vj++)
          {
-            pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, vi*nvars + vj);
+            pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pgrid, vi * nvars + vj);
             if (pbnd_boxaa != NULL)
             {
                hypre_fprintf(file, "\nPart %d - var (%d, %d)\n", part, vi, vj);

@@ -63,8 +63,8 @@ typedef struct hypre_CommEntry_struct
 {
    HYPRE_Int  offset;                       /* offset for the data */
    HYPRE_Int  dim;                          /* dimension of the data */
-   HYPRE_Int  length_array[HYPRE_MAXDIM+1];
-   HYPRE_Int  stride_array[HYPRE_MAXDIM+1];
+   HYPRE_Int  length_array[HYPRE_MAXDIM + 1];
+   HYPRE_Int  stride_array[HYPRE_MAXDIM + 1];
    HYPRE_Int *imap;                         /* index map for last dim values */
 
 } hypre_CommEntry;

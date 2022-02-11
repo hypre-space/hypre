@@ -543,7 +543,7 @@ hypre_SStructPVectorPrint( const char           *filename,
 
    for (var = 0; var < nvars; var++)
    {
-//      hypre_sprintf(new_filename, "%s.v%02d", filename, var);
+      //      hypre_sprintf(new_filename, "%s.v%02d", filename, var);
       hypre_sprintf(new_filename, "%s.%02d", filename, var);
       hypre_StructVectorPrint(new_filename,
                               hypre_SStructPVectorSVector(pvector, var),
@@ -605,7 +605,7 @@ hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector,
    HYPRE_Int             myid;
 
    myid  = hypre_MPI_Comm_rank(hypre_SStructVectorComm(vector), &myid);
-   pseed = seed*(myid + 1);
+   pseed = seed * (myid + 1);
    for (part = 0; part < nparts; part++)
    {
       pvector = hypre_SStructVectorPVector(vector, part);
@@ -922,12 +922,12 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    FILE                   *file[8];
    char                    filename[255];
    char                    fe_coll[100];
-//   HYPRE_Int               cellNV;
-//   HYPRE_Int               var_off;
-//   HYPRE_Int               vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
-//                                         {1, 1, 0}, {0, 1, 0},
-//                                         {0, 0, 1}, {1, 0, 1},
-//                                         {1, 1, 1}, {0, 1, 1}};
+   //   HYPRE_Int               cellNV;
+   //   HYPRE_Int               var_off;
+   //   HYPRE_Int               vinc[8][3] = {{0, 0, 0}, {1, 0, 0},
+   //                                         {1, 1, 0}, {0, 1, 0},
+   //                                         {0, 0, 1}, {1, 0, 1},
+   //                                         {1, 1, 1}, {0, 1, 1}};
    HYPRE_Int               myid;
    HYPRE_Int               i, ndim;
    HYPRE_Int               part, nparts;
@@ -942,11 +942,11 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    switch (ndim)
    {
       case 2:
-//         cellNV = 4;
+         //         cellNV = 4;
          break;
 
       case 3:
-//         cellNV = 8;
+         //         cellNV = 8;
          break;
 
       default:
@@ -993,12 +993,12 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
          {
             case HYPRE_SSTRUCT_VARIABLE_CELL:
                hypre_sprintf(fe_coll, "Local_L2_%dD_P0", ndim);
-//               var_off = 0;
+               //               var_off = 0;
                break;
 
             case HYPRE_SSTRUCT_VARIABLE_NODE:
                hypre_sprintf(fe_coll, "Local_H1_%dD_P1", ndim);
-//               var_off = 1;
+               //               var_off = 1;
                break;
 
             default:

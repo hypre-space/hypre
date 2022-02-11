@@ -341,13 +341,13 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                accp1 = a_cc[iAp1];
             }
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
+            ac_cw[iAc] = - a_cw[iA] * a_cw[iAm1] / accm1;
 
             ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / accm1
-               - a_ce[iA] * a_cw[iAp1] / accp1;
+                         - a_cw[iA] * a_ce[iAm1] / accm1
+                         - a_ce[iA] * a_cw[iAp1] / accp1;
 
-            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / accp1;
+            ac_ce[iAc] = - a_ce[iA] * a_ce[iAp1] / accp1;
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -381,11 +381,11 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                accp1 = a_cc[iAp1];
             }
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
+            ac_cw[iAc] = - a_cw[iA] * a_cw[iAm1] / accm1;
 
             ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / accm1
-               - a_ce[iA] * a_cw[iAp1] / accp1;
+                         - a_cw[iA] * a_ce[iAm1] / accm1
+                         - a_ce[iA] * a_cw[iAp1] / accp1;
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -561,7 +561,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
       /* coarsen the grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
-      hypre_StructGridAssemble(grid_l[l+1]);
+      hypre_StructGridAssemble(grid_l[l + 1]);
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_StructGridDataLocation(grid_l[l + 1]) = data_location;

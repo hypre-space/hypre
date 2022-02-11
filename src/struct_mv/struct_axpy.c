@@ -123,7 +123,7 @@ hypre_StructVectorElmdivpy( HYPRE_Complex       alpha,
       {
          yp[yi] = alpha * xp[xi] / zp[zi] + beta * yp[yi];
       }
-      hypre_BoxLoop3End(xi,yi,zi);
+      hypre_BoxLoop3End(xi, yi, zi);
 #undef DEVICE_VAR
    }
 

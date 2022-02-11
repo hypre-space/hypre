@@ -159,6 +159,7 @@ HYPRE_Int hypre_IJVectorAssembleParDevice(hypre_IJVector *vector);
 /* HYPRE_IJMatrix.c */
 HYPRE_Int HYPRE_IJMatrixCreate ( MPI_Comm comm, HYPRE_BigInt ilower, HYPRE_BigInt iupper,
                                  HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_IJMatrix *matrix );
+HYPRE_Int HYPRE_IJMatrixPartialClone ( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
 HYPRE_Int HYPRE_IJMatrixDestroy ( HYPRE_IJMatrix matrix );
 HYPRE_Int HYPRE_IJMatrixInitialize ( HYPRE_IJMatrix matrix );
 HYPRE_Int HYPRE_IJMatrixSetPrintLevel ( HYPRE_IJMatrix matrix, HYPRE_Int print_level );

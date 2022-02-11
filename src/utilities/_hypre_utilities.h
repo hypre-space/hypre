@@ -492,7 +492,8 @@ HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, H
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
-HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm , HYPRE_Int num_recvs , HYPRE_Int *recvs , HYPRE_Int num_sends , HYPRE_Int *sends );
+HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm, HYPRE_Int num_recvs, HYPRE_Int *recvs,
+                                     HYPRE_Int num_sends, HYPRE_Int *sends );
 
 #ifdef __cplusplus
 }
@@ -1627,7 +1628,7 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L, HYPRE_Int *ordering, HYPRE_In
                            HYPRE_Int is_col_major);
 
 /* unique.c */
-HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim , HYPRE_Int *size , HYPRE_Int **array );
+HYPRE_Int hypre_UniqueIntArrayND ( HYPRE_Int ndim, HYPRE_Int *size, HYPRE_Int **array );
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values, HYPRE_Int *indices, HYPRE_Int list_length,
@@ -3166,3 +3167,4 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
 #endif
 
 #endif
+

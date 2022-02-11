@@ -10,7 +10,7 @@
 
 #define DEBUG 0
 #if DEBUG
-   static HYPRE_Int  static_print_debug = 0;
+static HYPRE_Int  static_print_debug = 0;
 #endif
 
 /*--------------------------------------------------------------------------
@@ -160,13 +160,13 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructCoarsen(grid_l[l], cindex, stride, 0, &PT_grid_l[l + 1]);
 
       /* assemble the interpolation grid */
-      hypre_StructGridAssemble(PT_grid_l[l+1]);
+      hypre_StructGridAssemble(PT_grid_l[l + 1]);
 
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
 
       /* assemble the interpolation grid */
-      hypre_StructGridAssemble(grid_l[l+1]);
+      hypre_StructGridAssemble(grid_l[l + 1]);
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_StructGridDataLocation(PT_grid_l[l + 1]) = data_location;
@@ -336,8 +336,8 @@ hypre_SMGSetup( void               *smg_vdata,
       }
 #endif
 
-      hypre_StructMatrixInitializeData(A_l[l+1], data);
-      data += hypre_StructMatrixDataSize(A_l[l+1]);
+      hypre_StructMatrixInitializeData(A_l[l + 1], data);
+      data += hypre_StructMatrixDataSize(A_l[l + 1]);
 
       hypre_StructVectorInitializeData(b_l[l + 1], data);
       hypre_StructVectorAssemble(b_l[l + 1]);

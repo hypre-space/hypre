@@ -214,7 +214,7 @@ hypre_FACSolve3( void                 *fac_vdata,
 
          /* structured contribution */
          hypre_SStructPMatvecCompute(pmatvec_data_level[level],
-                                     -1.0, pA, px, 1.0, py);
+                                     -1.0, pA, px, 1.0, py, py);
 
          /* unstructured contribution */
          parcsrA = hypre_SStructMatrixParCSRMatrix(A_level[level]);
@@ -321,7 +321,7 @@ hypre_FACSolve3( void                 *fac_vdata,
          {
             hypre_SStructMatvecCompute(matvec_data_level[level], -1.0,
                                        A_level[level], e_level[level],
-                                       1.0, b_level[level]);
+                                       1.0, b_level[level], b_level[level]);
          }
 
          /*-----------------------------------------------------------

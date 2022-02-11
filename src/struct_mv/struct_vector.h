@@ -47,9 +47,9 @@ typedef struct hypre_StructVector_struct
                                           of data corresponding to boxnum b */
 
    HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
-   HYPRE_Int             bghost_not_clear;          /* Are boundary ghosts clear? */
+   HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
 
-   HYPRE_BigInt          global_size;  /* Total number coefficients */
+   HYPRE_BigInt          global_size; /* Total number coefficients */
 
    HYPRE_Int             ref_count;
 

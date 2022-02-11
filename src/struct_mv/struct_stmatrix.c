@@ -71,13 +71,13 @@ hypre_StIndexPrint( hypre_Index index,
 {
    HYPRE_Int d;
 
-/*   hypre_printf("(% d", index[0]);*/
+   /*   hypre_printf("(% d", index[0]);*/
    hypre_printf("%c% d", lchar, index[0]);
    for (d = 1; d < ndim; d++)
    {
       hypre_printf(",% d", index[d]);
    }
-/*   hypre_printf(")");*/
+   /*   hypre_printf(")");*/
    hypre_printf("%c", rchar);
 
    return hypre_error_flag;
@@ -168,7 +168,7 @@ hypre_StCoeffClone( hypre_StCoeff  *coeff,
          (clone->prev) = lastclone;
       }
       lastclone = clone;
-      
+
       coeff = (coeff->next);
    }
 
@@ -213,7 +213,7 @@ hypre_StCoeffShift( hypre_StCoeff *coeff,
       {
          hypre_StIndexShift((terms[t].shift), shift, ndim);
       }
-      
+
       coeff = (coeff->next);
    }
 
@@ -269,7 +269,7 @@ hypre_StCoeffMult( hypre_StCoeff  *Acoeff,
 
       while (Bcoeff != NULL)
       {
-         hypre_StCoeffCreate( ((Acoeff->nterms) + (Bcoeff->nterms)) , &coeff);
+         hypre_StCoeffCreate( ((Acoeff->nterms) + (Bcoeff->nterms)), &coeff);
          Ci = 0;
          for (i = 0; i < (Acoeff->nterms); i++)
          {
@@ -480,7 +480,7 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
          return hypre_error_flag;
       }
 
-      if ((m1 >= m2) && (m1%m2 == 0) && (m1 >= m3) && (m1%m3 == 0))
+      if ((m1 >= m2) && (m1 % m2 == 0) && (m1 >= m3) && (m1 % m3 == 0))
       {
          if (m1 != m3)
          {
@@ -496,7 +496,7 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
             }
          }
       }
-      else if ((m3 >= m2) && (m3%m2 == 0) && (m3 >= m1) && (m3%m1 == 0))
+      else if ((m3 >= m2) && (m3 % m2 == 0) && (m3 >= m1) && (m3 % m1 == 0))
       {
          if (m3 != m1)
          {
@@ -610,13 +610,13 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
          indomain = 1;
          for (d = 0; d < ndim; d++)
          {
-            if (ABoff[d]%Cdmap[d] != 0)
+            if (ABoff[d] % Cdmap[d] != 0)
             {
                indomain = 0;
                break;
             }
             /* Adjust index based on domain grid */
-            ABi[d] = ABoff[d]/Cdmap[d];
+            ABi[d] = ABoff[d] / Cdmap[d];
          }
          if (indomain)
          {

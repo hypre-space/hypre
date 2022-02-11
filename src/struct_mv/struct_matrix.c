@@ -461,9 +461,13 @@ hypre_StructMatrixExtractPointerByIndex( hypre_StructMatrix *matrix,
    entry = hypre_StructStencilOffsetEntry( stencil, index );
 
    if ( entry >= 0 )
+   {
       return hypre_StructMatrixBoxData(matrix, b, entry);
+   }
    else
-      return NULL;  /* error - invalid index */
+   {
+      return NULL;   /* error - invalid index */
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -655,10 +659,10 @@ hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
       data_box = hypre_BoxArrayBox(data_space, i);
       for (d = 0; d < ndim; d++)
       {
-         d2 = d*2;
-         hypre_BoxIMinD(data_box, d) -= hypre_max(num_ghost[d2]+sym_ghost[d2], trn_ghost[d2]);
-         d2 = d*2+1;
-         hypre_BoxIMaxD(data_box, d) += hypre_max(num_ghost[d2]+sym_ghost[d2], trn_ghost[d2]);
+         d2 = d * 2;
+         hypre_BoxIMinD(data_box, d) -= hypre_max(num_ghost[d2] + sym_ghost[d2], trn_ghost[d2]);
+         d2 = d * 2 + 1;
+         hypre_BoxIMaxD(data_box, d) += hypre_max(num_ghost[d2] + sym_ghost[d2], trn_ghost[d2]);
       }
       hypre_StructMatrixMapDataBox(matrix, data_box);
    }
@@ -770,7 +774,7 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
          {
             /* set pointers for "symmetric" coefficients */
             data_indices[i][j] = data_indices[i][symm_entries[j]] +
-               hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
+                                 hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
          }
       }
    }
@@ -997,7 +1001,8 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    {
       if ( (periodic[d] % ran_stride[d]) || (periodic[d] % dom_stride[d]) )
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Periodicity must be an integral multiple of the matrix domain and range strides");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Periodicity must be an integral multiple of the matrix domain and range strides");
          return hypre_error_flag;
       }
    }
@@ -1084,7 +1089,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    symm_entries  = hypre_StructMatrixSymmEntries(matrix);
 
    /* Initialize additional ghost size */
-   for (d = 0; d < 2*ndim; d++)
+   for (d = 0; d < 2 * ndim; d++)
    {
       sym_ghost[d] = 0;
    }
@@ -1615,7 +1620,7 @@ hypre_StructMatrixClearValues( hypre_StructMatrix *matrix,
          for (s = 0; s < num_stencil_indices; s++)
          {
             matp = hypre_StructMatrixBoxData(matrix, i, stencil_indices[s]) +
-               hypre_BoxIndexRank(data_box, grid_index);
+                   hypre_BoxIndexRank(data_box, grid_index);
             *matp = 0.0;
          }
       }
@@ -1749,7 +1754,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkg     *comm_pkg;
       hypre_CommHandle  *comm_handle;
       HYPRE_Complex    **comm_data;
-      HYPRE_Int          i, tot_num_ghost[2*HYPRE_MAXDIM];
+      HYPRE_Int          i, tot_num_ghost[2 * HYPRE_MAXDIM];
 
       /* RDF TODO: Use CommStencil to do communication */
       for (i = 0; i < 2 * ndim; i++)
@@ -1822,7 +1827,7 @@ hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
       if (constant[stencil_diag_entry] == 0)
       {
          constant_coefficient = 2;
-         if (nconst != (stencil_size-1))
+         if (nconst != (stencil_size - 1))
          {
             hypre_error(HYPRE_ERROR_GENERIC);
          }
@@ -1908,7 +1913,7 @@ hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix,
    HYPRE_Int  i, ndim = hypre_StructMatrixNDim(matrix);
 
    *resize = 0;
-   for (i = 0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       if (hypre_StructMatrixNumGhost(matrix)[i] != num_ghost[i])
       {
@@ -2224,7 +2229,7 @@ hypre_StructMatrixPrint( const char         *filename,
                   {
                      hypre_fprintf(file, ", %d", hypre_IndexD(oindex, d));
                   }
-                  value = vdata[datai + vi*data_box_volume];
+                  value = vdata[datai + vi * data_box_volume];
 #ifdef HYPRE_COMPLEX
                   hypre_fprintf(file, "; %d) %.14e , %.14e\n",
                                 value_ids[vi], hypre_creal(value), hypre_cimag(value));
@@ -2236,7 +2241,7 @@ hypre_StructMatrixPrint( const char         *filename,
          }
          hypre_SerialBoxLoop1End(datai);
 
-         vdata += num_values*data_box_volume;
+         vdata += num_values * data_box_volume;
       }
    }
 
@@ -2508,7 +2513,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
    {
       if (!hypre_StructMatrixConstEntry(matrix, e))
       {
-         hypre_CopyIndex(shape[e],stencil_offset);
+         hypre_CopyIndex(shape[e], stencil_offset);
          if (!hypre_IndexEqual(stencil_offset, 0, ndim))
          {
             hypre_ForBoxI(i, grid_boxes)

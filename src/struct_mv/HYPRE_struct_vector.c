@@ -346,7 +346,7 @@ HYPRE_Int
 HYPRE_StructVectorSetConstantValues( HYPRE_StructVector  vector,
                                      HYPRE_Complex       value )
 {
-   return( hypre_StructVectorSetConstantValues(vector, value) );
+   return ( hypre_StructVectorSetConstantValues(vector, value) );
 }
 
 
@@ -358,7 +358,7 @@ HYPRE_Int
 HYPRE_StructVectorSetRandomValues( HYPRE_StructVector  vector,
                                    HYPRE_Int           seed )
 {
-   return( hypre_StructVectorSetRandomValues(vector, seed) );
+   return ( hypre_StructVectorSetRandomValues(vector, seed) );
 }
 
 /*--------------------------------------------------------------------------

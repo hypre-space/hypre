@@ -176,16 +176,16 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       {
          ii = rownnz[i];
 
-         entries = (diag_i[ii+1] - diag_i[ii]) + (offd_i[ii+1] - offd_i[ii]);
+         entries = (diag_i[ii + 1] - diag_i[ii]) + (offd_i[ii + 1] - offd_i[ii]);
          min_entries = hypre_min(entries, min_entries);
          max_entries = hypre_max(entries, max_entries);
 
          rowsum = 0.0;
-         for (j = diag_i[ii]; j < diag_i[ii+1]; j++)
+         for (j = diag_i[ii]; j < diag_i[ii + 1]; j++)
          {
             rowsum += diag_a[j];
          }
-         for (j = offd_i[ii]; j < offd_i[ii+1]; j++)
+         for (j = offd_i[ii]; j < offd_i[ii + 1]; j++)
          {
             rowsum += offd_a[j];
          }
@@ -246,7 +246,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
                      stencil_size = hypre_StructStencilSize(stencil);
                      min_stsize = hypre_min(stencil_size, min_stsize);
                      max_stsize = hypre_max(stencil_size, max_stsize);
-                     avg_stsize += stencil_size*num_dofs_grid;
+                     avg_stsize += stencil_size * num_dofs_grid;
                   }
                }
             }
@@ -308,7 +308,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
                ndigits += 7;
             }
             hypre_printf("\n");
-            for (i = 0; i < ndigits; i++) hypre_printf("%s", "=");
+            for (i = 0; i < ndigits; i++) { hypre_printf("%s", "="); }
             hypre_printf("\n");
             for (l = 0; l < (num_levels - 1); l++)
             {
@@ -338,7 +338,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
                   ndigits += 7;
                }
                hypre_printf("\n");
-               for (i = 0; i < ndigits; i++) hypre_printf("%s", "=");
+               for (i = 0; i < ndigits; i++) { hypre_printf("%s", "="); }
                hypre_printf("\n");
                for (l = 0; l < num_levels; l++)
                {
@@ -369,7 +369,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
                   ndigits += 7;
                }
                hypre_printf("\n");
-               for (i = 0; i < ndigits; i++) hypre_printf("%s", "=");
+               for (i = 0; i < ndigits; i++) { hypre_printf("%s", "="); }
                hypre_printf("\n");
                for (l = 0; l < num_levels; l++)
                {
@@ -397,7 +397,7 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          ndigits_S[5] = hypre_max(hypre_ndigits(global_avg_stsize[l]) + offset, ndigits_S[5]);
       }
 
-      header[0]  = 3 + (ndigits_S[0] + ndigits_S[1])/2;
+      header[0]  = 3 + (ndigits_S[0] + ndigits_S[1]) / 2;
       header[1]  = ndigits_S[2] + ndigits_S[3] + ndigits_S[4] + ndigits_S[5] +
                    (3 + ndigits_S[0] + ndigits_S[1] - header[0]);
       header[2]  = header[0] + header[1];

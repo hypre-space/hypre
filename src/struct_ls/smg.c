@@ -419,7 +419,7 @@ hypre_SMGPrintLogging( void *smg_vdata )
       hypre_printf("% 5d    %e    %f     %e\n", 0, norms[0], convr, rel_norms[0]);
       for (i = 1; i <= num_iterations; i++)
       {
-         convr = norms[i] / norms[i-1];
+         convr = norms[i] / norms[i - 1];
          hypre_printf("% 5d    %e    %f     %e\n", i, norms[i], convr, rel_norms[i]);
       }
 

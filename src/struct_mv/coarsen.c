@@ -38,7 +38,7 @@ hypre_MapToCoarseIndex( hypre_Index    index,
       {
          index[d] -= origin[d];
       }
-      if ((index[d]%stride[d]) != 0)
+      if ((index[d] % stride[d]) != 0)
       {
          /* This index doesn't map directly to a coarse index */
          hypre_error(HYPRE_ERROR_GENERIC);
@@ -456,7 +456,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 #if TIME_DEBUG
    HYPRE_Int tindex;
    char new_title[80];
-   hypre_sprintf(new_title,"Coarsen.%d",s_coarsen_num);
+   hypre_sprintf(new_title, "Coarsen.%d", s_coarsen_num);
    tindex = hypre_InitializeTiming(new_title);
    s_coarsen_num++;
 
@@ -501,7 +501,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          hypre_CoarsenBox(box, origin, stride);
          if (hypre_BoxVolume(box))
          {
-           count++;
+            count++;
          }
       }
 
@@ -544,7 +544,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);
    for (i = 0; i < ndim; i++)
    {
-      hypre_IndexD(periodic,i) /= hypre_IndexD(stride,i);
+      hypre_IndexD(periodic, i) /= hypre_IndexD(stride, i);
    }
    hypre_StructGridSetPeriodic(cgrid, periodic);
 
@@ -559,8 +559,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    // hypre_SetIndex(new_dist, 2); /* RDF: Is this needed with new MAXDIM stuff? */
    for (i = 0; i < ndim; i++)
    {
-      coarsen_factor = hypre_IndexD(stride,i);
-      hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
+      coarsen_factor = hypre_IndexD(stride, i);
+      hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance, i) / coarsen_factor;
    }
 
    hypre_BoxManGetAllGlobalKnown(fboxman, &known);
@@ -648,9 +648,9 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
          }
       }
       else /* my boxes */
-           /* add my coarse grid boxes to the coarse grid box manager (have
-              already been pruned if necessary) - re-number the entry ids to be
-              sequential (this is the box number, really) */
+         /* add my coarse grid boxes to the coarse grid box manager (have
+            already been pruned if necessary) - re-number the entry ids to be
+            sequential (this is the box number, really) */
       {
          if (proc != last_proc) /* just do this once (the first myid) */
          {

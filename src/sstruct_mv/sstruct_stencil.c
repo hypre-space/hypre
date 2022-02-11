@@ -21,7 +21,7 @@ hypre_SStructStencilRef( hypre_SStructStencil  *stencil,
    if (stencil_ref)
    {
       hypre_SStructStencilRefCount(stencil) ++;
-     *stencil_ref = stencil;
+      *stencil_ref = stencil;
    }
 
    return hypre_error_flag;

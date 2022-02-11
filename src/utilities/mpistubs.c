@@ -760,7 +760,7 @@ hypre_MPI_CheckCommMatrix( hypre_MPI_Comm   comm,
                            HYPRE_Int        num_sends,
                            HYPRE_Int       *sends )
 {
-   return(0);
+   return (0);
 }
 
 /******************************************************************************

@@ -9,7 +9,8 @@
 #include "_hypre_sstruct_mv.h"
 
 /* Tests prototypes */
-HYPRE_Int test_SStructMatmult( HYPRE_Int nmatrices , HYPRE_SStructMatrix *ss_A , HYPRE_IJMatrix *ij_A , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *trans , HYPRE_Int print );
+HYPRE_Int test_SStructMatmult( HYPRE_Int nmatrices, HYPRE_SStructMatrix *ss_A, HYPRE_IJMatrix *ij_A,
+                               HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, HYPRE_Int print );
 
 /*--------------------------------------------------------------------------
  * Print usage info
@@ -427,7 +428,7 @@ test_SStructMatmult( HYPRE_Int            nmatrices,
    HYPRE_SStructMatrixToIJMatrix(ss_M, 0, &ij_M);
 
    /* Compute IJ matrices product */
-   m = terms[nterms-1];
+   m = terms[nterms - 1];
    HYPRE_IJMatrixGetObject(ij_A[m], (void **) &par_A[0]);
    for (t = (nterms - 2); t >= 0; t--)
    {
@@ -465,7 +466,7 @@ test_SStructMatmult( HYPRE_Int            nmatrices,
    if (!myid)
    {
       hypre_printf("[test_SStructMatmult]: Error norm = %e\n", norm_E);
-      if (norm_E > HYPRE_REAL_EPSILON*norm_M)
+      if (norm_E > HYPRE_REAL_EPSILON * norm_M)
       {
          ierr = 1;
 
