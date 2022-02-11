@@ -245,6 +245,7 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
    hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
                                        stencil_indices, values, 0 );
 
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

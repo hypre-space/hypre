@@ -81,9 +81,9 @@ HYPRE_Int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix, HYPRE_In
                                             HYPRE_Complex *values );
 HYPRE_Int HYPRE_SStructMatrixAssemble ( HYPRE_SStructMatrix matrix );
 HYPRE_Int HYPRE_SStructMatrixSetDomainStride ( HYPRE_SStructMatrix matrix, HYPRE_Int part,
-                                               hypre_Index dom_stride );
+                                               HYPRE_Int *dom_stride );
 HYPRE_Int HYPRE_SStructMatrixSetRangeStride ( HYPRE_SStructMatrix matrix, HYPRE_Int part,
-                                              hypre_Index ran_stride );
+                                              HYPRE_Int *ran_stride );
 HYPRE_Int HYPRE_SStructMatrixSetSymmetric ( HYPRE_SStructMatrix matrix, HYPRE_Int part,
                                             HYPRE_Int var, HYPRE_Int to_var, HYPRE_Int symmetric );
 HYPRE_Int HYPRE_SStructMatrixSetConstantEntries( HYPRE_SStructMatrix matrix, HYPRE_Int part,
