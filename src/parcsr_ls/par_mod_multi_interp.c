@@ -122,8 +122,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
 
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_HOST);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_HOST);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
 
    cnt = 0;
    remaining = 0;
@@ -351,10 +351,10 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       P_offd_i[i + 1] += P_offd_i[i];
    }
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_HOST);
-   P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_HOST);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_HOST);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
 
    /* insert weights for coarse points */
    for (i = 0; i < pass_starts[1]; i++)

@@ -282,7 +282,10 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
       hypre_ParCSRMatrixInitialize_v2(par_matrix, memory_location);
       hypre_AuxParCSRMatrixInitialize_v2(aux_matrix, memory_location_aux);
 
-      if (memory_location_aux == HYPRE_MEMORY_HOST)
+      /* WM: TODO - implement for sycl... is this available for other non-cuda/hip gpu implementations? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (hypre_GetExecPolicy1(memory_location_aux) == HYPRE_EXEC_HOST)
+#endif
       {
          if (hypre_AuxParCSRMatrixDiagSizes(aux_matrix))
          {
