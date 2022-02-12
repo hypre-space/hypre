@@ -19,13 +19,13 @@ template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_attempt( HYPRE_Int      HashSize,      /* capacity of the hash table */
-                                  #ifdef HYPRE_USING_SYCL
+#ifdef HYPRE_USING_SYCL
                                   HYPRE_Int     *HashKeys,      /* shared, assumed to be initialized as all -1's */
                                   HYPRE_Complex *HashVals,      /* shared, assumed to be initialized as all 0's */
-                                  #else
+#else
                                   volatile HYPRE_Int     *HashKeys,      /* shared, assumed to be initialized as all -1's */
                                   volatile HYPRE_Complex *HashVals,      /* shared, assumed to be initialized as all 0's */
-                                  #endif
+#endif
                                   HYPRE_Int      key,           /* assumed to be nonnegative */
                                   HYPRE_Complex  val,
                                   HYPRE_Int     &count,         /* increase by 1 if is a new entry */
@@ -89,13 +89,13 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
                                   HYPRE_Int     *jb,
                                   HYPRE_Complex *ab,
                                   HYPRE_Int      s_HashSize,
-                                  #ifdef HYPRE_USING_SYCL
+#ifdef HYPRE_USING_SYCL
                                   HYPRE_Int     *s_HashKeys,
                                   HYPRE_Complex *s_HashVals,
-                                  #else
+#else
                                   volatile HYPRE_Int     *s_HashKeys,
                                   volatile HYPRE_Complex *s_HashVals,
-                                  #endif
+#endif
                                   HYPRE_Int      g_HashSize,
                                   HYPRE_Int     *g_HashKeys,
                                   HYPRE_Complex *g_HashVals,

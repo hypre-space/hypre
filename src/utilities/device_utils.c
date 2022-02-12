@@ -446,7 +446,7 @@ hypreGPUKernel_CopyParCSRRows(
    HYPRE_BigInt  *d_jb,
    HYPRE_Complex *d_ab)
 {
-   HYPRE_Int warp_size=0, global_warp_id=0, lane_id=0;
+   HYPRE_Int warp_size = 0, global_warp_id = 0, lane_id = 0;
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
    warp_size = SG.get_local_range().get(0);
@@ -678,8 +678,8 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       /*                                                                 reduced_y ); */
 
       std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
-        oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                                     hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
+                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
+                                                               hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 

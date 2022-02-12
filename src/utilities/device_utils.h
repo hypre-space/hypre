@@ -1054,19 +1054,21 @@ namespace internal
 
 // Lambda: [pred, &new_value](Ref1 a, Ref2 s) {return pred(s) ? new_value : a;
 // });
-template <typename T, typename Predicate> struct replace_if_fun {
+template <typename T, typename Predicate> struct replace_if_fun
+{
 public:
-  typedef T result_of;
-  replace_if_fun(Predicate _pred, T _new_value)
+   typedef T result_of;
+   replace_if_fun(Predicate _pred, T _new_value)
       : pred(_pred), new_value(_new_value) {}
 
-  template <typename _T1, typename _T2> T operator()(_T1 &&a, _T2 &&s) const {
-    return pred(s) ? new_value : a;
-  }
+   template <typename _T1, typename _T2> T operator()(_T1 &&a, _T2 &&s) const
+   {
+      return pred(s) ? new_value : a;
+   }
 
 private:
-  Predicate pred;
-  const T new_value;
+   Predicate pred;
+   const T new_value;
 };
 
 //[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
@@ -1092,7 +1094,8 @@ private:
 // Functor evaluates second element of tied sequence with predicate.
 // Used by: copy_if, remove_copy_if, stable_partition_copy
 // Lambda:
-template <typename Predicate> struct predicate_key_fun {
+template <typename Predicate> struct predicate_key_fun
+{
    typedef bool result_of;
    predicate_key_fun(Predicate _pred) : pred(_pred) {}
 
@@ -1106,16 +1109,18 @@ private:
 };
 
 // Used by: remove_if
-template <typename Predicate> struct negate_predicate_key_fun {
-  typedef bool result_of;
-  negate_predicate_key_fun(Predicate _pred) : pred(_pred) {}
+template <typename Predicate> struct negate_predicate_key_fun
+{
+   typedef bool result_of;
+   negate_predicate_key_fun(Predicate _pred) : pred(_pred) {}
 
-  template <typename _T1> result_of operator()(_T1 &&a) const {
-    return !pred(std::get<1>(a));
-  }
+   template <typename _T1> result_of operator()(_T1 &&a) const
+   {
+      return !pred(std::get<1>(a));
+   }
 
 private:
-  Predicate pred;
+   Predicate pred;
 };
 
 } // namespace internal
@@ -1143,7 +1148,7 @@ Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
 
 // thrust::sequence (with step=1)
 template <class Iter, class T>
-void hypreSycl_iota(Iter first, Iter last, T init=0)
+void hypreSycl_iota(Iter first, Iter last, T init = 0)
 {
    static_assert(
       std::is_same<typename std::iterator_traits<Iter>::iterator_category,
@@ -1154,7 +1159,7 @@ void hypreSycl_iota(Iter first, Iter last, T init=0)
       oneapi::dpl::execution::make_device_policy(*hypre_HandleComputeStream(hypre_handle())),
       oneapi::dpl::counting_iterator<DiffType>(init),
       oneapi::dpl::counting_iterator<DiffType>(std::distance(first, last)),
-      first, [](auto i) { return i; });
+   first, [](auto i) { return i; });
 }
 
 template <class Iter1, class Iter2, class Iter3,
@@ -1228,56 +1233,58 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
                             perm_begin, perm_begin + n, result);
 }
 
-template <typename _Tp> class __buffer {
-  sycl::buffer<_Tp, 1> __buf;
+template <typename _Tp> class __buffer
+{
+   sycl::buffer<_Tp, 1> __buf;
 
-  __buffer(const __buffer &) = delete;
+   __buffer(const __buffer &) = delete;
 
-  void operator=(const __buffer &) = delete;
+   void operator=(const __buffer &) = delete;
 
 public:
-  // Try to obtain buffer of given size to store objects of _Tp type
-  __buffer(std::size_t __n) : __buf(sycl::range<1>(__n)) {}
+   // Try to obtain buffer of given size to store objects of _Tp type
+   __buffer(std::size_t __n) : __buf(sycl::range<1>(__n)) {}
 
-  // Return pointer to buffer, or  NULL if buffer could not be obtained.
-  auto get() -> decltype(oneapi::dpl::begin(__buf)) const {
-    return oneapi::dpl::begin(__buf);
-  }
+   // Return pointer to buffer, or  NULL if buffer could not be obtained.
+   auto get() -> decltype(oneapi::dpl::begin(__buf)) const
+   {
+      return oneapi::dpl::begin(__buf);
+   }
 };
 
 template <typename Iter1, typename Iter2, typename Pred>
 Iter1 hypreSycl_remove_if(Iter1 first, Iter1 last, Iter2 mask, Pred p)
 {
-  static_assert(
+   static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
-                   std::random_access_iterator_tag>::value &&
-          std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
-                       std::random_access_iterator_tag>::value,
+      std::random_access_iterator_tag>::value &&
+      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
+      std::random_access_iterator_tag>::value,
       "Iterators passed to algorithms must be random-access iterators.");
-  auto queue  = hypre_HandleComputeStream(hypre_handle());
-  auto policy = oneapi::dpl::execution::make_device_policy(*queue);
-  using ValueType = typename std::iterator_traits<Iter1>::value_type;
+   auto queue  = hypre_HandleComputeStream(hypre_handle());
+   auto policy = oneapi::dpl::execution::make_device_policy(*queue);
+   using ValueType = typename std::iterator_traits<Iter1>::value_type;
 
-    __buffer<ValueType> _tmp(std::distance(first, last));
+   __buffer<ValueType> _tmp(std::distance(first, last));
 
-  // auto _tmp = std::unique_ptr<ValueType>(sycl::malloc_device<ValueType>(std::distance(first, last), *queue),
-  //                                        [queue](ValueType *ptr) { sycl::free(ptr, *queue); });
+   // auto _tmp = std::unique_ptr<ValueType>(sycl::malloc_device<ValueType>(std::distance(first, last), *queue),
+   //                                        [queue](ValueType *ptr) { sycl::free(ptr, *queue); });
 
-  auto end = std::copy_if(
-      policy, make_zip_iterator(first, mask),
-      make_zip_iterator(last, mask + std::distance(first, last)),
-      make_zip_iterator(_tmp.get(), oneapi::dpl::discard_iterator()),
-      internal::negate_predicate_key_fun<Pred>(p));
+   auto end = std::copy_if(
+                 policy, make_zip_iterator(first, mask),
+                 make_zip_iterator(last, mask + std::distance(first, last)),
+                 make_zip_iterator(_tmp.get(), oneapi::dpl::discard_iterator()),
+                 internal::negate_predicate_key_fun<Pred>(p));
 
-  return std::copy(policy, _tmp.get(), std::get<0>(end.base()), first);
+   return std::copy(policy, _tmp.get(), std::get<0>(end.base()), first);
 }
 
 /* return the flattened warp id in nd_range */
 static __forceinline__
 hypre_int hypre_gpu_get_grid_warp_id(sycl::nd_item<>& item)
 {
-  return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
-    item.get_sub_group().get_group_linear_id();
+   return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
+          item.get_sub_group().get_group_linear_id();
 }
 
 template <typename T>
@@ -1285,29 +1292,32 @@ static __forceinline__
 typename std::enable_if_t<sizeof(T) == 4, T>
 atomicCAS(T* address, T expected, T val)
 {
-  static_assert(sizeof(unsigned int) == 4,
-                "this function assumes an unsigned int is 32-bit");
+   static_assert(sizeof(unsigned int) == 4,
+                 "this function assumes an unsigned int is 32-bit");
 #ifdef __SYCL_DEVICE_ONLY_
-  auto l = __SYCL_GenericCastToPtrExplicit_ToLocal<unsigned int>(address);
-  if (l) {
-    sycl::atomic_ref< unsigned int,
-                      sycl::memory_order::relaxed,
-                      sycl::memory_scope::device,
-                      sycl::access::address_space::local_space >
-      atomicCAS_ref( *reinterpret_cast<unsigned int*>(address) );
-    atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned int*>(&expected),
-                                          *reinterpret_cast<unsigned int*>(&val));
-    return expected;
-  } else {
-    sycl::atomic_ref< unsigned int,
-                      sycl::memory_order::relaxed,
-                      sycl::memory_scope::device,
-                      sycl::access::address_space::ext_intel_global_device_space >
-      atomicCAS_ref( *reinterpret_cast<unsigned int*>(address) );
-    atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned int*>(&expected),
-                                          *reinterpret_cast<unsigned int*>(&val));
-    return expected;
-  }
+   auto l = __SYCL_GenericCastToPtrExplicit_ToLocal<unsigned int>(address);
+   if (l)
+   {
+      sycl::atomic_ref< unsigned int,
+           sycl::memory_order::relaxed,
+           sycl::memory_scope::device,
+           sycl::access::address_space::local_space >
+           atomicCAS_ref( *reinterpret_cast<unsigned int*>(address) );
+      atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned int*>(&expected),
+                                            *reinterpret_cast<unsigned int*>(&val));
+      return expected;
+   }
+   else
+   {
+      sycl::atomic_ref< unsigned int,
+           sycl::memory_order::relaxed,
+           sycl::memory_scope::device,
+           sycl::access::address_space::ext_intel_global_device_space >
+           atomicCAS_ref( *reinterpret_cast<unsigned int*>(address) );
+      atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned int*>(&expected),
+                                            *reinterpret_cast<unsigned int*>(&val));
+      return expected;
+   }
 #endif
 }
 
@@ -1316,29 +1326,32 @@ static __forceinline__
 typename std::enable_if_t<sizeof(T) == 8, T>
 atomicCAS(T* address, T expected, T val)
 {
-  static_assert(sizeof(unsigned long long int) == 8,
-                "this function assumes an unsigned long long int is 64-bit");
+   static_assert(sizeof(unsigned long long int) == 8,
+                 "this function assumes an unsigned long long int is 64-bit");
 #ifdef __SYCL_DEVICE_ONLY_
-  auto l = __SYCL_GenericCastToPtrExplicit_ToLocal<unsigned long long int>(address);
-  if (l) {
-    sycl::atomic_ref< unsigned long long int,
-                      sycl::memory_order::relaxed,
-                      sycl::memory_scope::device,
-                      sycl::access::address_space::local_space >
-      atomicCAS_ref( *reinterpret_cast<unsigned long long int*>(address) );
-    atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned long long int*>(&expected),
-                                          *reinterpret_cast<unsigned long long int*>(&val));
-    return expected;
-  } else {
-    sycl::atomic_ref< unsigned long long int,
-                      sycl::memory_order::relaxed,
-                      sycl::memory_scope::device,
-                      sycl::access::address_space::ext_intel_global_device_space >
-      atomicCAS_ref( *reinterpret_cast<unsigned long long int*>(address) );
-    atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned long long int*>(&expected),
-                                          *reinterpret_cast<unsigned long long int*>(&val));
-    return expected;
-  }
+   auto l = __SYCL_GenericCastToPtrExplicit_ToLocal<unsigned long long int>(address);
+   if (l)
+   {
+      sycl::atomic_ref< unsigned long long int,
+           sycl::memory_order::relaxed,
+           sycl::memory_scope::device,
+           sycl::access::address_space::local_space >
+           atomicCAS_ref( *reinterpret_cast<unsigned long long int*>(address) );
+      atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned long long int*>(&expected),
+                                            *reinterpret_cast<unsigned long long int*>(&val));
+      return expected;
+   }
+   else
+   {
+      sycl::atomic_ref< unsigned long long int,
+           sycl::memory_order::relaxed,
+           sycl::memory_scope::device,
+           sycl::access::address_space::ext_intel_global_device_space >
+           atomicCAS_ref( *reinterpret_cast<unsigned long long int*>(address) );
+      atomicCAS_ref.compare_exchange_strong(*reinterpret_cast<unsigned long long int*>(&expected),
+                                            *reinterpret_cast<unsigned long long int*>(&val));
+      return expected;
+   }
 #endif
 }
 
@@ -1347,22 +1360,25 @@ static __forceinline__
 T atomicAdd(T* address, T val)
 {
 #ifdef __SYCL_DEVICE_ONLY_
-  auto l = __SYCL_GenericCastToPtrExplicit_ToLocal<T>(address);
-  if (l) {
-    sycl::atomic_ref< T,
-                      sycl::memory_order::relaxed,
-                      sycl::memory_scope::device,
-                      sycl::access::address_space::local_space >
-      atomicAdd_ref( *address );
-    return atomicAdd_ref.fetch_add(val);
-  } else {
-    sycl::atomic_ref< T,
-                      sycl::memory_order::relaxed,
-                      sycl::memory_scope::device,
-                      sycl::access::address_space::ext_intel_global_device_space >
-      atomicAdd_ref( *address );
-    return atomicAdd_ref.fetch_add(val);
-  }
+   auto l = __SYCL_GenericCastToPtrExplicit_ToLocal<T>(address);
+   if (l)
+   {
+      sycl::atomic_ref< T,
+           sycl::memory_order::relaxed,
+           sycl::memory_scope::device,
+           sycl::access::address_space::local_space >
+           atomicAdd_ref( *address );
+      return atomicAdd_ref.fetch_add(val);
+   }
+   else
+   {
+      sycl::atomic_ref< T,
+           sycl::memory_order::relaxed,
+           sycl::memory_scope::device,
+           sycl::access::address_space::ext_intel_global_device_space >
+           atomicAdd_ref( *address );
+      return atomicAdd_ref.fetch_add(val);
+   }
 #endif
 }
 

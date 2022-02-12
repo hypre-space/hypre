@@ -109,26 +109,28 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    // (a) Delete older SYCL devices (and its associated queues)
    // (b) Create a new SYCL device, but dont create SYCL queues at the moment
 
-   if (hypre_handle_ != nullptr) {
-     hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle_);
+   if (hypre_handle_ != nullptr)
+   {
+      hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle_);
 
-     /* Cleanup existing device and queues (first queues associated with device, then device) */
-     for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
-     {
-       if (data->streams[i])
-       {
-         delete data->streams[i];
-         data->streams[i] = nullptr;
-       }
-     }
-     if (data->device)
-     {
-       delete data->device;
-     }
+      /* Cleanup existing device and queues (first queues associated with device, then device) */
+      for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
+      {
+         if (data->streams[i])
+         {
+            delete data->streams[i];
+            data->streams[i] = nullptr;
+         }
+      }
+      if (data->device)
+      {
+         delete data->device;
+      }
 
-     /* Setup new device and compute stream */
-     data->device = sycl_get_device(device_id);
-     data->device_max_work_group_size = data->device->get_info<sycl::info::device::max_work_group_size>();
+      /* Setup new device and compute stream */
+      data->device = sycl_get_device(device_id);
+      data->device_max_work_group_size =
+         data->device->get_info<sycl::info::device::max_work_group_size>();
    }
 #else
    hypre_HandleDevice(hypre_handle_) = device_id;

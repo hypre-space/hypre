@@ -69,37 +69,37 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
 
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
-   #ifdef HYPRE_USING_SYCL
+#ifdef HYPRE_USING_SYCL
    local_coarse_size = HYPRE_ONEDPL_CALL( std::count_if,
                                           hypre_IntArrayData(CF_marker),
                                           hypre_IntArrayData(CF_marker) + local_num_variables,
                                           [](auto x)->bool { return (x == 1); } );
-   #else
+#else
    local_coarse_size = HYPRE_THRUST_CALL( count_if,
                                           hypre_IntArrayData(CF_marker),
                                           hypre_IntArrayData(CF_marker) + local_num_variables,
                                           equal<HYPRE_Int>(1) );
-   #endif
+#endif
 
    if (num_functions > 1)
    {
       *coarse_dof_func_ptr = hypre_IntArrayCreate(local_coarse_size);
       hypre_IntArrayInitialize_v2(*coarse_dof_func_ptr, HYPRE_MEMORY_DEVICE);
 
-      #ifdef HYPRE_USING_SYCL
+#ifdef HYPRE_USING_SYCL
       hypreSycl_copy_if( hypre_IntArrayData(dof_func),
                          hypre_IntArrayData(dof_func) + local_num_variables,
                          hypre_IntArrayData(CF_marker),
                          hypre_IntArrayData(*coarse_dof_func_ptr),
                          [](auto x)->bool { return (x == 1); } );
-      #else
+#else
       HYPRE_THRUST_CALL( copy_if,
                          hypre_IntArrayData(dof_func),
                          hypre_IntArrayData(dof_func) + local_num_variables,
                          hypre_IntArrayData(CF_marker),
                          hypre_IntArrayData(*coarse_dof_func_ptr),
                          equal<HYPRE_Int>(1) );
-      #endif
+#endif
    }
 
    {
