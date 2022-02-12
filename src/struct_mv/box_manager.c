@@ -832,7 +832,7 @@ hypre_BoxManGetEntry( hypre_BoxManager *manager,
          start = first_local;
          if (start >= 0 )
          {
-            finish =  proc_offsets[hypre_BoxManLocalProcOffset(manager) + 1];
+            finish = proc_offsets[hypre_BoxManLocalProcOffset(manager) + 1];
          }
       }
 

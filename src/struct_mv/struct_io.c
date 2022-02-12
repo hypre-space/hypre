@@ -88,6 +88,12 @@ hypre_PrintBoxArrayData( FILE            *file,
                hypre_fprintf(file, ", %d", hypre_IndexD(start, d) + hypre_IndexD(index, d));
             }
             value = data_host[datai + j * data_box_volume];
+
+            /* Make zero values "positive" */
+            if (value == 0.0)
+            {
+               value = 0.0;
+            }
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(file, "; %d) %.14e , %.14e\n",
                           value_ids[j], hypre_creal(value), hypre_cimag(value));

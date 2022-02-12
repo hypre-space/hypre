@@ -643,7 +643,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
           * a result of how stencils are stored when the domain is coarse. */
          for (d = 0; d < ndim; d++)
          {
-            num_ghost[2 * d]   += dom_stride[d] - 1;
+            num_ghost[2 * d]     += dom_stride[d] - 1;
             num_ghost[2 * d + 1] += dom_stride[d] - 1;
          }
       }

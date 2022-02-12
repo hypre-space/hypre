@@ -55,10 +55,15 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridPShifts(grid)      = NULL;
 
    hypre_StructGridGhlocalSize(grid)  = 0;
-   for (i = 0; i < HYPRE_MAXDIM; i++)
+   for (i = 0; i < ndim; i++)
    {
-      hypre_StructGridNumGhost(grid)[2 * i]   = 0;
-      hypre_StructGridNumGhost(grid)[2 * i + 1] = 0;
+      hypre_StructGridNumGhost(grid)[2*i]   = 1;
+      hypre_StructGridNumGhost(grid)[2*i+1] = 1;
+   }
+   for (i = ndim; i < HYPRE_MAXDIM; i++)
+   {
+      hypre_StructGridNumGhost(grid)[2*i]   = 0;
+      hypre_StructGridNumGhost(grid)[2*i+1] = 0;
    }
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

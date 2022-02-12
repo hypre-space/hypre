@@ -1325,7 +1325,7 @@ main( hypre_int argc,
                                           argv[read_x0fromfile_index],
                                           v_num_ghost);
 
-               readgrid = hypre_StructVectorGrid(b) ;
+               readgrid = hypre_StructVectorGrid(b);
                readperiodic = hypre_StructGridPeriodic(readgrid);
 
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
@@ -1909,7 +1909,6 @@ main( hypre_int argc,
 
             if ( checkOrtho )
             {
-
                gramXX = utilities_FortranMatrixCreate();
                identity = utilities_FortranMatrixCreate();
 
@@ -1927,12 +1926,10 @@ main( hypre_int argc,
 
                utilities_FortranMatrixDestroy( gramXX );
                utilities_FortranMatrixDestroy( identity );
-
             }
 
             if ( printLevel )
             {
-
                if ( myid == 0 )
                {
                   if ( (filePtr = fopen("values.txt", "w")) )
@@ -2123,7 +2120,6 @@ main( hypre_int argc,
 
             if ( checkOrtho )
             {
-
                gramXX = utilities_FortranMatrixCreate();
                identity = utilities_FortranMatrixCreate();
 
@@ -2141,12 +2137,10 @@ main( hypre_int argc,
 
                utilities_FortranMatrixDestroy( gramXX );
                utilities_FortranMatrixDestroy( identity );
-
             }
 
             if ( printLevel )
             {
-
                if ( myid == 0 )
                {
                   if ( (filePtr = fopen("values.txt", "w")) )
@@ -2173,7 +2167,6 @@ main( hypre_int argc,
 
                   if ( printLevel > 1 )
                   {
-
                      printBuffer = utilities_FortranMatrixCreate();
 
                      iterations = HYPRE_LOBPCGIterations( (HYPRE_Solver)solver );
@@ -2213,7 +2206,6 @@ main( hypre_int argc,
          }
 
          hypre_TFree( interpreter, HYPRE_MEMORY_HOST);
-
       }
 
       /* end lobpcg */
@@ -3071,28 +3063,37 @@ AddValuesMatrix( HYPRE_StructMatrix A,
             if (ndim == 1)
             {
                hypre_LoopBegin(volume, d)
-               HYPRE_Int i = stencil_size * d;
-               values[i    ] = west;
-               values[i + 1] = center;
+               {
+                  HYPRE_Int i = stencil_size * d;
+
+                  values[i    ] = west;
+                  values[i + 1] = center;
+               }
                hypre_LoopEnd()
             }
             else if (ndim == 2)
             {
                hypre_LoopBegin(volume, d)
-               HYPRE_Int i = stencil_size * d;
-               values[i    ] = west;
-               values[i + 1] = south;
-               values[i + 2] = center;
+               {
+                  HYPRE_Int i = stencil_size * d;
+
+                  values[i    ] = west;
+                  values[i + 1] = south;
+                  values[i + 2] = center;
+               }
                hypre_LoopEnd()
             }
             else if (ndim == 3)
             {
                hypre_LoopBegin(volume, d)
-               HYPRE_Int i = stencil_size * d;
-               values[i    ] = west;
-               values[i + 1] = south;
-               values[i + 2] = bottom;
-               values[i + 3] = center;
+               {
+                  HYPRE_Int i = stencil_size * d;
+
+                  values[i    ] = west;
+                  values[i + 1] = south;
+                  values[i + 2] = bottom;
+                  values[i + 3] = center;
+               }
                hypre_LoopEnd()
             }
 #undef DEVICE_VAR

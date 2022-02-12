@@ -249,7 +249,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box;
    HYPRE_Complex           *Ap, *xp, *yp;
-   HYPRE_Int          Ab, xb, yb;
+   HYPRE_Int                Ab, xb, yb;
    hypre_Index              Adstride, xdstride, ydstride, ustride;
 
    hypre_StructStencil     *stencil;
@@ -257,8 +257,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int                stencil_size;
 
    hypre_StructGrid        *grid;
-   HYPRE_Int          ran_nboxes;
-   HYPRE_Int         *ran_boxnums;
+   HYPRE_Int                ran_nboxes;
+   HYPRE_Int               *ran_boxnums;
    hypre_IndexRef           ran_stride;
    hypre_IndexRef           dom_stride;
    HYPRE_Int                dom_is_coarse;
