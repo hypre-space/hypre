@@ -33,11 +33,11 @@ hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int *HashKeys,
       /* compute the hash value of key */
       if (i == 0)
       {
-         j = (key * HYPRE_SPGEMM_SYMBL_HASH_MULT) & (SHMEM_HASH_SIZE - 1);
+         j = key & (SHMEM_HASH_SIZE - 1);
       }
       else
       {
-         j = HashFunc<SHMEM_HASH_SIZE, HASHTYPE>(key * HYPRE_SPGEMM_SYMBL_HASH_MULT, i, j);
+         j = HashFunc<SHMEM_HASH_SIZE, HASHTYPE>(key, i, j);
       }
 
       /* try to insert key+1 into slot j */
