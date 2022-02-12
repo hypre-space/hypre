@@ -17,7 +17,7 @@
    const HYPRE_Int bs = q - p;                                                             \
    if (bs)                                                                                 \
    {                                                                                       \
-      /* hypre_printf0("bin[%d]: %d rows\n", BIN, bs); */                                        \
+      hypre_printf0("bin[%d]: %d rows, p %d, q %d\n", BIN, bs, p, q);                      \
       hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, true>                 \
          ( bs, d_rind + p, k, n, GHASH, d_ia, d_ja, d_ib, d_jb, d_rc, CAN_FAIL, RF );      \
    }                                                                                       \
@@ -232,6 +232,7 @@ HYPRE_Int
 hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                    HYPRE_Int  k,
                                    HYPRE_Int  n,
+                                   HYPRE_Int  nnzA,
                                    HYPRE_Int *d_ia,
                                    HYPRE_Int *d_ja,
                                    HYPRE_Int *d_ib,
@@ -241,9 +242,16 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 {
    const char s = 32, t = 1, u = 5;
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
+#if 0
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_CSRSpGemmRownnzEstimate(m, k, n, d_ia, d_ja, d_ib, d_jb, d_rc, 1);
+#else
+   HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, hypre_max(m, k + 1), HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( adjacent_difference, d_ib, d_ib + k + 1, d_rind );
+   hypre_CSRMatrixIntSpMVDevice(m, nnzA, 1, d_ia, d_ja, NULL, d_rind + 1, 0, d_rc);
+#endif
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 
@@ -313,6 +321,7 @@ HYPRE_Int
 hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  k,
                              HYPRE_Int  n,
+                             HYPRE_Int  nnzA,
                              HYPRE_Int *d_ia,
                              HYPRE_Int *d_ja,
                              HYPRE_Int *d_ib,
@@ -337,7 +346,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    if (binned)
    {
       hypreDevice_CSRSpGemmRownnzBinned
-         (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
+         (m, k, n, nnzA, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
    }
    else
    {

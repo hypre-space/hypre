@@ -84,7 +84,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       if (alg == 1)
       {
          hypreDevice_CSRSpGemmRownnz
-            (m, k, n, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
+            (m, k, n, nnza, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
 
          hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
             (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);

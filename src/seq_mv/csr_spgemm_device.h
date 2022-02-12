@@ -29,8 +29,8 @@ static const char HYPRE_SPGEMM_HASH_TYPE = 'D';
 #define HYPRE_SPGEMM_SYMBL_UNROLL 1
 #endif
 
-//#define HYPRE_SPGEMM_TIMING
-//#define HYPRE_SPGEMM_PRINTF
+#define HYPRE_SPGEMM_TIMING
+#define HYPRE_SPGEMM_PRINTF
 //#define HYPRE_SPGEMM_NVTX
 
 /* ----------------------------------------------------------------------------------------------- *
@@ -372,7 +372,7 @@ HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_
                                                 HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc,
                                                 HYPRE_Int *d_rc, HYPRE_Int *rownnz_exact_ptr);
 
-HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int *d_ia,
+HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                       HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
 HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,

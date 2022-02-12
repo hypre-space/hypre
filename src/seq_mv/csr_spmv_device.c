@@ -24,14 +24,14 @@
    const HYPRE_Int col = read_only_load(&d_ja[p]);                   \
    if (F == 0)                                                       \
    {                                                                 \
-      const T val = d_a ? read_only_load(&d_a[p]) : 1.0;             \
+      const T val = d_a ? read_only_load(&d_a[p]) : T(1);            \
       sum += val * read_only_load(&d_x[col]);                        \
    }                                                                 \
    else if (F == -1)                                                 \
    {                                                                 \
       if (col <= grid_group_id)                                      \
       {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         const T val = d_a ? read_only_load(&d_a[p]) : T(1);         \
          sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
@@ -39,7 +39,7 @@
    {                                                                 \
       if (col >= grid_group_id)                                      \
       {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         const T val = d_a ? read_only_load(&d_a[p]) : T(1);         \
          sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
@@ -47,7 +47,7 @@
    {                                                                 \
       if (col < grid_group_id)                                       \
       {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         const T val = d_a ? read_only_load(&d_a[p]) : T(1);         \
          sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
@@ -55,7 +55,7 @@
    {                                                                 \
       if (col > grid_group_id)                                       \
       {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         const T val = d_a ? read_only_load(&d_a[p]) : T(1);         \
          sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
@@ -164,18 +164,18 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
  *   -2: strict lower
  *    2: strict upper
  */
-template <HYPRE_Int F>
+template <HYPRE_Int F, typename T>
 HYPRE_Int
-hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
-                             HYPRE_Int      nnz,
-                             HYPRE_Complex  alpha,
-                             HYPRE_Int     *d_ia,
-                             HYPRE_Int     *d_ja,
-                             HYPRE_Complex *d_a,
-                             HYPRE_Complex *d_x,
-                             HYPRE_Complex  beta,
-                             HYPRE_Complex *d_y,
-                             HYPRE_Int     *d_yind)
+hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
+                             HYPRE_Int  nnz,
+                             T          alpha,
+                             HYPRE_Int *d_ia,
+                             HYPRE_Int *d_ja,
+                             T         *d_a,
+                             T         *d_x,
+                             T          beta,
+                             T         *d_y,
+                             HYPRE_Int *d_yind)
 {
    const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
    const dim3 bDim(SPMV_BLOCKDIM);
@@ -185,7 +185,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 32;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else if (rownnz >= 32)
@@ -193,7 +193,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 16;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else if (rownnz >= 16)
@@ -201,7 +201,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 8;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else if (rownnz >= 8)
@@ -209,7 +209,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else
@@ -217,7 +217,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
 
@@ -291,4 +291,19 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  nrows,
+                              HYPRE_Int  nnz,
+                              HYPRE_Int  alpha,
+                              HYPRE_Int *d_ia,
+                              HYPRE_Int *d_ja,
+                              HYPRE_Int *d_a,
+                              HYPRE_Int *d_x,
+                              HYPRE_Int  beta,
+                              HYPRE_Int *d_y )
+{
+   hypreDevice_CSRMatrixMatvec<0, HYPRE_Int>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, NULL);
+
+   return hypre_error_flag;
+}
 #endif /*#if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
