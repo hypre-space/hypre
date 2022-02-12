@@ -249,8 +249,18 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 #else
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, hypre_max(m, k + 1), HYPRE_MEMORY_DEVICE);
 
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1 = hypre_MPI_Wtime();
+#endif
+
    HYPRE_THRUST_CALL( adjacent_difference, d_ib, d_ib + k + 1, d_rind );
    hypre_CSRMatrixIntSpMVDevice(m, nnzA, 1, d_ia, d_ja, NULL, d_rind + 1, 0, d_rc);
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf0("RownnzEst time %f\n", t2);
+#endif
 #endif
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);

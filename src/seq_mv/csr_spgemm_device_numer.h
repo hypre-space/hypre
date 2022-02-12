@@ -45,6 +45,23 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
       }
 
       /* try to insert key+1 into slot j */
+#if defined(HYPRE_SPGEMM_FAST_HASH)
+      if (HashKeys[j] == key)
+      {
+         atomicAdd((HYPRE_Complex*)(HashVals + j), val);
+         return j;
+      }
+      else if (HashKeys[j] == -1)
+      {
+         HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
+
+         if (old == -1 || old == key)
+         {
+            atomicAdd((HYPRE_Complex*)(HashVals + j), val);
+            return j;
+         }
+      }
+#else
       HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 
       if (old == -1 || old == key)
@@ -53,6 +70,7 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
          return j;
       }
+#endif
    }
 
    return -1;
