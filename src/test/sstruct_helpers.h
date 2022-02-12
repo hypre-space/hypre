@@ -11,6 +11,7 @@
 #include "HYPRE_utilities.h"
 #include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
+#include <math.h>
 
 typedef HYPRE_Int Index[3];
 typedef HYPRE_Int ProblemIndex[9];
