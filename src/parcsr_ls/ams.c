@@ -3374,7 +3374,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          {
             /* Add a discrete divergence term to A before computing  Pi^t A Pi */
             {
-               hypre_ParCSRMatrix *Gt, *GGt, *ApGGt;
+               hypre_ParCSRMatrix *Gt=NULL, *GGt=NULL, *ApGGt=NULL;
                hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
 
                /* scale GGt by h^2 */

@@ -53,7 +53,7 @@ hypre_SpGemmGhashSize1(
    HYPRE_Int  SHMEM_HASH_SIZE )
 {
 #ifdef HYPRE_USING_SYCL
-   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   const HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -89,7 +89,7 @@ hypre_SpGemmGhashSize2(
    HYPRE_Int  SHMEM_HASH_SIZE )
 {
 #ifdef HYPRE_USING_SYCL
-   const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   const HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -116,7 +116,7 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
 {
    hypre_assert(type == 2 || num_ghash <= num_rows);
 
-   HYPRE_Int *ghash_i, ghash_size;
+   HYPRE_Int *ghash_i = NULL, ghash_size;
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
 
    if (type == 1)
@@ -167,4 +167,3 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    return hypre_error_flag;
 }
 #endif
-

@@ -77,12 +77,6 @@ hypre_int get_thread_id(sycl::nd_item<3>& item)
 }
 
 static __forceinline__
-hypre_int get_warp_id(sycl::nd_item<3>& item)
-{
-   return item.get_local_id(0);
-}
-
-static __forceinline__
 hypre_int get_lane_id(sycl::nd_item<3>& item)
 {
    return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);

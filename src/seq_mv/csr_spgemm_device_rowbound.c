@@ -298,7 +298,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
    HYPRE_Int gridDim_x  = item.get_group_range(2);
    HYPRE_Int blockIdx_x = item.get_group(2);
    /* warp id inside the block */
-   volatile const HYPRE_Int warp_id = get_warp_id(item);
+   volatile const HYPRE_Int warp_id = item.get_local_id(0);
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id(item);
 #else
@@ -404,7 +404,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
 
       /* num of nonzeros of this row (an upper bound) */
 #ifdef HYPRE_USING_SYCL
-      j = warp_reduce_sum(j, item);
+      j = sycl::reduce_over_group(SG, j, std::plus<>());
 #else
       j = warp_reduce_sum(j);
 #endif
@@ -413,7 +413,7 @@ hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
       if (ATTEMPT == 1)
       {
 #ifdef HYPRE_USING_SYCL
-         failed = warp_reduce_sum(failed, item);
+         failed = sycl::reduce_over_group(SG, failed, std::plus<>());
 #else
          failed = warp_reduce_sum(failed);
 #endif
@@ -571,7 +571,7 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
+   hypre_SyncDevice(hypre_handle());
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
 #endif
 }

@@ -8,9 +8,13 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
-__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag(
+  #ifdef HYPRE_USING_SYCL
+                                                                   sycl::nd_item<1>& item,
+  #endif
+                                                                   HYPRE_Int nr_of_rows,
                                                                    HYPRE_Int *Fmap, HYPRE_Int *Cmap, HYPRE_Int *Z_diag_i, HYPRE_Int *Z_diag_j, HYPRE_Complex *Z_diag_a,
                                                                    HYPRE_Int *R_diag_i, HYPRE_Int *R_diag_j, HYPRE_Complex *R_diag_a);
 
@@ -31,25 +35,25 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                                            hypre_ParCSRMatrix  **R_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommHandle  *comm_handle;
+   hypre_ParCSRCommHandle  *comm_handle = NULL;
 
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
 
    /* Restriction matrix R and CSR's */
-   hypre_ParCSRMatrix *R;
-   hypre_CSRMatrix *R_diag;
+   hypre_ParCSRMatrix *R = NULL;
+   hypre_CSRMatrix *R_diag = NULL;
 
    /* arrays */
-   HYPRE_Complex      *R_diag_a;
-   HYPRE_Int          *R_diag_i;
-   HYPRE_Int          *R_diag_j;
-   HYPRE_BigInt       *col_map_offd_R;
+   HYPRE_Complex      *R_diag_a = NULL;
+   HYPRE_Int          *R_diag_i = NULL;
+   HYPRE_Int          *R_diag_j = NULL;
+   HYPRE_BigInt       *col_map_offd_R = NULL;
    HYPRE_Int           num_cols_offd_R;
    HYPRE_Int           my_id, num_procs;
    HYPRE_BigInt        total_global_cpts;
    HYPRE_Int           nnz_diag, nnz_offd;
-   HYPRE_BigInt       *send_buf_i;
+   HYPRE_BigInt       *send_buf_i = NULL;
    HYPRE_Int           i;
 
    /* local size */
@@ -68,10 +72,10 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /* get AFF and ACF */
-   hypre_ParCSRMatrix *AFF, *ACF, *Dinv, *N, *X, *X2, *Z, *Z2;
+   hypre_ParCSRMatrix *AFF=NULL, *ACF=NULL, *Dinv=NULL, *N=NULL, *X=NULL, *X2=NULL, *Z=NULL, *Z2=NULL;
    if (strong_thresholdR > 0)
    {
-      hypre_ParCSRMatrix *S;
+      hypre_ParCSRMatrix *S = NULL;
       hypre_BoomerAMGCreateSabs(A,
                                 strong_thresholdR,
                                 0.9,
@@ -93,6 +97,19 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* maps from F-pts and C-pts to all points */
    HYPRE_Int       *Fmap = hypre_TAlloc(HYPRE_Int, n_fpts, HYPRE_MEMORY_DEVICE);
    HYPRE_Int       *Cmap = hypre_TAlloc(HYPRE_Int, n_cpts, HYPRE_MEMORY_DEVICE);
+
+   #ifdef HYPRE_USING_SYCL
+   hypreSycl_copy_if( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(n_fine),
+                      CF_marker,
+                      Fmap,
+                      [](auto x)->bool { return (x < 0); } );
+   hypreSycl_copy_if( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(n_fine),
+                      CF_marker,
+                      Cmap,
+                      [](auto x)->bool { return (x > 0); } );
+   #else
    HYPRE_THRUST_CALL( copy_if,
                       thrust::make_counting_iterator(0),
                       thrust::make_counting_iterator(n_fine),
@@ -105,6 +122,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                       CF_marker,
                       Cmap,
                       is_positive<HYPRE_Int>());
+   #endif
 
    /* setup Dinv = 1/(diagonal of AFF) */
    Dinv = hypre_ParCSRMatrixCreate(comm,
@@ -119,6 +137,16 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixOwnsAssumedPartition(Dinv) = 0;
    hypre_ParCSRMatrixInitialize(Dinv);
    hypre_CSRMatrix *Dinv_diag = hypre_ParCSRMatrixDiag(Dinv);
+   #ifdef HYPRE_USING_SYCL
+   HYPRE_ONEDPL_CALL( std::copy,
+                      oneapi::dpl::counting_iterator(0),
+                      oneapi::dpl::counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag) + 1),
+                      hypre_CSRMatrixI(Dinv_diag) );
+   HYPRE_ONEDPL_CALL( std::copy,
+                      oneapi::dpl::counting_iterator(0),
+                      oneapi::dpl::counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag)),
+                      hypre_CSRMatrixJ(Dinv_diag) );
+   #else
    HYPRE_THRUST_CALL( copy,
                       thrust::make_counting_iterator(0),
                       thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag) + 1),
@@ -127,6 +155,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                       thrust::make_counting_iterator(0),
                       thrust::make_counting_iterator(hypre_CSRMatrixNumRows(Dinv_diag)),
                       hypre_CSRMatrixJ(Dinv_diag) );
+   #endif
    hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(AFF), hypre_CSRMatrixData(Dinv_diag),
                                         2);
 
@@ -137,6 +166,20 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
       hypre_CSRMatrixRemoveDiagonalDevice(hypre_ParCSRMatrixDiag(N));
 
+      #ifdef HYPRE_USING_SYCL
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)),
+                         hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(
+                                                                                                        N)),
+                         hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)),
+                         std::negate<HYPRE_Complex>() );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)),
+                         hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(
+                                                                                                        N)),
+                         hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)),
+                         std::negate<HYPRE_Complex>() );
+      #else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)),
                          hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(N)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(
@@ -149,6 +192,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                                                                                                         N)),
                          hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(N)),
                          thrust::negate<HYPRE_Complex>() );
+      #endif
    }
 
    /* Z = Acf * (I + N + N^2 + ... + N^k) * D^{-1} */
@@ -215,6 +259,18 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
       send_buf_i = hypre_TAlloc(HYPRE_BigInt, num_elems_send_Z, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg_Z);
+      #ifdef HYPRE_USING_SYCL
+      hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg_Z, num_sends_Z),
+                        Fmap,
+                        send_buf_i );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         send_buf_i,
+                         send_buf_i + num_elems_send_Z,
+                         send_buf_i,
+                         [col_start](const auto& x) { return x + col_start;} );
+      #else
       HYPRE_THRUST_CALL( gather,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z),
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg_Z) +
@@ -227,6 +283,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                          thrust::make_constant_iterator(col_start),
                          send_buf_i,
                          thrust::plus<HYPRE_BigInt>() );
+      #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i,
                                                     HYPRE_MEMORY_DEVICE, Fmap_offd_global);
@@ -244,12 +301,21 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
 
    /* setup R row indices (just Z row indices plus one extra entry for each C-pt)*/
+   #ifdef HYPRE_USING_SYCL
+   HYPRE_ONEDPL_CALL( std::transform,
+                      Z_diag_i,
+                      Z_diag_i + n_cpts + 1,
+                      oneapi::dpl::counting_iterator(0),
+                      R_diag_i,
+                      std::plus<HYPRE_Int>() );
+   #else
    HYPRE_THRUST_CALL( transform,
                       Z_diag_i,
                       Z_diag_i + n_cpts + 1,
                       thrust::make_counting_iterator(0),
                       R_diag_i,
                       thrust::plus<HYPRE_Int>() );
+   #endif
 
    /* assemble the diagonal part of R from Z */
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -280,12 +346,21 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    /* R_offd is simply a clone of -Z_offd */
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(R));
    hypre_ParCSRMatrixOffd(R) = hypre_CSRMatrixClone(Z_offd, 1);
+   #ifdef HYPRE_USING_SYCL
+   HYPRE_ONEDPL_CALL( std::transform,
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(
+                                                                                                     R)),
+                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
+                      std::negate<HYPRE_Complex>() );
+   #else
    HYPRE_THRUST_CALL( transform,
                       hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
                       hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)) + hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(
                                                                                                      R)),
                       hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(R)),
                       thrust::negate<HYPRE_Complex>() );
+   #endif
 
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
@@ -311,7 +386,11 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
 /*-----------------------------------------------------------------------*/
 __global__ void
-hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
+hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag(
+  #ifdef HYPRE_USING_SYCL
+                                                   sycl::nd_item<1>& item,
+  #endif
+                                                   HYPRE_Int      nr_of_rows,
                                                    HYPRE_Int     *Fmap,
                                                    HYPRE_Int     *Cmap,
                                                    HYPRE_Int     *Z_diag_i,
@@ -319,8 +398,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
                                                    HYPRE_Complex *Z_diag_a,
                                                    HYPRE_Int     *R_diag_i,
                                                    HYPRE_Int     *R_diag_j,
-                                                   HYPRE_Complex *R_diag_a)
-{
+                                                   HYPRE_Complex *R_diag_a){
    /*-----------------------------------------------------------------------*/
    /* Assemble diag part of R = [-Z I]
 
@@ -332,21 +410,38 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
+#ifdef HYPRE_USING_SYCL
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int warp_size = SG.get_local_range().get(0);
+   HYPRE_Int i = hypre_gpu_get_grid_warp_id(item);
+   HYPRE_Int lane = SG.get_local_linear_id();
+#else
+   HYPRE_Int warp_size  = HYPRE_WARP_SIZE;
    HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
-
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
    if (i >= nr_of_rows)
    {
       return;
    }
 
    HYPRE_Int p, q, pZ;
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
 
    /* diag part */
    if (lane < 2)
    {
       p = read_only_load(R_diag_i + i + lane);
    }
+
+   #ifdef HYPRE_USING_SYCL
+   q = SG.shuffle(p, 1);
+   p = SG.shuffle(p, 0);
+   if (lane < 1)
+   {
+      pZ = read_only_load(Z_diag_i + i + lane);
+   }
+   pZ = SG.shuffle(pZ, 0);
+   #else
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
    if (lane < 1)
@@ -354,8 +449,9 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
       pZ = read_only_load(Z_diag_i + i + lane);
    }
    pZ = __shfl_sync(HYPRE_WARP_FULL_MASK, pZ, 0);
+   #endif
 
-   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += warp_size)
    {
       if (j == q - 1)
       {
@@ -371,7 +467,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
    }
 }
 
-
+#if !defined(HYPRE_USING_SYCL)
 struct setTo1minus1 : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
    __host__ __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
@@ -379,18 +475,26 @@ struct setTo1minus1 : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
       return x > 0 ? 1 : -1;
    }
 };
+#endif
 
 HYPRE_Int
 hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker,
                                         HYPRE_Int size )
 {
+   #ifdef HYPRE_USING_SYCL
+   HYPRE_ONEDPL_CALL( std::transform,
+                      CF_marker,
+                      CF_marker + size,
+                      CF_marker,
+                      [](auto x)->HYPRE_Int { return (x > 0 ? 1 : -1); } );
+   #else
    HYPRE_THRUST_CALL( transform,
                       CF_marker,
                       CF_marker + size,
                       CF_marker,
                       setTo1minus1() );
-
+   #endif
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // defined(HYPRE_USING_GPU)

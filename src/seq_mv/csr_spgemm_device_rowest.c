@@ -84,7 +84,7 @@ void csr_spmm_rownnz_naive(
    HYPRE_Int gridDim_x  = item.get_group_range(2);
    HYPRE_Int blockIdx_x = item.get_group(2);
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id(item);
+   const HYPRE_Int warp_id = item.get_local_id(0);
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id(item);
 #else
@@ -117,7 +117,7 @@ void csr_spmm_rownnz_naive(
       if (type == 'U' || type == 'B')
       {
 #ifdef HYPRE_USING_SYCL
-         jU = warp_reduce_sum(jU, item);
+         jU = sycl::reduce_over_group(SG, jU, std::plus<>());
 #else
          jU = warp_reduce_sum(jU);
 #endif
@@ -127,7 +127,7 @@ void csr_spmm_rownnz_naive(
       if (type == 'L' || type == 'B')
       {
 #ifdef HYPRE_USING_SYCL
-         jL = warp_reduce_max(jL, item);
+         jL = sycl::reduce_over_group(SG, jL, sycl::maximum<>());
 #else
          jL = warp_reduce_max(jL);
 #endif
@@ -199,7 +199,7 @@ void cohen_rowest_kernel(
    HYPRE_Int blockIdx_x = item.get_group(2);
    HYPRE_Int gridDim_x  = item.get_group_range(2);
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id(item);
+   const HYPRE_Int warp_id = item.get_local_id(0);
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id(item);
 #else
@@ -323,7 +323,7 @@ void cohen_rowest_kernel(
 
             /* partial sum along r */
 #ifdef HYPRE_USING_SYCL
-            vmin = warp_reduce_sum(vmin, item);
+            vmin = sycl::reduce_over_group(SG, vmin, std::plus<>());
 #else
             vmin = warp_reduce_sum(vmin);
 #endif

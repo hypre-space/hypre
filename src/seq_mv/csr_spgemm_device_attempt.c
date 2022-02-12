@@ -19,8 +19,13 @@ template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_attempt( HYPRE_Int      HashSize,      /* capacity of the hash table */
+                                  #ifdef HYPRE_USING_SYCL
+                                  HYPRE_Int     *HashKeys,      /* shared, assumed to be initialized as all -1's */
+                                  HYPRE_Complex *HashVals,      /* shared, assumed to be initialized as all 0's */
+                                  #else
                                   volatile HYPRE_Int     *HashKeys,      /* shared, assumed to be initialized as all -1's */
                                   volatile HYPRE_Complex *HashVals,      /* shared, assumed to be initialized as all 0's */
+                                  #endif
                                   HYPRE_Int      key,           /* assumed to be nonnegative */
                                   HYPRE_Complex  val,
                                   HYPRE_Int     &count,         /* increase by 1 if is a new entry */
@@ -84,8 +89,13 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
                                   HYPRE_Int     *jb,
                                   HYPRE_Complex *ab,
                                   HYPRE_Int      s_HashSize,
+                                  #ifdef HYPRE_USING_SYCL
+                                  HYPRE_Int     *s_HashKeys,
+                                  HYPRE_Complex *s_HashVals,
+                                  #else
                                   volatile HYPRE_Int     *s_HashKeys,
                                   volatile HYPRE_Complex *s_HashVals,
+                                  #endif
                                   HYPRE_Int      g_HashSize,
                                   HYPRE_Int     *g_HashKeys,
                                   HYPRE_Complex *g_HashVals,
@@ -206,7 +216,7 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
             if (!warp_failed)
             {
 #ifdef HYPRE_USING_SYCL
-               warp_failed = warp_allreduce_sum(failed, item);
+               warp_failed = warp_allreduce_sum(failed, SG);
 #else
                warp_failed = warp_allreduce_sum(failed);
 #endif
@@ -251,7 +261,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * item.get_group_range(2);
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id(item);
+   const HYPRE_Int warp_id = item.get_local_id(0);
    /* warp id in the grid */
    const HYPRE_Int grid_warp_id = item.get_group(2) * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */
@@ -381,7 +391,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
 
       /* num of inserts in this row (an upper bound) */
 #ifdef HYPRE_USING_SYCL
-      j = warp_reduce_sum(j, item);
+      j = sycl::reduce_over_group(SG, j, std::plus<>());
 #else
       j = warp_reduce_sum(j);
 #endif
@@ -390,7 +400,7 @@ hypre_spgemm_attempt( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
       if (ATTEMPT == 1)
       {
 #ifdef HYPRE_USING_SYCL
-         failed = warp_allreduce_sum(failed, item);
+         failed = warp_allreduce_sum(failed, SG);
 #else
          failed = warp_allreduce_sum(failed);
 #endif
@@ -517,7 +527,7 @@ hypre_spgemm_copy_from_hash_into_C(
 
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * item.get_group_range(2);
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id(item);
+   const HYPRE_Int warp_id = item.get_local_id(0);
    /* warp id in the grid */
    volatile const HYPRE_Int grid_warp_id = item.get_group(2) * NUM_WARPS_PER_BLOCK + warp_id;
    /* lane id inside the warp */

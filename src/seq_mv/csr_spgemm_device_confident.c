@@ -296,7 +296,7 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
    HYPRE_Int gridDim_x  = item.get_group_range(2);
    HYPRE_Int blockIdx_x = item.get_group(2);
    /* warp id inside the block */
-   volatile const HYPRE_Int warp_id = get_warp_id(item);
+   volatile const HYPRE_Int warp_id = item.get_local_id(0);
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id(item);
    /* shared memory hash table */
@@ -399,7 +399,7 @@ hypre_spgemm_numeric( HYPRE_Int      M, /* HYPRE_Int K, HYPRE_Int N, */
          /* in the case when symb mult was failed, save row nnz into rc */
          /* num of nonzeros of this row of C (exact) */
 #ifdef HYPRE_USING_SYCL
-         jsum = warp_reduce_sum(jsum, item);
+         jsum = sycl::reduce_over_group(SG, jsum, std::plus<>());
 #else
          jsum = warp_reduce_sum(jsum);
 #endif
@@ -479,7 +479,7 @@ hypre_spgemm_copy_from_Cext_into_C(
    HYPRE_Int blockIdx_x = item.get_group(2);
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * item.get_group_range(2);
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id(item);
+   const HYPRE_Int warp_id = item.get_local_id(0);
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id(item);
 #else

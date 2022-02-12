@@ -101,47 +101,39 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   if (hypre_handle_)
-   {
-      HYPRE_Int nDevices = 0;
-      hypre_GetDeviceCount(&nDevices);
-      if (device_id > nDevices)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "ERROR: SYCL device-ID exceed the number of devices on-node\n");
-      }
+   syclSetDevice(device_id);
+#endif
 
-      sycl::platform platform(sycl::gpu_selector{});
-      auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-      HYPRE_Int local_nDevices = 0;
-      for (int i = 0; i < gpu_devices.size(); i++)
-      {
-         // multi-tile GPUs
-         /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) { */
-         /*   auto subDevicesDomainNuma = gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain>(sycl::info::partition_affinity_domain::numa); */
-         /*   for (auto &tile : subDevicesDomainNuma) { */
-         /*     if (local_nDevices == device_id) { */
-         /*       hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
-         /*     } */
-         /*     local_nDevices++; */
-         /*   } */
-         /* } */
-         /* // single-tile GPUs */
-         /* else */
-         /* { */
-         if (local_nDevices == device_id)
-         {
-            hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
-         }
-         local_nDevices++;
-         /* } */
-      }
+#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+   // (a) Delete older SYCL devices (and its associated queues)
+   // (b) Create a new SYCL device, but dont create SYCL queues at the moment
+
+   if (hypre_handle_ != nullptr) {
+     hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle_);
+
+     /* Cleanup existing device and queues (first queues associated with device, then device) */
+     for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
+     {
+       if (data->streams[i])
+       {
+         delete data->streams[i];
+         data->streams[i] = nullptr;
+       }
+     }
+     if (data->device)
+     {
+       delete data->device;
+     }
+
+     /* Setup new device and compute stream */
+     data->device = sycl_get_device(device_id);
+     data->device_max_work_group_size = data->device->get_info<sycl::info::device::max_work_group_size>();
    }
-#endif
-
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_SYCL)
+#else
    hypre_HandleDevice(hypre_handle_) = device_id;
-#endif
+#endif // HYPRE_USING_SYCL
+#endif // HYPRE_USING_GPU
 
    return hypre_error_flag;
 }
@@ -165,12 +157,7 @@ hypre_GetDevice(hypre_int *device_id)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
-    * Assume the rank/device binding below */
-   HYPRE_Int n_devices, my_id;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
-   hypre_GetDeviceCount(&n_devices);
-   (*device_id) = my_id % n_devices;
+   syclGetDevice(device_id);
 #endif
 
    return hypre_error_flag;
@@ -192,25 +179,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   (*device_count) = 0;
-   sycl::platform platform(sycl::gpu_selector{});
-   auto const& gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-   HYPRE_Int i;
-   for (i = 0; i < gpu_devices.size(); i++)
-   {
-      /* /\* WM: commenting out multi-tile GPU stuff for now as it is not yet working *\/ */
-      /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-      /* { */
-      /*    auto subDevicesDomainNuma = */
-      /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
-      /*       (sycl::info::partition_affinity_domain::numa); */
-      /*    (*device_count) += subDevicesDomainNuma.size(); */
-      /* } */
-      /* /\* else *\/ */
-      /* { */
-      (*device_count)++;
-      /* } */
-   }
+   syclGetDeviceCount(device_count);
 #endif
 
    return hypre_error_flag;

@@ -27,7 +27,7 @@ hypreGPUKernel_GetRowNnz(
    HYPRE_Int *d_rownnz)
 {
 #if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   const HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -136,7 +136,7 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0, std::plus<>());
+   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -390,7 +390,7 @@ hypreGPUKernel_ScatterConstant(
    T *x, HYPRE_Int n, HYPRE_Int *map, T v)
 {
 #ifdef HYPRE_USING_SYCL
-   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -446,17 +446,18 @@ hypreGPUKernel_CopyParCSRRows(
    HYPRE_BigInt  *d_jb,
    HYPRE_Complex *d_ab)
 {
+   HYPRE_Int warp_size=0, global_warp_id=0, lane_id=0;
 #ifdef HYPRE_USING_SYCL
    sycl::sub_group SG = item.get_sub_group();
-   HYPRE_Int warp_size = SG.get_local_range().get(0);
-   const HYPRE_Int global_warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
+   warp_size = SG.get_local_range().get(0);
+   global_warp_id = hypre_gpu_get_grid_warp_id(item);
    /* lane id inside the warp */
-   const HYPRE_Int lane_id = hypre_gpu_get_lane_id(SG);
+   lane_id = SG.get_local_linear_id();
 #else
-   HYPRE_Int warp_size  = HYPRE_WARP_SIZE;
-   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
+   warp_size  = HYPRE_WARP_SIZE;
+   global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
    /* lane id inside the warp */
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
+   lane_id = hypre_cuda_get_lane_id<1>();
 #endif
    if (global_warp_id >= nrows)
    {
@@ -599,7 +600,7 @@ hypreGPUKernel_ScatterAdd(
    HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
 #ifdef HYPRE_USING_SYCL
-   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
 #else
    HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
 #endif
@@ -677,8 +678,8 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       /*                                                                 reduced_y ); */
 
       std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
-                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                               hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
+        oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
+                                                                     hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 
@@ -716,22 +717,23 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 #if defined(HYPRE_USING_SYCL)
 dim3 hypre_GetDefaultDeviceBlockDimension()
 {
-   sycl::range<1> wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   //dim3 wgDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   dim3 wgDim(32);
    return wgDim;
 }
 
 dim3 hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
                                          const char *granularity,
-                                         sycl::range<1> wgDim)
+                                         dim3 wgDim)
 {
    HYPRE_Int num_WGs = 0;
    HYPRE_Int num_workitems_per_WG = wgDim[0];
 
-   if (granularity[0] == 't')
+   if (std::string(granularity) == "thread")
    {
       num_WGs = (n + num_workitems_per_WG - 1) / num_workitems_per_WG;
    }
-   else if (granularity[0] == 'w')
+   else if (std::string(granularity) == "warp")
    {
       HYPRE_Int num_subgroups_per_block = num_workitems_per_WG >> HYPRE_WARP_BITSHIFT;
       hypre_assert(num_subgroups_per_block * HYPRE_WARP_SIZE == num_workitems_per_WG);
@@ -743,7 +745,7 @@ dim3 hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
       hypre_assert(0);
    }
 
-   sycl::range<1> gDim(num_WGs);
+   dim3 gDim(num_WGs);
 
    return gDim;
 }
@@ -1253,7 +1255,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 #endif
 
    data->streams[i] = stream;
-#endif
+#endif // HYPRE_USING_CUDA_STREAMS
 
    return stream;
 }
@@ -1751,34 +1753,6 @@ hypre_SyncComputeStream(hypre_Handle *hypre_handle)
 
 #endif // #if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_SYCL)
-HYPRE_Int
-HYPRE_SetSYCLDevice(sycl::device user_device)
-{
-   hypre_DeviceData *data = hypre_HandleDeviceData(hypre_handle());
-
-   /* Cleanup default device and queues */
-   if (data->device)
-   {
-      delete data->device;
-   }
-   for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
-   {
-      if (data->streams[i])
-      {
-         delete data->streams[i];
-         data->streams[i] = nullptr;
-      }
-   }
-
-   /* Setup new device and compute stream */
-   data->device = new sycl::device(user_device);
-   hypre_HandleComputeStream(hypre_handle());
-
-   return hypre_error_flag;
-}
-#endif
-
 /* This function is supposed to be used in the test drivers to mimic
  * users' GPU binding approaches
  * It is supposed to be called before HYPRE_Init,
@@ -1797,9 +1771,9 @@ hypre_bind_device( HYPRE_Int myid,
    /* num of procs (size) on the node */
    HYPRE_Int NodeSize;
    /* num of devices seen */
-   hypre_int nDevices;
+   hypre_int nDevices = 0;
    /* device id that want to bind */
-   hypre_int device_id;
+   hypre_int device_id = -1;
 
    hypre_MPI_Comm node_comm;
    hypre_MPI_Comm_split_type( comm, hypre_MPI_COMM_TYPE_SHARED,
@@ -1810,8 +1784,6 @@ hypre_bind_device( HYPRE_Int myid,
 
    /* get number of devices on this node */
    hypre_GetDeviceCount(&nDevices);
-   /* TODO: ABB might need to look into this since nDevices are overwritten by 1 */
-   nDevices = 1;
 
    /* set device */
    device_id = myNodeid % nDevices;

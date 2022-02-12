@@ -15,7 +15,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 /**
   Generates global coarse_size and dof_func for next coarser level
@@ -69,23 +69,37 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
 
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
-
+   #ifdef HYPRE_USING_SYCL
+   local_coarse_size = HYPRE_ONEDPL_CALL( std::count_if,
+                                          hypre_IntArrayData(CF_marker),
+                                          hypre_IntArrayData(CF_marker) + local_num_variables,
+                                          [](auto x)->bool { return (x == 1); } );
+   #else
    local_coarse_size = HYPRE_THRUST_CALL( count_if,
                                           hypre_IntArrayData(CF_marker),
                                           hypre_IntArrayData(CF_marker) + local_num_variables,
                                           equal<HYPRE_Int>(1) );
+   #endif
 
    if (num_functions > 1)
    {
       *coarse_dof_func_ptr = hypre_IntArrayCreate(local_coarse_size);
       hypre_IntArrayInitialize_v2(*coarse_dof_func_ptr, HYPRE_MEMORY_DEVICE);
 
+      #ifdef HYPRE_USING_SYCL
+      hypreSycl_copy_if( hypre_IntArrayData(dof_func),
+                         hypre_IntArrayData(dof_func) + local_num_variables,
+                         hypre_IntArrayData(CF_marker),
+                         hypre_IntArrayData(*coarse_dof_func_ptr),
+                         [](auto x)->bool { return (x == 1); } );
+      #else
       HYPRE_THRUST_CALL( copy_if,
                          hypre_IntArrayData(dof_func),
                          hypre_IntArrayData(dof_func) + local_num_variables,
                          hypre_IntArrayData(CF_marker),
                          hypre_IntArrayData(*coarse_dof_func_ptr),
                          equal<HYPRE_Int>(1) );
+      #endif
    }
 
    {
@@ -112,20 +126,31 @@ hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func,
                                   HYPRE_Int  offset,
                                   HYPRE_Int  num_functions )
 {
+#ifdef HYPRE_USING_SYCL
+   hypreSycl_iota( dof_func,
+                   dof_func + local_size,
+                   offset );
+
+   HYPRE_ONEDPL_CALL( std::transform,
+                      dof_func,
+                      dof_func + local_size,
+                      dof_func,
+                      [num_functions](auto x)->HYPRE_Int { return (x % num_functions); } );
+#else
    HYPRE_THRUST_CALL( sequence,
                       dof_func,
                       dof_func + local_size,
                       offset,
-                      1 );
+                      1 ); // ABB: might not need the step=1, since the default is 1
 
    HYPRE_THRUST_CALL( transform,
                       dof_func,
                       dof_func + local_size,
                       dof_func,
                       modulo<HYPRE_Int>(num_functions) );
-
+#endif
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_GPU)
 

@@ -124,7 +124,7 @@ HYPRE_Int
 hypre_IJVectorSetMaxOffProcElmtsPar(hypre_IJVector *vector,
                                     HYPRE_Int       max_off_proc_elmts)
 {
-   hypre_AuxParVector *aux_vector;
+   hypre_AuxParVector *aux_vector = NULL;
 
    aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    if (!aux_vector)
@@ -134,7 +134,7 @@ hypre_IJVectorSetMaxOffProcElmtsPar(hypre_IJVector *vector,
    }
    hypre_AuxParVectorMaxOffProcElmts(aux_vector) = max_off_proc_elmts;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_AuxParVectorUsrOffProcElmts(aux_vector) = max_off_proc_elmts;
 #endif
 
@@ -156,7 +156,7 @@ hypre_IJVectorDistributePar(hypre_IJVector  *vector,
                             const HYPRE_Int *vec_starts)
 {
    hypre_ParVector *old_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   hypre_ParVector *par_vector;
+   hypre_ParVector *par_vector = NULL;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    if (!old_vector)
@@ -208,8 +208,8 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_BigInt *partitioning;
-   hypre_Vector *local_vector;
+   HYPRE_BigInt *partitioning = NULL;
+   hypre_Vector *local_vector = NULL;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -281,13 +281,13 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
    HYPRE_Int my_id;
    HYPRE_Int j, k;
    HYPRE_BigInt i, vec_start, vec_stop;
-   HYPRE_Complex *data;
+   HYPRE_Complex *data = NULL;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector;
+   hypre_Vector *local_vector = NULL;
 
    /* If no components are to be set, perform no checking and return */
    if (num_values < 1) { return 0; }
@@ -394,14 +394,14 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
 {
    HYPRE_Int my_id;
    HYPRE_Int i, j, vec_start, vec_stop;
-   HYPRE_Complex *data;
+   HYPRE_Complex *data = NULL;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector;
+   hypre_Vector *local_vector = NULL;
 
    /* If no components are to be retrieved, perform no checking and return */
    if (num_values < 1) { return 0; }
@@ -557,8 +557,8 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
    {
       HYPRE_Int off_proc_elmts, current_num_elmts;
       HYPRE_Int max_off_proc_elmts;
-      HYPRE_BigInt *off_proc_i;
-      HYPRE_Complex *off_proc_data;
+      HYPRE_BigInt *off_proc_i = NULL;
+      HYPRE_Complex *off_proc_data = NULL;
       current_num_elmts = hypre_AuxParVectorCurrentOffProcElmts(aux_vector);
       hypre_MPI_Allreduce(&current_num_elmts, &off_proc_elmts, 1, HYPRE_MPI_INT,
                           hypre_MPI_SUM, comm);
@@ -704,12 +704,12 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    HYPRE_Int  first_index;
 
    void *void_contact_buf = NULL;
-   void *index_ptr;
-   void *recv_data_ptr;
+   void *index_ptr = NULL;
+   void *recv_data_ptr = NULL;
 
    HYPRE_Complex tmp_complex;
    HYPRE_BigInt *ex_contact_buf = NULL;
-   HYPRE_Complex *vector_data;
+   HYPRE_Complex *vector_data = NULL;
    HYPRE_Complex value;
 
    hypre_DataExchangeResponse      response_obj1, response_obj2;
@@ -718,7 +718,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
 
-   hypre_IJAssumedPart   *apart;
+   hypre_IJAssumedPart   *apart = NULL;
 
    hypre_MPI_Comm_rank(comm, &myid);
 
@@ -1119,7 +1119,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
       hypre_TMemcpy(off_proc_data_recv_d, off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_cur,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       hypre_IJVectorSetAddValuesParDevice(vector, off_proc_nelm_recv_cur, off_proc_i_recv_d,
                                           off_proc_data_recv_d, "add");
 #endif
