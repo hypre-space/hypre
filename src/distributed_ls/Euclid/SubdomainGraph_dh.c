@@ -165,7 +165,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 {
   START_FUNC_DH
     HYPRE_Int i, j, k; 
-    HYPRE_Real max = 0, min = INT_MAX;
+    HYPRE_Real max = 0, min = HYPRE_REAL_MAX;
 
     hypre_fprintf(fp, "\n------------- SubdomainGraph_dhPrintStatsLong -----------\n");
     hypre_fprintf(fp, "colors used     = %i\n", s->colors);
