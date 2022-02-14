@@ -68,7 +68,7 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 #CUDA with UM and single precision
-co="--with-cuda --enable-unified-memory --enable-single --enable-debug"
+co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
 ./renametest.sh basic $output_dir/basic-cuda-um-single
