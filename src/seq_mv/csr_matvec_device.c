@@ -309,6 +309,8 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
       B = A;
    }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv(handle,
                                           rocsparse_operation_none,
                                           hypre_CSRMatrixNumRows(B) - offset,
@@ -323,6 +325,23 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                           hypre_VectorData(x),
                                           &beta,
                                           hypre_VectorData(y) + offset) );
+#elif defined(HYPRE_SINGLE)
+   HYPRE_ROCSPARSE_CALL( rocsparse_scsrmv(handle,
+                                          rocsparse_operation_none,
+                                          hypre_CSRMatrixNumRows(B) - offset,
+                                          hypre_CSRMatrixNumCols(B),
+                                          hypre_CSRMatrixNumNonzeros(B),
+                                          &alpha,
+                                          descr,
+                                          hypre_CSRMatrixData(B),
+                                          hypre_CSRMatrixI(B) + offset,
+                                          hypre_CSRMatrixJ(B),
+                                          info,
+                                          hypre_VectorData(x),
+                                          &beta,
+                                          hypre_VectorData(y) + offset) );
+#endif
+#endif
 
    if (trans)
    {
