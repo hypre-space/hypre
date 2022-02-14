@@ -64,13 +64,24 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
    hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 #else
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
                                          m, n, nnzA,
                                          d_aa, d_ia, d_ja,
                                          csc_a, csc_j, csc_i,
                                          action,
                                          CUSPARSE_INDEX_BASE_ZERO) );
+#elif defined(HYPRE_SINGLE)
+   HYPRE_CUSPARSE_CALL( cusparseScsr2csc(handle,
+                                         m, n, nnzA,
+                                         d_aa, d_ia, d_ja,
+                                         csc_a, csc_j, csc_i,
+                                         action,
+                                         CUSPARSE_INDEX_BASE_ZERO) );
 #endif
+#endif /* #if !defined(HYPRE_COMPLEX) */
+#endif /* #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION */
 
    *d_ic_out = csc_i;
    *d_jc_out = csc_j;

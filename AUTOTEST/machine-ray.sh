@@ -18,7 +18,7 @@ case $1 in
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
 
-   This script runs a number of tests suitable for the syrah cluster.
+   This script runs a number of tests suitable for the ray cluster.
 
    Example usage: $0 ../src
 
@@ -67,6 +67,12 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
+#CUDA with UM and single precision
+co="--with-cuda --enable-unified-memory --enable-single --enable-debug"
+ro="-single -rt -mpibind -save ${save}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
+./renametest.sh basic $output_dir/basic-cuda-um-single
+
 # CUDA with UM without MPI [no run]
 #co="--with-cuda --enable-unified-memory --without-MPI --with-gpu-arch=\\'60 70\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -89,13 +95,14 @@ ro="-bench -struct -rt -mpibind -save ${save}"
 
 # OMP 4.5 without UM in debug mode [struct]
 co="--with-device-openmp --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-ro="-struct -rt -mpibind -save ${host}"
+ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
 
-#################################
-# CUDA + CMake build (only) tests
-#################################
+#####################################
+## CUDA + CMake build (only) tests ##
+#####################################
+
 mo="-j"
 # CUDA with UM + CMake
 co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_DEVICE_POOL=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_CUDA_SM=70"
@@ -112,9 +119,10 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
 
-############################
-# CUDA 11 build (only) tests
-############################
+################################
+## CUDA 11 build (only) tests ##
+################################
+
 co="--with-cuda --enable-unified-memory --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 module -q load cuda/11
 module list cuda/11 |& grep "None found"
