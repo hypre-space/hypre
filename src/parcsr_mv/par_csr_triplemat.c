@@ -853,6 +853,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixTranspose(R_diag, &RT_diag, 1);
       C_diag = hypre_CSRMatrixMultiplyHost(RT_diag, Q_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_R, 0, 0);
+      hypre_CSRMatrixNumRownnz(C_offd) = 0;
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
       if (keep_transpose)
       {
@@ -880,6 +881,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    {
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_R, 0, 0);
       hypre_CSRMatrixInitialize(C_offd);
+      hypre_CSRMatrixNumRownnz(C_offd) = 0;
       hypre_ParCSRMatrixOffd(C) = C_offd;
    }
 

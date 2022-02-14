@@ -1596,6 +1596,8 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
  *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *
+ * TODO: Add OpenMP support
  *--------------------------------------------------------------------------*/
 hypre_CSRMatrix *
 hypre_CSRMatrixAddPartial( hypre_CSRMatrix *A,
@@ -2079,4 +2081,3 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    return hypre_error_flag;
 }
-
