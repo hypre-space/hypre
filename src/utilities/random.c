@@ -98,6 +98,6 @@ HYPRE_Int hypre_RandI()
  *--------------------------------------------------------------------------*/
 HYPRE_Real hypre_Rand()
 {
-   return ((hypre_double)(hypre_RandI()) / m);
+   return ((HYPRE_Real)(hypre_RandI()) / m);
 }
 
