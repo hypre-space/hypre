@@ -1320,6 +1320,46 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
    return A;
 }
 
+/* A = diag(v) */
+hypre_CSRMatrix *
+hypre_CSRMatrixDiagMatrixFromVectorDevice(HYPRE_Int n, HYPRE_Complex *v)
+{
+   hypre_CSRMatrix *A = hypre_CSRMatrixCreate(n, n, n);
+
+   hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_THRUST_CALL( sequence,
+                      hypre_CSRMatrixI(A),
+                      hypre_CSRMatrixI(A) + n + 1,
+                      0  );
+
+   HYPRE_THRUST_CALL( sequence,
+                      hypre_CSRMatrixJ(A),
+                      hypre_CSRMatrixJ(A) + n,
+                      0  );
+
+   HYPRE_THRUST_CALL( copy,
+                      v,
+                      v + n,
+                      hypre_CSRMatrixData(A) );
+
+   return A;
+}
+
+/* B = diagm(A) */
+hypre_CSRMatrix *
+hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex  *diag = hypre_CTAlloc(HYPRE_Complex, nrows, HYPRE_MEMORY_DEVICE);
+   hypre_CSRMatrixExtractDiagonalDevice(A, diag, type);
+
+   hypre_CSRMatrix *diag_mat = hypre_CSRMatrixDiagMatrixFromVectorDevice(nrows, diag);
+
+   hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
+   return diag_mat;
+}
+
 /* this predicate compares first and second element in a tuple in absolute value */
 /* first is assumed to be complex, second to be real > 0 */
 struct cabsfirst_greaterthan_second_pred : public
@@ -1530,6 +1570,84 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_CSRDiagScale( HYPRE_Int      nrows,
+                              HYPRE_Int     *ia,
+                              HYPRE_Int     *ja,
+                              HYPRE_Complex *aa,
+                              HYPRE_Complex *ld,
+                              HYPRE_Complex *rd)
+{
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p = 0, q = 0;
+
+   if (lane < 2)
+   {
+      p = read_only_load(ia + row + lane);
+   }
+   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
+   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Complex sl = 1.0;
+
+   if (ld)
+   {
+      if (!lane)
+      {
+         sl = read_only_load(ld + row);
+      }
+      sl = __shfl_sync(HYPRE_WARP_FULL_MASK, sl, 0);
+   }
+
+   if (rd)
+   {
+      for (HYPRE_Int i = p + lane; i < q; i += HYPRE_WARP_SIZE)
+      {
+         const HYPRE_Int col = read_only_load(ja + i);
+         const HYPRE_Complex sr = read_only_load(rd + col);
+         aa[i] = sl * aa[i] * sr;
+      }
+   }
+   else if (sl != 1.0)
+   {
+      for (HYPRE_Int i = p + lane; i < q; i += HYPRE_WARP_SIZE)
+      {
+         aa[i] = sl * aa[i];
+      }
+   }
+}
+
+HYPRE_Int
+hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
+                                hypre_Vector    *ld,
+                                hypre_Vector    *rd)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
+   HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
+   dim3           bDim, gDim;
+
+   bDim = hypre_GetDefaultDeviceBlockDimension();
+   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+
+   HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRDiagScale, gDim, bDim,
+                     nrows, A_i, A_j, A_data, ldata, rdata);
+
+   hypre_SyncComputeStream(hypre_handle());
+
+   return hypre_error_flag;
+}
+
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
@@ -1566,7 +1684,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 #elif defined(HYPRE_USING_ROCSPARSE)
       hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
                                       data);
-#else
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
    }

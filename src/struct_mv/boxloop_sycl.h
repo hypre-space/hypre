@@ -18,6 +18,8 @@
 #ifndef HYPRE_BOXLOOP_SYCL_HEADER
 #define HYPRE_BOXLOOP_SYCL_HEADER
 
+#if defined(HYPRE_USING_SYCL) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
+
 typedef struct hypre_Boxloop_struct
 {
    HYPRE_Int lsize0, lsize1, lsize2;
@@ -427,3 +429,6 @@ else                                                            \
         hypre_newBoxLoop2ReductionEnd(i1, i2, reducesum)
 
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_SYCL_HEADER */
+
