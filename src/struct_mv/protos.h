@@ -61,6 +61,8 @@ HYPRE_Int hypre_AddIndexes ( hypre_Index index1, hypre_Index index2, HYPRE_Int n
 HYPRE_Int hypre_SubtractIndexes ( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim,
                                   hypre_Index result );
 HYPRE_Int hypre_IndexesEqual ( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+HYPRE_Int hypre_IndexPrint ( FILE *file, HYPRE_Int ndim, hypre_Index index );
+HYPRE_Int hypre_IndexRead ( FILE *file, HYPRE_Int ndim, hypre_Index index );
 hypre_Box *hypre_BoxCreate ( HYPRE_Int ndim );
 HYPRE_Int hypre_BoxDestroy ( hypre_Box *box );
 HYPRE_Int hypre_BoxInit( hypre_Box *box, HYPRE_Int  ndim );
@@ -81,6 +83,8 @@ HYPRE_Int hypre_BoxShiftNeg( hypre_Box *box, hypre_Index shift );
 HYPRE_Int hypre_BoxGrowByIndex( hypre_Box *box, hypre_Index  index );
 HYPRE_Int hypre_BoxGrowByValue( hypre_Box *box, HYPRE_Int val );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box, HYPRE_Int *array );
+HYPRE_Int hypre_BoxPrint ( FILE *file , hypre_Box *box );
+HYPRE_Int hypre_BoxRead ( FILE *file , HYPRE_Int ndim, hypre_Box **box_ptr );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArraySetSize ( hypre_BoxArray *box_array, HYPRE_Int size );
