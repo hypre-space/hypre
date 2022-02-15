@@ -197,7 +197,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
                       n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                       CF_marker, CF_marker_offd, num_functions,
                       dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
@@ -228,7 +228,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    if (interp_type == 3)
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef, gDim, bDim,
                          n_fine, A_diag_i, A_diag_j, A_diag_data,
                          A_offd_i, A_offd_j, A_offd_data,
                          hypre_ParCSRMatrixSocDiagJ(S),
@@ -241,7 +241,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    }
    else
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef_v2, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef_v2, gDim, bDim,
                          n_fine, A_diag_i, A_diag_j, A_diag_data,
                          A_offd_i, A_offd_j, A_offd_data,
                          hypre_ParCSRMatrixSocDiagJ(S),
@@ -1161,7 +1161,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
                       n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,
                       A_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
                       offd_compress_marker, P_diag_i, P_diag_j_temp, P_offd_i, P_offd_j_temp);

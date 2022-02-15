@@ -103,14 +103,14 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    {
       ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_ghash, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
                          num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
    else if (type == 2)
    {
       ghash_i = hypre_CTAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize2, gDim, bDim,
                          num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );
    }
 

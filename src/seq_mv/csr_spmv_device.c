@@ -170,7 +170,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 32;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else if (rownnz >= 32)
@@ -178,7 +178,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 16;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else if (rownnz >= 16)
@@ -186,7 +186,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 8;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else if (rownnz >= 8)
@@ -194,7 +194,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
    else
@@ -202,7 +202,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
                          nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
 

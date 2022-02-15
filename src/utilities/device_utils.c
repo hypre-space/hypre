@@ -68,7 +68,7 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
    sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
    sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPY, gDim, bDim, n, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreSYCLKernel_IVAXPY, gDim, bDim, n, a, x, y );
 
    return hypre_error_flag;
 }
@@ -103,7 +103,7 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
    sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
    sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
+   HYPRE_GPU_LAUNCH( hypreSYCLKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
 
    return hypre_error_flag;
 }
@@ -156,7 +156,7 @@ hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
 
    HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
 
-   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
+   HYPRE_GPU_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
 
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
@@ -234,7 +234,7 @@ void hypre_CudaCompileFlagCheck()
    HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
    hypre_TMemcpy(cuda_arch_compile_d, &cuda_arch_compile, hypre_int, 1, HYPRE_MEMORY_DEVICE,
                  HYPRE_MEMORY_HOST);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
    hypre_TMemcpy(&cuda_arch_compile, cuda_arch_compile_d, hypre_int, 1, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
    //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
@@ -345,7 +345,7 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
       return hypre_error_flag;
    }
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia,
                       d_offd_ia, d_rownnz );
 
    return hypre_error_flag;
@@ -485,7 +485,7 @@ hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
    }
    */
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
                       nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
                       d_diag_i, d_diag_j, d_diag_a,
                       d_offd_i, d_offd_j, d_offd_a,
@@ -696,7 +696,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       /* trivial cases, n = 1, 2 */
       dim3 bDim = 1;
       dim3 gDim = 1;
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else
    {
@@ -735,7 +735,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
 
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
                          reduced_n, x, reduced_map, reduced_y );
 
       if (!work)
@@ -778,7 +778,7 @@ hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterConstant, gDim, bDim, x, n, map, v );
 
    return hypre_error_flag;
 }
@@ -812,7 +812,7 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IVAXPY, gDim, bDim, n, a, x, y );
 
    return hypre_error_flag;
 }
@@ -846,7 +846,7 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
 
    return hypre_error_flag;
 }
@@ -885,7 +885,7 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_DiagScaleVector, gDim, bDim, n, A_i, A_data, x, beta, y );
 
    return hypre_error_flag;
 }
@@ -920,7 +920,7 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_DiagScaleVector2, gDim, bDim, n, A_i, A_data, x, beta, y, z );
 
    return hypre_error_flag;
 }
@@ -944,7 +944,7 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
 
    return hypre_error_flag;
 }

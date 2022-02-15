@@ -313,19 +313,19 @@ hypre_spgemm_rownnz_attempt(HYPRE_Int  m,
     * ---------------------------------------------------------------------------*/
    if (hash_type == 'L')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>),
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'L'>),
                          gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'Q')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>),
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'Q'>),
                          gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }
    else if (hash_type == 'D')
    {
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>),
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_symbolic<num_warps_per_block, shmem_hash_size, ATTEMPT, 'D'>),
                          gDim, bDim,
                          m, rf_ind, /*k, n,*/ d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
    }

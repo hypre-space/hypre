@@ -130,8 +130,6 @@ struct hypre_device_allocator
 #include <oneapi/mkl/rng.hpp>
 #endif
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-
 #endif // defined(HYPRE_USING_CUDA)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -179,7 +177,7 @@ struct hypre_device_allocator
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
            *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
-#define HYPRE_SYCL_LAUNCH(kernel_name, gridsize, blocksize, ...)                             \
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
 {                                                                                            \
    if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
    {                                                                                         \
@@ -496,7 +494,7 @@ using namespace thrust::placeholders;
 #define GPU_LAUNCH_SYNC
 #endif // defined(HYPRE_DEBUG)
 
-#define HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                 \
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                  \
 {                                                                                                                             \
    if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
         blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
@@ -512,7 +510,7 @@ using namespace thrust::placeholders;
    }                                                                                                                          \
 }
 
-#define HYPRE_CUDA_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_CUDA_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
 
 /* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
  * The following one works OK for now */
@@ -1375,7 +1373,7 @@ struct ReduceSum
          /* 2nd reduction with only *one* block */
          hypre_assert(nblocks >= 0 && nblocks <= 1024);
          const dim3 gDim(1), bDim(1024);
-         HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+         HYPRE_GPU_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
          hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
          val += init;
       }
