@@ -1919,8 +1919,8 @@ HYPRE_Int hypre_ComputeBoxnums ( hypre_BoxArray *boxes, HYPRE_Int *procs, HYPRE_
 HYPRE_Int hypre_StructGridPrint ( FILE *file, hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm, FILE *file, hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid, HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructGridGetMaxBoxSize ( hypre_StructGrid *grid );
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
 HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid,
                                            HYPRE_MemoryLocation data_location );
 #endif
