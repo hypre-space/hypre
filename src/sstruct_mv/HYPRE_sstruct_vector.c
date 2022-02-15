@@ -796,19 +796,28 @@ HYPRE_SStructVectorPrint( const char          *filename,
                           HYPRE_Int            all )
 {
    /* Vector variables */
-   MPI_Comm             comm = hypre_SStructVectorComm(vector);
-   HYPRE_Int            nparts = hypre_SStructVectorNParts(vector);
-   hypre_SStructGrid   *grid = hypre_SStructVectorGrid(vector);
+   MPI_Comm              comm = hypre_SStructVectorComm(vector);
+   HYPRE_Int             ndim = hypre_SStructVectorNDim(vector);
+   HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
+   hypre_SStructGrid    *grid = hypre_SStructVectorGrid(vector);
 
    /* Local variables */
-   FILE                *file;
-   HYPRE_Int            myid;
-   HYPRE_Int            part;
-   char                 new_filename[255];
+   hypre_SStructPVector *pvector;
+   hypre_StructVector   *svector;
+   hypre_StructGrid     *sgrid;
+   hypre_BoxArray       *boxes;
+   hypre_BoxArray       *grid_boxes;
+   hypre_BoxArray       *data_space;
+   HYPRE_Complex        *data;
+
+   FILE                 *file;
+   HYPRE_Int             myid;
+   HYPRE_Int             part, var, nvars;
+   char                  new_filename[255];
 
    /* Print auxiliary data */
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_sprintf(new_filename, "%s.info.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       hypre_printf("Error: can't open output file %s\n", new_filename);
@@ -817,16 +826,28 @@ HYPRE_SStructVectorPrint( const char          *filename,
 
    hypre_fprintf(file, "SStructVector\n");
    hypre_SStructGridPrint(file, grid);
-   fclose(file);
 
-   /* Print part vectors */
+   /* Print (part, var) vectors */
    for (part = 0; part < nparts; part++)
    {
-      hypre_sprintf(new_filename, "%s.%02d", filename, part);
-      hypre_SStructPVectorPrint(new_filename,
-                                hypre_SStructVectorPVector(vector, part),
-                                all);
+      pvector = hypre_SStructVectorPVector(vector, part);
+      nvars = hypre_SStructPVectorNVars(pvector);
+      for (var = 0; var < nvars; var++)
+      {
+         svector = hypre_SStructPVectorSVector(pvector, var);
+         sgrid = hypre_StructVectorGrid(svector);
+
+         data = hypre_StructVectorData(svector);
+         data_space = hypre_StructVectorDataSpace(svector);
+         grid_boxes = hypre_StructGridBoxes(sgrid);
+         boxes = (all) ? data_space : grid_boxes;
+
+         hypre_fprintf(file, "\nData - (Part %d, Var %d):\n", part, var);
+         hypre_PrintBoxArrayData(file, boxes, data_space, 1, ndim, data);
+      }
    }
+
+   fclose(file);
 
    return hypre_error_flag;
 }
