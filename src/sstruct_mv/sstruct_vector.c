@@ -533,46 +533,6 @@ hypre_SStructPVectorPrint( const char           *filename,
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-#if 0
-HYPRE_Int
-hypre_SStructPVectorRead( MPI_Comm              comm,
-                          const char           *filename,
-                          HYPRE_Int             ndim,
-                          HYPRE_Int             nvars,
-                          hypre_SStructVector **pvector_ptr )
-{
-   hypre_SStructPGrid     *pgrid;
-   hypre_SStructPVector   *pvector;
-   hypre_StructVector     *svector;
-   HYPRE_Int               var;
-
-   /* Initialize part grid and vector data structures */
-   hypre_SStructPGridCreate(comm, ndim, &pgrid);
-   hypre_SStructPVectorCreate(comm, pgrid, &pvector);
-
-   for (var = 0; var < nvars; var++)
-   {
-      /* Destroy placeholder svector */
-      svector = hypre_SStructPVectorSVector(pvector, var);
-      hypre_StructVectorDestroy(svector);
-
-      /* Read svector from file */
-      hypre_sprintf(new_filename, "%s.%02d", filename, var);
-      hypre_StructVectorRead(new_filename, &svector);
-
-      /* Update pvector */
-      hypre_SStructPVectorSVector(pvector, var) = svector;
-   }
-
-   *pvector_ptr = pvector;
-
-   return hypre_error_flag;
-}
-#endif
-
 /*==========================================================================
  * SStructVector routines
  *==========================================================================*/
