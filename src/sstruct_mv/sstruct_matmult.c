@@ -812,175 +812,211 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    /* Temporary variables */
    hypre_SStructGraph      *graph;
    hypre_SStructGrid       *grid;
-   hypre_ParCSRMatrix     **parcsr;
+   hypre_ParCSRMatrix     **parcsr_tmp;
    hypre_ParCSRMatrix      *parcsr_sA;
    hypre_ParCSRMatrix      *parcsr_uA;
+   hypre_ParCSRMatrix      *parcsr_sP;
+   hypre_ParCSRMatrix      *parcsr_uP;
    hypre_ParCSRMatrix      *parcsr_sM;
    hypre_ParCSRMatrix      *parcsr_uM;
    hypre_ParCSRMatrix      *parcsr_uMold;
    hypre_ParCSRMatrix      *parcsr_sMold;
+   hypre_CSRMatrix         *diag_uP;
    hypre_IJMatrix          *ijmatrix;
+   hypre_IJMatrix          *ij_tmp;
    hypre_IJMatrix         **ij_sA;
 
    HYPRE_Int                m, t;
+   HYPRE_Int                num_nonzeros_uP;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   /* Temporary work matrices */
-   parcsr = hypre_TAlloc(hypre_ParCSRMatrix *, 3, HYPRE_MEMORY_HOST);
-   ij_sA  = hypre_TAlloc(hypre_IJMatrix *, nmatrices, HYPRE_MEMORY_HOST);
-   for (m = 0; m < nmatrices; m++)
-   {
-      ij_sA[m] = NULL;
-   }
-
-   /* Set initial data */
-   m = terms[nterms - 2];
-   graph = hypre_SStructMatrixGraph(matrices[m]);
-   grid  = hypre_SStructGraphGrid(graph);
-
-   m = terms[nterms - 1];
+   m = terms[2];
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
-   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-   hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);
-   HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
-
-#if defined(DEBUG_MATMULT)
-   char matname[64];
-
-   hypre_ParCSRMatrixPrintIJ(parcsr_uMold, 0, 0, "parcsr_uP");
-   hypre_ParCSRMatrixPrintIJ(parcsr_sMold, 0, 0, "parcsr_sP");
-#endif
-
-   /* Compute uM iteratively */
-   for (t = (nterms - 2); t >= 0; t--)
+   HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
+   diag_uP = hypre_ParCSRMatrixDiag(parcsr_uP);
+   num_nonzeros_uP = hypre_CSRMatrixNumNonzeros(diag_uP);
+   if (nterms == 3 && (num_nonzeros_uP == 0))
    {
-      m = terms[t];
-
-      /* Convert sA_n to IJMatrix */
-      if (ij_sA[m] == NULL)
-      {
-         graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
-         grid  = hypre_SStructGraphGrid(graph);
-
-         hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);
-      }
-      HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
-#if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_sA_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr_sA, 0, 0, matname);
-#endif
-
-      /* 1) Compute sA_n*uMold */
-      if (trans[t])
-      {
-         parcsr[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
-      }
-      else
-      {
-         parcsr[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
-      }
-#if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_0a_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr[0], 0, 0, matname);
-#endif
-
-      /* 2) Compute uA_n*uMold */
+      /* Specialization for RAP when P has only the structured component */
+      m = terms[1];
+      graph = hypre_SStructMatrixGraph(matrices[m]);
+      grid  = hypre_SStructGraphGrid(graph);
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
-      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
-#if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_uA_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr_uA, 0, 0, matname);
-#endif
-      if (trans[t])
-      {
-         parcsr[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
-      }
-      else
-      {
-         parcsr[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
-      }
-#if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_1_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr[1], 0, 0, matname);
-#endif
+      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
 
-      if (t != (nterms - 2))
+      m = terms[2];
+      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp);
+      HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
+
+      if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
       {
-         hypre_ParCSRMatrixDestroy(parcsr_uMold);
+         hypre_MatvecCommPkgCreate(parcsr_sP);
       }
 
-      /* 3) Compute (sA_n*uMold + uA_n*uMold) */
-      hypre_ParCSRMatrixAdd(1.0, parcsr[0], 1.0, parcsr[1], &parcsr[2]);
-#if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_2_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr[2], 0, 0, matname);
-#endif
+      //hypre_BoomerAMGBuildCoarseOperator(parcsr_sP, parcsr_sA, parcsr_sP, &parcsr_uM);
+      parcsr_uM = hypre_ParCSRMatrixRAP(parcsr_sP, parcsr_sA, parcsr_sP);
 
-      /* Free sA_n*uMold and uA_n*uMold */
-      hypre_ParCSRMatrixDestroy(parcsr[0]);
-      hypre_ParCSRMatrixDestroy(parcsr[1]);
-
-      /* 4) Compute uA_n*sMold */
-      if (trans[t])
+      HYPRE_IJMatrixDestroy(ij_tmp);
+   }
+   else
+   {
+      /* Temporary work matrices */
+      parcsr_tmp = hypre_TAlloc(hypre_ParCSRMatrix *, 3, HYPRE_MEMORY_HOST);
+      ij_sA = hypre_TAlloc(hypre_IJMatrix *, nmatrices, HYPRE_MEMORY_HOST);
+      for (m = 0; m < nmatrices; m++)
       {
-         parcsr[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+         ij_sA[m] = NULL;
       }
-      else
-      {
-         parcsr[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
-      }
+
+      /* Set initial data */
+      m = terms[nterms - 2];
+      graph = hypre_SStructMatrixGraph(matrices[m]);
+      grid  = hypre_SStructGraphGrid(graph);
+
+      m = terms[nterms - 1];
+      ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
+      HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
+      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);
+      HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
+
 #if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_0b_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr[0], 0, 0, matname);
+      char matname[64];
+
+      hypre_ParCSRMatrixPrintIJ(parcsr_uMold, 0, 0, "parcsr_uP");
+      hypre_ParCSRMatrixPrintIJ(parcsr_sMold, 0, 0, "parcsr_sP");
 #endif
 
-      /* 5) Compute (uA_n*uMold + sA_n*uMold + uA_n*uMold) */
-      hypre_ParCSRMatrixAdd(1.0, parcsr[0], 1.0, parcsr[2], &parcsr_uM);
+      /* Compute uM iteratively */
+      for (t = (nterms - 2); t >= 0; t--)
+      {
+         m = terms[t];
+
+         /* Convert sA_n to IJMatrix */
+         if (ij_sA[m] == NULL)
+         {
+            graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
+            grid  = hypre_SStructGraphGrid(graph);
+
+            hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);
+         }
+         HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
 #if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_uM_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr_uM, 0, 0, matname);
+         hypre_sprintf(matname, "parcsr_sA_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_sA, 0, 0, matname);
 #endif
+
+         /* 1) Compute sA_n*uMold */
+         if (trans[t])
+         {
+            parcsr_tmp[0] = hypre_ParTMatmul(parcsr_sA, parcsr_uMold);
+         }
+         else
+         {
+            parcsr_tmp[0] = hypre_ParMatmul(parcsr_sA, parcsr_uMold);
+         }
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_0a_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_tmp[0], 0, 0, matname);
+#endif
+
+         /* 2) Compute uA_n*uMold */
+         ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
+         HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uA);
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_uA_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_uA, 0, 0, matname);
+#endif
+         if (trans[t])
+         {
+            parcsr_tmp[1] = hypre_ParTMatmul(parcsr_uA, parcsr_uMold);
+         }
+         else
+         {
+            parcsr_tmp[1] = hypre_ParMatmul(parcsr_uA, parcsr_uMold);
+         }
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_1_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_tmp[1], 0, 0, matname);
+#endif
+
+         if (t != (nterms - 2))
+         {
+            hypre_ParCSRMatrixDestroy(parcsr_uMold);
+         }
+
+         /* 3) Compute (sA_n*uMold + uA_n*uMold) */
+         hypre_ParCSRMatrixAdd(1.0, parcsr_tmp[0], 1.0, parcsr_tmp[1], &parcsr_tmp[2]);
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_2_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_tmp[2], 0, 0, matname);
+#endif
+
+         /* Free sA_n*uMold and uA_n*uMold */
+         hypre_ParCSRMatrixDestroy(parcsr_tmp[0]);
+         hypre_ParCSRMatrixDestroy(parcsr_tmp[1]);
+
+         /* 4) Compute uA_n*sMold */
+         if (trans[t])
+         {
+            parcsr_tmp[0] = hypre_ParTMatmul(parcsr_uA, parcsr_sMold);
+         }
+         else
+         {
+            parcsr_tmp[0] = hypre_ParMatmul(parcsr_uA, parcsr_sMold);
+         }
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_0b_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_tmp[0], 0, 0, matname);
+#endif
+
+         /* 5) Compute (uA_n*uMold + sA_n*uMold + uA_n*uMold) */
+         hypre_ParCSRMatrixAdd(1.0, parcsr_tmp[0], 1.0, parcsr_tmp[2], &parcsr_uM);
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_uM_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_uM, 0, 0, matname);
+#endif
+
+         /* Free temporary work matrices */
+         hypre_ParCSRMatrixDestroy(parcsr_tmp[0]);
+         hypre_ParCSRMatrixDestroy(parcsr_tmp[2]);
+
+         /* 6) Compute sA_n*sMold */
+         if (trans[t])
+         {
+            parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+         }
+         else
+         {
+            parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
+         }
+#if defined(DEBUG_MATMULT)
+         hypre_sprintf(matname, "parcsr_sM_%d", t);
+         hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
+#endif
+
+         if (t < (nterms - 2))
+         {
+            hypre_ParCSRMatrixDestroy(parcsr_sMold);
+         }
+
+         /* 7) Update pointers */
+         parcsr_sMold = parcsr_sM;
+         parcsr_uMold = parcsr_uM;
+      }
 
       /* Free temporary work matrices */
-      hypre_ParCSRMatrixDestroy(parcsr[0]);
-      hypre_ParCSRMatrixDestroy(parcsr[2]);
-
-      /* 6) Compute sA_n*sMold */
-      if (trans[t])
+      hypre_TFree(parcsr_tmp, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixDestroy(parcsr_sM);
+      for (m = 0; m < nmatrices; m++)
       {
-         parcsr_sM = hypre_ParTMatmul(parcsr_sA, parcsr_sMold);
+         if (ij_sA[m] != NULL)
+         {
+            HYPRE_IJMatrixDestroy(ij_sA[m]);
+         }
       }
-      else
-      {
-         parcsr_sM = hypre_ParMatmul(parcsr_sA, parcsr_sMold);
-      }
-#if defined(DEBUG_MATMULT)
-      hypre_sprintf(matname, "parcsr_sM_%d", t);
-      hypre_ParCSRMatrixPrintIJ(parcsr_sM, 0, 0, matname);
-#endif
-
-      if (t < (nterms - 2))
-      {
-         hypre_ParCSRMatrixDestroy(parcsr_sMold);
-      }
-
-      /* 7) Update pointers */
-      parcsr_sMold = parcsr_sM;
-      parcsr_uMold = parcsr_uM;
+      hypre_TFree(ij_sA, HYPRE_MEMORY_HOST);
    }
-
-   /* Free temporary work matrices */
-   hypre_TFree(parcsr, HYPRE_MEMORY_HOST);
-   hypre_ParCSRMatrixDestroy(parcsr_sM);
-   for (m = 0; m < nmatrices; m++)
-   {
-      if (ij_sA[m] != NULL)
-      {
-         HYPRE_IJMatrixDestroy(ij_sA[m]);
-      }
-   }
-   hypre_TFree(ij_sA, HYPRE_MEMORY_HOST);
 
    /* Update pointer to unstructured matrix component of M */
    ij_M = hypre_SStructMatrixIJMatrix(M);

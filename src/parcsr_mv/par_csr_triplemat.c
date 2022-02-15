@@ -871,6 +871,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
+   hypre_CSRMatrixSetRownnz(C_diag);
 
    if (C_offd)
    {
@@ -882,6 +883,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixInitialize(C_offd);
       hypre_ParCSRMatrixOffd(C) = C_offd;
    }
+   hypre_CSRMatrixSetRownnz(C_offd);
 
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 

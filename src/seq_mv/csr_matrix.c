@@ -340,12 +340,15 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
    HYPRE_Int i, adiag;
    HYPRE_Int irownnz = 0;
 
-   for (i = 0; i < num_rows; i++)
+   if ((A_i[num_rows] - A_i[0]) > 0)
    {
-      adiag = A_i[i + 1] - A_i[i];
-      if (adiag > 0)
+      for (i = 0; i < num_rows; i++)
       {
-         irownnz++;
+         adiag = A_i[i + 1] - A_i[i];
+         if (adiag > 0)
+         {
+            irownnz++;
+         }
       }
    }
 
@@ -1092,4 +1095,3 @@ hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
    return hypre_CSRMatrixGPUMatData(matrix);
 }
 #endif
-
