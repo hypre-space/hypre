@@ -1616,6 +1616,53 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructMatrixPrintData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixPrintData( FILE               *file,
+                             hypre_StructMatrix *matrix,
+                             HYPRE_Int           all )
+{
+   HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
+   HYPRE_Int             num_values = hypre_StructMatrixNumValues(matrix);
+   HYPRE_Int             ctecoef = hypre_StructMatrixConstantCoefficient(matrix);
+   hypre_StructGrid     *grid = hypre_StructMatrixGrid(matrix);
+   hypre_StructStencil  *stencil = hypre_StructMatrixStencil(matrix);
+   HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int            *symm_elements = hypre_StructMatrixSymmElements(matrix);
+   hypre_BoxArray       *data_space = hypre_StructMatrixDataSpace(matrix);
+   hypre_BoxArray       *grid_boxes = hypre_StructGridBoxes(grid);
+   HYPRE_Complex        *data = hypre_StructMatrixData(matrix);
+
+   hypre_BoxArray       *boxes;
+   hypre_Index           center_index;
+   HYPRE_Int             center_rank;
+
+   boxes = (all) ? data_space : grid_boxes;
+   if ( ctecoef == 1 )
+   {
+      hypre_PrintCCBoxArrayData(file, boxes, data_space, num_values, data);
+   }
+   else if ( ctecoef == 2 )
+   {
+      hypre_SetIndex(center_index, 0);
+      center_rank = hypre_StructStencilElementRank(stencil, center_index);
+
+      hypre_PrintCCVDBoxArrayData(file, boxes, data_space, num_values,
+                                  center_rank, stencil_size, symm_elements,
+                                  ndim, data);
+   }
+   else
+   {
+      hypre_PrintBoxArrayData(file, boxes, data_space, num_values,
+                              ndim, data);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructMatrixPrint
  *--------------------------------------------------------------------------*/
 
@@ -1628,25 +1675,17 @@ hypre_StructMatrixPrint( const char         *filename,
    char                  new_filename[255];
 
    hypre_StructGrid     *grid;
-   hypre_BoxArray       *boxes;
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
-   hypre_Index           center_index;
 
    HYPRE_Int             ndim, num_values;
-
-   hypre_BoxArray       *data_space;
 
    HYPRE_Int            *symm_elements;
 
    HYPRE_Int             i, j, d;
-   HYPRE_Int             constant_coefficient;
-   HYPRE_Int             center_rank;
    HYPRE_Int             myid;
-
-   constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
 
    /*----------------------------------------
     * Open file
@@ -1706,40 +1745,9 @@ hypre_StructMatrixPrint( const char         *filename,
     * Print data
     *----------------------------------------*/
 
-   data_space = hypre_StructMatrixDataSpace(matrix);
-
-   if (all)
-   {
-      boxes = data_space;
-   }
-   else
-   {
-      boxes = hypre_StructGridBoxes(grid);
-   }
-
    hypre_fprintf(file, "\nData:\n");
-   if ( constant_coefficient == 1 )
-   {
-      hypre_PrintCCBoxArrayData(file, boxes, data_space, num_values,
-                                hypre_StructMatrixData(matrix));
-   }
-   else if ( constant_coefficient == 2 )
-   {
-      hypre_SetIndex(center_index, 0);
-      center_rank = hypre_StructStencilElementRank( stencil, center_index );
+   hypre_StructMatrixPrintData(file, matrix, all);
 
-      hypre_PrintCCVDBoxArrayData(file, boxes, data_space, num_values,
-                                  center_rank, stencil_size, symm_elements,
-                                  hypre_StructGridNDim(grid),
-                                  hypre_StructMatrixData(matrix));
-   }
-   else
-   {
-
-      hypre_PrintBoxArrayData(file, boxes, data_space, num_values,
-                              hypre_StructGridNDim(grid),
-                              hypre_StructMatrixData(matrix));
-   }
 
    /*----------------------------------------
     * Close file
@@ -2040,4 +2048,3 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 
    return hypre_error_flag;
 }
-

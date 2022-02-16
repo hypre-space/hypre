@@ -370,6 +370,7 @@ HYPRE_Int hypre_StructMatrixSetConstantCoefficient ( hypre_StructMatrix *matrix,
 HYPRE_Int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix, HYPRE_Int nentries,
                                                  HYPRE_Int *entries );
 HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
+HYPRE_Int hypre_StructMatrixPrintData ( FILE *file, hypre_StructMatrix *matrix, HYPRE_Int all );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename, hypre_StructMatrix *matrix,
                                     HYPRE_Int all );
 HYPRE_Int HYPRE_StructMatrixRead ( MPI_Comm comm, const char *filename,

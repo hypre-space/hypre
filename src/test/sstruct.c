@@ -2168,6 +2168,7 @@ PrintUsage( char *progname,
       hypre_printf("\n");
       hypre_printf("  -in <filename> : input file (default is `%s')\n",
                    infile_default);
+      hypre_printf("  -fromfile <filename> : read SStructMatrix from file\n");
       hypre_printf("\n");
       hypre_printf("  -pt <pt1> <pt2> ... : set part(s) for subsequent options\n");
       hypre_printf("  -pooldist <p>       : pool distribution to use\n");
@@ -2318,6 +2319,8 @@ hypre_int
 main( hypre_int argc,
       char *argv[] )
 {
+   MPI_Comm              comm = hypre_MPI_COMM_WORLD;
+
    char                 *infile;
    ProblemData           global_data;
    ProblemData           data;
@@ -2332,6 +2335,8 @@ main( hypre_int argc,
    HYPRE_Int             print_system;
    HYPRE_Int             cosine;
    HYPRE_Real            scale;
+   HYPRE_Int             read_fromfile_flag = 0;
+   HYPRE_Int             read_fromfile_index[3] = {-1, -1, -1};
 
    HYPRE_SStructGrid     grid, G_grid;
    HYPRE_SStructStencil *stencils, *G_stencils;
@@ -2436,14 +2441,14 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &myid);
 
    /*-----------------------------------------------------------------
     * GPU Device binding
     * Must be done before HYPRE_Init() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device(myid, num_procs, comm);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
@@ -2463,6 +2468,24 @@ main( hypre_int argc,
       {
          arg_index++;
          infile = argv[arg_index++];
+      }
+      else if (strcmp(argv[arg_index], "-fromfile") == 0 )
+      {
+         arg_index++;
+         read_fromfile_flag += 1;
+         read_fromfile_index[0] = arg_index;
+      }
+      else if (strcmp(argv[arg_index], "-rhsfromfile") == 0 )
+      {
+         arg_index++;
+         read_fromfile_flag += 2;
+         read_fromfile_index[1] = arg_index;
+      }
+      else if (strcmp(argv[arg_index], "-x0fromfile") == 0 )
+      {
+         arg_index++;
+         read_fromfile_flag += 4;
+         read_fromfile_index[2] = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -2487,7 +2510,45 @@ main( hypre_int argc,
       }
    }
 
-   ReadData(infile, &global_data);
+   /* Are we reading matrices/vectors directly from file? */
+   if (read_fromfile_index[0] == -1 &&
+       read_fromfile_index[1] == -1 &&
+       read_fromfile_index[2] == -1)
+   {
+      ReadData(infile, &global_data);
+   }
+   else
+   {
+      if (read_fromfile_index[0] != -1)
+      {
+         HYPRE_SStructMatrixRead(comm, argv[read_fromfile_index[0]], &A);
+      }
+      else
+      {
+         hypre_printf("Unsupported option! Must use '-fromfile'");
+         exit(1);
+      }
+
+      if (read_fromfile_index[1] != -1)
+      {
+         HYPRE_SStructVectorRead(comm, argv[read_fromfile_index[1]], &b);
+      }
+      else
+      {
+         hypre_printf("Unsupported option! Must use '-rhsfromfile'");
+         exit(1);
+      }
+
+      if (read_fromfile_index[2] != -1)
+      {
+         HYPRE_SStructVectorRead(comm, argv[read_fromfile_index[2]], &x);
+      }
+      else
+      {
+         hypre_printf("Unsupported option! Must use '-x0fromfile'");
+         exit(1);
+      }
+   }
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -2868,7 +2929,7 @@ main( hypre_int argc,
     * Synchronize so that timings make sense
     *-----------------------------------------------------------*/
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   hypre_MPI_Barrier(comm);
 
    /*-----------------------------------------------------------
     * Set up the grid
@@ -2877,7 +2938,7 @@ main( hypre_int argc,
    time_index = hypre_InitializeTiming("SStruct Interface");
    hypre_BeginTiming(time_index);
 
-   HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, data.ndim, data.nparts, &grid);
+   HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &grid);
    if (data.numghost != NULL)
    {
       HYPRE_SStructGridSetNumGhost(grid, data.numghost);
@@ -2984,7 +3045,7 @@ main( hypre_int argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &graph);
+   HYPRE_SStructGraphCreate(comm, grid, &graph);
 
    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
    if ( object_type != HYPRE_SSTRUCT )
@@ -3065,7 +3126,7 @@ main( hypre_int argc,
    values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
    d_values = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
+   HYPRE_SStructMatrixCreate(comm, graph, &A);
 
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
    for (i = 0; i < data.symmetric_num; i++)
@@ -3309,7 +3370,7 @@ main( hypre_int argc,
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
+   HYPRE_SStructVectorCreate(comm, grid, &b);
 
    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
    if ( object_type != HYPRE_SSTRUCT )
@@ -3440,7 +3501,7 @@ main( hypre_int argc,
 
    HYPRE_SStructVectorAssemble(b);
 
-   HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
+   HYPRE_SStructVectorCreate(comm, grid, &x);
 
    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
    if ( object_type != HYPRE_SSTRUCT )
@@ -3488,7 +3549,7 @@ main( hypre_int argc,
    HYPRE_SStructVectorAssemble(x);
 
    hypre_EndTiming(time_index);
-   hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("SStruct Interface", comm);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
@@ -3555,7 +3616,7 @@ main( hypre_int argc,
 
       /* Set up the domain grid */
 
-      HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, data.ndim, data.nparts, &G_grid);
+      HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &G_grid);
       for (part = 0; part < data.nparts; part++)
       {
          pdata = data.pdata[part];
@@ -3610,7 +3671,7 @@ main( hypre_int argc,
 
       /* Set up the gradient graph */
 
-      HYPRE_SStructGraphCreate(hypre_MPI_COMM_WORLD, grid, &G_graph);
+      HYPRE_SStructGraphCreate(comm, grid, &G_graph);
       HYPRE_SStructGraphSetDomainGrid(G_graph, G_grid);
       HYPRE_SStructGraphSetObjectType(G_graph, HYPRE_PARCSR);
       for (part = 0; part < data.nparts; part++)
@@ -3625,7 +3686,7 @@ main( hypre_int argc,
 
       /* Set up the matrix */
 
-      HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, G_graph, &G);
+      HYPRE_SStructMatrixCreate(comm, G_graph, &G);
       HYPRE_SStructMatrixSetObjectType(G, HYPRE_PARCSR);
       HYPRE_SStructMatrixInitialize(G);
       for (part = 0; part < data.nparts; part++)
@@ -3765,7 +3826,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("SysPFMG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructSysPFMGCreate(comm, &solver);
       HYPRE_SStructSysPFMGSetMaxIter(solver, 100);
       HYPRE_SStructSysPFMGSetTol(solver, tol);
       HYPRE_SStructSysPFMGSetRelChange(solver, 0);
@@ -3784,7 +3845,7 @@ main( hypre_int argc,
       HYPRE_SStructSysPFMGSetup(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -3794,7 +3855,7 @@ main( hypre_int argc,
       HYPRE_SStructSysPFMGSolve(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -3809,7 +3870,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("Split Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructSplitCreate(comm, &solver);
       HYPRE_SStructSplitSetMaxIter(solver, 100);
       HYPRE_SStructSplitSetTol(solver, tol);
       if (solver_id == 0)
@@ -3827,7 +3888,7 @@ main( hypre_int argc,
       HYPRE_SStructSplitSetup(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -3837,7 +3898,7 @@ main( hypre_int argc,
       HYPRE_SStructSplitSolve(solver, A, b, x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -3856,7 +3917,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructPCGCreate(comm, &solver);
       HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, 100 );
       HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
@@ -3867,7 +3928,7 @@ main( hypre_int argc,
       if ((solver_id == 10) || (solver_id == 11))
       {
          /* use Split solver as preconditioner */
-         HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitCreate(comm, &precond);
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
@@ -3888,7 +3949,7 @@ main( hypre_int argc,
       else if (solver_id == 13)
       {
          /* use SysPFMG solver as preconditioner */
-         HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSysPFMGCreate(comm, &precond);
          HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
          HYPRE_SStructSysPFMGSetTol(precond, 0.0);
          HYPRE_SStructSysPFMGSetZeroGuess(precond);
@@ -3922,7 +3983,7 @@ main( hypre_int argc,
                       (HYPRE_Vector) b, (HYPRE_Vector) x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -3933,7 +3994,7 @@ main( hypre_int argc,
                       (HYPRE_Vector) b, (HYPRE_Vector) x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -3981,7 +4042,7 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("PCG Setup");
          hypre_BeginTiming(time_index);
 
-         HYPRE_SStructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
+         HYPRE_SStructPCGCreate(comm, &solver);
          HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, pcgIterations );
          HYPRE_PCGSetTol( (HYPRE_Solver) solver, pcgTol );
          HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
@@ -3991,7 +4052,7 @@ main( hypre_int argc,
          if ((solver_id == 10) || (solver_id == 11))
          {
             /* use Split solver as preconditioner */
-            HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_SStructSplitCreate(comm, &precond);
             HYPRE_SStructSplitSetMaxIter(precond, 1);
             HYPRE_SStructSplitSetTol(precond, 0.0);
             HYPRE_SStructSplitSetZeroGuess(precond);
@@ -4012,7 +4073,7 @@ main( hypre_int argc,
          else if (solver_id == 13)
          {
             /* use SysPFMG solver as preconditioner */
-            HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_SStructSysPFMGCreate(comm, &precond);
             HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
             HYPRE_SStructSysPFMGSetTol(precond, 0.0);
             HYPRE_SStructSysPFMGSetZeroGuess(precond);
@@ -4047,7 +4108,7 @@ main( hypre_int argc,
 
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+         hypre_PrintTiming("Setup phase times", comm);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -4086,7 +4147,7 @@ main( hypre_int argc,
                            eigenvectors, eigenvalues );
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+         hypre_PrintTiming("Solve phase times", comm);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -4191,7 +4252,7 @@ main( hypre_int argc,
          if ((solver_id == 10) || (solver_id == 11))
          {
             /* use Split solver as preconditioner */
-            HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_SStructSplitCreate(comm, &precond);
             HYPRE_SStructSplitSetMaxIter(precond, 1);
             HYPRE_SStructSplitSetTol(precond, 0.0);
             HYPRE_SStructSplitSetZeroGuess(precond);
@@ -4212,7 +4273,7 @@ main( hypre_int argc,
          else if (solver_id == 13)
          {
             /* use SysPFMG solver as preconditioner */
-            HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
+            HYPRE_SStructSysPFMGCreate(comm, &precond);
             HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
             HYPRE_SStructSysPFMGSetTol(precond, 0.0);
             HYPRE_SStructSysPFMGSetZeroGuess(precond);
@@ -4249,7 +4310,7 @@ main( hypre_int argc,
                             (HYPRE_Vector) b, (HYPRE_Vector) x);
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+         hypre_PrintTiming("Setup phase times", comm);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -4274,7 +4335,7 @@ main( hypre_int argc,
          ( (HYPRE_Solver) solver, constrains, eigenvectors, eigenvalues );
 
          hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+         hypre_PrintTiming("Solve phase times", comm);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
@@ -4380,7 +4441,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRPCGCreate(hypre_MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRPCGCreate(comm, &par_solver);
       HYPRE_PCGSetMaxIter( par_solver, 100 );
       HYPRE_PCGSetTol( par_solver, tol );
       HYPRE_PCGSetTwoNorm( par_solver, 1 );
@@ -4406,7 +4467,7 @@ main( hypre_int argc,
       else if (solver_id == 21)
       {
          /* use Euclid as preconditioner */
-         HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidCreate(comm, &par_precond);
          HYPRE_EuclidSetParams(par_precond, argc, argv);
          HYPRE_PCGSetPrecond(par_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -4416,7 +4477,7 @@ main( hypre_int argc,
       else if (solver_id == 22)
       {
          /* use ParaSails as preconditioner */
-         HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
+         HYPRE_ParCSRParaSailsCreate(comm, &par_precond );
          HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
          HYPRE_PCGSetPrecond( par_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSolve,
@@ -4438,7 +4499,7 @@ main( hypre_int argc,
                       (HYPRE_Vector) par_b, (HYPRE_Vector) par_x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4449,7 +4510,7 @@ main( hypre_int argc,
                       (HYPRE_Vector) par_b, (HYPRE_Vector) par_x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4480,7 +4541,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructGMRESCreate(comm, &solver);
       HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, 5 );
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, 100 );
       HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol );
@@ -4490,7 +4551,7 @@ main( hypre_int argc,
       if ((solver_id == 30) || (solver_id == 31))
       {
          /* use Split solver as preconditioner */
-         HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitCreate(comm, &precond);
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
@@ -4522,7 +4583,7 @@ main( hypre_int argc,
                         (HYPRE_Vector) b, (HYPRE_Vector) x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4533,7 +4594,7 @@ main( hypre_int argc,
                         (HYPRE_Vector) b, (HYPRE_Vector) x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4556,7 +4617,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRGMRESCreate(comm, &par_solver);
       HYPRE_GMRESSetKDim(par_solver, 5);
       HYPRE_GMRESSetMaxIter(par_solver, 100);
       HYPRE_GMRESSetTol(par_solver, tol);
@@ -4581,7 +4642,7 @@ main( hypre_int argc,
       else if (solver_id == 41)
       {
          /* use Euclid as preconditioner */
-         HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidCreate(comm, &par_precond);
          HYPRE_EuclidSetParams(par_precond, argc, argv);
          HYPRE_GMRESSetPrecond(par_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -4591,7 +4652,7 @@ main( hypre_int argc,
       else if (solver_id == 42)
       {
          /* use ParaSails as preconditioner */
-         HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
+         HYPRE_ParCSRParaSailsCreate(comm, &par_precond );
          HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
          HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
          HYPRE_GMRESSetPrecond( par_solver,
@@ -4604,7 +4665,7 @@ main( hypre_int argc,
                         (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4615,7 +4676,7 @@ main( hypre_int argc,
                         (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4646,7 +4707,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructBiCGSTABCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructBiCGSTABCreate(comm, &solver);
       HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, 100 );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver) solver, tol );
       HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver) solver, 1 );
@@ -4655,7 +4716,7 @@ main( hypre_int argc,
       if ((solver_id == 50) || (solver_id == 51))
       {
          /* use Split solver as preconditioner */
-         HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitCreate(comm, &precond);
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
@@ -4687,7 +4748,7 @@ main( hypre_int argc,
                            (HYPRE_Vector) b, (HYPRE_Vector) x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4698,7 +4759,7 @@ main( hypre_int argc,
                            (HYPRE_Vector) b, (HYPRE_Vector) x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4721,7 +4782,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRBiCGSTABCreate(hypre_MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRBiCGSTABCreate(comm, &par_solver);
       HYPRE_BiCGSTABSetMaxIter(par_solver, 100);
       HYPRE_BiCGSTABSetTol(par_solver, tol);
       HYPRE_BiCGSTABSetPrintLevel(par_solver, 1);
@@ -4745,7 +4806,7 @@ main( hypre_int argc,
       else if (solver_id == 61)
       {
          /* use Euclid as preconditioner */
-         HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidCreate(comm, &par_precond);
          HYPRE_EuclidSetParams(par_precond, argc, argv);
          HYPRE_BiCGSTABSetPrecond(par_solver,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -4756,7 +4817,7 @@ main( hypre_int argc,
       else if (solver_id == 62)
       {
          /* use ParaSails as preconditioner */
-         HYPRE_ParCSRParaSailsCreate(hypre_MPI_COMM_WORLD, &par_precond );
+         HYPRE_ParCSRParaSailsCreate(comm, &par_precond );
          HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
          HYPRE_ParCSRParaSailsSetSym(par_precond, 0);
          HYPRE_BiCGSTABSetPrecond( par_solver,
@@ -4769,7 +4830,7 @@ main( hypre_int argc,
                            (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4780,7 +4841,7 @@ main( hypre_int argc,
                            (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4811,7 +4872,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructFlexGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructFlexGMRESCreate(comm, &solver);
       HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
       HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, 100 );
       HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, tol );
@@ -4821,7 +4882,7 @@ main( hypre_int argc,
       if ((solver_id == 70) || (solver_id == 71))
       {
          /* use Split solver as preconditioner */
-         HYPRE_SStructSplitCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitCreate(comm, &precond);
          HYPRE_SStructSplitSetMaxIter(precond, 1);
          HYPRE_SStructSplitSetTol(precond, 0.0);
          HYPRE_SStructSplitSetZeroGuess(precond);
@@ -4853,7 +4914,7 @@ main( hypre_int argc,
                             (HYPRE_Vector) b, (HYPRE_Vector) x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4864,7 +4925,7 @@ main( hypre_int argc,
                             (HYPRE_Vector) b, (HYPRE_Vector) x );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4887,7 +4948,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRFlexGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRFlexGMRESCreate(comm, &par_solver);
       HYPRE_FlexGMRESSetKDim(par_solver, 5);
       HYPRE_FlexGMRESSetMaxIter(par_solver, 100);
       HYPRE_FlexGMRESSetTol(par_solver, tol);
@@ -4914,7 +4975,7 @@ main( hypre_int argc,
                             (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4925,7 +4986,7 @@ main( hypre_int argc,
                             (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4948,7 +5009,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("LGMRES Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRLGMRESCreate(hypre_MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRLGMRESCreate(comm, &par_solver);
       HYPRE_LGMRESSetKDim(par_solver, 10);
       HYPRE_LGMRESSetAugDim(par_solver, 2);
       HYPRE_LGMRESSetMaxIter(par_solver, 100);
@@ -4976,7 +5037,7 @@ main( hypre_int argc,
                          (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -4987,7 +5048,7 @@ main( hypre_int argc,
                          (HYPRE_Vector) par_b, (HYPRE_Vector) par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5051,7 +5112,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetup(par_solver, par_A, par_b, par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5061,7 +5122,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSolve(par_solver, par_A, par_b, par_x);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5099,7 +5160,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructSMGCreate(comm, &struct_solver);
       HYPRE_StructSMGSetMemoryUse(struct_solver, 0);
       HYPRE_StructSMGSetMaxIter(struct_solver, 50);
       HYPRE_StructSMGSetTol(struct_solver, tol);
@@ -5111,7 +5172,7 @@ main( hypre_int argc,
       HYPRE_StructSMGSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5121,7 +5182,7 @@ main( hypre_int argc,
       HYPRE_StructSMGSolve(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5135,7 +5196,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("PFMG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructPFMGCreate(comm, &struct_solver);
       HYPRE_StructPFMGSetMaxIter(struct_solver, 50);
       HYPRE_StructPFMGSetTol(struct_solver, tol);
       HYPRE_StructPFMGSetRelChange(struct_solver, 0);
@@ -5154,7 +5215,7 @@ main( hypre_int argc,
       HYPRE_StructPFMGSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5164,7 +5225,7 @@ main( hypre_int argc,
       HYPRE_StructPFMGSolve(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5184,14 +5245,14 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("CycRed Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructCycRedCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructCycRedCreate(comm, &struct_solver);
       HYPRE_StructCycRedSetTDim(struct_solver, cycred_tdim);
       HYPRE_StructCycRedSetBase(struct_solver, data.ndim,
                                 cycred_index, cycred_stride);
       HYPRE_StructCycRedSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5201,12 +5262,12 @@ main( hypre_int argc,
       HYPRE_StructCycRedSolve(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
       num_iterations = 1;
-      HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD,
+      HYPRE_StructVectorCreate(comm,
                                hypre_StructVectorGrid(sb), &sr);
       HYPRE_StructVectorInitialize(sr);
       HYPRE_StructVectorAssemble(sr);
@@ -5232,7 +5293,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("SparseMSG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructSparseMSGCreate(comm, &struct_solver);
       HYPRE_StructSparseMSGSetMaxIter(struct_solver, 50);
       HYPRE_StructSparseMSGSetJump(struct_solver, jump);
       HYPRE_StructSparseMSGSetTol(struct_solver, tol);
@@ -5249,7 +5310,7 @@ main( hypre_int argc,
       HYPRE_StructSparseMSGSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5259,7 +5320,7 @@ main( hypre_int argc,
       HYPRE_StructSparseMSGSolve(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5278,13 +5339,13 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("Jacobi Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructJacobiCreate(comm, &struct_solver);
       HYPRE_StructJacobiSetMaxIter(struct_solver, 100);
       HYPRE_StructJacobiSetTol(struct_solver, tol);
       HYPRE_StructJacobiSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5294,7 +5355,7 @@ main( hypre_int argc,
       HYPRE_StructJacobiSolve(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5313,7 +5374,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructPCGCreate(comm, &struct_solver);
       HYPRE_PCGSetMaxIter( (HYPRE_Solver)struct_solver, 100 );
       HYPRE_PCGSetTol( (HYPRE_Solver)struct_solver, tol );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)struct_solver, 1 );
@@ -5324,7 +5385,7 @@ main( hypre_int argc,
       if (solver_id == 210)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGCreate(comm, &struct_precond);
          HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
          HYPRE_StructSMGSetMaxIter(struct_precond, 1);
          HYPRE_StructSMGSetTol(struct_precond, 0.0);
@@ -5342,7 +5403,7 @@ main( hypre_int argc,
       else if (solver_id == 211)
       {
          /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGCreate(comm, &struct_precond);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5367,7 +5428,7 @@ main( hypre_int argc,
       else if (solver_id == 212)
       {
          /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGCreate(comm, &struct_precond);
          HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
          HYPRE_StructSparseMSGSetJump(struct_precond, jump);
          HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
@@ -5390,7 +5451,7 @@ main( hypre_int argc,
       else if (solver_id == 217)
       {
          /* use two-step Jacobi as preconditioner */
-         HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructJacobiCreate(comm, &struct_precond);
          HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
          HYPRE_StructJacobiSetTol(struct_precond, 0.0);
          HYPRE_StructJacobiSetZeroGuess(struct_precond);
@@ -5415,7 +5476,7 @@ main( hypre_int argc,
         (HYPRE_Vector)sx );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5427,7 +5488,7 @@ main( hypre_int argc,
         (HYPRE_Vector)sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5462,7 +5523,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("Hybrid Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructHybridCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructHybridCreate(comm, &struct_solver);
       HYPRE_StructHybridSetDSCGMaxIter(struct_solver, 100);
       HYPRE_StructHybridSetPCGMaxIter(struct_solver, 100);
       HYPRE_StructHybridSetTol(struct_solver, tol);
@@ -5483,7 +5544,7 @@ main( hypre_int argc,
       if (solver_id == 220)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGCreate(comm, &struct_precond);
          HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
          HYPRE_StructSMGSetMaxIter(struct_precond, 1);
          HYPRE_StructSMGSetTol(struct_precond, 0.0);
@@ -5501,7 +5562,7 @@ main( hypre_int argc,
       else if (solver_id == 221)
       {
          /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGCreate(comm, &struct_precond);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5526,7 +5587,7 @@ main( hypre_int argc,
       else if (solver_id == 222)
       {
          /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGCreate(comm, &struct_precond);
          HYPRE_StructSparseMSGSetJump(struct_precond, jump);
          HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
          HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
@@ -5549,7 +5610,7 @@ main( hypre_int argc,
       HYPRE_StructHybridSetup(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5559,7 +5620,7 @@ main( hypre_int argc,
       HYPRE_StructHybridSolve(struct_solver, sA, sb, sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5590,7 +5651,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructGMRESCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructGMRESCreate(comm, &struct_solver);
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver)struct_solver, 100 );
       HYPRE_GMRESSetTol( (HYPRE_Solver)struct_solver, tol );
       HYPRE_GMRESSetRelChange( (HYPRE_Solver)struct_solver, 0 );
@@ -5600,7 +5661,7 @@ main( hypre_int argc,
       if (solver_id == 230)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGCreate(comm, &struct_precond);
          HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
          HYPRE_StructSMGSetMaxIter(struct_precond, 1);
          HYPRE_StructSMGSetTol(struct_precond, 0.0);
@@ -5618,7 +5679,7 @@ main( hypre_int argc,
       else if (solver_id == 231)
       {
          /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGCreate(comm, &struct_precond);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5642,7 +5703,7 @@ main( hypre_int argc,
       else if (solver_id == 232)
       {
          /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGCreate(comm, &struct_precond);
          HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
          HYPRE_StructSparseMSGSetJump(struct_precond, jump);
          HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
@@ -5665,7 +5726,7 @@ main( hypre_int argc,
       else if (solver_id == 237)
       {
          /* use two-step Jacobi as preconditioner */
-         HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructJacobiCreate(comm, &struct_precond);
          HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
          HYPRE_StructJacobiSetTol(struct_precond, 0.0);
          HYPRE_StructJacobiSetZeroGuess(struct_precond);
@@ -5690,7 +5751,7 @@ main( hypre_int argc,
         (HYPRE_Vector)sx );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5702,7 +5763,7 @@ main( hypre_int argc,
         (HYPRE_Vector)sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5736,7 +5797,7 @@ main( hypre_int argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructBiCGSTABCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructBiCGSTABCreate(comm, &struct_solver);
       HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)struct_solver, 100 );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver)struct_solver, tol );
       HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
@@ -5745,7 +5806,7 @@ main( hypre_int argc,
       if (solver_id == 240)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGCreate(comm, &struct_precond);
          HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
          HYPRE_StructSMGSetMaxIter(struct_precond, 1);
          HYPRE_StructSMGSetTol(struct_precond, 0.0);
@@ -5763,7 +5824,7 @@ main( hypre_int argc,
       else if (solver_id == 241)
       {
          /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGCreate(comm, &struct_precond);
          HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
          HYPRE_StructPFMGSetTol(struct_precond, 0.0);
          HYPRE_StructPFMGSetZeroGuess(struct_precond);
@@ -5788,7 +5849,7 @@ main( hypre_int argc,
       else if (solver_id == 242)
       {
          /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGCreate(comm, &struct_precond);
          HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
          HYPRE_StructSparseMSGSetJump(struct_precond, jump);
          HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
@@ -5811,7 +5872,7 @@ main( hypre_int argc,
       else if (solver_id == 247)
       {
          /* use two-step Jacobi as preconditioner */
-         HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructJacobiCreate(comm, &struct_precond);
          HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
          HYPRE_StructJacobiSetTol(struct_precond, 0.0);
          HYPRE_StructJacobiSetZeroGuess(struct_precond);
@@ -5836,7 +5897,7 @@ main( hypre_int argc,
         (HYPRE_Vector)sx );
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Setup phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5848,7 +5909,7 @@ main( hypre_int argc,
         (HYPRE_Vector)sx);
 
       hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming("Solve phase times", comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
@@ -5947,7 +6008,7 @@ main( hypre_int argc,
       HYPRE_StructVector    sxnew;
       HYPRE_Real            rnorm, bnorm;
 
-      HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &xnew);
+      HYPRE_SStructVectorCreate(comm, grid, &xnew);
       HYPRE_SStructVectorSetObjectType(xnew, object_type);
       HYPRE_SStructVectorInitialize(xnew);
 
