@@ -934,40 +934,77 @@ HYPRE_SStructMatrixPrint( const char          *filename,
                           HYPRE_Int            all )
 {
    /* Matrix variables */
-   MPI_Comm               comm = hypre_SStructMatrixComm(matrix);
-   HYPRE_Int              nparts = hypre_SStructMatrixNParts(matrix);
-   hypre_SStructPMatrix  *pmatrix = hypre_SStructMatrixPMatrix(matrix, 0);
-   hypre_SStructGraph    *graph = hypre_SStructMatrixGraph(matrix);
-   hypre_SStructGrid     *grid = hypre_SStructGraphGrid(graph);
+   MPI_Comm                comm = hypre_SStructMatrixComm(matrix);
+   HYPRE_Int               nparts = hypre_SStructMatrixNParts(matrix);
+   hypre_SStructGraph     *graph = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid      *grid = hypre_SStructGraphGrid(graph);
+   hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
+   hypre_SStructPMatrix   *pmatrix;
+   hypre_StructMatrix     *smatrix;
+   HYPRE_Int               data_size;
 
    /* Local variables */
-   FILE                  *file;
-   HYPRE_Int              myid;
-   HYPRE_Int              part;
-   char                   new_filename[255];
+   FILE                   *file;
+   HYPRE_Int               myid;
+   HYPRE_Int               part;
+   HYPRE_Int               var, vi, vj, nvars;
+   char                    new_filename[255];
 
    /* Sanity check */
    hypre_assert(nparts > 0);
 
-   /* Print auxiliary data */
+   /* Print auxiliary info */
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_sprintf(new_filename, "%s.info.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       hypre_printf("Error: can't open output file %s\n", new_filename);
       return hypre_error_flag;
    }
-   hypre_SStructGridPrint(file, grid);
-   fclose(file);
 
-   /* Print structured part matrices (S-Matrix) */
+   hypre_fprintf(file, "SStructMatrix\n");
+   hypre_SStructGridPrint(file, grid);
+
+   /* Print stencil info */
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      nvars = hypre_SStructPMatrixNVars(pmatrix);
 
-      hypre_sprintf(new_filename, "%s.%02d", filename, part);
-      hypre_SStructPMatrixPrint(new_filename, pmatrix, all);
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_fprintf(file, "\nStencil - (Part %d, Var %d):\n", part, var);
+         HYPRE_SStructStencilPrint(file, stencils[part][var]);
+      }
    }
+   hypre_fprintf(file, "\n");
+
+   /* Print graph info */
+   HYPRE_SStructGraphPrint(file, graph);
+
+   /* Print data */
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      nvars = hypre_SStructPMatrixNVars(pmatrix);
+
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+            data_size = (smatrix) ? hypre_StructMatrixDataSize(smatrix) : 0;
+
+            hypre_fprintf(file, "\nData - (Part %d, Vi %d, Vj %d): %d\n",
+                          part, vi, vj, data_size);
+            if (smatrix)
+            {
+               hypre_StructMatrixPrintData(file, smatrix, all);
+            }
+         }
+      }
+   }
+   fclose(file);
 
    /* Print unstructured matrix (U-Matrix) */
    hypre_sprintf(new_filename, "%s.UMatrix", filename);
@@ -986,81 +1023,103 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
                          HYPRE_SStructMatrix  *matrix_ptr )
 {
    /* Matrix variables */
-   HYPRE_SStructMatrix    matrix;
-   HYPRE_SStructGrid      grid;
-   HYPRE_SStructGraph     graph;
-   HYPRE_Int              nparts;
-   HYPRE_IJMatrix         umatrix;
+   HYPRE_SStructMatrix     matrix;
+   hypre_SStructPMatrix   *pmatrix;
+   hypre_StructMatrix     *smatrix;
+   HYPRE_SStructGrid       grid;
+   hypre_SStructPGrid     *pgrid;
+   HYPRE_SStructGraph      graph;
+   HYPRE_SStructStencil  **stencils;
+   HYPRE_Int               nparts;
+   HYPRE_Int               nvars;
+   HYPRE_Int               data_size;
+   HYPRE_IJMatrix          umatrix;
 
    /* Local variables */
-   FILE                  *file;
-   HYPRE_Int              myid;
-   HYPRE_Int              part;
-   char                   new_filename[255];
+   FILE                   *file;
+   HYPRE_Int               myid;
+   HYPRE_Int               part, var;
+   HYPRE_Int               p, v, i, j, vi, vj;
+   char                    new_filename[255];
 
    hypre_MPI_Comm_rank(comm, &myid);
 
    /* Read auxiliary data */
-   hypre_sprintf(new_filename, "%s.info.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "r")) == NULL)
    {
       hypre_printf("Error: can't open input file %s\n", new_filename);
       return hypre_error_flag;
    }
+
+   hypre_fscanf(file, "SStructMatrix\n");
    hypre_SStructGridRead(comm, file, &grid);
-   fclose(file);
+   nparts = hypre_SStructGridNParts(grid);
 
-   /* Create graph */
-   HYPRE_SStructGraphCreate(comm, grid, &graph);
-   HYPRE_SStructGraphAssemble(graph);
+   /* Read stencil info */
+   stencils = hypre_TAlloc(HYPRE_SStructStencil *, nparts, HYPRE_MEMORY_HOST);
+   for (p = 0; p < nparts; p++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, p);
+      nvars = hypre_SStructPGridNVars(pgrid);
 
-   /* TODO - Print stencils */
-#if 0
-   hypre_SStructStencilRead(stencils)
-#endif
+      stencils[part] = hypre_TAlloc(HYPRE_SStructStencil, nvars, HYPRE_MEMORY_HOST);
+      for (v = 0; v < nvars; v++)
+      {
+         hypre_fscanf(file, "\nStencil - (Part %d, Var %d):\n", &part, &var);
+         HYPRE_SStructStencilRead(file, &stencils[part][var]);
+      }
+   }
+   hypre_fscanf(file, "\n");
 
-   /* Create matrix */
-   HYPRE_SStructMatrixCreate(comm, graph, &matrix);
+   /* Read graph info */
+   HYPRE_SStructGraphRead(file, grid, stencils, &graph);
 
-   /* TODO - Read SetSymmetric */
-
-   /* TODO - Read values */
-#if 0
+   /* Free memory */
    for (part = 0; part < nparts; part++)
    {
+      pgrid = hypre_SStructGridPGrid(grid, p);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
       for (var = 0; var < nvars; var++)
       {
-         s = pdata.stencil_num[var];
-         for (i = 0; i < data.stencil_sizes[s]; i++)
+         HYPRE_SStructStencilDestroy(stencils[part][var]);
+      }
+
+      hypre_TFree(stencils[part], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(stencils, HYPRE_MEMORY_HOST);
+
+   /* Create and initialize matrix */
+   HYPRE_SStructMatrixCreate(comm, graph, &matrix);
+   HYPRE_SStructMatrixInitialize(matrix);
+
+   /* Read data */
+   for (p = 0; p < nparts; p++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, p);
+      nvars = hypre_SStructPMatrixNVars(pmatrix);
+
+      for (i = 0; i < nvars; i++)
+      {
+         for (j = 0; j < nvars; j++)
          {
-            for (j = 0; j < pdata.max_boxsize; j++)
+            hypre_fscanf(file, "\nData - (Part %d, Vi %d, Vj %d): %d\n",
+                         &part, &vi, &vj, &data_size);
+
+            pmatrix = hypre_SStructMatrixPMatrix(matrix, p);
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+            if (data_size > 0)
             {
-               values[j] = data.stencil_values[s][i];
-            }
-
-            hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-            for (box = 0; box < pdata.nboxes; box++)
-            {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                              pdata.vartypes[var], ilower, iupper);
-
-               HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                               var, 1, &i, d_values);
+               hypre_StructMatrixReadData(file, smatrix);
             }
          }
       }
    }
-#endif
+   fclose(file);
 
-   /* Read structured part matrices (S-Matrix) */
-   nparts = hypre_SStructGridNParts(grid);
-   for (part = 0; part < nparts; part++)
-   {
-      hypre_sprintf(new_filename, "%s.%02d", filename, part);
-      //hypre_SStructPMatrixRead(comm, new_filename, nvars, &pmatrix);
-      //hypre_SStructMatrixPMatrix(matrix, part) = pmatrix;
-   }
+   /* Assemble S-Matrix */
+   HYPRE_SStructMatrixAssemble(matrix);
 
    /* Read unstructured matrix (U-Matrix) */
    hypre_sprintf(new_filename, "%s.UMatrix", filename);
