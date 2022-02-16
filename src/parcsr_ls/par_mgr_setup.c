@@ -860,7 +860,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       wall_time = time_getWallclockSeconds() - wall_time;
-      if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Global smoother setup: %f\n", lev, my_id, wall_time); }
+      // if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Global smoother setup: %f\n", lev, my_id, wall_time); }
 
       /* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
       cflag = last_level || setNonCpointToF;
@@ -916,13 +916,13 @@ hypre_MGRSetup( void               *mgr_vdata,
             wall_time = time_getWallclockSeconds();
             hypre_MGRBuildBlockJacobiWp(A_array[lev], block_jacobi_bsize, CF_marker, NULL, debug_flag, &Wp);
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     Build Wp: %f\n", lev, interp_type[lev], my_id, wall_time); }
+         //   if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     Build Wp: %f\n", lev, interp_type[lev], my_id, wall_time); }
          }
          wall_time = time_getWallclockSeconds();
          hypre_MGRBuildInterp(A_array[lev], CF_marker, Wp, coarse_pnts_global, 1, dof_func_buff_data,
                               debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
          wall_time = time_getWallclockSeconds() - wall_time;
-         if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
+       //  if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
       }
       else
       {
@@ -930,7 +930,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
                               debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
          wall_time = time_getWallclockSeconds() - wall_time;
-         if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
+       //  if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
       }
       /*
       char fname[256];
@@ -1037,7 +1037,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                       debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
                                       restrict_type[lev], num_restrict_sweeps);
                wall_time = time_getWallclockSeconds() - wall_time;
-               if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
+             //  if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
                RT_array[lev] = RT;
             }
 
@@ -1056,7 +1056,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                Wp = NULL;
             }
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %1.8f\n", lev, my_id, wall_time); }
+          //  if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %1.8f\n", lev, my_id, wall_time); }
          }
          else
          {
@@ -1067,7 +1067,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             RT_array[lev] = RT;
 
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
+           // if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
 
             wall_time = time_getWallclockSeconds();
             //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
@@ -1076,7 +1076,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             //sprintf(fname, "RAP_%d", lev);
             //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time); }
+          //  if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time); }
          }
       }
 
@@ -1095,7 +1095,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
 #endif
          wall_time = time_getWallclockSeconds() - wall_time;
-         if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time); }
+       //  if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time); }
       }
       //char fname[256];
       //sprintf(fname, "RAP_%d", lev);
