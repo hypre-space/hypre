@@ -110,7 +110,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int *use_non_galerkin_cg = (mgr_data -> use_non_galerkin_cg);
 
-//   hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
+   //   hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
 
    HYPRE_Int use_air = 0;
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
