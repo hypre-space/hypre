@@ -15,8 +15,10 @@
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_KOKKOS_HEADER
+#define HYPRE_BOXLOOP_KOKKOS_HEADER
+
+#if defined(HYPRE_USING_KOKKOS)
 
 #ifdef __cplusplus
 extern "C++"
@@ -372,4 +374,8 @@ struct ColumnSums
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
 #define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
+
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_KOKKOS_HEADER */
+

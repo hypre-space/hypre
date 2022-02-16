@@ -15,8 +15,10 @@
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER
+#define HYPRE_BOXLOOP_DEVICEOMP_HEADER
+
+#if defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 #include "omp.h"
 
@@ -33,7 +35,7 @@
 
 #ifndef AUTO_OMP_TEAM
 /* omp team size (aka. gpu block size) */
-#define hypre_gpu_block_size 512
+#define hypre_gpu_block_size HYPRE_1D_BLOCK_SIZE
 /* the max number of omp teams */
 #define hypre_max_num_blocks 1000000
 #endif
@@ -571,4 +573,6 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
         hypre_BoxLoop2End(i1, i2)
 
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER */
 

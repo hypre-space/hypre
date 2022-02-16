@@ -264,7 +264,7 @@ void hypre_CudaCompileFlagCheck()
 dim3
 hypre_GetDefaultDeviceBlockDimension()
 {
-   dim3 bDim(512, 1, 1);
+   dim3 bDim(HYPRE_1D_BLOCK_SIZE, 1, 1);
 
    return bDim;
 }
@@ -1102,11 +1102,11 @@ hypre_HYPREIntToCusparseIndexType()
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
-#if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t
-#elif defined(HYPRE_USING_CUDA)
+/* CUDA/HIP stream */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
@@ -1115,47 +1115,12 @@ sycl::queue*
 #endif
 hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   cudaStream_t stream = 0;
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    cudaStream_t stream = 0;
 #elif defined(HYPRE_USING_HIP)
    hipStream_t stream = 0;
 #elif defined(HYPRE_USING_SYCL)
-   sycl::queue   *stream = NULL;
-   if (i >= HYPRE_MAX_NUM_STREAMS)
-   {
-      hypre_printf("SYCL queue %d exceeds the max number %d\n",
-                   i, HYPRE_MAX_NUM_STREAMS);
-      return NULL;
-   }
-   if (data->streams[i])
-   {
-      return data->streams[i];
-   }
-   else
-   {
-      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
-      {
-         for (std::exception_ptr const& e : exceptions)
-         {
-            try
-            {
-               std::rethrow_exception(e);
-            }
-            catch (sycl::exception const& ex)
-            {
-               std::cout << "Caught asynchronous SYCL exception:" << std::endl
-                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
-            }
-         }
-      };
-
-      sycl::device*  sycl_device   = data->device;
-      sycl::context  sycl_ctxt     = sycl::context(*sycl_device, sycl_asynchandler);
-      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
-      data->streams[i] = stream;
-   }
+   sycl::queue *stream = NULL;
 #endif
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -1163,7 +1128,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
    {
       /* return the default stream, i.e., the NULL stream */
       /*
-      hypre_printf("CUDA stream %d exceeds the max number %d\n",
+      hypre_printf("device stream %d exceeds the max number %d\n",
                    i, HYPRE_MAX_NUM_STREAMS);
       */
       return NULL;
@@ -1174,13 +1139,31 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
       return data->streams[i];
    }
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
    HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
+#elif defined(HYPRE_USING_SYCL)
+   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+   {
+      for (std::exception_ptr const& e : exceptions)
+      {
+         try
+         {
+            std::rethrow_exception(e);
+         }
+         catch (sycl::exception const& ex)
+         {
+            std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+         }
+      }
+   };
+
+   sycl::device* sycl_device = data->device;
+   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
+   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
 #endif
 
    data->streams[i] = stream;
@@ -1189,9 +1172,7 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
    return stream;
 }
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-cudaStream_t
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
 hipStream_t
@@ -1202,6 +1183,10 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 {
    return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
 }
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
@@ -1402,6 +1387,7 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
 
+#if defined(HYPRE_USING_GPU)
 
 hypre_DeviceData*
 hypre_DeviceDataCreate()
@@ -1493,13 +1479,12 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    }
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->streams[i])
       {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaStreamDestroy(data->streams[i]) );
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
          HYPRE_CUDA_CALL( cudaStreamDestroy(data->streams[i]) );
 #elif defined(HYPRE_USING_HIP)
          HYPRE_HIP_CALL( hipStreamDestroy(data->streams[i]) );
@@ -1509,6 +1494,7 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 #endif
       }
    }
+#endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
    hypre_DeviceDataCubCachingAllocatorDestroy(data);
@@ -1525,9 +1511,7 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 HYPRE_Int
 hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#elif defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
@@ -1595,9 +1579,6 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#else
          if (cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
@@ -1606,7 +1587,6 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
             HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
 #endif
          }
-#endif
          break;
       default:
          hypre_printf("hypre_SyncComputeStream_core invalid action\n");
