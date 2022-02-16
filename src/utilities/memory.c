@@ -1171,8 +1171,10 @@ hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker)
 void
 hypre_MemoryTrackerInsert(const char           *action,
                           void                 *ptr,
+                          void                 *ptr2,
                           size_t                nbytes,
                           hypre_MemoryLocation  memory_location,
+                          hypre_MemoryLocation  memory_location2,
                           const char           *filename,
                           const char           *function,
                           HYPRE_Int             line)
@@ -1198,8 +1200,10 @@ hypre_MemoryTrackerInsert(const char           *action,
 
    sprintf(entry->_action, "%s", action);
    entry->_ptr = ptr;
+   entry->_ptr2 = ptr2;
    entry->_nbytes = nbytes;
    entry->_memory_location = memory_location;
+   entry->_memory_location2 = memory_location2;
    sprintf(entry->_filename, "%s", filename);
    sprintf(entry->_function, "%s", function);
    entry->_line = line;
@@ -1300,6 +1304,7 @@ hypre_PrintMemoryTracker()
       }
 
       char memory_location[256];
+      char memory_location2[256];
       char nbytes[32];
 
       if (tracker->data[i]._memory_location == hypre_MEMORY_HOST)
@@ -1323,6 +1328,27 @@ hypre_PrintMemoryTracker()
          sprintf(memory_location, "%s", "UNDEFINED");
       }
 
+      if (tracker->data[i]._memory_location2 == hypre_MEMORY_HOST)
+      {
+         sprintf(memory_location2, "%s", "HOST");
+      }
+      else if (tracker->data[i]._memory_location2 == hypre_MEMORY_HOST_PINNED)
+      {
+         sprintf(memory_location2, "%s", "HOST_PINNED");
+      }
+      else if (tracker->data[i]._memory_location2 == hypre_MEMORY_DEVICE)
+      {
+         sprintf(memory_location2, "%s", "DEVICE");
+      }
+      else if (tracker->data[i]._memory_location2 == hypre_MEMORY_UNIFIED)
+      {
+         sprintf(memory_location2, "%s", "UNIFIED");
+      }
+      else
+      {
+         sprintf(memory_location2, "%s", "UNDEFINED");
+      }
+
       if (tracker->data[i]._nbytes != (size_t) -1)
       {
          sprintf(nbytes, "%zu", tracker->data[i]._nbytes);
@@ -1332,20 +1358,46 @@ hypre_PrintMemoryTracker()
          sprintf(nbytes, "%s", "");
       }
 
-      fprintf(file, " %6zu %12s        %16p %10s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
-              i,
-              tracker->data[i]._action,
-              tracker->data[i]._ptr,
-              nbytes,
-              memory_location,
-              tracker->data[i]._filename,
-              tracker->data[i]._line,
-              tracker->data[i]._function,
-              curr_bytes[hypre_MEMORY_HOST],
-              curr_bytes[hypre_MEMORY_HOST_PINNED],
-              curr_bytes[hypre_MEMORY_DEVICE],
-              curr_bytes[hypre_MEMORY_UNIFIED]
-             );
+#if 0
+      if (strstr(tracker->data[i]._action, "memcpy") != NULL &&
+          tracker->data[i]._memory_location == hypre_MEMORY_HOST &&
+          tracker->data[i]._memory_location2 == hypre_MEMORY_DEVICE )
+      {
+         fprintf(file, " %6zu %12s        %16p  %16p  %10s %16s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
+                 i,
+                 tracker->data[i]._action,
+                 tracker->data[i]._ptr,
+                 tracker->data[i]._ptr2,
+                 nbytes,
+                 memory_location,
+                 memory_location2,
+                 tracker->data[i]._filename,
+                 tracker->data[i]._line,
+                 tracker->data[i]._function,
+                 curr_bytes[hypre_MEMORY_HOST],
+                 curr_bytes[hypre_MEMORY_HOST_PINNED],
+                 curr_bytes[hypre_MEMORY_DEVICE],
+                 curr_bytes[hypre_MEMORY_UNIFIED]
+               );
+      }
+      else
+#endif
+      {
+         fprintf(file, " %6zu %12s        %16p %10s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
+                 i,
+                 tracker->data[i]._action,
+                 tracker->data[i]._ptr,
+                 nbytes,
+                 memory_location,
+                 tracker->data[i]._filename,
+                 tracker->data[i]._line,
+                 tracker->data[i]._function,
+                 curr_bytes[hypre_MEMORY_HOST],
+                 curr_bytes[hypre_MEMORY_HOST_PINNED],
+                 curr_bytes[hypre_MEMORY_DEVICE],
+                 curr_bytes[hypre_MEMORY_UNIFIED]
+               );
+      }
    }
 
    fprintf(file, "\n==== Total allocated (byte):\n");
