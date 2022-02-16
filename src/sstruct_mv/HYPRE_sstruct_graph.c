@@ -826,3 +826,113 @@ HYPRE_SStructGraphSetObjectType( HYPRE_SStructGraph  graph,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGraphPrint( FILE *file, HYPRE_SStructGraph graph )
+{
+   HYPRE_Int                 type = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int                 ndim = hypre_SStructGraphNDim(graph);
+   HYPRE_Int                 nentries = hypre_SStructNGraphEntries(graph);
+   hypre_SStructGraphEntry **entries = hypre_SStructGraphEntries(graph);
+   HYPRE_Int                 part, to_part;
+   HYPRE_Int                 var, to_var;
+   hypre_IndexRef            index, to_index;
+
+   HYPRE_Int                 i;
+
+   /* Print auxiliary info */
+   hypre_fprintf(file, "GraphSetObjectType: %d\n", type);
+
+   /* Print SStructGraphEntry info */
+   hypre_fprintf(file, "GraphNumEntries: %d", nentries);
+   for (i = 0; i < nentries; i++)
+   {
+      part = hypre_SStructGraphEntryPart(entries[i]);
+      var = hypre_SStructGraphEntryVar(entries[i]);
+      index = hypre_SStructGraphEntryIndex(entries[i]);
+      to_part = hypre_SStructGraphEntryToPart(entries[i]);
+      to_var = hypre_SStructGraphEntryToVar(entries[i]);
+      to_index = hypre_SStructGraphEntryToIndex(entries[i]);
+
+      hypre_fprintf(file, "\nGraphAddEntries: %d %d ", part, var);
+      hypre_IndexPrint(file, ndim, index);
+      hypre_fprintf(file, " %d %d ", to_part, to_var);
+      hypre_IndexPrint(file, ndim, to_index);
+   }
+   hypre_fprintf(file, "\n");
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGraphRead( FILE                  *file,
+                        HYPRE_SStructGrid      grid,
+                        HYPRE_SStructStencil **stencils,
+                        HYPRE_SStructGraph    *graph_ptr )
+{
+   MPI_Comm                  comm = hypre_SStructGridComm(grid);
+   HYPRE_Int                 nparts = hypre_SStructGridNParts(grid);
+   HYPRE_Int                 ndim = hypre_SStructGridNDim(grid);
+
+   HYPRE_SStructGraph        graph;
+   hypre_SStructGraphEntry **entries;
+   hypre_SStructPGrid       *pgrid;
+   HYPRE_Int                 nentries;
+   HYPRE_Int                 a_entries;
+   HYPRE_Int                 part, to_part;
+   HYPRE_Int                 var, to_var;
+   hypre_Index               index, to_index;
+
+   HYPRE_Int                 type;
+   HYPRE_Int                 nvars;
+   HYPRE_Int                 i;
+
+   /* Create graph */
+   HYPRE_SStructGraphCreate(comm, grid, &graph);
+
+   /* Read auxiliary info */
+   hypre_fscanf(file, "GraphSetObjectType: %d\n", &type);
+   HYPRE_SStructGraphSetObjectType(graph, type);
+
+   /* Set stencils */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      for (var = 0; var < nvars; var++)
+      {
+         HYPRE_SStructGraphSetStencil(graph, part, var, stencils[part][var]);
+      }
+   }
+
+   /* TODO: HYPRE_SStructGraphSetFEM */
+   /* TODO: HYPRE_SStructGraphSetFEMSparsity */
+
+   /* Read SStructGraphEntry info */
+   hypre_fscanf(file, "GraphNumEntries: %d", &nentries);
+   a_entries = nentries + 1;
+   hypre_SStructAGraphEntries(graph) = a_entries;
+   entries = hypre_CTAlloc(hypre_SStructGraphEntry *, a_entries, HYPRE_MEMORY_HOST);
+   hypre_SStructGraphEntries(graph) = entries;
+   for (i = 0; i < nentries; i++)
+   {
+      hypre_fscanf(file, "\nGraphAddEntries: %d %d ", &part, &var);
+      hypre_IndexRead(file, ndim, index);
+      hypre_fscanf(file, " %d %d ", &to_part, &to_var);
+      hypre_IndexRead(file, ndim, to_index);
+
+      HYPRE_SStructGraphAddEntries(graph, part, index, var, to_part, to_index, to_var);
+   }
+   hypre_fscanf(file, "\n");
+
+   *graph_ptr = graph;
+
+   return hypre_error_flag;
+}

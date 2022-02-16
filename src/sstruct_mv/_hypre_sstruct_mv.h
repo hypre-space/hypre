@@ -802,6 +802,8 @@ HYPRE_Int HYPRE_SStructGraphAddEntries ( HYPRE_SStructGraph graph, HYPRE_Int par
                                          HYPRE_Int var, HYPRE_Int to_part, HYPRE_Int *to_index, HYPRE_Int to_var );
 HYPRE_Int HYPRE_SStructGraphAssemble ( HYPRE_SStructGraph graph );
 HYPRE_Int HYPRE_SStructGraphSetObjectType ( HYPRE_SStructGraph graph, HYPRE_Int type );
+HYPRE_Int HYPRE_SStructGraphPrint ( FILE *file, HYPRE_SStructGraph graph );
+HYPRE_Int HYPRE_SStructGraphRead ( FILE *file, HYPRE_SStructGrid grid, HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr );
 
 /* HYPRE_sstruct_grid.c */
 HYPRE_Int HYPRE_SStructGridCreate ( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts,
@@ -872,6 +874,8 @@ HYPRE_Int HYPRE_SStructStencilCreate ( HYPRE_Int ndim, HYPRE_Int size,
 HYPRE_Int HYPRE_SStructStencilDestroy ( HYPRE_SStructStencil stencil );
 HYPRE_Int HYPRE_SStructStencilSetEntry ( HYPRE_SStructStencil stencil, HYPRE_Int entry,
                                          HYPRE_Int *offset, HYPRE_Int var );
+HYPRE_Int HYPRE_SStructStencilPrint ( FILE *file, HYPRE_SStructStencil stencil );
+HYPRE_Int HYPRE_SStructStencilRead ( FILE *file, HYPRE_SStructStencil *stencil_ptr );
 
 /* HYPRE_sstruct_vector.c */
 HYPRE_Int HYPRE_SStructVectorCreate ( MPI_Comm comm, HYPRE_SStructGrid grid,
@@ -1103,4 +1107,3 @@ HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
 #endif
 
 #endif
-
