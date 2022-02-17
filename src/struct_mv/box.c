@@ -668,7 +668,16 @@ hypre_BoxRead( FILE       *file,
    hypre_Box  *box;
    HYPRE_Int   d;
 
-   box = hypre_BoxCreate(ndim);
+   /* Don't create a new box if the output box already exists */
+   if (*box_ptr)
+   {
+      box = *box_ptr;
+      hypre_BoxInit(box, ndim);
+   }
+   else
+   {
+      box = hypre_BoxCreate(ndim);
+   }
 
    hypre_fscanf(file, "(%d", &hypre_BoxIMinD(box, 0));
    for (d = 1; d < ndim; d++)
@@ -680,7 +689,7 @@ hypre_BoxRead( FILE       *file,
    {
       hypre_fscanf(file, ", %d", &hypre_BoxIMaxD(box, d));
    }
-   hypre_fprintf(file, ")");
+   hypre_fscanf(file, ")");
 
    *box_ptr = box;
 
