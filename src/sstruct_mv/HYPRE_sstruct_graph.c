@@ -90,20 +90,22 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
 HYPRE_Int
 HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 {
-   HYPRE_Int               nparts;
-   hypre_SStructPGrid    **pgrids;
-   hypre_SStructStencil ***stencils;
-   HYPRE_Int              *fem_nsparse;
-   HYPRE_Int             **fem_sparse_i;
-   HYPRE_Int             **fem_sparse_j;
-   HYPRE_Int             **fem_entries;
-   HYPRE_Int               nUventries;
-   HYPRE_Int              *iUventries;
-   hypre_SStructUVEntry  **Uventries;
-   hypre_SStructUVEntry   *Uventry;
-   HYPRE_BigInt          **Uveoffsets;
-   HYPRE_Int               nvars;
-   HYPRE_Int               part, var, i;
+   HYPRE_Int                 nparts;
+   hypre_SStructPGrid      **pgrids;
+   hypre_SStructStencil   ***stencils;
+   HYPRE_Int                *fem_nsparse;
+   HYPRE_Int               **fem_sparse_i;
+   HYPRE_Int               **fem_sparse_j;
+   HYPRE_Int               **fem_entries;
+   HYPRE_Int                 nUventries;
+   HYPRE_Int                *iUventries;
+   hypre_SStructUVEntry    **Uventries;
+   hypre_SStructUVEntry     *Uventry;
+   HYPRE_BigInt            **Uveoffsets;
+   HYPRE_Int                 a_graph_entries;
+   hypre_SStructGraphEntry **graph_entries;
+   HYPRE_Int                 nvars;
+   HYPRE_Int                 part, var, i;
 
    if (graph)
    {
@@ -155,6 +157,13 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          hypre_TFree(iUventries, HYPRE_MEMORY_HOST);
          hypre_TFree(Uventries, HYPRE_MEMORY_HOST);
          hypre_TFree(Uveoffsets, HYPRE_MEMORY_HOST);
+         a_graph_entries = hypre_SStructAGraphEntries(graph);
+         graph_entries = hypre_SStructGraphEntries(graph);
+         for (i = 0; i < a_graph_entries; i++)
+         {
+            hypre_TFree(graph_entries[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(graph_entries, HYPRE_MEMORY_HOST);
          hypre_TFree(graph, HYPRE_MEMORY_HOST);
       }
    }
@@ -662,14 +671,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
          hypre_SStructGraphUVEntries(graph) = Uventries;
       }
-
-      /*free each add entry after copying */
-      hypre_TFree(new_entry, HYPRE_MEMORY_HOST);
-
-   }/* end of loop through add entries */
-
-   /* free the storage for the add entires */
-   hypre_TFree(add_entries, HYPRE_MEMORY_HOST);
+   } /* end of loop through add entries */
 
    /*---------------------------------------------------------
     * Set up the FEM stencil information
