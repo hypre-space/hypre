@@ -950,6 +950,7 @@ HYPRE_SStructMatrixPrint( const char          *filename,
    HYPRE_Int               myid;
    HYPRE_Int               part;
    HYPRE_Int               var, vi, vj, nvars;
+   HYPRE_Int               num_symm_calls;
    char                    new_filename[255];
 
    /* Sanity check */
@@ -966,6 +967,7 @@ HYPRE_SStructMatrixPrint( const char          *filename,
       return hypre_error_flag;
    }
 
+   /* Print grid info */
    hypre_fprintf(file, "SStructMatrix\n");
    hypre_SStructGridPrint(file, grid);
 
@@ -985,6 +987,46 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 
    /* Print graph info */
    HYPRE_SStructGraphPrint(file, graph);
+
+   /* Print symmetric info */
+   num_symm_calls = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      nvars = hypre_SStructPMatrixNVars(pmatrix);
+
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+            if (smatrix)
+            {
+               num_symm_calls++;
+            }
+         }
+      }
+   }
+   hypre_fprintf(file, "\nMatrixNumSetSymmetric: %d", num_symm_calls);
+   for (part = 0; part < nparts; part++)
+   {
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      nvars = hypre_SStructPMatrixNVars(pmatrix);
+
+      for (vi = 0; vi < nvars; vi++)
+      {
+         for (vj = 0; vj < nvars; vj++)
+         {
+            smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+            if (smatrix)
+            {
+               hypre_fprintf(file, "\nMatrixSetSymmetric: %d %d %d %d",
+                             part, vi, vj, hypre_StructMatrixSymmetric(smatrix));
+            }
+         }
+      }
+   }
+   hypre_fprintf(file, "\n");
 
    /* Print data */
    for (part = 0; part < nparts; part++)
@@ -1046,6 +1088,8 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_Int               myid;
    HYPRE_Int               part, var;
    HYPRE_Int               p, v, i, j, vi, vj;
+   HYPRE_Int               symmetric;
+   HYPRE_Int               num_symm_calls;
    HYPRE_Int               ret;
    HYPRE_Int               ncols;
    HYPRE_BigInt            row, col;
@@ -1068,6 +1112,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
       return hypre_error_flag;
    }
 
+   /* Read grid info */
    hypre_fscanf(file, "SStructMatrix\n");
    hypre_SStructGridRead(comm, file, &grid);
    nparts = hypre_SStructGridNParts(grid);
@@ -1108,8 +1153,20 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    /* Assemble graph */
    HYPRE_SStructGraphAssemble(graph);
 
-   /* Create and initialize matrix */
+   /* Create matrix */
    HYPRE_SStructMatrixCreate(comm, graph, &matrix);
+
+   /* Read symmetric info */
+   hypre_fscanf(file, "\nMatrixNumSetSymmetric: %d", &num_symm_calls);
+   for (i = 0; i < num_symm_calls; i++)
+   {
+      hypre_fscanf(file, "\nMatrixSetSymmetric: %d %d %d %d",
+                   &part, &vi, &vj, &symmetric);
+      HYPRE_SStructMatrixSetSymmetric(matrix, part, vi, vj, symmetric);
+   }
+   hypre_fscanf(file, "\n");
+
+   /* Initialize matrix */
    HYPRE_SStructMatrixInitialize(matrix);
 
    /* Read data */
