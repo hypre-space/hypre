@@ -6114,8 +6114,6 @@ main( hypre_int argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGridDestroy(grid);
-   HYPRE_SStructGraphDestroy(graph);
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
@@ -6133,6 +6131,9 @@ main( hypre_int argc,
 
    if (!read_fromfile_flag)
    {
+      HYPRE_SStructGridDestroy(grid);
+      HYPRE_SStructGraphDestroy(graph);
+
       for (s = 0; s < data.nstencils; s++)
       {
          HYPRE_SStructStencilDestroy(stencils[s]);

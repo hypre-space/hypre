@@ -2289,11 +2289,10 @@ hypre_SStructGridPrint( FILE              *file,
    hypre_IndexRef          periodic;
 
    /* Local variables */
-   HYPRE_Int               d, i;
+   HYPRE_Int               i;
    HYPRE_Int               part, var;
    HYPRE_Int               nvars;
    HYPRE_Int               nboxes;
-   HYPRE_Int               max_box_size;
 
    /* Print basic info */
    hypre_fprintf(file, "\nGridCreate: %d %d\n\n", ndim, nparts);
@@ -2308,7 +2307,6 @@ hypre_SStructGridPrint( FILE              *file,
 
       hypre_fprintf(file, "GridNumBoxes: %d %d\n", part, nboxes);
    }
-   hypre_fprintf(file, "\n");
 
    /* Print boxes per part */
    for (part = 0; part < nparts; part++)
@@ -2321,21 +2319,11 @@ hypre_SStructGridPrint( FILE              *file,
       {
          box = hypre_BoxArrayBox(boxes, i);
 
-         hypre_fprintf(file, "GridSetExtents: (%d, %d): ", part, i);
-         hypre_fprintf(file, "(%d", hypre_BoxIMinD(box, 0));
-         for (d = 1; d < ndim; d++)
-         {
-            hypre_fprintf(file, ", %d", hypre_BoxIMinD(box, d));
-         }
-         hypre_fprintf(file, ") x (%d", hypre_BoxIMaxD(box, 0));
-         for (d = 1; d < ndim; d++)
-         {
-            hypre_fprintf(file, ", %d", hypre_BoxIMaxD(box, d));
-         }
-         hypre_fprintf(file, ")\n");
+         hypre_fprintf(file, "\nGridSetExtents: (%d, %d): ", part, i);
+         hypre_BoxPrint(file, box);
       }
    }
-   hypre_fprintf(file, "\n");
+   hypre_fprintf(file, "\n\n");
 
    /* Print variable info per part */
    for (part = 0; part < nparts; part++)
@@ -2361,7 +2349,7 @@ hypre_SStructGridPrint( FILE              *file,
    {
       hypre_fprintf(file, " %d", num_ghost[i]);
    }
-   hypre_fprintf(file, "\n\n");
+   hypre_fprintf(file, "\n");
 
    /* Print periodic data per part */
    for (part = 0; part < nparts; part++)
@@ -2369,15 +2357,10 @@ hypre_SStructGridPrint( FILE              *file,
       pgrid = hypre_SStructGridPGrid(grid, part);
       periodic = hypre_SStructPGridPeriodic(pgrid);
 
-      hypre_fprintf(file, "GridSetPeriodic: %d ", part);
-      hypre_fprintf(file, "[%d", periodic[0]);
-      for (d = 1; d < ndim; d++)
-      {
-         hypre_fprintf(file, " %d", periodic[d]);
-      }
-      hypre_fprintf(file, "]\n");
+      hypre_fprintf(file, "\nGridSetPeriodic: %d ", part);
+      hypre_IndexPrint(file, ndim, periodic);
    }
-   hypre_fprintf(file, "\n");
+   hypre_fprintf(file, "\n\n");
 
    /* GridSetFEMOrdering */
 
@@ -2395,7 +2378,7 @@ hypre_SStructGridPrint( FILE              *file,
          dir = hypre_SStructNeighborDir(neighbor);
          ilomap = hypre_SStructNeighborILower(neighbor);
 
-         /* TODO: Move the following to SStructNeighborPrint */
+         /* Print SStructNeighbor info */
          hypre_fprintf(file, "GridNeighborInfo: ");
          hypre_BoxPrint(file, box);
          hypre_fprintf(file, " ");
@@ -2409,11 +2392,6 @@ hypre_SStructGridPrint( FILE              *file,
          hypre_fprintf(file, "\n");
       }
    }
-   hypre_fprintf(file, "\n");
-
-   /* Print maximum box size */
-   max_box_size = hypre_SStructGridGetMaxBoxSize(grid);
-   hypre_fprintf(file, "GridMaxBoxSize: %d\n", max_box_size);
 
    return hypre_error_flag;
 }
@@ -2423,9 +2401,6 @@ hypre_SStructGridPrint( FILE              *file,
  *
  * This function reads a semi-structured grid from file. This is used mainly
  * for debugging purposes.
- *
- * Assumptions:
- *   1) Maximum number of variables is 64
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2435,7 +2410,7 @@ hypre_SStructGridRead( MPI_Comm            comm,
 {
    /* Grid variables */
    HYPRE_SStructGrid       grid;
-   HYPRE_SStructVariable   vartypes[64];
+   HYPRE_SStructVariable  *vartypes;
    HYPRE_Int               num_ghost[2 * HYPRE_MAXDIM];
    hypre_Index           **nbor_offsets;
    HYPRE_Int              *nneighbors;
@@ -2448,7 +2423,6 @@ hypre_SStructGridRead( MPI_Comm            comm,
    HYPRE_Int               b, d, i, j;
    HYPRE_Int               part;
    HYPRE_Int               nparts, nvars;
-   HYPRE_Int               max_box_size;
    HYPRE_Int               nboxes;
    HYPRE_Int              *nboxes_array;
    hypre_Box              *box;
@@ -2474,32 +2448,18 @@ hypre_SStructGridRead( MPI_Comm            comm,
       for (j = 0; j < nboxes_array[i]; j++)
       {
          hypre_fscanf(file, "\nGridSetExtents: (%d, %d): ", &part, &b);
-         hypre_fscanf(file, "(%d", &hypre_BoxIMinD(box, 0));
-         for (d = 1; d < ndim; d++)
-         {
-            hypre_fscanf(file, ", %d", &hypre_BoxIMinD(box, d));
-         }
-         hypre_fscanf(file, ") x (%d", &hypre_BoxIMaxD(box, 0));
-         for (d = 1; d < ndim; d++)
-         {
-            hypre_fscanf(file, ", %d", &hypre_BoxIMaxD(box, d));
-         }
-         hypre_fscanf(file, ")\n");
+         hypre_BoxRead(file, ndim, &box);
 
          HYPRE_SStructGridSetExtents(grid, part, hypre_BoxIMin(box), hypre_BoxIMax(box));
       }
    }
-   hypre_fscanf(file, "\n");
+   hypre_fscanf(file, "\n\n");
 
    /* Read variable info per part */
    for (i = 0; i < nparts; i++)
    {
       hypre_fscanf(file, "GridSetVariables: %d %d ", &part, &nvars);
-      if (nvars > 64)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Cannot read more than 64 variables!\n");
-         return hypre_error_flag;
-      }
+      vartypes = hypre_CTAlloc(hypre_SStructVariable, nvars, HYPRE_MEMORY_HOST);
 
       hypre_fscanf(file, "[%d", &vartypes[0]);
       for (j = 1; j < nvars; j++)
@@ -2508,6 +2468,7 @@ hypre_SStructGridRead( MPI_Comm            comm,
       }
       hypre_fscanf(file, "]\n");
       HYPRE_SStructGridSetVariables(grid, part, nvars, vartypes);
+      hypre_TFree(vartypes, HYPRE_MEMORY_HOST);
    }
    hypre_fscanf(file, "\n");
 
@@ -2517,22 +2478,17 @@ hypre_SStructGridRead( MPI_Comm            comm,
    {
       hypre_fscanf(file, " %d", &num_ghost[i]);
    }
-   hypre_fscanf(file, "\n\n");
+   hypre_fscanf(file, "\n");
 
    /* Read periodic data per part */
    for (i = 0; i < nparts; i++)
    {
-      hypre_fscanf(file, "GridSetPeriodic: %d ", &part);
-      hypre_fscanf(file, "[%d", &periodic[0]);
-      for (d = 1; d < ndim; d++)
-      {
-         hypre_fscanf(file, " %d", &periodic[d]);
-      }
-      hypre_fscanf(file, "]\n");
+      hypre_fscanf(file, "\nGridSetPeriodic: %d ", &part);
+      hypre_IndexRead(file, ndim, periodic);
 
       HYPRE_SStructGridSetPeriodic(grid, part, periodic);
    }
-   hypre_fscanf(file, "\n");
+   hypre_fscanf(file, "\n\n");
 
    /* GridSetFEMOrdering */
 
@@ -2550,7 +2506,7 @@ hypre_SStructGridRead( MPI_Comm            comm,
       {
          neighbor = &neighbors[part][i];
 
-         /* TODO: Move the following to SStructNeighborRead */
+         /* Read SStructNeighbor info */
          hypre_fscanf(file, "GridNeighborInfo: ");
          hypre_BoxRead(file, ndim, &box);
          hypre_CopyBox(box, hypre_SStructNeighborBox(neighbor));
@@ -2571,10 +2527,6 @@ hypre_SStructGridRead( MPI_Comm            comm,
          }
       }
    }
-   hypre_fscanf(file, "\n");
-
-   /* Read maximum box size */
-   hypre_fscanf(file, "GridMaxBoxSize: %d\n", &max_box_size);
 
    HYPRE_SStructGridAssemble(grid);
 
