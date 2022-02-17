@@ -957,7 +957,7 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 
    /* Print auxiliary info */
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.SMatrix.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       hypre_printf("Error: can't open output file %s\n", new_filename);
@@ -1059,7 +1059,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
     * Read S-Matrix
     *-----------------------------------------------------------*/
 
-   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   hypre_sprintf(new_filename, "%s.SMatrix.%05d", filename, myid);
    if ((file = fopen(new_filename, "r")) == NULL)
    {
       hypre_printf("Error: can't open input file %s\n", new_filename);
@@ -1104,6 +1104,9 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
       hypre_TFree(stencils[part], HYPRE_MEMORY_HOST);
    }
    hypre_TFree(stencils, HYPRE_MEMORY_HOST);
+
+   /* Assemble graph */
+   HYPRE_SStructGraphAssemble(graph);
 
    /* Create and initialize matrix */
    HYPRE_SStructMatrixCreate(comm, graph, &matrix);
@@ -1173,7 +1176,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_SStructMatrixAssemble(matrix);
 
    /* Decrease ref counters */
-   //HYPRE_SStructGraphDestroy(graph);
+   HYPRE_SStructGraphDestroy(graph);
    HYPRE_SStructGridDestroy(grid);
 
    *matrix_ptr = matrix;
