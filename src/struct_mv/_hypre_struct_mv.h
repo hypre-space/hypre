@@ -1689,8 +1689,8 @@ HYPRE_Int hypre_BoxShiftNeg( hypre_Box *box, hypre_Index shift );
 HYPRE_Int hypre_BoxGrowByIndex( hypre_Box *box, hypre_Index  index );
 HYPRE_Int hypre_BoxGrowByValue( hypre_Box *box, HYPRE_Int val );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box, HYPRE_Int *array );
-HYPRE_Int hypre_BoxPrint ( FILE *file , hypre_Box *box );
-HYPRE_Int hypre_BoxRead ( FILE *file , HYPRE_Int ndim, hypre_Box **box_ptr );
+HYPRE_Int hypre_BoxPrint ( FILE *file, hypre_Box *box );
+HYPRE_Int hypre_BoxRead ( FILE *file, HYPRE_Int ndim, hypre_Box **box_ptr );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArraySetSize ( hypre_BoxArray *box_array, HYPRE_Int size );
@@ -2927,3 +2927,4 @@ typedef struct hypre_Boxloop_struct
 #endif
 
 #endif
+

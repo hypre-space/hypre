@@ -21,7 +21,8 @@ HYPRE_Int HYPRE_SStructGraphAddEntries ( HYPRE_SStructGraph graph, HYPRE_Int par
 HYPRE_Int HYPRE_SStructGraphAssemble ( HYPRE_SStructGraph graph );
 HYPRE_Int HYPRE_SStructGraphSetObjectType ( HYPRE_SStructGraph graph, HYPRE_Int type );
 HYPRE_Int HYPRE_SStructGraphPrint ( FILE *file, HYPRE_SStructGraph graph );
-HYPRE_Int HYPRE_SStructGraphRead ( FILE *file, HYPRE_SStructGrid grid, HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr );
+HYPRE_Int HYPRE_SStructGraphRead ( FILE *file, HYPRE_SStructGrid grid,
+                                   HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr );
 
 /* HYPRE_sstruct_grid.c */
 HYPRE_Int HYPRE_SStructGridCreate ( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts,
@@ -212,8 +213,8 @@ HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box, hypre_Index offset, hyp
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
                                        hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
 HYPRE_Int hypre_SStructGridGetMaxBoxSize ( hypre_SStructGrid *grid );
-HYPRE_Int hypre_SStructGridPrint ( FILE *file , hypre_SStructGrid *grid );
-HYPRE_Int hypre_SStructGridRead ( MPI_Comm comm , FILE *file , hypre_SStructGrid **grid_ptr );
+HYPRE_Int hypre_SStructGridPrint ( FILE *file, hypre_SStructGrid *grid );
+HYPRE_Int hypre_SStructGridRead ( MPI_Comm comm, FILE *file, hypre_SStructGrid **grid_ptr );
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px, hypre_SStructPVector *py,
