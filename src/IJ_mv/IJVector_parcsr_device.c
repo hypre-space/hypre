@@ -252,8 +252,8 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
-                         vec_start, new_sora,
-                         hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+                        vec_start, new_sora,
+                        hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
 
       hypre_TFree(new_i,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data, HYPRE_MEMORY_DEVICE);

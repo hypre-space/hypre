@@ -165,7 +165,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(len1, "thread", bDim);
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
-                         (HYPRE_Int *) row_indexes, ncols, indicator );
+                        (HYPRE_Int *) row_indexes, ncols, indicator );
 
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,

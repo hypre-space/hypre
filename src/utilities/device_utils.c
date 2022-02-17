@@ -346,7 +346,7 @@ hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_di
    }
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_GetRowNnz, gDim, bDim, nrows, d_row_indices, d_diag_ia,
-                      d_offd_ia, d_rownnz );
+                     d_offd_ia, d_rownnz );
 
    return hypre_error_flag;
 }
@@ -486,10 +486,10 @@ hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
    */
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
-                      nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
-                      d_diag_i, d_diag_j, d_diag_a,
-                      d_offd_i, d_offd_j, d_offd_a,
-                      d_ib, d_jb, d_ab );
+                     nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
+                     d_diag_i, d_diag_j, d_diag_a,
+                     d_offd_i, d_offd_j, d_offd_a,
+                     d_ib, d_jb, d_ab );
 
    return hypre_error_flag;
 }
@@ -736,7 +736,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
 
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_ScatterAdd, gDim, bDim,
-                         reduced_n, x, reduced_map, reduced_y );
+                        reduced_n, x, reduced_map, reduced_y );
 
       if (!work)
       {

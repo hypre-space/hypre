@@ -468,10 +468,10 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
    hypre_create_ija(m, d_rc, d_ic, &d_jc, &d_c, &nnzC_nume);
 
    HYPRE_GPU_LAUNCH ( (hypre_spgemm_numeric < num_warps_per_block, shmem_hash_size, !exact_rownnz,
-                        hash_type > ),
-                       gDim, bDim, /* shmem_size, */
-                       m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
-                       d_ghash_i, d_ghash_j, d_ghash_a );
+                       hash_type > ),
+                      gDim, bDim, /* shmem_size, */
+                      m, /* k, n, */ d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc,
+                      d_ghash_i, d_ghash_j, d_ghash_a );
 
    /* post-processing */
    if (!exact_rownnz)
@@ -494,7 +494,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int       m,
          /* copy to the final C */
          dim3 gDim( (m + bDim.z - 1) / bDim.z );
          HYPRE_GPU_LAUNCH( (hypre_spgemm_copy_from_Cext_into_C<num_warps_per_block>), gDim, bDim,
-                            m, d_ic, d_jc, d_c, d_ic_new, d_jc_new, d_c_new );
+                           m, d_ic, d_jc, d_c, d_ic_new, d_jc_new, d_c_new );
 
          hypre_TFree(d_ic, HYPRE_MEMORY_DEVICE);
          hypre_TFree(d_jc, HYPRE_MEMORY_DEVICE);

@@ -198,9 +198,9 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getnnz, gDim, bDim,
-                      n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
-                      CF_marker, CF_marker_offd, num_functions,
-                      dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
+                     n_fine, S_diag_i, S_diag_j, S_offd_i, S_offd_j,
+                     CF_marker, CF_marker_offd, num_functions,
+                     dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
 
    /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
    hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
@@ -229,28 +229,28 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    if (interp_type == 3)
    {
       HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef, gDim, bDim,
-                         n_fine, A_diag_i, A_diag_j, A_diag_data,
-                         A_offd_i, A_offd_j, A_offd_data,
-                         hypre_ParCSRMatrixSocDiagJ(S),
-                         hypre_ParCSRMatrixSocOffdJ(S),
-                         CF_marker, CF_marker_offd,
-                         num_functions, dof_func_dev, dof_func_offd,
-                         P_diag_i, P_diag_j, P_diag_data,
-                         P_offd_i, P_offd_j, P_offd_data,
-                         fine_to_coarse_d );
+                        n_fine, A_diag_i, A_diag_j, A_diag_data,
+                        A_offd_i, A_offd_j, A_offd_data,
+                        hypre_ParCSRMatrixSocDiagJ(S),
+                        hypre_ParCSRMatrixSocOffdJ(S),
+                        CF_marker, CF_marker_offd,
+                        num_functions, dof_func_dev, dof_func_offd,
+                        P_diag_i, P_diag_j, P_diag_data,
+                        P_offd_i, P_offd_j, P_offd_data,
+                        fine_to_coarse_d );
    }
    else
    {
       HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef_v2, gDim, bDim,
-                         n_fine, A_diag_i, A_diag_j, A_diag_data,
-                         A_offd_i, A_offd_j, A_offd_data,
-                         hypre_ParCSRMatrixSocDiagJ(S),
-                         hypre_ParCSRMatrixSocOffdJ(S),
-                         CF_marker, CF_marker_offd,
-                         num_functions, dof_func_dev, dof_func_offd,
-                         P_diag_i, P_diag_j, P_diag_data,
-                         P_offd_i, P_offd_j, P_offd_data,
-                         fine_to_coarse_d );
+                        n_fine, A_diag_i, A_diag_j, A_diag_data,
+                        A_offd_i, A_offd_j, A_offd_data,
+                        hypre_ParCSRMatrixSocDiagJ(S),
+                        hypre_ParCSRMatrixSocOffdJ(S),
+                        CF_marker, CF_marker_offd,
+                        num_functions, dof_func_dev, dof_func_offd,
+                        P_diag_i, P_diag_j, P_diag_data,
+                        P_offd_i, P_offd_j, P_offd_data,
+                        fine_to_coarse_d );
    }
 
    /* !!!! Free them here */
@@ -1162,9 +1162,9 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n_fine, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildInterpOnePnt_getnnz, gDim, bDim,
-                      n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,
-                      A_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
-                      offd_compress_marker, P_diag_i, P_diag_j_temp, P_offd_i, P_offd_j_temp);
+                     n_fine, A_diag_i, A_strong_diag_j, A_diag_a, A_offd_i, A_strong_offd_j,
+                     A_offd_a, CF_marker, CF_marker_offd, diag_compress_marker,
+                     offd_compress_marker, P_diag_i, P_diag_j_temp, P_offd_i, P_offd_j_temp);
 
    /*-----------------------------------------------------------------------
     *  Send and receive fine_to_coarse info.

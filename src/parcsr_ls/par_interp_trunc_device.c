@@ -163,7 +163,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_InterpTruncation, gDim, bDim,
-                      nrows, trunc_factor, max_elmts, P_rowptr, P_j, P_a );
+                     nrows, trunc_factor, max_elmts, P_rowptr, P_j, P_a );
 
    /* build new P_diag and P_offd */
    if (nnz_diag)
