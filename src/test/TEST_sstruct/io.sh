@@ -25,6 +25,10 @@ FILES="\
  ${TNAME}.out.4R\
  ${TNAME}.out.5P\
  ${TNAME}.out.5R\
+ ${TNAME}.out.6P\
+ ${TNAME}.out.6R\
+ ${TNAME}.out.7P\
+ ${TNAME}.out.7R\
  ${TNAME}.out.100P\
  ${TNAME}.out.100R\
  ${TNAME}.out.101P\
@@ -37,6 +41,10 @@ FILES="\
  ${TNAME}.out.104R\
  ${TNAME}.out.105P\
  ${TNAME}.out.105R\
+ ${TNAME}.out.106P\
+ ${TNAME}.out.106R\
+ ${TNAME}.out.107P\
+ ${TNAME}.out.107R\
 "
 
 for i in $FILES

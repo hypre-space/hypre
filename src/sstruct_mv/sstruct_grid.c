@@ -2528,6 +2528,7 @@ hypre_SStructGridRead( MPI_Comm            comm,
       }
    }
 
+   /* Assemble grid */
    HYPRE_SStructGridAssemble(grid);
 
    /* Free memory */

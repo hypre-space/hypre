@@ -26,6 +26,12 @@ mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fro
 mpirun -np 1 ./sstruct -in sstruct.in.marinak -solver 18 -tol 1e-3 -print > io.out.5P
 mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -tol 1e-3 > io.out.5R
 
+mpirun -np 1 ./sstruct -in sstruct.in.p7iso -r 2 2 2 -solver 18 -print > io.out.6P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 > io.out.6R
+
+mpirun -np 1 ./sstruct -in sstruct.in.symm3 -r 4 4 4 -solver 18 -print > io.out.7P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 > io.out.7R
+
 #=============================================================================
 # Parallel I/O tests
 #=============================================================================
@@ -47,3 +53,9 @@ mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fro
 
 mpirun -np 8 ./sstruct -in sstruct.in.marinak -pooldist 1 -solver 18 -tol 1e-3 -print > io.out.105P
 mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -tol 1e-3 > io.out.105R
+
+mpirun -np 8 ./sstruct -in sstruct.in.p7iso -P 2 2 2 -solver 18 -print > io.out.106P
+mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 > io.out.106R
+
+mpirun -np 8 ./sstruct -in sstruct.in.symm3 -r 2 2 2 -P 2 2 2 -solver 18 -print > io.out.107P
+mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 > io.out.107R
