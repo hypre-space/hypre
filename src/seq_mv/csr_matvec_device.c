@@ -336,13 +336,13 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
       matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
    }
 
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
-                                              oneapi::mkl::transpose::nontrans,
-                                              alpha,
-                                              matA_handle,
-                                              hypre_VectorData(x),
-                                              beta,
-                                              hypre_VectorData(y) + offset).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
+                                                oneapi::mkl::transpose::nontrans,
+                                                alpha,
+                                                matA_handle,
+                                                hypre_VectorData(x),
+                                                beta,
+                                                hypre_VectorData(y) + offset).wait() );
 
    if (trans)
    {

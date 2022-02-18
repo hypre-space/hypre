@@ -8,7 +8,8 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+/* WM: debug - modify macro guards when ready */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) // || defined(HYPRE_USING_SYCL)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
@@ -502,6 +503,9 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    return C;
 }
 
+/* WM: debug - drop macro guards when ready */
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* C = R^{T} * A * P */
 hypre_ParCSRMatrix*
@@ -542,6 +546,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    if (num_procs > 1)
    {
+      /* WM: debug - drop macro guards when ready */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       void *request;
       hypre_CSRMatrix *Abar, *RbarT, *Pext, *Pbar, *R_diagT, *R_offdT, *Cbar, *Cint, *Cext;
       HYPRE_Int num_cols_offd, local_nnz_Cbar;
@@ -769,6 +775,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_TFree(zmp_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_j, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_a, HYPRE_MEMORY_DEVICE);
+      /* WM: debug - drop macro guards when ready */
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    }
    else
    {
@@ -822,4 +830,4 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    return C;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

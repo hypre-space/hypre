@@ -1585,6 +1585,8 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
             HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
 #elif defined(HYPRE_USING_HIP)
             HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
+#elif defined(HYPRE_USING_SYCL)
+            HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->ext_oneapi_submit_barrier() );
 #endif
          }
          break;

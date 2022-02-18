@@ -486,9 +486,9 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()),
-                                            size, alpha,
-                                            y_data, 1).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()),
+                                              size, alpha,
+                                              y_data, 1).wait() );
 #else
    HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size,
                       y_data, [alpha](HYPRE_Complex y) -> HYPRE_Complex { return alpha * y; } );
@@ -558,9 +558,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
-                                            size, alpha,
-                                            x_data, 1, y_data, 1).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
+                                              size, alpha,
+                                              x_data, 1, y_data, 1).wait() );
 #else
    HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
                       [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
@@ -737,9 +737,9 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
    HYPRE_Real *result_dev = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()),
-                                           size, x_data, 1,
-                                           y_data, 1, result_dev).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()),
+                                             size, x_data, 1,
+                                             y_data, 1, result_dev).wait() );
    hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else

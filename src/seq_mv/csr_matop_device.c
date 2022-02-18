@@ -84,7 +84,7 @@ hypre_GpuMatDataCreate()
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::sparse::matrix_handle_t mat_handle;
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::init_matrix_handle(&mat_handle) );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::init_matrix_handle(&mat_handle) );
    hypre_GpuMatDataMatHandle(data) = mat_handle;
 #endif
 
@@ -98,13 +98,13 @@ hypre_GPUMatDataSetCSRData( hypre_GpuMatData *data,
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::sparse::matrix_handle_t mat_handle = hypre_GpuMatDataMatHandle(data);
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::set_csr_data(mat_handle,
-                                                      hypre_CSRMatrixNumRows(matrix),
-                                                      hypre_CSRMatrixNumCols(matrix),
-                                                      oneapi::mkl::index_base::zero,
-                                                      hypre_CSRMatrixI(matrix),
-                                                      hypre_CSRMatrixJ(matrix),
-                                                      hypre_CSRMatrixData(matrix)) );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(mat_handle,
+                                                        hypre_CSRMatrixNumRows(matrix),
+                                                        hypre_CSRMatrixNumCols(matrix),
+                                                        oneapi::mkl::index_base::zero,
+                                                        hypre_CSRMatrixI(matrix),
+                                                        hypre_CSRMatrixJ(matrix),
+                                                        hypre_CSRMatrixData(matrix)) );
 #endif
 
 }
@@ -128,7 +128,7 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 #endif
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::release_matrix_handle(&hypre_GpuMatDataMatHandle(data)) );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::release_matrix_handle(&hypre_GpuMatDataMatHandle(data)) );
 #endif
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
@@ -665,7 +665,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
 __global__ void
 hypreGPUKernel_CSRMoveDiagFirst(
-#ifdef HYPRE_USING_SYCL
+#if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
    HYPRE_Int      nrows,
@@ -673,7 +673,7 @@ hypreGPUKernel_CSRMoveDiagFirst(
    HYPRE_Int     *ja,
    HYPRE_Complex *aa )
 {
-#ifdef HYPRE_USING_SYCL
+#if defined(HYPRE_USING_SYCL)
    HYPRE_Int row  = hypre_gpu_get_grid_warp_id(item);
    sycl::sub_group SG = item.get_sub_group();
    HYPRE_Int lane = SG.get_local_linear_id();
@@ -693,7 +693,7 @@ hypreGPUKernel_CSRMoveDiagFirst(
    {
       p = read_only_load(ia + row + lane);
    }
-#ifdef HYPRE_USING_SYCL
+#if defined(HYPRE_USING_SYCL)
    q = SG.shuffle(p, 1);
    p = SG.shuffle(p, 0);
 
@@ -716,7 +716,7 @@ hypreGPUKernel_CSRMoveDiagFirst(
          aa[j] = tmp;
       }
 
-#ifdef HYPRE_USING_SYCL
+#if defined(HYPRE_USING_SYCL)
       if ( sycl::any_of_group(SG, find_diag) )
 #else
       if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )

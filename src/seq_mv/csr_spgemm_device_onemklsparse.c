@@ -57,15 +57,15 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    /* get tmp_buffer1 size for work estimation */
    req = oneapi::mkl::sparse::matmat_request::get_work_estimation_buf_size;
    tmp_size1 = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
-                                                handle_A,
-                                                handle_B,
-                                                handle_C,
-                                                req,
-                                                descr,
-                                                tmp_size1,
-                                                NULL,
-                                                {}).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
+                                                  handle_A,
+                                                  handle_B,
+                                                  handle_C,
+                                                  req,
+                                                  descr,
+                                                  tmp_size1,
+                                                  NULL,
+                                                  {}).wait() );
 
    /* allocate tmp_buffer1 for work estimation */
    tmp_buffer1 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size1, HYPRE_MEMORY_DEVICE);
@@ -73,56 +73,56 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    /* do work_estimation */
    req = oneapi::mkl::sparse::matmat_request::work_estimation;
    /* WM: Q - if I do a wait for each matmat call, do I still need to pass dependencies (last arguemnt) to subsequent matmat calls below? */
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
-                                                handle_A,
-                                                handle_B,
-                                                handle_C,
-                                                req,
-                                                descr,
-                                                tmp_size1,
-                                                tmp_buffer1,
-                                                {}).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
+                                                  handle_A,
+                                                  handle_B,
+                                                  handle_C,
+                                                  req,
+                                                  descr,
+                                                  tmp_size1,
+                                                  tmp_buffer1,
+                                                  {}).wait() );
 
    /* get tmp_buffer2 size for computation */
    req = oneapi::mkl::sparse::matmat_request::get_compute_buf_size;
    tmp_size2 = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
-                                                handle_A,
-                                                handle_B,
-                                                handle_C,
-                                                req,
-                                                descr,
-                                                tmp_size2,
-                                                NULL,
-                                                {}).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
+                                                  handle_A,
+                                                  handle_B,
+                                                  handle_C,
+                                                  req,
+                                                  descr,
+                                                  tmp_size2,
+                                                  NULL,
+                                                  {}).wait() );
 
    /* allocate tmp_buffer2 for computation */
    tmp_buffer2 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size2, HYPRE_MEMORY_DEVICE);
 
    /* do the computation */
    req = oneapi::mkl::sparse::matmat_request::compute;
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
-                                                handle_A,
-                                                handle_B,
-                                                handle_C,
-                                                req,
-                                                descr,
-                                                tmp_size2,
-                                                tmp_buffer2,
-                                                {}).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
+                                                  handle_A,
+                                                  handle_B,
+                                                  handle_C,
+                                                  req,
+                                                  descr,
+                                                  tmp_size2,
+                                                  tmp_buffer2,
+                                                  {}).wait() );
 
    /* get nnzC */
    req = oneapi::mkl::sparse::matmat_request::get_nnz;
    nnzC = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
-                                                handle_A,
-                                                handle_B,
-                                                handle_C,
-                                                req,
-                                                descr,
-                                                nnzC,
-                                                NULL,
-                                                {}).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
+                                                  handle_A,
+                                                  handle_B,
+                                                  handle_C,
+                                                  req,
+                                                  descr,
+                                                  nnzC,
+                                                  NULL,
+                                                  {}).wait() );
 
    /* allocate col index and data arrays */
    d_jc = hypre_CTAlloc(HYPRE_Int, *nnzC, HYPRE_MEMORY_DEVICE);
@@ -131,15 +131,15 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* finalize C */
    req = oneapi::mkl::sparse::matmat_request::finalize;
-   HYPRE_SYCL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
-                                                handle_A,
-                                                handle_B,
-                                                handle_C,
-                                                req,
-                                                descr,
-                                                NULL,
-                                                NULL,
-                                                {}).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
+                                                  handle_A,
+                                                  handle_B,
+                                                  handle_C,
+                                                  req,
+                                                  descr,
+                                                  NULL,
+                                                  NULL,
+                                                  {}).wait() );
 
    /* release the matmat descr */
    oneapi::mkl::sparse::release_matmat_descr(&descr);
