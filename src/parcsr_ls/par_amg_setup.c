@@ -9,7 +9,7 @@
 #include "par_amg.h"
 #include "../parcsr_block_mv/par_csr_block_matrix.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #define PRINT_CF 0
 
 #define DEBUG_SAVE_ALL_OPS 0
@@ -2772,6 +2772,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
 
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
+      hypre_printf("WM: debug - begin RAP, rap2 = %d, hypre_ParAMGDataModularizedMatMat = %d\n", rap2,
+                   hypre_ParAMGDataModularizedMatMat(amg_data));
       if (debug_flag == 1) { wall_time = time_getWallclockSeconds(); }
 
       if (block_mode)
@@ -2884,6 +2886,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* Compute standard Galerkin coarse-grid product */
             if (hypre_ParAMGDataModularizedMatMat(amg_data))
             {
+               hypre_printf("WM: debug - in amg setup, calling hypre_ParCSRMatrixRAPKT()\n");
                A_H = hypre_ParCSRMatrixRAPKT(P_array[level], A_array[level],
                                              P_array[level], keepTranspose);
             }
@@ -2902,6 +2905,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
 
       HYPRE_ANNOTATE_REGION_END("%s", "RAP");
+      hypre_printf("WM: debug - end RAP\n");
       if (debug_flag == 1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;

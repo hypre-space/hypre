@@ -8,6 +8,7 @@
 #ifndef HYPRE_DEVICE_UTILS_H
 #define HYPRE_DEVICE_UTILS_H
 
+/* WM: Q - do we need this macro gaurd? Where should it be placed? */
 #if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -38,13 +39,13 @@
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
+#endif // defined(HYPRE_USING_CUDA)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          hip includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#elif defined(HYPRE_USING_HIP)
-
+#if defined(HYPRE_USING_HIP)
 #include <hip/hip_runtime.h>
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -54,12 +55,53 @@
 #if defined(HYPRE_USING_ROCRAND)
 #include <rocrand.h>
 #endif
+#endif // defined(HYPRE_USING_HIP)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                          thrust includes
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#include <thrust/execution_policy.h>
+#if defined(HYPRE_USING_CUDA)
+#include <thrust/system/cuda/execution_policy.h>
+#elif defined(HYPRE_USING_HIP)
+#include <thrust/system/hip/execution_policy.h>
+#endif
+#include <thrust/count.h>
+#include <thrust/device_ptr.h>
+#include <thrust/unique.h>
+#include <thrust/sort.h>
+#include <thrust/binary_search.h>
+#include <thrust/iterator/constant_iterator.h>
+#include <thrust/iterator/counting_iterator.h>
+#include <thrust/iterator/zip_iterator.h>
+#include <thrust/transform.h>
+#include <thrust/functional.h>
+#include <thrust/gather.h>
+#include <thrust/scan.h>
+#include <thrust/fill.h>
+#include <thrust/adjacent_difference.h>
+#include <thrust/inner_product.h>
+#include <thrust/logical.h>
+#include <thrust/replace.h>
+#include <thrust/sequence.h>
+#include <thrust/for_each.h>
+
+using namespace thrust::placeholders;
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          sycl includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#elif defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
+/* WM: Q - is this the best way to deal with dim3 vs. sycl::range? */
+using dim3 = sycl::range<1>;
+#define __global__
+#define __host__
+#define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
 
 /* WM: problems with this being inside extern C++ {} */
 /* #include <CL/sycl.hpp> */
@@ -72,8 +114,61 @@
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
 #endif
+#endif // defined(HYPRE_USING_SYCL)
 
-#endif // defined(HYPRE_USING_CUDA)
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *       macro for launching GPU kernels
+ *       NOTE: IN HYPRE'S DEFAULT STREAM
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#if defined(HYPRE_DEBUG)
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); hypre_GetDeviceLastError(); }
+#else
+#define GPU_LAUNCH_SYNC
+#endif
+
+/* cuda/hip version */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                  \
+{                                                                                                                             \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
+   {                                                                                                                          \
+      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                                \
+                 __FILE__, __LINE__,                                                                                          \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                               \
+   }                                                                                                                          \
+   else                                                                                                                       \
+   {                                                                                                                          \
+      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__);     \
+      GPU_LAUNCH_SYNC;                                                                                                        \
+   }                                                                                                                          \
+}
+
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/* sycl version */
+#if defined(HYPRE_USING_SYCL)
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]);                                                \
+     assert(0); exit(1);                                                                     \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
+#endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
@@ -115,32 +210,13 @@
                    __FILE__, __LINE__);                                                      \
       assert(0); exit(1);                                                                    \
    }
+#endif
 
-#define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
-  func_name(oneapi::dpl::execution::make_device_policy(                                      \
-           *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      macros for wrapping vendor library calls for error reporting
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
-{                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
-   {                                                                                         \
-     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
-                  __FILE__, __LINE__,                                                        \
-                  gridsize[0], blocksize[0]);                                                \
-     assert(0); exit(1);                                                                     \
-   }                                                                                         \
-   else                                                                                      \
-   {                                                                                         \
-      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
-         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
-         });                                                                                 \
-      }).wait_and_throw();                                                                   \
-   }                                                                                         \
-}
-
-#endif // defined(HYPRE_USING_CUDA)
-
+/* WM: Q - any need to macro guard these definitions? */
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
@@ -178,6 +254,37 @@
       printf("ROCRAND ERROR (code = %d) at %s:%d\n", err, __FILE__, __LINE__);               \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
+
+#define HYPRE_ONEMKL_CALL(call)                                                              \
+   try                                                                                       \
+   {                                                                                         \
+      call;                                                                                  \
+   }                                                                                         \
+   catch (oneapi::mkl::exception const &ex)                                                  \
+   {                                                                                         \
+      hypre_printf("ONEMKL ERROR (code = %s) at %s:%d\n", ex.what(),                         \
+                   __FILE__, __LINE__);                                                      \
+      assert(0); exit(1);                                                                    \
+   }
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      macros for wrapping thrust/oneDPL calls for error reporting
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+/* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
+ * The following one works OK for now */
+
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_THRUST_CALL(func_name, ...) \
+   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_THRUST_CALL(func_name, ...) \
+   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+#elif defined(HYPRE_USING_SYCL)
+#define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
+  func_name(oneapi::dpl::execution::make_device_policy(                                      \
+           *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
@@ -380,91 +487,28 @@ struct hypre_GpuMatData
 
 #endif //#if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_SYCL)
-
-/* device_utils.c */
-HYPRE_Int HYPRE_SetSYCLDevice(sycl::device user_device);
-sycl::range<1> hypre_GetDefaultDeviceBlockDimension();
-
-sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity,
-                                                    sycl::range<1> bDim );
-
-#endif // #if defined(HYPRE_USING_SYCL)
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-#include <thrust/execution_policy.h>
-#if defined(HYPRE_USING_CUDA)
-#include <thrust/system/cuda/execution_policy.h>
-#elif defined(HYPRE_USING_HIP)
-#include <thrust/system/hip/execution_policy.h>
-#endif
-#include <thrust/count.h>
-#include <thrust/device_ptr.h>
-#include <thrust/unique.h>
-#include <thrust/sort.h>
-#include <thrust/binary_search.h>
-#include <thrust/iterator/constant_iterator.h>
-#include <thrust/iterator/counting_iterator.h>
-#include <thrust/iterator/zip_iterator.h>
-#include <thrust/transform.h>
-#include <thrust/functional.h>
-#include <thrust/gather.h>
-#include <thrust/scan.h>
-#include <thrust/fill.h>
-#include <thrust/adjacent_difference.h>
-#include <thrust/inner_product.h>
-#include <thrust/logical.h>
-#include <thrust/replace.h>
-#include <thrust/sequence.h>
-#include <thrust/for_each.h>
-
-using namespace thrust::placeholders;
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * macro for launching CUDA kernels, CUDA, Thrust, Cusparse, Curand calls
- *                    NOTE: IN HYPRE'S DEFAULT STREAM
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- */
+ *      WM: generic device functions (cuda/hip/sycl)
+ *      WM: Q - what about device openmp?
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_DEBUG)
-#if defined(HYPRE_USING_CUDA)
-#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
-#elif defined(HYPRE_USING_HIP)
-#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
+template <typename T>
+static __device__ __forceinline__
+T read_only_load( const T *ptr )
+{
+   /* WM: Q - where/when is __CUDA_ARCH__ defined? */
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 350
+   return __ldg( ptr );
+#else
+   return *ptr;
 #endif
-#else // #if defined(HYPRE_DEBUG)
-#define GPU_LAUNCH_SYNC
-#endif // defined(HYPRE_DEBUG)
-
-#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                  \
-{                                                                                                                             \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
-   {                                                                                                                          \
-      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                                \
-                 __FILE__, __LINE__,                                                                                          \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                               \
-   }                                                                                                                          \
-   else                                                                                                                       \
-   {                                                                                                                          \
-      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__);     \
-      GPU_LAUNCH_SYNC;                                                                                                        \
-   }                                                                                                                          \
 }
 
-#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      WM: cuda/hip functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-/* RL: TODO Want macro HYPRE_THRUST_CALL to return value but I don't know how to do it right
- * The following one works OK for now */
-
-#if defined(HYPRE_USING_CUDA)
-#define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
-#endif
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* return the number of threads in block */
 template <hypre_int dim>
@@ -674,18 +718,6 @@ hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
    return __ballot(predicate);
 }
 #endif
-
-
-template <typename T>
-static __device__ __forceinline__
-T read_only_load( const T *ptr )
-{
-#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 350
-   return __ldg( ptr );
-#else
-   return *ptr;
-#endif
-}
 
 /* exclusive prefix scan */
 template <typename T>
@@ -977,10 +1009,34 @@ struct print_functor
    }
 };
 
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      WM: sycl functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#if defined(HYPRE_USING_SYCL)
+
+/* return the flattened warp id in nd_range */
+static __forceinline__
+hypre_int hypre_gpu_get_grid_warp_id(sycl::nd_item<>& item)
+{
+   return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
+          item.get_sub_group().get_group_linear_id();
+}
+
+#endif // #if defined(HYPRE_USING_SYCL)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      WM: end of functions defined here
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 /* device_utils.c */
 dim3 hypre_GetDefaultDeviceBlockDimension();
 
 dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
    HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);

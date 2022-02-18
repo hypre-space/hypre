@@ -224,7 +224,7 @@ hypre_CSRMatrixTripleMultiplyDevice ( hypre_CSRMatrix *A,
    return ABC;
 }
 
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -659,30 +659,51 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 __global__ void
-hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
-                                  HYPRE_Int     *ia,
-                                  HYPRE_Int     *ja,
-                                  HYPRE_Complex *aa )
+hypreGPUKernel_CSRMoveDiagFirst(
+#ifdef HYPRE_USING_SYCL
+   sycl::nd_item<1>& item,
+#endif
+   HYPRE_Int      nrows,
+   HYPRE_Int     *ia,
+   HYPRE_Int     *ja,
+   HYPRE_Complex *aa )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+#ifdef HYPRE_USING_SYCL
+   HYPRE_Int row  = hypre_gpu_get_grid_warp_id(item);
+   sycl::sub_group SG = item.get_sub_group();
+   HYPRE_Int lane = SG.get_local_linear_id();
+#else
+   HYPRE_Int row  = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
       p = read_only_load(ia + row + lane);
    }
+#ifdef HYPRE_USING_SYCL
+   q = SG.shuffle(p, 1);
+   p = SG.shuffle(p, 0);
+
+   for (HYPRE_Int j = p + lane + 1; sycl::any_of_group(SG, j < q); j += SG.get_local_range().get(0))
+#else
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+#endif
    {
       hypre_int find_diag = j < q && ja[j] == row;
 
@@ -695,7 +716,11 @@ hypreCUDAKernel_CSRMoveDiagFirst( HYPRE_Int      nrows,
          aa[j] = tmp;
       }
 
+#ifdef HYPRE_USING_SYCL
+      if ( sycl::any_of_group(SG, find_diag) )
+#else
       if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+#endif
       {
          break;
       }
@@ -709,18 +734,21 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
    HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
    HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   dim3           bDim, gDim;
 
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH(hypreCUDAKernel_CSRMoveDiagFirst, gDim, bDim,
+   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMoveDiagFirst, gDim, bDim,
                     nrows, A_i, A_j, A_data);
 
    hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
+
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* check if diagonal entry is the first one at each row
  * Return: the number of rows that do not have the first entry as diagonal

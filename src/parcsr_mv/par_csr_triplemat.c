@@ -164,10 +164,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
    }
    else
    {
-      /* C_diag = hypre_CSRMatrixMultiplyHost(A_diag, B_diag); */
-      /* WM: debug - try just this part on the device */
-      hypre_printf("WM: debug - calling hypre_CSRMatrixMultiplyDevice()\n");
-      C_diag = hypre_CSRMatrixMultiplyDevice(A_diag, B_diag);
+      C_diag = hypre_CSRMatrixMultiplyHost(A_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_rows_diag_A, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
    }
@@ -852,9 +849,21 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    }
    else
    {
-      Q_diag = hypre_CSRMatrixMultiplyHost(A_diag, P_diag);
+      /* Q_diag = hypre_CSRMatrixMultiplyHost(A_diag, P_diag); */
+      /* WM: debug - try just this part on the device */
+      hypre_printf("WM: debug - calling hypre_CSRMatrixMultiplyDevice()\n");
+      Q_diag = hypre_CSRMatrixMultiplyDevice(A_diag, P_diag);
+
       hypre_CSRMatrixTranspose(R_diag, &RT_diag, 1);
-      C_diag = hypre_CSRMatrixMultiplyHost(RT_diag, Q_diag);
+
+
+      /* C_diag = hypre_CSRMatrixMultiplyHost(RT_diag, Q_diag); */
+      /* WM: debug - try just this part on the device */
+      hypre_printf("WM: debug - calling hypre_CSRMatrixMultiplyDevice()\n");
+      C_diag = hypre_CSRMatrixMultiplyDevice(RT_diag, Q_diag);
+
+
+
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_R, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
       if (keep_transpose)
@@ -915,11 +924,13 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
+      hypre_printf("WM: debug - calling RAPKTDevice()\n");
       C = hypre_ParCSRMatrixRAPKTDevice(R, A, P, keep_transpose);
    }
    else
 #endif
    {
+      hypre_printf("WM: debug - calling RAPKTHost()\n");
       C = hypre_ParCSRMatrixRAPKTHost(R, A, P, keep_transpose);
    }
 

@@ -72,6 +72,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
+      hypre_printf("WM: debug - in hypreDevice_CSRSpGemm() calling hypreDevice_CSRSpGemmOnemklsparse()\n");
       hypreDevice_CSRSpGemmOnemklsparse(m, k, n,
                                         hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a,
                                         hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b,
