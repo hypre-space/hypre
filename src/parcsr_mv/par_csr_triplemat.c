@@ -906,7 +906,8 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
 
    hypre_ParCSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+/* WM: debug - add sycl when ready */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) // || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(R),
                                                       hypre_ParCSRMatrixMemoryLocation(A) );
 
