@@ -503,7 +503,12 @@ hypre_MGRDestroy( void *data )
       hypre_TFree(mgr_data -> level_smooth_iters, HYPRE_MEMORY_HOST);
       (mgr_data -> level_smooth_iters) = NULL;
    }
-
+   if (mgr_data -> num_relax_sweeps)
+   {
+      hypre_TFree(mgr_data -> num_relax_sweeps, HYPRE_MEMORY_HOST);
+      (mgr_data -> num_relax_sweeps) = NULL;
+   }
+   
    /* mgr data */
    hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
 
@@ -2676,7 +2681,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       // wall_time_1 = time_getWallclockSeconds() - wall_time_1;
       //hypre_ParCSRMatrixPrintIJ(A_cf_truncated, 0, 0, "A_cf_truncated_new");
       //if (my_id == 0) hypre_printf("Proc = %d, compute and truncate A_cf time: %1.5f\n", my_id, wall_time_1);
-
+      if (my_id == 0) hypre_printf("Proc = %d, Using Non Galerkin approach ...\n");
       if (Wp != NULL)
       {
          A_h_correction = hypre_ParCSRMatMat(A_cf_truncated, Wp);
@@ -2736,7 +2741,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    HYPRE_Real      *A_h_correction_offd_data = hypre_CSRMatrixData(A_h_correction_offd);
    HYPRE_Int             *A_h_correction_offd_i = hypre_CSRMatrixI(A_h_correction_offd);
    HYPRE_Int             *A_h_correction_offd_j = hypre_CSRMatrixJ(A_h_correction_offd);
-
+   
+   // drop small entries in the correction
    if (Pmax > 0)
    {
       if (ordering == 0) // interleaved ordering
