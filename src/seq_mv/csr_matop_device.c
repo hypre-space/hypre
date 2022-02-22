@@ -791,7 +791,7 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
 
       if (find_diag)
       {
-         if (fabs(data[j]) <= tol)
+         if (hypre_cabs(data[j]) <= tol)
          {
             data[j] = v;
          }
@@ -890,7 +890,7 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
       if (find_diag)
       {
          HYPRE_Complex d = read_only_load(&new_diag[row]);
-         if (fabs(d) <= tol)
+         if (hypre_cabs(d) <= tol)
          {
             d = v;
          }
@@ -1084,7 +1084,7 @@ hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
       }
       else if (type == 1)
       {
-         row_sum_i += fabs(aii);
+         row_sum_i += hypre_cabs(aii);
       }
       else if (type == 2)
       {
@@ -1189,7 +1189,7 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          }
          else if (type == 1)
          {
-            d[row] = fabs(aa[j]);
+            d[row] = hypre_cabs(aa[j]);
          }
          else if (type == 2)
          {
@@ -1201,7 +1201,7 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          }
          else if (type == 4)
          {
-            d[row] = 1.0 / sqrt(fabs(aa[j]));
+            d[row] = 1.0 / sqrt(hypre_cabs(aa[j]));
          }
       }
 

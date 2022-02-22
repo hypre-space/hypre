@@ -2344,13 +2344,13 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
                /* infty-norm */
                for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
                {
-                  row_nrm = (row_nrm < fabs(A_diag_data[j])) ?
-                            fabs(A_diag_data[j]) : row_nrm;
+                  row_nrm = (row_nrm < hypre_cabs(A_diag_data[j])) ?
+                            hypre_cabs(A_diag_data[j]) : row_nrm;
                }
                for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
                {
-                  row_nrm = (row_nrm < fabs(A_offd_data[j])) ?
-                            fabs(A_offd_data[j]) : row_nrm;
+                  row_nrm = (row_nrm < hypre_cabs(A_offd_data[j])) ?
+                            hypre_cabs(A_offd_data[j]) : row_nrm;
                }
             }
             if (nrm_type == 1)
@@ -2358,11 +2358,11 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
                /* 1-norm */
                for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
                {
-                  row_nrm += fabs(A_diag_data[j]);
+                  row_nrm += hypre_cabs(A_diag_data[j]);
                }
                for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
                {
-                  row_nrm += fabs(A_offd_data[j]);
+                  row_nrm += hypre_cabs(A_offd_data[j]);
                }
             }
             if (nrm_type == 2)
@@ -2392,7 +2392,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
             for (j = start_j; j < A_diag_i[i + 1]; j++)
             {
                row_sum += A_diag_data[now_checking];
-               if (fabs(A_diag_data[now_checking]) < drop_coeff)
+               if (hypre_cabs(A_diag_data[now_checking]) < drop_coeff)
                {
                   num_lost++;
                   now_checking++;
@@ -2416,7 +2416,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
             for (j = start_j; j < A_offd_i[i + 1]; j++)
             {
                row_sum += A_offd_data[now_checking_offd];
-               if (fabs(A_offd_data[now_checking_offd]) < drop_coeff)
+               if (hypre_cabs(A_offd_data[now_checking_offd]) < drop_coeff)
                {
                   num_lost_offd++;
                   now_checking_offd++;

@@ -29,9 +29,11 @@ hypre_GrabSubArray(HYPRE_Int * indices,
    length = end - start + 1;
 
    for (i = 0; i < length; i++)
-   {   output[i] = array[ indices[start + i] ]; }
+   {
+      output[i] = array[indices[start + i]];
+   }
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /* Compute the intersection of x and y, placing

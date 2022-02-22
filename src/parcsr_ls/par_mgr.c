@@ -3615,7 +3615,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
          for (ii = A_diag_i[bidxm1 + k]; ii < A_diag_i[bidxm1 + k + 1]; ii++)
          {
             jj = A_diag_j[ii];
-            if (jj >= bidxm1 && jj < bidxp1 && fabs(A_diag_data[ii]) > SMALLREAL)
+            if (jj >= bidxm1 && jj < bidxp1 && hypre_cabs(A_diag_data[ii]) > SMALLREAL)
             {
                bidx = k * blk_size + jj - bidxm1;
                //printf("jj = %d,val = %e, bidx = %d\n",jj,A_diag_data[ii],bidx);
@@ -4065,7 +4065,7 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
          for (ii = A_diag_i[bidxm1 + k]; ii < A_diag_i[bidxm1 + k + 1]; ii++)
          {
             jj = A_diag_j[ii];
-            if (jj >= bidxm1 && jj < bidxp1 && fabs(A_diag_data[ii]) > SMALLREAL)
+            if (jj >= bidxm1 && jj < bidxp1 && hypre_cabs(A_diag_data[ii]) > SMALLREAL)
             {
                bidx = i * nb2 + k * blk_size + jj - bidxm1;
                //printf("jj = %d,val = %e, bidx = %d\n",jj,A_diag_data[ii],bidx);

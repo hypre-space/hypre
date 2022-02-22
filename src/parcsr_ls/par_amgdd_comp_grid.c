@@ -826,7 +826,7 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
             {
                if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] ] == cf_diag)
                {
-                  hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
+                  hypre_AMGDDCompGridL1Norms(compGrid)[i] += hypre_cabs(hypre_CSRMatrixData(diag)[j]);
                }
             }
             for (j = hypre_CSRMatrixI(offd)[i]; j < hypre_CSRMatrixI(offd)[i + 1]; j++)
@@ -834,7 +834,7 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
                if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j] +
                                                                                          hypre_AMGDDCompGridNumOwnedNodes(compGrid) ] == cf_diag)
                {
-                  hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(offd)[j]);
+                  hypre_AMGDDCompGridL1Norms(compGrid)[i] += hypre_cabs(hypre_CSRMatrixData(offd)[j]);
                }
             }
          }
@@ -850,7 +850,7 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
                if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(diag)[j] +
                                                                                          hypre_AMGDDCompGridNumOwnedNodes(compGrid) ] == cf_diag)
                {
-                  hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(
+                  hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += hypre_cabs(
                                                                                                              hypre_CSRMatrixData(diag)[j]);
                }
             }
@@ -858,7 +858,7 @@ HYPRE_Int hypre_AMGDDCompGridSetupRelax( hypre_ParAMGDDData *amgdd_data )
             {
                if (hypre_AMGDDCompGridCFMarkerArray(compGrid)[ hypre_CSRMatrixJ(offd)[j]] == cf_diag)
                {
-                  hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(
+                  hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += hypre_cabs(
                                                                                                              hypre_CSRMatrixData(offd)[j]);
                }
             }
