@@ -5,17 +5,46 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_SYCL)
+/* template <typename InputIter1, typename InputIter2, */
+/*           typename OutputIter> */
+/* OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last, */
+/*                             InputIter2 input_first, OutputIter result) */
+/* { */
+/*    static_assert( */
+/*       std::is_same<typename std::iterator_traits<InputIter1>::iterator_category, */
+/*       std::random_access_iterator_tag>::value && */
+/*       std::is_same < */
+/*       typename std::iterator_traits<InputIter2>::iterator_category, */
+/*       std::random_access_iterator_tag >::value && */
+/*       std::is_same < */
+/*       typename std::iterator_traits<OutputIter>::iterator_category, */
+/*       std::random_access_iterator_tag >::value, */
+/*       "Iterators passed to algorithms must be random-access iterators."); */
+/*    auto perm_begin = */
+/*       oneapi::dpl::make_permutation_iterator(input_first, map_first); */
+/*    const int n = ::std::distance(map_first, map_last); */
+/*    return HYPRE_ONEDPL_CALL( oneapi::dpl::copy, perm_begin, perm_begin + n, result); */
+/* } */
+
+#endif
+
 /* WM: debug - modify macro guards when ready */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) // || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
  */
 template<HYPRE_Int option, typename T>
+#if defined(HYPRE_USING_SYCL)
+struct RAP_functor
+#else
 struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
+#endif
 {
    HYPRE_Int num_col;
    T         first_col;
@@ -53,6 +82,10 @@ struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
       }
    }
 };
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+/* WM: debug - modify macro guards when ready */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) // || defined(HYPRE_USING_SYCL)
 
 /* C = A * B */
 hypre_ParCSRMatrix*
@@ -525,8 +558,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    HYPRE_Int num_procs;
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   //HYPRE_Int my_id;
-   //hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
    if ( hypre_ParCSRMatrixGlobalNumRows(R) != hypre_ParCSRMatrixGlobalNumRows(A) ||
         hypre_ParCSRMatrixGlobalNumCols(A) != hypre_ParCSRMatrixGlobalNumRows(P) )
@@ -546,16 +579,17 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    if (num_procs > 1)
    {
-/* WM: debug - drop macro guards when ready */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       void *request;
       hypre_CSRMatrix *Abar, *RbarT, *Pext, *Pbar, *R_diagT, *R_offdT, *Cbar, *Cint, *Cext;
       HYPRE_Int num_cols_offd, local_nnz_Cbar;
       HYPRE_BigInt *col_map_offd;
 
+      hypre_printf("WM: debug - 1\n");
       hypre_ParCSRMatrixExtractBExtDeviceInit(P, A, 1, &request);
+      hypre_printf("WM: debug - 2\n");
 
       Abar = hypre_ConcatDiagAndOffdDevice(A);
+      hypre_printf("WM: debug - 3\n");
 
       hypre_CSRMatrixTransposeDevice(R_diag, &R_diagT, 1);
       hypre_CSRMatrixTransposeDevice(R_offd, &R_offdT, 1);
@@ -576,6 +610,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_ConcatDiagOffdAndExtDevice(P, Pext, &Pbar, &num_cols_offd, &col_map_offd);
       hypre_CSRMatrixDestroy(Pext);
 
+      hypre_printf("WM: debug - 4\n");
       Cbar = hypre_CSRMatrixTripleMultiplyDevice(RbarT, Abar, Pbar);
 
       hypre_CSRMatrixDestroy(RbarT);
@@ -596,7 +631,13 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R);
+      hypre_printf("WM: debug - 5\n");
 #if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixI(Cint),
+                         hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
+                         hypre_CSRMatrixI(Cint),
+                         [const_val = local_nnz_Cbar] (const auto & x) {return x - const_val;} );
 #else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixI(Cint),
@@ -609,10 +650,15 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint),
                                                HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_SYCL)
-#else
       RAP_functor<1, HYPRE_BigInt> func1(hypre_ParCSRMatrixNumCols(P), hypre_ParCSRMatrixFirstColDiag(P),
                                          col_map_offd);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                         hypre_CSRMatrixBigJ(Cint),
+                         func1 );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
@@ -638,6 +684,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Complex *tmp_a = hypre_TAlloc(HYPRE_Complex, tmp_s, HYPRE_MEMORY_DEVICE);
       HYPRE_Int      Cext_diag_nnz, Cext_offd_nnz, *offd_map_to_C;
 
+      hypre_printf("WM: debug - 6\n");
       hypre_CSRMatrixSplitDevice_core(0,
                                       hypre_CSRMatrixNumRows(Cext),
                                       hypre_CSRMatrixNumNonzeros(Cext),
@@ -688,6 +735,16 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRMatrixCommPkg(R));
 
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather( tmp_i + local_nnz_Cbar,
+                        tmp_i + tmp_s,
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(R)),
+                        tmp_i + local_nnz_Cbar );
+
+      HYPRE_ONEDPL_CALL( std::transform,
+                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+                         tmp_j + tmp_s,
+                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+                         [const_val = hypre_ParCSRMatrixNumCols(P)] (const auto & x) {return x + const_val;} );
 #else
       HYPRE_THRUST_CALL( gather,
                          tmp_i + local_nnz_Cbar,
@@ -707,9 +764,14 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                          hypre_CSRMatrixI(Cbar), tmp_i);
       hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(Cbar), HYPRE_Complex, local_nnz_Cbar, HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_DEVICE);
-#if defined(HYPRE_USING_SYCL)
-#else
       RAP_functor<2, HYPRE_Int> func2(hypre_ParCSRMatrixNumCols(P), 0, offd_map_to_C);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar),
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         tmp_j,
+                         func2 );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar),
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
@@ -738,6 +800,10 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(P) - 1);
 
 #if defined(HYPRE_USING_SYCL)
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
+                                                zmp_j,
+                                                zmp_j + local_nnz_C,
+                                                pred );
 #else
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 zmp_j,
@@ -754,6 +820,12 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
 #if defined(HYPRE_USING_SYCL)
+      /* auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a), */
+      /*                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C, */
+      /*                                   zmp_j, */
+      /*                                   oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a), */
+      /*                                   pred ); */
+      /* hypre_assert( std::get<0>(new_end.base()) == C_diag_ii + nnz_C_diag ); */
 #else
       auto new_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
@@ -761,8 +833,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                         zmp_j,
                                         thrust::make_zip_iterator(thrust::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
                                         pred );
-#endif
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii,
                                          hypre_CSRMatrixI(C_diag));
       hypre_TFree(C_diag_ii, HYPRE_MEMORY_DEVICE);
@@ -773,6 +845,12 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
 #if defined(HYPRE_USING_SYCL)
+      /* new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a), */
+      /*                              oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C, */
+      /*                              zmp_j, */
+      /*                              oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a), */
+      /*                              std::not_fn(pred) ); */
+      /* hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd ); */
 #else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
@@ -780,13 +858,18 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                    zmp_j,
                                    thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
                                    thrust::not1(pred) );
-#endif
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii,
                                          hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         C_offd_j,
+                         C_offd_j + nnz_C_offd,
+                         C_offd_j,
+                         [const_val = hypre_ParCSRMatrixNumCols(P)] (const auto & x) {return x + const_val;} );
 #else
       HYPRE_THRUST_CALL( transform,
                          C_offd_j,
@@ -796,11 +879,10 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          thrust::minus<HYPRE_Int>() );
 #endif
 
+      hypre_printf("WM: debug - done!\n");
       hypre_TFree(zmp_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_j, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_a, HYPRE_MEMORY_DEVICE);
-/* WM: debug - drop macro guards when ready */
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    }
    else
    {

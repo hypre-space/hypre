@@ -1024,6 +1024,54 @@ hypre_int hypre_sycl_get_grid_warp_id(sycl::nd_item<>& item)
    return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
           item.get_sub_group().get_group_linear_id();
 }
+template<typename T>
+struct in_range
+{
+   T low, high;
+   in_range(T low_, T high_) { low = low_; high = high_; }
+
+   constexpr bool operator()(const T &x) const { return (x >= low && x <= high); }
+};
+
+template<typename... T>
+struct TupleComp2
+{
+   typedef std::tuple<T...> Tuple;
+   bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (std::get<0>(t1) < std::get<0>(t2))
+      {
+         return true;
+      }
+      if (std::get<0>(t1) > std::get<0>(t2))
+      {
+         return false;
+      }
+      return hypre_abs(std::get<1>(t1)) > hypre_abs(std::get<1>(t2));
+   }
+};
+
+template<typename... T>
+struct TupleComp3
+{
+   typedef std::tuple<T...> Tuple;
+   bool operator()(const Tuple& t1, const Tuple& t2)
+   {
+      if (std::get<0>(t1) < std::get<0>(t2))
+      {
+         return true;
+      }
+      if (std::get<0>(t1) > std::get<0>(t2))
+      {
+         return false;
+      }
+      if (std::get<0>(t2) == std::get<1>(t2))
+      {
+         return false;
+      }
+      return std::get<0>(t1) == std::get<1>(t1) || std::get<1>(t1) < std::get<1>(t2);
+   }
+};
 
 #endif // #if defined(HYPRE_USING_SYCL)
 
@@ -1036,8 +1084,6 @@ dim3 hypre_GetDefaultDeviceBlockDimension();
 
 dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
    HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 
@@ -1047,6 +1093,8 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
                                                                                         T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,

@@ -488,6 +488,89 @@ hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
    return hypre_error_flag;
 }
 
+/* https://github.com/OrangeOwlSolutions/Thrust/blob/master/Sort_by_key_with_tuple_key.cu */
+/* opt: 0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')  [normal tupe comp]
+ *      1, (a,b) < (a',b') iff a < a' or (a = a' and |b| > |b'|) [used in dropping small entries]
+ *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a') [used in putting diagonal first]
+ */
+template <typename T1, typename T2, typename T3>
+HYPRE_Int
+hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
+{
+#if defined(HYPRE_USING_SYCL)
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys1, keys2, vals);
+
+   if (opt == 0)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort, zipped_begin, zipped_begin + N,
+                        std::less< std::tuple<T1, T2, T3> >());
+   }
+   else if (opt == 1)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort, zipped_begin, zipped_begin + N, TupleComp2<T1, T2, T3>());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort, zipped_begin, zipped_begin + N, TupleComp3<T1, T2, T3>());
+   }
+#else
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals,
+                        thrust::less< thrust::tuple<T1, T2> >());
+   }
+   else if (opt == 1)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1, T2>());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1, T2>());
+   }
+#endif
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
+                                                    HYPRE_Int  *keys2, HYPRE_Int     *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
+                                                    HYPRE_Real *keys2, HYPRE_Int     *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
+                                                    HYPRE_Int  *keys2, HYPRE_Complex *vals, HYPRE_Int opt);
+
+template <typename T1, typename T2, typename T3>
+HYPRE_Int
+hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in,
+                             T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
+{
+#if defined(HYPRE_USING_SYCL)
+   auto begin_keys_in  = oneapi::dpl::make_zip_iterator(keys1_in,  keys2_in );
+   auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out, keys2_out);
+   std::equal_to< std::tuple<T1, T2> > pred;
+   std::plus<T3> func;
+
+   auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment, begin_keys_in, begin_keys_in + N,
+                                    vals_in, begin_keys_out,
+                                    vals_out, pred, func);
+#else
+   auto begin_keys_in  = thrust::make_zip_iterator(thrust::make_tuple(keys1_in,     keys2_in    ));
+   auto end_keys_in    = thrust::make_zip_iterator(thrust::make_tuple(keys1_in + N, keys2_in + N));
+   auto begin_keys_out = thrust::make_zip_iterator(thrust::make_tuple(keys1_out,    keys2_out   ));
+   thrust::equal_to< thrust::tuple<T1, T2> > pred;
+   thrust::plus<T3> func;
+
+   auto new_end = HYPRE_THRUST_CALL(reduce_by_key, begin_keys_in, end_keys_in, vals_in, begin_keys_out,
+                                    vals_out, pred, func);
+#endif
+   return new_end.second - vals_out;
+}
+template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in,
+                                                HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out,
+                                                HYPRE_Complex *vals_out);
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -1008,43 +1091,6 @@ hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int si
    return hypre_error_flag;
 }
 
-
-/* https://github.com/OrangeOwlSolutions/Thrust/blob/master/Sort_by_key_with_tuple_key.cu */
-/* opt: 0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')  [normal tupe comp]
- *      1, (a,b) < (a',b') iff a < a' or (a = a' and |b| > |b'|) [used in dropping small entries]
- *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a') [used in putting diagonal first]
- */
-template <typename T1, typename T2, typename T3>
-HYPRE_Int
-hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt)
-{
-   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
-   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
-
-   if (opt == 0)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals,
-                        thrust::less< thrust::tuple<T1, T2> >());
-   }
-   else if (opt == 1)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp2<T1, T2>());
-   }
-   else if (opt == 2)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1, T2>());
-   }
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                    HYPRE_Int  *keys2, HYPRE_Int     *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                    HYPRE_Real *keys2, HYPRE_Int     *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                    HYPRE_Int  *keys2, HYPRE_Complex *vals, HYPRE_Int opt);
-
 /* opt:
  *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')                       [normal tupe comp]
  *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a') [used in assembly to put diagonal first]
@@ -1077,27 +1123,6 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int 
 template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
                                                          HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #endif
-
-template <typename T1, typename T2, typename T3>
-HYPRE_Int
-hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in,
-                             T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
-{
-   auto begin_keys_in  = thrust::make_zip_iterator(thrust::make_tuple(keys1_in,     keys2_in    ));
-   auto end_keys_in    = thrust::make_zip_iterator(thrust::make_tuple(keys1_in + N, keys2_in + N));
-   auto begin_keys_out = thrust::make_zip_iterator(thrust::make_tuple(keys1_out,    keys2_out   ));
-   thrust::equal_to< thrust::tuple<T1, T2> > pred;
-   thrust::plus<T3> func;
-
-   auto new_end = HYPRE_THRUST_CALL(reduce_by_key, begin_keys_in, end_keys_in, vals_in, begin_keys_out,
-                                    vals_out, pred, func);
-
-   return new_end.second - vals_out;
-}
-
-template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in,
-                                                HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out,
-                                                HYPRE_Complex *vals_out);
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 
@@ -1767,18 +1792,11 @@ hypre_bind_device( HYPRE_Int myid,
    return hypre_error_flag;
 }
 
-
-
-
-
-
-
-
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      sycl functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
+
 
 #endif // #if defined(HYPRE_USING_SYCL)
