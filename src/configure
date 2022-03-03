@@ -9218,7 +9218,7 @@ $as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
                                         HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
-  HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
+  HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"
 elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
 
 fi
