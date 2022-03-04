@@ -20,4 +20,3 @@ hypre_SStructStencilRef( hypre_SStructStencil  *stencil,
 
    return hypre_error_flag;
 }
-
