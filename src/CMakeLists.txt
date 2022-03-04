@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.23.0)
-set(HYPRE_NUMBER  22300)
-set(HYPRE_DATE    2021/10/01)
+set(HYPRE_VERSION 2.24.0)
+set(HYPRE_NUMBER  22400)
+set(HYPRE_DATE    2022/02/11)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -329,6 +329,10 @@ if (HYPRE_WITH_SYCL)
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
+
+  if (HYPRE_ENABLE_CUDA_STREAMS)
+    set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
+  endif (HYPRE_ENABLE_CUDA_STREAMS)
 
 endif (HYPRE_WITH_SYCL)
 

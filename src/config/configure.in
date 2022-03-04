@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.23.0])
-m4_define([M4_HYPRE_NUMBER],  [22300])
-m4_define([M4_HYPRE_DATE],    [2021/10/01])
+m4_define([M4_HYPRE_VERSION], [2.24.0])
+m4_define([M4_HYPRE_NUMBER],  [22400])
+m4_define([M4_HYPRE_DATE],    [2022/02/11])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -105,7 +105,7 @@ AC_SUBST(HYPRE_BUGS)
 
 AC_SUBST(HYPRE_SRCDIR)
 
-AC_CHECK_FILE([$HYPRE_SRCDIR/../.git],
+AS_IF([test -d "$HYPRE_SRCDIR/../.git"],
   [
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)

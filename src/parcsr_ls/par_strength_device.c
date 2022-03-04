@@ -53,7 +53,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int               *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_BigInt            *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int                num_variables   = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int                global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt             global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int                num_nonzeros_diag;
    HYPRE_Int                num_nonzeros_offd;
    HYPRE_Int                num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
