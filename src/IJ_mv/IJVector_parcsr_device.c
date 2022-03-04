@@ -274,9 +274,14 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
  * Note: (I1, X1, A1) are not resized to N1 but have size N0
  */
 HYPRE_Int
-hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0,
+hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int       N0,
+                                     HYPRE_BigInt   *I0,
+                                     char           *X0,
                                      HYPRE_Complex  *A0,
-                                     HYPRE_Int *N1, HYPRE_BigInt **I1, char **X1, HYPRE_Complex **A1 )
+                                     HYPRE_Int      *N1,
+                                     HYPRE_BigInt  **I1,
+                                     char          **X1,
+                                     HYPRE_Complex **A1 )
 {
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -291,10 +296,10 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
       make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),     /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),        /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),         /* output value begin */
-      char(0),                                                                  /* init */
+      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),          /* output value begin */
+      char(0),                                                                   /* init */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
