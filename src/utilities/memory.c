@@ -263,13 +263,13 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-      ptr = omp_target_alloc(size, hypre__offload_device_num);
+   ptr = omp_target_alloc(size, hypre__offload_device_num);
 #else
-      ptr = malloc(size + sizeof(size_t));
-      size_t *sp = (size_t*) ptr;
-      sp[0] = size;
-      ptr = (void *) (&sp[1]);
-      HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
+   ptr = malloc(size + sizeof(size_t));
+   size_t *sp = (size_t*) ptr;
+   sp[0] = size;
+   ptr = (void *) (&sp[1]);
+   HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
 #endif
 #endif
 
@@ -444,9 +444,9 @@ hypre_UnifiedFree(void *ptr)
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_DEVICE_OPENMP_ALLOC)
-      omp_target_free(ptr, hypre__offload_device_num);
+   omp_target_free(ptr, hypre__offload_device_num);
 #else
-      HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
+   HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
 #endif
 #endif
 
