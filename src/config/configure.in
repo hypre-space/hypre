@@ -2311,7 +2311,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
         dnl plus flags for debugging symbols
         AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
+              [HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"],
               [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
 
 
