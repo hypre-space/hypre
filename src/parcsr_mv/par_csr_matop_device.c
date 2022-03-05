@@ -172,7 +172,7 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = recv_jstarts;
 
 #ifdef HYPRE_WITH_GPU_AWARE_MPI
-   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 
    /* init communication */

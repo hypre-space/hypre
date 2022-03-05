@@ -1757,7 +1757,7 @@ hypre_SyncComputeStream(hypre_Handle *hypre_handle)
 }
 
 HYPRE_Int
-hypre_ForceSyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
 {
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);

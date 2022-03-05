@@ -279,7 +279,7 @@ hypre_EndTiming( HYPRE_Int time_index )
    if (hypre_TimingState(time_index) == 0)
    {
 #if defined(HYPRE_USING_GPU)
-      hypre_ForceSyncCudaComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream(hypre_handle());
 #endif
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) += hypre_TimingWallCount;

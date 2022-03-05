@@ -607,7 +607,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_WITH_GPU_AWARE_MPI)
-   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */

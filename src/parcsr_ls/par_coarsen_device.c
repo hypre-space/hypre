@@ -229,7 +229,7 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    hypre_CSRMatrixColNNzRealDevice(S_offd, measure_offd);
 
 #ifdef HYPRE_WITH_GPU_AWARE_MPI
-   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 
    /* send local column nnz of the offd part to neighbors */
