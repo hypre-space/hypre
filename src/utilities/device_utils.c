@@ -1762,7 +1762,7 @@ hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(1);
-   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
    hypre_SetSyncCudaCompute(sync_stream);
 
    return hypre_error_flag;
