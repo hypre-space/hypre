@@ -614,7 +614,6 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 HYPRE_Int
 hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
-
    if ( comm_handle == NULL )
    {
       return hypre_error_flag;

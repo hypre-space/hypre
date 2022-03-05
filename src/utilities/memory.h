@@ -71,6 +71,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(HYPRE_USING_UNIFIED_MEMORY) && defined(HYPRE_USING_DEVICE_OPENMP)
+//#pragma omp requires unified_shared_memory
+#endif
+
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024

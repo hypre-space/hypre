@@ -940,11 +940,14 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
    hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
-   HYPRE_THRUST_CALL( gather,
-                      map2F,
-                      map2F + P_nr_of_rows + 1,
-                      W_offd_i,
-                      P_offd_i );
+   if (W_offd_i && P_offd_i)
+   {
+      HYPRE_THRUST_CALL( gather,
+                         map2F,
+                         map2F + P_nr_of_rows + 1,
+                         W_offd_i,
+                         P_offd_i );
+   }
 
    hypre_TFree(map2F, HYPRE_MEMORY_DEVICE);
 
@@ -978,12 +981,14 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       thrust::plus<HYPRE_Int>() );
 
    // P_diag_j and P_diag_data
-   HYPRE_THRUST_CALL( scatter,
-                      thrust::make_zip_iterator(thrust::make_tuple(W_diag_j, W_diag_data)),
-                      thrust::make_zip_iterator(thrust::make_tuple(W_diag_j, W_diag_data)) + W_diag_nnz,
-                      shift,
-                      thrust::make_zip_iterator(thrust::make_tuple(P_diag_j, P_diag_data)) );
-
+   if (W_diag_j && W_diag_data)
+   {
+      HYPRE_THRUST_CALL( scatter,
+                         thrust::make_zip_iterator(thrust::make_tuple(W_diag_j, W_diag_data)),
+                         thrust::make_zip_iterator(thrust::make_tuple(W_diag_j, W_diag_data)) + W_diag_nnz,
+                         shift,
+                         thrust::make_zip_iterator(thrust::make_tuple(P_diag_j, P_diag_data)) );
+   }
    hypre_TFree(shift, HYPRE_MEMORY_DEVICE);
 
    // fill the gap
@@ -1003,7 +1008,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       PC_i,
                       P_diag_j );
 
-   hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, 1.0);
+   hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, (HYPRE_Complex) 1.0);
 
    hypre_TFree(PC_i, HYPRE_MEMORY_DEVICE);
 }

@@ -53,8 +53,6 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-   // WM: TODO: remove trivial HYPRE_USING_SYCL branch after onemlksparse implementation is in
-#elif defined(HYPRE_USING_SYCL)
 #else // #ifdef HYPRE_USING_CUSPARSE
 #error HYPRE SPMV TODO
 #endif
@@ -117,7 +115,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
    }
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_GpuProfilingPopRange();
@@ -201,7 +199,7 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
 #endif
                                      dBuffer) );
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    if (trans)
    {
@@ -243,6 +241,8 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
       B = A;
    }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    HYPRE_CUSPARSE_CALL( cusparseDcsrmv(handle,
                                        CUSPARSE_OPERATION_NON_TRANSPOSE,
                                        hypre_CSRMatrixNumRows(B) - offset,
@@ -256,7 +256,22 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
                                        hypre_VectorData(x),
                                        &beta,
                                        hypre_VectorData(y) + offset) );
-
+#elif defined(HYPRE_SINGLE)
+   HYPRE_CUSPARSE_CALL( cusparseScsrmv(handle,
+                                       CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                       hypre_CSRMatrixNumRows(B) - offset,
+                                       hypre_CSRMatrixNumCols(B),
+                                       hypre_CSRMatrixNumNonzeros(B),
+                                       &alpha,
+                                       descr,
+                                       hypre_CSRMatrixData(B),
+                                       hypre_CSRMatrixI(B) + offset,
+                                       hypre_CSRMatrixJ(B),
+                                       hypre_VectorData(x),
+                                       &beta,
+                                       hypre_VectorData(y) + offset) );
+#endif
+#endif
 
    if (trans)
    {
@@ -294,6 +309,8 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
       B = A;
    }
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    HYPRE_ROCSPARSE_CALL( rocsparse_dcsrmv(handle,
                                           rocsparse_operation_none,
                                           hypre_CSRMatrixNumRows(B) - offset,
@@ -308,6 +325,23 @@ hypre_CSRMatrixMatvecRocsparse( HYPRE_Int        trans,
                                           hypre_VectorData(x),
                                           &beta,
                                           hypre_VectorData(y) + offset) );
+#elif defined(HYPRE_SINGLE)
+   HYPRE_ROCSPARSE_CALL( rocsparse_scsrmv(handle,
+                                          rocsparse_operation_none,
+                                          hypre_CSRMatrixNumRows(B) - offset,
+                                          hypre_CSRMatrixNumCols(B),
+                                          hypre_CSRMatrixNumNonzeros(B),
+                                          &alpha,
+                                          descr,
+                                          hypre_CSRMatrixData(B),
+                                          hypre_CSRMatrixI(B) + offset,
+                                          hypre_CSRMatrixJ(B),
+                                          info,
+                                          hypre_VectorData(x),
+                                          &beta,
+                                          hypre_VectorData(y) + offset) );
+#endif
+#endif
 
    if (trans)
    {
@@ -328,7 +362,29 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
                                    hypre_Vector    *y,
                                    HYPRE_Int        offset )
 {
-   /* WM: TODO */
+   sycl::queue *compute_queue = hypre_HandleComputeStream(hypre_handle());
+   hypre_CSRMatrix *AT;
+   oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
+
+   if (trans)
+   {
+      hypre_CSRMatrixTransposeDevice(A, &AT, 1);
+      matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
+   }
+
+   HYPRE_SYCL_CALL( oneapi::mkl::sparse::gemv(*compute_queue,
+                                              oneapi::mkl::transpose::nontrans,
+                                              alpha,
+                                              matA_handle,
+                                              hypre_VectorData(x),
+                                              beta,
+                                              hypre_VectorData(y) + offset).wait() );
+
+   if (trans)
+   {
+      hypre_CSRMatrixDestroy(AT);
+   }
+
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)

@@ -430,4 +430,5 @@ else                                                            \
 
 #endif
 
-#endif
+#endif /* #ifndef HYPRE_BOXLOOP_SYCL_HEADER */
+
