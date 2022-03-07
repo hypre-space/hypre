@@ -1309,8 +1309,6 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
-
-
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
@@ -1323,6 +1321,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, 0) );
    HYPRE_CURAND_CALL( curandSetStream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
@@ -1377,6 +1376,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
    rocrand_generator gen;
    HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
+   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, 0) );
    HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
@@ -1444,6 +1444,21 @@ hypre_CurandUniformSingle( HYPRE_Int          n,
                            hypre_ulonglongint offset)
 {
    return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+HYPRE_Int
+hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
+                                hypre_ulonglongint offset )
+{
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+#if defined(HYPRE_USING_CURAND)
+   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
+   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
+#elif defined(HYPRE_USING_ROCRAND)
+   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
+   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
+#endif
+   return hypre_error_flag;
 }
 
 #endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) */
