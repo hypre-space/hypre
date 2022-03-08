@@ -135,10 +135,10 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                                            hypre_CSRMatrixNumNonzeros(Cbar),
                                                            hypre_CSRMatrixI(Cbar));
 #if defined(HYPRE_USING_SYCL)
-      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar), 
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
                                                                        hypre_CSRMatrixData(Cbar)),
-                                        oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar), 
-                                                                       hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar), 
+                                        oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                       hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
                                         hypre_CSRMatrixJ(Cbar),
                                         oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
                                         pred );
