@@ -1158,9 +1158,21 @@ HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
 
+/* WM: debug */
+HYPRE_Int hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name);
+HYPRE_Int hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *name);
+HYPRE_Int hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayCSRMatrix(hypre_CSRMatrix *A, HYPRE_Int max_display_size, const char *name);
+HYPRE_Int hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name);
+HYPRE_Int hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B);
+HYPRE_Int hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB);
+
 #ifdef __cplusplus
 }
 #endif
+
+
 
 #endif
 

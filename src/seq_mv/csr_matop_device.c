@@ -418,14 +418,14 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data, B_ext_xata);
-      /* auto new_end = hypreSycl_copy_if( */
-      /*                   first,                                                             /1* first   *1/ */
-      /*                   first + B_ext_nnz,                                                 /1* last    *1/ */
-      /*                   B_ext_bigj,                                                        /1* stencil *1/ */
-      /*                   oneapi::dpl::make_zip_iterator(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data, */
-      /*                                     B_ext_diag_xata),                                /1* result  *1/ */
-      /*                   pred1 ); */
-      /* hypre_assert( std::get<0>(new_end.base()) == B_ext_diag_ii + B_ext_diag_nnz ); */
+      auto new_end = hypreSycl_copy_if(
+                        first,                                                             /* first   */
+                        first + B_ext_nnz,                                                 /* last    */
+                        B_ext_bigj,                                                        /* stencil */
+                        oneapi::dpl::make_zip_iterator(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data,
+                                          B_ext_diag_xata),                                /* result  */
+                        pred1 );
+      hypre_assert( std::get<0>(new_end.base()) == B_ext_diag_ii + B_ext_diag_nnz );
 #else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
@@ -444,13 +444,13 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data);
-      /* auto new_end = hypreSycl_copy_if( */
-      /*                   first,                                                                /1* first   *1/ */
-      /*                   first + B_ext_nnz,                                                    /1* last    *1/ */
-      /*                   B_ext_bigj,                                                           /1* stencil *1/ */
-      /*                   oneapi::dpl::make_zip_iterator(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data),   /1* result  *1/ */
-      /*                   pred1 ); */
-      /* hypre_assert( std::get<0>(new_end.base()) == B_ext_diag_ii + B_ext_diag_nnz ); */
+      auto new_end = hypreSycl_copy_if(
+                        first,                                                                /* first   */
+                        first + B_ext_nnz,                                                    /* last    */
+                        B_ext_bigj,                                                           /* stencil */
+                        oneapi::dpl::make_zip_iterator(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data),   /* result  */
+                        pred1 );
+      hypre_assert( std::get<0>(new_end.base()) == B_ext_diag_ii + B_ext_diag_nnz );
 #else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
@@ -471,7 +471,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                       B_ext_diag_bigj,
                       B_ext_diag_bigj + B_ext_diag_nnz,
                       B_ext_diag_j,
-                      [const_val = first_col_diag_B](const auto & x) {return x - const_val;} );
+   [const_val = first_col_diag_B](const auto & x) {return x - const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       B_ext_diag_bigj,
@@ -489,14 +489,14 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data, B_ext_xata);
-      /* auto new_end = hypreSycl_copy_if( */
-      /*                   first,                                                                                            /1* first *1/ */
-      /*                   first + B_ext_nnz,                                                                                /1* last *1/ */
-      /*                   B_ext_bigj,                                                                                       /1* stencil *1/ */
-      /*                   oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data, */
-      /*                                     B_ext_offd_xata), /1* result *1/ */
-      /*                   std::not_fn(pred1) ); */
-      /* hypre_assert( std::get<0>(new_end.base()) == B_ext_offd_ii + B_ext_offd_nnz ); */
+      auto new_end = hypreSycl_copy_if(
+                        first,                                                                                            /* first */
+                        first + B_ext_nnz,                                                                                /* last */
+                        B_ext_bigj,                                                                                       /* stencil */
+                        oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data,
+                                          B_ext_offd_xata), /* result */
+                        std::not_fn(pred1) );
+      hypre_assert( std::get<0>(new_end.base()) == B_ext_offd_ii + B_ext_offd_nnz );
 #else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
@@ -515,13 +515,13 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data);
-      /* auto new_end = hypreSycl_copy_if( */
-      /*                   first,                                                              /1* first   *1/ */
-      /*                   first + B_ext_nnz,                                                  /1* last    *1/ */
-      /*                   B_ext_bigj,                                                         /1* stencil *1/ */
-      /*                   oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data), /1* result  *1/ */
-      /*                   std::not_fn(pred1) ); */
-      /* hypre_assert( std::get<0>(new_end.base()) == B_ext_offd_ii + B_ext_offd_nnz ); */
+      auto new_end = hypreSycl_copy_if(
+                        first,                                                              /* first   */
+                        first + B_ext_nnz,                                                  /* last    */
+                        B_ext_bigj,                                                         /* stencil */
+                        oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data), /* result  */
+                        std::not_fn(pred1) );
+      hypre_assert( std::get<0>(new_end.base()) == B_ext_offd_ii + B_ext_offd_nnz );
 #else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
@@ -859,7 +859,7 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
                       C_i + hypre_CSRMatrixNumRows(A) + 1,
                       C_i + hypre_CSRMatrixNumRows(C) + 1,
                       C_i + hypre_CSRMatrixNumRows(A) + 1,
-                      [const_val = hypre_CSRMatrixNumNonzeros(A)] (const auto & x) {return x + const_val;} );
+   [const_val = hypre_CSRMatrixNumNonzeros(A)] (const auto & x) {return x + const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       C_i + hypre_CSRMatrixNumRows(A) + 1,

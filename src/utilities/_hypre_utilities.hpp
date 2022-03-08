@@ -220,7 +220,28 @@ using dim3 = sycl::range<1>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
+            [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, __VA_ARGS__);                                           \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
+#define HYPRE_GPU_DEBUG_LAUNCH(kernel_name, gridsize, blocksize, ...)                        \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]);                                                \
+     assert(0); exit(1);                                                                     \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         auto debug_stream = sycl::stream(4096, 1024, cgh);                                   \
+         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+            [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
    }                                                                                         \

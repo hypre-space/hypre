@@ -369,6 +369,7 @@ hypreGPUKernel_CopyParCSRRows(
       k = d_ib ? read_only_load(d_ib + global_warp_id) : 0;
    }
 #if defined(HYPRE_USING_SYCL)
+   SG.barrier();
    istart = SG.shuffle(j, 0);
    iend   = SG.shuffle(j, 1);
    bstart = SG.shuffle(k, 0);
@@ -399,6 +400,7 @@ hypreGPUKernel_CopyParCSRRows(
    }
    bstart += iend - istart;
 #if defined(HYPRE_USING_SYCL)
+   SG.barrier();
    istart = SG.shuffle(j, 0);
    iend   = SG.shuffle(j, 1);
 #else
@@ -480,7 +482,12 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0);
+   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
+   HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+   /* HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0); */
+   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, tmp, 0);
+   hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif

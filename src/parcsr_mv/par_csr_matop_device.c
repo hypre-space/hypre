@@ -16,7 +16,7 @@
 /* return B = [Adiag, Aoffd] */
 #if 1
 __global__ void
-hypreCUDAKernel_ConcatDiagAndOffd(
+hypreGPUKernel_ConcatDiagAndOffd(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
@@ -56,6 +56,8 @@ hypreCUDAKernel_ConcatDiagAndOffd(
       k = read_only_load(d_ib + row);
    }
 #if defined(HYPRE_USING_SYCL)
+   /* WM: Q - do I always need a barrier before calling shuffle? */
+   SG.barrier();
    istart = SG.shuffle(j, 0);
    iend   = SG.shuffle(j, 1);
    bstart = SG.shuffle(k, 0);
@@ -79,6 +81,7 @@ hypreCUDAKernel_ConcatDiagAndOffd(
    }
    bstart += iend - istart;
 #if defined(HYPRE_USING_SYCL)
+   SG.barrier();
    istart = SG.shuffle(j, 0);
    iend   = SG.shuffle(j, 1);
 #else
@@ -115,20 +118,48 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    const dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A_diag), "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_ConcatDiagAndOffd,
+   /* WM: Q - need to pass variables intead of hypre_CSRMatrix...() ? Why? */
+   HYPRE_Int  nrows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int  diag_ncol = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int *d_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int *d_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex *d_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int *d_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int *d_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Complex *d_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int *cols_offd_map = NULL;
+   HYPRE_Int *d_ib = hypre_CSRMatrixI(B);
+   HYPRE_Int *d_jb = hypre_CSRMatrixJ(B);
+   HYPRE_Complex *d_ab = hypre_CSRMatrixData(B);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd,
                      gDim, bDim,
-                     hypre_CSRMatrixNumRows(A_diag),
-                     hypre_CSRMatrixNumCols(A_diag),
-                     hypre_CSRMatrixI(A_diag),
-                     hypre_CSRMatrixJ(A_diag),
-                     hypre_CSRMatrixData(A_diag),
-                     hypre_CSRMatrixI(A_offd),
-                     hypre_CSRMatrixJ(A_offd),
-                     hypre_CSRMatrixData(A_offd),
-                     NULL,
-                     hypre_CSRMatrixI(B),
-                     hypre_CSRMatrixJ(B),
-                     hypre_CSRMatrixData(B) );
+                     nrows,
+                     diag_ncol,
+                     d_diag_i,
+                     d_diag_j,
+                     d_diag_a,
+                     d_offd_i,
+                     d_offd_j,
+                     d_offd_a,
+                     cols_offd_map,
+                     d_ib,
+                     d_jb,
+                     d_ab );
+   /* HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd, */
+   /*                   gDim, bDim, */
+   /*                   hypre_CSRMatrixNumRows(A_diag), */
+   /*                   hypre_CSRMatrixNumCols(A_diag), */
+   /*                   hypre_CSRMatrixI(A_diag), */
+   /*                   hypre_CSRMatrixJ(A_diag), */
+   /*                   hypre_CSRMatrixData(A_diag), */
+   /*                   hypre_CSRMatrixI(A_offd), */
+   /*                   hypre_CSRMatrixJ(A_offd), */
+   /*                   hypre_CSRMatrixData(A_offd), */
+   /*                   NULL, */
+   /*                   hypre_CSRMatrixI(B), */
+   /*                   hypre_CSRMatrixJ(B), */
+   /*                   hypre_CSRMatrixData(B) ); */
+
 
    return B;
 }
@@ -230,20 +261,46 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_ParCSRMatrixNumRows(A), "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_ConcatDiagAndOffd,
+   /* WM: Q - need to pass variables intead of hypre_CSRMatrix...() ? Why? */
+   HYPRE_Int  nrows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int  diag_ncol = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int *d_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int *d_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex *d_diag_a = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int *d_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int *d_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Complex *d_offd_a = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int *d_ib = hypre_CSRMatrixI(B);
+   HYPRE_Int *d_jb = hypre_CSRMatrixJ(B);
+   HYPRE_Complex *d_ab = hypre_CSRMatrixData(B);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd,
                      gDim, bDim,
-                     hypre_CSRMatrixNumRows(A_diag),
-                     hypre_CSRMatrixNumCols(A_diag),
-                     hypre_CSRMatrixI(A_diag),
-                     hypre_CSRMatrixJ(A_diag),
-                     hypre_CSRMatrixData(A_diag),
-                     hypre_CSRMatrixI(A_offd),
-                     hypre_CSRMatrixJ(A_offd),
-                     hypre_CSRMatrixData(A_offd),
+                     nrows,
+                     diag_ncol,
+                     d_diag_i,
+                     d_diag_j,
+                     d_diag_a,
+                     d_offd_i,
+                     d_offd_j,
+                     d_offd_a,
                      cols_offd_map,
-                     hypre_CSRMatrixI(B),
-                     hypre_CSRMatrixJ(B),
-                     hypre_CSRMatrixData(B) );
+                     d_ib,
+                     d_jb,
+                     d_ab );
+   /* HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd, */
+   /*                   gDim, bDim, */
+   /*                   hypre_CSRMatrixNumRows(A_diag), */
+   /*                   hypre_CSRMatrixNumCols(A_diag), */
+   /*                   hypre_CSRMatrixI(A_diag), */
+   /*                   hypre_CSRMatrixJ(A_diag), */
+   /*                   hypre_CSRMatrixData(A_diag), */
+   /*                   hypre_CSRMatrixI(A_offd), */
+   /*                   hypre_CSRMatrixJ(A_offd), */
+   /*                   hypre_CSRMatrixData(A_offd), */
+   /*                   cols_offd_map, */
+   /*                   hypre_CSRMatrixI(B), */
+   /*                   hypre_CSRMatrixJ(B), */
+   /*                   hypre_CSRMatrixData(B) ); */
 
    hypre_TFree(cols_offd_map, HYPRE_MEMORY_DEVICE);
 
@@ -255,7 +312,8 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(E) + 1,
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
-                      [const_val = hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd)] (const auto & x) {return x + const_val;} );
+                      [const_val = hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd)] (
+   const auto & x) {return x + const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
@@ -270,20 +328,47 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
 
    hypre_assert(hypre_CSRMatrixNumCols(E_diag) == hypre_CSRMatrixNumCols(A_diag));
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_ConcatDiagAndOffd,
+   /* WM: Q - need to pass variables intead of hypre_CSRMatrix...() ? Why? */
+   nrows = hypre_CSRMatrixNumRows(E_diag);
+   diag_ncol = hypre_CSRMatrixNumCols(E_diag);
+   d_diag_i = hypre_CSRMatrixI(E_diag);
+   d_diag_j = hypre_CSRMatrixJ(E_diag);
+   d_diag_a = hypre_CSRMatrixData(E_diag);
+   d_offd_i = hypre_CSRMatrixI(E_offd);
+   d_offd_j = hypre_CSRMatrixJ(E_offd);
+   d_offd_a = hypre_CSRMatrixData(E_offd);
+   cols_offd_map = NULL;
+   d_ib = hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A);
+   d_jb = hypre_CSRMatrixJ(B);
+   d_ab = hypre_CSRMatrixData(B);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd,
                      gDim, bDim,
-                     hypre_CSRMatrixNumRows(E_diag),
-                     hypre_CSRMatrixNumCols(E_diag),
-                     hypre_CSRMatrixI(E_diag),
-                     hypre_CSRMatrixJ(E_diag),
-                     hypre_CSRMatrixData(E_diag),
-                     hypre_CSRMatrixI(E_offd),
-                     hypre_CSRMatrixJ(E_offd),
-                     hypre_CSRMatrixData(E_offd),
-                     NULL,
-                     hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A),
-                     hypre_CSRMatrixJ(B),
-                     hypre_CSRMatrixData(B) );
+                     nrows,
+                     diag_ncol,
+                     d_diag_i,
+                     d_diag_j,
+                     d_diag_a,
+                     d_offd_i,
+                     d_offd_j,
+                     d_offd_a,
+                     cols_offd_map,
+                     d_ib,
+                     d_jb,
+                     d_ab );
+   /* HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd, */
+   /*                   gDim, bDim, */
+   /*                   hypre_CSRMatrixNumRows(E_diag), */
+   /*                   hypre_CSRMatrixNumCols(E_diag), */
+   /*                   hypre_CSRMatrixI(E_diag), */
+   /*                   hypre_CSRMatrixJ(E_diag), */
+   /*                   hypre_CSRMatrixData(E_diag), */
+   /*                   hypre_CSRMatrixI(E_offd), */
+   /*                   hypre_CSRMatrixJ(E_offd), */
+   /*                   hypre_CSRMatrixData(E_offd), */
+   /*                   NULL, */
+   /*                   hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A), */
+   /*                   hypre_CSRMatrixJ(B), */
+   /*                   hypre_CSRMatrixData(B) ); */
 
    hypre_CSRMatrixDestroy(E_diag);
    hypre_CSRMatrixDestroy(E_offd);
