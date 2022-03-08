@@ -329,6 +329,11 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                       functor),
                       send_buf );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, recv_buf);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -1101,6 +1106,11 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_transform_iterator(thrust::make_zip_iterator(thrust::make_tuple(map2FC, CF_marker)),
                                                       functor),
                       send_buf );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, recv_buf);

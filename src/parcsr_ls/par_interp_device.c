@@ -147,6 +147,11 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                       CF_marker,
                       int_buf_data );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                  HYPRE_MEMORY_DEVICE, CF_marker_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -165,6 +170,11 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                num_sends),
                          dof_func,
                          int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+      /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                     HYPRE_MEMORY_DEVICE, dof_func_offd);
@@ -1125,6 +1135,12 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                       CF_marker,
                       int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    /* create a handle to start communication. 11: for integer */
    comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                  HYPRE_MEMORY_DEVICE, CF_marker_offd);
@@ -1173,6 +1189,12 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       thrust::make_constant_iterator(my_first_cpt),
                       big_int_buf_data,
                       thrust::plus<HYPRE_BigInt>() );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure big_int_buf_data is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_int_buf_data,
                                                  HYPRE_MEMORY_DEVICE, fine_to_coarse_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);

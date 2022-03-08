@@ -283,6 +283,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          dof_func,
                          int_buf_data );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
       dof_func_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_DEVICE);
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
@@ -305,6 +310,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                          pass_marker,
                          int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
       /* allocate one more see comments in hypre_modmp_compute_num_cols_offd_fine_to_coarse */
       pass_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A + 1, HYPRE_MEMORY_DEVICE);
@@ -414,6 +424,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                             pass_marker,
                             int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+         /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+         hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
          /* create a handle to start communication. 11: for integer */
          comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
@@ -855,6 +870,11 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                          thrust::make_transform_iterator(fine_to_coarse, functor),
                          big_buf_data );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
                                                     HYPRE_MEMORY_DEVICE, big_convert_offd);
 
@@ -1105,6 +1125,11 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                          thrust::make_transform_iterator(fine_to_coarse, functor),
                          big_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
                                                     HYPRE_MEMORY_DEVICE, big_convert_offd);

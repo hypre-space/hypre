@@ -171,7 +171,8 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommPkgRecvProcs    (comm_pkg_j) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = recv_jstarts;
 
-#ifdef HYPRE_WITH_GPU_AWARE_MPI
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure d_send_j/d_send_a is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 
@@ -436,6 +437,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = jdata_send_map_starts;
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg_j) = jdata_recv_vec_starts;
 
+   /* RL: assume B_ext_a_d and B_ext_j_d are ready at input */
    /* send/recv CSR rows */
    if (want_data)
    {
@@ -1345,6 +1347,11 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixFirstRowIndex(A)),
                          hypre_CSRMatrixBigJ(A_offdT),
                          thrust::plus<HYPRE_BigInt>() );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure A_offdT is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
       if (!hypre_ParCSRMatrixCommPkg(A))
       {

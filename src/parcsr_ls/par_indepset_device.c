@@ -178,7 +178,8 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*--------------------------------------------------------------------
     * Exchange boundary data for IS_marker: send external IS to internal
     *-------------------------------------------------------------------*/
-#ifdef HYPRE_WITH_GPU_AWARE_MPI
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure IS_marker_offd is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 

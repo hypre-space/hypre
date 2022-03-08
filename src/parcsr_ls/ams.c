@@ -569,6 +569,11 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                                   num_sends),
                             cf_marker,
                             int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+         /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+         hypre_ForceSyncComputeStream(hypre_handle());
+#endif
       }
       else
 #endif
