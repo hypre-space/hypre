@@ -74,6 +74,6 @@ libHYPRE_DistributedMatrixPilutSolver.a: ${OBJS}
 libHYPRE_DistributedMatrixPilutSolver.so libHYPRE_DistributedMatrixPilutSolver.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
