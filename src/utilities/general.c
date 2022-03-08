@@ -283,7 +283,8 @@ HYPRE_Init()
    hypre_int device_id;
    hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
-#if CUDA_VERSION >= CUDA_MALLOCASYNC_VERSION
+
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
    cudaMemPool_t mempool;
    cudaDeviceGetDefaultMemPool(&mempool, device_id);
    uint64_t threshold = UINT64_MAX;
@@ -321,7 +322,7 @@ HYPRE_Init()
    HYPRE_OMPOffloadOn();
 #endif
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    /* Keep this check here at the end of HYPRE_Init()
     * Make sure that device pool allocator has not been setup in HYPRE_Init,
     * otherwise users are not able to set all the parameters

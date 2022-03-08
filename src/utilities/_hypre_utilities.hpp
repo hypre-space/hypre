@@ -95,8 +95,13 @@ struct hypre_device_allocator
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
-
 #define CUDA_MALLOCASYNC_VERSION 11020
+
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+#if CUDA_VERSION < CUDA_MALLOCASYNC_VERSION
+#error cudaMalloc/FreeAsync needs CUDA 11.2
+#endif
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          hip includes
@@ -296,7 +301,7 @@ struct hypre_DeviceData
 #endif
 #endif
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
    hypre_uint                        cub_max_bin;
