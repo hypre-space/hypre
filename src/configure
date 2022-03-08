@@ -785,6 +785,7 @@ enable_unified_memory
 enable_cuda_streams
 enable_cusparse
 enable_device_memory_pool
+enable_device_malloc_async
 enable_cublas
 enable_curand
 enable_rocsparse
@@ -1518,7 +1519,9 @@ Optional Features:
   --enable-cusparse       Use cuSPARSE (default is YES).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
-  --enable-cublas         Use cuBLAS (default is NO).
+  --enable-device-malloc-async
+                          Use device async malloc (default is NO).
+  --enable-cublas         Use cuBLAS (default is YES).
   --enable-curand         Use cuRAND (default is YES).
   --enable-rocsparse      Use rocSPARSE (default is YES).
   --enable-rocblas        Use rocBLAS (default is NO).
@@ -2782,9 +2785,10 @@ hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
-hypre_using_cublas=no
+hypre_using_cublas=yes
 hypre_using_curand=yes
 hypre_using_device_pool=no
+hypre_using_device_malloc_async=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -3151,15 +3155,28 @@ else
 fi
 
 
+# Check whether --enable-device-malloc-async was given.
+if test "${enable_device_malloc_async+set}" = set; then :
+  enableval=$enable_device_malloc_async; case "${enableval}" in
+    yes) hypre_using_device_malloc_async=yes ;;
+    no)  hypre_using_device_malloc_async=no ;;
+    *)   hypre_using_device_malloc_async=no ;;
+ esac
+else
+  hypre_using_device_malloc_async=no
+
+fi
+
+
 # Check whether --enable-cublas was given.
 if test "${enable_cublas+set}" = set; then :
   enableval=$enable_cublas; case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=yes ;;
  esac
 else
-  hypre_using_cublas=no
+  hypre_using_cublas=yes
 
 fi
 
@@ -9182,6 +9199,13 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
    then
 
 $as_echo "#define HYPRE_USING_DEVICE_POOL 1" >>confdefs.h
+
+   fi
+
+   if test "$hypre_using_device_malloc_async" = "yes"
+   then
+
+$as_echo "#define HYPRE_USING_DEVICE_MALLOC_ASYNC 1" >>confdefs.h
 
    fi
 

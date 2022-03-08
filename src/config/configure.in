@@ -173,9 +173,10 @@ hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
-hypre_using_cublas=no
+hypre_using_cublas=yes
 hypre_using_curand=yes
 hypre_using_device_pool=no
+hypre_using_device_malloc_async=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -442,15 +443,26 @@ AS_HELP_STRING([--enable-device-memory-pool],
 [hypre_using_device_pool=no]
 )
 
+AC_ARG_ENABLE(device-malloc-async,
+AS_HELP_STRING([--enable-device-malloc-async],
+               [Use device async malloc (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_device_malloc_async=yes ;;
+    no)  hypre_using_device_malloc_async=no ;;
+    *)   hypre_using_device_malloc_async=no ;;
+ esac],
+[hypre_using_device_malloc_async=no]
+)
+
 AC_ARG_ENABLE(cublas,
 AS_HELP_STRING([--enable-cublas],
-               [Use cuBLAS (default is NO).]),
+               [Use cuBLAS (default is YES).]),
 [case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=yes ;;
  esac],
-[hypre_using_cublas=no]
+[hypre_using_cublas=yes]
 )
 
 AC_ARG_ENABLE(curand,
@@ -2261,6 +2273,11 @@ then
    if test "$hypre_using_device_pool" = "yes"
    then
       AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
+   fi
+
+   if test "$hypre_using_device_malloc_async" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_DEVICE_MALLOC_ASYNC, 1, [Define to 1 if using device async malloc])
    fi
 
    if test "x$hypre_using_cuda_streams" = "xyes"
