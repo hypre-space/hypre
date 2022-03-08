@@ -9,7 +9,7 @@
 #include "par_amg.h"
 #include "../parcsr_block_mv/par_csr_block_matrix.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define PRINT_CF 0
 
 #define DEBUG_SAVE_ALL_OPS 0
@@ -822,7 +822,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    not_finished_coarsening = 1;
    level = 0;
    HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
-   hypre_printf("WM: debug - level %d\n", level);
 
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
@@ -1065,7 +1064,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**** Do the appropriate coarsening ****/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarsening");
-         hypre_printf("WM: debug - coarsening\n");
 
          if (nodal == 0) /* no nodal coarsening */
          {
@@ -1556,7 +1554,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-         hypre_printf("WM: debug - interpolation\n");
 
          if (level < agg_num_levels)
          {
@@ -2576,7 +2573,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-            hypre_printf("WM: debug - RAP\n");
             if (ns == 1)
             {
                hypre_ParCSRMatrix *Q = NULL;
@@ -2776,8 +2772,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
 
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-      hypre_printf("WM: debug - begin RAP, rap2 = %d, hypre_ParAMGDataModularizedMatMat = %d\n", rap2,
-                   hypre_ParAMGDataModularizedMatMat(amg_data));
       if (debug_flag == 1) { wall_time = time_getWallclockSeconds(); }
 
       if (block_mode)
@@ -2890,7 +2884,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* Compute standard Galerkin coarse-grid product */
             if (hypre_ParAMGDataModularizedMatMat(amg_data))
             {
-               hypre_printf("WM: debug - in amg setup, calling hypre_ParCSRMatrixRAPKT()\n");
                A_H = hypre_ParCSRMatrixRAPKT(P_array[level], A_array[level],
                                              P_array[level], keepTranspose);
             }
@@ -2909,7 +2902,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
 
       HYPRE_ANNOTATE_REGION_END("%s", "RAP");
-      hypre_printf("WM: debug - end RAP\n");
       if (debug_flag == 1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
@@ -2921,7 +2913,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       HYPRE_ANNOTATE_MGLEVEL_END(level);
       ++level;
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
-      hypre_printf("WM: debug - level %d\n", level);
 
       if (!block_mode)
       {
@@ -2960,7 +2951,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }  /* end of coarsening loop: while (not_finished_coarsening) */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
-   hypre_printf("WM: debug - coarse solve\n");
 
    /* redundant coarse grid solve */
    if ((seq_threshold >= coarse_threshold) &&
@@ -3172,7 +3162,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-      hypre_printf("WM: debug - relaxation\n");
 
       if (j < num_levels - 1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 ||
                                  grid_relax_type[1] == 14 ||
@@ -3223,7 +3212,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-      hypre_printf("WM: debug - relaxation\n");
 
       if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 &&
                                                                  j == (num_levels - 1)))
