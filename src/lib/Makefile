@@ -127,4 +127,4 @@ libHYPRE.a: ${FILES_HYPRE}
 libHYPRE.so libHYPRE.dylib: ${FILES_HYPRE}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${FILES_HYPRE} ${SOLIBS} ${SHARED_SET_SONAME}${SONAME} ${SHARED_OPTIONS} ${LDFLAGS}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@

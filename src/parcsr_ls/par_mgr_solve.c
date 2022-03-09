@@ -617,6 +617,9 @@ hypre_MGRCycle( void               *mgr_vdata,
    hypre_ParCSRMatrix   **A_array = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array  = (mgr_data -> RT_array);
    hypre_ParCSRMatrix   **P_array   = (mgr_data -> P_array);
+#if defined(HYPRE_USING_CUDA)
+   hypre_ParCSRMatrix   **P_FF_array   = (mgr_data -> P_FF_array);
+#endif
    hypre_ParCSRMatrix   *RAP = (mgr_data -> RAP);
    HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
    HYPRE_Solver         cg_solver = (mgr_data -> coarse_grid_solver);
@@ -691,9 +694,6 @@ hypre_MGRCycle( void               *mgr_vdata,
          // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
          if (mgr_data -> print_coarse_system)
          {
-            //HYPRE_ParCSRMatrixPrint(RAP, "RAP_mat");
-            //HYPRE_ParVectorPrint(F_array[level], "RAP_rhs");
-            //HYPRE_ParVectorPrint(U_array[level], "RAP_sol");
             hypre_ParCSRMatrixPrintIJ(RAP, 1, 1, "RAP_mat");
             hypre_ParVectorPrintIJ(F_array[level], 1, "RAP_rhs");
             hypre_ParVectorPrintIJ(U_array[level], 1, "RAP_sol");
@@ -716,6 +716,16 @@ hypre_MGRCycle( void               *mgr_vdata,
             /* (single level) relaxation for A_ff */
             if (relax_type == 18)
             {
+#if defined(HYPRE_USING_CUDA)
+               for (i = 0; i < nsweeps; i++)
+               {
+                  hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
+                                               hypre_IntArrayData(CF_marker[fine_grid]),
+                                               relax_points, relax_weight,
+                                               relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
+                                               U_array[fine_grid], Vtemp);
+               }
+#else
                for (i = 0; i < nsweeps; i++)
                {
                   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
@@ -724,6 +734,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                                               relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                                               U_array[fine_grid], Vtemp);
                }
+#endif
             }
             else if (relax_type == 8 || relax_type == 13 || relax_type == 14)
             {
@@ -752,7 +763,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             /* v-cycle smoother for A_ff */
             //HYPRE_Real convergence_factor_frelax;
             // compute residual before solve
-            //  hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
+            // hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
             //                                    U_array[level], 1.0, F_array[level], Vtemp);
             //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
 
@@ -837,25 +848,31 @@ hypre_MGRCycle( void               *mgr_vdata,
          {
             // We need to first compute residual to ensure that
             // F-relaxation is reducing the global residual
-
             alpha = -1.0;
             beta = 1.0;
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid], beta,
                                                F_array[fine_grid], Vtemp);
 
             // restrict to F points
-            //            hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
-            hypre_MGRAddVectorR(hypre_IntArrayData(CF_marker[fine_grid]), FMRK, 1.0, Vtemp, 0.0,
-                                &(F_fine_array[coarse_grid]));
-            // initialize solution array
+#if defined(HYPRE_USING_CUDA)
+            hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], Vtemp, 0.0, F_fine_array[coarse_grid]);
+#else
+            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
+#endif
             hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
-            // solve
+            // Do F-relaxation using AMG
             fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid],
                                    F_fine_array[coarse_grid],
                                    U_fine_array[coarse_grid]);
-            // update solution
-            hypre_MGRAddVectorP(hypre_IntArrayData(CF_marker[fine_grid]), FMRK, 1.0, U_fine_array[coarse_grid],
-                                1.0, &(U_array[fine_grid]));
+
+            // Interpolate the solution back to the fine grid level
+#if defined(HYPRE_USING_CUDA)
+            hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0,
+                                     U_array[fine_grid]);
+#else
+            hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0,
+                                &(U_array[fine_grid]));
+#endif
          }
          else
          {

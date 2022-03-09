@@ -205,10 +205,11 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
-                                         HYPRE_Int              part,
-                                         HYPRE_Int              nvars,
-                                         HYPRE_SStructVariable *vartypes )
+HYPRE_Int
+HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
+                               HYPRE_Int              part,
+                               HYPRE_Int              nvars,
+                               HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
 
@@ -882,4 +883,3 @@ HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
 
    return hypre_error_flag;
 }
-

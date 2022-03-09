@@ -90,20 +90,22 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
 HYPRE_Int
 HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
 {
-   HYPRE_Int               nparts;
-   hypre_SStructPGrid    **pgrids;
-   hypre_SStructStencil ***stencils;
-   HYPRE_Int              *fem_nsparse;
-   HYPRE_Int             **fem_sparse_i;
-   HYPRE_Int             **fem_sparse_j;
-   HYPRE_Int             **fem_entries;
-   HYPRE_Int               nUventries;
-   HYPRE_Int              *iUventries;
-   hypre_SStructUVEntry  **Uventries;
-   hypre_SStructUVEntry   *Uventry;
-   HYPRE_BigInt          **Uveoffsets;
-   HYPRE_Int               nvars;
-   HYPRE_Int               part, var, i;
+   HYPRE_Int                 nparts;
+   hypre_SStructPGrid      **pgrids;
+   hypre_SStructStencil   ***stencils;
+   HYPRE_Int                *fem_nsparse;
+   HYPRE_Int               **fem_sparse_i;
+   HYPRE_Int               **fem_sparse_j;
+   HYPRE_Int               **fem_entries;
+   HYPRE_Int                 nUventries;
+   HYPRE_Int                *iUventries;
+   hypre_SStructUVEntry    **Uventries;
+   hypre_SStructUVEntry     *Uventry;
+   HYPRE_BigInt            **Uveoffsets;
+   HYPRE_Int                 a_graph_entries;
+   hypre_SStructGraphEntry **graph_entries;
+   HYPRE_Int                 nvars;
+   HYPRE_Int                 part, var, i;
 
    if (graph)
    {
@@ -155,6 +157,13 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          hypre_TFree(iUventries, HYPRE_MEMORY_HOST);
          hypre_TFree(Uventries, HYPRE_MEMORY_HOST);
          hypre_TFree(Uveoffsets, HYPRE_MEMORY_HOST);
+         a_graph_entries = hypre_SStructAGraphEntries(graph);
+         graph_entries = hypre_SStructGraphEntries(graph);
+         for (i = 0; i < a_graph_entries; i++)
+         {
+            hypre_TFree(graph_entries[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(graph_entries, HYPRE_MEMORY_HOST);
          hypre_TFree(graph, HYPRE_MEMORY_HOST);
       }
    }
@@ -662,14 +671,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
          hypre_SStructGraphUVEntries(graph) = Uventries;
       }
-
-      /*free each add entry after copying */
-      hypre_TFree(new_entry, HYPRE_MEMORY_HOST);
-
-   }/* end of loop through add entries */
-
-   /* free the storage for the add entires */
-   hypre_TFree(add_entries, HYPRE_MEMORY_HOST);
+   } /* end of loop through add entries */
 
    /*---------------------------------------------------------
     * Set up the FEM stencil information
@@ -823,6 +825,116 @@ HYPRE_SStructGraphSetObjectType( HYPRE_SStructGraph  graph,
                                  HYPRE_Int           type )
 {
    hypre_SStructGraphObjectType(graph) = type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGraphPrint( FILE *file, HYPRE_SStructGraph graph )
+{
+   HYPRE_Int                 type = hypre_SStructGraphObjectType(graph);
+   HYPRE_Int                 ndim = hypre_SStructGraphNDim(graph);
+   HYPRE_Int                 nentries = hypre_SStructNGraphEntries(graph);
+   hypre_SStructGraphEntry **entries = hypre_SStructGraphEntries(graph);
+   HYPRE_Int                 part, to_part;
+   HYPRE_Int                 var, to_var;
+   hypre_IndexRef            index, to_index;
+
+   HYPRE_Int                 i;
+
+   /* Print auxiliary info */
+   hypre_fprintf(file, "GraphSetObjectType: %d\n", type);
+
+   /* Print SStructGraphEntry info */
+   hypre_fprintf(file, "GraphNumEntries: %d", nentries);
+   for (i = 0; i < nentries; i++)
+   {
+      part = hypre_SStructGraphEntryPart(entries[i]);
+      var = hypre_SStructGraphEntryVar(entries[i]);
+      index = hypre_SStructGraphEntryIndex(entries[i]);
+      to_part = hypre_SStructGraphEntryToPart(entries[i]);
+      to_var = hypre_SStructGraphEntryToVar(entries[i]);
+      to_index = hypre_SStructGraphEntryToIndex(entries[i]);
+
+      hypre_fprintf(file, "\nGraphAddEntries: %d %d ", part, var);
+      hypre_IndexPrint(file, ndim, index);
+      hypre_fprintf(file, " %d %d ", to_part, to_var);
+      hypre_IndexPrint(file, ndim, to_index);
+   }
+   hypre_fprintf(file, "\n");
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructGraphRead( FILE                  *file,
+                        HYPRE_SStructGrid      grid,
+                        HYPRE_SStructStencil **stencils,
+                        HYPRE_SStructGraph    *graph_ptr )
+{
+   MPI_Comm                  comm = hypre_SStructGridComm(grid);
+   HYPRE_Int                 nparts = hypre_SStructGridNParts(grid);
+   HYPRE_Int                 ndim = hypre_SStructGridNDim(grid);
+
+   HYPRE_SStructGraph        graph;
+   hypre_SStructGraphEntry **entries;
+   hypre_SStructPGrid       *pgrid;
+   HYPRE_Int                 nentries;
+   HYPRE_Int                 a_entries;
+   HYPRE_Int                 part, to_part;
+   HYPRE_Int                 var, to_var;
+   hypre_Index               index, to_index;
+
+   HYPRE_Int                 type;
+   HYPRE_Int                 nvars;
+   HYPRE_Int                 i;
+
+   /* Create graph */
+   HYPRE_SStructGraphCreate(comm, grid, &graph);
+
+   /* Read auxiliary info */
+   hypre_fscanf(file, "GraphSetObjectType: %d\n", &type);
+   HYPRE_SStructGraphSetObjectType(graph, type);
+
+   /* Set stencils */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+
+      for (var = 0; var < nvars; var++)
+      {
+         HYPRE_SStructGraphSetStencil(graph, part, var, stencils[part][var]);
+      }
+   }
+
+   /* TODO: HYPRE_SStructGraphSetFEM */
+   /* TODO: HYPRE_SStructGraphSetFEMSparsity */
+
+   /* Read SStructGraphEntry info */
+   hypre_fscanf(file, "GraphNumEntries: %d", &nentries);
+   a_entries = nentries + 1;
+   hypre_SStructAGraphEntries(graph) = a_entries;
+   entries = hypre_CTAlloc(hypre_SStructGraphEntry *, a_entries, HYPRE_MEMORY_HOST);
+   hypre_SStructGraphEntries(graph) = entries;
+   for (i = 0; i < nentries; i++)
+   {
+      hypre_fscanf(file, "\nGraphAddEntries: %d %d ", &part, &var);
+      hypre_IndexRead(file, ndim, index);
+      hypre_fscanf(file, " %d %d ", &to_part, &to_var);
+      hypre_IndexRead(file, ndim, to_index);
+
+      HYPRE_SStructGraphAddEntries(graph, part, index, var, to_part, to_index, to_var);
+   }
+   hypre_fscanf(file, "\n");
+
+   *graph_ptr = graph;
 
    return hypre_error_flag;
 }

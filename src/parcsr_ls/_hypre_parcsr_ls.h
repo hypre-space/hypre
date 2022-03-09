@@ -2893,6 +2893,13 @@ HYPRE_Int hypre_MGRSetNonCpointsToFpoints( void      *mgr_vdata, HYPRE_Int nonCp
 
 //HYPRE_Int hypre_MGRInitCFMarker(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 //HYPRE_Int hypre_MGRUpdateCoarseIndexes(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
+HYPRE_Int hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                        HYPRE_Int *CF_marker_host, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
+                                        hypre_ParVector *u, hypre_ParVector *Vtemp );
+HYPRE_Int hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
+                                HYPRE_BigInt *num_cpts_global, HYPRE_Int method, hypre_ParCSRMatrix **P_ptr);
+HYPRE_Int hypre_MGRBuildP(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                          HYPRE_BigInt *num_cpts_global, HYPRE_Int method, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr);
 HYPRE_Int hypre_MGRBuildInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S,
                                HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
                                HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix  **P, HYPRE_Int method,
@@ -2931,9 +2938,9 @@ HYPRE_Int hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker,
 HYPRE_Int hypre_MGRBuildAff( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int debug_flag,
                              hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRApproximateInverse(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **A_inv);
-HYPRE_Int hypre_MGRAddVectorP ( HYPRE_Int  *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
+HYPRE_Int hypre_MGRAddVectorP ( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
                                 hypre_ParVector *fromVector, HYPRE_Real b, hypre_ParVector **toVector );
-HYPRE_Int hypre_MGRAddVectorR ( HYPRE_Int  *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
+HYPRE_Int hypre_MGRAddVectorR ( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
                                 hypre_ParVector *fromVector, HYPRE_Real b, hypre_ParVector **toVector );
 HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P,
                                                 hypre_ParCSRMatrix *RT, HYPRE_Int bsize, HYPRE_Int ordering, HYPRE_Int method, HYPRE_Int Pmax,

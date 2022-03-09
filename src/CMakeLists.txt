@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.23.0)
-set(HYPRE_NUMBER  22300)
-set(HYPRE_DATE    2021/10/01)
+set(HYPRE_VERSION 2.24.0)
+set(HYPRE_NUMBER  22400)
+set(HYPRE_DATE    2022/02/11)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -113,6 +113,10 @@ option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
 set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
+# oneAPI options
+option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
+option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
+option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
@@ -326,6 +330,10 @@ if (HYPRE_WITH_SYCL)
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
+  if (HYPRE_ENABLE_CUDA_STREAMS)
+    set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
+  endif (HYPRE_ENABLE_CUDA_STREAMS)
+
 endif (HYPRE_WITH_SYCL)
 
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
@@ -420,6 +428,26 @@ if (HYPRE_USING_CUDA)
       ${MPI_CXX_INCLUDE_DIRS})
   endif ()
 endif ()
+
+if (HYPRE_USING_SYCL)
+  if (HYPRE_ENABLE_ONEMKLSPARSE)
+    set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
+  endif()
+  if (HYPRE_ENABLE_ONEMKLBLAS)
+    set(HYPRE_USING_ONEMKLBLAS ON CACHE BOOL "" FORCE)
+  endif()
+  if (HYPRE_ENABLE_ONEMKLRAND)
+    set(HYPRE_USING_ONEMKLRAND ON CACHE BOOL "" FORCE)
+  endif()
+  if (HYPRE_USING_ONEMKLSPARSE OR HYPRE_USING_ONEMKLBLAS OR HYPRE_USING_ONEMKLRAND)
+    set(MKL_LINK static)
+    set(MKL_THREADING sequential)
+    find_package(MKL CONFIG REQUIRED HINTS "$ENV{MKLROOT}/lib/cmake/mkl")
+    target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_COMPILE_OPTIONS>)
+    target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL_DPCPP>)
+  endif()
+endif()
 
 if (HYPRE_USING_CALIPER)
   find_package(caliper REQUIRED)
@@ -548,5 +576,9 @@ export(EXPORT HYPRETargets
   FILE "${CMAKE_CURRENT_BINARY_DIR}/HYPRETargets.cmake"
   NAMESPACE HYPRE::
   )
+
+# Declare an alias so that consumers can depend on HYPRE::HYPRE target
+# also when using HYPRE via add_directory or FetchContent
+add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 export(PACKAGE ${PROJECT_NAME})

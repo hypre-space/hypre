@@ -712,10 +712,6 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
-   /* WM: TODO - remove after sycl implementation in place */
-#if defined(HYPRE_USING_SYCL)
-   exec = HYPRE_EXEC_HOST;
-#endif
    if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_CSRMatrixMatvecDevice(0, alpha, A, x, beta, b, y, offset);

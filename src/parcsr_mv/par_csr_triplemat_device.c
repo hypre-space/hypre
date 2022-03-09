@@ -497,7 +497,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return C;
 }
@@ -817,7 +817,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
    return C;
 }
