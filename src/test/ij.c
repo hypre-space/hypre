@@ -286,6 +286,7 @@ main( hypre_int argc,
    coarsen_type  = 8;
    mod_rap2      = 1;
    HYPRE_Int spgemm_use_cusparse = 0;
+   HYPRE_Int spmv_use_cusparse = 1;
    HYPRE_Int use_curand = 1;
 #if defined(HYPRE_USING_HIP)
    spgemm_use_cusparse = 1;
@@ -1189,6 +1190,11 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_use_cusparse = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mv_cusparse") == 0 )
+      {
+         arg_index++;
+         spmv_use_cusparse = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_alg") == 0 )
       {
@@ -2321,6 +2327,7 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
+   ierr = HYPRE_SetSpMVUseCusparse(spmv_use_cusparse); hypre_assert(ierr == 0);
    /* use cuSPARSE for SpGEMM */
    ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);

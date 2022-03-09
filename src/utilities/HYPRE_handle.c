@@ -14,6 +14,15 @@
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetSpMVUseCusparse
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SetSpMVUseCusparse( HYPRE_Int use_cusparse )
+{
+   return hypre_SetSpMVUseCusparse(use_cusparse);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SetSpGemmUseCusparse
  *--------------------------------------------------------------------------*/
 HYPRE_Int

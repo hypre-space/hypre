@@ -229,6 +229,7 @@ HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HY
  * HYPRE handle
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int HYPRE_SetSpMVUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int HYPRE_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
 
