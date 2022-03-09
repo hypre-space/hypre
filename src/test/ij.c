@@ -3541,7 +3541,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          if (myid == 0) { hypre_printf("Solver:  AMG\n"); }
@@ -3848,7 +3850,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
 #if defined(HYPRE_USING_CUDA)
@@ -4089,7 +4093,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
@@ -4620,7 +4626,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
 #if defined(HYPRE_USING_CUDA)
@@ -5679,7 +5687,9 @@ main( hypre_int argc,
          {
             /* run a second time [for timings, to check for memory leaks] */
             mv_MultiVectorSetRandom( eigenvectors, 775 );
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
             hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
             hypre_ParVectorCopy(x0_save, x);
 
             HYPRE_LOBPCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
@@ -6246,7 +6256,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b,
@@ -7222,7 +7234,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
@@ -7576,7 +7590,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_COGMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_A,
@@ -7809,7 +7825,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b,
@@ -7971,7 +7989,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_MGRSetup(mgr_solver, parcsr_A, b, x);
@@ -8078,7 +8098,9 @@ main( hypre_int argc,
       {
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+#endif
          hypre_ParVectorCopy(x0_save, x);
 
          HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);
