@@ -629,7 +629,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       status0 = hypre_CTAlloc(hypre_MPI_Status,
                               hypre_ParCSRCommHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_NVTX)
-      hypre_GpuProfilingPushRange("MPI_Waitall");
+      hypre_GpuProfilingPushRange("hypre_MPI_Waitall");
 #endif
       hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
                         hypre_ParCSRCommHandleRequests(comm_handle), status0);
