@@ -381,7 +381,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int row, i, marker_row, row_start, row_end;
+   HYPRE_Int row, i=0, marker_row, row_start, row_end;
 
    if (lane < 2)
    {
@@ -543,4 +543,3 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-

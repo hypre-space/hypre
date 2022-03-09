@@ -26,7 +26,7 @@ hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(), p, q;
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(), p=0, q;
 
    /* 1. compute row max, rowsum */
    if (lane < 2)

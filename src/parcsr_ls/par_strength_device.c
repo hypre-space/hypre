@@ -268,7 +268,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag, q_diag, p_offd, q_offd;
+   HYPRE_Int p_diag=0, q_diag, p_offd=0, q_offd;
 
    /* diag part */
    if (lane < 2)
@@ -467,7 +467,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag, q_diag, p_offd, q_offd;
+   HYPRE_Int p_diag=0, q_diag, p_offd=0, q_offd;
 
    /* diag part */
    if (lane < 2)

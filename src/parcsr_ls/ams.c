@@ -388,7 +388,7 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( HYPRE_Int      nrows,
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Real eps = 0.0; /* DBL_EPSILON * 1e+4; */
    HYPRE_Real l1_norm = 0.0;
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1=0, q1, p2 = 0, q2 = 0;
 
    if (lane < 2)
    {
@@ -1495,7 +1495,7 @@ hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
    }
 
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int j, istart, iend;
+   HYPRE_Int j=0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
    Gdata[0] = Gx_data;
@@ -1781,7 +1781,7 @@ hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
    }
 
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int j, istart, iend;
+   HYPRE_Int j=0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3], *Odata[3];
 
    Gdata[0] = Gx_data;
@@ -2363,7 +2363,7 @@ hypreCUDAKernel_AMSComputeGPi_copy2(HYPRE_Int   nrows,
    }
 
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int j, istart, iend;
+   HYPRE_Int j=0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
    Gdata[0] = Gx_data;
@@ -2670,7 +2670,7 @@ hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
       return;
    }
 
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1=0, q1, p2 = 0, q2 = 0;
    bool nonempty_offd = G0t_offd_data != NULL;
 
    if (lane < 2)
@@ -2720,7 +2720,7 @@ hypreCUDAKernel_AMSSetupScaleGGt( HYPRE_Int   Gt_num_rows,
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Real h2 = 0.0;
-   HYPRE_Int ne, p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int ne, p1=0, q1, p2 = 0, q2 = 0;
 
    if (lane < 2)
    {

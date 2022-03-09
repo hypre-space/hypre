@@ -41,7 +41,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p=0, q;
 
    HYPRE_Complex diag_value = 0.0;
    HYPRE_Complex row_sum_i  = 0.0;
