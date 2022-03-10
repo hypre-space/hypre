@@ -3566,6 +3566,15 @@ main( hypre_int argc,
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
+
+         HYPRE_Real time[4];
+         HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
+
+         if (myid == 0)
+         {
+            hypre_printf("ParCSRHybrid: Setup-Time1 %f  Solve-Time1 %f  Setup-Time2 %f  Solve-Time2 %f\n",
+                         time[0], time[1], time[2], time[3]);
+         }
       }
 
       HYPRE_ParCSRHybridGetNumIterations(amg_solver, &num_iterations);
@@ -3573,7 +3582,6 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridGetDSCGNumIterations(amg_solver, &dscg_num_its);
       HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(amg_solver,
                                                      &final_res_norm);
-
       if (myid == 0)
       {
          hypre_printf("\n");
@@ -3582,15 +3590,6 @@ main( hypre_int argc,
          hypre_printf("DSCG_Iterations = %d\n", dscg_num_its);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
-      }
-
-      HYPRE_Real time[4];
-      HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
-
-      if (myid == 0)
-      {
-         printf("ParCSRHybrid: Setup-Time1 %f  Solve-Time1 %f  Setup-Time2 %f  Solve-Time2 %f\n",
-                time[0], time[1], time[2], time[3]);
       }
 
       HYPRE_ParCSRHybridDestroy(amg_solver);
