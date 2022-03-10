@@ -1159,10 +1159,14 @@ hypre_StructVectorRead( MPI_Comm    comm,
 
    hypre_StructGrid     *grid;
    hypre_BoxArray       *boxes;
+   HYPRE_Complex        *data;
+   HYPRE_Complex        *h_data;
 
    hypre_BoxArray       *data_space;
 
    HYPRE_Int             myid;
+   HYPRE_Int             ndim;
+   HYPRE_Int             data_size;
 
    /*----------------------------------------
     * Open file
@@ -1187,6 +1191,7 @@ hypre_StructVectorRead( MPI_Comm    comm,
    /* read grid info */
    hypre_fscanf(file, "\nGrid:\n");
    hypre_StructGridRead(comm, file, &grid);
+   ndim = hypre_StructGridNDim(grid);
 
    /*----------------------------------------
     * Initialize the vector
@@ -1200,13 +1205,30 @@ hypre_StructVectorRead( MPI_Comm    comm,
     * Read data
     *----------------------------------------*/
 
+   data_size = hypre_StructVectorDataSize(vector);
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      h_data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      h_data = hypre_StructVectorData(vector);
+   }
+
    boxes      = hypre_StructGridBoxes(grid);
    data_space = hypre_StructVectorDataSpace(vector);
 
    hypre_fscanf(file, "\nData:\n");
    hypre_ReadBoxArrayData(file, boxes, data_space, 1,
-                          hypre_StructGridNDim(grid),
-                          hypre_StructVectorData(vector));
+                          ndim, h_data);
+
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      data = hypre_StructVectorData(vector);
+      hypre_TMemcpy(data, h_data, HYPRE_Complex, data_size,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
+   }
 
    /*----------------------------------------
     * Assemble the vector
@@ -1265,4 +1287,3 @@ hypre_StructVectorClone(hypre_StructVector *x)
 
    return y;
 }
-

@@ -1680,8 +1680,20 @@ hypre_StructMatrixReadData( FILE               *file,
    hypre_BoxArray       *data_space = hypre_StructMatrixDataSpace(matrix);
    hypre_BoxArray       *boxes = hypre_StructGridBoxes(grid);
    HYPRE_Complex        *data = hypre_StructMatrixData(matrix);
+   HYPRE_Int             data_size = hypre_StructMatrixDataSize(matrix);
+
+   HYPRE_Complex        *h_data;
 
    HYPRE_Int             real_stencil_size;
+
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      h_data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      h_data = data;
+   }
 
    /* real_stencil_size is the stencil size of the matrix after it's fixed up
       by the call (if any) of hypre_StructStencilSymmetrize from
@@ -1698,14 +1710,21 @@ hypre_StructMatrixReadData( FILE               *file,
    if (ctecoef == 0)
    {
       hypre_ReadBoxArrayData(file, boxes, data_space,
-                             num_values, ndim, data);
+                             num_values, ndim, h_data);
    }
    else
    {
       hypre_assert(ctecoef <= 2);
       hypre_ReadBoxArrayData_CC(file, boxes, data_space,
                                 stencil_size, real_stencil_size,
-                                ctecoef, ndim, data);
+                                ctecoef, ndim, h_data);
+   }
+
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      hypre_TMemcpy(data, h_data, HYPRE_Complex, data_size,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
