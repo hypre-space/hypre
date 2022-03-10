@@ -35,33 +35,25 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
                         "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice2");
    }
 
-   if (hypre_HandleSpMVUseCusparse(hypre_handle()) || trans)
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+   if ( hypre_HandleSpMVUseCusparse(hypre_handle()) )
    {
-#ifdef HYPRE_USING_CUSPARSE
-#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
-      /* Luke E: The generic API is techinically supported on 10.1,10.2 as a preview,
-       * with Dscrmv being deprecated. However, there are limitations.
-       * While in Cuda < 11, there are specific mentions of using csr2csc involving
-       * transposed matrix products with dcsrm*,
-       * they are not present in SpMV interface.
-       */
-      hypre_CSRMatrixMatvecCusparseNewAPI(trans, alpha, A, x, beta, y, offset);
-#else
-      hypre_CSRMatrixMatvecCusparseOldAPI(trans, alpha, A, x, beta, y, offset);
-#endif
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
-      hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
+#if defined(HYPRE_USING_CUSPARSE)
+      hypre_CSRMatrixMatvecCusparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ROCSPARSE)
       hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
       hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
-#else
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: No TPL SpMV support configured");
 #endif
    }
    else
+#endif
    {
-      hypre_CSRMatrixSpMVDevice(alpha, A, x, beta, y, NULL, 0);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, NULL, 0);
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+      hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
+#endif
    }
 
    return hypre_error_flag;
@@ -289,6 +281,31 @@ hypre_CSRMatrixMatvecCusparseOldAPI( HYPRE_Int        trans,
 }
 
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+
+HYPRE_Int
+hypre_CSRMatrixMatvecCusparse( HYPRE_Int        trans,
+                               HYPRE_Complex    alpha,
+                               hypre_CSRMatrix *A,
+                               hypre_Vector    *x,
+                               HYPRE_Complex    beta,
+                               hypre_Vector    *y,
+                               HYPRE_Int        offset )
+{
+#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   /* Luke E: The generic API is techinically supported on 10.1,10.2 as a preview,
+    * with Dscrmv being deprecated. However, there are limitations.
+    * While in Cuda < 11, there are specific mentions of using csr2csc involving
+    * transposed matrix products with dcsrm*,
+    * they are not present in SpMV interface.
+    */
+   hypre_CSRMatrixMatvecCusparseNewAPI(trans, alpha, A, x, beta, y, offset);
+#else
+   hypre_CSRMatrixMatvecCusparseOldAPI(trans, alpha, A, x, beta, y, offset);
+#endif
+
+   return hypre_error_flag;
+}
+
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_ROCSPARSE)

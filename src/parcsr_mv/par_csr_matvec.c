@@ -1029,7 +1029,7 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
    hypre_VectorSize(&vec_x) = num_elemt;
    hypre_VectorData(&vec_y) = locl_data;
 
-   hypre_CSRMatrixSpMVDevice(1.0, &csr, &vec_x, 1.0, &vec_y,
+   hypre_CSRMatrixSpMVDevice(0, 1.0, &csr, &vec_x, 1.0, &vec_y,
                              hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
 #endif
 

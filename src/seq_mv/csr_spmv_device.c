@@ -224,25 +224,24 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
    return hypre_error_flag;
 }
 
-/* ind != NULL, y(ind) = alpha*A*x + beta*y(ind)
- * ind == NULL, y      = alpha*A*x + beta*y
- * Note: if A has no numrical values, assume the values are all ones
+/* ind != NULL, y(ind) = alpha*op(B)*x + beta*y(ind)
+ * ind == NULL, y      = alpha*op(B)*x + beta*y
+ * op(B) = B or B^T
+ * the size of y_ind = the number of rows of op(B)
+ * Note: if B has no numrical values, assume the values are all ones
  */
 HYPRE_Int
-hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
-                           hypre_CSRMatrix *A,
+hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
+                           HYPRE_Complex    alpha,
+                           hypre_CSRMatrix *B,
                            hypre_Vector    *x,
                            HYPRE_Complex    beta,
                            hypre_Vector    *y,
                            HYPRE_Int       *y_ind,
                            HYPRE_Int        fill )
 {
-   HYPRE_Int      nrows = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      nnz   = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int     *d_ia  = hypre_CSRMatrixI(A);
-   HYPRE_Int     *d_ja  = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *d_a   = hypre_CSRMatrixData(A);
-   HYPRE_Complex *d_x   = hypre_VectorData(x);
+   HYPRE_Int      nrows = trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B);
+   HYPRE_Int      nnz   = hypre_CSRMatrixNumNonzeros(B);
    HYPRE_Complex *d_y   = hypre_VectorData(y);
 
    if (nnz <= 0 || alpha == 0.0)
@@ -263,7 +262,24 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
       return hypre_error_flag;
    }
 
+   hypre_CSRMatrix *A = NULL;
+
+   if (trans)
+   {
+      hypre_CSRMatrixTransposeDevice(B, &A, hypre_CSRMatrixData(B) != NULL);
+   }
+   else
+   {
+      A = B;
+   }
+
+   hypre_assert(nrows == hypre_CSRMatrixNumRows(A));
    hypre_assert(nrows > 0);
+
+   HYPRE_Int     *d_ia = hypre_CSRMatrixI(A);
+   HYPRE_Int     *d_ja = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *d_a  = hypre_CSRMatrixData(A);
+   HYPRE_Complex *d_x  = hypre_VectorData(x);
 
    if (fill == 0)
    {
@@ -286,6 +302,11 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
    {
       return hypreDevice_CSRMatrixMatvec < -2 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
                                                  y_ind);
+   }
+
+   if (trans)
+   {
+      hypre_CSRMatrixDestroy(A);
    }
 
    return hypre_error_flag;
