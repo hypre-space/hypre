@@ -245,23 +245,10 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
    d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
 
-#if !defined(HYPRE_COMPLEX)
-#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDcsrgemm(cusparsehandle, transA, transB, m, n, k,
-                                            descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                            descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                            descr_C,       d_c, d_ic, d_jc) );
-   }
-#elif defined(HYPRE_SINGLE)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseScsrgemm(cusparsehandle, transA, transB, m, n, k,
-                                            descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                            descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                            descr_C, d_c, d_ic, d_jc) );
-   }
-#endif
-#endif
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csrgemm(cusparsehandle, transA, transB, m, n, k,
+                                               descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
+                                               descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
+                                               descr_C,       d_c, d_ic, d_jc) );
 
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;

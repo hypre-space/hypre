@@ -206,6 +206,73 @@ struct hypre_device_allocator
 
 #endif // defined(HYPRE_USING_CUDA)
 
+#if defined(HYPRE_COMPLEX) /* double complex */
+/* TODO */
+#elif defined(HYPRE_SINGLE) /* single */
+/* cublas */
+#define hypre_cublas_scal                      cublasSscal
+#define hypre_cublas_axpy                      cublasSaxpy
+#define hypre_cublas_dot                       cublasSdot
+/* cusparse */
+#define hypre_cusparse_csru2csr_bufferSizeExt  cusparseScsru2csr_bufferSizeExt
+#define hypre_cusparse_csru2csr                cusparseScsru2csr
+#define hypre_cusparse_csrsv2_bufferSize       cusparseScsrsv2_bufferSize
+#define hypre_cusparse_csrsv2_analysis         cusparseScsrsv2_analysis
+#define hypre_cusparse_csrsv2_solve            cusparseScsrsv2_solve
+#define hypre_cusparse_csrmv                   cusparseScsrmv
+#define hypre_cusparse_csrgemm                 cusparseScsrgemm
+#define hypre_cusparse_csr2csc                 cusparseScsr2csc
+#define hypre_cusparse_csrilu02_bufferSize     cusparseScsrilu02_bufferSize
+#define hypre_cusparse_csrilu02_analysis       cusparseScsrilu02_analysis
+#define hypre_cusparse_csrilu02                cusparseScsrilu02
+#define hypre_cusparse_csrsm2_bufferSizeExt    cusparseScsrsm2_bufferSizeExt
+#define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
+#define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
+/* rocsparse */
+#define hypre_rocsparse_csrsv_buffer_size      rocsparse_scsrsv_buffer_size
+#define hypre_rocsparse_csrsv_analysis         rocsparse_scsrsv_analysis
+#define hypre_rocsparse_csrsv_solve            rocsparse_scsrsv_solve
+#define hypre_rocsparse_gthr                   rocsparse_sgthr
+#define hypre_rocsparse_csrmv_analysis         rocsparse_scsrmv_analysis
+#define hypre_rocsparse_csrmv                  rocsparse_scsrmv
+#define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
+#define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
+#define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
+#elif defined(HYPRE_LONG_DOUBLE) /* long double */
+/* ... */
+#else /* double */
+/* cublas */
+#define hypre_cublas_scal                      cublasDscal
+#define hypre_cublas_axpy                      cublasDaxpy
+#define hypre_cublas_dot                       cublasDdot
+/* cusparse */
+#define hypre_cusparse_csru2csr_bufferSizeExt  cusparseDcsru2csr_bufferSizeExt
+#define hypre_cusparse_csru2csr                cusparseDcsru2csr
+#define hypre_cusparse_csrsv2_bufferSize       cusparseDcsrsv2_bufferSize
+#define hypre_cusparse_csrsv2_analysis         cusparseDcsrsv2_analysis
+#define hypre_cusparse_csrsv2_solve            cusparseDcsrsv2_solve
+#define hypre_cusparse_csrmv                   cusparseDcsrmv
+#define hypre_cusparse_csrgemm                 cusparseDcsrgemm
+#define hypre_cusparse_csr2csc                 cusparseDcsr2csc
+#define hypre_cusparse_csrilu02_bufferSize     cusparseDcsrilu02_bufferSize
+#define hypre_cusparse_csrilu02_analysis       cusparseDcsrilu02_analysis
+#define hypre_cusparse_csrilu02                cusparseDcsrilu02
+#define hypre_cusparse_csrsm2_bufferSizeExt    cusparseDcsrsm2_bufferSizeExt
+#define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
+#define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
+/* rocsparse */
+#define hypre_rocsparse_csrsv_buffer_size      rocsparse_dcsrsv_buffer_size
+#define hypre_rocsparse_csrsv_analysis         rocsparse_dcsrsv_analysis
+#define hypre_rocsparse_csrsv_solve            rocsparse_dcsrsv_solve
+#define hypre_rocsparse_gthr                   rocsparse_dgthr
+#define hypre_rocsparse_csrmv_analysis         rocsparse_dcsrmv_analysis
+#define hypre_rocsparse_csrmv                  rocsparse_dcsrmv
+#define hypre_rocsparse_csrgemm_buffer_size    rocsparse_dcsrgemm_buffer_size
+#define hypre_rocsparse_csrgemm                rocsparse_dcsrgemm
+#define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
+#endif
+
+
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
