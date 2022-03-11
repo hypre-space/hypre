@@ -206,9 +206,9 @@ struct hypre_device_allocator
 
 #endif // defined(HYPRE_USING_CUDA)
 
-#if defined(HYPRE_COMPLEX) /* double complex */
+#if defined(HYPRE_COMPLEX) /* Double Complex */
 /* TODO */
-#elif defined(HYPRE_SINGLE) /* single */
+#elif defined(HYPRE_SINGLE) /* Single */
 /* cublas */
 #define hypre_cublas_scal                      cublasSscal
 #define hypre_cublas_axpy                      cublasSaxpy
@@ -238,9 +238,9 @@ struct hypre_device_allocator
 #define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
 #define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
-#elif defined(HYPRE_LONG_DOUBLE) /* long double */
+#elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
 /* ... */
-#else /* double */
+#else /* Double */
 /* cublas */
 #define hypre_cublas_scal                      cublasDscal
 #define hypre_cublas_axpy                      cublasDaxpy
