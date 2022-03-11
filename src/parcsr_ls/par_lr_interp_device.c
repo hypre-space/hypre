@@ -733,6 +733,7 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
    HYPRE_Int ib, ie;
+   HYPRE_Complex rl = 0.0;
 
    if (lane == 0)
    {
@@ -740,33 +741,12 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
    }
    ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
 
-   if (ib >= flag)
+   if (ib < flag)
    {
-      return;
-   }
 
-   if (lane < 2)
-   {
-      ib = read_only_load(A_diag_i + row + lane);
-   }
-   ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
-   ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
-
-   HYPRE_Complex rl = 0.0;
-
-   for (HYPRE_Int i = ib + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
-   {
-      if (i < ie)
-      {
-         rl += read_only_load(&A_diag_a[i]) * (read_only_load(&Soc_diag_j[i]) < 0);
-      }
-   }
-
-   if (has_offd)
-   {
       if (lane < 2)
       {
-         ib = read_only_load(A_offd_i + row + lane);
+         ib = read_only_load(A_diag_i + row + lane);
       }
       ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
       ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
@@ -775,12 +755,30 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
       {
          if (i < ie)
          {
-            rl += read_only_load(&A_offd_a[i]) * (read_only_load(&Soc_offd_j[i]) < 0);
+            rl += read_only_load(&A_diag_a[i]) * (read_only_load(&Soc_diag_j[i]) < 0);
          }
       }
-   }
 
-   rl = warp_reduce_sum(rl);
+      if (has_offd)
+      {
+         if (lane < 2)
+         {
+            ib = read_only_load(A_offd_i + row + lane);
+         }
+         ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
+         ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+
+         for (HYPRE_Int i = ib + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
+         {
+            if (i < ie)
+            {
+               rl += read_only_load(&A_offd_a[i]) * (read_only_load(&Soc_offd_j[i]) < 0);
+            }
+         }
+      }
+
+      rl = warp_reduce_sum(rl);
+   }
 
    if (lane == 0)
    {
@@ -927,6 +925,8 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       &CF_marker[P_nr_of_rows],
                       PWoffset,
                       is_nonnegative<HYPRE_Int>() );
+
+   hypre_Memset(PWoffset + P_nr_of_rows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
    HYPRE_THRUST_CALL( exclusive_scan,
                       PWoffset,
