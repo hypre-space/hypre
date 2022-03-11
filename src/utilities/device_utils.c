@@ -1450,11 +1450,12 @@ HYPRE_Int
 hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
                                 hypre_ulonglongint offset )
 {
-   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 #if defined(HYPRE_USING_CURAND)
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
    HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
 #elif defined(HYPRE_USING_ROCRAND)
+   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
    HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
    HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
 #endif
