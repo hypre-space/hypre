@@ -484,6 +484,7 @@ hypre_CSRMatrixRead( char *file_name )
 
    hypre_CSRMatrixNumNonzeros(matrix) = num_nonzeros;
    hypre_CSRMatrixNumCols(matrix) = ++max_col;
+   hypre_CSRMatrixSetRownnz(matrix);
 
    return matrix;
 }
@@ -727,20 +728,37 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   HYPRE_BigInt  *A_bigj = hypre_CSRMatrixBigJ(A);
+   HYPRE_Int     *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_BigInt  *A_bigj   = hypre_CSRMatrixBigJ(A);
+   HYPRE_Int     *A_rownnz = hypre_CSRMatrixRownnz(A);
    HYPRE_Complex *A_data;
 
-   HYPRE_Int     *B_i    = hypre_CSRMatrixI(B);
-   HYPRE_Int     *B_j    = hypre_CSRMatrixJ(B);
-   HYPRE_BigInt  *B_bigj = hypre_CSRMatrixBigJ(B);
+   HYPRE_Int     *B_i      = hypre_CSRMatrixI(B);
+   HYPRE_Int     *B_j      = hypre_CSRMatrixJ(B);
+   HYPRE_BigInt  *B_bigj   = hypre_CSRMatrixBigJ(B);
+   HYPRE_Int     *B_rownnz = hypre_CSRMatrixRownnz(B);
    HYPRE_Complex *B_data;
 
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
 
    hypre_TMemcpy(B_i, A_i, HYPRE_Int, num_rows + 1, memory_location_B, memory_location_A);
+
+   if (A_rownnz)
+   {
+      if (!B_rownnz)
+      {
+         B_rownnz = hypre_TAlloc(HYPRE_Int,
+                                 hypre_CSRMatrixNumRownnz(A),
+                                 HYPRE_MEMORY_HOST);
+         hypre_CSRMatrixRownnz(B) = B_rownnz;
+      }
+      hypre_TMemcpy(B_rownnz, A_rownnz,
+                    HYPRE_Int, hypre_CSRMatrixNumRownnz(A),
+                    memory_location_B, memory_location_A);
+      hypre_CSRMatrixNumRownnz(B) = hypre_CSRMatrixNumRownnz(A);
+   }
 
    if (A_j && B_j)
    {
@@ -777,7 +795,7 @@ hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
    HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros( A );
 
-   hypre_CSRMatrix *B = hypre_CSRMatrixCreate( num_rows, num_cols, num_nonzeros );
+   hypre_CSRMatrix *B = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
 
    HYPRE_Int bigInit = hypre_CSRMatrixBigJ(A) != NULL;
 
@@ -1092,4 +1110,3 @@ hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
    return hypre_CSRMatrixGPUMatData(matrix);
 }
 #endif
-
