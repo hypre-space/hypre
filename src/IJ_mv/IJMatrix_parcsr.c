@@ -2865,10 +2865,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          }
       }
 
-      /*  generate the nonzero rows inside offd and diag by calling */
-      hypre_CSRMatrixSetRownnz(diag);
-      hypre_CSRMatrixSetRownnz(offd);
-
       /*  generate col_map_offd */
       nnz_offd = offd_i[num_rows];
       if (nnz_offd)
@@ -2916,6 +2912,11 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       hypre_IJMatrixAssembleFlag(matrix) = 1;
    }
 
+   /* Generate the nonzero rows in the diag and offd matrices */
+   hypre_CSRMatrixSetRownnz(diag);
+   hypre_CSRMatrixSetRownnz(offd);
+
+   /* Free memory */
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
    hypre_IJMatrixTranslator(matrix) = NULL;
 
