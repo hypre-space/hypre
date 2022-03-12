@@ -5991,7 +5991,8 @@ main( hypre_int argc,
       /* print out with shared data replicated */
       if (!read_fromfile_flag)
       {
-         values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_DEVICE);
+         values   = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
+         d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_DEVICE);
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -6008,7 +6009,9 @@ main( hypre_int argc,
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                                  var, values);
+                                                  var, d_values);
+                  hypre_TMemcpy(values, d_values, HYPRE_Real, values_size,
+                                HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
                   hypre_fprintf(file, "\nBox %d:\n\n", box);
                   size = 1;
                   for (j = 0; j < data.ndim; j++)
@@ -6024,7 +6027,8 @@ main( hypre_int argc,
                fclose(file);
             }
          }
-         hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
+         hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
       }
    }
 
