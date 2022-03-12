@@ -5991,7 +5991,7 @@ main( hypre_int argc,
       /* print out with shared data replicated */
       if (!read_fromfile_flag)
       {
-         values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST);
+         values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_DEVICE);
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -6024,7 +6024,7 @@ main( hypre_int argc,
                fclose(file);
             }
          }
-         hypre_TFree(values, HYPRE_MEMORY_HOST);
+         hypre_TFree(values, HYPRE_MEMORY_DEVICE);
       }
    }
 
