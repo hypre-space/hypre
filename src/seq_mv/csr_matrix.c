@@ -60,8 +60,6 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 HYPRE_Int
 hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int ierr = 0;
-
    if (matrix)
    {
       HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(matrix);
@@ -88,7 +86,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -332,7 +330,6 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
 HYPRE_Int
 hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int  ierr = 0;
    HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
    HYPRE_Int *A_i = hypre_CSRMatrixI(matrix);
    HYPRE_Int *Arownnz;
@@ -370,14 +367,12 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
       hypre_CSRMatrixRownnz(matrix) = Arownnz;
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int ierr = 0;
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
 
@@ -388,10 +383,10 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    else
 #endif
    {
-      ierr = hypre_CSRMatrixSetRownnzHost(matrix);
+      hypre_CSRMatrixSetRownnzHost(matrix);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* check if numnonzeros was properly set to be ia[nrow] */
@@ -717,6 +712,7 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixCopy: copy A to B,
+ *
  * if copy_data = 0 only the structure of A is copied to B.
  * the routine does not check if the dimensions/sparsity of A and B match !!!
  *--------------------------------------------------------------------------*/
@@ -724,7 +720,6 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 HYPRE_Int
 hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
 {
-   HYPRE_Int ierr = 0;
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
    HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
@@ -756,9 +751,9 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
       }
       hypre_TMemcpy(B_rownnz, A_rownnz,
                     HYPRE_Int, hypre_CSRMatrixNumRownnz(A),
-                    memory_location_B, memory_location_A);
-      hypre_CSRMatrixNumRownnz(B) = hypre_CSRMatrixNumRownnz(A);
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    }
+   hypre_CSRMatrixNumRownnz(B) = hypre_CSRMatrixNumRownnz(A);
 
    if (A_j && B_j)
    {
@@ -777,14 +772,14 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
       hypre_TMemcpy(B_data, A_data, HYPRE_Complex, num_nonzeros, memory_location_B, memory_location_A);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixClone
- * Creates and returns a new copy of the argument, A.
- * Copying is a deep copy in that no pointers are copied; new arrays are
- * created where necessary.
+ * hypre_CSRMatrixClone_v2
+ *
+ * This function does the same job as hypre_CSRMatrixClone; however, here
+ * the user can specify the memory location of the resulting matrix.
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
@@ -793,7 +788,7 @@ hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
 {
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
    HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros( A );
+   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
    hypre_CSRMatrix *B = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
 
@@ -805,6 +800,14 @@ hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
 
    return B;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixClone
+ *
+ * Creates and returns a new copy of the argument, A.
+ * Performs a deep copy of information (no pointers are copied);
+ * New arrays are created where necessary.
+ *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
 hypre_CSRMatrixClone( hypre_CSRMatrix *A, HYPRE_Int copy_data )
