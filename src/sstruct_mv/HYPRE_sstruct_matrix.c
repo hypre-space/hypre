@@ -1082,7 +1082,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_IJMatrix          umatrix;
    HYPRE_IJMatrix          h_umatrix;
    hypre_ParCSRMatrix     *h_parmatrix;
-   hypre_ParCSRMatrix     *parmatrix;
+   hypre_ParCSRMatrix     *parmatrix = NULL;
 
    /* Local variables */
    FILE                   *file;
@@ -1091,11 +1091,6 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_Int               p, v, i, j, vi, vj;
    HYPRE_Int               symmetric;
    HYPRE_Int               num_symm_calls;
-   HYPRE_Int               ret;
-   HYPRE_Int               ncols;
-   HYPRE_BigInt            row, col;
-   HYPRE_Complex           value;
-   HYPRE_BigInt            ilower, iupper, jlower, jupper;
    char                    new_filename[255];
 
    hypre_MPI_Comm_rank(comm, &myid);
@@ -1203,8 +1198,16 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_IJMatrixRead(new_filename, comm, HYPRE_PARCSR, &h_umatrix);
    h_parmatrix = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(h_umatrix);
 
-   /* Move ParCSRMatrix to device memory */
-   parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, HYPRE_MEMORY_DEVICE);
+   /* Move ParCSRMatrix to device memory if necessary */
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      parmatrix = h_parmatrix;
+      hypre_IJMatrixObject(h_umatrix) = NULL;
+   }
 
    /* Free memory */
    HYPRE_IJMatrixDestroy(h_umatrix);
@@ -1212,7 +1215,9 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    /* Update the umatrix with contents read from file,
       which now live on the correct memory location */
    umatrix = hypre_SStructMatrixIJMatrix(matrix);
-   hypre_IJMatrixSetObject(umatrix, (void*) parmatrix);
+   hypre_IJMatrixDestroyParCSR(umatrix);
+   hypre_IJMatrixObject(umatrix) = (void*) parmatrix;
+   hypre_IJMatrixAssembleFlag(umatrix) = 1;
 
    /* Assemble SStructMatrix */
    HYPRE_SStructMatrixAssemble(matrix);
