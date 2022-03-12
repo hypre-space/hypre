@@ -12,3 +12,23 @@ config.status
 Makefile.config
 HYPRE_config.h
 autom4te.cache
+src/TAGS
+hypre/
+
+###############
+# Executables
+###############
+ams_driver
+ij
+ij_assembly
+ij_mv
+maxwell_unscaled
+sstruct
+sstruct_fac
+struct
+struct_migrate
+zboxloop
+ex[0-9]
+ex1[0-6]
+ex5f
+ex12f
