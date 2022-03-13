@@ -330,17 +330,21 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
 HYPRE_Int
 hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 {
-   HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int *A_i = hypre_CSRMatrixI(matrix);
-   HYPRE_Int *Arownnz;
+   HYPRE_Int   num_rows = hypre_CSRMatrixNumRows(matrix);
+   HYPRE_Int  *A_i = hypre_CSRMatrixI(matrix);
+   HYPRE_Int  *Arownnz = hypre_CSRMatrixRownnz(matrix);
 
-   HYPRE_Int i, adiag;
-   HYPRE_Int irownnz = 0;
+   HYPRE_Int   i;
+   HYPRE_Int   irownnz = 0;
+
+   if (Arownnz)
+   {
+      hypre_TFree(Arownnz, HYPRE_MEMORY_HOST);
+   }
 
    for (i = 0; i < num_rows; i++)
    {
-      adiag = A_i[i + 1] - A_i[i];
-      if (adiag > 0)
+      if ((A_i[i + 1] - A_i[i]) > 0)
       {
          irownnz++;
       }
@@ -358,8 +362,7 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
       irownnz = 0;
       for (i = 0; i < num_rows; i++)
       {
-         adiag = A_i[i + 1] - A_i[i];
-         if (adiag > 0)
+         if ((A_i[i + 1] - A_i[i]) > 0)
          {
             Arownnz[irownnz++] = i;
          }
