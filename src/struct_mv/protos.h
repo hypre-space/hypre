@@ -254,7 +254,7 @@ HYPRE_Int HYPRE_StructVectorGetBoxValues ( HYPRE_StructVector vector, HYPRE_Int 
                                            HYPRE_Int *iupper, HYPRE_Complex *values );
 HYPRE_Int HYPRE_StructVectorAssemble ( HYPRE_StructVector vector );
 HYPRE_Int hypre_StructVectorPrintData ( FILE *file, hypre_StructVector *vector, HYPRE_Int all );
-HYPRE_Int hypre_StructVectorReadData ( FILE *file , hypre_StructVector *vector );
+HYPRE_Int hypre_StructVectorReadData ( FILE *file, hypre_StructVector *vector );
 HYPRE_Int HYPRE_StructVectorPrint ( const char *filename, HYPRE_StructVector vector,
                                     HYPRE_Int all );
 HYPRE_Int HYPRE_StructVectorRead ( MPI_Comm comm, const char *filename,
