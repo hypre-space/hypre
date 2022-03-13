@@ -77,7 +77,7 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
 
 
    ierr = HYPRE_ParCSRMatrixGetLocalRange( Parcsr_matrix, row_start, row_end,
-					col_start, col_end );
+                                           col_start, col_end );
 
    return(ierr);
 }
