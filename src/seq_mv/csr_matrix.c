@@ -94,8 +94,9 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix *matrix, HYPRE_Int bigInit,
-                              HYPRE_MemoryLocation memory_location )
+hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix      *matrix,
+                              HYPRE_Int             bigInit,
+                              HYPRE_MemoryLocation  memory_location )
 {
    HYPRE_Int  num_rows     = hypre_CSRMatrixNumRows(matrix);
    HYPRE_Int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);

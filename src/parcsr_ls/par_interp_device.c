@@ -203,6 +203,9 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                       dof_func_dev, dof_func_offd, P_diag_i, P_offd_i);
 
    /* The scans will transform P_diag_i and P_offd_i to the CSR I-vectors */
+   hypre_Memset(P_diag_i + n_fine, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+   hypre_Memset(P_offd_i + n_fine, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+
    hypreDevice_IntegerExclusiveScan(n_fine + 1, P_diag_i);
    hypreDevice_IntegerExclusiveScan(n_fine + 1, P_offd_i);
 
