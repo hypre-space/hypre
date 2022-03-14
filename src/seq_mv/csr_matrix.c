@@ -338,11 +338,6 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
    HYPRE_Int   i;
    HYPRE_Int   irownnz = 0;
 
-   if (Arownnz)
-   {
-      hypre_TFree(Arownnz, HYPRE_MEMORY_HOST);
-   }
-
    for (i = 0; i < num_rows; i++)
    {
       if ((A_i[i + 1] - A_i[i]) > 0)
@@ -353,6 +348,10 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 
    hypre_CSRMatrixNumRownnz(matrix) = irownnz;
 
+   /* Free old rownnz pointer */
+   hypre_TFree(Arownnz, HYPRE_MEMORY_HOST);
+
+   /* Set new rownnz pointer */
    if (irownnz == 0 || irownnz == num_rows)
    {
       hypre_CSRMatrixRownnz(matrix) = NULL;
