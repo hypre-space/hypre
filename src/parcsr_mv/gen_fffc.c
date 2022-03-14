@@ -42,11 +42,12 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    HYPRE_Int           num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
 
    /* diag part of S */
-   hypre_CSRMatrix    *S_diag   = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix    *S_diag   = S ? hypre_ParCSRMatrixDiag(S) : A_diag;
    HYPRE_Int          *S_diag_i = hypre_CSRMatrixI(S_diag);
    HYPRE_Int          *S_diag_j = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int           skip_diag = S ? 0 : 1;
    /* off-diag part of S */
-   hypre_CSRMatrix    *S_offd   = hypre_ParCSRMatrixOffd(S);
+   hypre_CSRMatrix    *S_offd   = S ? hypre_ParCSRMatrixOffd(S) : A_offd;
    HYPRE_Int          *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int          *S_offd_j = hypre_CSRMatrixJ(S_offd);
 
@@ -295,7 +296,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
          {
             row++;
             d_count_FF++; /* account for diagonal element */
-            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
+            for (j = S_diag_i[i] + skip_diag; j < S_diag_i[i + 1]; j++)
             {
                jj = S_diag_j[j];
                if (CF_marker[jj] > 0)
@@ -379,7 +380,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
             jA = A_diag_i[i];
             A_FF_diag_j[d_count_FF] = fine_to_fine[A_diag_j[jA]];
             A_FF_diag_data[d_count_FF++] = A_diag_data[jA++];
-            for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
+            for (j = S_diag_i[i] + skip_diag; j < S_diag_i[i + 1]; j++)
             {
                jA = A_diag_i[i] + 1;
                jS = S_diag_j[j];
@@ -481,6 +482,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
 
 /* -----------------------------------------------------------------------------
  * generate AFF, AFC, for 2 stage extended interpolation

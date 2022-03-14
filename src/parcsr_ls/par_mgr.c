@@ -1182,7 +1182,7 @@ hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix   *A,
       hypre_ParCSRMatrixColMapOffd(Wp_tmp)       = NULL;
       hypre_ParCSRMatrixDestroy(Wp_tmp);
       wall_time = time_getWallclockSeconds() - wall_time;
-      if (my_id == 0) { hypre_printf("proc = %d     Build Wp: %f\n", my_id, wall_time); }
+//      if (my_id == 0) { hypre_printf("proc = %d     Build Wp: %f\n", my_id, wall_time); }
    }
    else
    {
@@ -2504,6 +2504,10 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixI(A_CF_diag) = A_CF_diag_i;
    hypre_CSRMatrixJ(A_CF_diag) = A_CF_diag_j;
 
+   hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A_CF)) = NULL;
+   hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A_CF)) = NULL;
+   hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(A_CF)) = NULL;
+
    *A_CF_ptr = A_CF;
 
    hypre_TFree(f_to_c_col_map, HYPRE_MEMORY_HOST);
@@ -2617,7 +2621,11 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    hypre_ParCSRMatrix *A_h = NULL;
    hypre_ParCSRMatrix *A_h_correction = NULL;
    HYPRE_Int  max_elmts = Pmax;
-   HYPRE_Real alpha = 1.0;
+   HYPRE_Real alpha = -1.0;
+
+   HYPRE_BigInt         coarse_pnts_global[2];   
+   HYPRE_BigInt         fine_pnts_global[2];   
+   hypre_IntArray *marker_array = NULL;
 //   HYPRE_Real wall_time = 0.;
 //   HYPRE_Real wall_time_1 = 0.;
 
@@ -2628,8 +2636,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
 
    //wall_time = time_getWallclockSeconds();
    n_local_fine_grid = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   c_marker = hypre_CTAlloc(HYPRE_Int, n_local_fine_grid, HYPRE_MEMORY_HOST);
-   f_marker = hypre_CTAlloc(HYPRE_Int, n_local_fine_grid, HYPRE_MEMORY_HOST);
+   c_marker = hypre_CTAlloc(HYPRE_Int, n_local_fine_grid, memory_location);
+   f_marker = hypre_CTAlloc(HYPRE_Int, n_local_fine_grid, memory_location);
 
    for (i = 0; i < n_local_fine_grid; i++)
    {
@@ -2638,50 +2646,48 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       c_marker[i] = point_type;
       f_marker[i] = -point_type;
    }
-   //wall_time = time_getWallclockSeconds() - wall_time;
-   //if (my_id == 0) hypre_printf("Proc = %d, copy CF_marker time: %1.5f\n", my_id, wall_time);
+   // get local range for C and F points
+   // Set IntArray pointers to obtain global row and col (start) ranges
+   marker_array = hypre_IntArrayCreate(n_local_fine_grid);
+   hypre_IntArrayMemoryLocation(marker_array) = memory_location;
+   hypre_IntArrayData(marker_array) = c_marker;
+   // get range for c_points
+   hypre_BoomerAMGCoarseParms(comm, n_local_fine_grid, 1, NULL, marker_array, NULL, coarse_pnts_global);
+   // get range for f_points
+   hypre_IntArrayData(marker_array) = f_marker;
+   hypre_BoomerAMGCoarseParms(comm, n_local_fine_grid, 1, NULL, marker_array, NULL, fine_pnts_global);
 
-   // get the A_cc sub-block
-   //wall_time = time_getWallclockSeconds();
-   hypre_MGRGetSubBlock(A, c_marker, c_marker, 0, &A_cc);
-   //wall_time = time_getWallclockSeconds() - wall_time;
-   //if (my_id == 0) hypre_printf("Proc = %d, getting A_cc time: %1.5f\n", my_id, wall_time);
+   // Generate A_FF, A_FC, A_CC and A_CF submatrices. 
+   // Note: Not all submatrices are needed for each method below.
+   // hypre_ParCSRMatrixGenerateFFFC computes A_FF and A_FC given the CF_marker and start locations for the global C-points.
+   // To compute A_CC and A_CF, we need to pass in equivalent information for F-points. (i.e. CF_marker marking F-points 
+   // and start locations for the global F-points.
+   hypre_ParCSRMatrixGenerateFFFC(A, c_marker, coarse_pnts_global, NULL, &A_fc, &A_ff);
+   hypre_ParCSRMatrixGenerateFFFC(A, f_marker, fine_pnts_global, NULL, &A_cf, &A_cc);
 
-   //wall_time = time_getWallclockSeconds();
    if (method == 1)
    {
-      hypre_MGRGetSubBlock(A, c_marker, f_marker, 0, &A_cf);
       if (Wp != NULL)
       {
          A_h_correction = hypre_ParCSRMatMat(A_cf, Wp);
       }
       else
       {
+         // Build block diagonal inverse for A_FF
          hypre_ParCSRMatrixBlockDiagInvMatrix(A, 1, -1, CF_marker, &A_ff_inv, 0);
-         hypre_MGRGetSubBlock(A, f_marker, c_marker, 0, &A_fc);
+         // compute Wp = A_ff_inv * A_fc
          hypre_ParCSRMatrix *Wp_tmp = hypre_ParCSRMatMat(A_ff_inv, A_fc);
+         // compute correction A_h_correction = A_cf * (A_ff_inv * A_fc);
          A_h_correction = hypre_ParCSRMatMat(A_cf, Wp_tmp);
          hypre_ParCSRMatrixDestroy(Wp_tmp);
-         hypre_ParCSRMatrixDestroy(A_fc);
          hypre_ParCSRMatrixDestroy(A_ff_inv);
       }
-      alpha = -1.0;
-      hypre_ParCSRMatrixDestroy(A_cf);
    }
    else if (method == 2 || method == 3)
    {
       // extract the diagonal of A_cf
-      // wall_time_1 = time_getWallclockSeconds();
       hypre_ParCSRMatrix *A_cf_truncated = NULL;
-      /*
-      hypre_MGRGetSubBlock(A, c_marker, f_marker, 0, &A_cf);
-      hypre_MGRTruncateAcfCPR(A_cf, &A_cf_truncated);
-      */
       hypre_MGRGetAcfCPR(A, c_marker, f_marker, &A_cf_truncated);
-      // wall_time_1 = time_getWallclockSeconds() - wall_time_1;
-      //hypre_ParCSRMatrixPrintIJ(A_cf_truncated, 0, 0, "A_cf_truncated_new");
-      //if (my_id == 0) hypre_printf("Proc = %d, compute and truncate A_cf time: %1.5f\n", my_id, wall_time_1);
-      if (my_id == 0) hypre_printf("Proc = %d, Using Non Galerkin approach ...\n");
       if (Wp != NULL)
       {
          A_h_correction = hypre_ParCSRMatMat(A_cf_truncated, Wp);
@@ -2691,44 +2697,32 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
          HYPRE_Int blk_inv_size = method == 2 ? bsize : 1;
          hypre_ParCSRMatrixBlockDiagInvMatrix(A, blk_inv_size, -1, CF_marker, &A_ff_inv, 0);
          hypre_ParCSRMatrix *Wr = NULL;
-         hypre_MGRGetSubBlock(A, f_marker, c_marker, 0, &A_fc);
          Wr = hypre_ParCSRMatMat(A_cf_truncated, A_ff_inv);
          A_h_correction = hypre_ParCSRMatMat(Wr, A_fc);
-         hypre_ParCSRMatrixDestroy(A_fc);
          hypre_ParCSRMatrixDestroy(Wr);
          hypre_ParCSRMatrixDestroy(A_ff_inv);
       }
-      alpha = -1.0;
       hypre_ParCSRMatrixDestroy(A_cf_truncated);
-      //hypre_ParCSRMatrixDestroy(A_cf);
    }
    else if (method == 4)
    {
       // Approximate inverse for ideal interploation
-      hypre_MGRGetSubBlock(A, c_marker, f_marker, 0, &A_cf);
-      hypre_MGRGetSubBlock(A, f_marker, c_marker, 0, &A_fc);
-      hypre_MGRGetSubBlock(A, f_marker, f_marker, 0, &A_ff);
-
       hypre_ParCSRMatrix *A_ff_inv = NULL;
       hypre_ParCSRMatrix *minus_Wp = NULL;
       hypre_MGRApproximateInverse(A_ff, &A_ff_inv);
       minus_Wp = hypre_ParCSRMatMat(A_ff_inv, A_fc);
       A_h_correction = hypre_ParCSRMatMat(A_cf, minus_Wp);
-      alpha = -1.0;
 
       hypre_ParCSRMatrixDestroy(minus_Wp);
-      hypre_ParCSRMatrixDestroy(A_ff);
-      hypre_ParCSRMatrixDestroy(A_fc);
-      hypre_ParCSRMatrixDestroy(A_cf);
    }
-   //wall_time = time_getWallclockSeconds() - wall_time;
-   //if (my_id == 0) hypre_printf("Proc = %d, compute A_h_correction time: %1.5f\n", my_id, wall_time);
+   // Free data
+   hypre_ParCSRMatrixDestroy(A_ff);
+   hypre_ParCSRMatrixDestroy(A_fc);
+   hypre_ParCSRMatrixDestroy(A_cf);   
 
    // perform dropping for A_h_correction
    // specific to multiphase poromechanics
    // we only keep the diagonal of each block
-
-   //wall_time = time_getWallclockSeconds();
    HYPRE_Int n_local_cpoints = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_h_correction));
 
    hypre_CSRMatrix *A_h_correction_diag = hypre_ParCSRMatrixDiag(A_h_correction);
@@ -2768,8 +2762,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
          {
             HYPRE_Int max_num_nonzeros = A_h_correction_diag_i[i + 1] - A_h_correction_diag_i[i] +
                                          A_h_correction_offd_i[i + 1] - A_h_correction_offd_i[i];
-            HYPRE_Int *aux_j = hypre_CTAlloc(HYPRE_Int, max_num_nonzeros, HYPRE_MEMORY_HOST);
-            HYPRE_Real *aux_data = hypre_CTAlloc(HYPRE_Real, max_num_nonzeros, HYPRE_MEMORY_HOST);
+            HYPRE_Int *aux_j = hypre_CTAlloc(HYPRE_Int, max_num_nonzeros, memory_location);
+            HYPRE_Real *aux_data = hypre_CTAlloc(HYPRE_Real, max_num_nonzeros, memory_location);
             HYPRE_Int row_start = i - (i % bsize);
             HYPRE_Int row_stop = row_start + bsize - 1;
             HYPRE_Int cnt = 0;
@@ -2826,8 +2820,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
             A_h_correction_diag_i_new[i + 1] = num_nonzeros_diag_new;
             A_h_correction_offd_i_new[i + 1] = num_nonzeros_offd_new;
 
-            hypre_TFree(aux_j, HYPRE_MEMORY_HOST);
-            hypre_TFree(aux_data, HYPRE_MEMORY_HOST);
+            hypre_TFree(aux_j, memory_location);
+            hypre_TFree(aux_data, memory_location);
          }
 
          hypre_TFree(A_h_correction_diag_i, memory_location);
@@ -2852,21 +2846,17 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
          exit(-1);
       }
    }
-   //hypre_MGRParCSRMatrixTruncate(A_h_correction, max_elmts);
-   //hypre_ParCSRMatrixPrintIJ(A_h_correction,1,1,"A_h_correction_filtered");
-
    // coarse grid / schur complement
-   //wall_time = time_getWallclockSeconds();
+   alpha = -1;
    hypre_ParCSRMatrixAdd(1.0, A_cc, alpha, A_h_correction, &A_h);
-   //wall_time = time_getWallclockSeconds() - wall_time;
-   //if (my_id == 0) hypre_printf("Proc = %d, adding A_cc to A_h_correction time: %1.5f\n", my_id, wall_time);
    *A_h_ptr = A_h;
-   //hypre_ParCSRMatrixPrintIJ(A_h,1,1,"A_h");
 
    hypre_ParCSRMatrixDestroy(A_cc);
    hypre_ParCSRMatrixDestroy(A_h_correction);
-   hypre_TFree(c_marker, HYPRE_MEMORY_HOST);
-   hypre_TFree(f_marker, HYPRE_MEMORY_HOST);
+   hypre_TFree(c_marker, memory_location);
+   hypre_TFree(f_marker, memory_location);
+   // free IntArray. Note: IntArrayData was not initialized so need not be freed here (pointer is already freed elsewhere).
+   hypre_TFree(marker_array, memory_location);
 
    return hypre_error_flag;
 }
@@ -4751,6 +4741,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagInvMatrix(  hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixI(B_offd) = NULL;
    hypre_CSRMatrixJ(B_offd) = NULL;
 
+//   hypre_MatvecCommPkgCreate(B);
    *B_ptr = B;
 
    hypre_TFree(diaginv, HYPRE_MEMORY_HOST);
