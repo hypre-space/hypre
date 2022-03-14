@@ -2910,11 +2910,11 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          hypre_CSRMatrixBigJ(offd) = NULL;
       }
       hypre_IJMatrixAssembleFlag(matrix) = 1;
-   }
 
-   /* Generate the nonzero rows in the diag and offd matrices */
-   hypre_CSRMatrixSetRownnz(diag);
-   hypre_CSRMatrixSetRownnz(offd);
+      /* Generate the nonzero rows in the diag and offd matrices */
+      hypre_CSRMatrixSetRownnz(diag);
+      hypre_CSRMatrixSetRownnz(offd);
+   }
 
    /* Free memory */
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
