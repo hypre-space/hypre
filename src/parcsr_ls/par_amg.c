@@ -215,7 +215,7 @@ hypre_BoomerAMGCreate()
 
    /* FSAI smoother params */
    fsai_max_steps = 5;
-   fsai_max_step_size = 5;
+   fsai_max_step_size = 3;
    fsai_eig_maxiter = 5;
    fsai_kap_tolerance = 0.001;
 

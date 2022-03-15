@@ -43,9 +43,9 @@ hypre_FSAICreate()
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    /* setup params */
-   algo_type = 1;
-   max_steps = 10;
-   max_step_size = 3;
+   algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+   max_steps = 3;
+   max_step_size = 5;
    kap_tolerance = 1.0e-3;
 
    /* solver params */
