@@ -4446,6 +4446,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
@@ -5901,6 +5905,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(amg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(amg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(amg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(amg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(amg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(amg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(amg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(amg_precond, ns_coarse, 3);
          if (ns_down > -1)
          {
@@ -6079,6 +6087,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
@@ -6428,6 +6440,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
          {
@@ -6629,6 +6645,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
          {
@@ -7029,6 +7049,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
          {
@@ -7415,6 +7439,10 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
+         HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
+         HYPRE_BoomerAMGSetFSAIEigMaxIters(pcg_precond, fsai_eig_max_iters);
+         HYPRE_BoomerAMGSetFSAIKapTolerance(pcg_precond, fsai_kap_tolerance);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
          {
