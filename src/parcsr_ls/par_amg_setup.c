@@ -2866,16 +2866,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(AP);
-
-#if DEBUG_SAVE_ALL_OPS
-            if (level == 0)
-            {
-               hypre_ParCSRMatrixPrintIJ(A_array[0], 1, 1, "A_0.mtx");
-            }
-            char file[256];
-            hypre_sprintf(file, "A_%d.mtx", level + 1);
-            hypre_ParCSRMatrixPrintIJ(A_H, 1, 1, file);
-#endif
          }
          else if (rap2)
          {
@@ -2919,6 +2909,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
          }
       }
+
+#if DEBUG_SAVE_ALL_OPS
+      if (level == 0)
+      {
+         hypre_ParCSRMatrixPrintIJ(A_array[0], 0, 0, "A_00.IJ.out");
+      }
+      char file[256];
+      hypre_sprintf(file, "A_%02d.IJ.out", level + 1);
+      hypre_ParCSRMatrixPrintIJ(A_H, 0, 0, file);
+
+      hypre_sprintf(file, "P_%02d.IJ.out", level);
+      hypre_ParCSRMatrixPrintIJ(P_array[level], 0, 0, file);
+#endif
 
       HYPRE_ANNOTATE_REGION_END("%s", "RAP");
       if (debug_flag == 1)
@@ -3384,7 +3387,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
          HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
          HYPRE_FSAISetTolerance(smoother[j], 0.0);
-         HYPRE_FSAISetOmega(smoother[j], schwarz_relax_wt);
+         HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
          HYPRE_FSAISetEigMaxIters(smoother[j], fsai_eig_max_iters);
          HYPRE_FSAISetPrintLevel(smoother[j], 1);
 
@@ -3392,6 +3395,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                          (HYPRE_ParCSRMatrix) A_array[j],
                          (HYPRE_ParVector) F_array[j],
                          (HYPRE_ParVector) U_array[j]);
+
+#if DEBUG_SAVE_ALL_OPS
+         char file[256];
+         hypre_sprintf(file, "G_%02d.IJ.out", j);
+         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]), 0, 0, file);
+#endif
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {
