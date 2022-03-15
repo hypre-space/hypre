@@ -14,7 +14,7 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#ifdef HYPRE_USE_UMALLOC
+#if defined(HYPRE_USE_UMALLOC)
 #undef HYPRE_USE_UMALLOC
 #endif
 
@@ -42,6 +42,23 @@ hypre_WrongMemoryLocation()
                      "Wrong HYPRE MEMORY location: Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_HOST_PINNED are supported!\n");
    hypre_assert(0);
    fflush(stdout);
+}
+
+void
+hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   if (!ptr)
+   {
+      return;
+   }
+
+   hypre_MemoryLocation location_ptr;
+   hypre_GetPointerLocation(ptr, &location_ptr);
+   /* do not use hypre_assert, which has alloc and free;
+    * will create an endless loop otherwise */
+   assert(location == location_ptr);
+#endif
 }
 
 /*==========================================================================
@@ -123,14 +140,13 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
 static inline void
 hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 {
-#if defined(HYPRE_USING_GPU)
-#ifdef HYPRE_DEBUG
-   hypre_MemoryLocation tmp;
-   hypre_GetPointerLocation(ptr, &tmp);
-   /* do not use hypre_assert, which has alloc and free;
-    * will create an endless loop otherwise */
-   assert(hypre_MEMORY_UNIFIED == tmp);
-#endif
+   if (!size)
+   {
+      return;
+   }
+
+#if defined(HYPRE_DEBUG)
+   hypre_CheckMemoryLocation(ptr, hypre_MEMORY_UNIFIED);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
@@ -503,14 +519,8 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-#ifdef HYPRE_DEBUG
-   hypre_MemoryLocation tmp;
-   hypre_GetPointerLocation(ptr, &tmp);
-   /* do not use hypre_assert, which has alloc and free;
-    * will create an endless loop otherwise */
-   assert(location == tmp);
-#endif
+#if defined(HYPRE_DEBUG)
+   hypre_CheckMemoryLocation(ptr, location);
 #endif
 
    switch (location)
@@ -565,6 +575,14 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
    {
       return;
    }
+
+#if defined(HYPRE_DEBUG)
+   if (size > 0)
+   {
+      hypre_CheckMemoryLocation(dst, loc_dst);
+      hypre_CheckMemoryLocation(src, loc_src);
+   }
+#endif
 
    /* Totally 4 x 4 = 16 cases */
 
@@ -844,6 +862,10 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation locati
       }
       return ptr;
    }
+
+#if defined(HYPRE_DEBUG)
+   hypre_CheckMemoryLocation(ptr, hypre_GetActualMemLocation(location));
+#endif
 
    switch (hypre_GetActualMemLocation(location))
    {
@@ -1143,7 +1165,7 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    return ierr;
 }
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
+#if defined(HYPRE_USING_MEMORY_TRACKER)
 
 /*--------------------------------------------------------------------------
  * Memory tracker
@@ -1454,7 +1476,7 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
                         size_t     cub_max_cached_bytes)
 {
 #if defined(HYPRE_USING_CUDA)
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    hypre_HandleCubBinGrowth(hypre_handle())      = cub_bin_growth;
    hypre_HandleCubMinBin(hypre_handle())         = cub_min_bin;
    hypre_HandleCubMaxBin(hypre_handle())         = cub_max_bin;
@@ -1485,7 +1507,7 @@ HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth,
    return hypre_SetCubMemPoolSize(bin_growth, min_bin, max_bin, max_cached_bytes);
 }
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
 cudaError_t
 hypre_CachingMallocDevice(void **ptr, size_t nbytes)
 {
@@ -1562,7 +1584,7 @@ hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data)
    delete hypre_DeviceDataCubUvmAllocator(data);
 }
 
-#endif // #ifdef HYPRE_USING_DEVICE_POOL
+#endif // #if defined(HYPRE_USING_DEVICE_POOL)
 
 #if defined(HYPRE_USING_UMPIRE_HOST)
 HYPRE_Int

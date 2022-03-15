@@ -788,8 +788,6 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
  *
  * This function prints a SStructVector to file. For the assumptions used
  * here, see HYPRE_SStructMatrixPrint.
- *
- * TODO: Add GPU support
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -799,18 +797,12 @@ HYPRE_SStructVectorPrint( const char          *filename,
 {
    /* Vector variables */
    MPI_Comm              comm = hypre_SStructVectorComm(vector);
-   HYPRE_Int             ndim = hypre_SStructVectorNDim(vector);
    HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructGrid    *grid = hypre_SStructVectorGrid(vector);
 
    /* Local variables */
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
-   hypre_StructGrid     *sgrid;
-   hypre_BoxArray       *boxes;
-   hypre_BoxArray       *grid_boxes;
-   hypre_BoxArray       *data_space;
-   HYPRE_Complex        *data;
 
    FILE                 *file;
    HYPRE_Int             myid;
@@ -839,15 +831,9 @@ HYPRE_SStructVectorPrint( const char          *filename,
       for (var = 0; var < nvars; var++)
       {
          svector = hypre_SStructPVectorSVector(pvector, var);
-         sgrid = hypre_StructVectorGrid(svector);
-
-         data = hypre_StructVectorData(svector);
-         data_space = hypre_StructVectorDataSpace(svector);
-         grid_boxes = hypre_StructGridBoxes(sgrid);
-         boxes = (all) ? data_space : grid_boxes;
 
          hypre_fprintf(file, "\nData - (Part %d, Var %d):\n", part, var);
-         hypre_PrintBoxArrayData(file, boxes, data_space, 1, ndim, data);
+         hypre_StructVectorPrintData(file, svector, all);
       }
    }
 
@@ -857,7 +843,7 @@ HYPRE_SStructVectorPrint( const char          *filename,
 }
 
 /*--------------------------------------------------------------------------
- * TODO: Add GPU support
+ * HYPRE_SStructVectorRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -870,13 +856,8 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
    hypre_SStructPVector  *pvector;
    hypre_StructVector    *svector;
    hypre_SStructGrid     *grid;
-   hypre_StructGrid      *sgrid;
-   hypre_BoxArray        *grid_boxes;
-   hypre_BoxArray        *data_space;
-   HYPRE_Int              ndim;
    HYPRE_Int              nparts;
    HYPRE_Int              nvars;
-   HYPRE_Complex         *data;
 
    /* Local variables */
    FILE                  *file;
@@ -903,7 +884,6 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
    HYPRE_SStructVectorInitialize(vector);
 
    /* Read values from file */
-   ndim = hypre_SStructVectorNDim(vector);
    nparts = hypre_SStructVectorNParts(vector);
    for (p = 0; p < nparts; p++)
    {
@@ -916,13 +896,8 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
 
          pvector = hypre_SStructVectorPVector(vector, part);
          svector = hypre_SStructPVectorSVector(pvector, var);
-         sgrid = hypre_StructVectorGrid(svector);
 
-         data = hypre_StructVectorData(svector);
-         data_space = hypre_StructVectorDataSpace(svector);
-         grid_boxes = hypre_StructGridBoxes(sgrid);
-
-         hypre_ReadBoxArrayData(file, grid_boxes, data_space, 1, ndim, data);
+         hypre_StructVectorReadData(file, svector);
       }
    }
    fclose(file);

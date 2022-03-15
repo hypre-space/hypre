@@ -3736,9 +3736,9 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
          //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(&L_diag_j[ctrL], iL, HYPRE_Int, lenl,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(&L_diag_data[ctrL], wL, HYPRE_Real, lenl,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       }
       L_diag_i[ii + 1] = (ctrL += lenl);
 
@@ -3764,9 +3764,9 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
          //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(&U_diag_j[ctrU], iU, HYPRE_Int, lenu,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(&U_diag_data[ctrU], wU, HYPRE_Real, lenu,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       }
       U_diag_i[ii + 1] = (ctrU += lenu);
 
@@ -3901,9 +3901,9 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
          //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(&L_diag_j[ctrL], iL, HYPRE_Int, lenl,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(&L_diag_data[ctrL], wL, HYPRE_Real, lenl,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       }
       L_diag_i[ii + 1] = (ctrL += lenl);
 
@@ -3926,7 +3926,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
       }
       //hypre_TMemcpy(S_diag_data+ctrS+1, wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(S_diag_data + ctrS + 1, wU, HYPRE_Real, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       S_diag_i[ii - nLU + 1] = ctrS += (lenu + 1);
    }
    /* Assemble LDUS matrices */
@@ -4335,7 +4335,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          }
          //hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          ctrU += k;
@@ -4493,7 +4493,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
       temp_S_diag_j[ctrS] = ii;/* must have diagonal */
       //hypre_TMemcpy(temp_S_diag_j+ctrS+1,iL+nLU,HYPRE_Int,k-1,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
       hypre_TMemcpy(temp_S_diag_j + ctrS + 1, iL + nLU, HYPRE_Int, k - 1,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       ctrS += k;
       S_diag_i[ii - nLU + 1] = ctrS;
 
@@ -6334,9 +6334,9 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       L_diag_i[ii + 1] = (ctrL += lenl);
 
       /* diagonal part (we store the inverse) */
@@ -6359,9 +6359,9 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       U_diag_i[ii + 1] = (ctrU += lenu);
    }
 
@@ -6489,9 +6489,9 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       L_diag_i[ii + 1] = (ctrL += lenl);
 
       /* diagonal part (we store the inverse) */
@@ -6514,9 +6514,9 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       U_diag_i[ii + 1] = (ctrU += lenu);
    }
 
@@ -6631,9 +6631,9 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       L_diag_i[ii + 1] = (ctrL += lenl);
 
       /* diagonal part (we store the inverse) */
@@ -6656,9 +6656,9 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       U_diag_i[ii + 1] = (ctrU += lenu);
    }
 
@@ -6962,7 +6962,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          }
          //hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          ctrU += k;
@@ -7126,7 +7126,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          }
          //hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          ctrU += k;
@@ -7275,7 +7275,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
          }
          //hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
          hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          ctrU += k;
