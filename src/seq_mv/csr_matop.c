@@ -1282,6 +1282,8 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
       ierr = hypre_CSRMatrixTransposeHost(A, AT, data);
    }
 
+   hypre_CSRMatrixSetPatternOnly(*AT, hypre_CSRMatrixPatternOnly(A));
+
    return ierr;
 }
 

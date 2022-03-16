@@ -97,6 +97,7 @@ HYPRE_Int hypre_CSRMatrixBigInitialize ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixBigJtoJ ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixJtoBigJ ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixSetDataOwner ( hypre_CSRMatrix *matrix, HYPRE_Int owns_data );
+HYPRE_Int hypre_CSRMatrixSetPatternOnly( hypre_CSRMatrix *matrix, HYPRE_Int pattern_only );
 HYPRE_Int hypre_CSRMatrixSetRownnz ( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
 HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix, const char *file_name );

@@ -61,6 +61,7 @@ typedef struct
    hypre_int            *i_short;
    hypre_int            *j_short;
    HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   HYPRE_Int             pattern_only;    /* if 1, data array is ignored, and assumed to be all 1's */
    HYPRE_Complex        *data;
    HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
    HYPRE_Int             num_rownnz;
@@ -87,6 +88,7 @@ typedef struct
 #define hypre_CSRMatrixRownnz(matrix)               ((matrix) -> rownnz)
 #define hypre_CSRMatrixNumRownnz(matrix)            ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)             ((matrix) -> owns_data)
+#define hypre_CSRMatrixPatternOnly(matrix)          ((matrix) -> pattern_only)
 #define hypre_CSRMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
@@ -369,6 +371,7 @@ HYPRE_Int hypre_CSRMatrixBigInitialize ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixBigJtoJ ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixJtoBigJ ( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixSetDataOwner ( hypre_CSRMatrix *matrix, HYPRE_Int owns_data );
+HYPRE_Int hypre_CSRMatrixSetPatternOnly( hypre_CSRMatrix *matrix, HYPRE_Int pattern_only );
 HYPRE_Int hypre_CSRMatrixSetRownnz ( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
 HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix, const char *file_name );

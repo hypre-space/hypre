@@ -121,7 +121,7 @@ hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
       if (threadIdx.x == 0 && i < iend_a)
       {
          rowB = read_only_load(ja + i);
-         mult = read_only_load(aa + i);
+         mult = aa ? read_only_load(aa + i) : 1.0;
       }
 
 #if 0
@@ -149,7 +149,7 @@ hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
          if (k < rowB_end)
          {
             const HYPRE_Int     k_idx = read_only_load(jb + k);
-            const HYPRE_Complex k_val = read_only_load(ab + k) * mult;
+            const HYPRE_Complex k_val = (ab ? read_only_load(ab + k) : 1.0) * mult;
             /* first try to insert into shared memory hash table */
             HYPRE_Int pos = hypre_spgemm_hash_insert_numer<SHMEM_HASH_SIZE, HASHTYPE, UNROLL_FACTOR>
                             (s_HashKeys, s_HashVals, k_idx, k_val);

@@ -73,6 +73,9 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
    else
    {
+      d_a  = hypre_CSRMatrixPatternOnly(A) ? NULL : d_a;
+      d_b  = hypre_CSRMatrixPatternOnly(B) ? NULL : d_b;
+
       HYPRE_Int *d_rc = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
       const HYPRE_Int alg = hypre_HandleSpgemmAlgorithm(hypre_handle());
 
