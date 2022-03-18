@@ -257,31 +257,35 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* sort: by col */
-   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-   HYPRE_ONEDPL_CALL( std::copy,
-                      count,
-                      count + nnzA,
-                      d_pm);
-
-   auto zip_jt_pm = oneapi::dpl::make_zip_iterator(d_jt, d_pm);
-   HYPRE_ONEDPL_CALL( std::stable_sort,
-                      zip_jt_pm,
-                      zip_jt_pm + nnzA,
-   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
-
-   auto permuted_it = oneapi::dpl::make_permutation_iterator(d_it, d_pm);
-   HYPRE_ONEDPL_CALL( std::copy,
-                      permuted_it,
-                      permuted_it + nnzA,
-                      d_jc );
-
-   if (want_data)
+   /* WM: necessary? */
+   if (nnzA > 0)
    {
-      auto permuted_aa = oneapi::dpl::make_permutation_iterator(d_aa, d_pm);
+      oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
       HYPRE_ONEDPL_CALL( std::copy,
-                         permuted_aa,
-                         permuted_aa + nnzA,
-                         d_ac );
+                         count,
+                         count + nnzA,
+                         d_pm);
+
+      auto zip_jt_pm = oneapi::dpl::make_zip_iterator(d_jt, d_pm);
+      HYPRE_ONEDPL_CALL( std::stable_sort,
+                         zip_jt_pm,
+                         zip_jt_pm + nnzA,
+      [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+
+      auto permuted_it = oneapi::dpl::make_permutation_iterator(d_it, d_pm);
+      HYPRE_ONEDPL_CALL( std::copy,
+                         permuted_it,
+                         permuted_it + nnzA,
+                         d_jc );
+
+      if (want_data)
+      {
+         auto permuted_aa = oneapi::dpl::make_permutation_iterator(d_aa, d_pm);
+         HYPRE_ONEDPL_CALL( std::copy,
+                            permuted_aa,
+                            permuted_aa + nnzA,
+                            d_ac );
+      }
    }
 
    /* convert into ic: row idx --> row ptrs */

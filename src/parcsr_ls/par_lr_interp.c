@@ -1033,6 +1033,7 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
                                     HYPRE_Int             max_elmts,
                                     hypre_ParCSRMatrix  **P_ptr)
 {
+   /* hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPIInterpHost()\n"); */
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] -= hypre_MPI_Wtime();
 #endif

@@ -1802,6 +1802,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
       hypre_TFree(send_data, HYPRE_MEMORY_HOST);
    }
 #else
+   /* hypre_printf("WM: debug - inside hypre_ParCSRMatrixExtractBExt()\n"); */
    hypre_assert( hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(B)) ==
                  hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(B)) );
 
@@ -1823,6 +1824,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
    B_ext = hypre_ParcsrGetExternalRowsWait(request);
 #endif
 
+   /* hypre_printf("WM: debug - finished hypre_ParCSRMatrixExtractBExt()\n"); */
    return B_ext;
 }
 
@@ -4871,6 +4873,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
                                  HYPRE_Int             want_data,
                                  void                **request_ptr)
 {
+   /* hypre_printf("WM: debug - inside hypre_ParcsrGetExternalRowsInit()\n"); */
    HYPRE_Int i, j, k;
    HYPRE_Int num_sends, num_rows_send, num_nnz_send, *send_i,
              num_recvs, num_rows_recv, num_nnz_recv, *recv_i,
@@ -4904,6 +4907,10 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
+   /* WM: debug */
+   /* char my_filename[256]; */
+   /* hypre_sprintf(my_filename, "commPkgA_rank%d", my_id); */
+   /* hypre_ParCSRCommPkgPrint(comm_pkg, my_filename); */
    /* number of sends (#procs) */
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    /* number of rows to send */
@@ -4915,19 +4922,40 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
 
    /* must be true if indices contains proper offd indices */
    hypre_assert(indices_len == num_rows_recv);
+   /* hypre_MPI_Barrier(hypre_MPI_COMM_WORLD); */
+   /* hypre_printf("WM: debug - rank %d hypre_ParcsrGetExternalRowsInit() 1\n", my_id); */
 
    /* send_i/recv_i:
     * the arrays to send and recv: we first send and recv the row lengths */
    send_i = hypre_TAlloc(HYPRE_Int, num_rows_send, HYPRE_MEMORY_HOST);
    recv_i = hypre_CTAlloc(HYPRE_Int, num_rows_recv + 1, HYPRE_MEMORY_HOST);
+   /* hypre_printf("WM: debug - rank %d num_rows_send = %d\n", my_id, num_rows_send); */
+   /* hypre_printf("WM: debug - rank %d num_rows_recv = %d\n", my_id, num_rows_recv); */
    /* fill the send array with row lengths */
-   for (i = 0, num_nnz_send = 0; i < num_rows_send; i++)
-   {
-      /* j: row index to send */
-      j = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i);
-      send_i[i] = A_diag_i[j + 1] - A_diag_i[j] + A_offd_i[j + 1] - A_offd_i[j];
-      num_nnz_send += send_i[i];
-   }
+   /* for (HYPRE_Int rank = 0; rank < 4; rank++) */
+   /* { */
+   /*    if (my_id == rank) */
+   /*    { */
+         for (i = 0, num_nnz_send = 0; i < num_rows_send; i++)
+         {
+            /* j: row index to send */
+            /* hypre_printf("WM: debug - rank %d i = %d\n", my_id, i); */
+            /* hypre_printf("WM: debug - rank %d j = %d\n", my_id, hypre_ParCSRCommPkgSendMapElmts(comm_pkg)[i]); */
+            j = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i);
+            if (j < 0) hypre_printf("WM: debug - rank %d j = %d\n", my_id, j);
+            /* hypre_printf("WM: debug - rank %d i = %d after\n", my_id, i); */
+            /* WM: debug */
+            /* if (j > hypre_CSRMatrixNumRows(A_diag) - 1) hypre_printf("WM: debug - rank %d, j = %d, diag num rows = %d, i = %d\n", my_id, j, hypre_CSRMatrixNumRows(A_diag), i); */
+            /* if (j > hypre_CSRMatrixNumRows(A_offd) - 1) hypre_printf("WM: debug - rank %d, j = %d, offd num rows = %d, i = %d\n", my_id, j, hypre_CSRMatrixNumRows(A_offd), i); */
+            send_i[i] = A_diag_i[j + 1] - A_diag_i[j] + A_offd_i[j + 1] - A_offd_i[j];
+            /* hypre_printf("WM: debug - rank %d send_i = %d\n", my_id, send_i[i]); */
+            num_nnz_send += send_i[i];
+         }
+      /* } */
+      /* hypre_MPI_Barrier(hypre_MPI_COMM_WORLD); */
+   /* } */
+   /* hypre_MPI_Barrier(hypre_MPI_COMM_WORLD); */
+   /* hypre_printf("WM: debug - rank %d hypre_ParcsrGetExternalRowsInit() 2\n", my_id); */
 
    /* send this array out: note the shift in recv_i by one (async) */
    comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_i, recv_i + 1);
@@ -5058,6 +5086,8 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    hypre_TFree(send_i, HYPRE_MEMORY_HOST);
    hypre_TFree(send_i_offset, HYPRE_MEMORY_HOST);
 
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   /* hypre_printf("WM: debug - rank %d finished hypre_ParcsrGetExternalRowsInit()\n", my_id); */
    return hypre_error_flag;
 }
 

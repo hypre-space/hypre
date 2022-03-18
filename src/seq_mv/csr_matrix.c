@@ -501,6 +501,7 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    HYPRE_Complex *matrix_data;
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
+   HYPRE_BigInt  *matrix_bigj;
    HYPRE_Int      num_rows;
 
    HYPRE_Int      file_base = 1;
@@ -516,6 +517,7 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    matrix_data = hypre_CSRMatrixData(matrix);
    matrix_i    = hypre_CSRMatrixI(matrix);
    matrix_j    = hypre_CSRMatrixJ(matrix);
+   matrix_bigj = hypre_CSRMatrixBigJ(matrix);
    num_rows    = hypre_CSRMatrixNumRows(matrix);
 
    fp = fopen(file_name, "w");
@@ -527,9 +529,20 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
       hypre_fprintf(fp, "%d\n", matrix_i[j] + file_base);
    }
 
-   for (j = 0; j < matrix_i[num_rows]; j++)
+   if (matrix_j)
    {
-      hypre_fprintf(fp, "%d\n", matrix_j[j] + file_base);
+      for (j = 0; j < matrix_i[num_rows]; j++)
+      {
+         hypre_fprintf(fp, "%d\n", matrix_j[j] + file_base);
+      }
+   }
+
+   if (matrix_bigj)
+   {
+      for (j = 0; j < matrix_i[num_rows]; j++)
+      {
+         hypre_fprintf(fp, "%d\n", matrix_bigj[j] + file_base);
+      }
    }
 
    if (matrix_data)

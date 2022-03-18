@@ -224,6 +224,11 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                                    HYPRE_Int *d_row_ptr)
 {
 #if defined(HYPRE_USING_SYCL)
+   /* WM: necessary? */
+   if (nnz <= 0 || nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_row_ind, d_row_ind + nnz,
@@ -304,6 +309,11 @@ HYPRE_Int
 hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
+   /* WM: necessary? */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
    HYPRE_ONEDPL_CALL(oneapi::dpl::inclusive_scan, d_i, d_i + n, d_i);
 #else
    HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
@@ -482,6 +492,11 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
+   /* WM: necessary? */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
    /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
    HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
    /* HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0); */
@@ -506,6 +521,11 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
 {
 #if defined(HYPRE_USING_SYCL)
    auto zipped_begin = oneapi::dpl::make_zip_iterator(keys1, keys2, vals);
+   /* WM: necessary? */
+   if (N <= 0)
+   {
+      return hypre_error_flag;
+   }
 
    if (opt == 0)
    {
@@ -554,6 +574,11 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
                              T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
 {
 #if defined(HYPRE_USING_SYCL)
+   /* WM: necessary? */
+   if (N <= 0)
+   {
+      return hypre_error_flag;
+   }
    auto begin_keys_in  = oneapi::dpl::make_zip_iterator(keys1_in,  keys2_in );
    auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out, keys2_out);
    std::equal_to< std::tuple<T1, T2> > pred;
