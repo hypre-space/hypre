@@ -128,28 +128,19 @@ hypre_ndigits( HYPRE_BigInt number )
 /* printf functions */
 
 HYPRE_Int
-hypre_vprintf( const char *format, va_list ap )
-{
-   HYPRE_Int ierr = 0;
-   char *newformat;
-
-   new_format(format, &newformat);
-   ierr = vprintf(newformat, ap);
-   free_format(newformat);
-   fflush(stdout);
-
-   return ierr;
-}
-
-HYPRE_Int
 hypre_printf( const char *format, ...)
 {
    va_list   ap;
+   char     *newformat;
    HYPRE_Int ierr = 0;
 
    va_start(ap, format);
-   ierr = hypre_vprintf(format, ap);
+   new_format(format, &newformat);
+   ierr = vprintf(newformat, ap);
+   free_format(newformat);
    va_end(ap);
+
+   fflush(stdout);
 
    return ierr;
 }
@@ -239,8 +230,8 @@ hypre_sscanf( char *s, const char *format, ...)
 HYPRE_Int
 hypre_ParPrintf(MPI_Comm comm, const char *format, ...)
 {
-   HYPRE_Int my_id, ierr;
-   ierr = hypre_MPI_Comm_rank(comm, &my_id);
+   HYPRE_Int my_id;
+   HYPRE_Int ierr = hypre_MPI_Comm_rank(comm, &my_id);
 
    if (ierr)
    {
@@ -250,9 +241,15 @@ hypre_ParPrintf(MPI_Comm comm, const char *format, ...)
    if (!my_id)
    {
       va_list ap;
+      char   *newformat;
+
       va_start(ap, format);
-      ierr = hypre_vprintf(format, ap);
+      new_format(format, &newformat);
+      ierr = vprintf(newformat, ap);
+      free_format(newformat);
       va_end(ap);
+
+      fflush(stdout);
    }
 
    return ierr;
