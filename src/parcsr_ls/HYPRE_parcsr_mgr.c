@@ -517,7 +517,7 @@ HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
-                              HYPRE_Int global_smooth_cycle )
+                               HYPRE_Int global_smooth_cycle )
 {
    return hypre_MGRSetGlobalSmoothCycle(solver, global_smooth_cycle);
 }

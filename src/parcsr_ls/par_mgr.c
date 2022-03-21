@@ -23,9 +23,11 @@
  * dsuperlu.h on some lapack functions. Alternative is to move superLU related functions to a separate file.
 */
 /* dgetrf.c */
-HYPRE_Int hypre_dgetrf ( HYPRE_Int *m , HYPRE_Int *n , HYPRE_Real *a , HYPRE_Int *lda , HYPRE_Int *ipiv , HYPRE_Int *info );
+HYPRE_Int hypre_dgetrf ( HYPRE_Int *m, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *ipiv,
+                         HYPRE_Int *info );
 /* dgetri.c */
-HYPRE_Int hypre_dgetri ( HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *ipiv, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
+HYPRE_Int hypre_dgetri ( HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *ipiv,
+                         HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 /* Create */
 void *
@@ -508,7 +510,7 @@ hypre_MGRDestroy( void *data )
       hypre_TFree(mgr_data -> num_relax_sweeps, HYPRE_MEMORY_HOST);
       (mgr_data -> num_relax_sweeps) = NULL;
    }
-   
+
    /* mgr data */
    hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
 
@@ -1128,8 +1130,8 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A,
 
    hypre_ParCSRMatrixDestroy(A_FF_inv);
    hypre_ParCSRMatrixDestroy(A_FC);
-   hypre_ParCSRMatrixDestroy(A_FF);   
-   
+   hypre_ParCSRMatrixDestroy(A_FF);
+
    return hypre_error_flag;
 }
 
@@ -2873,11 +2875,11 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    HYPRE_Int  max_elmts = Pmax;
    HYPRE_Real alpha = -1.0;
 
-   HYPRE_BigInt         coarse_pnts_global[2];   
-   HYPRE_BigInt         fine_pnts_global[2];   
+   HYPRE_BigInt         coarse_pnts_global[2];
+   HYPRE_BigInt         fine_pnts_global[2];
    hypre_IntArray *marker_array = NULL;
-//   HYPRE_Real wall_time = 0.;
-//   HYPRE_Real wall_time_1 = 0.;
+   //   HYPRE_Real wall_time = 0.;
+   //   HYPRE_Real wall_time_1 = 0.;
 
    HYPRE_Int my_id;
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
@@ -2902,15 +2904,16 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    hypre_IntArrayMemoryLocation(marker_array) = memory_location;
    hypre_IntArrayData(marker_array) = c_marker;
    // get range for c_points
-   hypre_BoomerAMGCoarseParms(comm, n_local_fine_grid, 1, NULL, marker_array, NULL, coarse_pnts_global);
+   hypre_BoomerAMGCoarseParms(comm, n_local_fine_grid, 1, NULL, marker_array, NULL,
+                              coarse_pnts_global);
    // get range for f_points
    hypre_IntArrayData(marker_array) = f_marker;
    hypre_BoomerAMGCoarseParms(comm, n_local_fine_grid, 1, NULL, marker_array, NULL, fine_pnts_global);
 
-   // Generate A_FF, A_FC, A_CC and A_CF submatrices. 
+   // Generate A_FF, A_FC, A_CC and A_CF submatrices.
    // Note: Not all submatrices are needed for each method below.
    // hypre_ParCSRMatrixGenerateFFFC computes A_FF and A_FC given the CF_marker and start locations for the global C-points.
-   // To compute A_CC and A_CF, we need to pass in equivalent information for F-points. (i.e. CF_marker marking F-points 
+   // To compute A_CC and A_CF, we need to pass in equivalent information for F-points. (i.e. CF_marker marking F-points
    // and start locations for the global F-points.
    hypre_ParCSRMatrixGenerateFFFC(A, c_marker, coarse_pnts_global, NULL, &A_fc, &A_ff);
    hypre_ParCSRMatrixGenerateFFFC(A, f_marker, fine_pnts_global, NULL, &A_cf, &A_cc);
@@ -2968,7 +2971,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    // Free data
    hypre_ParCSRMatrixDestroy(A_ff);
    hypre_ParCSRMatrixDestroy(A_fc);
-   hypre_ParCSRMatrixDestroy(A_cf);   
+   hypre_ParCSRMatrixDestroy(A_cf);
 
    // perform dropping for A_h_correction
    // specific to multiphase poromechanics
@@ -2985,7 +2988,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    HYPRE_Real      *A_h_correction_offd_data = hypre_CSRMatrixData(A_h_correction_offd);
    HYPRE_Int             *A_h_correction_offd_i = hypre_CSRMatrixI(A_h_correction_offd);
    HYPRE_Int             *A_h_correction_offd_j = hypre_CSRMatrixJ(A_h_correction_offd);
-   
+
    // drop small entries in the correction
    if (Pmax > 0)
    {
@@ -3092,9 +3095,9 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       }
       else
       {
-        // do nothing. Dropping not yet implemented for non-interleaved variable ordering options
-       //  hypre_printf("Error!! Block ordering for non-Galerkin coarse grid is not currently supported\n");
-       //  exit(-1);
+         // do nothing. Dropping not yet implemented for non-interleaved variable ordering options
+         //  hypre_printf("Error!! Block ordering for non-Galerkin coarse grid is not currently supported\n");
+         //  exit(-1);
       }
    }
    // coarse grid / schur complement
@@ -3255,7 +3258,8 @@ hypre_MGRApproximateInverse(hypre_ParCSRMatrix      *A,
    droptol[0] = 1.0e-2;
    droptol[1] = 1.0e-2;
 
-   hypre_ILUParCSRInverseNSH(A, &approx_A_inv, droptol, mr_tol, nsh_tol, HYPRE_REAL_MIN, mr_max_row_nnz,
+   hypre_ILUParCSRInverseNSH(A, &approx_A_inv, droptol, mr_tol, nsh_tol, HYPRE_REAL_MIN,
+                             mr_max_row_nnz,
                              nsh_max_row_nnz, mr_max_iter, nsh_max_iter, mr_col_version, print_level);
    *A_inv = approx_A_inv;
 
@@ -4199,16 +4203,16 @@ HYPRE_Int hypre_block_jacobi_solve(hypre_ParCSRMatrix *A,
 /* Computes a block Jacobi relaxation of matrix A, given the inverse of the diagonal blocks (of A) obtained
  * by calling hypre_MGRBlockRelaxSetup.
  * TODO: Adapt to relax on specific points based on CF_marker information
-*/ 
+*/
 HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
-                                  hypre_ParVector    *f,
-                                  hypre_ParVector    *u,
-                                  HYPRE_Real         blk_size,
-                                  HYPRE_Int           n_block,
-                                  HYPRE_Int           left_size,
-                                  HYPRE_Int          method,
-                                  HYPRE_Real         *diaginv,
-                                  hypre_ParVector    *Vtemp)
+                                    hypre_ParVector    *f,
+                                    hypre_ParVector    *u,
+                                    HYPRE_Real         blk_size,
+                                    HYPRE_Int           n_block,
+                                    HYPRE_Int           left_size,
+                                    HYPRE_Int          method,
+                                    HYPRE_Real         *diaginv,
+                                    hypre_ParVector    *Vtemp)
 {
    MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -4471,14 +4475,14 @@ hypre_BlockDiagInvLapack(HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size)
 
    return hypre_error_flag;
 }
-// Extract the block diagonal part of a A or a principal submatrix of A defined by a marker (point_type) 
-// in an associated CF_marker array. The result is an array of (flattened) block diagonals. 
-// If CF marker array is NULL, it returns an array of the (flattened) 
+// Extract the block diagonal part of a A or a principal submatrix of A defined by a marker (point_type)
+// in an associated CF_marker array. The result is an array of (flattened) block diagonals.
+// If CF marker array is NULL, it returns an array of the (flattened)
 // block diagonal of the entire matrix A. Options for diag_type are:
 // diag_type = 1: return the inverse of the block diagonals
 // otherwise : return the block diagonals
-// On return, blk_diag_size contains the size of the returned (flattened) array. 
-// (i.e. nnz of extracted block diagonal) 
+// On return, blk_diag_size contains the size of the returned (flattened) array.
+// (i.e. nnz of extracted block diagonal)
 // ***Input***
 // A - parCSR matrix
 // blk_size - Size of diagonal blocks to extract
@@ -4488,15 +4492,15 @@ hypre_BlockDiagInvLapack(HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size)
 // ***Output***
 // diag_ptr: Array of block diagonal entries
 // blk_diag_size - number of entries in extracted block diagonal (size of diag_ptr).
-// 
+//
 HYPRE_Int
 hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
-                                  HYPRE_Int            blk_size,
-                                  HYPRE_Int            point_type,
-                                  HYPRE_Int            *CF_marker,
-                                  HYPRE_Int            *blk_diag_size,
-                                  HYPRE_Real           **diag_ptr,
-                                  HYPRE_Int		diag_type)
+                                   HYPRE_Int            blk_size,
+                                   HYPRE_Int            point_type,
+                                   HYPRE_Int            *CF_marker,
+                                   HYPRE_Int            *blk_diag_size,
+                                   HYPRE_Real           **diag_ptr,
+                                   HYPRE_Int     diag_type)
 {
    MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -4504,7 +4508,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
    HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
 
-   HYPRE_Int             i,j;
+   HYPRE_Int             i, j;
    HYPRE_Int             ii, jj;
    HYPRE_Int             bidx, bidxm1, bidxp1, ridx, didx;
    HYPRE_Int             num_procs, my_id;
@@ -4563,7 +4567,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
    *-----------------------------------------------------------------*/
    wall_time = time_getWallclockSeconds();
    //CF Marker is NULL. Consider all rows of matrix.
-   if(CF_marker == NULL)
+   if (CF_marker == NULL)
    {
       for (i = 0; i < n_block; i++)
       {
@@ -4584,11 +4588,11 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
          }
       }
       // deal with remaining points if any
-      if(left_size)
+      if (left_size)
       {
          bidxm1 = whole_num_points;
-         bidxp1 = num_points; 
-         for( j=0; j<left_size; j++)
+         bidxp1 = num_points;
+         for ( j = 0; j < left_size; j++)
          {
             for (ii = A_diag_i[bidxm1 + j]; ii < A_diag_i[bidxm1 + j + 1]; ii++)
             {
@@ -4598,7 +4602,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                   bidx = j * left_size + jj - bidxm1;
                   diag[bstart + bidx] = A_diag_data[ii];
                }
-            }              
+            }
          }
       }
    }
@@ -4627,7 +4631,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                   }
                }
             }
-            if(++cnt == whole_num_points) break;
+            if (++cnt == whole_num_points) { break; }
          }
          else
          {
@@ -4635,10 +4639,10 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
          }
       }
       // remaining points
-      for (i = whole_num_points; i < num_points; i++)          
-      { 
+      for (i = whole_num_points; i < num_points; i++)
+      {
          if (CF_marker[i] == point_type)
-         {               
+         {
             bidx = n_block;
             ridx = cnt - whole_num_points;
             bidxm1 = whole_num_points;
@@ -4669,7 +4673,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
    * compute the inverses of all the diagonal sub-blocks
    *-----------------------------------------------------------------*/
    wall_time = time_getWallclockSeconds();
-   if(diag_type == 1) // compute the inverse
+   if (diag_type == 1) // compute the inverse
    {
       if (blk_size > 1)
       {
@@ -4697,9 +4701,9 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
    return hypre_error_flag;
 }
 
-// Extract the block diagonal part of a A or a principal submatrix of A defined by a marker (point_type) 
-// in an associated CF_marker array. The result is new block diagonal parCSR matrix. 
-// If CF marker array is NULL, it returns the block diagonal of the original matrix A. 
+// Extract the block diagonal part of a A or a principal submatrix of A defined by a marker (point_type)
+// in an associated CF_marker array. The result is new block diagonal parCSR matrix.
+// If CF marker array is NULL, it returns the block diagonal of the original matrix A.
 // Options for diag_type are:
 // diag_type = 1: return the inverse of the block diagonals
 // otherwise : return the block diagonals
@@ -4711,13 +4715,13 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
 // diag_type - Type of block diagonal entries to return. Currently supports block diagonal or inverse block diagonal entries.
 // ***Output***
 // B_ptr: New block diagonal matrix
-// 
+//
 HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix(  hypre_ParCSRMatrix  *A,
-                                                 HYPRE_Int           blk_size,
-                                                 HYPRE_Int           point_type,
-                                                 HYPRE_Int           *CF_marker,
-                                                 hypre_ParCSRMatrix  **B_ptr,
-                                                 HYPRE_Int           diag_type)
+                                              HYPRE_Int           blk_size,
+                                              HYPRE_Int           point_type,
+                                              HYPRE_Int           *CF_marker,
+                                              hypre_ParCSRMatrix  **B_ptr,
+                                              HYPRE_Int           diag_type)
 {
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int         num_procs,  my_id;
@@ -4776,7 +4780,8 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix(  hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    wall_time = time_getWallclockSeconds();
-   hypre_ParCSRMatrixExtractBlockDiag(A, blk_size, point_type, CF_marker, &diag_size, &diag, diag_type);
+   hypre_ParCSRMatrixExtractBlockDiag(A, blk_size, point_type, CF_marker, &diag_size, &diag,
+                                      diag_type);
    wall_time = time_getWallclockSeconds() - wall_time;
    n_block = blk_diag_nlocal_rows / blk_size;
    left_size = blk_diag_nlocal_rows - n_block * blk_size;
@@ -4858,7 +4863,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix(  hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixI(B_offd) = NULL;
    hypre_CSRMatrixJ(B_offd) = NULL;
 
-//   hypre_MatvecCommPkgCreate(B);
+   //   hypre_MatvecCommPkgCreate(B);
    *B_ptr = B;
 
    hypre_TFree(diag, memory_location);
@@ -4867,17 +4872,17 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix(  hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-/*Setup block smoother: 
+/*Setup block smoother:
  * Computes the entries of the inverse of the block diagonal matrix with blk_size diagonal blocks.
  * Current implementation ignores reserved Cpoints and acts on whole matrix.
  */
 HYPRE_Int
 hypre_MGRBlockRelaxSetup(hypre_ParCSRMatrix *A,
-                       HYPRE_Int          blk_size,
-                       HYPRE_Real        **diaginvptr)
+                         HYPRE_Int          blk_size,
+                         HYPRE_Real        **diaginvptr)
 {
    HYPRE_Int blk_diag_size;
-   hypre_ParCSRMatrixExtractBlockDiag(A, blk_size,0,NULL,&blk_diag_size,diaginvptr,1);
+   hypre_ParCSRMatrixExtractBlockDiag(A, blk_size, 0, NULL, &blk_diag_size, diaginvptr, 1);
 
 #if 0
    MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
