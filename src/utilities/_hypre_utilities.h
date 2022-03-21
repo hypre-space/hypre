@@ -86,6 +86,7 @@ HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
+HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 // #else
 // #define hypre_printf  printf
 // #define hypre_fprintf fprintf
