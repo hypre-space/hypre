@@ -109,6 +109,12 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    {
       total_global_cpts = num_cpts_global[1];
    }
+
+   if (total_global_cpts == 0)
+   {
+      *P_ptr = NULL;
+      return hypre_error_flag;
+   }
    /* Generate pass marker array */
 
    pass_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
