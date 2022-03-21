@@ -98,7 +98,7 @@ typedef struct
    HYPRE_Int           *level_smooth_iters;
    HYPRE_Int           *level_smooth_type;
    HYPRE_Solver        *level_smoother;
-   HYPRE_Int           level_smooth_order;
+   HYPRE_Int           global_smooth_cycle;
 
    /*
     Number of points that remain part of the coarse grid throughout the hierarchy.

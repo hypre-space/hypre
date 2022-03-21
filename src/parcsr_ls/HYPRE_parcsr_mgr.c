@@ -513,13 +513,13 @@ HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
    return hypre_MGRSetLevelSmoothType(solver, smooth_type);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetLevelsmoothOrder
+ * HYPRE_MGRSetGlobalSmoothCycle
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
-                              HYPRE_Int level_smooth_order )
+HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
+                              HYPRE_Int global_smooth_cycle )
 {
-   return hypre_MGRSetLevelSmoothOrder(solver, level_smooth_order);
+   return hypre_MGRSetGlobalSmoothCycle(solver, global_smooth_cycle);
 }
 
 /*--------------------------------------------------------------------------

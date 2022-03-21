@@ -140,7 +140,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int setNonCpointToF = (mgr_data -> set_non_Cpoints_to_F);
    HYPRE_BigInt *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
    HYPRE_BigInt *idx_array = (mgr_data -> idx_array);
-   HYPRE_Int lvl_to_keep_cpoints = (mgr_data -> lvl_to_keep_cpoints);
+   HYPRE_Int lvl_to_keep_cpoints = (mgr_data -> lvl_to_keep_cpoints) > (mgr_data -> max_num_coarse_levels) ? (mgr_data -> max_num_coarse_levels) : (mgr_data -> lvl_to_keep_cpoints);
 
    HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
@@ -839,7 +839,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          HYPRE_Int level_blk_size = lev == 0 ? block_size : block_num_coarse_indexes[lev - 1];
          if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
-            hypre_blockRelax_setup(A_array[lev], level_blk_size, reserved_coarse_size,
+            hypre_MGRBlockRelaxSetup(A_array[lev], level_blk_size,
                                    &(mgr_data -> level_diaginv)[lev]);
          }
          else if (level_smooth_type[lev] == 8)
@@ -914,7 +914,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          if (mgr_coarse_grid_method[lev] != 0)
          {
             wall_time = time_getWallclockSeconds();
-            hypre_MGRBuildBlockJacobiWp(A_array[lev], block_jacobi_bsize, CF_marker, NULL, debug_flag, &Wp);
+            hypre_MGRBuildBlockJacobiWp(A_array[lev], block_jacobi_bsize, CF_marker, coarse_pnts_global, &Wp);
             wall_time = time_getWallclockSeconds() - wall_time;
          //   if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     Build Wp: %f\n", lev, interp_type[lev], my_id, wall_time); }
          }
@@ -942,8 +942,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          HYPRE_Real *diag_inv = NULL;
          HYPRE_Int inv_size;
-         hypre_ParCSRMatrixGetBlockDiagInv(A_array[lev], block_jacobi_bsize, -1, CF_marker, &inv_size,
-                                           &diag_inv);
+         hypre_ParCSRMatrixExtractBlockDiag(A_array[lev], block_jacobi_bsize, -1, CF_marker, &inv_size,
+                                           &diag_inv, 1);
          frelax_diaginv[lev] = diag_inv;
          blk_size[lev] = block_jacobi_bsize;
          hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
