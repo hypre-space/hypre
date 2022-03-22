@@ -18,6 +18,8 @@
 #ifndef HYPRE_BOXLOOP_CUDA_HEADER
 #define HYPRE_BOXLOOP_CUDA_HEADER
 
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
+
 #define HYPRE_LAMBDA [=] __host__  __device__
 
 /* TODO: RL: support 4-D */
@@ -424,4 +426,7 @@ else                                                            \
 #define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
 
+#endif
+
 #endif /* #ifndef HYPRE_BOXLOOP_CUDA_HEADER */
+

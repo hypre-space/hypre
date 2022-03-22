@@ -300,6 +300,26 @@ HYPRE_StructVectorPrint( const char         *filename,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorRead( MPI_Comm             comm,
+                        const char          *filename,
+                        HYPRE_Int           *num_ghost,
+                        HYPRE_StructVector  *vector )
+{
+   if (!vector)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   *vector = (HYPRE_StructVector) hypre_StructVectorRead(comm, filename, num_ghost);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorSetNumGhost
  *--------------------------------------------------------------------------*/
 

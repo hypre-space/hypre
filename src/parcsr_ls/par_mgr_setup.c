@@ -1083,7 +1083,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       if (truncate_cg_threshold > 0.0)
       {
-         wall_time = time_getWallclockSeconds();
          // truncate the coarse grid
          if (exec == HYPRE_EXEC_HOST)
          {
@@ -1092,15 +1091,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
          else
          {
-            hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, 1, 0);
+            hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
          }
 #endif
-         wall_time = time_getWallclockSeconds() - wall_time;
-         //  if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time); }
       }
-      //char fname[256];
-      //sprintf(fname, "RAP_%d", lev);
-      //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
 
       if (Frelax_method[lev] == 2) // full AMG
       {
@@ -1191,7 +1185,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          HYPRE_BigInt *num_fpts_global;
          hypre_ParCSRMatrix *P_FF_ptr;
-         hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, F_marker, NULL, &num_fpts_global);
+         hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, F_marker, NULL, num_fpts_global);
          hypre_MGRBuildPDevice(A_array[lev], F_marker_data, num_fpts_global, 0, &P_FF_ptr);
          P_FF_array[lev] = P_FF_ptr;
 

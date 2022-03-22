@@ -360,6 +360,14 @@ HYPRE_Int HYPRE_StructMatrixPrint(const char         *filename,
                                   HYPRE_Int           all);
 
 /**
+ * Read the matrix from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_StructMatrixRead( MPI_Comm             comm,
+                                  const char          *filename,
+                                  HYPRE_Int           *num_ghost,
+                                  HYPRE_StructMatrix  *matrix );
+
+/**
  * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
  * Note that you can do a simple matrix-vector multiply by setting
  * \f$\alpha=1\f$ and \f$\beta=0\f$.
@@ -520,6 +528,14 @@ HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
                                   HYPRE_StructVector  vector,
                                   HYPRE_Int           all);
 
+/**
+ * Read the vector from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_StructVectorRead( MPI_Comm             comm,
+                                  const char          *filename,
+                                  HYPRE_Int           *num_ghost,
+                                  HYPRE_StructVector  *vector );
+
 /**@}*/
 /**@}*/
 
@@ -562,4 +578,3 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
 #endif
 
 #endif
-

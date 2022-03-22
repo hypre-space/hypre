@@ -733,6 +733,7 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                              hypre_ParCSRMatrixNumCols(A) + num_cols_offd,
                              hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd) +
                              hypre_CSRMatrixNumNonzeros(E));
+
    hypre_CSRMatrixInitialize_v2(B, 0, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_GetRowNnz(hypre_ParCSRMatrixNumRows(A), NULL, hypre_CSRMatrixI(A_diag),
@@ -1588,9 +1589,9 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRDiagScale( HYPRE_ParCSRMatrix HA,
-                       HYPRE_ParVector    Hy,
-                       HYPRE_ParVector    Hx )
+hypre_ParCSRDiagScaleVector( HYPRE_ParCSRMatrix HA,
+                             HYPRE_ParVector    Hy,
+                             HYPRE_ParVector    Hx )
 {
    hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
    hypre_ParVector    *y = (hypre_ParVector *) Hy;

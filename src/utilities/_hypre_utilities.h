@@ -86,6 +86,7 @@ HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
+HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 // #else
 // #define hypre_printf  printf
 // #define hypre_fprintf fprintf
@@ -584,6 +585,10 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(HYPRE_USING_UNIFIED_MEMORY) && defined(HYPRE_USING_DEVICE_OPENMP)
+//#pragma omp requires unified_shared_memory
+#endif
+
 #if defined(HYPRE_USING_UMPIRE)
 #include "umpire/interface/umpire.h"
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
@@ -1071,6 +1076,7 @@ extern hypre_TimingType *hypre_global_timing;
 /* timing.c */
 HYPRE_Int hypre_InitializeTiming( const char *name );
 HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
+HYPRE_Int hypre_FinalizeAllTimings();
 HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
@@ -1856,13 +1862,13 @@ HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
-#include <math.h>
+//#include <math.h>
 
 #ifdef HYPRE_USING_OPENMP
 #include <omp.h>
 #endif
 
-#include "_hypre_utilities.h"
+//#include "_hypre_utilities.h"
 
 // Potentially architecture specific features used here:
 // __sync_val_compare_and_swap

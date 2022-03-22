@@ -71,7 +71,7 @@ struct hypre_device_allocator
  *                          cuda includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -130,13 +130,13 @@ struct hypre_device_allocator
 #include <oneapi/mkl/rng.hpp>
 #endif
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif // defined(HYPRE_USING_CUDA)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
    if (cudaSuccess != err) {                                                                 \
@@ -196,7 +196,7 @@ struct hypre_device_allocator
    }                                                                                         \
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#endif // defined(HYPRE_USING_CUDA)
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -241,7 +241,7 @@ struct hypre_device_allocator
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 // HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
 #define HYPRE_WARP_SIZE       32
 #define HYPRE_WARP_BITSHIFT   5
 #elif defined(HYPRE_USING_HIP)
@@ -284,12 +284,14 @@ struct hypre_DeviceData
    rocsparse_handle                  cusparse_handle;
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA_STREAMS)
+#if defined(HYPRE_USING_CUDA)
    cudaStream_t                      streams[HYPRE_MAX_NUM_STREAMS];
 #elif defined(HYPRE_USING_HIP)
    hipStream_t                       streams[HYPRE_MAX_NUM_STREAMS];
 #elif defined(HYPRE_USING_SYCL)
    sycl::queue*                      streams[HYPRE_MAX_NUM_STREAMS] = {NULL};
+#endif
 #endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
@@ -377,7 +379,7 @@ cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
 cudaStream_t        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 cudaStream_t        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_HIP)
@@ -503,7 +505,7 @@ using namespace thrust::placeholders;
    }                                                                                                                          \
    else                                                                                                                       \
    {                                                                                                                          \
-      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__); \
+      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__);     \
       GPU_LAUNCH_SYNC;                                                                                                        \
    }                                                                                                                          \
 }

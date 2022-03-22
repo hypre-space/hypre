@@ -17,7 +17,6 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
-#include "_hypre_utilities.hpp"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
@@ -299,10 +298,12 @@ main( hypre_int argc,
    hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
                             mempool_max_bin, mempool_max_cached_bytes );
 
-   hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
+   HYPRE_SetMemoryLocation(memory_location);
+
+   HYPRE_SetExecutionPolicy(default_exec_policy);
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
+   ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
 #endif
 
 
@@ -572,7 +573,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       // Setup main solver
@@ -588,7 +589,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       time_index = hypre_InitializeTiming("FlexGMRES Solve");
@@ -605,7 +606,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      cudaDeviceSynchronize();
+      hypre_SyncCudaDevice(hypre_handle());
 #endif
 
       if (print_system)
@@ -660,34 +661,36 @@ main( hypre_int argc,
       // Test building MGR interpolation on device
       comm = hypre_ParCSRMatrixComm(parcsr_A);
       hypre_ParCSRMatrix *P = NULL;
-      HYPRE_Int *dof_func_buff = NULL;
+      hypre_IntArray *dof_func_buff = NULL;
       HYPRE_BigInt *coarse_pnts_global = NULL;
       HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(parcsr_A));
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(parcsr_A) );
 
-      HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
+      hypre_IntArray *CF_marker = hypre_IntArrayCreate(nloc);
+      hypre_IntArrayInitialize_v2(CF_marker, HYPRE_MEMORY_HOST);
+
       for (i = 0; i < nloc; i++)
       {
          if (i % 3 == 0)
          {
-            CF_marker[i] = 1;
+            hypre_IntArrayData(CF_marker)[i] = 1;
          }
          else
          {
-            CF_marker[i] = -1;
+            hypre_IntArrayData(CF_marker)[i] = -1;
          }
       }
 
       hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker, &dof_func_buff, &coarse_pnts_global);
       if (exec == HYPRE_EXEC_HOST)
       {
-         hypre_MGRBuildP(parcsr_A, CF_marker, coarse_pnts_global, 2, 0, &P);
+         hypre_MGRBuildP(parcsr_A, hypre_IntArrayData(CF_marker), coarse_pnts_global, 2, 0, &P);
          hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P_host");
       }
 #if defined(HYPRE_USING_CUDA)
       else
       {
-         hypre_MGRBuildPDevice(parcsr_A, CF_marker, coarse_pnts_global, 2, &P);
+         hypre_MGRBuildPDevice(parcsr_A, hypre_IntArrayData(CF_marker), coarse_pnts_global, 2, &P);
          hypre_ParCSRMatrixMigrate(P, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P_device");
       }
@@ -719,7 +722,7 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   cudaDeviceReset();
+   hypre_ResetCudaDevice(hypre_handle());
 #endif
 
    return (0);
