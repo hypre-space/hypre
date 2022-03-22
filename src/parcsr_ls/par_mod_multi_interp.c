@@ -125,7 +125,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    /* reverse of pass_order, keeps track where original numbers go */
    points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    /* contains row numbers of remaining points, auxiliary */
-   pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
+   pass_starts = hypre_CTAlloc(HYPRE_Int, 11, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
 
    P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
