@@ -217,6 +217,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       total_global_cpts = num_cpts_global[1];
    }
 
+   if (!total_global_cpts)
+   {
+      *P_ptr = NULL;
+      return hypre_error_flag;
+   }
+
    hypre_BoomerAMGMakeSocFromSDevice(A, S);
 
    /* Generate pass marker array */
@@ -266,7 +272,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                       HYPRE_Int(0) );
 
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
-   pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
+   pass_starts = hypre_CTAlloc(HYPRE_Int, 11, HYPRE_MEMORY_HOST);
    /* first pass is C */
    pass_starts[0] = 0;
    pass_starts[1] = cnt;
