@@ -2647,7 +2647,6 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    {
       HYPRE_Int rescale = 1; // rescale P
       HYPRE_Int nrm_type = 0; // Use infty-norm of row to perform treshold dropping
-      /* hypre_printf("WM: debug - calling hypre_ParCSRMatrixTruncate() with %f, %d, %d, %d\n", trunc_factor, max_elmts, rescale, nrm_type); */
       return hypre_ParCSRMatrixTruncate(P, trunc_factor, max_elmts, rescale, nrm_type);
    }
 }

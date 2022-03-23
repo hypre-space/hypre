@@ -913,8 +913,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                             HYPRE_Int              debug_flag,
                             hypre_IntArray       **CF_marker_ptr)
 {
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenRuge()\n"); */
-   /* hypre_printf("WM: debug - A = %p, S = %p\n", A, S); */
    MPI_Comm                comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg    *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
@@ -1035,14 +1033,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-      /* hypre_printf("WM: debug - using comm pkg of A\n"); */
       use_commpkg_A = 1;
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    if (!comm_pkg)
    {
-      /* hypre_printf("WM: debug - creating comm pkg of A\n"); */
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
@@ -1063,7 +1059,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    hypre_CSRMatrixI(ST) = ST_i;
    hypre_CSRMatrixJ(ST) = ST_j;
 
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenRuge() 1\n"); */
    /*----------------------------------------------------------
     * generate transpose of S, ST
     *----------------------------------------------------------*/
@@ -1095,7 +1090,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    }
    ST_i[0] = 0;
 
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenRuge() 2\n"); */
    /*----------------------------------------------------------
     * Compute the measures
     *
@@ -1129,11 +1123,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       if (use_commpkg_A)
       {
-         /* hypre_printf("WM: debug - calling hypre_ParCSRMatrixExtractBExt(S, A, 0)\n"); */
-         /* hypre_ParCSRMatrixPrint(S, "S"); */
-         /* hypre_ParCSRMatrixPrint(A, "A"); */
          S_ext      = hypre_ParCSRMatrixExtractBExt(S, A, 0);
-         /* hypre_printf("WM: debug - finished hypre_ParCSRMatrixExtractBExt(S, A, 0)\n"); */
       }
       else
       {
@@ -1158,7 +1148,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       }
    }
 
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenRuge() 3\n"); */
    /*---------------------------------------------------
     * Loop until all points are either fine or coarse.
     *---------------------------------------------------*/
@@ -1273,7 +1262,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       }
    }
 
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenRuge() 4\n"); */
    /****************************************************************
     *
     *  Main loop of Ruge-Stueben first coloring pass.

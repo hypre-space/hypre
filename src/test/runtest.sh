@@ -316,7 +316,7 @@ function ExecuteJobs
             OutFile=`echo $OutFile | sed -e 's/ //g'`               # remove extra space
             ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`  # set error file
             RunName=`echo $OutFile | sed -e 's/\.out.*$//'`   # set test run name
-            CheckPath $RunCmd               # check path to executable
+            # CheckPath $RunCmd               # check path to executable
             if [ "$?" -gt 0 ] ; then
                cat >> $RunName.err <<- EOF
 Executable doesn't exist command:

@@ -240,7 +240,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
 {
    HYPRE_Int my_id;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
-   /* hypre_printf("WM: debug - rank %d, inside hypre_ConcatDiagOffdAndExtDevice()\n", my_id); */
    MPI_Barrier(MPI_COMM_WORLD);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
@@ -251,17 +250,14 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    hypre_CSRMatrixSplitDevice(E, hypre_ParCSRMatrixFirstColDiag(A), hypre_ParCSRMatrixLastColDiag(A),
                               hypre_CSRMatrixNumCols(A_offd), hypre_ParCSRMatrixDeviceColMapOffd(A),
                               &cols_offd_map, &num_cols_offd, &cols_map_offd, &E_diag, &E_offd);
-   /* hypre_printf("WM: debug - rank %d, inside hypre_ConcatDiagOffdAndExtDevice() 1\n", my_id); */
    MPI_Barrier(MPI_COMM_WORLD);
 
    B = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(E),
                              hypre_ParCSRMatrixNumCols(A) + num_cols_offd,
                              hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd) +
                              hypre_CSRMatrixNumNonzeros(E));
-   /* hypre_printf("WM: debug - rank %d, inside hypre_ConcatDiagOffdAndExtDevice() 2\n", my_id); */
    MPI_Barrier(MPI_COMM_WORLD);
    hypre_CSRMatrixInitialize_v2(B, 0, HYPRE_MEMORY_DEVICE);
-   /* hypre_printf("WM: debug - rank %d, inside hypre_ConcatDiagOffdAndExtDevice() 3\n", my_id); */
    MPI_Barrier(MPI_COMM_WORLD);
 
    hypreDevice_GetRowNnz(hypre_ParCSRMatrixNumRows(A), NULL, hypre_CSRMatrixI(A_diag),
@@ -391,7 +387,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    *num_cols_offd_ptr = num_cols_offd;
    *cols_map_offd_ptr = cols_map_offd;
 
-   /* hypre_printf("WM: debug - rank %d, finished hypre_ConcatDiagOffdAndExtDevice()\n", my_id); */
    return hypre_error_flag;
 }
 /* WM: Q - necessary to keep the implementation below? */

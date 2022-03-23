@@ -984,7 +984,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                if (!useSabs)
                {
-                  /* hypre_printf("WM: debug - creating S\n"); */
                   hypre_BoomerAMGCreateS(A_array[level], strong_threshold, max_row_sum,
                                          num_functions, dof_func_data, &S);
                }
@@ -1065,7 +1064,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**** Do the appropriate coarsening ****/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarsening");
-         /* hypre_printf("WM: debug - coarsening\n"); */
 
          if (nodal == 0) /* no nodal coarsening */
          {
@@ -1556,7 +1554,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-         /* hypre_printf("WM: debug - interpolation\n"); */
 
          if (level < agg_num_levels)
          {
@@ -1564,7 +1561,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                if (agg_interp_type == 1)
                {
-                  /* hypre_printf("WM: debug - calling hypre_BoomerAMGBuildExtPIInterp()\n"); */
                   hypre_BoomerAMGBuildExtPIInterp(A_array[level],
                                                   CF_marker, S, coarse_pnts_global1,
                                                   num_functions, dof_func_data, debug_flag,
@@ -1659,7 +1655,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                              &coarse_dof_func, coarse_pnts_global);
                   if (agg_interp_type == 1 || agg_interp_type == 6 )
                   {
-                     /* hypre_printf("WM: debug - calling hypre_BoomerAMGBuildPartialExtPIInterp()\n"); */
                      hypre_BoomerAMGBuildPartialExtPIInterp(A_array[level],
                                                             CF_marker, S, coarse_pnts_global,
                                                             coarse_pnts_global1, num_functions,
@@ -1704,8 +1699,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if (hypre_ParAMGDataModularizedMatMat(amg_data))
                   {
                      P = hypre_ParCSRMatMat(P1, P2);
-                     /* WM: debug */
-                     /* hypre_ParCSRMatrixPrint(P, "P_after_matmat"); */
                   }
                   else
                   {
@@ -1713,8 +1706,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   }
 
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor, agg_P_max_elmts);
-                     /* WM: debug */
-                     /* hypre_ParCSRMatrixPrint(P, "P_after_trunc"); */
 
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
@@ -2582,7 +2573,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-         /* hypre_printf("WM: debug - rap\n"); */
             if (ns == 1)
             {
                hypre_ParCSRMatrix *Q = NULL;
@@ -2782,7 +2772,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
 
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-         /* hypre_printf("WM: debug - rap\n"); */
       if (debug_flag == 1) { wall_time = time_getWallclockSeconds(); }
 
       if (block_mode)
@@ -2962,7 +2951,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }  /* end of coarsening loop: while (not_finished_coarsening) */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
-         /* hypre_printf("WM: debug - coarsesolve\n"); */
 
    /* redundant coarse grid solve */
    if ((seq_threshold >= coarse_threshold) &&
@@ -3101,7 +3089,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-         /* hypre_printf("WM: debug - relaxation\n"); */
 
       if (j < num_levels - 1 &&
           (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
@@ -3157,7 +3144,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-         /* hypre_printf("WM: debug - relaxation\n"); */
 
          hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
 
@@ -3176,7 +3162,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-         /* hypre_printf("WM: debug - relaxation\n"); */
 
       if (j < num_levels - 1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 ||
                                  grid_relax_type[1] == 14 ||
@@ -3227,7 +3212,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-         /* hypre_printf("WM: debug - relaxation\n"); */
 
       if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 &&
                                                                  j == (num_levels - 1)))
