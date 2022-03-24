@@ -143,6 +143,11 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
          fine_to_coarse[i] = cnt;
          pass_order[cnt++] = i;
       }
+      else if (CF_marker[i] == -3)
+      {
+         P_diag_i[i + 1] = 1;
+         P_offd_i[i + 1] = 0;
+      }
       else
       {
          points_left[remaining++] = i;
