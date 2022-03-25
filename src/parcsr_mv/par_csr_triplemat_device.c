@@ -553,13 +553,6 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                           hypre_ParCSRMatrix  *B )
 {
-   /* WM: debug */
-   hypre_printf("WM: debug - print P's\n");
-   /* hypre_ParCSRMatrixPrint(A, "P1"); */
-   /* hypre_ParCSRMatrixPrint(B, "P2"); */
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
-   hypre_printf("WM: debug - rank %d, inside hypre_ParCSRMatMatDevice()\n", my_id);
    hypre_ParCSRMatrix *C;
    hypre_CSRMatrix    *C_diag;
    hypre_CSRMatrix    *C_offd;
@@ -745,8 +738,6 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
-   hypre_printf("WM: debug - rank %d, finished hypre_ParCSRMatMatDevice()\n", my_id);
-   /* hypre_ParCSRMatrixPrint(C, "P"); */
    return C;
 }
 
@@ -769,7 +760,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
    HYPRE_Int my_id;
    hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
-   hypre_printf("WM: debug - rank %d, inside hypre_ParCSRTMatMatKTDevice()\n", my_id);
 
    if (hypre_ParCSRMatrixGlobalNumRows(A) != hypre_ParCSRMatrixGlobalNumRows(B) ||
        hypre_ParCSRMatrixNumRows(A)       != hypre_ParCSRMatrixNumRows(B))
@@ -1141,7 +1131,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    hypre_SyncComputeStream(hypre_handle());
 
-   hypre_printf("WM: debug - rank %d, finished hypre_ParCSRTMatMatKTDevice()\n", my_id);
    return C;
 }
 
@@ -1167,7 +1156,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
    HYPRE_Int my_id;
    hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
-   hypre_printf("WM: debug - rank %d, inside hypre_ParCSRMatrixRAPKTDevice()\n", my_id);
 
    if ( hypre_ParCSRMatrixGlobalNumRows(R) != hypre_ParCSRMatrixGlobalNumRows(A) ||
         hypre_ParCSRMatrixGlobalNumCols(A) != hypre_ParCSRMatrixGlobalNumRows(P) )
@@ -1555,14 +1543,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_SyncComputeStream(hypre_handle());
 
-   /* hypre_printf("WM: debug - rank %d, finished hypre_ParCSRMatrixRAPKTDevice()\n", my_id); */
-   /* hypre_MatvecCommPkgCreate(C); */
-   /* hypre_ParCSRMatrixPrint(C, "C"); */
-   /* char my_filename[256]; */
-   /* hypre_sprintf(my_filename, "commPkg%d", my_id); */
-   /* hypre_ParCSRCommPkgPrint(hypre_ParCSRMatrixCommPkg(C), my_filename); */
-   /* hypre_MPI_Finalize(); */
-   /* exit(0); */
    return C;
 }
 
