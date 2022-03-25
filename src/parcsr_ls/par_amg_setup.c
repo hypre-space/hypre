@@ -1555,6 +1555,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
 
+         hypre_printf("WM: debug - agg_num_levels = %d, nodal = %d\n", agg_num_levels, nodal);
          if (level < agg_num_levels)
          {
             if (nodal == 0)

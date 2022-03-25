@@ -703,10 +703,11 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
 
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
+         /* WM: If statement was in the wrong place? Need all procs to participate in comm above */
          if (n)
          {
-            A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-            f_vector = hypre_ParVectorToVectorAll(f);
             A_CSR_i = hypre_CSRMatrixI(A_CSR);
             A_CSR_j = hypre_CSRMatrixJ(A_CSR);
             A_CSR_data = hypre_CSRMatrixData(A_CSR);

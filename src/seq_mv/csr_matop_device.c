@@ -563,9 +563,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                          col_map_offd_C,
                          col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-      HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique,
-                                                 col_map_offd_C,
-                                                 col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+      new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                   col_map_offd_C,
+                                   col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
    }
 #else
    HYPRE_THRUST_CALL( sort,
