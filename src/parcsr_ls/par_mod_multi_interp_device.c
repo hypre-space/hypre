@@ -898,6 +898,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                          S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                          P_diag_i, P_offd_i );
 
+      hypre_Memset(P_diag_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+      hypre_Memset(P_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
                          thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ) + num_points + 1,
@@ -1148,6 +1151,9 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                          num_points, color, pass_order, pass_marker, pass_marker_offd,
                          S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                          Q_diag_i, Q_offd_i );
+
+      hypre_Memset(Q_diag_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+      hypre_Memset(Q_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(Q_diag_i, Q_offd_i) ),

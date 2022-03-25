@@ -1061,8 +1061,6 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMatrixRead
- *
- * TODO: Add GPU support
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1082,6 +1080,9 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_Int               nvars;
    HYPRE_Int               data_size;
    HYPRE_IJMatrix          umatrix;
+   HYPRE_IJMatrix          h_umatrix;
+   hypre_ParCSRMatrix     *h_parmatrix;
+   hypre_ParCSRMatrix     *parmatrix = NULL;
 
    /* Local variables */
    FILE                   *file;
@@ -1090,11 +1091,6 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_Int               p, v, i, j, vi, vj;
    HYPRE_Int               symmetric;
    HYPRE_Int               num_symm_calls;
-   HYPRE_Int               ret;
-   HYPRE_Int               ncols;
-   HYPRE_BigInt            row, col;
-   HYPRE_Complex           value;
-   HYPRE_BigInt            ilower, iupper, jlower, jupper;
    char                    new_filename[255];
 
    hypre_MPI_Comm_rank(comm, &myid);
@@ -1197,37 +1193,31 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
     * Read U-Matrix
     *-----------------------------------------------------------*/
 
-   hypre_sprintf(new_filename, "%s.UMatrix.%05d", filename, myid);
-   if ((file = fopen(new_filename, "r")) == NULL)
-   {
-      hypre_printf("Error: can't open input file %s\n", new_filename);
-      hypre_error_in_arg(2);
+   /* Read unstructured matrix from file using host memory */
+   hypre_sprintf(new_filename, "%s.UMatrix", filename);
+   HYPRE_IJMatrixRead(new_filename, comm, HYPRE_PARCSR, &h_umatrix);
+   h_parmatrix = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(h_umatrix);
 
-      return hypre_error_flag;
+   /* Move ParCSRMatrix to device memory if necessary */
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      parmatrix = h_parmatrix;
+      hypre_IJMatrixObject(h_umatrix) = NULL;
    }
 
-   hypre_fscanf(file, "%b %b %b %b", &ilower, &iupper, &jlower, &jupper);
-   ncols = 1;
+   /* Free memory */
+   HYPRE_IJMatrixDestroy(h_umatrix);
+
+   /* Update the umatrix with contents read from file,
+      which now live on the correct memory location */
    umatrix = hypre_SStructMatrixIJMatrix(matrix);
-   while ((ret = hypre_fscanf(file, "%b %b%*[ \t]%le", &row, &col, &value)) != EOF)
-   {
-      if (ret != 3)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in IJ matrix input file.");
-
-         return hypre_error_flag;
-      }
-
-      if (row < ilower || row > iupper)
-      {
-         HYPRE_IJMatrixAddToValues(umatrix, 1, &ncols, &row, &col, &value);
-      }
-      else
-      {
-         HYPRE_IJMatrixSetValues(umatrix, 1, &ncols, &row, &col, &value);
-      }
-   }
-   fclose(file);
+   hypre_IJMatrixDestroyParCSR(umatrix);
+   hypre_IJMatrixObject(umatrix) = (void*) parmatrix;
+   hypre_IJMatrixAssembleFlag(umatrix) = 1;
 
    /* Assemble SStructMatrix */
    HYPRE_SStructMatrixAssemble(matrix);
