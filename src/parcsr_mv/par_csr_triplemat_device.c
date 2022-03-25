@@ -8,6 +8,8 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
+#define PARCSRGEMM_TIMING 2
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* option == 1, T = HYPRE_BigInt
@@ -65,7 +67,8 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt       *col_map_offd_C = NULL;
 
    HYPRE_Int num_procs;
-   hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    if ( hypre_ParCSRMatrixGlobalNumCols(A) != hypre_ParCSRMatrixGlobalNumRows(B) ||
         hypre_ParCSRMatrixNumCols(A)       != hypre_ParCSRMatrixNumRows(B) )
@@ -74,6 +77,15 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       hypre_printf(" Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
+
+#if PARCSRGEMM_TIMING > 0
+   HYPRE_Real ta, tb;
+   ta = hypre_MPI_Wtime();
+#endif
+
+#if PARCSRGEMM_TIMING > 1
+   HYPRE_Real t1, t2;
+#endif
 
    /*-----------------------------------------------------------------------
     *  Extract B_ext, i.e. portion of B that is stored on neighbor procs
@@ -88,15 +100,49 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
        * equally load balanced partitionings within
        * hypre_ParCSRMatrixExtractBExt
        *--------------------------------------------------------------------*/
+
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       /* contains communication which should be explicitly included to allow for overlap */
       hypre_ParCSRMatrixExtractBExtDeviceInit(B, A, 1, &request);
+#if PARCSRGEMM_TIMING > 1
+      t2 = hypre_MPI_Wtime();
+#endif
       Abar = hypre_ConcatDiagAndOffdDevice(A);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t2;
+      hypre_ParPrintf(comm, "Time Concat %f\n", t2);
+#endif
       Bext = hypre_ParCSRMatrixExtractBExtDeviceWait(request);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1 - t2;
+      hypre_ParPrintf(comm, "Time Bext %f\n", t2);
+      hypre_ParPrintf(comm, "Size Bext %d %d %d\n", hypre_CSRMatrixNumRows(Bext), hypre_CSRMatrixNumCols(Bext), hypre_CSRMatrixNumNonzeros(Bext));
+#endif
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       hypre_ConcatDiagOffdAndExtDevice(B, Bext, &Bbar, &num_cols_offd_C, &col_map_offd_C);
       hypre_CSRMatrixDestroy(Bext);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Concat %f\n", t2);
+#endif
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       Cbar = hypre_CSRMatrixMultiplyDevice(Abar, Bbar);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
+#endif
 
       hypre_CSRMatrixDestroy(Abar);
       hypre_CSRMatrixDestroy(Bbar);
@@ -105,6 +151,9 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       hypre_assert(hypre_CSRMatrixNumCols(Cbar) == hypre_ParCSRMatrixNumCols(B) + num_cols_offd_C);
 
       // split into diag and offd
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 hypre_CSRMatrixJ(Cbar),
@@ -165,10 +214,23 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 
       hypre_TFree(Cbar_ii, HYPRE_MEMORY_DEVICE);
       hypre_CSRMatrixDestroy(Cbar);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Split %f\n", t2);
+#endif
    }
    else
    {
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       C_diag = hypre_CSRMatrixMultiplyDevice(hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B));
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
+#endif
       C_offd = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumRows(A), 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
    }
@@ -197,6 +259,12 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
+#if PARCSRGEMM_TIMING > 0
+   hypre_ForceSyncComputeStream(hypre_handle());
+   tb = hypre_MPI_Wtime() - ta;
+   hypre_ParPrintf(comm, "Time hypre_ParCSRMatMatDevice %f\n", tb);
+#endif
+
    return C;
 }
 
@@ -216,9 +284,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    HYPRE_BigInt       *col_map_offd_C = NULL;
 
    HYPRE_Int num_procs;
-   hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   //HYPRE_Int my_id;
-   //hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    if (hypre_ParCSRMatrixGlobalNumRows(A) != hypre_ParCSRMatrixGlobalNumRows(B) ||
        hypre_ParCSRMatrixNumRows(A)       != hypre_ParCSRMatrixNumRows(B))
@@ -227,6 +294,15 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       return NULL;
    }
 
+#if PARCSRGEMM_TIMING > 0
+   HYPRE_Real ta, tb;
+   ta = hypre_MPI_Wtime();
+#endif
+
+#if PARCSRGEMM_TIMING > 1
+   HYPRE_Real t1, t2;
+#endif
+
    if (num_procs > 1)
    {
       void *request;
@@ -234,11 +310,36 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrix *B_offd = hypre_ParCSRMatrixOffd(B);
       HYPRE_Int local_nnz_Cbar;
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       Bbar = hypre_ConcatDiagAndOffdDevice(B);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Concat %f\n", t2);
+#endif
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       hypre_CSRMatrixTranspose(A_diag, &AT_diag, 1);
       hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Transpose %f\n", t2);
+#endif
+
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       AbarT = hypre_CSRMatrixStack2Device(AT_diag, AT_offd);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Stack %f\n", t2);
+#endif
 
       if (keep_transpose)
       {
@@ -251,7 +352,16 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
          hypre_CSRMatrixDestroy(AT_offd);
       }
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       Cbar = hypre_CSRMatrixMultiplyDevice(AbarT, Bbar);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
+#endif
+
 
       hypre_CSRMatrixDestroy(AbarT);
       hypre_CSRMatrixDestroy(Bbar);
@@ -261,6 +371,9 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_assert(hypre_CSRMatrixNumCols(Cbar) == hypre_ParCSRMatrixNumCols(B) + hypre_CSRMatrixNumCols(
                       B_offd));
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       hypre_TMemcpy(&local_nnz_Cbar, hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(A), HYPRE_Int, 1,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
@@ -297,6 +410,15 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
       hypre_CSRMatrixData(Cint) = hypre_CSRMatrixData(Cbar) + local_nnz_Cbar;
 
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Cint %f\n", t2);
+#endif
+
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       hypre_ExchangeExternalRowsDeviceInit(Cint, hypre_ParCSRMatrixCommPkg(A), 1, &request);
       Cext = hypre_ExchangeExternalRowsDeviceWait(request);
 
@@ -305,7 +427,16 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
       hypre_TMemcpy(hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(A), &local_nnz_Cbar, HYPRE_Int, 1,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Cext %f\n", t2);
+      hypre_ParPrintf(comm, "Size Cext %d %d %d\n", hypre_CSRMatrixNumRows(Cext), hypre_CSRMatrixNumCols(Cext), hypre_CSRMatrixNumNonzeros(Cext));
+#endif
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       // to hold Cbar local and Cext
       HYPRE_Int      tmp_s = local_nnz_Cbar + hypre_CSRMatrixNumNonzeros(Cext);
       HYPRE_Int     *tmp_i = hypre_TAlloc(HYPRE_Int,     tmp_s, HYPRE_MEMORY_DEVICE);
@@ -388,6 +519,15 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(Cbar);
       hypre_TFree(offd_map_to_C, HYPRE_MEMORY_DEVICE);
 
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time PartialAdd1 %f\n", t2);
+#endif
+
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       // add Cext to Cbar local. Note: type 2, diagonal entries are put at the first in the rows
       hypreDevice_StableSortByTupleKey(tmp_s, tmp_i, tmp_j, tmp_a, 2);
 
@@ -401,7 +541,15 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(tmp_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
       hypre_TFree(tmp_a, HYPRE_MEMORY_DEVICE);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time PartialAdd2 %f\n", t2);
+#endif
 
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
 
@@ -455,13 +603,34 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(zmp_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_j, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_a, HYPRE_MEMORY_DEVICE);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Split %f\n", t2);
+#endif
    }
    else
    {
       hypre_CSRMatrix *AT_diag;
       hypre_CSRMatrix *B_diag = hypre_ParCSRMatrixDiag(B);
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       hypre_CSRMatrixTransposeDevice(A_diag, &AT_diag, 1);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time Transpose %f\n", t2);
+#endif
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       C_diag = hypre_CSRMatrixMultiplyDevice(AT_diag, B_diag);
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time SpGemm %f\n", t2);
+#endif
       C_offd = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumCols(A), 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
       if (keep_transpose)
@@ -504,6 +673,12 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    hypre_SyncComputeStream(hypre_handle());
 
+#if PARCSRGEMM_TIMING > 0
+   hypre_ForceSyncComputeStream(hypre_handle());
+   tb = hypre_MPI_Wtime() - ta;
+   hypre_ParPrintf(comm, "Time hypre_ParCSRTMatMatKTDevice %f\n", tb);
+#endif
+
    return C;
 }
 
@@ -525,9 +700,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    HYPRE_BigInt       *col_map_offd_C = NULL;
 
    HYPRE_Int num_procs;
-   hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   //HYPRE_Int my_id;
-   //hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    if ( hypre_ParCSRMatrixGlobalNumRows(R) != hypre_ParCSRMatrixGlobalNumRows(A) ||
         hypre_ParCSRMatrixGlobalNumCols(A) != hypre_ParCSRMatrixGlobalNumRows(P) )
