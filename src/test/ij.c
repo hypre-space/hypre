@@ -282,10 +282,10 @@ main( hypre_int argc,
    keepTranspose = 1;
    coarsen_type  = 8;
    mod_rap2      = 1;
-   HYPRE_Int spgemm_use_cusparse = 0;
+   HYPRE_Int spgemm_use_vendor = 0;
    HYPRE_Int use_curand = 1;
 #if defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-   spgemm_use_cusparse = 1;
+   spgemm_use_vendor = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
    HYPRE_Int  spgemm_rowest_mtd = 3;
@@ -1180,10 +1180,10 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
-      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
-         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_alg") == 0 )
       {
@@ -2306,8 +2306,8 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-   /* use cuSPARSE for SpGEMM */
-   ierr = HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse); hypre_assert(ierr == 0);
+   /* use vendor implementation for SpGEMM */
+   ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0);

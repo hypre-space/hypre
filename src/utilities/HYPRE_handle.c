@@ -14,20 +14,20 @@
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetSpGemmUseCusparse
+ * HYPRE_SetSpGemmUseVendor
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SetSpGemmUseCusparse( HYPRE_Int use_cusparse )
+HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 {
-   return hypre_SetSpGemmUseCusparse(use_cusparse);
+   return hypre_SetSpGemmUseVendor(use_vendor);
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_SetUseGpuRand
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SetUseGpuRand( HYPRE_Int use_curand )
+HYPRE_SetUseGpuRand( HYPRE_Int use_gpu_rand )
 {
-   return hypre_SetUseGpuRand(use_curand);
+   return hypre_SetUseGpuRand(use_gpu_rand);
 }
 

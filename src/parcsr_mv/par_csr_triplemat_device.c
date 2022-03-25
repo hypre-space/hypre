@@ -268,8 +268,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int num_procs;
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
    if (hypre_ParCSRMatrixGlobalNumRows(A) != hypre_ParCSRMatrixGlobalNumRows(B) ||
        hypre_ParCSRMatrixNumRows(A)       != hypre_ParCSRMatrixNumRows(B))
@@ -651,8 +649,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                hypre_ParCSRMatrix *P,
                                HYPRE_Int           keep_transpose )
 {
-   /* hypre_ParCSRMatrixPrint(P, "P"); */
-   /* hypre_ParCSRMatrixPrint(A, "A"); */
    hypre_CSRMatrix *R_diag = hypre_ParCSRMatrixDiag(R);
    hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(R);
 
@@ -664,8 +660,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    HYPRE_Int num_procs;
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
    if ( hypre_ParCSRMatrixGlobalNumRows(R) != hypre_ParCSRMatrixGlobalNumRows(A) ||
         hypre_ParCSRMatrixGlobalNumCols(A) != hypre_ParCSRMatrixGlobalNumRows(P) )
