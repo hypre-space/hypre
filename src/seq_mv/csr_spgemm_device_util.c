@@ -102,6 +102,7 @@ hypre_SpGemmCreateGlobalHashTable( HYPRE_Int       num_rows,        /* number of
    if (type == 1)
    {
       ghash_i = hypre_TAlloc(HYPRE_Int, num_ghash + 1, HYPRE_MEMORY_DEVICE);
+      hypre_Memset(ghash_i + num_ghash, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_ghash, "thread", bDim);
       HYPRE_GPU_LAUNCH( hypre_SpGemmGhashSize1, gDim, bDim,
                         num_rows, row_id, num_ghash, row_sizes, ghash_i, SHMEM_HASH_SIZE );

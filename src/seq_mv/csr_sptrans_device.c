@@ -64,13 +64,24 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
    hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 #else
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
                                          m, n, nnzA,
                                          d_aa, d_ia, d_ja,
                                          csc_a, csc_j, csc_i,
                                          action,
                                          CUSPARSE_INDEX_BASE_ZERO) );
+#elif defined(HYPRE_SINGLE)
+   HYPRE_CUSPARSE_CALL( cusparseScsr2csc(handle,
+                                         m, n, nnzA,
+                                         d_aa, d_ia, d_ja,
+                                         csc_a, csc_j, csc_i,
+                                         action,
+                                         CUSPARSE_INDEX_BASE_ZERO) );
 #endif
+#endif /* #if !defined(HYPRE_COMPLEX) */
+#endif /* #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION */
 
    *d_ic_out = csc_i;
    *d_jc_out = csc_j;
@@ -124,6 +135,8 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
    void * buffer;
    buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
 
+#if !defined(HYPRE_COMPLEX)
+#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
    HYPRE_ROCSPARSE_CALL( rocsparse_dcsr2csc(handle,
                                             m, n, nnzA,
                                             d_aa, d_ia, d_ja,
@@ -131,6 +144,17 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
                                             action,
                                             rocsparse_index_base_zero,
                                             buffer) );
+#elif defined(HYPRE_SINGLE)
+   HYPRE_ROCSPARSE_CALL( rocsparse_scsr2csc(handle,
+                                            m, n, nnzA,
+                                            d_aa, d_ia, d_ja,
+                                            csc_a, csc_j, csc_i,
+                                            action,
+                                            rocsparse_index_base_zero,
+                                            buffer) );
+#endif
+#endif /* #if !defined(HYPRE_COMPLEX) */
+
    hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = csc_i;

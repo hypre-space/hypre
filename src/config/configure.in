@@ -105,7 +105,7 @@ AC_SUBST(HYPRE_BUGS)
 
 AC_SUBST(HYPRE_SRCDIR)
 
-AC_CHECK_FILE([$HYPRE_SRCDIR/../.git],
+AS_IF([test -d "$HYPRE_SRCDIR/../.git"],
   [
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
@@ -2311,7 +2311,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
         dnl plus flags for debugging symbols
         AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
+              [HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"],
               [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
 
 

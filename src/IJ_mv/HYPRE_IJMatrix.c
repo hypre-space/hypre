@@ -258,7 +258,7 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
       {
          HYPRE_Int  i, n = hypre_min((j + bsize), nvals);
 
-         sums[0] = 0;
+         sums[j] = 0;
          for (i = j + 1; i < n; i++)
          {
             sums[i] = sums[i - 1] + vals[i - 1];

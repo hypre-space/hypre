@@ -53,7 +53,6 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *Dbeta_offd, *rsWA, *rsW;
    hypre_ParCSRMatrix *As_F2F, *As_FC, *W, *P;
 
@@ -62,11 +61,6 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_HOST);
-
-   //TODO use CF_marker_dev
    /* As_F2F = As_{F2, F}, As_FC = As_{F, C2} */
    hypre_ParCSRMatrixGenerateFFFC3Device(A, CF_marker, num_cpts_global, S, &As_FC, &As_F2F);
 
@@ -113,7 +107,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
-                     CF_marker_dev,
+                     CF_marker,
                      A_diag_i,
                      A_diag_data,
                      Soc_diag_j,
@@ -127,7 +121,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
-                                               CF_marker_dev,
+                                               CF_marker,
                                                rsW,
                                                equal<HYPRE_Int>(-2) );
 
@@ -138,8 +132,8 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    /* map from F2 to F */
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
-                      thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F,
                       HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
 
@@ -148,7 +142,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
                                            map_to_F + A_nr_local,
-                                           CF_marker_dev,
+                                           CF_marker,
                                            map_F2_to_F,
                                            equal<HYPRE_Int>(-2) );
 
@@ -201,15 +195,13 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
    tmp_end = HYPRE_THRUST_CALL( copy_if,
-                                CF_marker_dev,
-                                CF_marker_dev + A_nr_local,
-                                CF_marker_dev,
+                                CF_marker,
+                                CF_marker + A_nr_local,
+                                CF_marker,
                                 C2F2_marker,
                                 out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
 
    hypre_assert(tmp_end - C2F2_marker == P_nr_local);
-
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_extendWtoP( P_nr_local,
                            AF2F_nr_local,
@@ -291,7 +283,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int          *A_offd_i     = hypre_CSRMatrixI(A_offd);
    HYPRE_Int           A_offd_nnz   = hypre_CSRMatrixNumNonzeros(A_offd);
-   HYPRE_Int          *CF_marker_dev;
    HYPRE_Complex      *Dbeta, *rsWA, *rsW, *dlam, *dlam_offd, *dtmp, *dtmp_offd;
    hypre_ParCSRMatrix *As_F2F, *As_FF, *As_FC, *W, *P;
 
@@ -300,11 +291,6 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
 
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker_dev, CF_marker, HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_HOST);
-
-   //TODO use CF_marker_dev
    /* As_F2F = As_{F2, F}, As_FC = As_{F, C2} */
    hypre_ParCSRMatrixGenerateFFFC3Device(A, CF_marker, num_cpts_global, S, &As_FC, &As_F2F);
 
@@ -392,7 +378,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
-                     CF_marker_dev,
+                     CF_marker,
                      A_diag_i,
                      A_diag_data,
                      Soc_diag_j,
@@ -406,7 +392,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
-                                               CF_marker_dev,
+                                               CF_marker,
                                                rsW,
                                                equal<HYPRE_Int>(-2) );
 
@@ -417,8 +403,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* map from F2 to F */
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(CF_marker_dev,              is_negative<HYPRE_Int>()),
-                      thrust::make_transform_iterator(CF_marker_dev + A_nr_local, is_negative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
+                      thrust::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
@@ -426,7 +412,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
                                            map_to_F + A_nr_local,
-                                           CF_marker_dev,
+                                           CF_marker,
                                            map_F2_to_F,
                                            equal<HYPRE_Int>(-2) );
 
@@ -483,15 +469,13 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
    tmp_end = HYPRE_THRUST_CALL( copy_if,
-                                CF_marker_dev,
-                                CF_marker_dev + A_nr_local,
-                                CF_marker_dev,
+                                CF_marker,
+                                CF_marker + A_nr_local,
+                                CF_marker,
                                 C2F2_marker,
                                 out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
 
    hypre_assert(tmp_end - C2F2_marker == P_nr_local);
-
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_extendWtoP( P_nr_local,
                            AF2F_nr_local,

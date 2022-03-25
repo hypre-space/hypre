@@ -53,7 +53,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int               *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_BigInt            *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int                num_variables   = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int                global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt             global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int                num_nonzeros_diag;
    HYPRE_Int                num_nonzeros_offd;
    HYPRE_Int                num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
@@ -158,6 +158,9 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                         num_functions, dof_func, dof_func_offd_dev,
                         S_diag_i, S_offd_i );
    }
+
+   hypre_Memset(S_diag_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+   hypre_Memset(S_offd_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_diag_i);
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_offd_i);

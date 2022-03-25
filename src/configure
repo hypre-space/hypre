@@ -2700,24 +2700,7 @@ _ACEOF
 
 
 
-as_ac_File=`$as_echo "ac_cv_file_$HYPRE_SRCDIR/../.git" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $HYPRE_SRCDIR/../.git" >&5
-$as_echo_n "checking for $HYPRE_SRCDIR/../.git... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$HYPRE_SRCDIR/../.git"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+if test -d "$HYPRE_SRCDIR/../.git"; then :
 
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
@@ -2758,7 +2741,6 @@ else
 $as_echo "$as_me: NOTE: Could not find .git directory" >&6;}
 
 fi
-
 
 PACKAGE_DATE=
 PACKAGE_TIME=
@@ -9236,7 +9218,7 @@ $as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
                                         HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
-  HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
+  HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"
 elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
 
 fi
