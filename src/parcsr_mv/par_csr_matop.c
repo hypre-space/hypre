@@ -4920,6 +4920,7 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
     * the arrays to send and recv: we first send and recv the row lengths */
    send_i = hypre_TAlloc(HYPRE_Int, num_rows_send, HYPRE_MEMORY_HOST);
    recv_i = hypre_CTAlloc(HYPRE_Int, num_rows_recv + 1, HYPRE_MEMORY_HOST);
+   /* fill the send array with row lengths */
    for (i = 0, num_nnz_send = 0; i < num_rows_send; i++)
    {
       /* j: row index to send */
@@ -5057,7 +5058,6 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
    hypre_TFree(send_i, HYPRE_MEMORY_HOST);
    hypre_TFree(send_i_offset, HYPRE_MEMORY_HOST);
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    return hypre_error_flag;
 }
 

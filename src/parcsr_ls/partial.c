@@ -810,7 +810,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_printf("WM: calling hypre_BoomerAMGInterpTruncation()\n");
       hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
