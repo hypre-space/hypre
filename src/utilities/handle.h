@@ -74,7 +74,7 @@ typedef struct
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_DeviceDataStructCommSendBuffer(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_DeviceDataStructCommRecvBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_DeviceDataStructCommSendBufferSize(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleSpgemmUseCusparse(hypre_handle)              hypre_DeviceDataSpgemmUseCusparse(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpMVUseCusparse(hypre_handle)                hypre_DeviceDataSpMVUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseCusparse(hypre_handle)             hypre_DeviceDataSpTransUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))

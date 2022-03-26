@@ -476,7 +476,7 @@ main( hypre_int argc,
    HYPRE_Int           mult_order = 0;
    HYPRE_Int           print_system = 0;
    HYPRE_Int           verify       = 0;
-   HYPRE_Int           use_cusparse = 0;
+   HYPRE_Int           use_vendor = 0;
    HYPRE_Int           spgemm_alg = 1;
    HYPRE_Int           spgemm_alg_binned = 0;
    HYPRE_Int           rowest_mtd = 3;
@@ -618,10 +618,10 @@ main( hypre_int argc,
          arg_index++;
          mult_order = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-vendor") == 0 )
       {
          arg_index++;
-         use_cusparse = atoi(argv[arg_index++]);
+         use_vendor = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemmalg") == 0 )
       {
@@ -733,7 +733,7 @@ main( hypre_int argc,
       errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
       hypre_assert(errcode == 0);
    }
-   errcode = HYPRE_SetSpGemmUseCusparse(use_cusparse);
+   errcode = HYPRE_SetSpGemmUseVendor(use_vendor);
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);

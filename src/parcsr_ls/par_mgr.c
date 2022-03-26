@@ -3206,19 +3206,19 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    /* Interpolation for each level */
    if (interp_type < 3)
    {
-      if (exec == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
+         //hypre_ParCSRMatrixPrintIJ(P_ptr, 0, 0, "P_device");
+      }
+      else
+#endif
       {
          //      hypre_MGRBuildP(A, CF_marker, num_cpts_global, interp_type, debug_flag, &P_ptr);
          hypre_MGRBuildPHost(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
          //hypre_ParCSRMatrixPrintIJ(P_ptr, 0, 0, "P_host");
       }
-#if defined(HYPRE_USING_CUDA)
-      else
-      {
-         hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
-         //hypre_ParCSRMatrixPrintIJ(P_ptr, 0, 0, "P_device");
-      }
-#endif
       /* Could do a few sweeps of Jacobi to further improve Jacobi interpolation P */
       /*
           if(interp_type == 2)
@@ -3233,17 +3233,17 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 4)
    {
-      if (exec == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_NoGPUSupport("interpolation");
+      }
+      else
+#endif
       {
          hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global, debug_flag, &P_ptr);
          hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
       }
-#if defined(HYPRE_USING_CUDA)
-      else
-      {
-         hypre_NoGPUSupport("interpolation");
-      }
-#endif
    }
    /*
      else if (interp_type == 99)
@@ -3322,33 +3322,33 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    /* Restriction for each level */
    if (restrict_type == 0)
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
-         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R_ptr);
          //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_device");
       }
+      else
 #endif
+      {
+         hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
+         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
+      }
    }
    else if (restrict_type == 1 || restrict_type == 2)
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
-         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R_ptr);
          //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_device");
       }
+      else
 #endif
+      {
+         hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
+         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
+      }
    }
    else if (restrict_type == 3)
    {

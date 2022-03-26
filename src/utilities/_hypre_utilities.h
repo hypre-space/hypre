@@ -1351,7 +1351,7 @@ typedef struct
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_DeviceDataStructCommSendBuffer(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_DeviceDataStructCommRecvBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_DeviceDataStructCommSendBufferSize(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleSpgemmUseCusparse(hypre_handle)              hypre_DeviceDataSpgemmUseCusparse(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpMVUseCusparse(hypre_handle)                hypre_DeviceDataSpMVUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseCusparse(hypre_handle)             hypre_DeviceDataSpTransUseCusparse(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
@@ -1759,6 +1759,7 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out,
                                            hypre_UnorderedBigIntMap *inverse_map);
 
+/* device_utils.c */
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
@@ -1816,7 +1817,7 @@ HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetSpMVUseCusparse( HYPRE_Int use_cusparse );
-HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );

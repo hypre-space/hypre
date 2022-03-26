@@ -224,7 +224,7 @@ main( hypre_int argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
 
-   HYPRE_SetSpGemmUseCusparse(0);
+   HYPRE_SetSpGemmUseVendor(0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(1);
 
