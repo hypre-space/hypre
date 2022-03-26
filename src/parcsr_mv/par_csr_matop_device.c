@@ -56,7 +56,7 @@ hypreGPUKernel_ConcatDiagAndOffd(
       k = read_only_load(d_ib + row);
    }
 #if defined(HYPRE_USING_SYCL)
-   /* WM: Q - do I always need a barrier before calling shuffle? */
+   /* WM: NOTE - barriers seem to be required before shuffle to guarantee correct results */
    SG.barrier();
    istart = SG.shuffle(j, 0);
    iend   = SG.shuffle(j, 1);
@@ -145,21 +145,6 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
                      d_ib,
                      d_jb,
                      d_ab );
-   /* HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd, */
-   /*                   gDim, bDim, */
-   /*                   hypre_CSRMatrixNumRows(A_diag), */
-   /*                   hypre_CSRMatrixNumCols(A_diag), */
-   /*                   hypre_CSRMatrixI(A_diag), */
-   /*                   hypre_CSRMatrixJ(A_diag), */
-   /*                   hypre_CSRMatrixData(A_diag), */
-   /*                   hypre_CSRMatrixI(A_offd), */
-   /*                   hypre_CSRMatrixJ(A_offd), */
-   /*                   hypre_CSRMatrixData(A_offd), */
-   /*                   NULL, */
-   /*                   hypre_CSRMatrixI(B), */
-   /*                   hypre_CSRMatrixJ(B), */
-   /*                   hypre_CSRMatrixData(B) ); */
-
 
    return B;
 }
@@ -287,20 +272,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                      d_ib,
                      d_jb,
                      d_ab );
-   /* HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd, */
-   /*                   gDim, bDim, */
-   /*                   hypre_CSRMatrixNumRows(A_diag), */
-   /*                   hypre_CSRMatrixNumCols(A_diag), */
-   /*                   hypre_CSRMatrixI(A_diag), */
-   /*                   hypre_CSRMatrixJ(A_diag), */
-   /*                   hypre_CSRMatrixData(A_diag), */
-   /*                   hypre_CSRMatrixI(A_offd), */
-   /*                   hypre_CSRMatrixJ(A_offd), */
-   /*                   hypre_CSRMatrixData(A_offd), */
-   /*                   cols_offd_map, */
-   /*                   hypre_CSRMatrixI(B), */
-   /*                   hypre_CSRMatrixJ(B), */
-   /*                   hypre_CSRMatrixData(B) ); */
 
    hypre_TFree(cols_offd_map, HYPRE_MEMORY_DEVICE);
 
@@ -359,20 +330,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                      d_ib,
                      d_jb,
                      d_ab );
-   /* HYPRE_GPU_LAUNCH( hypreGPUKernel_ConcatDiagAndOffd, */
-   /*                   gDim, bDim, */
-   /*                   hypre_CSRMatrixNumRows(E_diag), */
-   /*                   hypre_CSRMatrixNumCols(E_diag), */
-   /*                   hypre_CSRMatrixI(E_diag), */
-   /*                   hypre_CSRMatrixJ(E_diag), */
-   /*                   hypre_CSRMatrixData(E_diag), */
-   /*                   hypre_CSRMatrixI(E_offd), */
-   /*                   hypre_CSRMatrixJ(E_offd), */
-   /*                   hypre_CSRMatrixData(E_offd), */
-   /*                   NULL, */
-   /*                   hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A), */
-   /*                   hypre_CSRMatrixJ(B), */
-   /*                   hypre_CSRMatrixData(B) ); */
 
    hypre_CSRMatrixDestroy(E_diag);
    hypre_CSRMatrixDestroy(E_offd);
