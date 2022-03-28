@@ -267,8 +267,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       /* if the number of remaining points does not change, we have a situation of isolated areas of
        * fine points that are not connected to any C-points, and the pass generation process breaks
        * down. Those points can be ignored, i.e. the corresponding rows in P will just be 0
-       * and can be ignored for the algorithm. */ 
-      if (old_global_remaining == global_remaining) break;
+       * and can be ignored for the algorithm. */
+      if (old_global_remaining == global_remaining) { break; }
    }
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(points_left, HYPRE_MEMORY_HOST);
