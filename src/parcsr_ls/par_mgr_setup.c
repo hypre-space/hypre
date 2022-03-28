@@ -865,7 +865,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
       cflag = last_level || setNonCpointToF;
-      if (!cflag || (interp_type[lev] > 2 && (interp_type[lev] != 4 || interp_type[lev] != 12)))
+      if (!cflag || interp_type[lev] == 3 || interp_type[lev] == 5 || interp_type[lev] == 6 || interp_type[lev] == 7)
       {
          hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);
       }
@@ -938,7 +938,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       sprintf(fname, "P_lev_%d", lev);
       hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);
       */
-
+     /* Use block Jacobi F-relaxation with block Jacobi interpolation */
       if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
       {
          HYPRE_Real *diag_inv = NULL;
@@ -1028,23 +1028,28 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else
       {
-         /* Compute RAP for next level */
          if (mgr_coarse_grid_method[lev] != 0)
          {
+            HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev - 1]) -
+                                           block_num_coarse_indexes[lev];
+            if (block_num_f_points == 1 && restrict_type[lev] == 12)
+            {  
+                restrict_type[lev] = 2;
+            } 
             if (restrict_type[lev] > 0)
             {
                wall_time = time_getWallclockSeconds();
+
                hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
-                                      debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
+                                      debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, block_num_f_points, &RT,
                                       restrict_type[lev], num_restrict_sweeps);
                wall_time = time_getWallclockSeconds() - wall_time;
                //  if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
+
                RT_array[lev] = RT;
             }
 
             wall_time = time_getWallclockSeconds();
-            HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev - 1]) -
-                                           block_num_coarse_indexes[lev];
             hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], Wp, RT, block_num_f_points,
                                                   /* ordering */set_c_points_method, /* method (approx. inverse or not) */
                                                   mgr_coarse_grid_method[lev], max_elmts, CF_marker, &RAP_ptr);
@@ -1062,8 +1067,12 @@ hypre_MGRSetup( void               *mgr_vdata,
          else
          {
             wall_time = time_getWallclockSeconds();
+            if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
+            {  
+               restrict_type[lev] = 2;
+            } 
             hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
-                                   debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
+                                   debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, block_jacobi_bsize, &RT,
                                    restrict_type[lev], num_restrict_sweeps);
             RT_array[lev] = RT;
 

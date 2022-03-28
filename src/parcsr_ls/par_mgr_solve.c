@@ -705,6 +705,9 @@ hypre_MGRCycle( void               *mgr_vdata,
             /* (single level) relaxation for A_ff */
             if (interp_type[level] == 12)
             {
+               HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_ff_array[fine_grid]));
+               HYPRE_Int n_block = nrows / blk_size[fine_grid];
+               HYPRE_Int left_size = nrows - n_block * blk_size[fine_grid];
                for (i = 0; i < nsweeps[level]; i++)
                {
                   // Block Jacobi
@@ -712,8 +715,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                                       &(F_fine_array[coarse_grid]));
                   hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
 
-                  hypre_block_jacobi_solve(A_ff_array[fine_grid], F_fine_array[coarse_grid],
-                                           U_fine_array[coarse_grid], blk_size[fine_grid], 0, frelax_diaginv[fine_grid], Vtemp);
+                  hypre_MGRBlockRelaxSolve(A_ff_array[fine_grid], F_fine_array[coarse_grid],
+                                           U_fine_array[coarse_grid], blk_size[fine_grid], n_block, left_size, 0, frelax_diaginv[fine_grid], Vtemp);
                   hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0,
                                       &(U_array[fine_grid]));
                }

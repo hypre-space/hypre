@@ -481,9 +481,9 @@ HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   return hypre_MGRSetMaxGlobalsmoothIters(solver, max_iter);
+   return hypre_MGRSetMaxGlobalSmoothIters(solver, max_iter);
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothIters
@@ -499,9 +499,9 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 {
-   return hypre_MGRSetGlobalsmoothType(solver, iter_type);
+   return hypre_MGRSetGlobalSmoothType(solver, iter_type);
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothType

@@ -3964,7 +3964,7 @@ HYPRE_MGRSetTol( HYPRE_Solver solver,
  * Default is 0 (no global smoothing).
  **/
 HYPRE_Int
-HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver,
+HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver,
                                   HYPRE_Int smooth_iter );
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
@@ -3994,7 +3994,7 @@ HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
  *    - 8 : Euclid (ILU)
  **/
 HYPRE_Int
-HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver,
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
                               HYPRE_Int smooth_type );
 
 HYPRE_Int

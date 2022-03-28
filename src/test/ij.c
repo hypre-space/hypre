@@ -4506,8 +4506,12 @@ main( hypre_int argc,
          HYPRE_MGRSetRelaxType(pcg_precond, 0);
          HYPRE_MGRSetNumRelaxSweeps(pcg_precond, 2);
          /* set interpolation type */
-         HYPRE_MGRSetInterpType(pcg_precond, 2);
+         HYPRE_MGRSetRestrictType(pcg_precond, mgr_restrict_type);
+         HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
          HYPRE_MGRSetNumInterpSweeps(pcg_precond, 2);
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
          /* set print level */
          HYPRE_MGRSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -6631,9 +6635,9 @@ main( hypre_int argc,
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
-
-         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
 
          /* create AMG coarse grid solver */
 
@@ -7099,9 +7103,9 @@ main( hypre_int argc,
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
-
-         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
 
          /* create AMG coarse grid solver */
 
@@ -7459,9 +7463,9 @@ main( hypre_int argc,
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
-
-         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
 
          /* create AMG coarse grid solver */
 
@@ -7820,9 +7824,9 @@ main( hypre_int argc,
       /* set max iterations */
       HYPRE_MGRSetMaxIter(mgr_solver, max_iter);
       HYPRE_MGRSetTol(mgr_solver, tol);
-
-      HYPRE_MGRSetGlobalsmoothType(mgr_solver, mgr_gsmooth_type);
-      HYPRE_MGRSetMaxGlobalsmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
+       /* set global smoother */
+      HYPRE_MGRSetGlobalSmoothType(mgr_solver, mgr_gsmooth_type);
+      HYPRE_MGRSetMaxGlobalSmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
 
       /* create AMG coarse grid solver */
 
