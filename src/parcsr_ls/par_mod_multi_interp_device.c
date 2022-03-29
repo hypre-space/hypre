@@ -187,7 +187,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int        i;
    HYPRE_Int        num_passes, p, remaining;
-   HYPRE_Int        global_remaining;
+   HYPRE_BigInt     remaining_big; /* tmp variable for reducing global_remaining */
+   HYPRE_BigInt     global_remaining;
    HYPRE_Int        cnt, cnt_old, cnt_rem, current_pass;
 
    HYPRE_BigInt     total_global_cpts;
@@ -215,6 +216,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    else
    {
       total_global_cpts = num_cpts_global[1];
+   }
+
+   if (!total_global_cpts)
+   {
+      *P_ptr = NULL;
+      return hypre_error_flag;
    }
 
    hypre_BoomerAMGMakeSocFromSDevice(A, S);
@@ -266,7 +273,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                       HYPRE_Int(0) );
 
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
-   pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
+   pass_starts = hypre_CTAlloc(HYPRE_Int, 11, HYPRE_MEMORY_HOST);
    /* first pass is C */
    pass_starts[0] = 0;
    pass_starts[1] = cnt;
@@ -320,7 +327,8 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    current_pass = 1;
    num_passes = 1;
    /* color points according to pass number */
-   hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+   remaining_big = remaining;
+   hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -423,7 +431,20 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          hypre_ParCSRCommHandleDestroy(comm_handle);
       }
 
-      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+      HYPRE_BigInt old_global_remaining = global_remaining;
+
+      remaining_big = remaining;
+      hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+
+      /* if the number of remaining points does not change, we have a situation of isolated areas of
+       * fine points that are not connected to any C-points, and the pass generation process breaks
+       * down. Those points can be ignored, i.e. the corresponding rows in P will just be 0
+       * and can be ignored for the algorithm. */
+      if (old_global_remaining == global_remaining)
+      {
+         break;
+      }
+
    } // while (global_remaining > 0)
 
    hypre_TFree(diag_shifts,     HYPRE_MEMORY_DEVICE);
