@@ -81,8 +81,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *pass_starts;
 
    HYPRE_Int        i, j, i1, i2, j1;
-   HYPRE_Int        num_passes, p, remaining;
-   HYPRE_Int        global_remaining;
+   HYPRE_Int        num_passes, p;
+   HYPRE_BigInt     global_remaining, remaining;
    HYPRE_Int        cnt, cnt_old, cnt_rem, current_pass;
    HYPRE_Int        startc, index;
 
@@ -109,6 +109,12 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    {
       total_global_cpts = num_cpts_global[1];
    }
+
+   if (total_global_cpts == 0)
+   {
+      *P_ptr = NULL;
+      return hypre_error_flag;
+   }
    /* Generate pass marker array */
 
    pass_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
@@ -119,7 +125,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    /* reverse of pass_order, keeps track where original numbers go */
    points_left = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    /* contains row numbers of remaining points, auxiliary */
-   pass_starts = hypre_CTAlloc(HYPRE_Int, 10, HYPRE_MEMORY_HOST);
+   pass_starts = hypre_CTAlloc(HYPRE_Int, 11, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
 
    P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
@@ -191,10 +197,11 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    current_pass = 1;
    num_passes = 1;
    /* color points according to pass number */
-   hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    while (global_remaining > 0)
    {
-      HYPRE_Int remaining_pts = remaining;
+      HYPRE_Int remaining_pts = (HYPRE_Int) remaining;
+      HYPRE_BigInt old_global_remaining = global_remaining;
       cnt_rem = 0;
       for (i = 0; i < remaining_pts; i++)
       {
@@ -230,7 +237,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
             points_left[cnt_rem++] = i1;
          }
       }
-      remaining = cnt_rem;
+      remaining = (HYPRE_BigInt) cnt_rem;
       current_pass++;
       num_passes++;
       if (num_passes > 9)
@@ -255,7 +262,13 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
       }
-      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+      old_global_remaining = global_remaining;
+      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      /* if the number of remaining points does not change, we have a situation of isolated areas of
+       * fine points that are not connected to any C-points, and the pass generation process breaks
+       * down. Those points can be ignored, i.e. the corresponding rows in P will just be 0
+       * and can be ignored for the algorithm. */
+      if (old_global_remaining == global_remaining) { break; }
    }
    hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    hypre_TFree(points_left, HYPRE_MEMORY_HOST);
