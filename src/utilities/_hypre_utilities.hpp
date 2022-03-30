@@ -236,10 +236,9 @@ using dim3 = sycl::range<1>;
 {                                                                                            \
    if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
    {                                                                                         \
-     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+     /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
-                  gridsize[0], blocksize[0]);                                                \
-     assert(0); exit(1);                                                                     \
+                  gridsize[0], blocksize[0]); */                                             \
    }                                                                                         \
    else                                                                                      \
    {                                                                                         \
@@ -643,10 +642,10 @@ struct hypre_GpuMatData
 #endif //#if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: generic device functions (cuda/hip/sycl)
- *      WM: Q - what about device openmp?
+ *      generic device functions (cuda/hip/sycl)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 template <typename T>
 static __device__ __forceinline__
 T read_only_load( const T *ptr )
@@ -657,9 +656,10 @@ T read_only_load( const T *ptr )
    return *ptr;
 #endif
 }
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: cuda/hip functions
+ *      cuda/hip functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1234,6 +1234,7 @@ struct TupleComp3
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 /* device_utils.c */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 dim3 hypre_GetDefaultDeviceBlockDimension();
 
 dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
@@ -1247,6 +1248,7 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
                                                                                         T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
