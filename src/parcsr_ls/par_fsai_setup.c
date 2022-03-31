@@ -437,7 +437,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    HYPRE_Complex           *twspace;     /* shared work space for omp threads */
 
    /* Initalize some variables */
-   avg_nnzrow_diag_A = num_nnzs_diag_A/num_rows_diag_A;
+   avg_nnzrow_diag_A = (num_rows_diag_A > 0) ? num_nnzs_diag_A/num_rows_diag_A : 0;
    max_nnzrow_diag_G = max_steps*max_step_size + 1;
    max_cand_size     = avg_nnzrow_diag_A*max_nnzrow_diag_G;
 
