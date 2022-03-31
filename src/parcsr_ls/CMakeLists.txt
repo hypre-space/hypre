@@ -48,9 +48,6 @@ set(SRCS
   HYPRE_parcsr_pilut.c
   HYPRE_parcsr_schwarz.c
   HYPRE_parcsr_fsai.c
-  par_fsai.c
-  par_fsai_setup.c
-  par_fsai_solve.c
   HYPRE_ams.c
   HYPRE_ads.c
   HYPRE_ame.c
@@ -77,6 +74,9 @@ set(SRCS
   par_cycle.c
   par_add_cycle.c
   par_difconv.c
+  par_fsai.c
+  par_fsai_setup.c
+  par_fsai_solve.c
   par_gauss_elim.c
   par_gsmg.c
   par_indepset.c
