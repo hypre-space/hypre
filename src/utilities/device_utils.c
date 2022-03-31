@@ -14,6 +14,8 @@
  *      generic device functions (cuda/hip/sycl)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 dim3
 hypre_GetDefaultDeviceBlockDimension()
 {
@@ -602,6 +604,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in,
                                                 HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out,
                                                 HYPRE_Complex *vals_out);
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions
