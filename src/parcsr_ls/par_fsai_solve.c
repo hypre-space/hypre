@@ -86,6 +86,10 @@ hypre_FSAISolve( void               *fsai_vdata,
       /* Update iteration count */
       iter++;
    }
+   else
+   {
+      hypre_ParVectorCopy(b, x);
+   }
 
    /* Apply remaining iterations */
    for (; iter < max_iter; iter++)
