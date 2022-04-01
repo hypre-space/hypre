@@ -123,6 +123,9 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
 
+   hypre_MatvecCommPkgCreate(parcsr_A);
+   hypre_ParCSRMatrixCopyColMapOffdToDevice(parcsr_A);
+
    if (verify)
    {
       parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
@@ -156,7 +159,10 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    for (i = 0 ; i < rep; i++)
    {
-      hypre_printf("--- rep %d (out of %d) ---\n", i, rep);
+      if (myid == 0)
+      {
+         hypre_printf("--- rep %d (out of %d) ---\n", i, rep);
+      }
       if (i == rep - 1)
       {
          time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, A*A");
@@ -194,12 +200,12 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
       if (myid == 0)
       {
-         printf("A^2: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n",
-                hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
-                hypre_ParCSRMatrixGlobalNumCols(parcsr_B_host2),
-                hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
-                hypre_ParCSRMatrixNumNonzeros(parcsr_B_host2),
-                rfnorm);
+         hypre_printf("A^2: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n",
+                      hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
+                      hypre_ParCSRMatrixGlobalNumCols(parcsr_B_host2),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_B_host2),
+                      rfnorm);
       }
    }
 
@@ -230,29 +236,19 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_B_host2);
 }
 
-void runjob2( HYPRE_ParCSRMatrix parcsr_A,
+void runjob3( HYPRE_ParCSRMatrix parcsr_A,
+              HYPRE_ParCSRMatrix parcsr_P,
               HYPRE_Int          print_system,
               HYPRE_Int          mult_order,
               HYPRE_Int          verify)
 {
-   HYPRE_Int    measure_type = 0;
-   HYPRE_Real   trunc_factor = 0.0;
-   HYPRE_Int    P_max_elmts = 8;
-   HYPRE_Int    debug_flag = 0;
-   HYPRE_Int    rap2 = 1;
-   HYPRE_Int    keepTranspose = 0;
-   HYPRE_Int    num_functions = 1;
-   HYPRE_Real   strong_threshold = 0.25;
-   HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Real   fnorm, rfnorm, fnorm0;
-   HYPRE_Int    local_num_vars, coarse_pnts_global[2];
-   HYPRE_Int    num_procs, myid;
-   HYPRE_Int    time_index, i;
-   char         fname[1024];
+   HYPRE_Int          num_procs, myid, i;
+   char               fname[1024];
+   HYPRE_Int          time_index, rep = 2;
+   HYPRE_Int          keepTranspose = 0;
+   HYPRE_Int          rap2 = 1;
+   HYPRE_Real         fnorm, rfnorm, fnorm0;
 
-   hypre_IntArray    *CF_marker         = NULL;
-   HYPRE_ParCSRMatrix parcsr_S          = NULL;
-   HYPRE_ParCSRMatrix parcsr_P          = NULL;
    HYPRE_ParCSRMatrix parcsr_Q          = NULL;
    HYPRE_ParCSRMatrix parcsr_AH         = NULL;
    HYPRE_ParCSRMatrix parcsr_A_host     = NULL;
@@ -265,33 +261,22 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   /* coarsening */
-   hypre_BoomerAMGCreateS(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL, &parcsr_S);
-
-   hypre_BoomerAMGCoarsenPMIS(parcsr_S, parcsr_A, measure_type, debug_flag, &CF_marker);
-
-   local_num_vars = hypre_ParCSRMatrixNumRows(parcsr_A);
-
-   hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_vars, num_functions, NULL,
-                              CF_marker, NULL, coarse_pnts_global);
-
-   /* generate P */
-   hypre_BoomerAMGBuildExtPIInterp(parcsr_A, hypre_IntArrayData(CF_marker), parcsr_S,
-                                   coarse_pnts_global,
-                                   num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
-                                   &parcsr_P);
-
    if (myid == 0)
    {
-      hypre_printf("A %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
-                   hypre_ParCSRMatrixGlobalNumCols(parcsr_A));
-      hypre_printf("P %d x %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_P),
-                   hypre_ParCSRMatrixGlobalNumCols(parcsr_P));
+      hypre_printf("A %d x %d, NNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_A), hypre_ParCSRMatrixNumNonzeros(parcsr_A));
+      hypre_printf("P %d x %d, NNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_P),
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_P), hypre_ParCSRMatrixNumNonzeros(parcsr_P));
    }
 
    /* !!! */
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_P) == HYPRE_MEMORY_DEVICE);
+
+   hypre_MatvecCommPkgCreate(parcsr_A);
+   hypre_MatvecCommPkgCreate(parcsr_P);
+
+   //hypre_ParCSRMatrixSetPatternOnly(parcsr_P, 1);
 
    /*-----------------------------------------------------------
     * Matrix-by-Matrix on host
@@ -341,9 +326,13 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
 
    /* run for the first time without timing [some allocation is done] */
    /* run for a second time for timing */
-   for (i = 0 ; i < 2; i++)
+   for (i = 0 ; i < rep; i++)
    {
-      if (i == 1)
+      if (myid == 0)
+      {
+         hypre_printf("--- rep %d (out of %d) ---\n", i, rep);
+      }
+      if (i == rep -1)
       {
          time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, RAP2");
          hypre_BeginTiming(time_index);
@@ -368,7 +357,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
          parcsr_AH = hypre_ParCSRMatrixRAPKT(parcsr_P, parcsr_A, parcsr_P, keepTranspose);
       }
 
-      if (i == 1)
+      if (i == rep - 1)
       {
          hypre_SyncCudaDevice(hypre_handle());
          //cudaProfilerStop();
@@ -378,7 +367,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
          hypre_ClearTiming();
       }
 
-      if (i == 0)
+      if (i < rep - 1)
       {
          hypre_ParCSRMatrixDestroy(parcsr_Q);
          hypre_ParCSRMatrixDestroy(parcsr_AH);
@@ -400,25 +389,68 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
 
       if (myid == 0)
       {
-         printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
-                hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
-                hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
-                rfnorm);
+         hypre_printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
+                      hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
+                      rfnorm);
       }
    }
 
-   hypre_IntArrayDestroy(CF_marker);
-   hypre_ParCSRMatrixDestroy(parcsr_S);
-   hypre_ParCSRMatrixDestroy(parcsr_P);
    hypre_ParCSRMatrixDestroy(parcsr_Q);
    hypre_ParCSRMatrixDestroy(parcsr_AH);
-
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_P_host);
    hypre_ParCSRMatrixDestroy(parcsr_Q_host);
    hypre_ParCSRMatrixDestroy(parcsr_AH_host);
    hypre_ParCSRMatrixDestroy(parcsr_AH_host_2);
    hypre_ParCSRMatrixDestroy(parcsr_error_host);
+}
+
+void runjob2( HYPRE_ParCSRMatrix parcsr_A,
+              HYPRE_Int          print_system,
+              HYPRE_Int          mult_order,
+              HYPRE_Int          verify)
+{
+   HYPRE_Int    measure_type = 0;
+   HYPRE_Real   trunc_factor = 0.0;
+   HYPRE_Int    P_max_elmts = 8;
+   HYPRE_Int    debug_flag = 0;
+   HYPRE_Int    num_functions = 1;
+   HYPRE_Real   strong_threshold = 0.25;
+   HYPRE_Real   max_row_sum = 1.0;
+   HYPRE_Int    local_num_vars, coarse_pnts_global[2];
+   HYPRE_Int    num_procs, myid;
+   HYPRE_Int    time_index, i;
+   char         fname[1024];
+
+   hypre_IntArray    *CF_marker         = NULL;
+   HYPRE_ParCSRMatrix parcsr_S          = NULL;
+   HYPRE_ParCSRMatrix parcsr_P          = NULL;
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /* coarsening */
+   hypre_BoomerAMGCreateS(parcsr_A, strong_threshold, max_row_sum, num_functions, NULL, &parcsr_S);
+
+   hypre_BoomerAMGCoarsenPMIS(parcsr_S, parcsr_A, measure_type, debug_flag, &CF_marker);
+
+   local_num_vars = hypre_ParCSRMatrixNumRows(parcsr_A);
+
+   hypre_BoomerAMGCoarseParms(hypre_ParCSRMatrixComm(parcsr_A), local_num_vars, num_functions, NULL,
+                              CF_marker, NULL, coarse_pnts_global);
+
+   /* generate P */
+   hypre_BoomerAMGBuildExtPIInterp(parcsr_A, hypre_IntArrayData(CF_marker), parcsr_S,
+                                   coarse_pnts_global,
+                                   num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
+                                   &parcsr_P);
+
+   runjob3(parcsr_A, parcsr_P, print_system, mult_order, verify);
+
+   hypre_IntArrayDestroy(CF_marker);
+   hypre_ParCSRMatrixDestroy(parcsr_S);
+   hypre_ParCSRMatrixDestroy(parcsr_P);
 }
 
 hypre_int
@@ -431,25 +463,26 @@ main( hypre_int argc,
    HYPRE_Int           build_matrix_arg_index;
    HYPRE_Int           ierr = 0;
    void               *object;
-   HYPRE_IJMatrix     ij_A = NULL;
-   HYPRE_ParCSRMatrix parcsr_A   = NULL;
-   HYPRE_Int          errcode, job = 1;
-   HYPRE_Int          num_procs, myid;
-   HYPRE_Int          time_index;
-   MPI_Comm           comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int          first_local_row, last_local_row;//, local_num_rows;
-   HYPRE_Int          first_local_col, last_local_col;//, local_num_cols;
-   HYPRE_Int          mult_order = 0;
-
-   HYPRE_Int          print_system = 0;
-   HYPRE_Int          verify       = 0;
-   HYPRE_Int          use_cusparse = 0;
-   HYPRE_Int          spgemm_alg = 1;
-   HYPRE_Int          spgemm_alg_binned = 0;
-   HYPRE_Int          rowest_mtd = 3;
-   HYPRE_Int          rowest_nsamples = -1; /* default */
-   HYPRE_Real         rowest_mult = -1.0; /* default */
-   HYPRE_Int          zero_mem_cost = 0;
+   HYPRE_IJMatrix      ij_A = NULL;
+   HYPRE_IJMatrix      ij_P = NULL;
+   HYPRE_ParCSRMatrix  parcsr_A  = NULL;
+   HYPRE_ParCSRMatrix  parcsr_P  = NULL;
+   HYPRE_Int           errcode, job = 1;
+   HYPRE_Int           num_procs, myid;
+   HYPRE_Int           time_index;
+   MPI_Comm            comm = hypre_MPI_COMM_WORLD;
+   HYPRE_Int           first_local_row, last_local_row;//, local_num_rows;
+   HYPRE_Int           first_local_col, last_local_col;//, local_num_cols;
+   HYPRE_Int           mult_order = 0;
+   HYPRE_Int           print_system = 0;
+   HYPRE_Int           verify       = 0;
+   HYPRE_Int           use_cusparse = 0;
+   HYPRE_Int           spgemm_alg = 1;
+   HYPRE_Int           spgemm_alg_binned = 0;
+   HYPRE_Int           rowest_mtd = 3;
+   HYPRE_Int           rowest_nsamples = -1; /* default */
+   HYPRE_Real          rowest_mult = -1.0; /* default */
+   HYPRE_Int           zero_mem_cost = 0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -471,7 +504,10 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    HYPRE_Init();
 
-   HYPRE_PrintDeviceInfo();
+   if (myid == 0)
+   {
+      HYPRE_PrintDeviceInfo();
+   }
 
    /* for timing, sync after kernels */
    hypre_SetSyncCudaCompute(1);
@@ -481,7 +517,10 @@ main( hypre_int argc,
 #endif
 
    //hypre_SetNumThreads(20);
-   hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
+   if (myid == 0)
+   {
+      hypre_printf("CPU #OMP THREADS %d\n", hypre_NumThreads());
+   }
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -516,11 +555,12 @@ main( hypre_int argc,
          build_matrix_type      = 0;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-fromonecsrfile") == 0 )
+      else if ( strcmp(argv[arg_index], "-from2files") == 0 )
       {
          arg_index++;
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
+         arg_index++;
       }
       else if ( strcmp(argv[arg_index], "-laplacian") == 0 )
       {
@@ -703,7 +743,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up matrix
     *-----------------------------------------------------------*/
-   time_index = hypre_InitializeTiming("Generate Matrix A");
+   time_index = hypre_InitializeTiming("Generate Matrices");
    hypre_BeginTiming(time_index);
    if ( build_matrix_type == -2 )
    {
@@ -728,6 +768,18 @@ main( hypre_int argc,
    else if ( build_matrix_type == 0 )
    {
       BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
+   }
+   else if ( build_matrix_type == 1 )
+   {
+      HYPRE_Int ierr1 = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
+                                            HYPRE_PARCSR, &ij_A );
+      HYPRE_Int ierr2 = HYPRE_IJMatrixRead( argv[build_matrix_arg_index+1], comm,
+                                            HYPRE_PARCSR, &ij_P );
+      if (ierr1 || ierr2)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         exit(1);
+      }
    }
    else if ( build_matrix_type == 2 )
    {
@@ -756,7 +808,8 @@ main( hypre_int argc,
       return (-1);
    }
 
-   if (build_matrix_type < 0)
+   /* first matrix */
+   if (ij_A)
    {
       ierr = HYPRE_IJMatrixGetLocalRange( ij_A,
                                           &first_local_row, &last_local_row,
@@ -773,19 +826,32 @@ main( hypre_int argc,
       ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                                               &first_local_row, &last_local_row,
                                               &first_local_col, &last_local_col );
-
-      //local_num_rows = last_local_row - first_local_row + 1;
-      //local_num_cols = last_local_col - first_local_col + 1;
    }
 
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_A);
 
+   /* [optional] second matrix */
+   if (ij_P)
+   {
+      ierr += HYPRE_IJMatrixGetObject( ij_P, &object);
+      parcsr_P = (HYPRE_ParCSRMatrix) object;
+   }
+
+   if (parcsr_P)
+   {
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_P);
+   }
+
    hypre_EndTiming(time_index);
-   hypre_PrintTiming("Generate Matrix A", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("Generate Matrices", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
    hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
+   if (parcsr_P)
+   {
+      hypre_ParCSRMatrixMigrate(parcsr_P, hypre_HandleMemoryLocation(hypre_handle()));
+   }
 
    if (job == 1)
    {
@@ -795,17 +861,26 @@ main( hypre_int argc,
    {
       runjob2(parcsr_A, print_system, mult_order, verify);
    }
+   else if (job == 3)
+   {
+      runjob3(parcsr_A, parcsr_P, print_system, mult_order, verify);
+   }
 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
-   if (build_matrix_type == -1)
+   if (ij_A)
    {
       HYPRE_IJMatrixDestroy(ij_A);
    }
    else
    {
       HYPRE_ParCSRMatrixDestroy(parcsr_A);
+   }
+
+   if (ij_P)
+   {
+      HYPRE_IJMatrixDestroy(ij_P);
    }
 
 final:
