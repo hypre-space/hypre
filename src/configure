@@ -9317,11 +9317,7 @@ $as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
 
-<<<<<<< HEAD
-        LINK_CC=${CUCC}
-=======
                 LINK_CC=${CUCC}
->>>>>>> d079a90fb8f15baf11bab7115efddfbc0f0730c5
         LINK_CXX=${CUCC}
 
         SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
@@ -9368,24 +9364,11 @@ fi
 
 $as_echo "#define HYPRE_USING_ONEMKLBLAS 1" >>confdefs.h
 
-<<<<<<< HEAD
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -lmkl_sycl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include/oneapi/mkl/blas.hpp"
-
-=======
->>>>>>> d079a90fb8f15baf11bab7115efddfbc0f0730c5
 fi
 
         if test x"$hypre_using_onemklrand" == x"yes"; then :
 
 $as_echo "#define HYPRE_USING_ONEMKLRAND 1" >>confdefs.h
-
-fi
-
-        if test x"$hypre_using_cuda_streams" == x"yes"; then :
-
-$as_echo "#define HYPRE_USING_CUDA_STREAMS 1" >>confdefs.h
-
 
 fi
 
