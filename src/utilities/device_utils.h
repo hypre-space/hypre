@@ -38,8 +38,14 @@
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
-
 #define CUDA_MALLOCASYNC_VERSION 11020
+#define THRUST_CALL_BLOCKING 1
+
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+#if CUDA_VERSION < CUDA_MALLOCASYNC_VERSION
+#error cudaMalloc/FreeAsync needs CUDA 11.2
+#endif
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          hip includes
@@ -48,17 +54,6 @@
 #elif defined(HYPRE_USING_HIP)
 
 #include <hip/hip_runtime.h>
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *                          sycl includes
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-#elif defined(HYPRE_USING_SYCL)
-
-/* WM: problems with this being inside extern C++ {} */
-/* #include <CL/sycl.hpp> */
-
-#endif // defined(HYPRE_USING_CUDA)
 
 #if defined(HYPRE_USING_ROCSPARSE)
 #include <rocsparse.h>
@@ -69,10 +64,30 @@
 #endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *                          sycl includes
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#elif defined(HYPRE_USING_SYCL)
+
+/* WM: problems with this being inside extern C++ {} */
+/* #include <CL/sycl.hpp> */
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+#include <oneapi/mkl/spblas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLBLAS)
+#include <oneapi/mkl/blas.hpp>
+#endif
+#if defined(HYPRE_USING_ONEMKLRAND)
+#include <oneapi/mkl/rng.hpp>
+#endif
+
+#endif // defined(HYPRE_USING_CUDA)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_CUDA_CALL(call) do {                                                           \
    cudaError_t err = call;                                                                   \
    if (cudaSuccess != err) {                                                                 \
@@ -109,7 +124,97 @@
       assert(0); exit(1);                                                                    \
    }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
+  func_name(oneapi::dpl::execution::make_device_policy(                                      \
+           *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+#define HYPRE_SYCL_LAUNCH(kernel_name, gridsize, blocksize, ...)                             \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     hypre_printf("Error %s %d: Invalid SYCL 1D launch parameters grid/block (%d) (%d)\n",   \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]);                                                \
+     assert(0); exit(1);                                                                     \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+            [=] (sycl::nd_item<1> item) { (kernel_name)(item, __VA_ARGS__);                  \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
+
+#endif // defined(HYPRE_USING_CUDA)
+
+#if defined(HYPRE_COMPLEX) /* Double Complex */
+/* TODO */
+#elif defined(HYPRE_SINGLE) /* Single */
+/* cublas */
+#define hypre_cublas_scal                      cublasSscal
+#define hypre_cublas_axpy                      cublasSaxpy
+#define hypre_cublas_dot                       cublasSdot
+/* cusparse */
+#define hypre_cusparse_csru2csr_bufferSizeExt  cusparseScsru2csr_bufferSizeExt
+#define hypre_cusparse_csru2csr                cusparseScsru2csr
+#define hypre_cusparse_csrsv2_bufferSize       cusparseScsrsv2_bufferSize
+#define hypre_cusparse_csrsv2_analysis         cusparseScsrsv2_analysis
+#define hypre_cusparse_csrsv2_solve            cusparseScsrsv2_solve
+#define hypre_cusparse_csrmv                   cusparseScsrmv
+#define hypre_cusparse_csrgemm                 cusparseScsrgemm
+#define hypre_cusparse_csr2csc                 cusparseScsr2csc
+#define hypre_cusparse_csrilu02_bufferSize     cusparseScsrilu02_bufferSize
+#define hypre_cusparse_csrilu02_analysis       cusparseScsrilu02_analysis
+#define hypre_cusparse_csrilu02                cusparseScsrilu02
+#define hypre_cusparse_csrsm2_bufferSizeExt    cusparseScsrsm2_bufferSizeExt
+#define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
+#define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
+/* rocsparse */
+#define hypre_rocsparse_csrsv_buffer_size      rocsparse_scsrsv_buffer_size
+#define hypre_rocsparse_csrsv_analysis         rocsparse_scsrsv_analysis
+#define hypre_rocsparse_csrsv_solve            rocsparse_scsrsv_solve
+#define hypre_rocsparse_gthr                   rocsparse_sgthr
+#define hypre_rocsparse_csrmv_analysis         rocsparse_scsrmv_analysis
+#define hypre_rocsparse_csrmv                  rocsparse_scsrmv
+#define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
+#define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
+#define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
+#elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
+/* ... */
+#else /* Double */
+/* cublas */
+#define hypre_cublas_scal                      cublasDscal
+#define hypre_cublas_axpy                      cublasDaxpy
+#define hypre_cublas_dot                       cublasDdot
+/* cusparse */
+#define hypre_cusparse_csru2csr_bufferSizeExt  cusparseDcsru2csr_bufferSizeExt
+#define hypre_cusparse_csru2csr                cusparseDcsru2csr
+#define hypre_cusparse_csrsv2_bufferSize       cusparseDcsrsv2_bufferSize
+#define hypre_cusparse_csrsv2_analysis         cusparseDcsrsv2_analysis
+#define hypre_cusparse_csrsv2_solve            cusparseDcsrsv2_solve
+#define hypre_cusparse_csrmv                   cusparseDcsrmv
+#define hypre_cusparse_csrgemm                 cusparseDcsrgemm
+#define hypre_cusparse_csr2csc                 cusparseDcsr2csc
+#define hypre_cusparse_csrilu02_bufferSize     cusparseDcsrilu02_bufferSize
+#define hypre_cusparse_csrilu02_analysis       cusparseDcsrilu02_analysis
+#define hypre_cusparse_csrilu02                cusparseDcsrilu02
+#define hypre_cusparse_csrsm2_bufferSizeExt    cusparseDcsrsm2_bufferSizeExt
+#define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
+#define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
+/* rocsparse */
+#define hypre_rocsparse_csrsv_buffer_size      rocsparse_dcsrsv_buffer_size
+#define hypre_rocsparse_csrsv_analysis         rocsparse_dcsrsv_analysis
+#define hypre_rocsparse_csrsv_solve            rocsparse_dcsrsv_solve
+#define hypre_rocsparse_gthr                   rocsparse_dgthr
+#define hypre_rocsparse_csrmv_analysis         rocsparse_dcsrmv_analysis
+#define hypre_rocsparse_csrmv                  rocsparse_dcsrmv
+#define hypre_rocsparse_csrgemm_buffer_size    rocsparse_dcsrgemm_buffer_size
+#define hypre_rocsparse_csrgemm                rocsparse_dcsrgemm
+#define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
+#endif
+
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -154,7 +259,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 // HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
 #define HYPRE_WARP_SIZE       32
 #define HYPRE_WARP_BITSHIFT   5
 #elif defined(HYPRE_USING_HIP)
@@ -208,7 +313,7 @@ struct hypre_DeviceData
 #endif
 #endif
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
    hypre_uint                        cub_max_bin;
@@ -324,6 +429,10 @@ struct hypre_CsrsvData
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info info_L;
    rocsparse_mat_info info_U;
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   /* WM: todo - placeholders */
+   char info_L;
+   char info_U;
 #endif
    hypre_int    BufferSize;
    char        *Buffer;
@@ -345,10 +454,15 @@ struct hypre_GpuMatData
    rocsparse_mat_descr   mat_descr;
    rocsparse_mat_info    mat_info;
 #endif
+
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+   oneapi::mkl::sparse::matrix_handle_t mat_handle;
+#endif
 };
 
 #define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
+#define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
 #endif //#if defined(HYPRE_USING_GPU)
@@ -402,9 +516,9 @@ using namespace thrust::placeholders;
 
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_CUDA_CALL( cudaGetLastError() ); }
 #elif defined(HYPRE_USING_HIP)
-#define GPU_LAUNCH_SYNC { hypre_SyncCudaComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); HYPRE_HIP_CALL( hipGetLastError() );  }
 #endif
 #else // #if defined(HYPRE_DEBUG)
 #define GPU_LAUNCH_SYNC
@@ -994,16 +1108,6 @@ HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
-
-HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
-                                             HYPRE_Int *d_row_ind);
-
-HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
-
-HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
-                                             HYPRE_Int *d_row_ptr);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);

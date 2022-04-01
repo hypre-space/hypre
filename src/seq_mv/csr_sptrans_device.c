@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
@@ -63,13 +64,13 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
    hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 #else
-   HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
-                                         m, n, nnzA,
-                                         d_aa, d_ia, d_ja,
-                                         csc_a, csc_j, csc_i,
-                                         action,
-                                         CUSPARSE_INDEX_BASE_ZERO) );
-#endif
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csr2csc(handle,
+                                               m, n, nnzA,
+                                               d_aa, d_ia, d_ja,
+                                               csc_a, csc_j, csc_i,
+                                               action,
+                                               CUSPARSE_INDEX_BASE_ZERO) );
+#endif /* #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION */
 
    *d_ic_out = csc_i;
    *d_jc_out = csc_j;
@@ -122,13 +123,14 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
    void * buffer;
    buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_ROCSPARSE_CALL( rocsparse_dcsr2csc(handle,
-                                            m, n, nnzA,
-                                            d_aa, d_ia, d_ja,
-                                            csc_a, csc_j, csc_i,
-                                            action,
-                                            rocsparse_index_base_zero,
-                                            buffer) );
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csr2csc(handle,
+                                                 m, n, nnzA,
+                                                 d_aa, d_ia, d_ja,
+                                                 csc_a, csc_j, csc_i,
+                                                 action,
+                                                 rocsparse_index_base_zero,
+                                                 buffer) );
+
    hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = csc_i;
@@ -144,19 +146,6 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
 }
 
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
-
-#if defined(HYPRE_USING_ONEMKLSPARSE)
-HYPRE_Int
-hypreDevice_CSRSpTransOnemklsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int       nnzA,
-                                   HYPRE_Int  *d_ia,     HYPRE_Int  *d_ja,     HYPRE_Complex  *d_aa,
-                                   HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
-                                   HYPRE_Int   want_data)
-{
-   /* WM: TODO */
-   return hypre_error_flag;
-}
-#endif // #if defined(HYPRE_USING_ONEMKLSPARSE)
-
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -240,7 +229,79 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out,
                        HYPRE_Int   want_data)
 {
-   /* WM: TODO */
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] -= hypre_MPI_Wtime();
+#endif
+
+   HYPRE_Int *d_jt, *d_it, *d_pm, *d_ic, *d_jc;
+   HYPRE_Complex *d_ac = NULL;
+   HYPRE_Int *mem_work = hypre_TAlloc(HYPRE_Int, 3 * nnzA, HYPRE_MEMORY_DEVICE);
+
+   /* allocate C */
+   d_jc = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   if (want_data)
+   {
+      d_ac = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+   }
+
+   /* permutation vector */
+   d_pm = mem_work;
+
+   /* expansion: A's row idx */
+   d_it = d_pm + nnzA;
+   hypreDevice_CsrRowPtrsToIndices_v2(m, nnzA, d_ia, d_it);
+
+   /* a copy of col idx of A */
+   d_jt = d_it + nnzA;
+   hypre_TMemcpy(d_jt, d_ja, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   /* sort: by col */
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      count,
+                      count + nnzA,
+                      d_pm);
+
+   auto zip_jt_pm = oneapi::dpl::make_zip_iterator(d_jt, d_pm);
+   HYPRE_ONEDPL_CALL( std::stable_sort,
+                      zip_jt_pm,
+                      zip_jt_pm + nnzA,
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+
+   auto permuted_it = oneapi::dpl::make_permutation_iterator(d_it, d_pm);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      permuted_it,
+                      permuted_it + nnzA,
+                      d_jc );
+
+   if (want_data)
+   {
+      auto permuted_aa = oneapi::dpl::make_permutation_iterator(d_aa, d_pm);
+      HYPRE_ONEDPL_CALL( std::copy,
+                         permuted_aa,
+                         permuted_aa + nnzA,
+                         d_ac );
+   }
+
+   /* convert into ic: row idx --> row ptrs */
+   d_ic = hypreDevice_CsrRowIndicesToPtrs(n, nnzA, d_jt);
+
+#ifdef HYPRE_DEBUG
+   HYPRE_Int nnzC;
+   hypre_TMemcpy(&nnzC, &d_ic[n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_assert(nnzC == nnzA);
+#endif
+
+   hypre_TFree(mem_work, HYPRE_MEMORY_DEVICE);
+
+   *d_ic_out = d_ic;
+   *d_jc_out = d_jc;
+   *d_ac_out = d_ac;
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
+#endif
+
    return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_SYCL)

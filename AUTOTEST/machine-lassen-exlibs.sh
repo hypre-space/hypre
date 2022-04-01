@@ -55,7 +55,7 @@ save="lassen"
 # make
 # make install
 
-UMPIRE_DIR=/usr/workspace/li50/Umpire-git/Umpire/install_xlC_lassen
+UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/5.0.1-nvcc10.1.243-sm_70-xl2021.03.11/
 co="--with-cuda --enable-debug --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=umpire --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-bench -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo #-ro: $ro
@@ -65,7 +65,7 @@ ro="-bench -rt -mpibind -save ${save}"
 # build RAJA
 # cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=$(which xlC) -DENABLE_OPENMP=Off -DENABLE_CUDA=On -DCUDA_ARCH=sm_70 -DCMAKE_INSTALL_PREFIX=../install_lassen ../
 
-RAJA_DIR=/usr/workspace/li50/RAJA-git/raja/install_lassen
+RAJA_DIR=/usr/workspace/hypre/ext-libs/RAJA/nvcc10.1.243-sm_70-xl2021.03.11/
 co="--with-cuda --enable-debug --with-raja --with-raja-include=${RAJA_DIR}/include --with-raja-lib-dirs=${RAJA_DIR}/lib --with-raja-libs=RAJA --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
@@ -80,7 +80,7 @@ ro="-struct -rt -mpibind -save ${save}"
 
 module load gcc/8.3.1
 module load cmake/3.16
-KOKKOS_DIR=/usr/workspace/li50/kokkos-git/kokkos/install_lassen_cuda
+KOKKOS_DIR=/usr/workspace/hypre/ext-libs/Kokkos/nvcc10.1.243-sm_70-gcc8.3.1/
 co="--with-cuda --enable-debug --with-kokkos --with-kokkos-include=${KOKKOS_DIR}/include --with-kokkos-lib-dirs=${KOKKOS_DIR}/lib64 --with-kokkos-libs=kokkoscore --with-cxxstandard=14 --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
 ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro

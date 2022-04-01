@@ -132,6 +132,7 @@ set(SRCS
   par_2s_interp_device.c
   par_relax_device.c
   par_mod_multi_interp_device.c
+  par_mgr_device.c
 )
 
 if (HYPRE_USING_DSUPERLU)
@@ -167,6 +168,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_amgdd_fac_cycle_device.c
     par_2s_interp_device.c
     par_relax_device.c
+    par_mgr_device.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

@@ -275,6 +275,11 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    /* when using GPUs, start local matvec first in order to overlap with communication */
 #if defined(HYPRE_USING_GPU)
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
@@ -363,7 +368,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -607,7 +612,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_WITH_GPU_AWARE_MPI)
-   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
@@ -771,7 +777,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -1023,7 +1029,7 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
    hypre_VectorSize(&vec_x) = num_elemt;
    hypre_VectorData(&vec_y) = locl_data;
 
-   hypre_CSRMatrixSpMVDevice(1.0, &csr, &vec_x, 1.0, &vec_y,
+   hypre_CSRMatrixSpMVDevice(0, 1.0, &csr, &vec_x, 1.0, &vec_y,
                              hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
 #endif
 

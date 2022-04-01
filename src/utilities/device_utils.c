@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
@@ -42,7 +43,156 @@ sycl::range<1> hypre_GetDefaultDeviceGridDimension(HYPRE_Int n,
 
    return gDim;
 }
-#endif
+void
+hypreSYCLKernel_IVAXPY(sycl::nd_item<1>& item,
+                       HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y )
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < n)
+   {
+      y[i] += x[i] / a[i];
+   }
+}
+
+/* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
+HYPRE_Int
+hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPY, gDim, bDim, n, a, x, y );
+
+   return hypre_error_flag;
+}
+
+void
+hypreSYCLKernel_IVAXPYMarked(sycl::nd_item<1>& item,
+                             HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
+                             HYPRE_Int *marker, HYPRE_Int marker_val)
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < n)
+   {
+      if (marker[i] == marker_val)
+      {
+         y[i] += x[i] / a[i];
+      }
+   }
+}
+
+/* Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i] */
+HYPRE_Int
+hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
+                         HYPRE_Int *marker, HYPRE_Int marker_val)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int*
+hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return NULL;
+   }
+
+   HYPRE_Int *d_row_ind = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, d_row_ind);
+
+   return d_row_ind;
+}
+
+void
+hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
+                              HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
+{
+   HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
+
+   if (i < nrows)
+   {
+      HYPRE_Int row_start = d_row_ptr[i];
+      HYPRE_Int row_end = d_row_ptr[i + 1];
+      if (row_start != row_end)
+      {
+         d_row_ind[row_start] = i;
+      }
+   }
+}
+
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
+                                   HYPRE_Int *d_row_ind)
+{
+   /* trivial case */
+   if (nrows <= 0 || nnz <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
+   sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
+
+   HYPRE_ONEDPL_CALL( std::fill, d_row_ind, d_row_ind + nnz, 0 );
+
+   HYPRE_SYCL_LAUNCH( hypreSYCLKernel_ScatterRowPtr, gDim, bDim, nrows, d_row_ptr, d_row_ind );
+
+   HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
+                      oneapi::dpl::maximum<HYPRE_Int>());
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int*
+hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind)
+{
+   HYPRE_Int *d_row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
+
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      count,
+                      count + nrows + 1,
+                      d_row_ptr);
+
+   return d_row_ptr;
+}
+
+HYPRE_Int
+hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
+                                   HYPRE_Int *d_row_ptr)
+{
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_row_ind, d_row_ind + nnz,
+                      count,
+                      count + nrows + 1,
+                      d_row_ptr);
+
+   return hypre_error_flag;
+}
+#endif // #if defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -82,11 +232,9 @@ void hypre_CudaCompileFlagCheck()
    hypre_int *cuda_arch_compile_d = NULL;
    //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
    HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
-   hypre_TMemcpy(cuda_arch_compile_d, &cuda_arch_compile, hypre_int, 1, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_HOST);
+   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int), cudaMemcpyHostToDevice) );
    HYPRE_CUDA_LAUNCH( hypreCUDAKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
-   hypre_TMemcpy(&cuda_arch_compile, cuda_arch_compile_d, hypre_int, 1, HYPRE_MEMORY_HOST,
-                 HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int), cudaMemcpyDeviceToHost) );
    //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
    HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
 
@@ -1159,8 +1307,6 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
-
-
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
@@ -1173,6 +1319,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
    curandGenerator_t gen;
    HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, 0) );
    HYPRE_CURAND_CALL( curandSetStream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
@@ -1227,6 +1374,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
    rocrand_generator gen;
    HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
    HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
+   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, 0) );
    HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_DeviceDataComputeStream(data)) );
 
    data->curand_generator = gen;
@@ -1294,6 +1442,22 @@ hypre_CurandUniformSingle( HYPRE_Int          n,
                            hypre_ulonglongint offset)
 {
    return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+HYPRE_Int
+hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
+                                hypre_ulonglongint offset )
+{
+#if defined(HYPRE_USING_CURAND)
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
+   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
+#elif defined(HYPRE_USING_ROCRAND)
+   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
+   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
+   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
+#endif
+   return hypre_error_flag;
 }
 
 #endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) */
@@ -1495,6 +1659,17 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipDeviceSynchronize() );
+#elif defined(HYPRE_USING_SYCL)
+   try
+   {
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+   }
+   catch (sycl::exception const &exc)
+   {
+      std::cerr << exc.what() << "Exception caught at file:" << __FILE__
+                << ", line:" << __LINE__ << std::endl;
+      std::exit(1);
+   }
 #endif
    return hypre_error_flag;
 }
@@ -1518,9 +1693,9 @@ hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
  *         4: sync stream based on cuda_compute_stream_sync
  */
 HYPRE_Int
-hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
-                                 hypre_Handle *hypre_handle,
-                                 HYPRE_Int    *cuda_compute_stream_sync_ptr)
+hypre_SyncComputeStream_core(HYPRE_Int     action,
+                             hypre_Handle *hypre_handle,
+                             HYPRE_Int    *cuda_compute_stream_sync_ptr)
 {
    /* with UVM the default is to sync at kernel completions, since host is also able to
     * touch GPU memory */
@@ -1558,7 +1733,7 @@ hypre_SyncCudaComputeStream_core(HYPRE_Int     action,
          }
          break;
       default:
-         hypre_printf("hypre_SyncCudaComputeStream_core invalid action\n");
+         hypre_printf("hypre_SyncComputeStream_core invalid action\n");
          hypre_error_in_arg(1);
    }
 
@@ -1570,7 +1745,7 @@ hypre_SetSyncCudaCompute(HYPRE_Int action)
 {
    /* convert to 1/0 */
    action = action != 0;
-   hypre_SyncCudaComputeStream_core(action, NULL, NULL);
+   hypre_SyncComputeStream_core(action, NULL, NULL);
 
    return hypre_error_flag;
 }
@@ -1578,7 +1753,7 @@ hypre_SetSyncCudaCompute(HYPRE_Int action)
 HYPRE_Int
 hypre_RestoreSyncCudaCompute()
 {
-   hypre_SyncCudaComputeStream_core(2, NULL, NULL);
+   hypre_SyncComputeStream_core(2, NULL, NULL);
 
    return hypre_error_flag;
 }
@@ -1586,26 +1761,26 @@ hypre_RestoreSyncCudaCompute()
 HYPRE_Int
 hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
 {
-   hypre_SyncCudaComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
+   hypre_SyncComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_SyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncComputeStream(hypre_Handle *hypre_handle)
 {
-   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_ForceSyncCudaComputeStream(hypre_Handle *hypre_handle)
+hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
 {
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(1);
-   hypre_SyncCudaComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
    hypre_SetSyncCudaCompute(sync_stream);
 
    return hypre_error_flag;

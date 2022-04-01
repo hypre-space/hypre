@@ -252,11 +252,6 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    cusparseOperation_t transA = CUSPARSE_OPERATION_NON_TRANSPOSE;
    cusparseOperation_t transB = CUSPARSE_OPERATION_NON_TRANSPOSE;
 
-   HYPRE_Int isDoublePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int isSinglePrecision = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   hypre_assert(isDoublePrecision || isSinglePrecision);
-
    /* Copy the unsorted over as the initial "sorted" */
    hypre_TMemcpy(d_ja_sorted, d_ja, HYPRE_Int,     nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_a_sorted,  d_a,  HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -314,20 +309,10 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
    d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDcsrgemm(cusparsehandle, transA, transB, m, n, k,
-                                            descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                            descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                            descr_C,       d_c, d_ic, d_jc) );
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseScsrgemm(cusparsehandle, transA, transB, m, n, k,
-                                            descr_A, nnzA, (float *) d_a_sorted, d_ia, d_ja_sorted,
-                                            descr_B, nnzB, (float *) d_b_sorted, d_ib, d_jb_sorted,
-                                            descr_C,       (float *) d_c, d_ic, d_jc) );
-   }
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csrgemm(cusparsehandle, transA, transB, m, n, k,
+                                               descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
+                                               descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
+                                               descr_C,       d_c, d_ic, d_jc) );
 
 #ifdef HYPRE_SPGEMM_TIMING
    hypre_ForceSyncCudaComputeStream(hypre_handle());

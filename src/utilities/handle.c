@@ -14,6 +14,16 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+/* GPU SpMV */
+HYPRE_Int
+hypre_SetSpMVUseCusparse( HYPRE_Int use_cusparse )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpMVUseCusparse(hypre_handle()) = use_cusparse;
+#endif
+   return hypre_error_flag;
+}
+
 /* GPU SpGemm */
 HYPRE_Int
 hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse )

@@ -11,6 +11,7 @@
  *
  *****************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp" //RL: TODO vector_device.c, include cuda there
 
@@ -286,6 +287,11 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    {
       hypreDevice_ComplexFilln( vector_data, size, value );
    }
+#elif defined(HYPRE_USING_SYCL)
+   if (size > 0)
+   {
+      HYPRE_ONEDPL_CALL( std::fill_n, vector_data, size, value );
+   }
 #else
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -300,7 +306,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -467,13 +473,31 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_scal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
 #else
    hypreDevice_ComplexScalen( y_data, size, y_data, alpha );
-#endif
+#endif // #if defined(HYPRE_USING_CUBLAS)
+
+#elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()),
+                                            size, alpha,
+                                            y_data, 1).wait() );
 #else
+   HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size,
+                      y_data, [alpha](HYPRE_Complex y) -> HYPRE_Complex { return alpha * y; } );
+#endif // #if defined(HYPRE_USING_ONEMKL)
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data)
@@ -485,10 +509,10 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
       y_data[i] *= alpha;
    }
 
-#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -520,14 +544,32 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
-                                  y_data, 1) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
+                                        y_data, 1) );
 #else
    hypreDevice_ComplexAxpyn(x_data, size, y_data, y_data, alpha);
-#endif
+#endif // #if defined(HYPRE_USING_CUBLAS)
+
+#elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
+                                            size, alpha,
+                                            x_data, 1, y_data, 1).wait() );
 #else
+   HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
+                      [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
+#endif // #if defined(HYPRE_USING_ONEMKL)
+
+#endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
+
+#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
@@ -539,10 +581,10 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
       y_data[i] += alpha * x_data[i];
    }
 
-#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -567,7 +609,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(b);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
    //RL: TODO back to hypre_GetExecPolicy2 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -596,7 +638,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -647,7 +689,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -678,19 +720,41 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 #ifndef HYPRE_COMPLEX
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1,
-                                 &result) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_dot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1,
+                                       &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
-#endif
+#endif // #if defined(HYPRE_USING_CUBLAS)
+
+#elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_ONEMKLBLAS)
+   HYPRE_Real *result_dev = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_SYCL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()),
+                                           size, x_data, 1,
+                                           y_data, 1, result_dev).wait() );
+   hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else
+   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0 );
+#endif // #if defined(HYPRE_USING_ONEMKLBLAS)
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#else // #ifndef HYPRE_COMPLEX
    /* TODO */
 #error "Complex inner product"
-#endif
-#else /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif // #ifndef HYPRE_COMPLEX
+
+#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams  distribute  parallel for private(i) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
@@ -701,10 +765,11 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    {
       result += hypre_conj(y_data[i]) * x_data[i];
    }
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -806,7 +871,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

@@ -459,7 +459,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsDevice(hypre_ParCSRMatrix *A)
    HYPRE_CUDA_LAUNCH(hypreCUDAKernel_ParCSRMatrixFixZeroRows, gDim, bDim,
                      nrows, A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_data, num_cols_offd);
 
-   //hypre_SyncCudaComputeStream(hypre_handle());
+   //hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
@@ -569,6 +569,11 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                                   num_sends),
                             cf_marker,
                             int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+         /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+         hypre_ForceSyncComputeStream(hypre_handle());
+#endif
       }
       else
 #endif

@@ -2164,7 +2164,7 @@ hypre_BoomerAMGDD_PackSendBuffer( hypre_ParAMGDDData *amgdd_data,
          total_num_nodes = hypre_AMGDDCompGridNumOwnedNodes(compGrid[level]) +
                            hypre_AMGDDCompGridNumNonOwnedNodes(compGrid[level]);
 
-         hypre_Memset(add_flag[level], 0, sizeof(HYPRE_Int)*total_num_nodes, HYPRE_MEMORY_HOST);
+         hypre_Memset(add_flag[level], 0, sizeof(HYPRE_Int)*total_num_nodes, memory_location);
          (*send_flag_buffer_size) += num_send_nodes[current_level][proc][level];
          if (level != num_levels - 1)
          {

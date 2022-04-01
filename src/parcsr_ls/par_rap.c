@@ -234,7 +234,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    num_nz_cols_A = num_cols_diag_A + num_cols_offd_A;
 
    n_coarse_RT = hypre_ParCSRMatrixGlobalNumCols(RT);
-   if (n_coarse != n_coarse_RT)
+
+   if (n_coarse != n_coarse_RT || num_cols_diag_RT != num_cols_diag_P)
    {
       square = 0;
    }
