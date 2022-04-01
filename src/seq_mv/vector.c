@@ -478,7 +478,8 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( hypre_cublas_scal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_scal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data,
+                                        1) );
 #else
    hypreDevice_ComplexScalen( y_data, size, y_data, alpha );
 #endif // #if defined(HYPRE_USING_CUBLAS)
@@ -553,7 +554,8 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
+   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data,
+                                        1,
                                         y_data, 1) );
 #else
    hypreDevice_ComplexAxpyn(x_data, size, y_data, y_data, alpha);
@@ -735,7 +737,8 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( hypre_cublas_dot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1,
+   HYPRE_CUBLAS_CALL( hypre_cublas_dot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1,
+                                       y_data, 1,
                                        &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );

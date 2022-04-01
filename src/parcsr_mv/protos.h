@@ -452,7 +452,12 @@ HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha, hypre_ParCSRMatrix 
                                         hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y, HYPRE_Int *CF_marker, HYPRE_Int fpt );
 
 /* par_csr_triplemat.c */
-HYPRE_Int hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg_A, HYPRE_Int num_cols_A, HYPRE_Int num_cols_B, HYPRE_BigInt first_col_diag_B, HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B, HYPRE_Int local_nnz_Cbar, hypre_CSRMatrix *Cbar, hypre_CSRMatrix *Cext, hypre_CSRMatrix **C_diag_ptr, hypre_CSRMatrix **C_offd_ptr, HYPRE_Int *num_cols_offd_C_ptr, HYPRE_BigInt **col_map_offd_C_ptr );
+HYPRE_Int hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg_A,
+                                               HYPRE_Int num_cols_A, HYPRE_Int num_cols_B, HYPRE_BigInt first_col_diag_B,
+                                               HYPRE_BigInt last_col_diag_B, HYPRE_Int num_cols_offd_B, HYPRE_BigInt *col_map_offd_B,
+                                               HYPRE_Int local_nnz_Cbar, hypre_CSRMatrix *Cbar, hypre_CSRMatrix *Cext,
+                                               hypre_CSRMatrix **C_diag_ptr, hypre_CSRMatrix **C_offd_ptr, HYPRE_Int *num_cols_offd_C_ptr,
+                                               HYPRE_BigInt **col_map_offd_C_ptr );
 hypre_ParCSRMatrix *hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A, hypre_ParCSRMatrix  *B );
 hypre_ParCSRMatrix *hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A, hypre_ParCSRMatrix  *B );
 hypre_ParCSRMatrix *hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A, hypre_ParCSRMatrix  *B );

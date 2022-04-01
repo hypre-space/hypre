@@ -332,7 +332,7 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
       {
          hypre_printf("--- rep %d (out of %d) ---\n", i, rep);
       }
-      if (i == rep -1)
+      if (i == rep - 1)
       {
          time_index = hypre_InitializeTiming("Device Parcsr Matrix-by-Matrix, RAP2");
          hypre_BeginTiming(time_index);
@@ -389,7 +389,8 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
 
       if (myid == 0)
       {
-         hypre_printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
+         hypre_printf("AH: %d x %d, nnz %d, CPU-GPU err %e\n",
+                      hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
                       hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
                       hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
                       rfnorm);
@@ -773,7 +774,7 @@ main( hypre_int argc,
    {
       HYPRE_Int ierr1 = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
                                             HYPRE_PARCSR, &ij_A );
-      HYPRE_Int ierr2 = HYPRE_IJMatrixRead( argv[build_matrix_arg_index+1], comm,
+      HYPRE_Int ierr2 = HYPRE_IJMatrixRead( argv[build_matrix_arg_index + 1], comm,
                                             HYPRE_PARCSR, &ij_P );
       if (ierr1 || ierr2)
       {

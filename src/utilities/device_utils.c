@@ -674,9 +674,11 @@ void hypre_CudaCompileFlagCheck()
    hypre_int *cuda_arch_compile_d = NULL;
    //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
    HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
-   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int), cudaMemcpyHostToDevice) );
+   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
+                               cudaMemcpyHostToDevice) );
    HYPRE_GPU_LAUNCH( hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
-   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int), cudaMemcpyDeviceToHost) );
+   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
+                               cudaMemcpyDeviceToHost) );
    //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
    HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
 
@@ -1020,7 +1022,7 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HY
 
 __global__ void
 hypreGPUKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
-                                HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
+                               HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
@@ -1059,7 +1061,7 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
 
 __global__ void
 hypreGPUKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
-                                 HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
+                                HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
 {
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 
@@ -1093,9 +1095,9 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
 }
 
 __global__ void
-hypreGPUKernel_BigToSmallCopy(      HYPRE_Int*    __restrict__ tgt,
-                                     const HYPRE_BigInt* __restrict__ src,
-                                     HYPRE_Int                  size)
+hypreGPUKernel_BigToSmallCopy( HYPRE_Int*          __restrict__ tgt,
+                               const HYPRE_BigInt* __restrict__ src,
+                               HYPRE_Int                        size )
 {
    HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
 

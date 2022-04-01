@@ -305,7 +305,8 @@ HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
 hypre_MemoryTracker * hypre_MemoryTrackerCreate();
 void hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker);
 void hypre_MemoryTrackerInsert(const char *action, void *ptr, void *ptr2, size_t nbytes,
-                               hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2, const char *filename, const char *function, HYPRE_Int line);
+                               hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2, const char *filename,
+                               const char *function, HYPRE_Int line);
 HYPRE_Int hypre_PrintMemoryTracker();
 #endif
 

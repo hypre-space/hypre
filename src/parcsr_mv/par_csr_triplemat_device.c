@@ -125,7 +125,8 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       hypre_ForceSyncComputeStream(hypre_handle());
       t2 = hypre_MPI_Wtime() - t1 - t2;
       hypre_ParPrintf(comm, "Time Bext %f\n", t2);
-      hypre_ParPrintf(comm, "Size Bext %d %d %d\n", hypre_CSRMatrixNumRows(Bext), hypre_CSRMatrixNumCols(Bext), hypre_CSRMatrixNumNonzeros(Bext));
+      hypre_ParPrintf(comm, "Size Bext %d %d %d\n", hypre_CSRMatrixNumRows(Bext),
+                      hypre_CSRMatrixNumCols(Bext), hypre_CSRMatrixNumNonzeros(Bext));
 #endif
 
 #if PARCSRGEMM_TIMING > 1
@@ -502,7 +503,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_ForceSyncComputeStream(hypre_handle());
       t2 = hypre_MPI_Wtime() - t1;
       hypre_ParPrintf(comm, "Time Cext %f\n", t2);
-      hypre_ParPrintf(comm, "Size Cext %d %d %d\n", hypre_CSRMatrixNumRows(Cext), hypre_CSRMatrixNumCols(Cext), hypre_CSRMatrixNumNonzeros(Cext));
+      hypre_ParPrintf(comm, "Size Cext %d %d %d\n", hypre_CSRMatrixNumRows(Cext),
+                      hypre_CSRMatrixNumCols(Cext), hypre_CSRMatrixNumNonzeros(Cext));
 #endif
 
       /* add Cext to local part of Cbar */
@@ -893,7 +895,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          tmp_j + tmp_s,
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
-                         [const_val = num_cols] (const auto & x) {return x + const_val;} );
+      [const_val = num_cols] (const auto & x) {return x + const_val;} );
    }
 #else
    HYPRE_THRUST_CALL( gather,
@@ -951,7 +953,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    HYPRE_Int     *zmp_j = hypre_TAlloc(HYPRE_Int,     tmp_s, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *zmp_a = hypre_TAlloc(HYPRE_Complex, tmp_s, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_Int local_nnz_C = hypreDevice_ReduceByTupleKey(tmp_s, tmp_i, tmp_j, tmp_a, zmp_i, zmp_j, zmp_a);
+   HYPRE_Int local_nnz_C = hypreDevice_ReduceByTupleKey(tmp_s, tmp_i, tmp_j, tmp_a, zmp_i, zmp_j,
+                                                        zmp_a);
 
    hypre_TFree(tmp_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
@@ -1045,7 +1048,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          C_offd_j,
-                         [const_val = num_cols] (const auto & x) {return x - const_val;} );
+      [const_val = num_cols] (const auto & x) {return x - const_val;} );
    }
 #else
    HYPRE_THRUST_CALL( transform,

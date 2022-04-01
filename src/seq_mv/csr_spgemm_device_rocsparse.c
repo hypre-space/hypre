@@ -78,14 +78,14 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
    void *rs_buffer;
 
    HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrgemm_buffer_size(handle,
-                                                            transA, transB,
-                                                            m, n, k,
-                                                            &alpha, // \alpha = 1
-                                                            descrA, nnzA, d_ia, d_ja_sorted,
-                                                            descrB, nnzB, d_ib, d_jb_sorted,
-                                                            NULL, // \beta = 0
-                                                            NULL,   0,    NULL, NULL, // D is nothing
-                                                            infoC, &rs_buffer_size) );
+                                                             transA, transB,
+                                                             m, n, k,
+                                                             &alpha, // \alpha = 1
+                                                             descrA, nnzA, d_ia, d_ja_sorted,
+                                                             descrB, nnzB, d_ib, d_jb_sorted,
+                                                             NULL, // \beta = 0
+                                                             NULL,   0,    NULL, NULL, // D is nothing
+                                                             infoC, &rs_buffer_size) );
 
    rs_buffer = hypre_TAlloc(char, rs_buffer_size, HYPRE_MEMORY_DEVICE);
 
