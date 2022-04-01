@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#define PARCSRGEMM_TIMING 0
+#define PARCSRGEMM_TIMING 2
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
@@ -806,6 +806,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    return C;
 }
 
+#if 1
 HYPRE_Int
 hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      HYPRE_Int            num_rows,
@@ -823,8 +824,38 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      HYPRE_BigInt       **col_map_offd_C_ptr )
 {
 #if PARCSRGEMM_TIMING > 1
+   MPI_Comm comm = hypre_ParCSRCommPkgComm(comm_pkg);
+   HYPRE_Real t1, t2;
    t1 = hypre_MPI_Wtime();
 #endif
+
+   return hypre_error_flag;
+}
+
+#else
+
+HYPRE_Int
+hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
+                                     HYPRE_Int            num_rows,
+                                     HYPRE_Int            num_cols,
+                                     HYPRE_BigInt         first_col_diag,
+                                     HYPRE_BigInt         last_col_diag,
+                                     HYPRE_Int            num_cols_offd,
+                                     HYPRE_BigInt        *col_map_offd,
+                                     HYPRE_Int            local_nnz_Cbar,
+                                     hypre_CSRMatrix     *Cbar,
+                                     hypre_CSRMatrix     *Cext,
+                                     hypre_CSRMatrix    **C_diag_ptr,
+                                     hypre_CSRMatrix    **C_offd_ptr,
+                                     HYPRE_Int           *num_cols_offd_C_ptr,
+                                     HYPRE_BigInt       **col_map_offd_C_ptr )
+{
+#if PARCSRGEMM_TIMING > 1
+   MPI_Comm comm = hypre_ParCSRCommPkgComm(comm_pkg);
+   HYPRE_Real t1, t2;
+   t1 = hypre_MPI_Wtime();
+#endif
+
    // to hold Cbar local and Cext
    HYPRE_Int        tmp_s = local_nnz_Cbar + hypre_CSRMatrixNumNonzeros(Cext);
    HYPRE_Int       *tmp_i = hypre_TAlloc(HYPRE_Int,     tmp_s, HYPRE_MEMORY_DEVICE);
@@ -1075,5 +1106,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
    return hypre_error_flag;
 }
+
+#endif
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
