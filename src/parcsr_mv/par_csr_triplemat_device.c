@@ -162,15 +162,10 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 #endif
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      HYPRE_Int nnz_C_diag = 0;
-      if (hypre_CSRMatrixNumNonzeros(Cbar) > 0)
-      {
-         nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
-                                         hypre_CSRMatrixJ(Cbar),
-                                         hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
-                                         pred );
-      }
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
+                                                hypre_CSRMatrixJ(Cbar),
+                                                hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                                                pred );
 #else
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 hypre_CSRMatrixJ(Cbar),
@@ -247,15 +242,11 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      if (nnz_C_offd > 0)
-      {
-         HYPRE_ONEDPL_CALL( std::transform,
-                            C_offd_j,
-                            C_offd_j + nnz_C_offd,
-                            C_offd_j,
-         [const_val = hypre_ParCSRMatrixNumCols(B)] (const auto & x) {return x - const_val;} );
-      }
+      HYPRE_ONEDPL_CALL( std::transform,
+                         C_offd_j,
+                         C_offd_j + nnz_C_offd,
+                         C_offd_j,
+      [const_val = hypre_ParCSRMatrixNumCols(B)] (const auto & x) {return x - const_val;} );
 #else
       HYPRE_THRUST_CALL( transform,
                          C_offd_j,
@@ -458,15 +449,11 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                                           hypre_ParCSRMatrixFirstColDiag(B),
                                           hypre_ParCSRMatrixDeviceColMapOffd(B) );
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      if (hypre_CSRMatrixNumNonzeros(Cbar) > local_nnz_Cbar)
-      {
-         HYPRE_ONEDPL_CALL( std::transform,
-                            hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
-                            hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
-                            hypre_CSRMatrixBigJ(Cint),
-                            func1 );
-      }
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                         hypre_CSRMatrixBigJ(Cint),
+                         func1 );
 #else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
@@ -703,15 +690,11 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       RAP_functor<1, HYPRE_BigInt> func1(hypre_ParCSRMatrixNumCols(P), hypre_ParCSRMatrixFirstColDiag(P),
                                          col_map_offd);
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      if (hypre_CSRMatrixNumNonzeros(Cbar) > local_nnz_Cbar)
-      {
-         HYPRE_ONEDPL_CALL( std::transform,
-                            hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
-                            hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
-                            hypre_CSRMatrixBigJ(Cint),
-                            func1 );
-      }
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                         hypre_CSRMatrixBigJ(Cint),
+                         func1 );
 #else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
@@ -806,7 +789,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    return C;
 }
 
-#if 1
+#if 0
 HYPRE_Int
 hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      HYPRE_Int            num_rows,
@@ -919,15 +902,11 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      tmp_i + local_nnz_Cbar );
 
-   /* WM: necessary? */
-   if (tmp_s > local_nnz_Cbar + Cext_diag_nnz)
-   {
-      HYPRE_ONEDPL_CALL( std::transform,
-                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
-                         tmp_j + tmp_s,
-                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
-      [const_val = num_cols] (const auto & x) {return x + const_val;} );
-   }
+   HYPRE_ONEDPL_CALL( std::transform,
+                      tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+                      tmp_j + tmp_s,
+                      tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+   [const_val = num_cols] (const auto & x) {return x + const_val;} );
 #else
    HYPRE_THRUST_CALL( gather,
                       tmp_i + local_nnz_Cbar,
@@ -948,15 +927,11 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                  HYPRE_MEMORY_DEVICE);
    RAP_functor<2, HYPRE_Int> func2(num_cols, 0, offd_map_to_C);
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   if (local_nnz_Cbar > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::transform,
-                         hypre_CSRMatrixJ(Cbar),
-                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
-                         tmp_j,
-                         func2 );
-   }
+   HYPRE_ONEDPL_CALL( std::transform,
+                      hypre_CSRMatrixJ(Cbar),
+                      hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                      tmp_j,
+                      func2 );
 #else
    HYPRE_THRUST_CALL( transform,
                       hypre_CSRMatrixJ(Cbar),
@@ -1003,15 +978,10 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    in_range<HYPRE_Int> pred(0, num_cols - 1);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   HYPRE_Int nnz_C_diag = 0;
-   if (local_nnz_C > 0)
-   {
-      nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
-                                      zmp_j,
-                                      zmp_j + local_nnz_C,
-                                      pred );
-   }
+   HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
+                                             zmp_j,
+                                             zmp_j + local_nnz_C,
+                                             pred );
 #else
    HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                              zmp_j,
@@ -1072,15 +1042,11 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   if (nnz_C_offd > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::transform,
-                         C_offd_j,
-                         C_offd_j + nnz_C_offd,
-                         C_offd_j,
-      [const_val = num_cols] (const auto & x) {return x - const_val;} );
-   }
+   HYPRE_ONEDPL_CALL( std::transform,
+                      C_offd_j,
+                      C_offd_j + nnz_C_offd,
+                      C_offd_j,
+   [const_val = num_cols] (const auto & x) {return x - const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       C_offd_j,

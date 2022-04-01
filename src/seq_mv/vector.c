@@ -491,12 +491,8 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
                                               size, alpha,
                                               y_data, 1).wait() );
 #else
-   /* WM: necessary? */
-   if (size > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size,
-                         y_data, [alpha](HYPRE_Complex y) -> HYPRE_Complex { return alpha * y; } );
-   }
+   HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size,
+                      y_data, [alpha](HYPRE_Complex y) -> HYPRE_Complex { return alpha * y; } );
 #endif // #if defined(HYPRE_USING_ONEMKL)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -568,12 +564,8 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                                               size, alpha,
                                               x_data, 1, y_data, 1).wait() );
 #else
-   /* WM: necessary? */
-   if (size > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
-                         [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
-   }
+   HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
+                      [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
 #endif // #if defined(HYPRE_USING_ONEMKL)
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
