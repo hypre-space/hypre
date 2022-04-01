@@ -437,7 +437,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                         first + B_ext_nnz,                                                 /* last    */
                         B_ext_bigj,                                                        /* stencil */
                         oneapi::dpl::make_zip_iterator(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data,
-                                                       B_ext_diag_xata),                                /* result  */
+                                                       B_ext_diag_xata),                   /* result  */
                         pred1 );
       hypre_assert( std::get<0>(new_end.base()) == B_ext_diag_ii + B_ext_diag_nnz );
 #else
@@ -447,9 +447,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                                                                      B_ext_xata)),             /* first */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,      B_ext_data,
                                                                      B_ext_xata)) + B_ext_nnz, /* last */
-                        B_ext_bigj,                                                                                                          /* stencil */
+                        B_ext_bigj,                                                            /* stencil */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_diag_ii, B_ext_diag_bigj, B_ext_diag_data,
-                                                                     B_ext_diag_xata)),     /* result */
+                                                                     B_ext_diag_xata)),        /* result */
                         pred1 );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_diag_ii + B_ext_diag_nnz );
@@ -473,7 +473,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                                                                      B_ext_data)),             /* first */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,
                                                                      B_ext_data)) + B_ext_nnz, /* last */
-                        B_ext_bigj,                                                                                            /* stencil */
+                        B_ext_bigj,                                                            /* stencil */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_diag_ii, B_ext_diag_bigj,
                                                                      B_ext_diag_data)),        /* result */
                         pred1 );
@@ -510,9 +510,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
 #if defined(HYPRE_USING_SYCL)
       auto first = oneapi::dpl::make_zip_iterator(B_ext_ii, B_ext_bigj, B_ext_data, B_ext_xata);
       auto new_end = hypreSycl_copy_if(
-                        first,                                                                                            /* first */
-                        first + B_ext_nnz,                                                                                /* last */
-                        B_ext_bigj,                                                                                       /* stencil */
+                        first,                                           /* first */
+                        first + B_ext_nnz,                               /* last */
+                        B_ext_bigj,                                      /* stencil */
                         oneapi::dpl::make_zip_iterator(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data,
                                                        B_ext_offd_xata), /* result */
                         std::not_fn(pred1) );
@@ -526,7 +526,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                                                                      B_ext_xata)) + B_ext_nnz, /* last */
                         B_ext_bigj,                                                            /* stencil */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data,
-                                                                     B_ext_offd_xata)),     /* result */
+                                                                     B_ext_offd_xata)),        /* result */
                         thrust::not1(pred1) );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
@@ -550,7 +550,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                                                                      B_ext_data)),             /* first */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_ii,      B_ext_bigj,
                                                                      B_ext_data)) + B_ext_nnz, /* last */
-                        B_ext_bigj,                                                                                            /* stencil */
+                        B_ext_bigj,                                                            /* stencil */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj,
                                                                      B_ext_offd_data)),        /* result */
                         thrust::not1(pred1) );
@@ -651,8 +651,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
 
    if (map_B_to_C_ptr)
    {
-      *map_B_to_C_ptr   = map_B_to_C;
+      *map_B_to_C_ptr = map_B_to_C;
    }
+
    *num_cols_offd_C_ptr = num_cols_offd_C;
    *col_map_offd_C_ptr  = col_map_offd_C;
 
