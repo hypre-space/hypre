@@ -245,14 +245,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #elif defined(HYPRE_USING_SYCL)
       auto permuted_source = oneapi::dpl::make_permutation_iterator(locl_data,
                                                                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg));
-      /* WM: necessary? */
-      if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) > 0)
-      {
-         HYPRE_ONEDPL_CALL( std::copy,
-                            permuted_source,
-                            permuted_source + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                            send_data );
-      }
+      HYPRE_ONEDPL_CALL( std::copy,
+                         permuted_source,
+                         permuted_source + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                         send_data );
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       /* pack send data on device */
       HYPRE_Int i;

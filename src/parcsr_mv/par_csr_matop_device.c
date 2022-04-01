@@ -279,16 +279,12 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                  HYPRE_Int, hypre_CSRMatrixNumRows(E),
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 #ifdef HYPRE_USING_SYCL
-   /* WM: necessary? */
-   if (hypre_CSRMatrixNumRows(E) > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::transform,
-                         hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
-                         hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(E) + 1,
-                         hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
-                         [const_val = hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd)] (
-      const auto & x) {return x + const_val;} );
-   }
+   HYPRE_ONEDPL_CALL( std::transform,
+                      hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
+                      hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(E) + 1,
+                      hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,
+                      [const_val = hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd)] (
+   const auto & x) {return x + const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       hypre_CSRMatrixI(B) + hypre_ParCSRMatrixNumRows(A) + 1,

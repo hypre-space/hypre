@@ -768,58 +768,6 @@ hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
    }
 }
 
-/* B = A(row_indices, :) */
-/* Note: d_ib is an input vector that contains row ptrs,
- *       i.e., start positions where to put the rows in d_jb and d_ab.
- *       The col indices in B are global indices, i.e., BigJ
- *       of length (nrows + 1) or nrow (without the last entry, nnz) */
-/* Special cases:
- *    if d_row_indices == NULL, it means d_row_indices=[0,1,...,nrows-1]
- *    If col_map_offd_A == NULL, use (-1 - d_offd_j) as column id
- *    If nrows == 1 and d_ib == NULL, it means d_ib[0] = 0 */
-HYPRE_Int
-hypreDevice_CopyParCSRRows(HYPRE_Int      nrows,
-                           HYPRE_Int     *d_row_indices,
-                           HYPRE_Int      job,
-                           HYPRE_Int      has_offd,
-                           HYPRE_BigInt   first_col,
-                           HYPRE_BigInt  *d_col_map_offd_A,
-                           HYPRE_Int     *d_diag_i,
-                           HYPRE_Int     *d_diag_j,
-                           HYPRE_Complex *d_diag_a,
-                           HYPRE_Int     *d_offd_i,
-                           HYPRE_Int     *d_offd_j,
-                           HYPRE_Complex *d_offd_a,
-                           HYPRE_Int     *d_ib,
-                           HYPRE_BigInt  *d_jb,
-                           HYPRE_Complex *d_ab)
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   hypre_assert(!(nrows > 1 && d_ib == NULL));
-
-   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-   /*
-   if (job == 2)
-   {
-   }
-   */
-
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CopyParCSRRows, gDim, bDim,
-                     nrows, d_row_indices, has_offd, first_col, d_col_map_offd_A,
-                     d_diag_i, d_diag_j, d_diag_a,
-                     d_offd_i, d_offd_j, d_offd_a,
-                     d_ib, d_jb, d_ab );
-
-   return hypre_error_flag;
-}
-
 HYPRE_Int
 hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 {

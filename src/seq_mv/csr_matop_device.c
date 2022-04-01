@@ -472,15 +472,11 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    }
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   if (B_ext_diag_nnz > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::transform,
-                         B_ext_diag_bigj,
-                         B_ext_diag_bigj + B_ext_diag_nnz,
-                         B_ext_diag_j,
-      [const_val = first_col_diag_B](const auto & x) {return x - const_val;} );
-   }
+   HYPRE_ONEDPL_CALL( std::transform,
+                      B_ext_diag_bigj,
+                      B_ext_diag_bigj + B_ext_diag_nnz,
+                      B_ext_diag_j,
+   [const_val = first_col_diag_B](const auto & x) {return x - const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       B_ext_diag_bigj,
@@ -877,15 +873,11 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
                  hypre_CSRMatrixNumRows(B),
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   if (hypre_CSRMatrixNumRows(C) > hypre_CSRMatrixNumRows(A))
-   {
-      HYPRE_ONEDPL_CALL( std::transform,
-                         C_i + hypre_CSRMatrixNumRows(A) + 1,
-                         C_i + hypre_CSRMatrixNumRows(C) + 1,
-                         C_i + hypre_CSRMatrixNumRows(A) + 1,
-      [const_val = hypre_CSRMatrixNumNonzeros(A)] (const auto & x) {return x + const_val;} );
-   }
+   HYPRE_ONEDPL_CALL( std::transform,
+                      C_i + hypre_CSRMatrixNumRows(A) + 1,
+                      C_i + hypre_CSRMatrixNumRows(C) + 1,
+                      C_i + hypre_CSRMatrixNumRows(A) + 1,
+   [const_val = hypre_CSRMatrixNumNonzeros(A)] (const auto & x) {return x + const_val;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       C_i + hypre_CSRMatrixNumRows(A) + 1,
