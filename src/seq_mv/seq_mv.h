@@ -578,13 +578,9 @@ HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int *y_ind, HYPRE_Int fill );
 
-<<<<<<< HEAD
 HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int alpha, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta, HYPRE_Int *d_y );
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-=======
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
->>>>>>> d079a90fb8f15baf11bab7115efddfbc0f0730c5
 hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 hypre_GpuMatData* hypre_GpuMatDataCreate();
