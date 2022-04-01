@@ -1045,7 +1045,7 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
                              hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
 #endif
 
-                      return hypre_error_flag;
+   return hypre_error_flag;
 }
 #endif
 
