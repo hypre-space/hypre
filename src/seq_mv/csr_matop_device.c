@@ -388,15 +388,10 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
       /* query the nnz's */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      B_ext_diag_nnz = 0;
-      if (B_ext_nnz > 0)
-      {
-         B_ext_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                             B_ext_bigj,
-                                             B_ext_bigj + B_ext_nnz,
-                                             pred1 );
-      }
+      B_ext_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                          B_ext_bigj,
+                                          B_ext_bigj + B_ext_nnz,
+                                          pred1 );
 #else
       B_ext_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                           B_ext_bigj,
@@ -551,18 +546,13 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   HYPRE_BigInt *new_end = col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B;
-   if (B_ext_offd_nnz + num_cols_offd_B > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::sort,
-                         col_map_offd_C,
-                         col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   HYPRE_ONEDPL_CALL( std::sort,
+                      col_map_offd_C,
+                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-      new_end = HYPRE_ONEDPL_CALL( std::unique,
-                                   col_map_offd_C,
-                                   col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-   }
+   HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              col_map_offd_C,
+                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 #else
    HYPRE_THRUST_CALL( sort,
                       col_map_offd_C,
@@ -591,7 +581,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
       map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
+      /* WM: onedpl lower bound currently does not accept zero length input */
       if (num_cols_offd_C > 0)
       {
          HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
@@ -612,7 +602,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    }
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
+   /* WM: onedpl lower bound currently does not accept zero length input */
    if (num_cols_offd_C > 0 && B_ext_offd_nnz > 0)
    {
       HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,

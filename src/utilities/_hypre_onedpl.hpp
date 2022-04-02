@@ -100,11 +100,6 @@ template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
 Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
                         Iter3 result, Pred pred)
 {
-   /* WM: necessary? */
-   if (last - first <= 0)
-   {
-      return result;
-   }
    static_assert(
       std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
       std::random_access_iterator_tag>::value &&
@@ -126,11 +121,6 @@ template <typename InputIter1, typename InputIter2,
 OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
                             InputIter2 input_first, OutputIter result)
 {
-   /* WM: necessary? */
-   if (map_last - map_first <= 0)
-   {
-      return result;
-   }
    static_assert(
       std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
       std::random_access_iterator_tag>::value &&
