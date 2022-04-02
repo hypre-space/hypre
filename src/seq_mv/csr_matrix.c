@@ -65,7 +65,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
       HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(matrix);
 
       hypre_TFree(hypre_CSRMatrixI(matrix),      memory_location);
-      hypre_TFree(hypre_CSRMatrixRownnz(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_CSRMatrixRownnz(matrix), memory_location);
 
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {

@@ -117,7 +117,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
    for (i = 0; i < num_inner_iters; ++i)
    {
       // 2) r = Lz
-      hypre_CSRMatrixSpMVDevice(0, 1.0, A_diag, z_local, 0.0, r_local, NULL, -2);
+      hypre_CSRMatrixSpMVDevice(0, 1.0, A_diag, z_local, 0.0, r_local, -2);
       // 3) z = r/D, u = u + m*z
       hypreDevice_DiagScaleVector2(num_rows, A_diag_i, A_diag_data, r_data, multiplier, z_data, u_data);
       multiplier *= -1.0;
