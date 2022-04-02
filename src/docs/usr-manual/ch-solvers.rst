@@ -30,7 +30,7 @@ interfaces:
    ADS                      X        X        X
    MLI                      X        X        X
    MGR                                        X
-   FSAI                     X        X        X
+   FSAI                                       X
    ParaSails                X        X        X
    hypre-ILU                                  X
    Euclid                   X        X        X
