@@ -942,6 +942,42 @@ hypre_ParcsrGetExternalRowsDeviceWait(void *vrequest)
    return A_ext;
 }
 
+HYPRE_Int
+hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
+                                  HYPRE_Int             local_nrows )
+{
+   HYPRE_Int  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int  num_elemt = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_Int *send_map  = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
+
+   hypre_CSRMatrix *matrix_E = hypre_CSRMatrixCreate(local_nrows, num_elemt, num_elemt);
+   hypre_CSRMatrixMemoryLocation(matrix_E) = HYPRE_MEMORY_DEVICE;
+
+   HYPRE_Int *e_ii = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *e_j  = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(e_ii, send_map, HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL( sequence, e_j, e_j + num_elemt);
+   HYPRE_THRUST_CALL( stable_sort_by_key, e_ii, e_ii + num_elemt, e_j );
+
+   HYPRE_Int *e_i = hypreDevice_CsrRowIndicesToPtrs(local_nrows, num_elemt, e_ii);
+
+   HYPRE_Int *new_end = HYPRE_THRUST_CALL( unique, e_ii, e_ii + num_elemt);
+   HYPRE_Int nid = new_end - e_ii;
+   e_ii = hypre_TReAlloc_v2(e_ii, HYPRE_Int, num_elemt, HYPRE_Int, nid,
+                            HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixI(matrix_E) = e_i;
+   hypre_CSRMatrixJ(matrix_E) = e_j;
+   hypre_CSRMatrixNumRownnz(matrix_E) = nid;
+   hypre_CSRMatrixRownnz(matrix_E) = e_ii;
+
+   hypre_ParCSRCommPkgMatrixE(comm_pkg) = matrix_E;
+
+   return hypre_error_flag;
+}
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

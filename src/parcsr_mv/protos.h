@@ -336,6 +336,8 @@ HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_R
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE_Complex tol,
                                                     HYPRE_Int type);
 
+HYPRE_Int hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int local_nrows );
+
 #ifdef HYPRE_USING_PERSISTENT_COMM
 hypre_ParCSRPersistentCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job,
                                                                          hypre_ParCSRCommPkg *comm_pkg);
@@ -446,7 +448,7 @@ HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                      HYPRE_Complex beta, hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y );
-HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex *locl_data, HYPRE_Complex *recv_data,
+HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int nrows, HYPRE_Complex *locl_data, HYPRE_Complex *recv_data,
                                             hypre_ParCSRCommPkg *comm_pkg );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                         hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y, HYPRE_Int *CF_marker, HYPRE_Int fpt );
