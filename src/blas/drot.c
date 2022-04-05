@@ -21,9 +21,9 @@ extern "C" {
     /* System generated locals */
 
     /* Local variables */
-    static integer i;
-    static doublereal dtemp;
-    static integer ix, iy;
+     integer i;
+     doublereal dtemp;
+     integer ix, iy;
 
 
 /*     applies a plane rotation.   

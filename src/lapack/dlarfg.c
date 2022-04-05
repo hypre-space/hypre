@@ -8,60 +8,60 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dlarfg_(integer *n, doublereal *alpha, doublereal *x, 
+/* Subroutine */ integer dlarfg_(integer *n, doublereal *alpha, doublereal *x,
 	integer *incx, doublereal *tau)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       September 30, 1994   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLARFG generates a real elementary reflector H of order n, such   
-    that   
+    DLARFG generates a real elementary reflector H of order n, such
+    that
 
-          H * ( alpha ) = ( beta ),   H' * H = I.   
-              (   x   )   (   0  )   
+          H * ( alpha ) = ( beta ),   H' * H = I.
+              (   x   )   (   0  )
 
-    where alpha and beta are scalars, and x is an (n-1)-element real   
-    vector. H is represented in the form   
+    where alpha and beta are scalars, and x is an (n-1)-element real
+    vector. H is represented in the form
 
-          H = I - tau * ( 1 ) * ( 1 v' ) ,   
-                        ( v )   
+          H = I - tau * ( 1 ) * ( 1 v' ) ,
+                        ( v )
 
-    where tau is a real scalar and v is a real (n-1)-element   
-    vector.   
+    where tau is a real scalar and v is a real (n-1)-element
+    vector.
 
-    If the elements of x are all zero, then tau = 0 and H is taken to be   
-    the unit matrix.   
+    If the elements of x are all zero, then tau = 0 and H is taken to be
+    the unit matrix.
 
-    Otherwise  1 <= tau <= 2.   
+    Otherwise  1 <= tau <= 2.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    N       (input) INTEGER   
-            The order of the elementary reflector.   
+    N       (input) INTEGER
+            The order of the elementary reflector.
 
-    ALPHA   (input/output) DOUBLE PRECISION   
-            On entry, the value alpha.   
-            On exit, it is overwritten with the value beta.   
+    ALPHA   (input/output) DOUBLE PRECISION
+            On entry, the value alpha.
+            On exit, it is overwritten with the value beta.
 
-    X       (input/output) DOUBLE PRECISION array, dimension   
-                           (1+(N-2)*abs(INCX))   
-            On entry, the vector x.   
-            On exit, it is overwritten with the vector v.   
+    X       (input/output) DOUBLE PRECISION array, dimension
+                           (1+(N-2)*abs(INCX))
+            On entry, the vector x.
+            On exit, it is overwritten with the vector v.
 
-    INCX    (input) INTEGER   
-            The increment between elements of X. INCX > 0.   
+    INCX    (input) INTEGER
+            The increment between elements of X. INCX > 0.
 
-    TAU     (output) DOUBLE PRECISION   
-            The value tau.   
+    TAU     (output) DOUBLE PRECISION
+            The value tau.
 
-    =====================================================================   
+    =====================================================================
 
 
        Parameter adjustments */
@@ -71,15 +71,15 @@ extern "C" {
     /* Builtin functions */
     doublereal d_sign(doublereal *, doublereal *);
     /* Local variables */
-    static doublereal beta;
+    doublereal beta;
     extern doublereal dnrm2_(integer *, doublereal *, integer *);
-    static integer j;
-    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
+    integer j;
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *,
 	    integer *);
-    static doublereal xnorm;
+    doublereal xnorm;
     extern doublereal dlapy2_(doublereal *, doublereal *), dlamch_(const char *);
-    static doublereal safmin, rsafmn;
-    static integer knt;
+    doublereal safmin, rsafmn;
+    integer knt;
 
     --x;
 

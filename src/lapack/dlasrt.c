@@ -11,58 +11,58 @@ extern "C" {
 /* Subroutine */ integer dlasrt_(const char *id, integer *n, doublereal *d__, integer *
 	info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       September 30, 1994   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    Sort the numbers in D in increasing order (if ID = 'I') or   
-    in decreasing order (if ID = 'D' ).   
+    Sort the numbers in D in increasing order (if ID = 'I') or
+    in decreasing order (if ID = 'D' ).
 
-    Use Quick Sort, reverting to Insertion sort on arrays of   
-    size <= 20. Dimension of STACK limits N to about 2**32.   
+    Use Quick Sort, reverting to Insertion sort on arrays of
+    size <= 20. Dimension of STACK limits N to about 2**32.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    ID      (input) CHARACTER*1   
-            = 'I': sort D in increasing order;   
-            = 'D': sort D in decreasing order.   
+    ID      (input) CHARACTER*1
+            = 'I': sort D in increasing order;
+            = 'D': sort D in decreasing order.
 
-    N       (input) INTEGER   
-            The length of the array D.   
+    N       (input) INTEGER
+            The length of the array D.
 
-    D       (input/output) DOUBLE PRECISION array, dimension (N)   
-            On entry, the array to be sorted.   
-            On exit, D has been sorted into increasing order   
-            (D(1) <= ... <= D(N) ) or into decreasing order   
-            (D(1) >= ... >= D(N) ), depending on ID.   
+    D       (input/output) DOUBLE PRECISION array, dimension (N)
+            On entry, the array to be sorted.
+            On exit, D has been sorted into increasing order
+            (D(1) <= ... <= D(N) ) or into decreasing order
+            (D(1) >= ... >= D(N) ), depending on ID.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input paramters.   
+       Test the input paramters.
 
        Parameter adjustments */
     /* System generated locals */
     integer i__1, i__2;
     /* Local variables */
-    static integer endd, i__, j;
+    integer endd, i__, j;
     extern logical lsame_(const char *,const char *);
-    static integer stack[64]	/* was [2][32] */;
-    static doublereal dmnmx, d1, d2, d3;
-    static integer start;
+    integer stack[64]	/* was [2][32] */;
+    doublereal dmnmx, d1, d2, d3;
+    integer start;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    static integer stkpnt, dir;
-    static doublereal tmp;
+    integer stkpnt, dir;
+    doublereal tmp;
 #define stack_ref(a_1,a_2) stack[(a_2)*2 + a_1 - 3]
 
     --d__;
@@ -149,7 +149,7 @@ L50:
 
     } else if (endd - start > 20) {
 
-/*        Partition D( START:ENDD ) and stack parts, largest one first   
+/*        Partition D( START:ENDD ) and stack parts, largest one first
 
           Choose partition entry as median of 3 */
 

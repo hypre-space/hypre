@@ -9,83 +9,83 @@ extern "C" {
 #include "hypre_lapack.h"
 
 /* Subroutine */ integer dlarf_(const char *side, integer *m, integer *n, doublereal *v,
-	 integer *incv, doublereal *tau, doublereal *c__, integer *ldc, 
+	 integer *incv, doublereal *tau, doublereal *c__, integer *ldc,
 	doublereal *work)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       February 29, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       February 29, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLARF applies a real elementary reflector H to a real m by n matrix   
-    C, from either the left or the right. H is represented in the form   
+    DLARF applies a real elementary reflector H to a real m by n matrix
+    C, from either the left or the right. H is represented in the form
 
-          H = I - tau * v * v'   
+          H = I - tau * v * v'
 
-    where tau is a real scalar and v is a real vector.   
+    where tau is a real scalar and v is a real vector.
 
-    If tau = 0, then H is taken to be the unit matrix.   
+    If tau = 0, then H is taken to be the unit matrix.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    SIDE    (input) CHARACTER*1   
-            = 'L': form  H * C   
-            = 'R': form  C * H   
+    SIDE    (input) CHARACTER*1
+            = 'L': form  H * C
+            = 'R': form  C * H
 
-    M       (input) INTEGER   
-            The number of rows of the matrix C.   
+    M       (input) INTEGER
+            The number of rows of the matrix C.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix C.   
+    N       (input) INTEGER
+            The number of columns of the matrix C.
 
-    V       (input) DOUBLE PRECISION array, dimension   
-                       (1 + (M-1)*abs(INCV)) if SIDE = 'L'   
-                    or (1 + (N-1)*abs(INCV)) if SIDE = 'R'   
-            The vector v in the representation of H. V is not used if   
-            TAU = 0.   
+    V       (input) DOUBLE PRECISION array, dimension
+                       (1 + (M-1)*abs(INCV)) if SIDE = 'L'
+                    or (1 + (N-1)*abs(INCV)) if SIDE = 'R'
+            The vector v in the representation of H. V is not used if
+            TAU = 0.
 
-    INCV    (input) INTEGER   
-            The increment between elements of v. INCV <> 0.   
+    INCV    (input) INTEGER
+            The increment between elements of v. INCV <> 0.
 
-    TAU     (input) DOUBLE PRECISION   
-            The value tau in the representation of H.   
+    TAU     (input) DOUBLE PRECISION
+            The value tau in the representation of H.
 
-    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)   
-            On entry, the m by n matrix C.   
-            On exit, C is overwritten by the matrix H * C if SIDE = 'L',   
-            or C * H if SIDE = 'R'.   
+    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)
+            On entry, the m by n matrix C.
+            On exit, C is overwritten by the matrix H * C if SIDE = 'L',
+            or C * H if SIDE = 'R'.
 
-    LDC     (input) INTEGER   
-            The leading dimension of the array C. LDC >= max(1,M).   
+    LDC     (input) INTEGER
+            The leading dimension of the array C. LDC >= max(1,M).
 
-    WORK    (workspace) DOUBLE PRECISION array, dimension   
-                           (N) if SIDE = 'L'   
-                        or (M) if SIDE = 'R'   
+    WORK    (workspace) DOUBLE PRECISION array, dimension
+                           (N) if SIDE = 'L'
+                        or (M) if SIDE = 'R'
 
-    =====================================================================   
+    =====================================================================
 
 
        Parameter adjustments */
     /* Table of constant values */
-    static doublereal c_b4 = 1.;
-    static doublereal c_b5 = 0.;
-    static integer c__1 = 1;
-    
+    doublereal c_b4 = 1.;
+    doublereal c_b5 = 0.;
+    integer c__1 = 1;
+
     /* System generated locals */
     integer c_dim1, c_offset;
     doublereal d__1;
     /* Local variables */
-    extern /* Subroutine */ integer dger_(integer *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dger_(integer *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ integer dgemv_(const char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dgemv_(const char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *);
 
 
@@ -110,7 +110,7 @@ extern "C" {
 /*           C := C - v * w' */
 
 	    d__1 = -(*tau);
-	    dger_(m, n, &d__1, &v[1], incv, &work[1], &c__1, &c__[c_offset], 
+	    dger_(m, n, &d__1, &v[1], incv, &work[1], &c__1, &c__[c_offset],
 		    ldc);
 	}
     } else {
@@ -121,13 +121,13 @@ extern "C" {
 
 /*           w := C * v */
 
-	    dgemv_("No transpose", m, n, &c_b4, &c__[c_offset], ldc, &v[1], 
+	    dgemv_("No transpose", m, n, &c_b4, &c__[c_offset], ldc, &v[1],
 		    incv, &c_b5, &work[1], &c__1);
 
 /*           C := C - w * v' */
 
 	    d__1 = -(*tau);
-	    dger_(m, n, &d__1, &work[1], &c__1, &v[1], incv, &c__[c_offset], 
+	    dger_(m, n, &d__1, &work[1], &c__1, &v[1], incv, &c__[c_offset],
 		    ldc);
 	}
     }

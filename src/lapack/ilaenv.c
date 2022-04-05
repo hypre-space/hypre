@@ -8,114 +8,114 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1, 
-	integer *n2, integer *n3, integer *n4, ftnlen name_len, ftnlen 
+integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
+	integer *n2, integer *n3, integer *n4, ftnlen name_len, ftnlen
 	opts_len)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    ILAENV is called from the LAPACK routines to choose problem-dependent   
-    parameters for the local environment.  See ISPEC for a description of   
-    the parameters.   
+    ILAENV is called from the LAPACK routines to choose problem-dependent
+    parameters for the local environment.  See ISPEC for a description of
+    the parameters.
 
-    This version provides a set of parameters which should give good,   
-    but not optimal, performance on many of the currently available   
-    computers.  Users are encouraged to modify this subroutine to set   
-    the tuning parameters for their particular machine using the option   
-    and problem size information in the arguments.   
+    This version provides a set of parameters which should give good,
+    but not optimal, performance on many of the currently available
+    computers.  Users are encouraged to modify this subroutine to set
+    the tuning parameters for their particular machine using the option
+    and problem size information in the arguments.
 
-    This routine will not function correctly if it is converted to all   
-    lower case.  Converting it to all upper case is allowed.   
+    This routine will not function correctly if it is converted to all
+    lower case.  Converting it to all upper case is allowed.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    ISPEC   (input) INTEGER   
-            Specifies the parameter to be returned as the value of   
-            ILAENV.   
-            = 1: the optimal blocksize; if this value is 1, an unblocked   
-                 algorithm will give the best performance.   
-            = 2: the minimum block size for which the block routine   
-                 should be used; if the usable block size is less than   
-                 this value, an unblocked routine should be used.   
-            = 3: the crossover point (in a block routine, for N less   
-                 than this value, an unblocked routine should be used)   
-            = 4: the number of shifts, used in the nonsymmetric   
-                 eigenvalue routines   
-            = 5: the minimum column dimension for blocking to be used;   
-                 rectangular blocks must have dimension at least k by m,   
-                 where k is given by ILAENV(2,...) and m by ILAENV(5,...)   
-            = 6: the crossover point for the SVD (when reducing an m by n   
-                 matrix to bidiagonal form, if max(m,n)/min(m,n) exceeds   
-                 this value, a QR factorization is used first to reduce   
-                 the matrix to a triangular form.)   
-            = 7: the number of processors   
-            = 8: the crossover point for the multishift QR and QZ methods   
-                 for nonsymmetric eigenvalue problems.   
-            = 9: maximum size of the subproblems at the bottom of the   
-                 computation tree in the divide-and-conquer algorithm   
-                 (used by xGELSD and xGESDD)   
-            =10: ieee NaN arithmetic can be trusted not to trap   
-            =11: infinity arithmetic can be trusted not to trap   
+    ISPEC   (input) INTEGER
+            Specifies the parameter to be returned as the value of
+            ILAENV.
+            = 1: the optimal blocksize; if this value is 1, an unblocked
+                 algorithm will give the best performance.
+            = 2: the minimum block size for which the block routine
+                 should be used; if the usable block size is less than
+                 this value, an unblocked routine should be used.
+            = 3: the crossover point (in a block routine, for N less
+                 than this value, an unblocked routine should be used)
+            = 4: the number of shifts, used in the nonsymmetric
+                 eigenvalue routines
+            = 5: the minimum column dimension for blocking to be used;
+                 rectangular blocks must have dimension at least k by m,
+                 where k is given by ILAENV(2,...) and m by ILAENV(5,...)
+            = 6: the crossover point for the SVD (when reducing an m by n
+                 matrix to bidiagonal form, if max(m,n)/min(m,n) exceeds
+                 this value, a QR factorization is used first to reduce
+                 the matrix to a triangular form.)
+            = 7: the number of processors
+            = 8: the crossover point for the multishift QR and QZ methods
+                 for nonsymmetric eigenvalue problems.
+            = 9: maximum size of the subproblems at the bottom of the
+                 computation tree in the divide-and-conquer algorithm
+                 (used by xGELSD and xGESDD)
+            =10: ieee NaN arithmetic can be trusted not to trap
+            =11: infinity arithmetic can be trusted not to trap
 
-    NAME    (input) CHARACTER*(*)   
-            The name of the calling subroutine, in either upper case or   
-            lower case.   
+    NAME    (input) CHARACTER*(*)
+            The name of the calling subroutine, in either upper case or
+            lower case.
 
-    OPTS    (input) CHARACTER*(*)   
-            The character options to the subroutine NAME, concatenated   
-            into a single character string.  For example, UPLO = 'U',   
-            TRANS = 'T', and DIAG = 'N' for a triangular routine would   
-            be specified as OPTS = 'UTN'.   
+    OPTS    (input) CHARACTER*(*)
+            The character options to the subroutine NAME, concatenated
+            into a single character string.  For example, UPLO = 'U',
+            TRANS = 'T', and DIAG = 'N' for a triangular routine would
+            be specified as OPTS = 'UTN'.
 
-    N1      (input) INTEGER   
-    N2      (input) INTEGER   
-    N3      (input) INTEGER   
-    N4      (input) INTEGER   
-            Problem dimensions for the subroutine NAME; these may not all   
-            be required.   
+    N1      (input) INTEGER
+    N2      (input) INTEGER
+    N3      (input) INTEGER
+    N4      (input) INTEGER
+            Problem dimensions for the subroutine NAME; these may not all
+            be required.
 
-   (ILAENV) (output) INTEGER   
-            >= 0: the value of the parameter specified by ISPEC   
-            < 0:  if ILAENV = -k, the k-th argument had an illegal value.   
+   (ILAENV) (output) INTEGER
+            >= 0: the value of the parameter specified by ISPEC
+            < 0:  if ILAENV = -k, the k-th argument had an illegal value.
 
-    Further Details   
-    ===============   
+    Further Details
+    ===============
 
-    The following conventions have been used when calling ILAENV from the   
-    LAPACK routines:   
-    1)  OPTS is a concatenation of all of the character options to   
-        subroutine NAME, in the same order that they appear in the   
-        argument list for NAME, even if they are not used in determining   
-        the value of the parameter specified by ISPEC.   
-    2)  The problem dimensions N1, N2, N3, N4 are specified in the order   
-        that they appear in the argument list for NAME.  N1 is used   
-        first, N2 second, and so on, and unused problem dimensions are   
-        passed a value of -1.   
-    3)  The parameter value returned by ILAENV is checked for validity in   
-        the calling subroutine.  For example, ILAENV is used to retrieve   
-        the optimal blocksize for STRTRI as follows:   
+    The following conventions have been used when calling ILAENV from the
+    LAPACK routines:
+    1)  OPTS is a concatenation of all of the character options to
+        subroutine NAME, in the same order that they appear in the
+        argument list for NAME, even if they are not used in determining
+        the value of the parameter specified by ISPEC.
+    2)  The problem dimensions N1, N2, N3, N4 are specified in the order
+        that they appear in the argument list for NAME.  N1 is used
+        first, N2 second, and so on, and unused problem dimensions are
+        passed a value of -1.
+    3)  The parameter value returned by ILAENV is checked for validity in
+        the calling subroutine.  For example, ILAENV is used to retrieve
+        the optimal blocksize for STRTRI as follows:
 
-        NB = ILAENV( 1, 'STRTRI', UPLO // DIAG, N, -1, -1, -1 )   
-        IF( NB.LE.1 ) NB = MAX( 1, N )   
+        NB = ILAENV( 1, 'STRTRI', UPLO // DIAG, N, -1, -1, -1 )
+        IF( NB.LE.1 ) NB = MAX( 1, N )
 
     ===================================================================== */
     /* Table of constant values */
-    static integer c__0 = 0;
-    static real c_b162 = 0.f;
-    static real c_b163 = 1.f;
-    static integer c__1 = 1;
-    
+    integer c__0 = 0;
+    real c_b162 = 0.f;
+    real c_b163 = 1.f;
+    integer c__1 = 1;
+
     /* System generated locals */
     integer ret_val;
-    /* Builtin functions   
+    /* Builtin functions
        Subroutine */
 
     /* Builtin functions */
@@ -123,14 +123,14 @@ integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
     integer s_cmp(char *, const char *, ftnlen, ftnlen);
 
     /* Local variables */
-    static integer i__;
-    static logical cname, sname;
-    static integer nbmin;
-    static char c1[1], c2[2], c3[3], c4[2];
-    static integer ic, nb;
+    integer i__;
+    logical cname, sname;
+    integer nbmin;
+    char c1[1], c2[2], c3[3], c4[2];
+    integer ic, nb;
     extern integer ieeeck_(integer *, real *, real *);
-    static integer iz, nx;
-    static char subnam[6];
+    integer iz, nx;
+    char subnam[6];
 
 
 
@@ -181,14 +181,14 @@ L100:
 
 /*        EBCDIC character set */
 
-	if (((ic >= 129) && (ic <= 137)) || 
-            ((ic >= 145) && (ic <= 153)) || 
+	if (((ic >= 129) && (ic <= 137)) ||
+            ((ic >= 145) && (ic <= 153)) ||
             ((ic >= 162) && (ic <= 169))) {
 	    *(unsigned char *)subnam = (char) (ic + 64);
 	    for (i__ = 2; i__ <= 6; ++i__) {
 		ic = *(unsigned char *)&subnam[i__ - 1];
-		if (((ic >= 129) && (ic <= 137)) || 
-                    ((ic >= 145) && (ic <= 153)) || 
+		if (((ic >= 129) && (ic <= 137)) ||
+                    ((ic >= 145) && (ic <= 153)) ||
                     ((ic >= 162) && (ic <= 169))) {
 		    *(unsigned char *)&subnam[i__ - 1] = (char) (ic + 64);
 		}
@@ -230,10 +230,10 @@ L100:
 
 L110:
 
-/*     ISPEC = 1:  block size   
+/*     ISPEC = 1:  block size
 
-       In these examples, separate code is provided for setting NB for   
-       real and complex.  We assume that NB will take the same value in   
+       In these examples, separate code is provided for setting NB for
+       real and complex.  We assume that NB will take the same value in
        single or doublereal precision. */
 
     nb = 1;
@@ -245,9 +245,9 @@ L110:
 	    } else {
 		nb = 64;
 	    }
-	} else if (s_cmp(c3, "QRF", (ftnlen)3, (ftnlen)3) == 0 || s_cmp(c3, 
+	} else if (s_cmp(c3, "QRF", (ftnlen)3, (ftnlen)3) == 0 || s_cmp(c3,
 		"RQF", (ftnlen)3, (ftnlen)3) == 0 || s_cmp(c3, "LQF", (ftnlen)
-		3, (ftnlen)3) == 0 || s_cmp(c3, "QLF", (ftnlen)3, (ftnlen)3) 
+		3, (ftnlen)3) == 0 || s_cmp(c3, "QLF", (ftnlen)3, (ftnlen)3)
 		== 0) {
 	    if (sname) {
 		nb = 32;
@@ -303,7 +303,7 @@ L110:
 	}
     } else if (sname && s_cmp(c2, "OR", (ftnlen)2, (ftnlen)2) == 0) {
 	if (*(unsigned char *)c3 == 'G') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -312,7 +312,7 @@ L110:
 		nb = 32;
 	    }
 	} else if (*(unsigned char *)c3 == 'M') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -323,7 +323,7 @@ L110:
 	}
     } else if (cname && s_cmp(c2, "UN", (ftnlen)2, (ftnlen)2) == 0) {
 	if (*(unsigned char *)c3 == 'G') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -332,7 +332,7 @@ L110:
 		nb = 32;
 	    }
 	} else if (*(unsigned char *)c3 == 'M') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -447,7 +447,7 @@ L200:
 	}
     } else if (sname && s_cmp(c2, "OR", (ftnlen)2, (ftnlen)2) == 0) {
 	if (*(unsigned char *)c3 == 'G') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -456,7 +456,7 @@ L200:
 		nbmin = 2;
 	    }
 	} else if (*(unsigned char *)c3 == 'M') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -467,7 +467,7 @@ L200:
 	}
     } else if (cname && s_cmp(c2, "UN", (ftnlen)2, (ftnlen)2) == 0) {
 	if (*(unsigned char *)c3 == 'G') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -476,7 +476,7 @@ L200:
 		nbmin = 2;
 	    }
 	} else if (*(unsigned char *)c3 == 'M') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -527,7 +527,7 @@ L300:
 	}
     } else if (sname && s_cmp(c2, "OR", (ftnlen)2, (ftnlen)2) == 0) {
 	if (*(unsigned char *)c3 == 'G') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -538,7 +538,7 @@ L300:
 	}
     } else if (cname && s_cmp(c2, "UN", (ftnlen)2, (ftnlen)2) == 0) {
 	if (*(unsigned char *)c3 == 'G') {
-	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ", 
+	    if (s_cmp(c4, "QR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "RQ",
 		    (ftnlen)2, (ftnlen)2) == 0 || s_cmp(c4, "LQ", (ftnlen)2, (
 		    ftnlen)2) == 0 || s_cmp(c4, "QL", (ftnlen)2, (ftnlen)2) ==
 		     0 || s_cmp(c4, "HR", (ftnlen)2, (ftnlen)2) == 0 || s_cmp(
@@ -588,8 +588,8 @@ L800:
 
 L900:
 
-/*     ISPEC = 9:  maximum size of the subproblems at the bottom of the   
-                   computation tree in the divide-and-conquer algorithm   
+/*     ISPEC = 9:  maximum size of the subproblems at the bottom of the
+                   computation tree in the divide-and-conquer algorithm
                    (used by xGELSD and xGESDD) */
 
     ret_val = 25;
@@ -597,7 +597,7 @@ L900:
 
 L1000:
 
-/*     ISPEC = 10: ieee NaN arithmetic can be trusted not to trap   
+/*     ISPEC = 10: ieee NaN arithmetic can be trusted not to trap
 
        ILAENV = 0 */
     ret_val = 1;
@@ -608,7 +608,7 @@ L1000:
 
 L1100:
 
-/*     ISPEC = 11: infinity arithmetic can be trusted not to trap   
+/*     ISPEC = 11: infinity arithmetic can be trusted not to trap
 
        ILAENV = 0 */
     ret_val = 1;
