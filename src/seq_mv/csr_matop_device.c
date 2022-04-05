@@ -350,33 +350,121 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
    return ierr;
 }
 
+
 HYPRE_Int
-hypre_CSRMatrixSplitDevice_core( HYPRE_Int
-                                 job,                 /* 0: query B_ext_diag_nnz and B_ext_offd_nnz; 1: the real computation */
-                                 HYPRE_Int         num_rows,
-                                 HYPRE_Int         B_ext_nnz,
-                                 HYPRE_Int
-                                 *B_ext_ii,            /* Note: this is NOT row pointers as in CSR but row indices as in COO */
-                                 HYPRE_BigInt     *B_ext_bigj,          /* Note: [BigInt] global column indices */
-                                 HYPRE_Complex    *B_ext_data,
-                                 char             *B_ext_xata,          /* companion data with B_ext_data; NULL if none */
-                                 HYPRE_BigInt      first_col_diag_B,
-                                 HYPRE_BigInt      last_col_diag_B,
-                                 HYPRE_Int         num_cols_offd_B,
-                                 HYPRE_BigInt     *col_map_offd_B,
-                                 HYPRE_Int       **map_B_to_C_ptr,
-                                 HYPRE_Int        *num_cols_offd_C_ptr,
-                                 HYPRE_BigInt    **col_map_offd_C_ptr,
-                                 HYPRE_Int        *B_ext_diag_nnz_ptr,
-                                 HYPRE_Int        *B_ext_diag_ii,       /* memory allocated outside */
-                                 HYPRE_Int        *B_ext_diag_j,
-                                 HYPRE_Complex    *B_ext_diag_data,
-                                 char             *B_ext_diag_xata,     /* companion with B_ext_diag_data_ptr; NULL if none */
-                                 HYPRE_Int        *B_ext_offd_nnz_ptr,
-                                 HYPRE_Int        *B_ext_offd_ii,       /* memory allocated outside */
-                                 HYPRE_Int        *B_ext_offd_j,
-                                 HYPRE_Complex    *B_ext_offd_data,
-                                 char             *B_ext_offd_xata      /* companion with B_ext_offd_data_ptr; NULL if none */ )
+hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
+                                HYPRE_BigInt  *col_map_offd_B,
+                                HYPRE_Int      B_ext_offd_nnz,
+                                HYPRE_BigInt  *B_ext_offd_bigj,
+                                HYPRE_Int     *num_cols_offd_C_ptr,
+                                HYPRE_BigInt **col_map_offd_C_ptr,
+                                HYPRE_Int    **map_B_to_C_ptr )
+{
+   /* offd map of B_ext_offd Union col_map_offd_B */
+   HYPRE_BigInt *col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
+                                               HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(col_map_offd_C, B_ext_offd_bigj, HYPRE_BigInt, B_ext_offd_nnz,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(col_map_offd_C + B_ext_offd_nnz, col_map_offd_B, HYPRE_BigInt, num_cols_offd_B,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_SYCL)
+   /* WM: necessary? */
+   HYPRE_BigInt *new_end = col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B;
+   if (B_ext_offd_nnz + num_cols_offd_B > 0)
+   {
+      HYPRE_ONEDPL_CALL( std::sort,
+                         col_map_offd_C,
+                         col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+
+      new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                   col_map_offd_C,
+                                   col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   }
+#else
+   HYPRE_THRUST_CALL( sort,
+                      col_map_offd_C,
+                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+
+   HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
+                                              col_map_offd_C,
+                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+#endif
+
+   HYPRE_Int num_cols_offd_C = new_end - col_map_offd_C;
+
+#if 1
+   HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
+   col_map_offd_C = tmp;
+#else
+   col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
+                                      HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+#endif
+
+   /* create map from col_map_offd_B */
+   HYPRE_Int *map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
+
+   if (num_cols_offd_B)
+   {
+#if defined(HYPRE_USING_SYCL)
+      /* WM: necessary? */
+      if (num_cols_offd_C > 0)
+      {
+         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                            col_map_offd_C,
+                            col_map_offd_C + num_cols_offd_C,
+                            col_map_offd_B,
+                            col_map_offd_B + num_cols_offd_B,
+                            map_B_to_C );
+      }
+#else
+      HYPRE_THRUST_CALL( lower_bound,
+                         col_map_offd_C,
+                         col_map_offd_C + num_cols_offd_C,
+                         col_map_offd_B,
+                         col_map_offd_B + num_cols_offd_B,
+                         map_B_to_C );
+#endif
+   }
+
+   *map_B_to_C_ptr = map_B_to_C;
+   *num_cols_offd_C_ptr = num_cols_offd_C;
+   *col_map_offd_C_ptr  = col_map_offd_C;
+
+   return hypre_error_flag;
+}
+
+/* job = 0: query B_ext_diag/offd_nnz; 1: real computation */
+HYPRE_Int
+hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
+                                 HYPRE_Int      num_rows,
+                                 HYPRE_Int      B_ext_nnz,
+                                 HYPRE_Int     *B_ext_ii,            /* Note: NOT row pointers of CSR but row indices of COO */
+                                 HYPRE_BigInt  *B_ext_bigj,          /* Note: [BigInt] global column indices */
+                                 HYPRE_Complex *B_ext_data,
+                                 char          *B_ext_xata,          /* companion data with B_ext_data; NULL if none */
+                                 HYPRE_BigInt   first_col_diag_B,
+                                 HYPRE_BigInt   last_col_diag_B,
+                                 HYPRE_Int      num_cols_offd_B,
+                                 HYPRE_BigInt  *col_map_offd_B,
+                                 HYPRE_Int    **map_B_to_C_ptr,
+                                 HYPRE_Int     *num_cols_offd_C_ptr,
+                                 HYPRE_BigInt **col_map_offd_C_ptr,
+                                 HYPRE_Int     *B_ext_diag_nnz_ptr,
+                                 HYPRE_Int     *B_ext_diag_ii,       /* memory allocated outside */
+                                 HYPRE_Int     *B_ext_diag_j,
+                                 HYPRE_Complex *B_ext_diag_data,
+                                 char          *B_ext_diag_xata,     /* companion with B_ext_diag_data_ptr; NULL if none */
+                                 HYPRE_Int     *B_ext_offd_nnz_ptr,
+                                 HYPRE_Int     *B_ext_offd_ii,       /* memory allocated outside */
+                                 HYPRE_Int     *B_ext_offd_j,
+                                 HYPRE_Complex *B_ext_offd_data,
+                                 char          *B_ext_offd_xata      /* companion with B_ext_offd_data_ptr; NULL if none */ )
 {
    HYPRE_Int      B_ext_diag_nnz;
    HYPRE_Int      B_ext_offd_nnz;
@@ -555,73 +643,8 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
 #endif
    }
 
-   /* offd map of B_ext_offd Union col_map_offd_B */
-   col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(col_map_offd_C,                  B_ext_offd_bigj, HYPRE_BigInt, B_ext_offd_nnz,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(col_map_offd_C + B_ext_offd_nnz, col_map_offd_B,  HYPRE_BigInt, num_cols_offd_B,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   HYPRE_BigInt *new_end = col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B;
-   if (B_ext_offd_nnz + num_cols_offd_B > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::sort,
-                         col_map_offd_C,
-                         col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-
-      new_end = HYPRE_ONEDPL_CALL( std::unique,
-                                   col_map_offd_C,
-                                   col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-   }
-#else
-   HYPRE_THRUST_CALL( sort,
-                      col_map_offd_C,
-                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-
-   HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
-                                              col_map_offd_C,
-                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-#endif
-
-   num_cols_offd_C = new_end - col_map_offd_C;
-
-#if 1
-   HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
-   col_map_offd_C = tmp;
-#else
-   col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
-                                      HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
-#endif
-
-   /* create map from col_map_offd_B */
-   if (num_cols_offd_B)
-   {
-      map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
-#if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      if (num_cols_offd_C > 0)
-      {
-         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
-                            col_map_offd_C,
-                            col_map_offd_C + num_cols_offd_C,
-                            col_map_offd_B,
-                            col_map_offd_B + num_cols_offd_B,
-                            map_B_to_C );
-      }
-#else
-      HYPRE_THRUST_CALL( lower_bound,
-                         col_map_offd_C,
-                         col_map_offd_C + num_cols_offd_C,
-                         col_map_offd_B,
-                         col_map_offd_B + num_cols_offd_B,
-                         map_B_to_C );
-#endif
-   }
+   hypre_CSRMatrixMergeColMapOffd(num_cols_offd_B, col_map_offd_B, B_ext_offd_nnz, B_ext_offd_bigj,
+                                  &num_cols_offd_C, &col_map_offd_C, &map_B_to_C);
 
 #if defined(HYPRE_USING_SYCL)
    /* WM: necessary? */
@@ -645,11 +668,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
 
    hypre_TFree(B_ext_offd_bigj, HYPRE_MEMORY_DEVICE);
 
-   if (map_B_to_C_ptr)
-   {
-      *map_B_to_C_ptr = map_B_to_C;
-   }
-
+   *map_B_to_C_ptr = map_B_to_C;
    *num_cols_offd_C_ptr = num_cols_offd_C;
    *col_map_offd_C_ptr  = col_map_offd_C;
 
@@ -657,7 +676,6 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
 
    return hypre_error_flag;
 }
-
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 
