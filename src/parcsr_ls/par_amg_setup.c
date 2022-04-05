@@ -46,7 +46,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_IntArray     **CF_marker_array;
    hypre_IntArray     **dof_func_array;
    hypre_IntArray      *dof_func;
-   HYPRE_Int           *dof_func_data;
+   HYPRE_Int           *dof_func_data = NULL;
    HYPRE_Real          *relax_weight;
    HYPRE_Real          *omega;
    HYPRE_Real           schwarz_relax_wt = 1;
@@ -211,7 +211,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       ns = num_grid_sweeps[1];
    HYPRE_Real      wall_time;   /* for debugging instrumentation */
    HYPRE_Int       add_end;
-
+   
+   HYPRE_Int	  use_aux_strength_mat = hypre_ParAMGDataUseAuxStrengthMatrix(amg_data);
+   hypre_ParCSRMatrix  *S_aux = NULL;   
+   hypre_ParCSRMatrix  *S_H = NULL;   
+   
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int       dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
@@ -841,10 +845,50 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataSmoother(amg_data) = smoother;
    }
 
+   /*------------------------------------------------------------------------------------------------
+    * Initialize Auxilliary matrix for computing strength matrix if needed
+    *-----------------------------------------------------------------------------------------------*/
+   if(use_aux_strength_mat >= 0)
+   {
+       HYPRE_Int method = 0;
+       switch (use_aux_strength_mat)
+       {
+          case 1: 
+          	method = 1;
+          	break;
+         case 10:
+         	method = 10;
+         	break;
+         case 11:
+         	method = 11;
+         	break;
+         default:
+         	method = 0;         	
+       }
+       if(my_id == 0 && amg_print_level > 1)
+          hypre_printf("\n\nUsing Auxilliary matrix for computing strength matrix: method %d \n",method);
+       use_aux_strength_mat = method;
+   }
+   if(use_aux_strength_mat == 10)
+   {
+      /* Build auxilliary matrix for strength */
+      hypre_BoomerAMGCreateAuxS(A, NULL, &S_aux, 0); 
+   }
+   else if(use_aux_strength_mat == 11)
+   {
+       /* create iniitial strenth matrix */
+      hypre_BoomerAMGCreateS(A, strong_threshold, max_row_sum,
+                                         num_functions, dof_func_data, &S);           
+      /* Build auxilliary matrix from strength matrix */
+      hypre_BoomerAMGCreateAuxS(A, S, &S_aux, 1);                                                    
+     /* create new strength matrix from auxilliary matrix */        
+     hypre_ParCSRMatrixDestroy(S);
+     S = NULL;
+   }
+
    /*-----------------------------------------------------
     *  Enter Coarsening Loop
-    *-----------------------------------------------------*/
-
+    *-----------------------------------------------------*/   
    while (not_finished_coarsening)
    {
       /* only do nodal coarsening on a fixed number of levels */
@@ -984,8 +1028,43 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                if (!useSabs)
                {
-                  hypre_BoomerAMGCreateS(A_array[level], strong_threshold, max_row_sum,
+                  if(use_aux_strength_mat == 0)
+                  {
+                     /* Build auxilliary matrix for strength */
+                     hypre_BoomerAMGCreateAuxS(A_array[level], NULL, &S_aux, 0);      
+                     /* build strength matrix */              
+                     hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
                                          num_functions, dof_func_data, &S);
+                     /* destroy auxilliary matrix */                    
+                     hypre_ParCSRMatrixDestroy(S_aux);
+                     S_aux = NULL;
+                  }
+                  else if(use_aux_strength_mat == 1)
+                  {
+                     /* create iniitial strenth matrix */
+                     hypre_BoomerAMGCreateS(A_array[level], strong_threshold, max_row_sum,
+                                         num_functions, dof_func_data, &S);           
+                     /* Build auxilliary matrix from strength matrix */
+                     hypre_BoomerAMGCreateAuxS(A_array[level], S, &S_aux, 1);                                                    
+                     /* create new strength matrix from auxilliary matrix */        
+                     hypre_ParCSRMatrixDestroy(S);
+                     S = NULL;
+                     hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
+                                         num_functions, dof_func_data, &S);
+                     /* destroy auxilliary matrix */                    
+                     hypre_ParCSRMatrixDestroy(S_aux);
+                     S_aux = NULL;
+                  }
+                  else if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11)
+                  {
+                      hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
+                                         num_functions, dof_func_data, &S); 
+                  }
+                  else
+                  {
+                     hypre_BoomerAMGCreateS(A_array[level], strong_threshold, max_row_sum,
+                                         num_functions, dof_func_data, &S);                  
+                  }
                }
                else
                {
@@ -2658,7 +2737,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   {
                      hypre_MatvecCommPkgCreate(A_H);
                   }
-
+hypre_printf("Building RAP here ... nongal \n");
                   /* Delete AP */
                   hypre_ParCSRMatrixDestroy(Q);
                }
@@ -2891,6 +2970,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level],
                                                     P_array[level], keepTranspose, &A_H);
+               
+               if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11)
+               {
+                  hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], S_aux,
+                                       P_array[level], keepTranspose, &S_H);
+                  /* Do we need to drop small entries in S_H ?? */
+                  /* reset S_aux */
+                  hypre_ParCSRMatrixDestroy(S_aux);
+                  S_aux = S_H;
+               }
+
             }
 
             if (Pnew && ns == 1)
@@ -2992,7 +3082,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
    HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
    HYPRE_ANNOTATE_MGLEVEL_END(level);
-
+   /* destroy S_aux */
+   if(use_aux_strength_mat == 0 || use_aux_strength_mat == 11)
+   {
+      hypre_ParCSRMatrixDestroy(S_aux);
+      S_aux = NULL;
+   }
    if (level > 0)
    {
       if (block_mode)

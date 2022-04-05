@@ -584,6 +584,7 @@ HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints( HYPRE_Solver solver, HYPRE_Int num_
                                              HYPRE_BigInt *isolated_fpt_index );
 HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt,
                                      HYPRE_BigInt *fpt_index );
+HYPRE_Int HYPRE_BoomerAMGSetUseAuxStrengthMatrix(HYPRE_Solver solver,  HYPRE_Int use_aux_strength_mat);
 
 /* HYPRE_parcsr_amgdd.c */
 HYPRE_Int HYPRE_BoomerAMGDDSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
@@ -1151,6 +1152,8 @@ HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level,
 HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int num_points,
                                      HYPRE_BigInt *indices );
 
+HYPRE_Int hypre_BoomerAMGSetUseAuxStrengthMatrix( void  *data, HYPRE_Int   use_aux_strength_mat);
+
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u );
@@ -1543,6 +1546,9 @@ HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x, HYPRE_Real *x_data, HYPRE_Int
 HYPRE_Int hypre_IntersectTwoBigArrays ( HYPRE_BigInt *x, HYPRE_Real *x_data, HYPRE_Int x_length,
                                         HYPRE_BigInt *y, HYPRE_Int y_length, HYPRE_BigInt *z, HYPRE_Real *output_x_data,
                                         HYPRE_Int *intersect_length );
+HYPRE_Int hypre_IntersectTwoBigIntegerArrays ( HYPRE_BigInt *x, HYPRE_Int x_length,
+                                        HYPRE_BigInt *y, HYPRE_Int y_length, HYPRE_BigInt *z, 
+                                        HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold,
                                       HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix **S_ptr );
@@ -1779,7 +1785,7 @@ HYPRE_Int hypre_BoomerAMGCreateSabsHost ( hypre_ParCSRMatrix *A, HYPRE_Real stre
 HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker,
                                            HYPRE_Int num_paths, HYPRE_BigInt *coarse_row_starts, hypre_ParCSRMatrix **C_ptr);
 HYPRE_Int hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S);
-
+HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix    *S, hypre_ParCSRMatrix   **S_aux_ptr, HYPRE_Int method);
 
 /* par_sv_interp.c */
 HYPRE_Int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A, HYPRE_Int num_smooth_vecs,

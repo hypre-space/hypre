@@ -260,6 +260,9 @@ typedef struct
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
 #endif
+   
+   /* use auxilliary strength matrix */
+   HYPRE_Int use_aux_strength_matrix;
 
 } hypre_ParAMGData;
 
@@ -510,5 +513,8 @@ typedef struct
 #define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
 #define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)
 #endif
+
+/* use auxilliary matrix for defining strength */
+#define hypre_ParAMGDataUseAuxStrengthMatrix(amg_data) ((amg_data)->use_aux_strength_matrix)
 
 #endif
