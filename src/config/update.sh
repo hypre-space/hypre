@@ -61,11 +61,3 @@ mv CMakeLists.txt.tmp CMakeLists.txt
 ##### Update release information in documentation
 
 (cd docs; ./update-release.sh)
-
-##### Update Copyright header
-
-OLDYEAR=$(head -1 ../CHANGELOG | cut -f2 -d- | cut -f1 -d' ')
-NEWYEAR=$(date +"%Y")
-if [ ${NEWYEAR} -ne ${OLDYEAR} ]; then
-    find ../ -type f -exec sed -i -e "s/Copyright 1998-${OLDYEAR}\+/Copyright 1998-${NEWYEAR}/g" {} \;
-fi
