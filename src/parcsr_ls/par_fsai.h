@@ -17,7 +17,8 @@ typedef struct hypre_ParFSAIData_struct
    /* FSAI Setup data */
    HYPRE_Int             algo_type;       /* FSAI algorithm implementation type */
    HYPRE_Int             max_steps;       /* Maximum iterations run per row */
-   HYPRE_Int             max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
+   HYPRE_Int
+   max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
    HYPRE_Real            kap_tolerance;   /* Minimum amount of change between two steps */
    hypre_ParCSRMatrix   *Gmat;            /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *GTmat;           /* Matrix holding the transpose of the FSAI factor */
@@ -31,7 +32,7 @@ typedef struct hypre_ParFSAIData_struct
    HYPRE_Int             max_iterations;  /* Maximum iterations run for the solver */
    HYPRE_Int             num_iterations;  /* Number of iterations the solver ran */
    HYPRE_Real            omega;           /* Step size for Preconditioned Richardson Solver */
-   HYPRE_Real            tolerance;    	  /* Tolerance for the solver */
+   HYPRE_Real            tolerance;         /* Tolerance for the solver */
    HYPRE_Real            rel_resnorm;     /* available if logging > 1 */
    hypre_ParVector      *r_work;          /* work vector used to compute the residual */
    hypre_ParVector      *z_work;          /* work vector used for applying FSAI */

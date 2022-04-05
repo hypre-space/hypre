@@ -342,12 +342,12 @@ HYPRE_Int
 hypre_FSAISetLogging( void      *data,
                       HYPRE_Int  logging )
 {
-/*   This function should be called before Setup.  Logging changes
- *    may require allocation or freeing of arrays, which is presently
- *    only done there.
- *    It may be possible to support logging changes at other times,
- *    but there is little need.
- */
+   /*   This function should be called before Setup.  Logging changes
+    *    may require allocation or freeing of arrays, which is presently
+    *    only done there.
+    *    It may be possible to support logging changes at other times,
+    *    but there is little need.
+    */
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
    if (!fsai_data)

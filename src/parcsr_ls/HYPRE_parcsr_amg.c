@@ -1299,7 +1299,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetFSAIMaxSteps( HYPRE_Solver  solver,
                                 HYPRE_Int     max_steps  )
 {
-   return( hypre_BoomerAMGSetFSAIMaxSteps( (void *) solver, max_steps ) );
+   return ( hypre_BoomerAMGSetFSAIMaxSteps( (void *) solver, max_steps ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1310,7 +1310,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetFSAIMaxStepSize( HYPRE_Solver  solver,
                                    HYPRE_Int     max_step_size  )
 {
-   return( hypre_BoomerAMGSetFSAIMaxStepSize( (void *) solver, max_step_size ) );
+   return ( hypre_BoomerAMGSetFSAIMaxStepSize( (void *) solver, max_step_size ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1321,7 +1321,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetFSAIEigMaxIters( HYPRE_Solver  solver,
                                    HYPRE_Int     eig_max_iters  )
 {
-   return( hypre_BoomerAMGSetFSAIEigMaxIters( (void *) solver, eig_max_iters ) );
+   return ( hypre_BoomerAMGSetFSAIEigMaxIters( (void *) solver, eig_max_iters ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1332,7 +1332,7 @@ HYPRE_Int
 HYPRE_BoomerAMGSetFSAIKapTolerance( HYPRE_Solver  solver,
                                     HYPRE_Real    kap_tolerance  )
 {
-   return( hypre_BoomerAMGSetFSAIKapTolerance( (void *) solver, kap_tolerance ) );
+   return ( hypre_BoomerAMGSetFSAIKapTolerance( (void *) solver, kap_tolerance ) );
 }
 
 /*--------------------------------------------------------------------------

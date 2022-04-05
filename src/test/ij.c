@@ -4497,7 +4497,7 @@ main( hypre_int argc,
       else if (solver_id == 31)
       {
          /* use FSAI preconditioning */
-         if (myid == 0) hypre_printf("Solver: FSAI-PCG\n");
+         if (myid == 0) { hypre_printf("Solver: FSAI-PCG\n"); }
 
          HYPRE_FSAICreate(&pcg_precond);
 

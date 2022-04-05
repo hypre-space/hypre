@@ -422,9 +422,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   Choose Smoother
                 -----------------------------------------------*/
                if ( smooth_num_levels > level &&
-                   (smooth_type == 7 || smooth_type == 17 ||
-                    smooth_type == 8 || smooth_type == 18 ||
-                    smooth_type == 9 || smooth_type == 19) )
+                    (smooth_type == 7 || smooth_type == 17 ||
+                     smooth_type == 8 || smooth_type == 18 ||
+                     smooth_type == 9 || smooth_type == 19) )
                {
                   hypre_VectorSize(hypre_ParVectorLocalVector(Utemp)) = local_size;
                   alpha = -1.0;

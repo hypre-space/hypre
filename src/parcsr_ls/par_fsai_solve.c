@@ -103,7 +103,7 @@ hypre_FSAISolve( void               *fsai_vdata,
          resnorm = hypre_ParVectorInnerProd(r_work, r_work);
 
          /* Compute rel_resnorm */
-         rel_resnorm = resnorm/old_resnorm;
+         rel_resnorm = resnorm / old_resnorm;
 
          if (my_id == 0 && print_level > 1)
          {
