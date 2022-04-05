@@ -144,6 +144,11 @@ typedef struct
    HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_reordering_type;
 
+   HYPRE_Int            fsai_max_steps;
+   HYPRE_Int            fsai_max_step_size;
+   HYPRE_Int            fsai_eig_max_iters;
+   HYPRE_Real           fsai_kap_tolerance;
+
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
@@ -385,6 +390,10 @@ typedef struct
 #define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
+#define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
+#define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
+#define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)

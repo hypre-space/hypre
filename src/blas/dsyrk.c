@@ -13,8 +13,8 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ integer dsyrk_(const char *uplo,const char *trans, integer *n, integer *k, 
-	doublereal *alpha, doublereal *a, integer *lda, doublereal *beta, 
+/* Subroutine */ integer dsyrk_(const char *uplo,const char *trans, integer *n, integer *k,
+	doublereal *alpha, doublereal *a, integer *lda, doublereal *beta,
 	doublereal *c, integer *ldc)
 {
 
@@ -22,158 +22,158 @@ extern "C" {
     /* System generated locals */
 
     /* Local variables */
-    static integer info;
-    static doublereal temp;
-    static integer i, j, l;
+    integer info;
+    doublereal temp;
+    integer i, j, l;
     extern logical lsame_(const char *,const char *);
-    static integer nrowa;
-    static logical upper;
+    integer nrowa;
+    logical upper;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
-/*  Purpose   
-    =======   
+/*  Purpose
+    =======
 
-    DSYRK  performs one of the symmetric rank k operations   
+    DSYRK  performs one of the symmetric rank k operations
 
-       C := alpha*A*A' + beta*C,   
+       C := alpha*A*A' + beta*C,
 
-    or   
+    or
 
-       C := alpha*A'*A + beta*C,   
+       C := alpha*A'*A + beta*C,
 
-    where  alpha and beta  are scalars, C is an  n by n  symmetric matrix 
-  
-    and  A  is an  n by k  matrix in the first case and a  k by n  matrix 
-  
-    in the second case.   
+    where  alpha and beta  are scalars, C is an  n by n  symmetric matrix
 
-    Parameters   
-    ==========   
+    and  A  is an  n by k  matrix in the first case and a  k by n  matrix
 
-    UPLO   - CHARACTER*1.   
-             On  entry,   UPLO  specifies  whether  the  upper  or  lower 
-  
-             triangular  part  of the  array  C  is to be  referenced  as 
-  
-             follows:   
+    in the second case.
 
-                UPLO = 'U' or 'u'   Only the  upper triangular part of  C 
-  
-                                    is to be referenced.   
+    Parameters
+    ==========
 
-                UPLO = 'L' or 'l'   Only the  lower triangular part of  C 
-  
-                                    is to be referenced.   
+    UPLO   - CHARACTER*1.
+             On  entry,   UPLO  specifies  whether  the  upper  or  lower
 
-             Unchanged on exit.   
+             triangular  part  of the  array  C  is to be  referenced  as
 
-    TRANS  - CHARACTER*1.   
-             On entry,  TRANS  specifies the operation to be performed as 
-  
-             follows:   
+             follows:
 
-                TRANS = 'N' or 'n'   C := alpha*A*A' + beta*C.   
+                UPLO = 'U' or 'u'   Only the  upper triangular part of  C
 
-                TRANS = 'T' or 't'   C := alpha*A'*A + beta*C.   
+                                    is to be referenced.
 
-                TRANS = 'C' or 'c'   C := alpha*A'*A + beta*C.   
+                UPLO = 'L' or 'l'   Only the  lower triangular part of  C
 
-             Unchanged on exit.   
+                                    is to be referenced.
 
-    N      - INTEGER.   
-             On entry,  N specifies the order of the matrix C.  N must be 
-  
-             at least zero.   
-             Unchanged on exit.   
+             Unchanged on exit.
 
-    K      - INTEGER.   
-             On entry with  TRANS = 'N' or 'n',  K  specifies  the number 
-  
-             of  columns   of  the   matrix   A,   and  on   entry   with 
-  
-             TRANS = 'T' or 't' or 'C' or 'c',  K  specifies  the  number 
-  
-             of rows of the matrix  A.  K must be at least zero.   
-             Unchanged on exit.   
+    TRANS  - CHARACTER*1.
+             On entry,  TRANS  specifies the operation to be performed as
 
-    ALPHA  - DOUBLE PRECISION.   
-             On entry, ALPHA specifies the scalar alpha.   
-             Unchanged on exit.   
+             follows:
 
-    A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is 
-  
-             k  when  TRANS = 'N' or 'n',  and is  n  otherwise.   
-             Before entry with  TRANS = 'N' or 'n',  the  leading  n by k 
-  
-             part of the array  A  must contain the matrix  A,  otherwise 
-  
-             the leading  k by n  part of the array  A  must contain  the 
-  
-             matrix A.   
-             Unchanged on exit.   
+                TRANS = 'N' or 'n'   C := alpha*A*A' + beta*C.
 
-    LDA    - INTEGER.   
-             On entry, LDA specifies the first dimension of A as declared 
-  
-             in  the  calling  (sub)  program.   When  TRANS = 'N' or 'n' 
-  
-             then  LDA must be at least  max( 1, n ), otherwise  LDA must 
-  
-             be at least  max( 1, k ).   
-             Unchanged on exit.   
+                TRANS = 'T' or 't'   C := alpha*A'*A + beta*C.
 
-    BETA   - DOUBLE PRECISION.   
-             On entry, BETA specifies the scalar beta.   
-             Unchanged on exit.   
+                TRANS = 'C' or 'c'   C := alpha*A'*A + beta*C.
 
-    C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).   
-             Before entry  with  UPLO = 'U' or 'u',  the leading  n by n 
-  
-             upper triangular part of the array C must contain the upper 
-  
-             triangular part  of the  symmetric matrix  and the strictly 
-  
-             lower triangular part of C is not referenced.  On exit, the 
-  
-             upper triangular part of the array  C is overwritten by the 
-  
-             upper triangular part of the updated matrix.   
-             Before entry  with  UPLO = 'L' or 'l',  the leading  n by n 
-  
-             lower triangular part of the array C must contain the lower 
-  
-             triangular part  of the  symmetric matrix  and the strictly 
-  
-             upper triangular part of C is not referenced.  On exit, the 
-  
-             lower triangular part of the array  C is overwritten by the 
-  
-             lower triangular part of the updated matrix.   
+             Unchanged on exit.
 
-    LDC    - INTEGER.   
-             On entry, LDC specifies the first dimension of C as declared 
-  
-             in  the  calling  (sub)  program.   LDC  must  be  at  least 
-  
-             max( 1, n ).   
-             Unchanged on exit.   
+    N      - INTEGER.
+             On entry,  N specifies the order of the matrix C.  N must be
 
+             at least zero.
+             Unchanged on exit.
 
-    Level 3 Blas routine.   
+    K      - INTEGER.
+             On entry with  TRANS = 'N' or 'n',  K  specifies  the number
 
-    -- Written on 8-February-1989.   
-       Jack Dongarra, Argonne National Laboratory.   
-       Iain Duff, AERE Harwell.   
-       Jeremy Du Croz, Numerical Algorithms Group Ltd.   
-       Sven Hammarling, Numerical Algorithms Group Ltd.   
+             of  columns   of  the   matrix   A,   and  on   entry   with
+
+             TRANS = 'T' or 't' or 'C' or 'c',  K  specifies  the  number
+
+             of rows of the matrix  A.  K must be at least zero.
+             Unchanged on exit.
+
+    ALPHA  - DOUBLE PRECISION.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
+
+    A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
+
+             k  when  TRANS = 'N' or 'n',  and is  n  otherwise.
+             Before entry with  TRANS = 'N' or 'n',  the  leading  n by k
+
+             part of the array  A  must contain the matrix  A,  otherwise
+
+             the leading  k by n  part of the array  A  must contain  the
+
+             matrix A.
+             Unchanged on exit.
+
+    LDA    - INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+
+             in  the  calling  (sub)  program.   When  TRANS = 'N' or 'n'
+
+             then  LDA must be at least  max( 1, n ), otherwise  LDA must
+
+             be at least  max( 1, k ).
+             Unchanged on exit.
+
+    BETA   - DOUBLE PRECISION.
+             On entry, BETA specifies the scalar beta.
+             Unchanged on exit.
+
+    C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
+             Before entry  with  UPLO = 'U' or 'u',  the leading  n by n
+
+             upper triangular part of the array C must contain the upper
+
+             triangular part  of the  symmetric matrix  and the strictly
+
+             lower triangular part of C is not referenced.  On exit, the
+
+             upper triangular part of the array  C is overwritten by the
+
+             upper triangular part of the updated matrix.
+             Before entry  with  UPLO = 'L' or 'l',  the leading  n by n
+
+             lower triangular part of the array C must contain the lower
+
+             triangular part  of the  symmetric matrix  and the strictly
+
+             upper triangular part of C is not referenced.  On exit, the
+
+             lower triangular part of the array  C is overwritten by the
+
+             lower triangular part of the updated matrix.
+
+    LDC    - INTEGER.
+             On entry, LDC specifies the first dimension of C as declared
+
+             in  the  calling  (sub)  program.   LDC  must  be  at  least
+
+             max( 1, n ).
+             Unchanged on exit.
 
 
+    Level 3 Blas routine.
 
-       Test the input parameters.   
+    -- Written on 8-February-1989.
+       Jack Dongarra, Argonne National Laboratory.
+       Iain Duff, AERE Harwell.
+       Jeremy Du Croz, Numerical Algorithms Group Ltd.
+       Sven Hammarling, Numerical Algorithms Group Ltd.
 
-    
-   Parameter adjustments   
+
+
+       Test the input parameters.
+
+
+   Parameter adjustments
        Function Body */
 
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]

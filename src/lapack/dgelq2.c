@@ -77,12 +77,12 @@ extern "C" {
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
-    static integer i__, k;
+     integer i__, k;
     extern /* Subroutine */ integer dlarf_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *), dlarfg_(integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *), xerbla_(const char *, integer *);
-    static doublereal aii;
+     doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
     a_dim1 = *lda;

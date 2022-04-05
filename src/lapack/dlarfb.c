@@ -98,15 +98,15 @@ extern "C" {
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static doublereal c_b14 = 1.;
-    static doublereal c_b25 = -1.;
+     integer c__1 = 1;
+     doublereal c_b14 = 1.;
+     doublereal c_b25 = -1.;
     
     /* System generated locals */
     integer c_dim1, c_offset, t_dim1, t_offset, v_dim1, v_offset, work_dim1, 
 	    work_offset, i__1, i__2;
     /* Local variables */
-    static integer i__, j;
+     integer i__, j;
     extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
@@ -115,7 +115,7 @@ extern "C" {
 	    doublereal *, integer *), dtrmm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
-    static char transt[1];
+     char transt[1];
 #define work_ref(a_1,a_2) work[(a_2)*work_dim1 + a_1]
 #define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
 #define v_ref(a_1,a_2) v[(a_2)*v_dim1 + a_1]
