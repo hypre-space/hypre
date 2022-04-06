@@ -268,7 +268,7 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    if (!a_entries)
    {
       a_entries = 1000;
-      entries = hypre_CTAlloc(hypre_SStructGraphEntry *,  a_entries, HYPRE_MEMORY_HOST);
+      entries = hypre_TAlloc(hypre_SStructGraphEntry *,  a_entries, HYPRE_MEMORY_HOST);
 
       hypre_SStructAGraphEntries(graph) = a_entries;
       hypre_SStructGraphEntries(graph) = entries;
