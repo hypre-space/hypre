@@ -969,15 +969,25 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       hypre_CSRMatrixDestroy(Cbar);
       hypre_CSRMatrixDestroy(Cext);
 
+#if PARCSRGEMM_TIMING > 1
+      hypre_ForceSyncComputeStream(hypre_handle());
+      t2 = hypre_MPI_Wtime() - t1;
+      hypre_ParPrintf(comm, "Time PartialAdd2 %f\n", t2);
+#endif
+
       // Cz = IE * CC
+#if PARCSRGEMM_TIMING > 1
+      t1 = hypre_MPI_Wtime();
+#endif
       hypreDevice_CSRSpGemm(IE, CC, &Cz);
+
       hypre_CSRMatrixDestroy(IE);
       hypre_CSRMatrixDestroy(CC);
 
 #if PARCSRGEMM_TIMING > 1
       hypre_ForceSyncComputeStream(hypre_handle());
       t2 = hypre_MPI_Wtime() - t1;
-      hypre_ParPrintf(comm, "Time PartialAdd2 %f\n", t2);
+      hypre_ParPrintf(comm, "Time PartialAdd-SpGemm %f\n", t2);
 #endif
    }
 
