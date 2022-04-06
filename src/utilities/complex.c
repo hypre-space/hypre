@@ -35,4 +35,10 @@ hypre_cimag( HYPRE_Complex value )
    return cimag(value);
 }
 
+HYPRE_Complex
+hypre_csqrt( HYPRE_Complex value )
+{
+   return csqrt(value);
+}
+
 #endif
