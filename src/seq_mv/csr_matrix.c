@@ -762,12 +762,12 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
       {
          B_rownnz = hypre_TAlloc(HYPRE_Int,
                                  hypre_CSRMatrixNumRownnz(A),
-                                 HYPRE_MEMORY_HOST);
+                                 memory_location_B);
          hypre_CSRMatrixRownnz(B) = B_rownnz;
       }
       hypre_TMemcpy(B_rownnz, A_rownnz,
                     HYPRE_Int, hypre_CSRMatrixNumRownnz(A),
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+                    memory_location_B, memory_location_A);
    }
    hypre_CSRMatrixNumRownnz(B) = hypre_CSRMatrixNumRownnz(A);
 
