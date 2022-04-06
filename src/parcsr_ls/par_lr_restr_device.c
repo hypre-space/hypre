@@ -344,7 +344,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
       return;
    }
 
-   HYPRE_Int p, q, pZ;
+   HYPRE_Int p = 0, q, pZ = 0;
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
 
    /* diag part */

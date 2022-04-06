@@ -43,7 +43,7 @@ hypreGPUKernel_ConcatDiagAndOffd(
 #else
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
 #endif
-   HYPRE_Int i, j, k, p, istart, iend, bstart;
+   HYPRE_Int i, j = 0, k = 0, p, istart, iend, bstart;
 
    /* diag part */
    if (lane_id < 2)
@@ -146,6 +146,8 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
                      d_ib,
                      d_jb,
                      d_ab );
+
+   hypre_GpuProfilingPopRange();
 
    return B;
 }
@@ -1196,7 +1198,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
+   HYPRE_Int p_diag = 0, p_offd = 0, q_diag, q_offd;
 
    /* sum row norm over diag part */
    if (lane < 2)

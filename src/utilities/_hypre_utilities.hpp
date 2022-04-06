@@ -453,6 +453,7 @@ using dim3 = sycl::range<1>;
 #define HYPRE_FLT_LARGE       1e30
 #define HYPRE_1D_BLOCK_SIZE   512
 #define HYPRE_MAX_NUM_STREAMS 10
+#define HYPRE_SPGEMM_MAX_NBIN 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device info data structures
@@ -511,6 +512,7 @@ struct hypre_DeviceData
 #else
    HYPRE_Int                         device;
 #endif
+   hypre_int                         device_max_shmem_per_block[2];
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) stream */
    HYPRE_Int                         compute_stream_num;
@@ -524,10 +526,12 @@ struct hypre_DeviceData
    /* device spgemm options */
    HYPRE_Int                         spgemm_use_vendor;
    HYPRE_Int                         spgemm_algorithm;
+   HYPRE_Int                         spgemm_algorithm_binned;
+   HYPRE_Int                         spgemm_algorithm_num_bin;
+   HYPRE_Int                         spgemm_algorithm_max_num_blocks[4][HYPRE_SPGEMM_MAX_NBIN + 1];
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
-   char                              spgemm_hash_type;
    /* cusparse */
    HYPRE_Int                         spmv_use_cusparse;
    HYPRE_Int                         sptrans_use_cusparse;
@@ -543,6 +547,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataCubUvmAllocator(data)                ((data) -> cub_uvm_allocator)
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
+#define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
 #define hypre_DeviceDataComputeStreamNum(data)               ((data) -> compute_stream_num)
 #define hypre_DeviceDataReduceBuffer(data)                   ((data) -> reduce_buffer)
 #define hypre_DeviceDataStructCommRecvBuffer(data)           ((data) -> struct_comm_recv_buffer)
@@ -553,10 +558,12 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpMVUseCusparse(data)                ((data) -> spmv_use_cusparse)
 #define hypre_DeviceDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
+#define hypre_DeviceDataSpgemmAlgorithmBinned(data)          ((data) -> spgemm_algorithm_binned)
+#define hypre_DeviceDataSpgemmAlgorithmNumBin(data)          ((data) -> spgemm_algorithm_num_bin)
+#define hypre_DeviceDataSpgemmAlgorithmMaxNumBlocks(data)    ((data) -> spgemm_algorithm_max_num_blocks)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
-#define hypre_DeviceDataSpgemmHashType(data)                 ((data) -> spgemm_hash_type)
 #define hypre_DeviceDataDeviceAllocator(data)                ((data) -> device_allocator)
 #define hypre_DeviceDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
@@ -1011,6 +1018,15 @@ hypre_int next_power_of_2(hypre_int n)
 
    return n;
 }
+
+template<typename T1, typename T2>
+struct type_cast : public thrust::unary_function<T1, T2>
+{
+   __host__ __device__ T2 operator()(const T1 &x) const
+   {
+      return (T2) x;
+   }
+};
 
 template<typename T>
 struct absolute_value : public thrust::unary_function<T, T>

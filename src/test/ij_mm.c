@@ -738,7 +738,7 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);
-   //TODO ierr = hypre_SetSpGemmAlgorithmBinned(spgemm_alg_binned);
+   ierr = hypre_SetSpGemmAlgorithmBinned(spgemm_alg_binned);
    hypre_assert(ierr == 0);
 
    /*-----------------------------------------------------------
@@ -748,8 +748,8 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    if ( build_matrix_type == -2 )
    {
-      //TODO ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
-      //                             HYPRE_PARCSR, &ij_A );
+      ierr = HYPRE_IJMatrixReadMM( argv[build_matrix_arg_index], comm,
+                                   HYPRE_PARCSR, &ij_A );
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the system matrix in MM format!\n");

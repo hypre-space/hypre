@@ -39,7 +39,7 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int ib, ie;
+   HYPRE_Int ib = 0, ie;
 
    if (lane == 0)
    {
@@ -118,9 +118,9 @@ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q;
 
-   HYPRE_Complex iscale, beta;
+   HYPRE_Complex iscale = 0.0, beta = 0.0;
 
    if (lane == 0)
    {
@@ -363,7 +363,7 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
 
-   HYPRE_Int ib_diag, ie_diag, ib_offd, ie_offd;
+   HYPRE_Int ib_diag = 0, ie_diag, ib_offd = 0, ie_offd;
 
    // diag
    if (lane < 2)
@@ -379,7 +379,7 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
    // entire warp works on each j
    for (HYPRE_Int indj = ib_diag; indj < ie_diag; indj++)
    {
-      HYPRE_Int j;
+      HYPRE_Int j = 0;
 
       if (lane == 0)
       {
@@ -397,7 +397,7 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
          continue;
       }
 
-      HYPRE_Int kb, ke;
+      HYPRE_Int kb = 0, ke;
 
       // find if there exists entry (j, row) in row j of diag
       if (lane < 2)
@@ -451,7 +451,7 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
 
    for (HYPRE_Int indj = ib_offd; indj < ie_offd; indj++)
    {
-      HYPRE_Int j;
+      HYPRE_Int j = 0;
 
       if (lane == 0)
       {
@@ -459,7 +459,7 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       }
       j = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
 
-      HYPRE_Int kb, ke;
+      HYPRE_Int kb = 0, ke;
 
       if (lane < 2)
       {
@@ -556,9 +556,9 @@ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int pd, qd, po, qo, xd, yd, xo, yo;
+   HYPRE_Int pd = 0, qd, po = 0, qo, xd = 0, yd, xo = 0, yo;
 
-   HYPRE_Complex theta, value;
+   HYPRE_Complex theta = 0.0, value = 0.0;
    HYPRE_Complex dtau_i = 0.0;
 
    if (lane < 2)
@@ -682,7 +682,7 @@ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
+   HYPRE_Int p_diag = 0, p_offd = 0, q_diag, q_offd;
 
    if (lane < 2)
    {

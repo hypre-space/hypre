@@ -320,6 +320,20 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSetPatternOnly
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_CSRMatrixSetPatternOnly( hypre_CSRMatrix *matrix,
+                               HYPRE_Int        pattern_only )
+{
+   HYPRE_Int ierr = 0;
+
+   hypre_CSRMatrixPatternOnly(matrix) = pattern_only;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CSRMatrixSetRownnz
  *
  * function to set the substructure rownnz and num_rowsnnz inside the CSRMatrix

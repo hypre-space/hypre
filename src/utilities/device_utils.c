@@ -382,7 +382,7 @@ hypreGPUKernel_CopyParCSRRows(
 #else
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
 #endif
-   HYPRE_Int i, j, k, p, row, istart, iend, bstart;
+   HYPRE_Int i, j = 0, k = 0, p, row, istart, iend, bstart;
 
    /* diag part */
    if (lane_id < 2)
@@ -1538,11 +1538,15 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpTransUseCusparse(data) = 0;
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
+   hypre_DeviceDataSpgemmAlgorithmBinned(data)          = 0;
+   hypre_DeviceDataSpgemmAlgorithmNumBin(data)          = 0;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
-   hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = 32;
-   hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = 1.5;
-   hypre_DeviceDataSpgemmHashType(data)                 = 'D';
+   const HYPRE_Int Nsamples = 64;
+   const HYPRE_Real sigma = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
+   hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
+   hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
