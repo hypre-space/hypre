@@ -102,7 +102,6 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    hypre_SStructUVEntry    **Uventries;
    hypre_SStructUVEntry     *Uventry;
    HYPRE_BigInt            **Uveoffsets;
-   HYPRE_Int                 a_graph_entries;
    hypre_SStructGraphEntry **graph_entries;
    HYPRE_Int                 nvars;
    HYPRE_Int                 part, var, i;
@@ -157,9 +156,8 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          hypre_TFree(iUventries, HYPRE_MEMORY_HOST);
          hypre_TFree(Uventries, HYPRE_MEMORY_HOST);
          hypre_TFree(Uveoffsets, HYPRE_MEMORY_HOST);
-         a_graph_entries = hypre_SStructAGraphEntries(graph);
          graph_entries = hypre_SStructGraphEntries(graph);
-         for (i = 0; i < a_graph_entries; i++)
+         for (i = 0; i < hypre_SStructNGraphEntries(graph); i++)
          {
             hypre_TFree(graph_entries[i], HYPRE_MEMORY_HOST);
          }
