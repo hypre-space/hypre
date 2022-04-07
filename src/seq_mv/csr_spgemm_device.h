@@ -416,9 +416,9 @@ hypre_spgemm_get_num_groups_per_block()
 }
 
 #if defined(HYPRE_SPGEMM_PRINTF) || defined(HYPRE_SPGEMM_TIMING)
-hypre_int hypre_printf0( const char * format, ... );
+#define HYPRE_SPGEMM_PRINT(...) hypre_ParPrintf(hypre_MPI_COMM_WORLD, __VA_ARGS__)
 #else
-#define hypre_printf0(...)
+#define HYPRE_SPGEMM_PRINT(...)
 #endif
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */

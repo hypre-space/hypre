@@ -85,15 +85,15 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
 #endif
 
 #if defined(HYPRE_SPGEMM_PRINTF)
-   hypre_printf0("=======================================================================\n");
-   hypre_printf0("SM count %d\n", multiProcessorCount);
-   hypre_printf0("Bin:  "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { hypre_printf0("%5d ", i); } hypre_printf0("\n");
-   hypre_printf0("-----------------------------------------------------------------------\n");
-   hypre_printf0("Bdim: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { hypre_printf0("%5d ", max_nblocks[2][i]); } hypre_printf0("\n");
-   hypre_printf0("Sym:  "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { hypre_printf0("%5d ", max_nblocks[0][i]); } hypre_printf0("\n");
-   hypre_printf0("Bdim: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { hypre_printf0("%5d ", max_nblocks[3][i]); } hypre_printf0("\n");
-   hypre_printf0("Num:  "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { hypre_printf0("%5d ", max_nblocks[1][i]); } hypre_printf0("\n");
-   hypre_printf0("=======================================================================\n");
+   HYPRE_SPGEMM_PRINT("=======================================================================\n");
+   HYPRE_SPGEMM_PRINT("SM count %d\n", multiProcessorCount);
+   HYPRE_SPGEMM_PRINT("Bin:  "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", i); } HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("-----------------------------------------------------------------------\n");
+   HYPRE_SPGEMM_PRINT("Bdim: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[2][i]); } HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("Sym:  "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[0][i]); } HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("Bdim: "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[3][i]); } HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("Num:  "); for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[1][i]); } HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("=======================================================================\n");
 #endif
 
    return hypre_error_flag;

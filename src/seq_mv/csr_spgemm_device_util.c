@@ -226,7 +226,7 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
                                   HYPRE_Int *h_bin_ptr )
 {
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream(hypre_handle());
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
@@ -265,34 +265,13 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    hypre_TFree(d_bin_ptr, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncCudaComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream(hypre_handle());
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
-   hypre_printf0("%s[%d]: Binning time %f\n", __FILE__, __LINE__, t2);
+   HYPRE_SPGEMM_PRINT("%s[%d]: Binning time %f\n", __FILE__, __LINE__, t2);
 #endif
 
    return hypre_error_flag;
 }
-
-#if defined(HYPRE_SPGEMM_PRINTF) || defined(HYPRE_SPGEMM_TIMING)
-hypre_int hypre_printf0( const char * format, ... )
-{
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   hypre_int ret = 0;
-
-   if (!myid)
-   {
-      va_list args;
-      va_start (args, format);
-      ret = vprintf (format, args);
-      va_end (args);
-   }
-
-   fflush(stdout);
-
-   return ret;
-}
-#endif
 
 #endif
 

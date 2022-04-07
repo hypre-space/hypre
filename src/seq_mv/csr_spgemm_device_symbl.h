@@ -365,11 +365,11 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    }
 
 #ifdef HYPRE_SPGEMM_PRINTF
-   hypre_printf0("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
+   HYPRE_SPGEMM_PRINT("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
                  "can_fail %d, need_ghash %d, ghash %p size %d\n",
                  __FILE__, __LINE__, BIN, m, k, n,
                  HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, can_fail, need_ghash, d_ghash_i, ghash_size);
-   hypre_printf0("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
+   HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
