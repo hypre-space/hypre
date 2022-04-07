@@ -500,6 +500,7 @@ hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
 }
 #endif
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 struct hypre_empty_row_functor
 {
    // This is needed for clang
@@ -514,6 +515,7 @@ struct hypre_empty_row_functor
       return a != b;
    }
 };
+#endif
 
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
