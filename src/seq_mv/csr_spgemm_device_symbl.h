@@ -390,14 +390,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    {
       if (ghash_size)
       {
-         HYPRE_CUDA_LAUNCH2(
+         HYPRE_GPU_LAUNCH2(
             (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, true>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
-         HYPRE_CUDA_LAUNCH2(
+         HYPRE_GPU_LAUNCH2(
             (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
@@ -407,14 +407,14 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    {
       if (ghash_size)
       {
-         HYPRE_CUDA_LAUNCH2(
+         HYPRE_GPU_LAUNCH2(
             (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, true>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );
       }
       else
       {
-         HYPRE_CUDA_LAUNCH2(
+         HYPRE_GPU_LAUNCH2(
             (hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_ib, d_jb, d_ghash_i, d_ghash_j, d_rc, d_rf );

@@ -467,14 +467,14 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    {
       if (ghash_size)
       {
-         HYPRE_CUDA_LAUNCH2 (
+         HYPRE_GPU_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, true>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else
       {
-         HYPRE_CUDA_LAUNCH2 (
+         HYPRE_GPU_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j, d_ghash_a );
@@ -484,14 +484,14 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    {
       if (ghash_size)
       {
-         HYPRE_CUDA_LAUNCH2 (
+         HYPRE_GPU_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, true>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j, d_ghash_a );
       }
       else
       {
-         HYPRE_CUDA_LAUNCH2 (
+         HYPRE_GPU_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j, d_ghash_a );
@@ -587,7 +587,7 @@ hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int       m,
       dim3 bDim(GROUP_SIZE, 1, num_groups_per_block);
       dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-      HYPRE_CUDA_LAUNCH( (hypre_spgemm_copy_from_Cext_into_C<GROUP_SIZE>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_copy_from_Cext_into_C<GROUP_SIZE>), gDim, bDim,
                          m, *d_ic, *d_jc, *d_c, d_ic_new, d_jc_new, d_c_new );
 
       hypre_TFree(*d_ic, HYPRE_MEMORY_DEVICE);
