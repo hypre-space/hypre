@@ -8,97 +8,97 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dlasq3_(integer *i0, integer *n0, doublereal *z__, 
+/* Subroutine */ integer dlasq3_(integer *i0, integer *n0, doublereal *z__,
 	integer *pp, doublereal *dmin__, doublereal *sigma, doublereal *desig,
-	 doublereal *qmax, integer *nfail, integer *iter, integer *ndiv, 
+	 doublereal *qmax, integer *nfail, integer *iter, integer *ndiv,
 	logical *ieee)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       May 17, 2000   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       May 17, 2000
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLASQ3 checks for deflation, computes a shift (TAU) and calls dqds.   
-    In case of failure it changes shifts, and tries again until output   
-    is positive.   
+    DLASQ3 checks for deflation, computes a shift (TAU) and calls dqds.
+    In case of failure it changes shifts, and tries again until output
+    is positive.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    I0     (input) INTEGER   
-           First index.   
+    I0     (input) INTEGER
+           First index.
 
-    N0     (input) INTEGER   
-           Last index.   
+    N0     (input) INTEGER
+           Last index.
 
-    Z      (input) DOUBLE PRECISION array, dimension ( 4*N )   
-           Z holds the qd array.   
+    Z      (input) DOUBLE PRECISION array, dimension ( 4*N )
+           Z holds the qd array.
 
-    PP     (input) INTEGER   
-           PP=0 for ping, PP=1 for pong.   
+    PP     (input) INTEGER
+           PP=0 for ping, PP=1 for pong.
 
-    DMIN   (output) DOUBLE PRECISION   
-           Minimum value of d.   
+    DMIN   (output) DOUBLE PRECISION
+           Minimum value of d.
 
-    SIGMA  (output) DOUBLE PRECISION   
-           Sum of shifts used in current segment.   
+    SIGMA  (output) DOUBLE PRECISION
+           Sum of shifts used in current segment.
 
-    DESIG  (input/output) DOUBLE PRECISION   
-           Lower order part of SIGMA   
+    DESIG  (input/output) DOUBLE PRECISION
+           Lower order part of SIGMA
 
-    QMAX   (input) DOUBLE PRECISION   
-           Maximum value of q.   
+    QMAX   (input) DOUBLE PRECISION
+           Maximum value of q.
 
-    NFAIL  (output) INTEGER   
-           Number of times shift was too big.   
+    NFAIL  (output) INTEGER
+           Number of times shift was too big.
 
-    ITER   (output) INTEGER   
-           Number of iterations.   
+    ITER   (output) INTEGER
+           Number of iterations.
 
-    NDIV   (output) INTEGER   
-           Number of divisions.   
+    NDIV   (output) INTEGER
+           Number of divisions.
 
-    TTYPE  (output) INTEGER   
-           Shift type.   
+    TTYPE  (output) INTEGER
+           Shift type.
 
-    IEEE   (input) LOGICAL   
-           Flag for IEEE or non IEEE arithmetic (passed to DLASQ5).   
+    IEEE   (input) LOGICAL
+           Flag for IEEE or non IEEE arithmetic (passed to DLASQ5).
 
-    =====================================================================   
+    =====================================================================
 
        Parameter adjustments */
     /* Initialized data */
-    static integer ttype = 0;
-    static doublereal dmin1 = 0.;
-    static doublereal dmin2 = 0.;
-    static doublereal dn = 0.;
-    static doublereal dn1 = 0.;
-    static doublereal dn2 = 0.;
-    static doublereal tau = 0.;
+    integer ttype = 0;
+    doublereal dmin1 = 0.;
+    doublereal dmin2 = 0.;
+    doublereal dn = 0.;
+    doublereal dn1 = 0.;
+    doublereal dn2 = 0.;
+    doublereal tau = 0.;
     /* System generated locals */
     integer i__1;
     doublereal d__1, d__2;
     /* Local variables */
-    static doublereal temp, s, t;
-    static integer j4;
-    extern /* Subroutine */ integer dlasq4_(integer *, integer *, doublereal *, 
-	    integer *, integer *, doublereal *, doublereal *, doublereal *, 
+    doublereal temp, s, t;
+    integer j4;
+    extern /* Subroutine */ integer dlasq4_(integer *, integer *, doublereal *,
+	    integer *, integer *, doublereal *, doublereal *, doublereal *,
 	    doublereal *, doublereal *, doublereal *, doublereal *, integer *)
-	    , dlasq5_(integer *, integer *, doublereal *, integer *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
+	    , dlasq5_(integer *, integer *, doublereal *, integer *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
 	    doublereal *, doublereal *, doublereal *, logical *), dlasq6_(
-	    integer *, integer *, doublereal *, integer *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
+	    integer *, integer *, doublereal *, integer *, doublereal *,
+	    doublereal *, doublereal *, doublereal *, doublereal *,
 	    doublereal *);
     extern doublereal dlamch_(const char *);
-    static integer nn;
-    static doublereal safmin, eps, tol;
-    static integer n0in, ipn4;
-    static doublereal tol2;
+    integer nn;
+    doublereal safmin, eps, tol;
+    integer n0in, ipn4;
+    doublereal tol2;
 
     --z__;
 
@@ -129,7 +129,7 @@ L10:
 
 /*     Check whether E(N0-1) is negligible, 1 eigenvalue. */
 
-    if (z__[nn - 5] > tol2 * (*sigma + z__[nn - 3]) && z__[nn - (*pp << 1) - 
+    if (z__[nn - 5] > tol2 * (*sigma + z__[nn - 3]) && z__[nn - (*pp << 1) -
 	    4] > tol2 * z__[nn - 7]) {
 	goto L30;
     }
@@ -219,7 +219,7 @@ L50:
 	}
     }
 
-/* L70:   
+/* L70:
 
    Computing MIN */
     d__1 = z__[(*n0 << 2) + *pp - 1], d__2 = z__[(*n0 << 2) + *pp - 9], d__1 =
@@ -235,7 +235,7 @@ L50:
 
 L80:
 
-	dlasq5_(i0, n0, &z__[1], pp, &tau, dmin__, &dmin1, &dmin2, &dn, &dn1, 
+	dlasq5_(i0, n0, &z__[1], pp, &tau, dmin__, &dmin1, &dmin2, &dn, &dn1,
 		&dn2, ieee);
 
 	*ndiv += *n0 - *i0 + 2;
@@ -249,7 +249,7 @@ L80:
 
 	    goto L100;
 
-	} else if (*dmin__ < 0. && dmin1 > 0. && z__[((*n0 - 1) << 2) - *pp] < 
+	} else if (*dmin__ < 0. && dmin1 > 0. && z__[((*n0 - 1) << 2) - *pp] <
 		tol * (*sigma + dn1) && abs(dn) < tol * *sigma) {
 
 /*           Convergence hidden by negative DN. */

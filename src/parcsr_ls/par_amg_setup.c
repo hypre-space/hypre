@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -164,6 +164,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_max_iter;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
+   HYPRE_Int     fsai_max_steps;
+   HYPRE_Int     fsai_max_step_size;
+   HYPRE_Int     fsai_eig_max_iters;
+   HYPRE_Real    fsai_kap_tolerance;
    HYPRE_Int     needZ = 0;
 
    HYPRE_Int interp_type, restri_type;
@@ -253,6 +257,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_droptol = hypre_ParAMGDataILUDroptol(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
+   fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
+   fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
+   fsai_eig_max_iters = hypre_ParAMGDataFSAIEigMaxIters(amg_data);
+   fsai_kap_tolerance = hypre_ParAMGDataFSAIKapTolerance(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
    restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
    post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
@@ -540,6 +548,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (smoother[i])
                {
                   HYPRE_EuclidDestroy(smoother[i]);
+                  smoother[i] = NULL;
+               }
+            }
+         }
+         else if (hypre_ParAMGDataSmoothType(amg_data) == 4)
+         {
+            for (i = 0; i < smooth_num_levels; i++)
+            {
+               if (smoother[i])
+               {
+                  HYPRE_FSAIDestroy(smoother[i]);
                   smoother[i] = NULL;
                }
             }
@@ -2926,16 +2945,6 @@ hypre_printf("Building RAP here ... nongal \n");
             }
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(AP);
-
-#if DEBUG_SAVE_ALL_OPS
-            if (level == 0)
-            {
-               hypre_ParCSRMatrixPrintIJ(A_array[0], 1, 1, "A_0.mtx");
-            }
-            char file[256];
-            hypre_sprintf(file, "A_%d.mtx", level + 1);
-            hypre_ParCSRMatrixPrintIJ(A_H, 1, 1, file);
-#endif
          }
          else if (rap2)
          {
@@ -2990,6 +2999,19 @@ hypre_printf("Building RAP here ... nongal \n");
             }
          }
       }
+
+#if DEBUG_SAVE_ALL_OPS
+      if (level == 0)
+      {
+         hypre_ParCSRMatrixPrintIJ(A_array[0], 0, 0, "A_00.IJ.out");
+      }
+      char file[256];
+      hypre_sprintf(file, "A_%02d.IJ.out", level + 1);
+      hypre_ParCSRMatrixPrintIJ(A_H, 0, 0, file);
+
+      hypre_sprintf(file, "P_%02d.IJ.out", level);
+      hypre_ParCSRMatrixPrintIJ(P_array[level], 0, 0, file);
+#endif
 
       HYPRE_ANNOTATE_REGION_END("%s", "RAP");
       if (debug_flag == 1)
@@ -3452,6 +3474,28 @@ hypre_printf("Building RAP here ... nongal \n");
                            (HYPRE_ParCSRMatrix) A_array[j],
                            (HYPRE_ParVector) F_array[j],
                            (HYPRE_ParVector) U_array[j]);
+      }
+      else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
+      {
+         HYPRE_FSAICreate(&smoother[j]);
+         HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
+         HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
+         HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
+         HYPRE_FSAISetTolerance(smoother[j], 0.0);
+         HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
+         HYPRE_FSAISetEigMaxIters(smoother[j], fsai_eig_max_iters);
+         HYPRE_FSAISetPrintLevel(smoother[j], 1);
+
+         HYPRE_FSAISetup(smoother[j],
+                         (HYPRE_ParCSRMatrix) A_array[j],
+                         (HYPRE_ParVector) F_array[j],
+                         (HYPRE_ParVector) U_array[j]);
+
+#if DEBUG_SAVE_ALL_OPS
+         char file[256];
+         hypre_sprintf(file, "G_%02d.IJ.out", j);
+         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]), 0, 0, file);
+#endif
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {

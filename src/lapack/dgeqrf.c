@@ -11,106 +11,106 @@ extern "C" {
 /* Subroutine */ integer dgeqrf_(integer *m, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DGEQRF computes a QR factorization of a real M-by-N matrix A:   
-    A = Q * R.   
+    DGEQRF computes a QR factorization of a real M-by-N matrix A:
+    A = Q * R.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    M       (input) INTEGER   
-            The number of rows of the matrix A.  M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix A.  N >= 0.   
+    N       (input) INTEGER
+            The number of columns of the matrix A.  N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the M-by-N matrix A.   
-            On exit, the elements on and above the diagonal of the array   
-            contain the min(M,N)-by-N upper trapezoidal matrix R (R is   
-            upper triangular if m >= n); the elements below the diagonal,   
-            with the array TAU, represent the orthogonal matrix Q as a   
-            product of min(m,n) elementary reflectors (see Further   
-            Details).   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the M-by-N matrix A.
+            On exit, the elements on and above the diagonal of the array
+            contain the min(M,N)-by-N upper trapezoidal matrix R (R is
+            upper triangular if m >= n); the elements below the diagonal,
+            with the array TAU, represent the orthogonal matrix Q as a
+            product of min(m,n) elementary reflectors (see Further
+            Details).
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
-    TAU     (output) DOUBLE PRECISION array, dimension (min(M,N))   
-            The scalar factors of the elementary reflectors (see Further   
-            Details).   
+    TAU     (output) DOUBLE PRECISION array, dimension (min(M,N))
+            The scalar factors of the elementary reflectors (see Further
+            Details).
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= max(1,N).   
-            For optimum performance LWORK >= N*NB, where NB is   
-            the optimal blocksize.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK.  LWORK >= max(1,N).
+            For optimum performance LWORK >= N*NB, where NB is
+            the optimal blocksize.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    Further Details   
-    ===============   
+    Further Details
+    ===============
 
-    The matrix Q is represented as a product of elementary reflectors   
+    The matrix Q is represented as a product of elementary reflectors
 
-       Q = H(1) H(2) . . . H(k), where k = min(m,n).   
+       Q = H(1) H(2) . . . H(k), where k = min(m,n).
 
-    Each H(i) has the form   
+    Each H(i) has the form
 
-       H(i) = I - tau * v * v'   
+       H(i) = I - tau * v * v'
 
-    where tau is a real scalar, and v is a real vector with   
-    v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),   
-    and tau in TAU(i).   
+    where tau is a real scalar, and v is a real vector with
+    v(1:i-1) = 0 and v(i) = 1; v(i+1:m) is stored on exit in A(i+1:m,i),
+    and tau in TAU(i).
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__3 = 3;
-    static integer c__2 = 2;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__3 = 3;
+    integer c__2 = 2;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
-    static integer i__, k, nbmin, iinfo;
-    extern /* Subroutine */ integer dgeqr2_(integer *, integer *, doublereal *, 
+    integer i__, k, nbmin, iinfo;
+    extern /* Subroutine */ integer dgeqr2_(integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *);
-    static integer ib, nb;
-    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *, 
-	    integer *, integer *, integer *, doublereal *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    integer ib, nb;
+    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *,
+	    integer *, integer *, integer *, doublereal *, integer *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    integer *);
-    static integer nx;
-    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *, 
+    integer nx;
+    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *,
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    static integer ldwork, lwkopt;
-    static logical lquery;
-    static integer iws;
+    integer ldwork, lwkopt;
+    logical lquery;
+    integer iws;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -157,7 +157,7 @@ extern "C" {
     iws = *n;
     if (nb > 1 && nb < k) {
 
-/*        Determine when to cross over from blocked to unblocked code.   
+/*        Determine when to cross over from blocked to unblocked code.
 
    Computing MAX */
 	i__1 = 0, i__2 = ilaenv_(&c__3, "DGEQRF", " ", m, n, &c_n1, &c_n1, (
@@ -171,7 +171,7 @@ extern "C" {
 	    iws = ldwork * nb;
 	    if (*lwork < iws) {
 
-/*              Not enough workspace to use optimal NB:  reduce NB and   
+/*              Not enough workspace to use optimal NB:  reduce NB and
                 determine the minimum value of NB. */
 
 		nb = *lwork / ldwork;
@@ -194,7 +194,7 @@ extern "C" {
 	    i__3 = k - i__ + 1;
 	    ib = min(i__3,nb);
 
-/*           Compute the QR factorization of the current block   
+/*           Compute the QR factorization of the current block
              A(i:m,i:i+ib-1) */
 
 	    i__3 = *m - i__ + 1;
@@ -202,7 +202,7 @@ extern "C" {
 		    iinfo);
 	    if (i__ + ib <= *n) {
 
-/*              Form the triangular factor of the block reflector   
+/*              Form the triangular factor of the block reflector
                 H = H(i) H(i+1) . . . H(i+ib-1) */
 
 		i__3 = *m - i__ + 1;

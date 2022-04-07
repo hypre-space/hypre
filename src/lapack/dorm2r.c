@@ -99,21 +99,21 @@ extern "C" {
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
+     integer c__1 = 1;
     
     /* System generated locals */
     integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2;
     /* Local variables */
-    static logical left;
-    static integer i__;
+     logical left;
+     integer i__;
     extern /* Subroutine */ integer dlarf_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *);
     extern logical lsame_(const char *,const char *);
-    static integer i1, i2, i3, ic, jc, mi, ni, nq;
+     integer i1, i2, i3, ic, jc, mi, ni, nq;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    static logical notran;
-    static doublereal aii;
+     logical notran;
+     doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
 

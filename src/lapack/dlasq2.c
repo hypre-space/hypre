@@ -13,15 +13,6 @@ extern "C" {
 	-lf2c -lm   (in that order)
 */
 
-/* Table of constant values */
-
-static integer c__1 = 1;
-static integer c__2 = 2;
-static integer c__10 = 10;
-static integer c__3 = 3;
-static integer c__4 = 4;
-static integer c__11 = 11;
-
 /* Subroutine */ integer dlasq2_(integer *n, doublereal *z__, integer *info)
 {
     /* System generated locals */
@@ -29,97 +20,105 @@ static integer c__11 = 11;
     doublereal d__1, d__2;
 
     /* Local variables */
-    static logical ieee;
-    static integer nbig;
-    static doublereal dmin__, emin, emax;
-    static integer ndiv, iter;
-    static doublereal qmin, temp, qmax, zmax;
-    static integer splt;
-    static doublereal d__, e;
-    static integer k;
-    static doublereal s, t;
-    static integer nfail;
-    static doublereal desig, trace, sigma;
-    static integer iinfo, i0, i4, n0;
-    extern /* Subroutine */ integer dlasq3_(integer *, integer *, doublereal *, 
+    logical ieee;
+    integer nbig;
+    doublereal dmin__, emin, emax;
+    integer ndiv, iter;
+    doublereal qmin, temp, qmax, zmax;
+    integer splt;
+    doublereal d__, e;
+    integer k;
+    doublereal s, t;
+    integer nfail;
+    doublereal desig, trace, sigma;
+    integer iinfo, i0, i4, n0;
+    extern /* Subroutine */ integer dlasq3_(integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     integer *, integer *, integer *, logical *);
     extern doublereal dlamch_(const char *);
-    static integer pp, iwhila, iwhilb;
-    static doublereal oldemn, safmin;
+    integer pp, iwhila, iwhilb;
+    doublereal oldemn, safmin;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ integer dlasrt_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dlasrt_(const char *, integer *, doublereal *,
 	    integer *);
-    static doublereal eps, tol;
-    static integer ipn4;
-    static doublereal tol2;
+    doublereal eps, tol;
+    integer ipn4;
+    doublereal tol2;
+
+    /* Table of constant values */
+    integer c__1 = 1;
+    integer c__2 = 2;
+    integer c__10 = 10;
+    integer c__3 = 3;
+    integer c__4 = 4;
+    integer c__11 = 11;
 
 
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLASQ2 computes all the eigenvalues of the symmetric positive   
-    definite tridiagonal matrix associated with the qd array Z to high   
-    relative accuracy are computed to high relative accuracy, in the   
-    absence of denormalization, underflow and overflow.   
+    DLASQ2 computes all the eigenvalues of the symmetric positive
+    definite tridiagonal matrix associated with the qd array Z to high
+    relative accuracy are computed to high relative accuracy, in the
+    absence of denormalization, underflow and overflow.
 
-    To see the relation of Z to the tridiagonal matrix, let L be a   
-    unit lower bidiagonal matrix with subdiagonals Z(2,4,6,,..) and   
-    let U be an upper bidiagonal matrix with 1's above and diagonal   
-    Z(1,3,5,,..). The tridiagonal is L*U or, if you prefer, the   
-    symmetric tridiagonal to which it is similar.   
+    To see the relation of Z to the tridiagonal matrix, let L be a
+    unit lower bidiagonal matrix with subdiagonals Z(2,4,6,,..) and
+    let U be an upper bidiagonal matrix with 1's above and diagonal
+    Z(1,3,5,,..). The tridiagonal is L*U or, if you prefer, the
+    symmetric tridiagonal to which it is similar.
 
-    Note : DLASQ2 defines a logical variable, IEEE, which is true   
-    on machines which follow ieee-754 floating-point standard in their   
-    handling of infinities and NaNs, and false otherwise. This variable   
-    is passed to DLASQ3.   
+    Note : DLASQ2 defines a logical variable, IEEE, which is true
+    on machines which follow ieee-754 floating-point standard in their
+    handling of infinities and NaNs, and false otherwise. This variable
+    is passed to DLASQ3.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    N     (input) INTEGER   
-          The number of rows and columns in the matrix. N >= 0.   
+    N     (input) INTEGER
+          The number of rows and columns in the matrix. N >= 0.
 
-    Z     (workspace) DOUBLE PRECISION array, dimension ( 4*N )   
-          On entry Z holds the qd array. On exit, entries 1 to N hold   
-          the eigenvalues in decreasing order, Z( 2*N+1 ) holds the   
-          trace, and Z( 2*N+2 ) holds the sum of the eigenvalues. If   
-          N > 2, then Z( 2*N+3 ) holds the iteration count, Z( 2*N+4 )   
-          holds NDIVS/NIN^2, and Z( 2*N+5 ) holds the percentage of   
-          shifts that failed.   
+    Z     (workspace) DOUBLE PRECISION array, dimension ( 4*N )
+          On entry Z holds the qd array. On exit, entries 1 to N hold
+          the eigenvalues in decreasing order, Z( 2*N+1 ) holds the
+          trace, and Z( 2*N+2 ) holds the sum of the eigenvalues. If
+          N > 2, then Z( 2*N+3 ) holds the iteration count, Z( 2*N+4 )
+          holds NDIVS/NIN^2, and Z( 2*N+5 ) holds the percentage of
+          shifts that failed.
 
-    INFO  (output) INTEGER   
-          = 0: successful exit   
-          < 0: if the i-th argument is a scalar and had an illegal   
-               value, then INFO = -i, if the i-th argument is an   
-               array and the j-entry had an illegal value, then   
-               INFO = -(i*100+j)   
-          > 0: the algorithm failed   
-                = 1, a split was marked by a positive value in E   
-                = 2, current block of Z not diagonalized after 30*N   
-                     iterations (in inner while loop)   
-                = 3, termination criterion of outer while loop not met   
-                     (program created more than N unreduced blocks)   
+    INFO  (output) INTEGER
+          = 0: successful exit
+          < 0: if the i-th argument is a scalar and had an illegal
+               value, then INFO = -i, if the i-th argument is an
+               array and the j-entry had an illegal value, then
+               INFO = -(i*100+j)
+          > 0: the algorithm failed
+                = 1, a split was marked by a positive value in E
+                = 2, current block of Z not diagonalized after 30*N
+                     iterations (in inner while loop)
+                = 3, termination criterion of outer while loop not met
+                     (program created more than N unreduced blocks)
 
-    Further Details   
-    ===============   
-    Local Variables: I0:N0 defines a current unreduced segment of Z.   
-    The shifts are accumulated in SIGMA. Iteration count is in ITER.   
-    Ping-pong is controlled by PP (alternates between 0 and 1).   
+    Further Details
+    ===============
+    Local Variables: I0:N0 defines a current unreduced segment of Z.
+    The shifts are accumulated in SIGMA. Iteration count is in ITER.
+    Ping-pong is controlled by PP (alternates between 0 and 1).
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments.   
-       (in case DLASQ2 is not called by DLASQ1)   
+       Test the input arguments.
+       (in case DLASQ2 is not called by DLASQ1)
 
        Parameter adjustments */
     --z__;
@@ -310,7 +309,7 @@ static integer c__11 = 11;
 		z__[i4 - (pp << 1) - 2] = d__;
 		z__[i4 - (pp << 1)] = 0.;
 		d__ = z__[i4 + 1];
-	    } else if (safmin * z__[i4 + 1] < z__[i4 - (pp << 1) - 2] && 
+	    } else if (safmin * z__[i4 + 1] < z__[i4 - (pp << 1) - 2] &&
 		    safmin * z__[i4 - (pp << 1) - 2] < z__[i4 + 1]) {
 		temp = z__[i4 + 1] / z__[i4 - (pp << 1) - 2];
 		z__[i4 - (pp << 1)] = z__[i4 - 1] * temp;
@@ -354,9 +353,9 @@ static integer c__11 = 11;
 	    goto L150;
 	}
 
-/*        While array unfinished do   
+/*        While array unfinished do
 
-          E(N0) holds the value of SIGMA when submatrix in I0:N0   
+          E(N0) holds the value of SIGMA when submatrix in I0:N0
           splits from the rest of the array, but is negated. */
 
 	desig = 0.;
@@ -370,7 +369,7 @@ static integer c__11 = 11;
 	    return 0;
 	}
 
-/*        Find last unreduced submatrix's top index I0, find QMAX and   
+/*        Find last unreduced submatrix's top index I0, find QMAX and
           EMIN. Find Gershgorin-type bound if Q's much greater than E's. */
 
 	emax = 0.;
@@ -410,7 +409,7 @@ L100:
 
 	z__[(n0 << 2) - 1] = emin;
 
-/*        Put -(initial shift) into DMIN.   
+/*        Put -(initial shift) into DMIN.
 
    Computing MAX */
 	d__1 = 0., d__2 = qmin - sqrt(qmin) * 2. * sqrt(emax);
@@ -445,7 +444,7 @@ L100:
 		    oldemn = z__[i0 * 4];
 		    i__3 = (n0 - 3) << 2;
 		    for (i4 = i0 << 2; i4 <= i__3; i4 += 4) {
-			if (z__[i4] <= tol2 * z__[i4 - 3] || z__[i4 - 1] <= 
+			if (z__[i4] <= tol2 * z__[i4 - 3] || z__[i4 - 1] <=
 				tol2 * sigma) {
 			    z__[i4 - 1] = -sigma;
 			    splt = i4 / 4;

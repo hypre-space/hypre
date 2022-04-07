@@ -9,163 +9,163 @@ extern "C" {
 #include "hypre_lapack.h"
 
 /* Subroutine */ integer dgels_(char *trans, integer *m, integer *n, integer *
-	nrhs, doublereal *a, integer *lda, doublereal *b, integer *ldb, 
+	nrhs, doublereal *a, integer *lda, doublereal *b, integer *ldb,
 	doublereal *work, integer *lwork, integer *info)
 {
-/*  -- LAPACK driver routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK driver routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DGELS solves overdetermined or underdetermined real linear systems   
-    involving an M-by-N matrix A, or its transpose, using a QR or LQ   
-    factorization of A.  It is assumed that A has full rank.   
+    DGELS solves overdetermined or underdetermined real linear systems
+    involving an M-by-N matrix A, or its transpose, using a QR or LQ
+    factorization of A.  It is assumed that A has full rank.
 
-    The following options are provided:   
+    The following options are provided:
 
-    1. If TRANS = 'N' and m >= n:  find the least squares solution of   
-       an overdetermined system, i.e., solve the least squares problem   
-                    minimize || B - A*X ||.   
+    1. If TRANS = 'N' and m >= n:  find the least squares solution of
+       an overdetermined system, i.e., solve the least squares problem
+                    minimize || B - A*X ||.
 
-    2. If TRANS = 'N' and m < n:  find the minimum norm solution of   
-       an underdetermined system A * X = B.   
+    2. If TRANS = 'N' and m < n:  find the minimum norm solution of
+       an underdetermined system A * X = B.
 
-    3. If TRANS = 'T' and m >= n:  find the minimum norm solution of   
-       an undetermined system A**T * X = B.   
+    3. If TRANS = 'T' and m >= n:  find the minimum norm solution of
+       an undetermined system A**T * X = B.
 
-    4. If TRANS = 'T' and m < n:  find the least squares solution of   
-       an overdetermined system, i.e., solve the least squares problem   
-                    minimize || B - A**T * X ||.   
+    4. If TRANS = 'T' and m < n:  find the least squares solution of
+       an overdetermined system, i.e., solve the least squares problem
+                    minimize || B - A**T * X ||.
 
-    Several right hand side vectors b and solution vectors x can be   
-    handled in a single call; they are stored as the columns of the   
-    M-by-NRHS right hand side matrix B and the N-by-NRHS solution   
-    matrix X.   
+    Several right hand side vectors b and solution vectors x can be
+    handled in a single call; they are stored as the columns of the
+    M-by-NRHS right hand side matrix B and the N-by-NRHS solution
+    matrix X.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    TRANS   (input) CHARACTER   
-            = 'N': the linear system involves A;   
-            = 'T': the linear system involves A**T.   
+    TRANS   (input) CHARACTER
+            = 'N': the linear system involves A;
+            = 'T': the linear system involves A**T.
 
-    M       (input) INTEGER   
-            The number of rows of the matrix A.  M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix A.  M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix A.  N >= 0.   
+    N       (input) INTEGER
+            The number of columns of the matrix A.  N >= 0.
 
-    NRHS    (input) INTEGER   
-            The number of right hand sides, i.e., the number of   
-            columns of the matrices B and X. NRHS >=0.   
+    NRHS    (input) INTEGER
+            The number of right hand sides, i.e., the number of
+            columns of the matrices B and X. NRHS >=0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the M-by-N matrix A.   
-            On exit,   
-              if M >= N, A is overwritten by details of its QR   
-                         factorization as returned by DGEQRF;   
-              if M <  N, A is overwritten by details of its LQ   
-                         factorization as returned by DGELQF.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the M-by-N matrix A.
+            On exit,
+              if M >= N, A is overwritten by details of its QR
+                         factorization as returned by DGEQRF;
+              if M <  N, A is overwritten by details of its LQ
+                         factorization as returned by DGELQF.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
-    B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS)   
-            On entry, the matrix B of right hand side vectors, stored   
-            columnwise; B is M-by-NRHS if TRANS = 'N', or N-by-NRHS   
-            if TRANS = 'T'.   
-            On exit, B is overwritten by the solution vectors, stored   
-            columnwise:   
-            if TRANS = 'N' and m >= n, rows 1 to n of B contain the least   
-            squares solution vectors; the residual sum of squares for the   
-            solution in each column is given by the sum of squares of   
-            elements N+1 to M in that column;   
-            if TRANS = 'N' and m < n, rows 1 to N of B contain the   
-            minimum norm solution vectors;   
-            if TRANS = 'T' and m >= n, rows 1 to M of B contain the   
-            minimum norm solution vectors;   
-            if TRANS = 'T' and m < n, rows 1 to M of B contain the   
-            least squares solution vectors; the residual sum of squares   
-            for the solution in each column is given by the sum of   
-            squares of elements M+1 to N in that column.   
+    B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS)
+            On entry, the matrix B of right hand side vectors, stored
+            columnwise; B is M-by-NRHS if TRANS = 'N', or N-by-NRHS
+            if TRANS = 'T'.
+            On exit, B is overwritten by the solution vectors, stored
+            columnwise:
+            if TRANS = 'N' and m >= n, rows 1 to n of B contain the least
+            squares solution vectors; the residual sum of squares for the
+            solution in each column is given by the sum of squares of
+            elements N+1 to M in that column;
+            if TRANS = 'N' and m < n, rows 1 to N of B contain the
+            minimum norm solution vectors;
+            if TRANS = 'T' and m >= n, rows 1 to M of B contain the
+            minimum norm solution vectors;
+            if TRANS = 'T' and m < n, rows 1 to M of B contain the
+            least squares solution vectors; the residual sum of squares
+            for the solution in each column is given by the sum of
+            squares of elements M+1 to N in that column.
 
-    LDB     (input) INTEGER   
-            The leading dimension of the array B. LDB >= MAX(1,M,N).   
+    LDB     (input) INTEGER
+            The leading dimension of the array B. LDB >= MAX(1,M,N).
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.   
-            LWORK >= max( 1, MN + max( MN, NRHS ) ).   
-            For optimal performance,   
-            LWORK >= max( 1, MN + max( MN, NRHS )*NB ).   
-            where MN = min(M,N) and NB is the optimum block size.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK.
+            LWORK >= max( 1, MN + max( MN, NRHS ) ).
+            For optimal performance,
+            LWORK >= max( 1, MN + max( MN, NRHS )*NB ).
+            where MN = min(M,N) and NB is the optimum block size.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments.   
+       Test the input arguments.
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static doublereal c_b33 = 0.;
-    static integer c__0 = 0;
-    static doublereal c_b61 = 1.;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    doublereal c_b33 = 0.;
+    integer c__0 = 0;
+    doublereal c_b61 = 1.;
+
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     /* Local variables */
-    static doublereal anrm, bnrm;
-    static integer brow;
-    static logical tpsd;
-    static integer i__, j, iascl, ibscl;
+    doublereal anrm, bnrm;
+    integer brow;
+    logical tpsd;
+    integer i__, j, iascl, ibscl;
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
-	    integer *, integer *, doublereal *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *,
+	    integer *, integer *, doublereal *, doublereal *, integer *,
 	    doublereal *, integer *);
-    static integer wsize;
-    static doublereal rwork[1];
+    integer wsize;
+    doublereal rwork[1];
     extern /* Subroutine */ integer dlabad_(doublereal *, doublereal *);
-    static integer nb;
-    extern doublereal dlamch_(const char *), dlange_(const char *, integer *, 
+    integer nb;
+    extern doublereal dlamch_(const char *), dlange_(const char *, integer *,
 	    integer *, doublereal *, integer *, doublereal *);
-    static integer mn;
-    extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *, 
-	    integer *, doublereal *, doublereal *, integer *, integer *), 
-	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *, 
+    integer mn;
+    extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *,
+	    integer *, doublereal *, doublereal *, integer *, integer *),
+	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *,
 	    integer *, integer *, doublereal *, integer *, integer *),
-	     dgeqrf_(integer *, integer *, doublereal *, integer *, 
+	     dgeqrf_(integer *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, integer *), dlaset_(const char *,
-	     integer *, integer *, doublereal *, doublereal *, doublereal *, 
+	     integer *, integer *, doublereal *, doublereal *, doublereal *,
 	    integer *), xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    static integer scllen;
-    static doublereal bignum;
-    extern /* Subroutine */ integer dormlq_(const char *,const char *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, integer *, integer *), 
-	    dormqr_(const char *,const char *, integer *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
+    integer scllen;
+    doublereal bignum;
+    extern /* Subroutine */ integer dormlq_(const char *,const char *, integer *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, doublereal *,
+	    integer *, doublereal *, integer *, integer *),
+	    dormqr_(const char *,const char *, integer *, integer *, integer *,
+	    doublereal *, integer *, doublereal *, doublereal *, integer *,
 	    doublereal *, integer *, integer *);
-    static doublereal smlnum;
-    static logical lquery;
+    doublereal smlnum;
+    logical lquery;
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
 
 
@@ -215,7 +215,7 @@ extern "C" {
 	}
 
 	if (*m >= *n) {
-	    nb = ilaenv_(&c__1, "DGEQRF", " ", m, n, &c_n1, &c_n1, (ftnlen)6, 
+	    nb = ilaenv_(&c__1, "DGEQRF", " ", m, n, &c_n1, &c_n1, (ftnlen)6,
 		    (ftnlen)1);
 	    if (tpsd) {
 /* Computing MAX */
@@ -229,7 +229,7 @@ extern "C" {
 		nb = max(i__1,i__2);
 	    }
 	} else {
-	    nb = ilaenv_(&c__1, "DGELQF", " ", m, n, &c_n1, &c_n1, (ftnlen)6, 
+	    nb = ilaenv_(&c__1, "DGELQF", " ", m, n, &c_n1, &c_n1, (ftnlen)6,
 		    (ftnlen)1);
 	    if (tpsd) {
 /* Computing MAX */
@@ -259,7 +259,7 @@ extern "C" {
 	return 0;
     }
 
-/*     Quick return if possible   
+/*     Quick return if possible
 
    Computing MIN */
     i__1 = min(*m,*n);
@@ -283,14 +283,14 @@ extern "C" {
 
 /*        Scale matrix norm up to SMLNUM */
 
-	dlascl_("G", &c__0, &c__0, &anrm, &smlnum, m, n, &a[a_offset], lda, 
+	dlascl_("G", &c__0, &c__0, &anrm, &smlnum, m, n, &a[a_offset], lda,
 		info);
 	iascl = 1;
     } else if (anrm > bignum) {
 
 /*        Scale matrix norm down to BIGNUM */
 
-	dlascl_("G", &c__0, &c__0, &anrm, &bignum, m, n, &a[a_offset], lda, 
+	dlascl_("G", &c__0, &c__0, &anrm, &bignum, m, n, &a[a_offset], lda,
 		info);
 	iascl = 2;
     } else if (anrm == 0.) {
@@ -312,14 +312,14 @@ extern "C" {
 
 /*        Scale matrix norm up to SMLNUM */
 
-	dlascl_("G", &c__0, &c__0, &bnrm, &smlnum, &brow, nrhs, &b[b_offset], 
+	dlascl_("G", &c__0, &c__0, &bnrm, &smlnum, &brow, nrhs, &b[b_offset],
 		ldb, info);
 	ibscl = 1;
     } else if (bnrm > bignum) {
 
 /*        Scale matrix norm down to BIGNUM */
 
-	dlascl_("G", &c__0, &c__0, &bnrm, &bignum, &brow, nrhs, &b[b_offset], 
+	dlascl_("G", &c__0, &c__0, &bnrm, &bignum, &brow, nrhs, &b[b_offset],
 		ldb, info);
 	ibscl = 2;
     }
@@ -336,7 +336,7 @@ extern "C" {
 
 	if (! tpsd) {
 
-/*           Least-Squares Problem min || A * X - B ||   
+/*           Least-Squares Problem min || A * X - B ||
 
              B(1:M,1:NRHS) := Q' * B(1:M,1:NRHS) */
 
@@ -344,7 +344,7 @@ extern "C" {
 	    dormqr_("Left", "Transpose", m, nrhs, n, &a[a_offset], lda, &work[
 		    1], &b[b_offset], ldb, &work[mn + 1], &i__1, info);
 
-/*           workspace at least NRHS, optimally NRHS*NB   
+/*           workspace at least NRHS, optimally NRHS*NB
 
              B(1:N,1:NRHS) := inv(R) * B(1:N,1:NRHS) */
 
@@ -355,11 +355,11 @@ extern "C" {
 
 	} else {
 
-/*           Overdetermined system of equations A' * X = B   
+/*           Overdetermined system of equations A' * X = B
 
              B(1:N,1:NRHS) := inv(R') * B(1:N,1:NRHS) */
 
-	    dtrsm_("Left", "Upper", "Transpose", "Non-unit", n, nrhs, &c_b61, 
+	    dtrsm_("Left", "Upper", "Transpose", "Non-unit", n, nrhs, &c_b61,
 		    &a[a_offset], lda, &b[b_offset], ldb);
 
 /*           B(N+1:M,1:NRHS) = ZERO */
@@ -398,7 +398,7 @@ extern "C" {
 
 	if (! tpsd) {
 
-/*           underdetermined system of equations A * X = B   
+/*           underdetermined system of equations A * X = B
 
              B(1:M,1:NRHS) := inv(L) * B(1:M,1:NRHS) */
 
@@ -429,7 +429,7 @@ extern "C" {
 
 	} else {
 
-/*           overdetermined system min || A' * X - B ||   
+/*           overdetermined system min || A' * X - B ||
 
              B(1:N,1:NRHS) := Q * B(1:N,1:NRHS) */
 
@@ -437,11 +437,11 @@ extern "C" {
 	    dormlq_("Left", "No transpose", n, nrhs, m, &a[a_offset], lda, &
 		    work[1], &b[b_offset], ldb, &work[mn + 1], &i__1, info);
 
-/*           workspace at least NRHS, optimally NRHS*NB   
+/*           workspace at least NRHS, optimally NRHS*NB
 
              B(1:M,1:NRHS) := inv(L') * B(1:M,1:NRHS) */
 
-	    dtrsm_("Left", "Lower", "Transpose", "Non-unit", m, nrhs, &c_b61, 
+	    dtrsm_("Left", "Lower", "Transpose", "Non-unit", m, nrhs, &c_b61,
 		    &a[a_offset], lda, &b[b_offset], ldb);
 
 	    scllen = *m;
