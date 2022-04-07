@@ -8,87 +8,87 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dsterf_(integer *n, doublereal *d__, doublereal *e, 
+/* Subroutine */ integer dsterf_(integer *n, doublereal *d__, doublereal *e,
 	integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DSTERF computes all eigenvalues of a symmetric tridiagonal matrix   
-    using the Pal-Walker-Kahan variant of the QL or QR algorithm.   
+    DSTERF computes all eigenvalues of a symmetric tridiagonal matrix
+    using the Pal-Walker-Kahan variant of the QL or QR algorithm.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    N       (input) INTEGER   
-            The order of the matrix.  N >= 0.   
+    N       (input) INTEGER
+            The order of the matrix.  N >= 0.
 
-    D       (input/output) DOUBLE PRECISION array, dimension (N)   
-            On entry, the n diagonal elements of the tridiagonal matrix.   
-            On exit, if INFO = 0, the eigenvalues in ascending order.   
+    D       (input/output) DOUBLE PRECISION array, dimension (N)
+            On entry, the n diagonal elements of the tridiagonal matrix.
+            On exit, if INFO = 0, the eigenvalues in ascending order.
 
-    E       (input/output) DOUBLE PRECISION array, dimension (N-1)   
-            On entry, the (n-1) subdiagonal elements of the tridiagonal   
-            matrix.   
-            On exit, E has been destroyed.   
+    E       (input/output) DOUBLE PRECISION array, dimension (N-1)
+            On entry, the (n-1) subdiagonal elements of the tridiagonal
+            matrix.
+            On exit, E has been destroyed.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
-            > 0:  the algorithm failed to find all of the eigenvalues in   
-                  a total of 30*N iterations; if INFO = i, then i   
-                  elements of E have not converged to zero.   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
+            > 0:  the algorithm failed to find all of the eigenvalues in
+                  a total of 30*N iterations; if INFO = i, then i
+                  elements of E have not converged to zero.
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input parameters.   
+       Test the input parameters.
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__0 = 0;
-    static integer c__1 = 1;
-    static doublereal c_b32 = 1.;
-    
+    integer c__0 = 0;
+    integer c__1 = 1;
+    doublereal c_b32 = 1.;
+
     /* System generated locals */
     integer i__1;
     doublereal d__1, d__2, d__3;
     /* Builtin functions */
     doublereal d_sign(doublereal *, doublereal *);
     /* Local variables */
-    static doublereal oldc;
-    static integer lend, jtot;
-    extern /* Subroutine */ integer dlae2_(doublereal *, doublereal *, doublereal 
+    doublereal oldc;
+    integer lend, jtot;
+    extern /* Subroutine */ integer dlae2_(doublereal *, doublereal *, doublereal
 	    *, doublereal *, doublereal *);
-    static doublereal c__;
-    static integer i__, l, m;
-    static doublereal p, gamma, r__, s, alpha, sigma, anorm;
-    static integer l1;
+    doublereal c__;
+    integer i__, l, m;
+    doublereal p, gamma, r__, s, alpha, sigma, anorm;
+    integer l1;
     extern doublereal dlapy2_(doublereal *, doublereal *);
-    static doublereal bb;
+    doublereal bb;
     extern doublereal dlamch_(const char *);
-    static integer iscale;
-    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
+    integer iscale;
+    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, integer *, doublereal *,
 	    integer *, integer *);
-    static doublereal oldgam, safmin;
+    doublereal oldgam, safmin;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    static doublereal safmax;
+    doublereal safmax;
     extern doublereal dlanst_(const char *, integer *, doublereal *, doublereal *);
-    extern /* Subroutine */ integer dlasrt_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dlasrt_(const char *, integer *, doublereal *,
 	    integer *);
-    static integer lendsv;
-    static doublereal ssfmin;
-    static integer nmaxit;
-    static doublereal ssfmax, rt1, rt2, eps, rte;
-    static integer lsv;
-    static doublereal eps2;
+    integer lendsv;
+    doublereal ssfmin;
+    integer nmaxit;
+    doublereal ssfmax, rt1, rt2, eps, rte;
+    integer lsv;
+    doublereal eps2;
 
 
     --e;
@@ -126,8 +126,8 @@ extern "C" {
     sigma = 0.;
     jtot = 0;
 
-/*     Determine where the matrix splits and choose QL or QR iteration   
-       for each block, according to whether top or bottom diagonal   
+/*     Determine where the matrix splits and choose QL or QR iteration
+       for each block, according to whether top or bottom diagonal
        element is smaller. */
 
     l1 = 1;
@@ -141,7 +141,7 @@ L10:
     }
     i__1 = *n - 1;
     for (m = l1; m <= i__1; ++m) {
-	if ((d__3 = e[m], abs(d__3)) <= sqrt((d__1 = d__[m], abs(d__1))) * 
+	if ((d__3 = e[m], abs(d__3)) <= sqrt((d__1 = d__[m], abs(d__1))) *
 		sqrt((d__2 = d__[m + 1], abs(d__2))) * eps) {
 	    e[m] = 0.;
 	    goto L30;
@@ -168,18 +168,18 @@ L30:
     if (anorm > ssfmax) {
 	iscale = 1;
 	i__1 = lend - l + 1;
-	dlascl_("G", &c__0, &c__0, &anorm, &ssfmax, &i__1, &c__1, &d__[l], n, 
+	dlascl_("G", &c__0, &c__0, &anorm, &ssfmax, &i__1, &c__1, &d__[l], n,
 		info);
 	i__1 = lend - l;
-	dlascl_("G", &c__0, &c__0, &anorm, &ssfmax, &i__1, &c__1, &e[l], n, 
+	dlascl_("G", &c__0, &c__0, &anorm, &ssfmax, &i__1, &c__1, &e[l], n,
 		info);
     } else if (anorm < ssfmin) {
 	iscale = 2;
 	i__1 = lend - l + 1;
-	dlascl_("G", &c__0, &c__0, &anorm, &ssfmin, &i__1, &c__1, &d__[l], n, 
+	dlascl_("G", &c__0, &c__0, &anorm, &ssfmin, &i__1, &c__1, &d__[l], n,
 		info);
 	i__1 = lend - l;
-	dlascl_("G", &c__0, &c__0, &anorm, &ssfmin, &i__1, &c__1, &e[l], n, 
+	dlascl_("G", &c__0, &c__0, &anorm, &ssfmin, &i__1, &c__1, &e[l], n,
 		info);
     }
 
@@ -200,7 +200,7 @@ L30:
 
     if (lend >= l) {
 
-/*        QL Iteration   
+/*        QL Iteration
 
           Look for small subdiagonal element. */
 
@@ -208,7 +208,7 @@ L50:
 	if (l != lend) {
 	    i__1 = lend - 1;
 	    for (m = l; m <= i__1; ++m) {
-		if ((d__2 = e[m], abs(d__2)) <= eps2 * (d__1 = d__[m] * d__[m 
+		if ((d__2 = e[m], abs(d__2)) <= eps2 * (d__1 = d__[m] * d__[m
 			+ 1], abs(d__1))) {
 		    goto L70;
 		}
@@ -226,7 +226,7 @@ L70:
 	    goto L90;
 	}
 
-/*        If remaining matrix is 2 by 2, use DLAE2 to compute its   
+/*        If remaining matrix is 2 by 2, use DLAE2 to compute its
           eigenvalues. */
 
 	if (m == l + 1) {
@@ -300,14 +300,14 @@ L90:
 
     } else {
 
-/*        QR Iteration   
+/*        QR Iteration
 
           Look for small superdiagonal element. */
 
 L100:
 	i__1 = lend + 1;
 	for (m = l; m >= i__1; --m) {
-	    if ((d__2 = e[m - 1], abs(d__2)) <= eps2 * (d__1 = d__[m] * d__[m 
+	    if ((d__2 = e[m - 1], abs(d__2)) <= eps2 * (d__1 = d__[m] * d__[m
 		    - 1], abs(d__1))) {
 		goto L120;
 	    }
@@ -324,7 +324,7 @@ L120:
 	    goto L140;
 	}
 
-/*        If remaining matrix is 2 by 2, use DLAE2 to compute its   
+/*        If remaining matrix is 2 by 2, use DLAE2 to compute its
           eigenvalues. */
 
 	if (m == l - 1) {
@@ -403,16 +403,16 @@ L140:
 L150:
     if (iscale == 1) {
 	i__1 = lendsv - lsv + 1;
-	dlascl_("G", &c__0, &c__0, &ssfmax, &anorm, &i__1, &c__1, &d__[lsv], 
+	dlascl_("G", &c__0, &c__0, &ssfmax, &anorm, &i__1, &c__1, &d__[lsv],
 		n, info);
     }
     if (iscale == 2) {
 	i__1 = lendsv - lsv + 1;
-	dlascl_("G", &c__0, &c__0, &ssfmin, &anorm, &i__1, &c__1, &d__[lsv], 
+	dlascl_("G", &c__0, &c__0, &ssfmin, &anorm, &i__1, &c__1, &d__[lsv],
 		n, info);
     }
 
-/*     Check for no convergence to an eigenvalue after a total   
+/*     Check for no convergence to an eigenvalue after a total
        of N*MAXIT iterations. */
 
     if (jtot < nmaxit) {

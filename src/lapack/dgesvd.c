@@ -13,210 +13,208 @@ extern "C" {
 	-lf2c -lm   (in that order)
 */
 
-/* Table of constant values */
-
-static integer c__6 = 6;
-static integer c__0 = 0;
-static integer c__2 = 2;
-static integer c__1 = 1;
-static integer c_n1 = -1;
-static doublereal c_b416 = 0.;
-static doublereal c_b438 = 1.;
-
-/* Subroutine */ integer dgesvd_(char *jobu, char *jobvt, integer *m, integer *n, 
+/* Subroutine */ integer dgesvd_(char *jobu, char *jobvt, integer *m, integer *n,
 	doublereal *a, integer *lda, doublereal *s, doublereal *u, integer *
-	ldu, doublereal *vt, integer *ldvt, doublereal *work, integer *lwork, 
+	ldu, doublereal *vt, integer *ldvt, doublereal *work, integer *lwork,
 	integer *info)
 {
     /* System generated locals */
     address a__1[2];
-    integer a_dim1, a_offset, u_dim1, u_offset, vt_dim1, vt_offset, i__1[2], 
+    integer a_dim1, a_offset, u_dim1, u_offset, vt_dim1, vt_offset, i__1[2],
 	    i__2, i__3, i__4;
     char ch__1[2];
 
-    /* Builtin functions   
+    /* Builtin functions
        Subroutine */ integer s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
-    static integer iscl;
-    static doublereal anrm;
-    static integer ierr, itau, ncvt, nrvt, i__;
-    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
-	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+    integer iscl;
+    doublereal anrm;
+    integer ierr, itau, ncvt, nrvt, i__;
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *,
+	    integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *);
     extern logical lsame_(const char *,const char *);
-    static integer chunk, minmn, wrkbl, itaup, itauq, mnthr, iwork;
-    static logical wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
-    static integer ie;
-    extern /* Subroutine */ integer dgebrd_(integer *, integer *, doublereal *, 
+    integer chunk, minmn, wrkbl, itaup, itauq, mnthr, iwork;
+    logical wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
+    integer ie;
+    extern /* Subroutine */ integer dgebrd_(integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, integer *, integer *);
-    extern doublereal dlamch_(const char *), dlange_(const char *, integer *, 
+    extern doublereal dlamch_(const char *), dlange_(const char *, integer *,
 	    integer *, doublereal *, integer *, doublereal *);
-    static integer ir, bdspac, iu;
-    extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *, 
-	    integer *, doublereal *, doublereal *, integer *, integer *), 
-	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *, 
+    integer ir, bdspac, iu;
+    extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *,
+	    integer *, doublereal *, doublereal *, integer *, integer *),
+	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *,
 	    integer *, integer *, doublereal *, integer *, integer *),
-	     dgeqrf_(integer *, integer *, doublereal *, integer *, 
+	     dgeqrf_(integer *, integer *, doublereal *, integer *,
 	    doublereal *, doublereal *, integer *, integer *), dlacpy_(const char *,
-	     integer *, integer *, doublereal *, integer *, doublereal *, 
-	    integer *), dlaset_(const char *, integer *, integer *, 
-	    doublereal *, doublereal *, doublereal *, integer *), 
-	    dbdsqr_(const char *, integer *, integer *, integer *, integer *, 
+	     integer *, integer *, doublereal *, integer *, doublereal *,
+	    integer *), dlaset_(const char *, integer *, integer *,
+	    doublereal *, doublereal *, doublereal *, integer *),
+	    dbdsqr_(const char *, integer *, integer *, integer *, integer *,
 	    doublereal *, doublereal *, doublereal *, integer *, doublereal *,
-	     integer *, doublereal *, integer *, doublereal *, integer *), dorgbr_(const char *, integer *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
+	     integer *, doublereal *, integer *, doublereal *, integer *), dorgbr_(const char *, integer *, integer *, integer *,
+	    doublereal *, integer *, doublereal *, doublereal *, integer *,
 	    integer *);
-    static doublereal bignum;
+    doublereal bignum;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
-	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ integer dormbr_(const char *,const char *,const char *, integer *, 
-	    integer *, integer *, doublereal *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, integer *), dorglq_(integer *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
+                           integer *, integer *, ftnlen, ftnlen);
+    extern /* Subroutine */ integer dormbr_(const char *,const char *,const char *, integer *,
+	    integer *, integer *, doublereal *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, integer *), dorglq_(integer *, integer *, integer *,
+	    doublereal *, integer *, doublereal *, doublereal *, integer *,
 	    integer *), dorgqr_(integer *, integer *, integer *, doublereal *,
-	     integer *, doublereal *, doublereal *, integer *, integer *);
-    static integer ldwrkr, minwrk, ldwrku, maxwrk;
-    static doublereal smlnum;
-    static logical lquery, wntuas, wntvas;
-    static integer blk, ncu;
-    static doublereal dum[1], eps;
-    static integer nru;
+            integer *, doublereal *, doublereal *, integer *, integer *);
+    integer ldwrkr, minwrk, ldwrku, maxwrk;
+    doublereal smlnum;
+    logical lquery, wntuas, wntvas;
+    integer blk, ncu;
+    doublereal dum[1], eps;
+    integer nru;
 
+    /* Table of constant values */
+    integer c__6 = 6;
+    integer c__0 = 0;
+    integer c__2 = 2;
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    doublereal c_b416 = 0.;
+    doublereal c_b438 = 1.;
 
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define u_ref(a_1,a_2) u[(a_2)*u_dim1 + a_1]
 #define vt_ref(a_1,a_2) vt[(a_2)*vt_dim1 + a_1]
 
 
-/*  -- LAPACK driver routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1999   
+/*  -- LAPACK driver routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DGESVD computes the singular value decomposition (SVD) of a real   
-    M-by-N matrix A, optionally computing the left and/or right singular   
-    vectors. The SVD is written   
+    DGESVD computes the singular value decomposition (SVD) of a real
+    M-by-N matrix A, optionally computing the left and/or right singular
+    vectors. The SVD is written
 
-         A = U * SIGMA * transpose(V)   
+         A = U * SIGMA * transpose(V)
 
-    where SIGMA is an M-by-N matrix which is zero except for its   
-    min(m,n) diagonal elements, U is an M-by-M orthogonal matrix, and   
-    V is an N-by-N orthogonal matrix.  The diagonal elements of SIGMA   
-    are the singular values of A; they are real and non-negative, and   
-    are returned in descending order.  The first min(m,n) columns of   
-    U and V are the left and right singular vectors of A.   
+    where SIGMA is an M-by-N matrix which is zero except for its
+    min(m,n) diagonal elements, U is an M-by-M orthogonal matrix, and
+    V is an N-by-N orthogonal matrix.  The diagonal elements of SIGMA
+    are the singular values of A; they are real and non-negative, and
+    are returned in descending order.  The first min(m,n) columns of
+    U and V are the left and right singular vectors of A.
 
-    Note that the routine returns V**T, not V.   
+    Note that the routine returns V**T, not V.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    JOBU    (input) CHARACTER*1   
-            Specifies options for computing all or part of the matrix U:   
-            = 'A':  all M columns of U are returned in array U:   
-            = 'S':  the first min(m,n) columns of U (the left singular   
-                    vectors) are returned in the array U;   
-            = 'O':  the first min(m,n) columns of U (the left singular   
-                    vectors) are overwritten on the array A;   
-            = 'N':  no columns of U (no left singular vectors) are   
-                    computed.   
+    JOBU    (input) CHARACTER*1
+            Specifies options for computing all or part of the matrix U:
+            = 'A':  all M columns of U are returned in array U:
+            = 'S':  the first min(m,n) columns of U (the left singular
+                    vectors) are returned in the array U;
+            = 'O':  the first min(m,n) columns of U (the left singular
+                    vectors) are overwritten on the array A;
+            = 'N':  no columns of U (no left singular vectors) are
+                    computed.
 
-    JOBVT   (input) CHARACTER*1   
-            Specifies options for computing all or part of the matrix   
-            V**T:   
-            = 'A':  all N rows of V**T are returned in the array VT;   
-            = 'S':  the first min(m,n) rows of V**T (the right singular   
-                    vectors) are returned in the array VT;   
-            = 'O':  the first min(m,n) rows of V**T (the right singular   
-                    vectors) are overwritten on the array A;   
-            = 'N':  no rows of V**T (no right singular vectors) are   
-                    computed.   
+    JOBVT   (input) CHARACTER*1
+            Specifies options for computing all or part of the matrix
+            V**T:
+            = 'A':  all N rows of V**T are returned in the array VT;
+            = 'S':  the first min(m,n) rows of V**T (the right singular
+                    vectors) are returned in the array VT;
+            = 'O':  the first min(m,n) rows of V**T (the right singular
+                    vectors) are overwritten on the array A;
+            = 'N':  no rows of V**T (no right singular vectors) are
+                    computed.
 
-            JOBVT and JOBU cannot both be 'O'.   
+            JOBVT and JOBU cannot both be 'O'.
 
-    M       (input) INTEGER   
-            The number of rows of the input matrix A.  M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the input matrix A.  M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the input matrix A.  N >= 0.   
+    N       (input) INTEGER
+            The number of columns of the input matrix A.  N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the M-by-N matrix A.   
-            On exit,   
-            if JOBU = 'O',  A is overwritten with the first min(m,n)   
-                            columns of U (the left singular vectors,   
-                            stored columnwise);   
-            if JOBVT = 'O', A is overwritten with the first min(m,n)   
-                            rows of V**T (the right singular vectors,   
-                            stored rowwise);   
-            if JOBU .ne. 'O' and JOBVT .ne. 'O', the contents of A   
-                            are destroyed.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the M-by-N matrix A.
+            On exit,
+            if JOBU = 'O',  A is overwritten with the first min(m,n)
+                            columns of U (the left singular vectors,
+                            stored columnwise);
+            if JOBVT = 'O', A is overwritten with the first min(m,n)
+                            rows of V**T (the right singular vectors,
+                            stored rowwise);
+            if JOBU .ne. 'O' and JOBVT .ne. 'O', the contents of A
+                            are destroyed.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
-    S       (output) DOUBLE PRECISION array, dimension (min(M,N))   
-            The singular values of A, sorted so that S(i) >= S(i+1).   
+    S       (output) DOUBLE PRECISION array, dimension (min(M,N))
+            The singular values of A, sorted so that S(i) >= S(i+1).
 
-    U       (output) DOUBLE PRECISION array, dimension (LDU,UCOL)   
-            (LDU,M) if JOBU = 'A' or (LDU,min(M,N)) if JOBU = 'S'.   
-            If JOBU = 'A', U contains the M-by-M orthogonal matrix U;   
-            if JOBU = 'S', U contains the first min(m,n) columns of U   
-            (the left singular vectors, stored columnwise);   
-            if JOBU = 'N' or 'O', U is not referenced.   
+    U       (output) DOUBLE PRECISION array, dimension (LDU,UCOL)
+            (LDU,M) if JOBU = 'A' or (LDU,min(M,N)) if JOBU = 'S'.
+            If JOBU = 'A', U contains the M-by-M orthogonal matrix U;
+            if JOBU = 'S', U contains the first min(m,n) columns of U
+            (the left singular vectors, stored columnwise);
+            if JOBU = 'N' or 'O', U is not referenced.
 
-    LDU     (input) INTEGER   
-            The leading dimension of the array U.  LDU >= 1; if   
-            JOBU = 'S' or 'A', LDU >= M.   
+    LDU     (input) INTEGER
+            The leading dimension of the array U.  LDU >= 1; if
+            JOBU = 'S' or 'A', LDU >= M.
 
-    VT      (output) DOUBLE PRECISION array, dimension (LDVT,N)   
-            If JOBVT = 'A', VT contains the N-by-N orthogonal matrix   
-            V**T;   
-            if JOBVT = 'S', VT contains the first min(m,n) rows of   
-            V**T (the right singular vectors, stored rowwise);   
-            if JOBVT = 'N' or 'O', VT is not referenced.   
+    VT      (output) DOUBLE PRECISION array, dimension (LDVT,N)
+            If JOBVT = 'A', VT contains the N-by-N orthogonal matrix
+            V**T;
+            if JOBVT = 'S', VT contains the first min(m,n) rows of
+            V**T (the right singular vectors, stored rowwise);
+            if JOBVT = 'N' or 'O', VT is not referenced.
 
-    LDVT    (input) INTEGER   
-            The leading dimension of the array VT.  LDVT >= 1; if   
-            JOBVT = 'A', LDVT >= N; if JOBVT = 'S', LDVT >= min(M,N).   
+    LDVT    (input) INTEGER
+            The leading dimension of the array VT.  LDVT >= 1; if
+            JOBVT = 'A', LDVT >= N; if JOBVT = 'S', LDVT >= min(M,N).
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK;   
-            if INFO > 0, WORK(2:MIN(M,N)) contains the unconverged   
-            superdiagonal elements of an upper bidiagonal matrix B   
-            whose diagonal is in S (not necessarily sorted). B   
-            satisfies A = U * B * VT, so it has the same singular values   
-            as A, and singular vectors related by U and VT.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK;
+            if INFO > 0, WORK(2:MIN(M,N)) contains the unconverged
+            superdiagonal elements of an upper bidiagonal matrix B
+            whose diagonal is in S (not necessarily sorted). B
+            satisfies A = U * B * VT, so it has the same singular values
+            as A, and singular vectors related by U and VT.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK. LWORK >= 1.   
-            LWORK >= MAX(3*MIN(M,N)+MAX(M,N),5*MIN(M,N)).   
-            For good performance, LWORK should generally be larger.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK. LWORK >= 1.
+            LWORK >= MAX(3*MIN(M,N)+MAX(M,N),5*MIN(M,N)).
+            For good performance, LWORK should generally be larger.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit.   
-            < 0:  if INFO = -i, the i-th argument had an illegal value.   
-            > 0:  if DBDSQR did not converge, INFO specifies how many   
-                  superdiagonals of an intermediate bidiagonal form B   
-                  did not converge to zero. See the description of WORK   
-                  above for details.   
+    INFO    (output) INTEGER
+            = 0:  successful exit.
+            < 0:  if INFO = -i, the i-th argument had an illegal value.
+            > 0:  if DBDSQR did not converge, INFO specifies how many
+                  superdiagonals of an intermediate bidiagonal form B
+                  did not converge to zero. See the description of WORK
+                  above for details.
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     a_dim1 = *lda;
@@ -269,11 +267,11 @@ static doublereal c_b438 = 1.;
 	*info = -11;
     }
 
-/*     Compute workspace   
-        (Note: Comments in the code beginning "Workspace:" describe the   
-         minimal amount of workspace needed at that point in the code,   
-         as well as the preferred amount for good performance.   
-         NB refers to the optimal block size for the immediately   
+/*     Compute workspace
+        (Note: Comments in the code beginning "Workspace:" describe the
+         minimal amount of workspace needed at that point in the code,
+         as well as the preferred amount for good performance.
+         NB refers to the optimal block size for the immediately
          following subroutine, as returned by ILAENV.) */
 
     if (*info == 0 && (*lwork >= 1 || lquery) && *m > 0 && *n > 0) {
@@ -290,7 +288,7 @@ static doublereal c_b438 = 1.;
 		    maxwrk = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = maxwrk, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = maxwrk, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    maxwrk = max(i__2,i__3);
@@ -313,11 +311,11 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR",
 			    " ", m, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -335,17 +333,17 @@ static doublereal c_b438 = 1.;
 		    maxwrk = max(maxwrk,minwrk);
 		} else if (wntuo && wntvas) {
 
-/*                 Path 3 (M much larger than N, JOBU='O', JOBVT='S' or   
+/*                 Path 3 (M much larger than N, JOBU='O', JOBVT='S' or
                    'A') */
 
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR",
 			    " ", m, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -354,7 +352,7 @@ static doublereal c_b438 = 1.;
 			    , "Q", n, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", n, n, n, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -373,11 +371,11 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR",
 			    " ", m, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -398,11 +396,11 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR",
 			    " ", m, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -411,7 +409,7 @@ static doublereal c_b438 = 1.;
 			    , "Q", n, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", n, n, n, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -423,17 +421,17 @@ static doublereal c_b438 = 1.;
 		    maxwrk = max(maxwrk,minwrk);
 		} else if (wntus && wntvas) {
 
-/*                 Path 6 (M much larger than N, JOBU='S', JOBVT='S' or   
+/*                 Path 6 (M much larger than N, JOBU='S', JOBVT='S' or
                    'A') */
 
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *n * ilaenv_(&c__1, "DORGQR",
 			    " ", m, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -442,7 +440,7 @@ static doublereal c_b438 = 1.;
 			    , "Q", n, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", n, n, n, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -459,11 +457,11 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "DORGQR",
 			    " ", m, m, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -484,11 +482,11 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "DORGQR",
 			    " ", m, m, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -497,7 +495,7 @@ static doublereal c_b438 = 1.;
 			    , "Q", n, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", n, n, n, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -509,17 +507,17 @@ static doublereal c_b438 = 1.;
 		    maxwrk = max(maxwrk,minwrk);
 		} else if (wntua && wntvas) {
 
-/*                 Path 9 (M much larger than N, JOBU='A', JOBVT='S' or   
+/*                 Path 9 (M much larger than N, JOBU='A', JOBVT='S' or
                    'A') */
 
 		    wrkbl = *n + *n * ilaenv_(&c__1, "DGEQRF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "DORGQR", 
+		    i__2 = wrkbl, i__3 = *n + *m * ilaenv_(&c__1, "DORGQR",
 			    " ", m, m, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", n, n, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
@@ -528,7 +526,7 @@ static doublereal c_b438 = 1.;
 			    , "Q", n, n, n, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", n, n, n, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -559,7 +557,7 @@ static doublereal c_b438 = 1.;
 		}
 		if (! wntvn) {
 /* Computing MAX */
-		    i__2 = maxwrk, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1, 
+		    i__2 = maxwrk, i__3 = *n * 3 + (*n - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", n, n, n, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    maxwrk = max(i__2,i__3);
@@ -583,13 +581,13 @@ static doublereal c_b438 = 1.;
 		    maxwrk = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = maxwrk, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = maxwrk, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    maxwrk = max(i__2,i__3);
 		    if (wntuo || wntuas) {
 /* Computing MAX */
-			i__2 = maxwrk, i__3 = *m * 3 + *m * ilaenv_(&c__1, 
+			i__2 = maxwrk, i__3 = *m * 3 + *m * ilaenv_(&c__1,
 				"DORGBR", "Q", m, m, m, &c_n1, (ftnlen)6, (
 				ftnlen)1);
 			maxwrk = max(i__2,i__3);
@@ -606,16 +604,16 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ",
 			    " ", m, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -629,22 +627,22 @@ static doublereal c_b438 = 1.;
 		    maxwrk = max(maxwrk,minwrk);
 		} else if (wntvo && wntuas) {
 
-/*                 Path 3t(N much larger than M, JOBU='S' or 'A',   
+/*                 Path 3t(N much larger than M, JOBU='S' or 'A',
                    JOBVT='O') */
 
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ",
 			    " ", m, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -667,16 +665,16 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ",
 			    " ", m, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -693,16 +691,16 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ",
 			    " ", m, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -718,22 +716,22 @@ static doublereal c_b438 = 1.;
 		    maxwrk = max(maxwrk,minwrk);
 		} else if (wntvs && wntuas) {
 
-/*                 Path 6t(N much larger than M, JOBU='S' or 'A',   
+/*                 Path 6t(N much larger than M, JOBU='S' or 'A',
                    JOBVT='S') */
 
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *m * ilaenv_(&c__1, "DORGLQ",
 			    " ", m, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -754,16 +752,16 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "DORGLQ",
 			    " ", n, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -780,16 +778,16 @@ static doublereal c_b438 = 1.;
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "DORGLQ",
 			    " ", n, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -805,22 +803,22 @@ static doublereal c_b438 = 1.;
 		    maxwrk = max(maxwrk,minwrk);
 		} else if (wntva && wntuas) {
 
-/*                 Path 9t(N much larger than M, JOBU='S' or 'A',   
+/*                 Path 9t(N much larger than M, JOBU='S' or 'A',
                    JOBVT='A') */
 
 		    wrkbl = *m + *m * ilaenv_(&c__1, "DGELQF", " ", m, n, &
 			    c_n1, &c_n1, (ftnlen)6, (ftnlen)1);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "DORGLQ", 
+		    i__2 = wrkbl, i__3 = *m + *n * ilaenv_(&c__1, "DORGLQ",
 			    " ", n, n, m, &c_n1, (ftnlen)6, (ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m << 1) * ilaenv_(&c__1,
 			    "DGEBRD", " ", m, m, &c_n1, &c_n1, (ftnlen)6, (
 			    ftnlen)1);
 		    wrkbl = max(i__2,i__3);
 /* Computing MAX */
-		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = wrkbl, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "P", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    wrkbl = max(i__2,i__3);
@@ -855,7 +853,7 @@ static doublereal c_b438 = 1.;
 		}
 		if (! wntun) {
 /* Computing MAX */
-		    i__2 = maxwrk, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1, 
+		    i__2 = maxwrk, i__3 = *m * 3 + (*m - 1) * ilaenv_(&c__1,
 			    "DORGBR", "Q", m, m, m, &c_n1, (ftnlen)6, (ftnlen)
 			    1);
 		    maxwrk = max(i__2,i__3);
@@ -912,21 +910,21 @@ static doublereal c_b438 = 1.;
 
     if (*m >= *n) {
 
-/*        A has at least as many rows as columns. If A has sufficiently   
-          more rows than columns, first reduce using the QR   
+/*        A has at least as many rows as columns. If A has sufficiently
+          more rows than columns, first reduce using the QR
           decomposition (if sufficient workspace available) */
 
 	if (*m >= mnthr) {
 
 	    if (wntun) {
 
-/*              Path 1 (M much larger than N, JOBU='N')   
+/*              Path 1 (M much larger than N, JOBU='N')
                 No left singular vectors to be computed */
 
 		itau = 1;
 		iwork = itau + *n;
 
-/*              Compute A=Q*R   
+/*              Compute A=Q*R
                 (Workspace: need 2*N, prefer N+N*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -937,14 +935,14 @@ static doublereal c_b438 = 1.;
 
 		i__2 = *n - 1;
 		i__3 = *n - 1;
-		dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &a_ref(2, 1), 
+		dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &a_ref(2, 1),
 			lda);
 		ie = 1;
 		itauq = ie + *n;
 		itaup = itauq + *n;
 		iwork = itaup + *n;
 
-/*              Bidiagonalize R in A   
+/*              Bidiagonalize R in A
                 (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -953,7 +951,7 @@ static doublereal c_b438 = 1.;
 		ncvt = 0;
 		if (wntvo || wntvas) {
 
-/*                 If right singular vectors desired, generate P'.   
+/*                 If right singular vectors desired, generate P'.
                    (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -963,26 +961,26 @@ static doublereal c_b438 = 1.;
 		}
 		iwork = ie + *n;
 
-/*              Perform bidiagonal QR iteration, computing right   
-                singular vectors of A in A if desired   
+/*              Perform bidiagonal QR iteration, computing right
+                singular vectors of A in A if desired
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("U", n, &ncvt, &c__0, &c__0, &s[1], &work[ie], &a[
-			a_offset], lda, dum, &c__1, dum, &c__1, &work[iwork], 
+			a_offset], lda, dum, &c__1, dum, &c__1, &work[iwork],
 			info);
 
 /*              If right singular vectors desired in VT, copy them there */
 
 		if (wntvas) {
-		    dlacpy_("F", n, n, &a[a_offset], lda, &vt[vt_offset], 
+		    dlacpy_("F", n, n, &a[a_offset], lda, &vt[vt_offset],
 			    ldvt);
 		}
 
 	    } else if (wntuo && wntvn) {
 
-/*              Path 2 (M much larger than N, JOBU='O', JOBVT='N')   
-                N left singular vectors to be overwritten on A and   
-                no right singular vectors to be computed   
+/*              Path 2 (M much larger than N, JOBU='O', JOBVT='N')
+                N left singular vectors to be overwritten on A and
+                no right singular vectors to be computed
 
    Computing MAX */
 		i__2 = *n << 2;
@@ -1019,7 +1017,7 @@ static doublereal c_b438 = 1.;
 		    itau = ir + ldwrkr * *n;
 		    iwork = itau + *n;
 
-/*                 Compute A=Q*R   
+/*                 Compute A=Q*R
                    (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1034,7 +1032,7 @@ static doublereal c_b438 = 1.;
 		    dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[ir + 1]
 			    , &ldwrkr);
 
-/*                 Generate Q in A   
+/*                 Generate Q in A
                    (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1045,14 +1043,14 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *n;
 		    iwork = itaup + *n;
 
-/*                 Bidiagonalize R in WORK(IR)   
+/*                 Bidiagonalize R in WORK(IR)
                    (Workspace: need N*N+4*N, prefer N*N+3*N+2*N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
 		    dgebrd_(n, n, &work[ir], &ldwrkr, &s[1], &work[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__2, &ierr);
 
-/*                 Generate left vectors bidiagonalizing R   
+/*                 Generate left vectors bidiagonalizing R
                    (Workspace: need N*N+4*N, prefer N*N+3*N+N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1060,8 +1058,8 @@ static doublereal c_b438 = 1.;
 			    work[iwork], &i__2, &ierr);
 		    iwork = ie + *n;
 
-/*                 Perform bidiagonal QR iteration, computing left   
-                   singular vectors of R in WORK(IR)   
+/*                 Perform bidiagonal QR iteration, computing left
+                   singular vectors of R in WORK(IR)
                    (Workspace: need N*N+BDSPAC) */
 
 		    dbdsqr_("U", n, &c__0, n, &c__0, &s[1], &work[ie], dum, &
@@ -1069,8 +1067,8 @@ static doublereal c_b438 = 1.;
 			    , info);
 		    iu = ie + *n;
 
-/*                 Multiply Q in A by left singular vectors of R in   
-                   WORK(IR), storing result in WORK(IU) and copying to A   
+/*                 Multiply Q in A by left singular vectors of R in
+                   WORK(IR), storing result in WORK(IU) and copying to A
                    (Workspace: need N*N+2*N, prefer N*N+M*N+N) */
 
 		    i__2 = *m;
@@ -1097,14 +1095,14 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *n;
 		    iwork = itaup + *n;
 
-/*                 Bidiagonalize A   
+/*                 Bidiagonalize A
                    (Workspace: need 3*N+M, prefer 3*N+(M+N)*NB) */
 
 		    i__3 = *lwork - iwork + 1;
 		    dgebrd_(m, n, &a[a_offset], lda, &s[1], &work[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__3, &ierr);
 
-/*                 Generate left vectors bidiagonalizing A   
+/*                 Generate left vectors bidiagonalizing A
                    (Workspace: need 4*N, prefer 3*N+N*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -1112,8 +1110,8 @@ static doublereal c_b438 = 1.;
 			    work[iwork], &i__3, &ierr);
 		    iwork = ie + *n;
 
-/*                 Perform bidiagonal QR iteration, computing left   
-                   singular vectors of A in A   
+/*                 Perform bidiagonal QR iteration, computing left
+                   singular vectors of A in A
                    (Workspace: need BDSPAC) */
 
 		    dbdsqr_("U", n, &c__0, m, &c__0, &s[1], &work[ie], dum, &
@@ -1124,9 +1122,9 @@ static doublereal c_b438 = 1.;
 
 	    } else if (wntuo && wntvas) {
 
-/*              Path 3 (M much larger than N, JOBU='O', JOBVT='S' or 'A')   
-                N left singular vectors to be overwritten on A and   
-                N right singular vectors to be computed in VT   
+/*              Path 3 (M much larger than N, JOBU='O', JOBVT='S' or 'A')
+                N left singular vectors to be overwritten on A and
+                N right singular vectors to be computed in VT
 
    Computing MAX */
 		i__3 = *n << 2;
@@ -1163,7 +1161,7 @@ static doublereal c_b438 = 1.;
 		    itau = ir + ldwrkr * *n;
 		    iwork = itau + *n;
 
-/*                 Compute A=Q*R   
+/*                 Compute A=Q*R
                    (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -1172,14 +1170,14 @@ static doublereal c_b438 = 1.;
 
 /*                 Copy R to VT, zeroing out below it */
 
-		    dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset], 
+		    dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset],
 			    ldvt);
 		    i__3 = *n - 1;
 		    i__2 = *n - 1;
 		    dlaset_("L", &i__3, &i__2, &c_b416, &c_b416, &vt_ref(2, 1)
 			    , ldvt);
 
-/*                 Generate Q in A   
+/*                 Generate Q in A
                    (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -1190,7 +1188,7 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *n;
 		    iwork = itaup + *n;
 
-/*                 Bidiagonalize R in VT, copying result to WORK(IR)   
+/*                 Bidiagonalize R in VT, copying result to WORK(IR)
                    (Workspace: need N*N+4*N, prefer N*N+3*N+2*N*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -1200,33 +1198,33 @@ static doublereal c_b438 = 1.;
 		    dlacpy_("L", n, n, &vt[vt_offset], ldvt, &work[ir], &
 			    ldwrkr);
 
-/*                 Generate left vectors bidiagonalizing R in WORK(IR)   
+/*                 Generate left vectors bidiagonalizing R in WORK(IR)
                    (Workspace: need N*N+4*N, prefer N*N+3*N+N*NB) */
 
 		    i__3 = *lwork - iwork + 1;
 		    dorgbr_("Q", n, n, n, &work[ir], &ldwrkr, &work[itauq], &
 			    work[iwork], &i__3, &ierr);
 
-/*                 Generate right vectors bidiagonalizing R in VT   
+/*                 Generate right vectors bidiagonalizing R in VT
                    (Workspace: need N*N+4*N-1, prefer N*N+3*N+(N-1)*NB) */
 
 		    i__3 = *lwork - iwork + 1;
-		    dorgbr_("P", n, n, n, &vt[vt_offset], ldvt, &work[itaup], 
+		    dorgbr_("P", n, n, n, &vt[vt_offset], ldvt, &work[itaup],
 			    &work[iwork], &i__3, &ierr);
 		    iwork = ie + *n;
 
-/*                 Perform bidiagonal QR iteration, computing left   
-                   singular vectors of R in WORK(IR) and computing right   
-                   singular vectors of R in VT   
+/*                 Perform bidiagonal QR iteration, computing left
+                   singular vectors of R in WORK(IR) and computing right
+                   singular vectors of R in VT
                    (Workspace: need N*N+BDSPAC) */
 
 		    dbdsqr_("U", n, n, n, &c__0, &s[1], &work[ie], &vt[
-			    vt_offset], ldvt, &work[ir], &ldwrkr, dum, &c__1, 
+			    vt_offset], ldvt, &work[ir], &ldwrkr, dum, &c__1,
 			    &work[iwork], info);
 		    iu = ie + *n;
 
-/*                 Multiply Q in A by left singular vectors of R in   
-                   WORK(IR), storing result in WORK(IU) and copying to A   
+/*                 Multiply Q in A by left singular vectors of R in
+                   WORK(IR), storing result in WORK(IU) and copying to A
                    (Workspace: need N*N+2*N, prefer N*N+M*N+N) */
 
 		    i__3 = *m;
@@ -1251,7 +1249,7 @@ static doublereal c_b438 = 1.;
 		    itau = 1;
 		    iwork = itau + *n;
 
-/*                 Compute A=Q*R   
+/*                 Compute A=Q*R
                    (Workspace: need 2*N, prefer N+N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1260,14 +1258,14 @@ static doublereal c_b438 = 1.;
 
 /*                 Copy R to VT, zeroing out below it */
 
-		    dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset], 
+		    dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset],
 			    ldvt);
 		    i__2 = *n - 1;
 		    i__3 = *n - 1;
 		    dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &vt_ref(2, 1)
 			    , ldvt);
 
-/*                 Generate Q in A   
+/*                 Generate Q in A
                    (Workspace: need 2*N, prefer N+N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1278,7 +1276,7 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *n;
 		    iwork = itaup + *n;
 
-/*                 Bidiagonalize R in VT   
+/*                 Bidiagonalize R in VT
                    (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1286,7 +1284,7 @@ static doublereal c_b438 = 1.;
 			    work[itauq], &work[itaup], &work[iwork], &i__2, &
 			    ierr);
 
-/*                 Multiply Q in A by left vectors bidiagonalizing R   
+/*                 Multiply Q in A by left vectors bidiagonalizing R
                    (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -1294,17 +1292,17 @@ static doublereal c_b438 = 1.;
 			    work[itauq], &a[a_offset], lda, &work[iwork], &
 			    i__2, &ierr);
 
-/*                 Generate right vectors bidiagonalizing R in VT   
+/*                 Generate right vectors bidiagonalizing R in VT
                    (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 		    i__2 = *lwork - iwork + 1;
-		    dorgbr_("P", n, n, n, &vt[vt_offset], ldvt, &work[itaup], 
+		    dorgbr_("P", n, n, n, &vt[vt_offset], ldvt, &work[itaup],
 			    &work[iwork], &i__2, &ierr);
 		    iwork = ie + *n;
 
-/*                 Perform bidiagonal QR iteration, computing left   
-                   singular vectors of A in A and computing right   
-                   singular vectors of A in VT   
+/*                 Perform bidiagonal QR iteration, computing left
+                   singular vectors of A in A and computing right
+                   singular vectors of A in VT
                    (Workspace: need BDSPAC) */
 
 		    dbdsqr_("U", n, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -1317,9 +1315,9 @@ static doublereal c_b438 = 1.;
 
 		if (wntvn) {
 
-/*                 Path 4 (M much larger than N, JOBU='S', JOBVT='N')   
-                   N left singular vectors to be computed in U and   
-                   no right singular vectors to be computed   
+/*                 Path 4 (M much larger than N, JOBU='S', JOBVT='N')
+                   N left singular vectors to be computed in U and
+                   no right singular vectors to be computed
 
    Computing MAX */
 		    i__2 = *n << 2;
@@ -1342,7 +1340,7 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *n;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R   
+/*                    Compute A=Q*R
                       (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1355,10 +1353,10 @@ static doublereal c_b438 = 1.;
 				ldwrkr);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[ir 
+			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[ir
 				+ 1], &ldwrkr);
 
-/*                    Generate Q in A   
+/*                    Generate Q in A
                       (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1369,7 +1367,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in WORK(IR)   
+/*                    Bidiagonalize R in WORK(IR)
                       (Workspace: need N*N+4*N, prefer N*N+3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1377,7 +1375,7 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Generate left vectors bidiagonalizing R in WORK(IR)   
+/*                    Generate left vectors bidiagonalizing R in WORK(IR)
                       (Workspace: need N*N+4*N, prefer N*N+3*N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1385,20 +1383,20 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of R in WORK(IR)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of R in WORK(IR)
                       (Workspace: need N*N+BDSPAC) */
 
-			dbdsqr_("U", n, &c__0, n, &c__0, &s[1], &work[ie], 
+			dbdsqr_("U", n, &c__0, n, &c__0, &s[1], &work[ie],
 				dum, &c__1, &work[ir], &ldwrkr, dum, &c__1, &
 				work[iwork], info);
 
-/*                    Multiply Q in A by left singular vectors of R in   
-                      WORK(IR), storing result in U   
+/*                    Multiply Q in A by left singular vectors of R in
+                      WORK(IR), storing result in U
                       (Workspace: need N*N) */
 
-			dgemm_("N", "N", m, n, n, &c_b438, &a[a_offset], lda, 
-				&work[ir], &ldwrkr, &c_b416, &u[u_offset], 
+			dgemm_("N", "N", m, n, n, &c_b438, &a[a_offset], lda,
+				&work[ir], &ldwrkr, &c_b416, &u[u_offset],
 				ldu);
 
 		    } else {
@@ -1408,16 +1406,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1435,7 +1433,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &a_ref(2,
 				 1), lda);
 
-/*                    Bidiagonalize R in A   
+/*                    Bidiagonalize R in A
                       (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1443,21 +1441,21 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply Q in U by left vectors bidiagonalizing R   
+/*                    Multiply Q in U by left vectors bidiagonalizing R
                       (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dormbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
-				work[itauq], &u[u_offset], ldu, &work[iwork], 
+				work[itauq], &u[u_offset], ldu, &work[iwork],
 				&i__2, &ierr)
 				;
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U
                       (Workspace: need BDSPAC) */
 
-			dbdsqr_("U", n, &c__0, m, &c__0, &s[1], &work[ie], 
+			dbdsqr_("U", n, &c__0, m, &c__0, &s[1], &work[ie],
 				dum, &c__1, &u[u_offset], ldu, dum, &c__1, &
 				work[iwork], info);
 
@@ -1465,9 +1463,9 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntvo) {
 
-/*                 Path 5 (M much larger than N, JOBU='S', JOBVT='O')   
-                   N left singular vectors to be computed in U and   
-                   N right singular vectors to be overwritten on A   
+/*                 Path 5 (M much larger than N, JOBU='S', JOBVT='O')
+                   N left singular vectors to be computed in U and
+                   N right singular vectors to be overwritten on A
 
    Computing MAX */
 		    i__2 = *n << 2;
@@ -1501,7 +1499,7 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *n;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R   
+/*                    Compute A=Q*R
                       (Workspace: need 2*N*N+2*N, prefer 2*N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1514,10 +1512,10 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ 1], &ldwrku);
 
-/*                    Generate Q in A   
+/*                    Generate Q in A
                       (Workspace: need 2*N*N+2*N, prefer 2*N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1528,9 +1526,9 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in WORK(IU), copying result to   
-                      WORK(IR)   
-                      (Workspace: need 2*N*N+4*N,   
+/*                    Bidiagonalize R in WORK(IU), copying result to
+                      WORK(IR)
+                      (Workspace: need 2*N*N+4*N,
                                   prefer 2*N*N+3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1540,15 +1538,15 @@ static doublereal c_b438 = 1.;
 			dlacpy_("U", n, n, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IU)   
+/*                    Generate left bidiagonalizing vectors in WORK(IU)
                       (Workspace: need 2*N*N+4*N, prefer 2*N*N+3*N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("Q", n, n, n, &work[iu], &ldwrku, &work[itauq]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IR)   
-                      (Workspace: need 2*N*N+4*N-1,   
+/*                    Generate right bidiagonalizing vectors in WORK(IR)
+                      (Workspace: need 2*N*N+4*N-1,
                                   prefer 2*N*N+3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1556,27 +1554,27 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of R in WORK(IU) and computing   
-                      right singular vectors of R in WORK(IR)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of R in WORK(IU) and computing
+                      right singular vectors of R in WORK(IR)
                       (Workspace: need 2*N*N+BDSPAC) */
 
 			dbdsqr_("U", n, n, n, &c__0, &s[1], &work[ie], &work[
-				ir], &ldwrkr, &work[iu], &ldwrku, dum, &c__1, 
+				ir], &ldwrkr, &work[iu], &ldwrku, dum, &c__1,
 				&work[iwork], info);
 
-/*                    Multiply Q in A by left singular vectors of R in   
-                      WORK(IU), storing result in U   
+/*                    Multiply Q in A by left singular vectors of R in
+                      WORK(IU), storing result in U
                       (Workspace: need N*N) */
 
-			dgemm_("N", "N", m, n, n, &c_b438, &a[a_offset], lda, 
-				&work[iu], &ldwrku, &c_b416, &u[u_offset], 
+			dgemm_("N", "N", m, n, n, &c_b438, &a[a_offset], lda,
+				&work[iu], &ldwrku, &c_b416, &u[u_offset],
 				ldu);
 
-/*                    Copy right singular vectors of R to A   
+/*                    Copy right singular vectors of R to A
                       (Workspace: need N*N) */
 
-			dlacpy_("F", n, n, &work[ir], &ldwrkr, &a[a_offset], 
+			dlacpy_("F", n, n, &work[ir], &ldwrkr, &a[a_offset],
 				lda);
 
 		    } else {
@@ -1586,16 +1584,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1613,7 +1611,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &a_ref(2,
 				 1), lda);
 
-/*                    Bidiagonalize R in A   
+/*                    Bidiagonalize R in A
                       (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1621,16 +1619,16 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply Q in U by left vectors bidiagonalizing R   
+/*                    Multiply Q in U by left vectors bidiagonalizing R
                       (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dormbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
-				work[itauq], &u[u_offset], ldu, &work[iwork], 
+				work[itauq], &u[u_offset], ldu, &work[iwork],
 				&i__2, &ierr)
 				;
 
-/*                    Generate right vectors bidiagonalizing R in A   
+/*                    Generate right vectors bidiagonalizing R in A
                       (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1638,9 +1636,9 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U and computing right   
-                      singular vectors of A in A   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U and computing right
+                      singular vectors of A in A
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", n, n, m, &c__0, &s[1], &work[ie], &a[
@@ -1651,10 +1649,10 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntvas) {
 
-/*                 Path 6 (M much larger than N, JOBU='S', JOBVT='S'   
-                           or 'A')   
-                   N left singular vectors to be computed in U and   
-                   N right singular vectors to be computed in VT   
+/*                 Path 6 (M much larger than N, JOBU='S', JOBVT='S'
+                           or 'A')
+                   N left singular vectors to be computed in U and
+                   N right singular vectors to be computed in VT
 
    Computing MAX */
 		    i__2 = *n << 2;
@@ -1677,7 +1675,7 @@ static doublereal c_b438 = 1.;
 			itau = iu + ldwrku * *n;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R   
+/*                    Compute A=Q*R
                       (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1690,10 +1688,10 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ 1], &ldwrku);
 
-/*                    Generate Q in A   
+/*                    Generate Q in A
                       (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1704,7 +1702,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in WORK(IU), copying result to VT   
+/*                    Bidiagonalize R in WORK(IU), copying result to VT
                       (Workspace: need N*N+4*N, prefer N*N+3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1714,15 +1712,15 @@ static doublereal c_b438 = 1.;
 			dlacpy_("U", n, n, &work[iu], &ldwrku, &vt[vt_offset],
 				 ldvt);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IU)   
+/*                    Generate left bidiagonalizing vectors in WORK(IU)
                       (Workspace: need N*N+4*N, prefer N*N+3*N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("Q", n, n, n, &work[iu], &ldwrku, &work[itauq]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in VT   
-                      (Workspace: need N*N+4*N-1,   
+/*                    Generate right bidiagonalizing vectors in VT
+                      (Workspace: need N*N+4*N-1,
                                   prefer N*N+3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1731,21 +1729,21 @@ static doublereal c_b438 = 1.;
 				;
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of R in WORK(IU) and computing   
-                      right singular vectors of R in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of R in WORK(IU) and computing
+                      right singular vectors of R in VT
                       (Workspace: need N*N+BDSPAC) */
 
 			dbdsqr_("U", n, n, n, &c__0, &s[1], &work[ie], &vt[
 				vt_offset], ldvt, &work[iu], &ldwrku, dum, &
 				c__1, &work[iwork], info);
 
-/*                    Multiply Q in A by left singular vectors of R in   
-                      WORK(IU), storing result in U   
+/*                    Multiply Q in A by left singular vectors of R in
+                      WORK(IU), storing result in U
                       (Workspace: need N*N) */
 
-			dgemm_("N", "N", m, n, n, &c_b438, &a[a_offset], lda, 
-				&work[iu], &ldwrku, &c_b416, &u[u_offset], 
+			dgemm_("N", "N", m, n, n, &c_b438, &a[a_offset], lda,
+				&work[iu], &ldwrku, &c_b416, &u[u_offset],
 				ldu);
 
 		    } else {
@@ -1755,16 +1753,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1773,7 +1771,7 @@ static doublereal c_b438 = 1.;
 
 /*                    Copy R to VT, zeroing out below it */
 
-			dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
@@ -1784,24 +1782,24 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in VT   
+/*                    Bidiagonalize R in VT
                       (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
-			dgebrd_(n, n, &vt[vt_offset], ldvt, &s[1], &work[ie], 
+			dgebrd_(n, n, &vt[vt_offset], ldvt, &s[1], &work[ie],
 				&work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply Q in U by left bidiagonalizing vectors   
-                      in VT   
+/*                    Multiply Q in U by left bidiagonalizing vectors
+                      in VT
                       (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
-			dormbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, 
+			dormbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt,
 				&work[itauq], &u[u_offset], ldu, &work[iwork],
 				 &i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in VT   
+/*                    Generate right bidiagonalizing vectors in VT
                       (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1810,9 +1808,9 @@ static doublereal c_b438 = 1.;
 				;
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U and computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U and computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", n, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -1827,9 +1825,9 @@ static doublereal c_b438 = 1.;
 
 		if (wntvn) {
 
-/*                 Path 7 (M much larger than N, JOBU='A', JOBVT='N')   
-                   M left singular vectors to be computed in U and   
-                   no right singular vectors to be computed   
+/*                 Path 7 (M much larger than N, JOBU='A', JOBVT='N')
+                   M left singular vectors to be computed in U and
+                   no right singular vectors to be computed
 
    Computing MAX */
 		    i__2 = *n + *m, i__3 = *n << 2, i__2 = max(i__2,i__3);
@@ -1852,13 +1850,13 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *n;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
 /*                    Copy R to WORK(IR), zeroing out below it */
@@ -1867,10 +1865,10 @@ static doublereal c_b438 = 1.;
 				ldwrkr);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[ir 
+			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[ir
 				+ 1], &ldwrkr);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need N*N+N+M, prefer N*N+N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1881,7 +1879,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in WORK(IR)   
+/*                    Bidiagonalize R in WORK(IR)
                       (Workspace: need N*N+4*N, prefer N*N+3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1889,7 +1887,7 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IR)   
+/*                    Generate left bidiagonalizing vectors in WORK(IR)
                       (Workspace: need N*N+4*N, prefer N*N+3*N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1897,25 +1895,25 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of R in WORK(IR)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of R in WORK(IR)
                       (Workspace: need N*N+BDSPAC) */
 
-			dbdsqr_("U", n, &c__0, n, &c__0, &s[1], &work[ie], 
+			dbdsqr_("U", n, &c__0, n, &c__0, &s[1], &work[ie],
 				dum, &c__1, &work[ir], &ldwrkr, dum, &c__1, &
 				work[iwork], info);
 
-/*                    Multiply Q in U by left singular vectors of R in   
-                      WORK(IR), storing result in A   
+/*                    Multiply Q in U by left singular vectors of R in
+                      WORK(IR), storing result in A
                       (Workspace: need N*N) */
 
-			dgemm_("N", "N", m, n, n, &c_b438, &u[u_offset], ldu, 
-				&work[ir], &ldwrkr, &c_b416, &a[a_offset], 
+			dgemm_("N", "N", m, n, n, &c_b438, &u[u_offset], ldu,
+				&work[ir], &ldwrkr, &c_b416, &a[a_offset],
 				lda);
 
 /*                    Copy left singular vectors of A from A to U */
 
-			dlacpy_("F", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("F", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
 		    } else {
@@ -1925,16 +1923,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need N+M, prefer N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1952,7 +1950,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &a_ref(2,
 				 1), lda);
 
-/*                    Bidiagonalize R in A   
+/*                    Bidiagonalize R in A
                       (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -1960,22 +1958,22 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply Q in U by left bidiagonalizing vectors   
-                      in A   
+/*                    Multiply Q in U by left bidiagonalizing vectors
+                      in A
                       (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dormbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
-				work[itauq], &u[u_offset], ldu, &work[iwork], 
+				work[itauq], &u[u_offset], ldu, &work[iwork],
 				&i__2, &ierr)
 				;
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U
                       (Workspace: need BDSPAC) */
 
-			dbdsqr_("U", n, &c__0, m, &c__0, &s[1], &work[ie], 
+			dbdsqr_("U", n, &c__0, m, &c__0, &s[1], &work[ie],
 				dum, &c__1, &u[u_offset], ldu, dum, &c__1, &
 				work[iwork], info);
 
@@ -1983,9 +1981,9 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntvo) {
 
-/*                 Path 8 (M much larger than N, JOBU='A', JOBVT='O')   
-                   M left singular vectors to be computed in U and   
-                   N right singular vectors to be overwritten on A   
+/*                 Path 8 (M much larger than N, JOBU='A', JOBVT='O')
+                   M left singular vectors to be computed in U and
+                   N right singular vectors to be overwritten on A
 
    Computing MAX */
 		    i__2 = *n + *m, i__3 = *n << 2, i__2 = max(i__2,i__3);
@@ -2019,16 +2017,16 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *n;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N*N+2*N, prefer 2*N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need 2*N*N+N+M, prefer 2*N*N+N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2041,16 +2039,16 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ 1], &ldwrku);
 			ie = itau;
 			itauq = ie + *n;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in WORK(IU), copying result to   
-                      WORK(IR)   
-                      (Workspace: need 2*N*N+4*N,   
+/*                    Bidiagonalize R in WORK(IU), copying result to
+                      WORK(IR)
+                      (Workspace: need 2*N*N+4*N,
                                   prefer 2*N*N+3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2060,15 +2058,15 @@ static doublereal c_b438 = 1.;
 			dlacpy_("U", n, n, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IU)   
+/*                    Generate left bidiagonalizing vectors in WORK(IU)
                       (Workspace: need 2*N*N+4*N, prefer 2*N*N+3*N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("Q", n, n, n, &work[iu], &ldwrku, &work[itauq]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IR)   
-                      (Workspace: need 2*N*N+4*N-1,   
+/*                    Generate right bidiagonalizing vectors in WORK(IR)
+                      (Workspace: need 2*N*N+4*N-1,
                                   prefer 2*N*N+3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2076,31 +2074,31 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of R in WORK(IU) and computing   
-                      right singular vectors of R in WORK(IR)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of R in WORK(IU) and computing
+                      right singular vectors of R in WORK(IR)
                       (Workspace: need 2*N*N+BDSPAC) */
 
 			dbdsqr_("U", n, n, n, &c__0, &s[1], &work[ie], &work[
-				ir], &ldwrkr, &work[iu], &ldwrku, dum, &c__1, 
+				ir], &ldwrkr, &work[iu], &ldwrku, dum, &c__1,
 				&work[iwork], info);
 
-/*                    Multiply Q in U by left singular vectors of R in   
-                      WORK(IU), storing result in A   
+/*                    Multiply Q in U by left singular vectors of R in
+                      WORK(IU), storing result in A
                       (Workspace: need N*N) */
 
-			dgemm_("N", "N", m, n, n, &c_b438, &u[u_offset], ldu, 
-				&work[iu], &ldwrku, &c_b416, &a[a_offset], 
+			dgemm_("N", "N", m, n, n, &c_b438, &u[u_offset], ldu,
+				&work[iu], &ldwrku, &c_b416, &a[a_offset],
 				lda);
 
 /*                    Copy left singular vectors of A from A to U */
 
-			dlacpy_("F", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("F", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
 /*                    Copy right singular vectors of R from WORK(IR) to A */
 
-			dlacpy_("F", n, n, &work[ir], &ldwrkr, &a[a_offset], 
+			dlacpy_("F", n, n, &work[ir], &ldwrkr, &a[a_offset],
 				lda);
 
 		    } else {
@@ -2110,16 +2108,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need N+M, prefer N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2137,7 +2135,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &a_ref(2,
 				 1), lda);
 
-/*                    Bidiagonalize R in A   
+/*                    Bidiagonalize R in A
                       (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2145,17 +2143,17 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply Q in U by left bidiagonalizing vectors   
-                      in A   
+/*                    Multiply Q in U by left bidiagonalizing vectors
+                      in A
                       (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dormbr_("Q", "R", "N", m, n, n, &a[a_offset], lda, &
-				work[itauq], &u[u_offset], ldu, &work[iwork], 
+				work[itauq], &u[u_offset], ldu, &work[iwork],
 				&i__2, &ierr)
 				;
 
-/*                    Generate right bidiagonalizing vectors in A   
+/*                    Generate right bidiagonalizing vectors in A
                       (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2163,9 +2161,9 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U and computing right   
-                      singular vectors of A in A   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U and computing right
+                      singular vectors of A in A
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", n, n, m, &c__0, &s[1], &work[ie], &a[
@@ -2176,10 +2174,10 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntvas) {
 
-/*                 Path 9 (M much larger than N, JOBU='A', JOBVT='S'   
-                           or 'A')   
-                   M left singular vectors to be computed in U and   
-                   N right singular vectors to be computed in VT   
+/*                 Path 9 (M much larger than N, JOBU='A', JOBVT='S'
+                           or 'A')
+                   M left singular vectors to be computed in U and
+                   N right singular vectors to be computed in VT
 
    Computing MAX */
 		    i__2 = *n + *m, i__3 = *n << 2, i__2 = max(i__2,i__3);
@@ -2202,16 +2200,16 @@ static doublereal c_b438 = 1.;
 			itau = iu + ldwrku * *n;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need N*N+2*N, prefer N*N+N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need N*N+N+M, prefer N*N+N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2224,14 +2222,14 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
-			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("L", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ 1], &ldwrku);
 			ie = itau;
 			itauq = ie + *n;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in WORK(IU), copying result to VT   
+/*                    Bidiagonalize R in WORK(IU), copying result to VT
                       (Workspace: need N*N+4*N, prefer N*N+3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2241,15 +2239,15 @@ static doublereal c_b438 = 1.;
 			dlacpy_("U", n, n, &work[iu], &ldwrku, &vt[vt_offset],
 				 ldvt);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IU)   
+/*                    Generate left bidiagonalizing vectors in WORK(IU)
                       (Workspace: need N*N+4*N, prefer N*N+3*N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("Q", n, n, n, &work[iu], &ldwrku, &work[itauq]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in VT   
-                      (Workspace: need N*N+4*N-1,   
+/*                    Generate right bidiagonalizing vectors in VT
+                      (Workspace: need N*N+4*N-1,
                                   prefer N*N+3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2258,26 +2256,26 @@ static doublereal c_b438 = 1.;
 				;
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of R in WORK(IU) and computing   
-                      right singular vectors of R in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of R in WORK(IU) and computing
+                      right singular vectors of R in VT
                       (Workspace: need N*N+BDSPAC) */
 
 			dbdsqr_("U", n, n, n, &c__0, &s[1], &work[ie], &vt[
 				vt_offset], ldvt, &work[iu], &ldwrku, dum, &
 				c__1, &work[iwork], info);
 
-/*                    Multiply Q in U by left singular vectors of R in   
-                      WORK(IU), storing result in A   
+/*                    Multiply Q in U by left singular vectors of R in
+                      WORK(IU), storing result in A
                       (Workspace: need N*N) */
 
-			dgemm_("N", "N", m, n, n, &c_b438, &u[u_offset], ldu, 
-				&work[iu], &ldwrku, &c_b416, &a[a_offset], 
+			dgemm_("N", "N", m, n, n, &c_b438, &u[u_offset], ldu,
+				&work[iu], &ldwrku, &c_b416, &a[a_offset],
 				lda);
 
 /*                    Copy left singular vectors of A from A to U */
 
-			dlacpy_("F", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("F", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
 		    } else {
@@ -2287,16 +2285,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *n;
 
-/*                    Compute A=Q*R, copying result to U   
+/*                    Compute A=Q*R, copying result to U
                       (Workspace: need 2*N, prefer N+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgeqrf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset],
 				ldu);
 
-/*                    Generate Q in U   
+/*                    Generate Q in U
                       (Workspace: need N+M, prefer N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2305,7 +2303,7 @@ static doublereal c_b438 = 1.;
 
 /*                    Copy R from A to VT, zeroing out below it */
 
-			dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 			i__2 = *n - 1;
 			i__3 = *n - 1;
@@ -2316,24 +2314,24 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *n;
 			iwork = itaup + *n;
 
-/*                    Bidiagonalize R in VT   
+/*                    Bidiagonalize R in VT
                       (Workspace: need 4*N, prefer 3*N+2*N*NB) */
 
 			i__2 = *lwork - iwork + 1;
-			dgebrd_(n, n, &vt[vt_offset], ldvt, &s[1], &work[ie], 
+			dgebrd_(n, n, &vt[vt_offset], ldvt, &s[1], &work[ie],
 				&work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply Q in U by left bidiagonalizing vectors   
-                      in VT   
+/*                    Multiply Q in U by left bidiagonalizing vectors
+                      in VT
                       (Workspace: need 3*N+M, prefer 3*N+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
-			dormbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt, 
+			dormbr_("Q", "R", "N", m, n, n, &vt[vt_offset], ldvt,
 				&work[itauq], &u[u_offset], ldu, &work[iwork],
 				 &i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in VT   
+/*                    Generate right bidiagonalizing vectors in VT
                       (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2342,9 +2340,9 @@ static doublereal c_b438 = 1.;
 				;
 			iwork = ie + *n;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U and computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U and computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", n, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -2359,9 +2357,9 @@ static doublereal c_b438 = 1.;
 
 	} else {
 
-/*           M .LT. MNTHR   
+/*           M .LT. MNTHR
 
-             Path 10 (M at least N, but not much larger)   
+             Path 10 (M at least N, but not much larger)
              Reduce to bidiagonal form without QR decomposition */
 
 	    ie = 1;
@@ -2369,7 +2367,7 @@ static doublereal c_b438 = 1.;
 	    itaup = itauq + *n;
 	    iwork = itaup + *n;
 
-/*           Bidiagonalize A   
+/*           Bidiagonalize A
              (Workspace: need 3*N+M, prefer 3*N+(M+N)*NB) */
 
 	    i__2 = *lwork - iwork + 1;
@@ -2377,8 +2375,8 @@ static doublereal c_b438 = 1.;
 		    work[itaup], &work[iwork], &i__2, &ierr);
 	    if (wntuas) {
 
-/*              If left singular vectors desired in U, copy result to U   
-                and generate left bidiagonalizing vectors in U   
+/*              If left singular vectors desired in U, copy result to U
+                and generate left bidiagonalizing vectors in U
                 (Workspace: need 3*N+NCU, prefer 3*N+NCU*NB) */
 
 		dlacpy_("L", m, n, &a[a_offset], lda, &u[u_offset], ldu);
@@ -2394,8 +2392,8 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (wntvas) {
 
-/*              If right singular vectors desired in VT, copy result to   
-                VT and generate right bidiagonalizing vectors in VT   
+/*              If right singular vectors desired in VT, copy result to
+                VT and generate right bidiagonalizing vectors in VT
                 (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 		dlacpy_("U", n, n, &a[a_offset], lda, &vt[vt_offset], ldvt);
@@ -2405,8 +2403,8 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (wntuo) {
 
-/*              If left singular vectors desired in A, generate left   
-                bidiagonalizing vectors in A   
+/*              If left singular vectors desired in A, generate left
+                bidiagonalizing vectors in A
                 (Workspace: need 4*N, prefer 3*N+N*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -2415,8 +2413,8 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (wntvo) {
 
-/*              If right singular vectors desired in A, generate right   
-                bidiagonalizing vectors in A   
+/*              If right singular vectors desired in A, generate right
+                bidiagonalizing vectors in A
                 (Workspace: need 4*N-1, prefer 3*N+(N-1)*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -2438,9 +2436,9 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (! wntuo && ! wntvo) {
 
-/*              Perform bidiagonal QR iteration, if desired, computing   
-                left singular vectors in U and computing right singular   
-                vectors in VT   
+/*              Perform bidiagonal QR iteration, if desired, computing
+                left singular vectors in U and computing right singular
+                vectors in VT
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("U", n, &ncvt, &nru, &c__0, &s[1], &work[ie], &vt[
@@ -2448,9 +2446,9 @@ static doublereal c_b438 = 1.;
 			work[iwork], info);
 	    } else if (! wntuo && wntvo) {
 
-/*              Perform bidiagonal QR iteration, if desired, computing   
-                left singular vectors in U and computing right singular   
-                vectors in A   
+/*              Perform bidiagonal QR iteration, if desired, computing
+                left singular vectors in U and computing right singular
+                vectors in A
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("U", n, &ncvt, &nru, &c__0, &s[1], &work[ie], &a[
@@ -2458,9 +2456,9 @@ static doublereal c_b438 = 1.;
 			iwork], info);
 	    } else {
 
-/*              Perform bidiagonal QR iteration, if desired, computing   
-                left singular vectors in A and computing right singular   
-                vectors in VT   
+/*              Perform bidiagonal QR iteration, if desired, computing
+                left singular vectors in A and computing right singular
+                vectors in VT
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("U", n, &ncvt, &nru, &c__0, &s[1], &work[ie], &vt[
@@ -2472,21 +2470,21 @@ static doublereal c_b438 = 1.;
 
     } else {
 
-/*        A has more columns than rows. If A has sufficiently more   
-          columns than rows, first reduce using the LQ decomposition (if   
+/*        A has more columns than rows. If A has sufficiently more
+          columns than rows, first reduce using the LQ decomposition (if
           sufficient workspace available) */
 
 	if (*n >= mnthr) {
 
 	    if (wntvn) {
 
-/*              Path 1t(N much larger than M, JOBVT='N')   
+/*              Path 1t(N much larger than M, JOBVT='N')
                 No right singular vectors to be computed */
 
 		itau = 1;
 		iwork = itau + *m;
 
-/*              Compute A=L*Q   
+/*              Compute A=L*Q
                 (Workspace: need 2*M, prefer M+M*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -2497,14 +2495,14 @@ static doublereal c_b438 = 1.;
 
 		i__2 = *m - 1;
 		i__3 = *m - 1;
-		dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &a_ref(1, 2), 
+		dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &a_ref(1, 2),
 			lda);
 		ie = 1;
 		itauq = ie + *m;
 		itaup = itauq + *m;
 		iwork = itaup + *m;
 
-/*              Bidiagonalize L in A   
+/*              Bidiagonalize L in A
                 (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -2512,7 +2510,7 @@ static doublereal c_b438 = 1.;
 			itauq], &work[itaup], &work[iwork], &i__2, &ierr);
 		if (wntuo || wntuas) {
 
-/*                 If left singular vectors desired, generate Q   
+/*                 If left singular vectors desired, generate Q
                    (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2525,12 +2523,12 @@ static doublereal c_b438 = 1.;
 		    nru = *m;
 		}
 
-/*              Perform bidiagonal QR iteration, computing left singular   
-                vectors of A in A if desired   
+/*              Perform bidiagonal QR iteration, computing left singular
+                vectors of A in A if desired
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("U", m, &c__0, &nru, &c__0, &s[1], &work[ie], dum, &
-			c__1, &a[a_offset], lda, dum, &c__1, &work[iwork], 
+			c__1, &a[a_offset], lda, dum, &c__1, &work[iwork],
 			info);
 
 /*              If left singular vectors desired in U, copy them there */
@@ -2541,9 +2539,9 @@ static doublereal c_b438 = 1.;
 
 	    } else if (wntvo && wntun) {
 
-/*              Path 2t(N much larger than M, JOBU='N', JOBVT='O')   
-                M right singular vectors to be overwritten on A and   
-                no left singular vectors to be computed   
+/*              Path 2t(N much larger than M, JOBU='N', JOBVT='O')
+                M right singular vectors to be overwritten on A and
+                no left singular vectors to be computed
 
    Computing MAX */
 		i__2 = *m << 2;
@@ -2583,7 +2581,7 @@ static doublereal c_b438 = 1.;
 		    itau = ir + ldwrkr * *m;
 		    iwork = itau + *m;
 
-/*                 Compute A=L*Q   
+/*                 Compute A=L*Q
                    (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2595,10 +2593,10 @@ static doublereal c_b438 = 1.;
 		    dlacpy_("L", m, m, &a[a_offset], lda, &work[ir], &ldwrkr);
 		    i__2 = *m - 1;
 		    i__3 = *m - 1;
-		    dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[ir + 
+		    dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[ir +
 			    ldwrkr], &ldwrkr);
 
-/*                 Generate Q in A   
+/*                 Generate Q in A
                    (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2609,14 +2607,14 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *m;
 		    iwork = itaup + *m;
 
-/*                 Bidiagonalize L in WORK(IR)   
+/*                 Bidiagonalize L in WORK(IR)
                    (Workspace: need M*M+4*M, prefer M*M+3*M+2*M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
 		    dgebrd_(m, m, &work[ir], &ldwrkr, &s[1], &work[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__2, &ierr);
 
-/*                 Generate right vectors bidiagonalizing L   
+/*                 Generate right vectors bidiagonalizing L
                    (Workspace: need M*M+4*M-1, prefer M*M+3*M+(M-1)*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2624,8 +2622,8 @@ static doublereal c_b438 = 1.;
 			    work[iwork], &i__2, &ierr);
 		    iwork = ie + *m;
 
-/*                 Perform bidiagonal QR iteration, computing right   
-                   singular vectors of L in WORK(IR)   
+/*                 Perform bidiagonal QR iteration, computing right
+                   singular vectors of L in WORK(IR)
                    (Workspace: need M*M+BDSPAC) */
 
 		    dbdsqr_("U", m, m, &c__0, &c__0, &s[1], &work[ie], &work[
@@ -2633,8 +2631,8 @@ static doublereal c_b438 = 1.;
 			    , info);
 		    iu = ie + *m;
 
-/*                 Multiply right singular vectors of L in WORK(IR) by Q   
-                   in A, storing result in WORK(IU) and copying to A   
+/*                 Multiply right singular vectors of L in WORK(IR) by Q
+                   in A, storing result in WORK(IU) and copying to A
                    (Workspace: need M*M+2*M, prefer M*M+M*N+M) */
 
 		    i__2 = *n;
@@ -2647,7 +2645,7 @@ static doublereal c_b438 = 1.;
 			dgemm_("N", "N", m, &blk, m, &c_b438, &work[ir], &
 				ldwrkr, &a_ref(1, i__), lda, &c_b416, &work[
 				iu], &ldwrku);
-			dlacpy_("F", m, &blk, &work[iu], &ldwrku, &a_ref(1, 
+			dlacpy_("F", m, &blk, &work[iu], &ldwrku, &a_ref(1,
 				i__), lda);
 /* L30: */
 		    }
@@ -2661,14 +2659,14 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *m;
 		    iwork = itaup + *m;
 
-/*                 Bidiagonalize A   
+/*                 Bidiagonalize A
                    (Workspace: need 3*M+N, prefer 3*M+(M+N)*NB) */
 
 		    i__3 = *lwork - iwork + 1;
 		    dgebrd_(m, n, &a[a_offset], lda, &s[1], &work[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__3, &ierr);
 
-/*                 Generate right vectors bidiagonalizing A   
+/*                 Generate right vectors bidiagonalizing A
                    (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -2676,8 +2674,8 @@ static doublereal c_b438 = 1.;
 			    work[iwork], &i__3, &ierr);
 		    iwork = ie + *m;
 
-/*                 Perform bidiagonal QR iteration, computing right   
-                   singular vectors of A in A   
+/*                 Perform bidiagonal QR iteration, computing right
+                   singular vectors of A in A
                    (Workspace: need BDSPAC) */
 
 		    dbdsqr_("L", m, n, &c__0, &c__0, &s[1], &work[ie], &a[
@@ -2688,9 +2686,9 @@ static doublereal c_b438 = 1.;
 
 	    } else if (wntvo && wntuas) {
 
-/*              Path 3t(N much larger than M, JOBU='S' or 'A', JOBVT='O')   
-                M right singular vectors to be overwritten on A and   
-                M left singular vectors to be computed in U   
+/*              Path 3t(N much larger than M, JOBU='S' or 'A', JOBVT='O')
+                M right singular vectors to be overwritten on A and
+                M left singular vectors to be computed in U
 
    Computing MAX */
 		i__3 = *m << 2;
@@ -2730,7 +2728,7 @@ static doublereal c_b438 = 1.;
 		    itau = ir + ldwrkr * *m;
 		    iwork = itau + *m;
 
-/*                 Compute A=L*Q   
+/*                 Compute A=L*Q
                    (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -2745,7 +2743,7 @@ static doublereal c_b438 = 1.;
 		    dlaset_("U", &i__3, &i__2, &c_b416, &c_b416, &u_ref(1, 2),
 			     ldu);
 
-/*                 Generate Q in A   
+/*                 Generate Q in A
                    (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -2756,7 +2754,7 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *m;
 		    iwork = itaup + *m;
 
-/*                 Bidiagonalize L in U, copying result to WORK(IR)   
+/*                 Bidiagonalize L in U, copying result to WORK(IR)
                    (Workspace: need M*M+4*M, prefer M*M+3*M+2*M*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -2764,14 +2762,14 @@ static doublereal c_b438 = 1.;
 			    itauq], &work[itaup], &work[iwork], &i__3, &ierr);
 		    dlacpy_("U", m, m, &u[u_offset], ldu, &work[ir], &ldwrkr);
 
-/*                 Generate right vectors bidiagonalizing L in WORK(IR)   
+/*                 Generate right vectors bidiagonalizing L in WORK(IR)
                    (Workspace: need M*M+4*M-1, prefer M*M+3*M+(M-1)*NB) */
 
 		    i__3 = *lwork - iwork + 1;
 		    dorgbr_("P", m, m, m, &work[ir], &ldwrkr, &work[itaup], &
 			    work[iwork], &i__3, &ierr);
 
-/*                 Generate left vectors bidiagonalizing L in U   
+/*                 Generate left vectors bidiagonalizing L in U
                    (Workspace: need M*M+4*M, prefer M*M+3*M+M*NB) */
 
 		    i__3 = *lwork - iwork + 1;
@@ -2779,18 +2777,18 @@ static doublereal c_b438 = 1.;
 			    work[iwork], &i__3, &ierr);
 		    iwork = ie + *m;
 
-/*                 Perform bidiagonal QR iteration, computing left   
-                   singular vectors of L in U, and computing right   
-                   singular vectors of L in WORK(IR)   
+/*                 Perform bidiagonal QR iteration, computing left
+                   singular vectors of L in U, and computing right
+                   singular vectors of L in WORK(IR)
                    (Workspace: need M*M+BDSPAC) */
 
-		    dbdsqr_("U", m, m, m, &c__0, &s[1], &work[ie], &work[ir], 
+		    dbdsqr_("U", m, m, m, &c__0, &s[1], &work[ie], &work[ir],
 			    &ldwrkr, &u[u_offset], ldu, dum, &c__1, &work[
 			    iwork], info);
 		    iu = ie + *m;
 
-/*                 Multiply right singular vectors of L in WORK(IR) by Q   
-                   in A, storing result in WORK(IU) and copying to A   
+/*                 Multiply right singular vectors of L in WORK(IR) by Q
+                   in A, storing result in WORK(IU) and copying to A
                    (Workspace: need M*M+2*M, prefer M*M+M*N+M)) */
 
 		    i__3 = *n;
@@ -2803,7 +2801,7 @@ static doublereal c_b438 = 1.;
 			dgemm_("N", "N", m, &blk, m, &c_b438, &work[ir], &
 				ldwrkr, &a_ref(1, i__), lda, &c_b416, &work[
 				iu], &ldwrku);
-			dlacpy_("F", m, &blk, &work[iu], &ldwrku, &a_ref(1, 
+			dlacpy_("F", m, &blk, &work[iu], &ldwrku, &a_ref(1,
 				i__), lda);
 /* L40: */
 		    }
@@ -2815,7 +2813,7 @@ static doublereal c_b438 = 1.;
 		    itau = 1;
 		    iwork = itau + *m;
 
-/*                 Compute A=L*Q   
+/*                 Compute A=L*Q
                    (Workspace: need 2*M, prefer M+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2830,7 +2828,7 @@ static doublereal c_b438 = 1.;
 		    dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &u_ref(1, 2),
 			     ldu);
 
-/*                 Generate Q in A   
+/*                 Generate Q in A
                    (Workspace: need 2*M, prefer M+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2841,14 +2839,14 @@ static doublereal c_b438 = 1.;
 		    itaup = itauq + *m;
 		    iwork = itaup + *m;
 
-/*                 Bidiagonalize L in U   
+/*                 Bidiagonalize L in U
                    (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
 		    dgebrd_(m, m, &u[u_offset], ldu, &s[1], &work[ie], &work[
 			    itauq], &work[itaup], &work[iwork], &i__2, &ierr);
 
-/*                 Multiply right vectors bidiagonalizing L by Q in A   
+/*                 Multiply right vectors bidiagonalizing L by Q in A
                    (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2856,7 +2854,7 @@ static doublereal c_b438 = 1.;
 			    itaup], &a[a_offset], lda, &work[iwork], &i__2, &
 			    ierr);
 
-/*                 Generate left vectors bidiagonalizing L in U   
+/*                 Generate left vectors bidiagonalizing L in U
                    (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 		    i__2 = *lwork - iwork + 1;
@@ -2864,9 +2862,9 @@ static doublereal c_b438 = 1.;
 			    work[iwork], &i__2, &ierr);
 		    iwork = ie + *m;
 
-/*                 Perform bidiagonal QR iteration, computing left   
-                   singular vectors of A in U and computing right   
-                   singular vectors of A in A   
+/*                 Perform bidiagonal QR iteration, computing left
+                   singular vectors of A in U and computing right
+                   singular vectors of A in A
                    (Workspace: need BDSPAC) */
 
 		    dbdsqr_("U", m, n, m, &c__0, &s[1], &work[ie], &a[
@@ -2879,9 +2877,9 @@ static doublereal c_b438 = 1.;
 
 		if (wntun) {
 
-/*                 Path 4t(N much larger than M, JOBU='N', JOBVT='S')   
-                   M right singular vectors to be computed in VT and   
-                   no left singular vectors to be computed   
+/*                 Path 4t(N much larger than M, JOBU='N', JOBVT='S')
+                   M right singular vectors to be computed in VT and
+                   no left singular vectors to be computed
 
    Computing MAX */
 		    i__2 = *m << 2;
@@ -2904,7 +2902,7 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *m;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q   
+/*                    Compute A=L*Q
                       (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2917,10 +2915,10 @@ static doublereal c_b438 = 1.;
 				ldwrkr);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[ir 
+			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[ir
 				+ ldwrkr], &ldwrkr);
 
-/*                    Generate Q in A   
+/*                    Generate Q in A
                       (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2931,7 +2929,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in WORK(IR)   
+/*                    Bidiagonalize L in WORK(IR)
                       (Workspace: need M*M+4*M, prefer M*M+3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2939,8 +2937,8 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Generate right vectors bidiagonalizing L in   
-                      WORK(IR)   
+/*                    Generate right vectors bidiagonalizing L in
+                      WORK(IR)
                       (Workspace: need M*M+4*M, prefer M*M+3*M+(M-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2948,20 +2946,20 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing right   
-                      singular vectors of L in WORK(IR)   
+/*                    Perform bidiagonal QR iteration, computing right
+                      singular vectors of L in WORK(IR)
                       (Workspace: need M*M+BDSPAC) */
 
 			dbdsqr_("U", m, m, &c__0, &c__0, &s[1], &work[ie], &
 				work[ir], &ldwrkr, dum, &c__1, dum, &c__1, &
 				work[iwork], info);
 
-/*                    Multiply right singular vectors of L in WORK(IR) by   
-                      Q in A, storing result in VT   
+/*                    Multiply right singular vectors of L in WORK(IR) by
+                      Q in A, storing result in VT
                       (Workspace: need M*M) */
 
 			dgemm_("N", "N", m, n, m, &c_b438, &work[ir], &ldwrkr,
-				 &a[a_offset], lda, &c_b416, &vt[vt_offset], 
+				 &a[a_offset], lda, &c_b416, &vt[vt_offset],
 				ldvt);
 
 		    } else {
@@ -2971,7 +2969,7 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q   
+/*                    Compute A=L*Q
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -2980,10 +2978,10 @@ static doublereal c_b438 = 1.;
 
 /*                    Copy result to VT */
 
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3001,7 +2999,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &a_ref(1,
 				 2), lda);
 
-/*                    Bidiagonalize L in A   
+/*                    Bidiagonalize L in A
                       (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3009,7 +3007,7 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply right vectors bidiagonalizing L by Q in VT   
+/*                    Multiply right vectors bidiagonalizing L by Q in VT
                       (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3018,8 +3016,8 @@ static doublereal c_b438 = 1.;
 				iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", m, n, &c__0, &c__0, &s[1], &work[ie], &
@@ -3030,9 +3028,9 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntuo) {
 
-/*                 Path 5t(N much larger than M, JOBU='O', JOBVT='S')   
-                   M right singular vectors to be computed in VT and   
-                   M left singular vectors to be overwritten on A   
+/*                 Path 5t(N much larger than M, JOBU='O', JOBVT='S')
+                   M right singular vectors to be computed in VT and
+                   M left singular vectors to be overwritten on A
 
    Computing MAX */
 		    i__2 = *m << 2;
@@ -3066,7 +3064,7 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *m;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q   
+/*                    Compute A=L*Q
                       (Workspace: need 2*M*M+2*M, prefer 2*M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3079,10 +3077,10 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ ldwrku], &ldwrku);
 
-/*                    Generate Q in A   
+/*                    Generate Q in A
                       (Workspace: need 2*M*M+2*M, prefer 2*M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3093,9 +3091,9 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in WORK(IU), copying result to   
-                      WORK(IR)   
-                      (Workspace: need 2*M*M+4*M,   
+/*                    Bidiagonalize L in WORK(IU), copying result to
+                      WORK(IR)
+                      (Workspace: need 2*M*M+4*M,
                                   prefer 2*M*M+3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3105,15 +3103,15 @@ static doublereal c_b438 = 1.;
 			dlacpy_("L", m, m, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IU)   
-                      (Workspace: need 2*M*M+4*M-1,   
+/*                    Generate right bidiagonalizing vectors in WORK(IU)
+                      (Workspace: need 2*M*M+4*M-1,
                                   prefer 2*M*M+3*M+(M-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("P", m, m, m, &work[iu], &ldwrku, &work[itaup]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IR)   
+/*                    Generate left bidiagonalizing vectors in WORK(IR)
                       (Workspace: need 2*M*M+4*M, prefer 2*M*M+3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3121,27 +3119,27 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of L in WORK(IR) and computing   
-                      right singular vectors of L in WORK(IU)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of L in WORK(IR) and computing
+                      right singular vectors of L in WORK(IU)
                       (Workspace: need 2*M*M+BDSPAC) */
 
 			dbdsqr_("U", m, m, m, &c__0, &s[1], &work[ie], &work[
-				iu], &ldwrku, &work[ir], &ldwrkr, dum, &c__1, 
+				iu], &ldwrku, &work[ir], &ldwrkr, dum, &c__1,
 				&work[iwork], info);
 
-/*                    Multiply right singular vectors of L in WORK(IU) by   
-                      Q in A, storing result in VT   
+/*                    Multiply right singular vectors of L in WORK(IU) by
+                      Q in A, storing result in VT
                       (Workspace: need M*M) */
 
 			dgemm_("N", "N", m, n, m, &c_b438, &work[iu], &ldwrku,
-				 &a[a_offset], lda, &c_b416, &vt[vt_offset], 
+				 &a[a_offset], lda, &c_b416, &vt[vt_offset],
 				ldvt);
 
-/*                    Copy left singular vectors of L to A   
+/*                    Copy left singular vectors of L to A
                       (Workspace: need M*M) */
 
-			dlacpy_("F", m, m, &work[ir], &ldwrkr, &a[a_offset], 
+			dlacpy_("F", m, m, &work[ir], &ldwrkr, &a[a_offset],
 				lda);
 
 		    } else {
@@ -3151,16 +3149,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3178,7 +3176,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &a_ref(1,
 				 2), lda);
 
-/*                    Bidiagonalize L in A   
+/*                    Bidiagonalize L in A
                       (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3186,7 +3184,7 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply right vectors bidiagonalizing L by Q in VT   
+/*                    Multiply right vectors bidiagonalizing L by Q in VT
                       (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3194,7 +3192,7 @@ static doublereal c_b438 = 1.;
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors of L in A   
+/*                    Generate left bidiagonalizing vectors of L in A
                       (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3202,9 +3200,9 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, compute left   
-                      singular vectors of A in A and compute right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, compute left
+                      singular vectors of A in A and compute right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", m, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -3215,10 +3213,10 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntuas) {
 
-/*                 Path 6t(N much larger than M, JOBU='S' or 'A',   
-                           JOBVT='S')   
-                   M right singular vectors to be computed in VT and   
-                   M left singular vectors to be computed in U   
+/*                 Path 6t(N much larger than M, JOBU='S' or 'A',
+                           JOBVT='S')
+                   M right singular vectors to be computed in VT and
+                   M left singular vectors to be computed in U
 
    Computing MAX */
 		    i__2 = *m << 2;
@@ -3241,7 +3239,7 @@ static doublereal c_b438 = 1.;
 			itau = iu + ldwrku * *m;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q   
+/*                    Compute A=L*Q
                       (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3254,10 +3252,10 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ ldwrku], &ldwrku);
 
-/*                    Generate Q in A   
+/*                    Generate Q in A
                       (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3268,25 +3266,25 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in WORK(IU), copying result to U   
+/*                    Bidiagonalize L in WORK(IU), copying result to U
                       (Workspace: need M*M+4*M, prefer M*M+3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgebrd_(m, m, &work[iu], &ldwrku, &s[1], &work[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
-			dlacpy_("L", m, m, &work[iu], &ldwrku, &u[u_offset], 
+			dlacpy_("L", m, m, &work[iu], &ldwrku, &u[u_offset],
 				ldu);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IU)   
-                      (Workspace: need M*M+4*M-1,   
+/*                    Generate right bidiagonalizing vectors in WORK(IU)
+                      (Workspace: need M*M+4*M-1,
                                   prefer M*M+3*M+(M-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("P", m, m, m, &work[iu], &ldwrku, &work[itaup]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in U   
+/*                    Generate left bidiagonalizing vectors in U
                       (Workspace: need M*M+4*M, prefer M*M+3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3294,21 +3292,21 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of L in U and computing right   
-                      singular vectors of L in WORK(IU)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of L in U and computing right
+                      singular vectors of L in WORK(IU)
                       (Workspace: need M*M+BDSPAC) */
 
 			dbdsqr_("U", m, m, m, &c__0, &s[1], &work[ie], &work[
 				iu], &ldwrku, &u[u_offset], ldu, dum, &c__1, &
 				work[iwork], info);
 
-/*                    Multiply right singular vectors of L in WORK(IU) by   
-                      Q in A, storing result in VT   
+/*                    Multiply right singular vectors of L in WORK(IU) by
+                      Q in A, storing result in VT
                       (Workspace: need M*M) */
 
 			dgemm_("N", "N", m, n, m, &c_b438, &work[iu], &ldwrku,
-				 &a[a_offset], lda, &c_b416, &vt[vt_offset], 
+				 &a[a_offset], lda, &c_b416, &vt[vt_offset],
 				ldvt);
 
 		    } else {
@@ -3318,16 +3316,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3336,7 +3334,7 @@ static doublereal c_b438 = 1.;
 
 /*                    Copy L to U, zeroing out above it */
 
-			dlacpy_("L", m, m, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, m, &a[a_offset], lda, &u[u_offset],
 				ldu);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
@@ -3347,7 +3345,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in U   
+/*                    Bidiagonalize L in U
                       (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3355,8 +3353,8 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply right bidiagonalizing vectors in U by Q   
-                      in VT   
+/*                    Multiply right bidiagonalizing vectors in U by Q
+                      in VT
                       (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3364,7 +3362,7 @@ static doublereal c_b438 = 1.;
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in U   
+/*                    Generate left bidiagonalizing vectors in U
                       (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3372,9 +3370,9 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U and computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U and computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", m, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -3389,9 +3387,9 @@ static doublereal c_b438 = 1.;
 
 		if (wntun) {
 
-/*                 Path 7t(N much larger than M, JOBU='N', JOBVT='A')   
-                   N right singular vectors to be computed in VT and   
-                   no left singular vectors to be computed   
+/*                 Path 7t(N much larger than M, JOBU='N', JOBVT='A')
+                   N right singular vectors to be computed in VT and
+                   no left singular vectors to be computed
 
    Computing MAX */
 		    i__2 = *n + *m, i__3 = *m << 2, i__2 = max(i__2,i__3);
@@ -3414,13 +3412,13 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *m;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
 /*                    Copy L to WORK(IR), zeroing out above it */
@@ -3429,10 +3427,10 @@ static doublereal c_b438 = 1.;
 				ldwrkr);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[ir 
+			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[ir
 				+ ldwrkr], &ldwrkr);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need M*M+M+N, prefer M*M+M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3443,7 +3441,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in WORK(IR)   
+/*                    Bidiagonalize L in WORK(IR)
                       (Workspace: need M*M+4*M, prefer M*M+3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3451,8 +3449,8 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IR)   
-                      (Workspace: need M*M+4*M-1,   
+/*                    Generate right bidiagonalizing vectors in WORK(IR)
+                      (Workspace: need M*M+4*M-1,
                                   prefer M*M+3*M+(M-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3460,25 +3458,25 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing right   
-                      singular vectors of L in WORK(IR)   
+/*                    Perform bidiagonal QR iteration, computing right
+                      singular vectors of L in WORK(IR)
                       (Workspace: need M*M+BDSPAC) */
 
 			dbdsqr_("U", m, m, &c__0, &c__0, &s[1], &work[ie], &
 				work[ir], &ldwrkr, dum, &c__1, dum, &c__1, &
 				work[iwork], info);
 
-/*                    Multiply right singular vectors of L in WORK(IR) by   
-                      Q in VT, storing result in A   
+/*                    Multiply right singular vectors of L in WORK(IR) by
+                      Q in VT, storing result in A
                       (Workspace: need M*M) */
 
 			dgemm_("N", "N", m, n, m, &c_b438, &work[ir], &ldwrkr,
-				 &vt[vt_offset], ldvt, &c_b416, &a[a_offset], 
+				 &vt[vt_offset], ldvt, &c_b416, &a[a_offset],
 				lda);
 
 /*                    Copy right singular vectors of A from A to VT */
 
-			dlacpy_("F", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("F", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
 		    } else {
@@ -3488,16 +3486,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need M+N, prefer M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3515,7 +3513,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &a_ref(1,
 				 2), lda);
 
-/*                    Bidiagonalize L in A   
+/*                    Bidiagonalize L in A
                       (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3523,8 +3521,8 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply right bidiagonalizing vectors in A by Q   
-                      in VT   
+/*                    Multiply right bidiagonalizing vectors in A by Q
+                      in VT
                       (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3533,8 +3531,8 @@ static doublereal c_b438 = 1.;
 				iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", m, n, &c__0, &c__0, &s[1], &work[ie], &
@@ -3545,9 +3543,9 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntuo) {
 
-/*                 Path 8t(N much larger than M, JOBU='O', JOBVT='A')   
-                   N right singular vectors to be computed in VT and   
-                   M left singular vectors to be overwritten on A   
+/*                 Path 8t(N much larger than M, JOBU='O', JOBVT='A')
+                   N right singular vectors to be computed in VT and
+                   M left singular vectors to be overwritten on A
 
    Computing MAX */
 		    i__2 = *n + *m, i__3 = *m << 2, i__2 = max(i__2,i__3);
@@ -3581,16 +3579,16 @@ static doublereal c_b438 = 1.;
 			itau = ir + ldwrkr * *m;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need 2*M*M+2*M, prefer 2*M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need 2*M*M+M+N, prefer 2*M*M+M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3603,16 +3601,16 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ ldwrku], &ldwrku);
 			ie = itau;
 			itauq = ie + *m;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in WORK(IU), copying result to   
-                      WORK(IR)   
-                      (Workspace: need 2*M*M+4*M,   
+/*                    Bidiagonalize L in WORK(IU), copying result to
+                      WORK(IR)
+                      (Workspace: need 2*M*M+4*M,
                                   prefer 2*M*M+3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3622,15 +3620,15 @@ static doublereal c_b438 = 1.;
 			dlacpy_("L", m, m, &work[iu], &ldwrku, &work[ir], &
 				ldwrkr);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IU)   
-                      (Workspace: need 2*M*M+4*M-1,   
+/*                    Generate right bidiagonalizing vectors in WORK(IU)
+                      (Workspace: need 2*M*M+4*M-1,
                                   prefer 2*M*M+3*M+(M-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("P", m, m, m, &work[iu], &ldwrku, &work[itaup]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in WORK(IR)   
+/*                    Generate left bidiagonalizing vectors in WORK(IR)
                       (Workspace: need 2*M*M+4*M, prefer 2*M*M+3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3638,31 +3636,31 @@ static doublereal c_b438 = 1.;
 				, &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of L in WORK(IR) and computing   
-                      right singular vectors of L in WORK(IU)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of L in WORK(IR) and computing
+                      right singular vectors of L in WORK(IU)
                       (Workspace: need 2*M*M+BDSPAC) */
 
 			dbdsqr_("U", m, m, m, &c__0, &s[1], &work[ie], &work[
-				iu], &ldwrku, &work[ir], &ldwrkr, dum, &c__1, 
+				iu], &ldwrku, &work[ir], &ldwrkr, dum, &c__1,
 				&work[iwork], info);
 
-/*                    Multiply right singular vectors of L in WORK(IU) by   
-                      Q in VT, storing result in A   
+/*                    Multiply right singular vectors of L in WORK(IU) by
+                      Q in VT, storing result in A
                       (Workspace: need M*M) */
 
 			dgemm_("N", "N", m, n, m, &c_b438, &work[iu], &ldwrku,
-				 &vt[vt_offset], ldvt, &c_b416, &a[a_offset], 
+				 &vt[vt_offset], ldvt, &c_b416, &a[a_offset],
 				lda);
 
 /*                    Copy right singular vectors of A from A to VT */
 
-			dlacpy_("F", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("F", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
 /*                    Copy left singular vectors of A from WORK(IR) to A */
 
-			dlacpy_("F", m, m, &work[ir], &ldwrkr, &a[a_offset], 
+			dlacpy_("F", m, m, &work[ir], &ldwrkr, &a[a_offset],
 				lda);
 
 		    } else {
@@ -3672,16 +3670,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need M+N, prefer M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3699,7 +3697,7 @@ static doublereal c_b438 = 1.;
 			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &a_ref(1,
 				 2), lda);
 
-/*                    Bidiagonalize L in A   
+/*                    Bidiagonalize L in A
                       (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3707,8 +3705,8 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply right bidiagonalizing vectors in A by Q   
-                      in VT   
+/*                    Multiply right bidiagonalizing vectors in A by Q
+                      in VT
                       (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3716,7 +3714,7 @@ static doublereal c_b438 = 1.;
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in A   
+/*                    Generate left bidiagonalizing vectors in A
                       (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3724,9 +3722,9 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in A and computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in A and computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", m, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -3737,10 +3735,10 @@ static doublereal c_b438 = 1.;
 
 		} else if (wntuas) {
 
-/*                 Path 9t(N much larger than M, JOBU='S' or 'A',   
-                           JOBVT='A')   
-                   N right singular vectors to be computed in VT and   
-                   M left singular vectors to be computed in U   
+/*                 Path 9t(N much larger than M, JOBU='S' or 'A',
+                           JOBVT='A')
+                   N right singular vectors to be computed in VT and
+                   M left singular vectors to be computed in U
 
    Computing MAX */
 		    i__2 = *n + *m, i__3 = *m << 2, i__2 = max(i__2,i__3);
@@ -3763,16 +3761,16 @@ static doublereal c_b438 = 1.;
 			itau = iu + ldwrku * *m;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need M*M+2*M, prefer M*M+M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need M*M+M+N, prefer M*M+M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3785,31 +3783,31 @@ static doublereal c_b438 = 1.;
 				ldwrku);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
-			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu 
+			dlaset_("U", &i__2, &i__3, &c_b416, &c_b416, &work[iu
 				+ ldwrku], &ldwrku);
 			ie = itau;
 			itauq = ie + *m;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in WORK(IU), copying result to U   
+/*                    Bidiagonalize L in WORK(IU), copying result to U
                       (Workspace: need M*M+4*M, prefer M*M+3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgebrd_(m, m, &work[iu], &ldwrku, &s[1], &work[ie], &
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
-			dlacpy_("L", m, m, &work[iu], &ldwrku, &u[u_offset], 
+			dlacpy_("L", m, m, &work[iu], &ldwrku, &u[u_offset],
 				ldu);
 
-/*                    Generate right bidiagonalizing vectors in WORK(IU)   
+/*                    Generate right bidiagonalizing vectors in WORK(IU)
                       (Workspace: need M*M+4*M, prefer M*M+3*M+(M-1)*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dorgbr_("P", m, m, m, &work[iu], &ldwrku, &work[itaup]
 				, &work[iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in U   
+/*                    Generate left bidiagonalizing vectors in U
                       (Workspace: need M*M+4*M, prefer M*M+3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3817,26 +3815,26 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of L in U and computing right   
-                      singular vectors of L in WORK(IU)   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of L in U and computing right
+                      singular vectors of L in WORK(IU)
                       (Workspace: need M*M+BDSPAC) */
 
 			dbdsqr_("U", m, m, m, &c__0, &s[1], &work[ie], &work[
 				iu], &ldwrku, &u[u_offset], ldu, dum, &c__1, &
 				work[iwork], info);
 
-/*                    Multiply right singular vectors of L in WORK(IU) by   
-                      Q in VT, storing result in A   
+/*                    Multiply right singular vectors of L in WORK(IU) by
+                      Q in VT, storing result in A
                       (Workspace: need M*M) */
 
 			dgemm_("N", "N", m, n, m, &c_b438, &work[iu], &ldwrku,
-				 &vt[vt_offset], ldvt, &c_b416, &a[a_offset], 
+				 &vt[vt_offset], ldvt, &c_b416, &a[a_offset],
 				lda);
 
 /*                    Copy right singular vectors of A from A to VT */
 
-			dlacpy_("F", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("F", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
 		    } else {
@@ -3846,16 +3844,16 @@ static doublereal c_b438 = 1.;
 			itau = 1;
 			iwork = itau + *m;
 
-/*                    Compute A=L*Q, copying result to VT   
+/*                    Compute A=L*Q, copying result to VT
                       (Workspace: need 2*M, prefer M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
 			dgelqf_(m, n, &a[a_offset], lda, &work[itau], &work[
 				iwork], &i__2, &ierr);
-			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], 
+			dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset],
 				ldvt);
 
-/*                    Generate Q in VT   
+/*                    Generate Q in VT
                       (Workspace: need M+N, prefer M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3864,7 +3862,7 @@ static doublereal c_b438 = 1.;
 
 /*                    Copy L to U, zeroing out above it */
 
-			dlacpy_("L", m, m, &a[a_offset], lda, &u[u_offset], 
+			dlacpy_("L", m, m, &a[a_offset], lda, &u[u_offset],
 				ldu);
 			i__2 = *m - 1;
 			i__3 = *m - 1;
@@ -3875,7 +3873,7 @@ static doublereal c_b438 = 1.;
 			itaup = itauq + *m;
 			iwork = itaup + *m;
 
-/*                    Bidiagonalize L in U   
+/*                    Bidiagonalize L in U
                       (Workspace: need 4*M, prefer 3*M+2*M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3883,8 +3881,8 @@ static doublereal c_b438 = 1.;
 				work[itauq], &work[itaup], &work[iwork], &
 				i__2, &ierr);
 
-/*                    Multiply right bidiagonalizing vectors in U by Q   
-                      in VT   
+/*                    Multiply right bidiagonalizing vectors in U by Q
+                      in VT
                       (Workspace: need 3*M+N, prefer 3*M+N*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3892,7 +3890,7 @@ static doublereal c_b438 = 1.;
 				work[itaup], &vt[vt_offset], ldvt, &work[
 				iwork], &i__2, &ierr);
 
-/*                    Generate left bidiagonalizing vectors in U   
+/*                    Generate left bidiagonalizing vectors in U
                       (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 			i__2 = *lwork - iwork + 1;
@@ -3900,9 +3898,9 @@ static doublereal c_b438 = 1.;
 				 &work[iwork], &i__2, &ierr);
 			iwork = ie + *m;
 
-/*                    Perform bidiagonal QR iteration, computing left   
-                      singular vectors of A in U and computing right   
-                      singular vectors of A in VT   
+/*                    Perform bidiagonal QR iteration, computing left
+                      singular vectors of A in U and computing right
+                      singular vectors of A in VT
                       (Workspace: need BDSPAC) */
 
 			dbdsqr_("U", m, n, m, &c__0, &s[1], &work[ie], &vt[
@@ -3917,9 +3915,9 @@ static doublereal c_b438 = 1.;
 
 	} else {
 
-/*           N .LT. MNTHR   
+/*           N .LT. MNTHR
 
-             Path 10t(N greater than M, but not much larger)   
+             Path 10t(N greater than M, but not much larger)
              Reduce to bidiagonal form without LQ decomposition */
 
 	    ie = 1;
@@ -3927,7 +3925,7 @@ static doublereal c_b438 = 1.;
 	    itaup = itauq + *m;
 	    iwork = itaup + *m;
 
-/*           Bidiagonalize A   
+/*           Bidiagonalize A
              (Workspace: need 3*M+N, prefer 3*M+(M+N)*NB) */
 
 	    i__2 = *lwork - iwork + 1;
@@ -3935,8 +3933,8 @@ static doublereal c_b438 = 1.;
 		    work[itaup], &work[iwork], &i__2, &ierr);
 	    if (wntuas) {
 
-/*              If left singular vectors desired in U, copy result to U   
-                and generate left bidiagonalizing vectors in U   
+/*              If left singular vectors desired in U, copy result to U
+                and generate left bidiagonalizing vectors in U
                 (Workspace: need 4*M-1, prefer 3*M+(M-1)*NB) */
 
 		dlacpy_("L", m, m, &a[a_offset], lda, &u[u_offset], ldu);
@@ -3946,8 +3944,8 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (wntvas) {
 
-/*              If right singular vectors desired in VT, copy result to   
-                VT and generate right bidiagonalizing vectors in VT   
+/*              If right singular vectors desired in VT, copy result to
+                VT and generate right bidiagonalizing vectors in VT
                 (Workspace: need 3*M+NRVT, prefer 3*M+NRVT*NB) */
 
 		dlacpy_("U", m, n, &a[a_offset], lda, &vt[vt_offset], ldvt);
@@ -3958,13 +3956,13 @@ static doublereal c_b438 = 1.;
 		    nrvt = *m;
 		}
 		i__2 = *lwork - iwork + 1;
-		dorgbr_("P", &nrvt, n, m, &vt[vt_offset], ldvt, &work[itaup], 
+		dorgbr_("P", &nrvt, n, m, &vt[vt_offset], ldvt, &work[itaup],
 			&work[iwork], &i__2, &ierr);
 	    }
 	    if (wntuo) {
 
-/*              If left singular vectors desired in A, generate left   
-                bidiagonalizing vectors in A   
+/*              If left singular vectors desired in A, generate left
+                bidiagonalizing vectors in A
                 (Workspace: need 4*M-1, prefer 3*M+(M-1)*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -3973,8 +3971,8 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (wntvo) {
 
-/*              If right singular vectors desired in A, generate right   
-                bidiagonalizing vectors in A   
+/*              If right singular vectors desired in A, generate right
+                bidiagonalizing vectors in A
                 (Workspace: need 4*M, prefer 3*M+M*NB) */
 
 		i__2 = *lwork - iwork + 1;
@@ -3996,9 +3994,9 @@ static doublereal c_b438 = 1.;
 	    }
 	    if (! wntuo && ! wntvo) {
 
-/*              Perform bidiagonal QR iteration, if desired, computing   
-                left singular vectors in U and computing right singular   
-                vectors in VT   
+/*              Perform bidiagonal QR iteration, if desired, computing
+                left singular vectors in U and computing right singular
+                vectors in VT
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("L", m, &ncvt, &nru, &c__0, &s[1], &work[ie], &vt[
@@ -4006,9 +4004,9 @@ static doublereal c_b438 = 1.;
 			work[iwork], info);
 	    } else if (! wntuo && wntvo) {
 
-/*              Perform bidiagonal QR iteration, if desired, computing   
-                left singular vectors in U and computing right singular   
-                vectors in A   
+/*              Perform bidiagonal QR iteration, if desired, computing
+                left singular vectors in U and computing right singular
+                vectors in A
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("L", m, &ncvt, &nru, &c__0, &s[1], &work[ie], &a[
@@ -4016,9 +4014,9 @@ static doublereal c_b438 = 1.;
 			iwork], info);
 	    } else {
 
-/*              Perform bidiagonal QR iteration, if desired, computing   
-                left singular vectors in A and computing right singular   
-                vectors in VT   
+/*              Perform bidiagonal QR iteration, if desired, computing
+                left singular vectors in A and computing right singular
+                vectors in VT
                 (Workspace: need BDSPAC) */
 
 		dbdsqr_("L", m, &ncvt, &nru, &c__0, &s[1], &work[ie], &vt[
@@ -4030,7 +4028,7 @@ static doublereal c_b438 = 1.;
 
     }
 
-/*     If DBDSQR failed to converge, copy unconverged superdiagonals   
+/*     If DBDSQR failed to converge, copy unconverged superdiagonals
        to WORK( 2:MINMN ) */
 
     if (*info != 0) {

@@ -1,4 +1,4 @@
-dnl Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+dnl Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 dnl HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 dnl
 dnl SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -63,7 +63,7 @@ AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
-AC_COPYRIGHT([Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+AC_COPYRIGHT([Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 HYPRE Project Developers. See the top-level COPYRIGHT file for details.])
 
 AC_CONFIG_AUX_DIR(config)

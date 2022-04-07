@@ -11,91 +11,91 @@ extern "C" {
 /* Subroutine */ integer dorgtr_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DORGTR generates a real orthogonal matrix Q which is defined as the   
-    product of n-1 elementary reflectors of order N, as returned by   
-    DSYTRD:   
+    DORGTR generates a real orthogonal matrix Q which is defined as the
+    product of n-1 elementary reflectors of order N, as returned by
+    DSYTRD:
 
-    if UPLO = 'U', Q = H(n-1) . . . H(2) H(1),   
+    if UPLO = 'U', Q = H(n-1) . . . H(2) H(1),
 
-    if UPLO = 'L', Q = H(1) H(2) . . . H(n-1).   
+    if UPLO = 'L', Q = H(1) H(2) . . . H(n-1).
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    UPLO    (input) CHARACTER*1   
-            = 'U': Upper triangle of A contains elementary reflectors   
-                   from DSYTRD;   
-            = 'L': Lower triangle of A contains elementary reflectors   
-                   from DSYTRD.   
+    UPLO    (input) CHARACTER*1
+            = 'U': Upper triangle of A contains elementary reflectors
+                   from DSYTRD;
+            = 'L': Lower triangle of A contains elementary reflectors
+                   from DSYTRD.
 
-    N       (input) INTEGER   
-            The order of the matrix Q. N >= 0.   
+    N       (input) INTEGER
+            The order of the matrix Q. N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the vectors which define the elementary reflectors,   
-            as returned by DSYTRD.   
-            On exit, the N-by-N orthogonal matrix Q.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the vectors which define the elementary reflectors,
+            as returned by DSYTRD.
+            On exit, the N-by-N orthogonal matrix Q.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A. LDA >= max(1,N).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A. LDA >= max(1,N).
 
-    TAU     (input) DOUBLE PRECISION array, dimension (N-1)   
-            TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by DSYTRD.   
+    TAU     (input) DOUBLE PRECISION array, dimension (N-1)
+            TAU(i) must contain the scalar factor of the elementary
+            reflector H(i), as returned by DSYTRD.
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK. LWORK >= max(1,N-1).   
-            For optimum performance LWORK >= (N-1)*NB, where NB is   
-            the optimal blocksize.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK. LWORK >= max(1,N-1).
+            For optimum performance LWORK >= (N-1)*NB, where NB is
+            the optimal blocksize.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
-    static integer i__, j;
+    integer i__, j;
     extern logical lsame_(const char *,const char *);
-    static integer iinfo;
-    static logical upper;
-    static integer nb;
+    integer iinfo;
+    logical upper;
+    integer nb;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ integer dorgql_(integer *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dorgql_(integer *, integer *, integer *,
+	    doublereal *, integer *, doublereal *, doublereal *, integer *,
 	    integer *), dorgqr_(integer *, integer *, integer *, doublereal *,
 	     integer *, doublereal *, doublereal *, integer *, integer *);
-    static integer lwkopt;
-    static logical lquery;
+    integer lwkopt;
+    logical lquery;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -160,10 +160,10 @@ extern "C" {
 
     if (upper) {
 
-/*        Q was determined by a call to DSYTRD with UPLO = 'U'   
+/*        Q was determined by a call to DSYTRD with UPLO = 'U'
 
-          Shift the vectors which define the elementary reflectors one   
-          column to the left, and set the last row and column of Q to   
+          Shift the vectors which define the elementary reflectors one
+          column to the left, and set the last row and column of Q to
           those of the unit matrix */
 
 	i__1 = *n - 1;
@@ -188,15 +188,15 @@ extern "C" {
 	i__1 = *n - 1;
 	i__2 = *n - 1;
 	i__3 = *n - 1;
-	dorgql_(&i__1, &i__2, &i__3, &a[a_offset], lda, &tau[1], &work[1], 
+	dorgql_(&i__1, &i__2, &i__3, &a[a_offset], lda, &tau[1], &work[1],
 		lwork, &iinfo);
 
     } else {
 
-/*        Q was determined by a call to DSYTRD with UPLO = 'L'.   
+/*        Q was determined by a call to DSYTRD with UPLO = 'L'.
 
-          Shift the vectors which define the elementary reflectors one   
-          column to the right, and set the first row and column of Q to   
+          Shift the vectors which define the elementary reflectors one
+          column to the right, and set the first row and column of Q to
           those of the unit matrix */
 
 	for (j = *n; j >= 2; --j) {
