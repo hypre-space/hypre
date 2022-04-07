@@ -98,6 +98,7 @@ char file_dir[] = "./";
 
 void runjob1( HYPRE_ParCSRMatrix parcsr_A,
               HYPRE_Int          print_system,
+              HYPRE_Int          rep,
               HYPRE_Int          verify)
 {
    HYPRE_Int          num_procs, myid, i;
@@ -107,7 +108,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_ParCSRMatrix parcsr_B       = NULL;
    HYPRE_ParCSRMatrix parcsr_error_host = NULL;
    HYPRE_Real         fnorm, rfnorm, fnorm0;
-   HYPRE_Int          time_index, rep = 2;
+   HYPRE_Int          time_index;
    char               fname[1024];
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
@@ -222,6 +223,147 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    }
 
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_B);
+
+   if (myid == 0)
+   {
+      hypre_printf("B %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B),
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_B),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_B),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_B) / hypre_ParCSRMatrixGlobalNumRows(parcsr_B));
+   }
+
+   hypre_ParCSRMatrixDestroy(parcsr_B);
+   hypre_ParCSRMatrixDestroy(parcsr_A_host);
+   hypre_ParCSRMatrixDestroy(parcsr_B_host);
+   hypre_ParCSRMatrixDestroy(parcsr_B_host2);
+}
+
+void runjob2( HYPRE_ParCSRMatrix parcsr_A,
+              HYPRE_Int          print_system,
+              HYPRE_Int          rep,
+              HYPRE_Int          verify)
+{
+   HYPRE_Int          num_procs, myid, i;
+   HYPRE_ParCSRMatrix parcsr_A_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_B_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_B_host2 = NULL;
+   HYPRE_ParCSRMatrix parcsr_B       = NULL;
+   HYPRE_ParCSRMatrix parcsr_error_host = NULL;
+   HYPRE_Real         fnorm, rfnorm, fnorm0;
+   HYPRE_Int          time_index;
+   char               fname[1024];
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   if (myid == 0)
+   {
+      hypre_printf("A %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_A),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_A) / hypre_ParCSRMatrixGlobalNumRows(parcsr_A));
+   }
+
+   hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
+
+   hypre_MatvecCommPkgCreate(parcsr_A);
+   hypre_ParCSRMatrixCopyColMapOffdToDevice(parcsr_A);
+
+   if (verify)
+   {
+      parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+      hypre_MatvecCommPkgCreate(parcsr_A_host);
+
+      time_index = hypre_InitializeTiming("Host Parcsr Matrix-Transpose-by-Matrix, AT*A");
+
+      hypre_BeginTiming(time_index);
+
+      parcsr_B_host = hypre_ParCSRTMatMat(parcsr_A_host, parcsr_A_host);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Host Parcsr Matrix-Transpose-by-Matrix, AT*A", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_B_host);
+   }
+
+   if (print_system)
+   {
+      if (!parcsr_A_host)
+      {
+         parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+      }
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.A");
+      hypre_ParCSRMatrixPrintIJ(parcsr_A_host, 0, 0, fname);
+   }
+
+   for (i = 0 ; i < rep; i++)
+   {
+      if (myid == 0)
+      {
+         hypre_printf("--- rep %d (out of %d) ---\n", i, rep);
+      }
+      if (i == rep - 1)
+      {
+         time_index = hypre_InitializeTiming("Device Parcsr Matrix-Transpose-by-Matrix, AT*A");
+         hypre_BeginTiming(time_index);
+         //cudaProfilerStart();
+      }
+
+      parcsr_B = hypre_ParCSRTMatMat(parcsr_A, parcsr_A);
+
+      if (i == rep - 1)
+      {
+         hypre_SyncCudaDevice(hypre_handle());
+         //cudaProfilerStop();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Device Parcsr Matrix-Transpose-by-Matrix, AT*A", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
+
+      if (i < rep - 1)
+      {
+         hypre_ParCSRMatrixDestroy(parcsr_B);
+      }
+   }
+
+   if (verify)
+   {
+      parcsr_B_host2 = hypre_ParCSRMatrixClone_v2(parcsr_B, 1, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_B_host2);
+
+      hypre_ParCSRMatrixAdd(1.0, parcsr_B_host, -1.0, parcsr_B_host2, &parcsr_error_host);
+      fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
+      fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_B_host);
+      rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
+
+      if (myid == 0)
+      {
+         hypre_printf("A^T*A: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n",
+                      hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
+                      hypre_ParCSRMatrixGlobalNumCols(parcsr_B_host2),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_B_host2),
+                      rfnorm);
+      }
+   }
+
+   if (print_system)
+   {
+      if (!parcsr_B_host2)
+      {
+         parcsr_B_host2 = hypre_ParCSRMatrixClone_v2(parcsr_B, 1, HYPRE_MEMORY_HOST);
+      }
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.B");
+      hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.B.CPU");
+      hypre_ParCSRMatrixPrintIJ(parcsr_B_host, 0, 0, fname);
+   }
+
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_B);
+
    if (myid == 0)
    {
       hypre_printf("B %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B),
@@ -238,13 +380,15 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
 void runjob3( HYPRE_ParCSRMatrix parcsr_A,
               HYPRE_ParCSRMatrix parcsr_P,
+              HYPRE_Int          boolean_P,
               HYPRE_Int          print_system,
               HYPRE_Int          mult_order,
+              HYPRE_Int          rep,
               HYPRE_Int          verify)
 {
    HYPRE_Int          num_procs, myid, i;
    char               fname[1024];
-   HYPRE_Int          time_index, rep = 2;
+   HYPRE_Int          time_index;
    HYPRE_Int          keepTranspose = 0;
    HYPRE_Int          rap2 = 1;
    HYPRE_Real         fnorm, rfnorm, fnorm0;
@@ -276,7 +420,7 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
    hypre_MatvecCommPkgCreate(parcsr_A);
    hypre_MatvecCommPkgCreate(parcsr_P);
 
-   //hypre_ParCSRMatrixSetPatternOnly(parcsr_P, 1);
+   hypre_ParCSRMatrixSetPatternOnly(parcsr_P, boolean_P);
 
    /*-----------------------------------------------------------
     * Matrix-by-Matrix on host
@@ -407,9 +551,10 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_error_host);
 }
 
-void runjob2( HYPRE_ParCSRMatrix parcsr_A,
+void runjob4( HYPRE_ParCSRMatrix parcsr_A,
               HYPRE_Int          print_system,
               HYPRE_Int          mult_order,
+              HYPRE_Int          rep,
               HYPRE_Int          verify)
 {
    HYPRE_Int    measure_type = 0;
@@ -447,7 +592,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
                                    num_functions, NULL, debug_flag, trunc_factor, P_max_elmts,
                                    &parcsr_P);
 
-   runjob3(parcsr_A, parcsr_P, print_system, mult_order, verify);
+   runjob3(parcsr_A, parcsr_P, 0, print_system, mult_order, rep, verify);
 
    hypre_IntArrayDestroy(CF_marker);
    hypre_ParCSRMatrixDestroy(parcsr_S);
@@ -484,6 +629,8 @@ main( hypre_int argc,
    HYPRE_Int           rowest_nsamples = -1; /* default */
    HYPRE_Real          rowest_mult = -1.0; /* default */
    HYPRE_Int           zero_mem_cost = 0;
+   HYPRE_Int           boolean_P = 1;
+   HYPRE_Int           rep = 10;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -654,6 +801,11 @@ main( hypre_int argc,
          arg_index++;
          job  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-rep") == 0 )
+      {
+         arg_index++;
+         rep  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-zeromemcost") == 0 )
       {
          arg_index++;
@@ -709,12 +861,9 @@ main( hypre_int argc,
          hypre_printf("           0=Forward (default)       1=Backward\n");
          hypre_printf("           2=Centered                3=Upwind\n");
          hypre_printf("\n");
-         hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
-         hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
          hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
          hypre_printf("\n");
-
-         hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
+         hypre_printf("  -job                   : 1. A^2;  2. A^T*A;  3. P^T*A*P;  4. P^T*A*P, P is AMG Interp. from A \n");
       }
       goto final;
    }
@@ -856,15 +1005,19 @@ main( hypre_int argc,
 
    if (job == 1)
    {
-      runjob1(parcsr_A, print_system, verify);
+      runjob1(parcsr_A, print_system, rep, verify);
    }
    else if (job == 2)
    {
-      runjob2(parcsr_A, print_system, mult_order, verify);
+      runjob2(parcsr_A, print_system, rep, verify);
    }
    else if (job == 3)
    {
-      runjob3(parcsr_A, parcsr_P, print_system, mult_order, verify);
+      runjob3(parcsr_A, parcsr_P, boolean_P, print_system, mult_order, rep, verify);
+   }
+   else if (job == 4)
+   {
+      runjob4(parcsr_A, print_system, mult_order, rep, verify);
    }
 
    /*-----------------------------------------------------------
