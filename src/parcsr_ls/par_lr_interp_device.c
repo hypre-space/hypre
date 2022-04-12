@@ -5,11 +5,12 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #define MAX_C_CONNECTIONS 100
 #define HAVE_COMMON_C 1
@@ -18,34 +19,53 @@
 // S_*_j is the special j-array from device SoC
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
-__global__
-void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
-                                           bool           has_offd,
-                                           HYPRE_Int     *CF_marker,
-                                           HYPRE_Int     *A_diag_i,
-                                           HYPRE_Complex *A_diag_a,
-                                           HYPRE_Int     *Soc_diag_j,
-                                           HYPRE_Int     *A_offd_i,
-                                           HYPRE_Complex *A_offd_a,
-                                           HYPRE_Int     *Soc_offd_j,
-                                           HYPRE_Real    *rs,
-                                           HYPRE_Int      flag)
+__global__ void
+hypreCUDAKernel_compute_weak_rowsums( 
+#if defined(HYPRE_USING_SYCL)
+   sycl::nd_item<1>& item,
+#endif
+   HYPRE_Int      nr_of_rows,
+   bool           has_offd,
+   HYPRE_Int     *CF_marker,
+   HYPRE_Int     *A_diag_i,
+   HYPRE_Complex *A_diag_a,
+   HYPRE_Int     *Soc_diag_j,
+   HYPRE_Int     *A_offd_i,
+   HYPRE_Complex *A_offd_a,
+   HYPRE_Int     *Soc_offd_j,
+   HYPRE_Real    *rs,
+   HYPRE_Int      flag)
 {
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
+#else
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+#endif
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::sub_group SG = item.get_sub_group();
+   const HYPRE_Int lane = SG.get_local_linear_id();
+#else
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
    HYPRE_Int ib, ie;
 
    if (lane == 0)
    {
       ib = read_only_load(CF_marker + row);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   /* WM: Q - does shuffle() work in place like this? Don't think I've done it like that before */
+   ib = SG.shuffle(ib, 0);
+#else
    ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+#endif
 
    if (ib >= flag)
    {
@@ -56,17 +76,20 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
    {
       ib = read_only_load(A_diag_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   ie = SG.shuffle(ib, 1);
+   ib = SG.shuffle(ib, 0);
+#else
    ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
    ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+#endif
 
    HYPRE_Complex rl = 0.0;
 
-   for (HYPRE_Int i = ib + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = ib + lane; i < ie; i += HYPRE_WARP_SIZE)
    {
-      if (i < ie)
-      {
-         rl += read_only_load(&A_diag_a[i]) * (read_only_load(&Soc_diag_j[i]) < 0);
-      }
+      rl += read_only_load(&A_diag_a[i]) * (read_only_load(&Soc_diag_j[i]) < 0);
    }
 
    if (has_offd)
@@ -75,19 +98,26 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
       {
          ib = read_only_load(A_offd_i + row + lane);
       }
+#if defined(HYPRE_USING_SYCL)
+      SG.barrier();
+      ie = SG.shuffle(ib, 1);
+      ib = SG.shuffle(ib, 0);
+#else
       ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
       ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+#endif
 
-      for (HYPRE_Int i = ib + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
+      for (HYPRE_Int i = ib + lane; i < ie; i += HYPRE_WARP_SIZE)
       {
-         if (i < ie)
-         {
-            rl += read_only_load(&A_offd_a[i]) * (read_only_load(&Soc_offd_j[i]) < 0);
-         }
+         rl += read_only_load(&A_offd_a[i]) * (read_only_load(&Soc_offd_j[i]) < 0);
       }
    }
 
+#if defined(HYPRE_USING_SYCL)
+   rl = warp_reduce_sum(rl, SG);
+#else
    rl = warp_reduce_sum(rl);
+#endif
 
    if (lane == 0)
    {
@@ -97,27 +127,40 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
-                                      HYPRE_Int     *AFF_diag_i,
-                                      HYPRE_Int     *AFF_diag_j,
-                                      HYPRE_Complex *AFF_diag_data,
-                                      HYPRE_Int     *AFF_offd_i,
-                                      HYPRE_Complex *AFF_offd_data,
-                                      HYPRE_Int     *AFC_diag_i,
-                                      HYPRE_Complex *AFC_diag_data,
-                                      HYPRE_Int     *AFC_offd_i,
-                                      HYPRE_Complex *AFC_offd_data,
-                                      HYPRE_Complex *rsW,
-                                      HYPRE_Complex *rsFC )
+void hypreCUDAKernel_compute_aff_afc( 
+#if defined(HYPRE_USING_SYCL)
+   sycl::nd_item<1>& item,
+#endif
+   HYPRE_Int      nr_of_rows,
+   HYPRE_Int     *AFF_diag_i,
+   HYPRE_Int     *AFF_diag_j,
+   HYPRE_Complex *AFF_diag_data,
+   HYPRE_Int     *AFF_offd_i,
+   HYPRE_Complex *AFF_offd_data,
+   HYPRE_Int     *AFC_diag_i,
+   HYPRE_Complex *AFC_diag_data,
+   HYPRE_Int     *AFC_offd_i,
+   HYPRE_Complex *AFC_offd_data,
+   HYPRE_Complex *rsW,
+   HYPRE_Complex *rsFC )
 {
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
+#else
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+#endif
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::sub_group SG = item.get_sub_group();
+   const HYPRE_Int lane = SG.get_local_linear_id();
+#else
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
    HYPRE_Int p, q;
 
    HYPRE_Complex iscale, beta;
@@ -127,8 +170,14 @@ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
       iscale = -1.0 / read_only_load(&rsW[row]);
       beta = read_only_load(&rsFC[row]);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   iscale = SG.shuffle(iscale, 0);
+   beta   = SG.shuffle(beta,   0);
+#else
    iscale = __shfl_sync(HYPRE_WARP_FULL_MASK, iscale, 0);
    beta   = __shfl_sync(HYPRE_WARP_FULL_MASK, beta,   0);
+#endif
 
    // AFF
    /* Diag part */
@@ -136,22 +185,25 @@ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
    {
       p = read_only_load(AFF_diag_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   q = SG.shuffle(p, 1);
+   p = SG.shuffle(p, 0);
+#else
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+#endif
 
    // do not assume diag is the first element of row
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j < q)
+      if (read_only_load(&AFF_diag_j[j]) == row)
       {
-         if (read_only_load(&AFF_diag_j[j]) == row)
-         {
-            AFF_diag_data[j] = beta * iscale;
-         }
-         else
-         {
-            AFF_diag_data[j] *= iscale;
-         }
+         AFF_diag_data[j] = beta * iscale;
+      }
+      else
+      {
+         AFF_diag_data[j] *= iscale;
       }
    }
 
@@ -160,15 +212,18 @@ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
    {
       p = read_only_load(AFF_offd_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   q = SG.shuffle(p, 1);
+   p = SG.shuffle(p, 0);
+#else
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+#endif
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j < q)
-      {
-         AFF_offd_data[j] *= iscale;
-      }
+      AFF_offd_data[j] *= iscale;
    }
 
    if (beta != 0.0)
@@ -181,16 +236,19 @@ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
    {
       p = read_only_load(AFC_diag_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   q = SG.shuffle(p, 1);
+   p = SG.shuffle(p, 0);
+#else
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+#endif
 
    /* Diag part */
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j < q)
-      {
-         AFC_diag_data[j] *= beta;
-      }
+      AFC_diag_data[j] *= beta;
    }
 
    /* offd part */
@@ -198,15 +256,18 @@ void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
    {
       p = read_only_load(AFC_offd_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   q = SG.shuffle(p, 1);
+   p = SG.shuffle(p, 0);
+#else
    q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
    p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+#endif
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j < q)
-      {
-         AFC_offd_data[j] *= beta;
-      }
+      AFC_offd_data[j] *= beta;
    }
 }
 
@@ -229,29 +290,65 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 {
    // row index shift P --> W
    HYPRE_Int *PWoffset = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::transform,
+                      CF_marker,
+                      &CF_marker[P_nr_of_rows],
+                      PWoffset,
+                      is_nonnegative<HYPRE_Int>() );
+#else
    HYPRE_THRUST_CALL( transform,
                       CF_marker,
                       &CF_marker[P_nr_of_rows],
                       PWoffset,
                       is_nonnegative<HYPRE_Int>() );
+#endif
 
    hypre_Memset(PWoffset + P_nr_of_rows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
-   HYPRE_THRUST_CALL( exclusive_scan,
-                      PWoffset,
-                      &PWoffset[P_nr_of_rows + 1],
-                      PWoffset);
+   hypreDevice_IntegerExclusiveScan(P_nr_of_rows + 1, PWoffset);
 
    // map F+C to (next) F
    HYPRE_Int *map2F = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::transform,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(P_nr_of_rows + 1),
+                      PWoffset,
+                      map2F,
+                      std::minus<HYPRE_Int>() );
+#else
    HYPRE_THRUST_CALL( transform,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::counting_iterator<HYPRE_Int>(P_nr_of_rows + 1),
                       PWoffset,
                       map2F,
                       thrust::minus<HYPRE_Int>() );
+#endif
 
    // P_diag_i
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( map2F,
+                     map2F + P_nr_of_rows + 1,
+                     W_diag_i,
+                     P_diag_i );
+
+   HYPRE_ONEDPL_CALL( transform,
+                      P_diag_i,
+                      P_diag_i + P_nr_of_rows + 1,
+                      PWoffset,
+                      P_diag_i,
+                      std::plus<HYPRE_Int>() );
+
+   // P_offd_i
+   if (W_offd_i && P_offd_i)
+   {
+      hypreSycl_gather( map2F,
+                        map2F + P_nr_of_rows + 1,
+                        W_offd_i,
+                        P_offd_i );
+   }
+#else
    HYPRE_THRUST_CALL( gather,
                       map2F,
                       map2F + P_nr_of_rows + 1,
@@ -274,31 +371,64 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                          W_offd_i,
                          P_offd_i );
    }
+#endif
 
    hypre_TFree(map2F, HYPRE_MEMORY_DEVICE);
 
    // row index shift W --> P
    HYPRE_Int *WPoffset = hypre_TAlloc(HYPRE_Int, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int *new_end = hypreSycl_copy_if( PWoffset,
+                                           PWoffset + P_nr_of_rows,
+                                           CF_marker,
+                                           WPoffset,
+                                           is_negative<HYPRE_Int>() );
+#else
    HYPRE_Int *new_end = HYPRE_THRUST_CALL( copy_if,
                                            PWoffset,
                                            PWoffset + P_nr_of_rows,
                                            CF_marker,
                                            WPoffset,
                                            is_negative<HYPRE_Int>() );
+#endif
    hypre_assert(new_end - WPoffset == W_nr_of_rows);
 
    hypre_TFree(PWoffset, HYPRE_MEMORY_DEVICE);
 
    // elements shift
    HYPRE_Int *shift = hypreDevice_CsrRowPtrsToIndices(W_nr_of_rows, W_diag_nnz, W_diag_i);
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( shift,
+                     shift + W_diag_nnz,
+                     WPoffset,
+                     shift);
+#else
    HYPRE_THRUST_CALL( gather,
                       shift,
                       shift + W_diag_nnz,
                       WPoffset,
                       shift);
+#endif
 
    hypre_TFree(WPoffset, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( transform,
+                      shift,
+                      shift + W_diag_nnz,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      shift,
+                      std::plus<HYPRE_Int>() );
+
+   // P_diag_j and P_diag_data
+   if (W_diag_j && W_diag_data)
+   {
+      HYPRE_ONEDPL_CALL( std::copy,
+                         oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
+                         oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data) + W_diag_nnz,
+                         oneapi::dpl::make_permutation_iterator(oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data), shift) );
+   }
+#else
    HYPRE_THRUST_CALL( transform,
                       shift,
                       shift + W_diag_nnz,
@@ -315,24 +445,40 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                          shift,
                          thrust::make_zip_iterator(thrust::make_tuple(P_diag_j, P_diag_data)) );
    }
+#endif
    hypre_TFree(shift, HYPRE_MEMORY_DEVICE);
 
    // fill the gap
    HYPRE_Int *PC_i = hypre_TAlloc(HYPRE_Int, W_nr_of_cols, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   new_end = hypreSycl_copy_if( P_diag_i,
+                                P_diag_i + P_nr_of_rows,
+                                CF_marker,
+                                PC_i,
+                                is_nonnegative<HYPRE_Int>() );
+#else
    new_end = HYPRE_THRUST_CALL( copy_if,
                                 P_diag_i,
                                 P_diag_i + P_nr_of_rows,
                                 CF_marker,
                                 PC_i,
                                 is_nonnegative<HYPRE_Int>() );
+#endif
 
    hypre_assert(new_end - PC_i == W_nr_of_cols);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( copy,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(W_nr_of_cols),
+                      oneapi::dpl::make_permutation_iterator(P_diag_j, PC_i) );
+#else
    HYPRE_THRUST_CALL( scatter,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::counting_iterator<HYPRE_Int>(W_nr_of_cols),
                       PC_i,
                       P_diag_j );
+#endif
 
    hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, (HYPRE_Complex) 1.0);
 
@@ -343,30 +489,43 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 //-----------------------------------------------------------------------
 // For Ext+i Interp, scale AFF from the left and the right
 __global__
-void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
-                                       HYPRE_BigInt   first_index,
-                                       HYPRE_Int     *AFF_diag_i,
-                                       HYPRE_Int     *AFF_diag_j,
-                                       HYPRE_Complex *AFF_diag_data,
-                                       HYPRE_Complex *AFF_diag_data_old,
-                                       HYPRE_Int     *AFF_offd_i,
-                                       HYPRE_Int     *AFF_offd_j,
-                                       HYPRE_Complex *AFF_offd_data,
-                                       HYPRE_Int     *AFF_ext_i,
-                                       HYPRE_BigInt  *AFF_ext_j,
-                                       HYPRE_Complex *AFF_ext_data,
-                                       HYPRE_Complex *rsW,
-                                       HYPRE_Complex *rsFC,
-                                       HYPRE_Complex *rsFC_offd )
+void hypreCUDAKernel_compute_twiaff_w( 
+#if defined(HYPRE_USING_SYCL)
+   sycl::nd_item<1>& item,
+#endif
+   HYPRE_Int      nr_of_rows,
+   HYPRE_BigInt   first_index,
+   HYPRE_Int     *AFF_diag_i,
+   HYPRE_Int     *AFF_diag_j,
+   HYPRE_Complex *AFF_diag_data,
+   HYPRE_Complex *AFF_diag_data_old,
+   HYPRE_Int     *AFF_offd_i,
+   HYPRE_Int     *AFF_offd_j,
+   HYPRE_Complex *AFF_offd_data,
+   HYPRE_Int     *AFF_ext_i,
+   HYPRE_BigInt  *AFF_ext_j,
+   HYPRE_Complex *AFF_ext_data,
+   HYPRE_Complex *rsW,
+   HYPRE_Complex *rsFC,
+   HYPRE_Complex *rsFC_offd )
 {
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
+#else
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+#endif
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::sub_group SG = item.get_sub_group();
+   const HYPRE_Int lane = SG.get_local_linear_id();
+#else
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
 
    HYPRE_Int ib_diag, ie_diag, ib_offd, ie_offd;
 
@@ -375,8 +534,14 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
    {
       ib_diag = read_only_load(AFF_diag_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   ie_diag = SG.shuffle(ib_diag, 1);
+   ib_diag = SG.shuffle(ib_diag, 0);
+#else
    ie_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 1);
    ib_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 0);
+#endif
 
    HYPRE_Complex theta_i = 0.0;
 
@@ -390,7 +555,12 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       {
          j = read_only_load(&AFF_diag_j[indj]);
       }
+#if defined(HYPRE_USING_SYCL)
+      SG.barrier();
+      j = SG.shuffle(j, 0);
+#else
       j = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+#endif
 
       if (j == row)
       {
@@ -409,24 +579,44 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       {
          kb = read_only_load(AFF_diag_i + j + lane);
       }
+#if defined(HYPRE_USING_SYCL)
+      SG.barrier();
+      ke = SG.shuffle(kb, 1);
+      kb = SG.shuffle(kb, 0);
+#else
       ke = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 1);
       kb = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 0);
+#endif
 
       HYPRE_Int kmatch = -1;
+#if defined(HYPRE_USING_SYCL)
+      /* WM: Q - will I need any kind of barrier anywhere? Barrier on each loop iteration for the SG? */
+      for (HYPRE_Int indk = kb + lane; sycl::any_of_group(SG, indk < ke);
+           indk += HYPRE_WARP_SIZE)
+#else
       for (HYPRE_Int indk = kb + lane; __any_sync(HYPRE_WARP_FULL_MASK, indk < ke);
            indk += HYPRE_WARP_SIZE)
+#endif
       {
          if (indk < ke && row == read_only_load(&AFF_diag_j[indk]))
          {
             kmatch = indk;
          }
 
+#if defined(HYPRE_USING_SYCL)
+         if (sycl::any_of_group(SG, kmatch >= 0))
+#else
          if (__any_sync(HYPRE_WARP_FULL_MASK, kmatch >= 0))
+#endif
          {
             break;
          }
       }
+#if defined(HYPRE_USING_SYCL)
+      kmatch = warp_reduce_max(kmatch, SG);
+#else
       kmatch = warp_reduce_max(kmatch);
+#endif
 
       if (lane == 0)
       {
@@ -451,8 +641,14 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
    {
       ib_offd = read_only_load(AFF_offd_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   ie_offd = SG.shuffle(ib_offd, 1);
+   ib_offd = SG.shuffle(ib_offd, 0);
+#else
    ie_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 1);
    ib_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 0);
+#endif
 
    for (HYPRE_Int indj = ib_offd; indj < ie_offd; indj++)
    {
@@ -462,7 +658,12 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       {
          j = read_only_load(&AFF_offd_j[indj]);
       }
+#if defined(HYPRE_USING_SYCL)
+      SG.barrier();
+      j = SG.shuffle(j, 0);
+#else
       j = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+#endif
 
       HYPRE_Int kb, ke;
 
@@ -470,24 +671,43 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       {
          kb = read_only_load(AFF_ext_i + j + lane);
       }
+#if defined(HYPRE_USING_SYCL)
+      SG.barrier();
+      ke = SG.shuffle(kb, 1);
+      kb = SG.shuffle(kb, 0);
+#else
       ke = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 1);
       kb = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 0);
+#endif
 
       HYPRE_Int kmatch = -1;
+#if defined(HYPRE_USING_SYCL)
+      for (HYPRE_Int indk = kb + lane; sycl::any_of_group(SG, indk < ke);
+           indk += HYPRE_WARP_SIZE)
+#else
       for (HYPRE_Int indk = kb + lane; __any_sync(HYPRE_WARP_FULL_MASK, indk < ke);
            indk += HYPRE_WARP_SIZE)
+#endif
       {
          if (indk < ke && row + first_index == read_only_load(&AFF_ext_j[indk]))
          {
             kmatch = indk;
          }
 
+#if defined(HYPRE_USING_SYCL)
+         if (sycl::any_of_group(SG, kmatch >= 0))
+#else
          if (__any_sync(HYPRE_WARP_FULL_MASK, kmatch >= 0))
+#endif
          {
             break;
          }
       }
+#if defined(HYPRE_USING_SYCL)
+      kmatch = warp_reduce_max(kmatch, SG);
+#else
       kmatch = warp_reduce_max(kmatch);
+#endif
 
       if (lane == 0)
       {
@@ -513,54 +733,64 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
       theta_i += read_only_load(rsW + row);
       theta_i = theta_i ? -1.0 / theta_i : -1.0;
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   theta_i = SG.shuffle(theta_i, 0);
+#else
    theta_i = __shfl_sync(HYPRE_WARP_FULL_MASK, theta_i, 0);
+#endif
 
-   for (HYPRE_Int j = ib_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < ie_diag);
-        j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = ib_diag + lane; j < ie_diag; j += HYPRE_WARP_SIZE)
    {
-      if (j < ie_diag)
-      {
-         AFF_diag_data[j] *= theta_i;
-      }
+      AFF_diag_data[j] *= theta_i;
    }
 
-   for (HYPRE_Int j = ib_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < ie_offd);
-        j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = ib_offd + lane; j < ie_offd; j += HYPRE_WARP_SIZE)
    {
-      if (j < ie_offd)
-      {
-         AFF_offd_data[j] *= theta_i;
-      }
+      AFF_offd_data[j] *= theta_i;
    }
 }
 
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
-                                          HYPRE_Int     *AFF_diag_i,
-                                          HYPRE_Int     *AFF_diag_j,
-                                          HYPRE_Complex *AFF_diag_data,
-                                          HYPRE_Int     *AFF_offd_i,
-                                          HYPRE_Int     *AFF_offd_j,
-                                          HYPRE_Complex *AFF_offd_data,
-                                          HYPRE_Int     *AFC_diag_i,
-                                          HYPRE_Complex *AFC_diag_data,
-                                          HYPRE_Int     *AFC_offd_i,
-                                          HYPRE_Complex *AFC_offd_data,
-                                          HYPRE_Complex *rsW,
-                                          HYPRE_Complex *dlam,
-                                          HYPRE_Complex *dtmp,
-                                          HYPRE_Complex *dtmp_offd )
+void hypreCUDAKernel_compute_aff_afc_epe( 
+#if defined(HYPRE_USING_SYCL)
+   sycl::nd_item<1>& item,
+#endif
+   HYPRE_Int      nr_of_rows,
+   HYPRE_Int     *AFF_diag_i,
+   HYPRE_Int     *AFF_diag_j,
+   HYPRE_Complex *AFF_diag_data,
+   HYPRE_Int     *AFF_offd_i,
+   HYPRE_Int     *AFF_offd_j,
+   HYPRE_Complex *AFF_offd_data,
+   HYPRE_Int     *AFC_diag_i,
+   HYPRE_Complex *AFC_diag_data,
+   HYPRE_Int     *AFC_offd_i,
+   HYPRE_Complex *AFC_offd_data,
+   HYPRE_Complex *rsW,
+   HYPRE_Complex *dlam,
+   HYPRE_Complex *dtmp,
+   HYPRE_Complex *dtmp_offd )
 {
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
+#else
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+#endif
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::sub_group SG = item.get_sub_group();
+   const HYPRE_Int lane = SG.get_local_linear_id();
+#else
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
    HYPRE_Int pd, qd, po, qo, xd, yd, xo, yo;
 
    HYPRE_Complex theta, value;
@@ -574,6 +804,17 @@ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
       xo = read_only_load(AFC_offd_i + row + lane);
    }
 
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   qd = SG.shuffle(pd, 1);
+   pd = SG.shuffle(pd, 0);
+   qo = SG.shuffle(po, 1);
+   po = SG.shuffle(po, 0);
+   yd = SG.shuffle(xd, 1);
+   xd = SG.shuffle(xd, 0);
+   yo = SG.shuffle(xo, 1);
+   xo = SG.shuffle(xo, 0);
+#else
    qd = __shfl_sync(HYPRE_WARP_FULL_MASK, pd, 1);
    pd = __shfl_sync(HYPRE_WARP_FULL_MASK, pd, 0);
    qo = __shfl_sync(HYPRE_WARP_FULL_MASK, po, 1);
@@ -582,31 +823,30 @@ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
    xd = __shfl_sync(HYPRE_WARP_FULL_MASK, xd, 0);
    yo = __shfl_sync(HYPRE_WARP_FULL_MASK, xo, 1);
    xo = __shfl_sync(HYPRE_WARP_FULL_MASK, xo, 0);
+#endif
 
    /* D_\tau */
    /* do not assume the first element is the diagonal */
-   for (HYPRE_Int j = pd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qd); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = pd + lane; j < qd; j += HYPRE_WARP_SIZE)
    {
-      if (j < qd)
+      const HYPRE_Int index = read_only_load(&AFF_diag_j[j]);
+      if (index != row)
       {
-         const HYPRE_Int index = read_only_load(&AFF_diag_j[j]);
-         if (index != row)
-         {
-            dtau_i += AFF_diag_data[j] * read_only_load(&dtmp[index]);
-         }
+         dtau_i += AFF_diag_data[j] * read_only_load(&dtmp[index]);
       }
    }
 
-   for (HYPRE_Int j = po + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qo); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = po + lane; j < qo; j += HYPRE_WARP_SIZE)
    {
-      if (j < qo)
-      {
-         const HYPRE_Int index = read_only_load(&AFF_offd_j[j]);
-         dtau_i += AFF_offd_data[j] * read_only_load(&dtmp_offd[index]);
-      }
+      const HYPRE_Int index = read_only_load(&AFF_offd_j[j]);
+      dtau_i += AFF_offd_data[j] * read_only_load(&dtmp_offd[index]);
    }
 
+#if defined(HYPRE_USING_SYCL)
+   dtau_i = warp_reduce_sum(dtau_i, SG);
+#else
    dtau_i = warp_reduce_sum(dtau_i);
+#endif
 
    if (lane == 0)
    {
@@ -616,103 +856,112 @@ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
       theta = read_only_load(&dlam[row]);
    }
 
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   value = SG.shuffle(value, 0);
+   theta = SG.shuffle(theta, 0);
+#else
    value = __shfl_sync(HYPRE_WARP_FULL_MASK, value, 0);
    theta = __shfl_sync(HYPRE_WARP_FULL_MASK, theta, 0);
+#endif
 
    /* AFF Diag part */
    // do not assume diag is the first element of row
-   for (HYPRE_Int j = pd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qd); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = pd + lane; j < qd; j += HYPRE_WARP_SIZE)
    {
-      if (j < qd)
+      if (read_only_load(&AFF_diag_j[j]) == row)
       {
-         if (read_only_load(&AFF_diag_j[j]) == row)
-         {
-            AFF_diag_data[j] = theta * value;
-         }
-         else
-         {
-            AFF_diag_data[j] *= value;
-         }
+         AFF_diag_data[j] = theta * value;
+      }
+      else
+      {
+         AFF_diag_data[j] *= value;
       }
    }
 
    /* AFF offd part */
-   for (HYPRE_Int j = po + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < qo); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = po + lane; j < qo; j += HYPRE_WARP_SIZE)
    {
-      if (j < qo)
-      {
-         AFF_offd_data[j] *= value;
-      }
+      AFF_offd_data[j] *= value;
    }
 
    theta = theta != 0.0 ? 1.0 / theta : 0.0;
 
    /* AFC Diag part */
-   for (HYPRE_Int j = xd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < yd); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = xd + lane; j < yd; j += HYPRE_WARP_SIZE)
    {
-      if (j < yd)
-      {
-         AFC_diag_data[j] *= theta;
-      }
+      AFC_diag_data[j] *= theta;
    }
 
    /* AFC offd part */
-   for (HYPRE_Int j = xo + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < yo); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = xo + lane; j < yo; j += HYPRE_WARP_SIZE)
    {
-      if (j < yo)
-      {
-         AFC_offd_data[j] *= theta;
-      }
+      AFC_offd_data[j] *= theta;
    }
 }
 
 //-----------------------------------------------------------------------
 // For Ext+e Interp, compute D_lambda and D_tmp = D_mu / D_lambda
 __global__
-void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
-                                        HYPRE_Int     *AFF_diag_i,
-                                        HYPRE_Int     *AFF_diag_j,
-                                        HYPRE_Complex *AFF_diag_data,
-                                        HYPRE_Int     *AFF_offd_i,
-                                        HYPRE_Complex *AFF_offd_data,
-                                        HYPRE_Complex *rsFC,
-                                        HYPRE_Complex *dlam,
-                                        HYPRE_Complex *dtmp )
+void hypreCUDAKernel_compute_dlam_dtmp(
+#if defined(HYPRE_USING_SYCL)
+   sycl::nd_item<1>& item,
+#endif
+   HYPRE_Int      nr_of_rows,
+   HYPRE_Int     *AFF_diag_i,
+   HYPRE_Int     *AFF_diag_j,
+   HYPRE_Complex *AFF_diag_data,
+   HYPRE_Int     *AFF_offd_i,
+   HYPRE_Complex *AFF_offd_data,
+   HYPRE_Complex *rsFC,
+   HYPRE_Complex *dlam,
+   HYPRE_Complex *dtmp )
 {
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
+#else
    HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+#endif
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
+#if defined(HYPRE_USING_SYCL)
+   sycl::sub_group SG = item.get_sub_group();
+   const HYPRE_Int lane = SG.get_local_linear_id();
+#else
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+#endif
    HYPRE_Int p_diag, p_offd, q_diag, q_offd;
 
    if (lane < 2)
    {
       p_diag = read_only_load(AFF_diag_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   q_diag = SG.shuffle(p_diag, 1);
+   p_diag = SG.shuffle(p_diag, 0);
+#else
    q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
    p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+#endif
 
    HYPRE_Complex row_sum = 0.0;
    HYPRE_Int find_diag = 0;
 
    /* do not assume the first element is the diagonal */
-   for (HYPRE_Int j = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag);
-        j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_diag + lane; j < q_diag; j += HYPRE_WARP_SIZE)
    {
-      if ( j < q_diag )
+      if (read_only_load(&AFF_diag_j[j]) == row)
       {
-         if (read_only_load(&AFF_diag_j[j]) == row)
-         {
-            find_diag ++;
-         }
-         else
-         {
-            row_sum += read_only_load(&AFF_diag_data[j]);
-         }
+         find_diag ++;
+      }
+      else
+      {
+         row_sum += read_only_load(&AFF_diag_data[j]);
       }
    }
 
@@ -720,20 +969,27 @@ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
    {
       p_offd = read_only_load(AFF_offd_i + row + lane);
    }
+#if defined(HYPRE_USING_SYCL)
+   SG.barrier();
+   q_offd = SG.shuffle(p_offd, 1);
+   p_offd = SG.shuffle(p_offd, 0);
+#else
    q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
    p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+#endif
 
-   for (HYPRE_Int j = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd);
-        j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
    {
-      if ( j < q_offd )
-      {
-         row_sum += read_only_load(&AFF_offd_data[j]);
-      }
+      row_sum += read_only_load(&AFF_offd_data[j]);
    }
 
+#if defined(HYPRE_USING_SYCL)
+   row_sum = warp_reduce_sum(row_sum, SG);
+   find_diag = warp_reduce_sum(find_diag, SG);
+#else
    row_sum = warp_reduce_sum(row_sum);
    find_diag = warp_reduce_sum(find_diag);
+#endif
 
    if (lane == 0)
    {
@@ -812,12 +1068,16 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Complex *new_end;
+#else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
                                                CF_marker,
                                                rsW,
                                                is_negative<HYPRE_Int>() );
+#endif
    hypre_assert(new_end - rsW == W_nr_of_rows);
    hypre_TFree(rsWA, HYPRE_MEMORY_DEVICE);
 
@@ -922,7 +1182,11 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);
+#else
    HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);
+#endif
 
    *P_ptr = P;
 
@@ -998,12 +1262,20 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
+                                               rsWA + A_nr_of_rows,
+                                               CF_marker,
+                                               rsW,
+                                               is_negative<HYPRE_Int>() );
+#else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
                                                CF_marker,
                                                rsW,
                                                is_negative<HYPRE_Int>() );
+#endif
    hypre_assert(new_end - rsW == W_nr_of_rows);
    hypre_TFree(rsWA, HYPRE_MEMORY_DEVICE);
 
@@ -1026,11 +1298,18 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                     rsFC,
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       rsFC,
                       send_buf );
+#endif
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, rsFC_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -1046,11 +1325,11 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *AFF_diag_data_old = hypre_TAlloc(HYPRE_Complex,
                                                    hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
                                                    HYPRE_MEMORY_DEVICE);
-   HYPRE_THRUST_CALL( copy,
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)) + hypre_CSRMatrixNumNonzeros(
-                         hypre_ParCSRMatrixDiag(AFF)),
-                      AFF_diag_data_old );
+   hypre_TMemcpy( AFF_diag_data_old,
+                  hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
+                  HYPRE_Complex,
+                  hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
+                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
@@ -1152,7 +1431,11 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);
+#else
    HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);
+#endif
 
    *P_ptr = P;
 
@@ -1227,12 +1510,20 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
+                                               rsWA + A_nr_of_rows,
+                                               CF_marker,
+                                               rsW,
+                                               is_negative<HYPRE_Int>() );
+#else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_of_rows,
                                                CF_marker,
                                                rsW,
                                                is_negative<HYPRE_Int>() );
+#endif
    hypre_assert(new_end - rsW == W_nr_of_rows);
    hypre_TFree(rsWA, HYPRE_MEMORY_DEVICE);
 
@@ -1273,11 +1564,18 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Int num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                     dtmp,
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       dtmp,
                       send_buf );
+#endif
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, dtmp_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -1387,7 +1685,11 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MatvecCommPkgCreate(P);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);
+#else
    HYPRE_THRUST_CALL( replace_if, CF_marker, CF_marker + A_nr_of_rows, equal<HYPRE_Int>(-3), -1);
+#endif
 
    *P_ptr = P;
 
@@ -1397,4 +1699,4 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

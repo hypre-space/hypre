@@ -9,7 +9,176 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
+/* WM: TODO */ 
+/* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_SYCL)
+
+typedef std::tuple<HYPRE_Int, HYPRE_Int> Tuple;
+
+/* transform from local F/C index to global F/C index,
+ * where F index "x" are saved as "-x-1"
+ */
+struct FFFC_functor
+{
+   HYPRE_BigInt CF_first[2];
+
+   FFFC_functor(HYPRE_BigInt F_first_, HYPRE_BigInt C_first_)
+   {
+      CF_first[1] = F_first_;
+      CF_first[0] = C_first_;
+   }
+
+   HYPRE_BigInt operator()(const Tuple& t) const
+   {
+      const HYPRE_Int local_idx = thrust::get<0>(t);
+      const HYPRE_Int cf_marker = thrust::get<1>(t);
+      const HYPRE_Int s = cf_marker < 0;
+      const HYPRE_Int m = 1 - 2 * s;
+      return m * (local_idx + CF_first[s] + s);
+   }
+};
+
+/* this predicate selects A^s_{FF} */
+template<typename T>
+struct FF_pred
+{
+   HYPRE_Int  option;
+   HYPRE_Int *row_CF_marker;
+   T         *col_CF_marker;
+
+   FF_pred(HYPRE_Int option_, HYPRE_Int *row_CF_marker_, T *col_CF_marker_)
+   {
+      option = option_;
+      row_CF_marker = row_CF_marker_;
+      col_CF_marker = col_CF_marker_;
+   }
+
+   constexpr bool operator()(const Tuple& t) const
+   {
+      const HYPRE_Int i = std::get<0>(t);
+      const HYPRE_Int j = std::get<1>(t);
+
+      if (option == 1)
+      {
+         /* A_{F,F} */
+         return row_CF_marker[i] <   0 && (j == -2 || j >= 0 && col_CF_marker[j] < 0);
+      }
+      else
+      {
+         /* A_{F2, F} */
+         return row_CF_marker[i] == -2 && (j == -2 || j >= 0 && col_CF_marker[j] < 0);
+      }
+   }
+};
+
+/* this predicate selects A^s_{FC} */
+template<typename T>
+struct FC_pred
+{
+   HYPRE_Int *row_CF_marker;
+   T         *col_CF_marker;
+
+   FC_pred(HYPRE_Int *row_CF_marker_, T *col_CF_marker_)
+   {
+      row_CF_marker = row_CF_marker_;
+      col_CF_marker = col_CF_marker_;
+   }
+
+   constexpr bool operator()(const Tuple& t) const
+   {
+      const HYPRE_Int i = std::get<0>(t);
+      const HYPRE_Int j = std::get<1>(t);
+
+      return row_CF_marker[i] < 0 && (j >= 0 && col_CF_marker[j] >= 0);
+   }
+};
+
+/* this predicate selects A^s_{CF} */
+template<typename T>
+struct CF_pred
+{
+   HYPRE_Int *row_CF_marker;
+   T         *col_CF_marker;
+
+   CF_pred(HYPRE_Int *row_CF_marker_, T *col_CF_marker_)
+   {
+      row_CF_marker = row_CF_marker_;
+      col_CF_marker = col_CF_marker_;
+   }
+
+   constexpr bool operator()(const Tuple& t) const
+   {
+      const HYPRE_Int i = std::get<0>(t);
+      const HYPRE_Int j = std::get<1>(t);
+
+      return row_CF_marker[i] >= 0 && (j >= 0 && col_CF_marker[j] < 0);
+   }
+};
+
+/* this predicate selects A^s_{CC} */
+template<typename T>
+struct CC_pred
+{
+   HYPRE_Int *row_CF_marker;
+   T         *col_CF_marker;
+
+   CC_pred(HYPRE_Int *row_CF_marker_, T *col_CF_marker_)
+   {
+      row_CF_marker = row_CF_marker_;
+      col_CF_marker = col_CF_marker_;
+   }
+
+   constexpr bool operator()(const Tuple& t) const
+   {
+      const HYPRE_Int i = std::get<0>(t);
+      const HYPRE_Int j = std::get<1>(t);
+
+      return row_CF_marker[i] >= 0 && (j == -2 || j >= 0 && col_CF_marker[j] >= 0);
+   }
+};
+
+/* this predicate selects A^s_{C,:} */
+struct CX_pred
+{
+   HYPRE_Int *row_CF_marker;
+
+   CX_pred(HYPRE_Int *row_CF_marker_)
+   {
+      row_CF_marker = row_CF_marker_;
+   }
+
+   constexpr bool operator()(const Tuple& t) const
+   {
+      const HYPRE_Int i = std::get<0>(t);
+      const HYPRE_Int j = std::get<1>(t);
+
+      return row_CF_marker[i] >= 0 && (j == -2 || j >= 0);
+   }
+};
+
+/* this predicate selects A^s_{:,C} */
+template<typename T>
+struct XC_pred
+{
+   T         *col_CF_marker;
+
+   XC_pred(T *col_CF_marker_)
+   {
+      col_CF_marker = col_CF_marker_;
+   }
+
+   constexpr bool operator()(const Tuple& t) const
+   {
+      const HYPRE_Int i = std::get<0>(t);
+      const HYPRE_Int j = std::get<1>(t);
+
+      return (j == -2 && col_CF_marker[i] >= 0) || (j >= 0 && col_CF_marker[j] >= 0);
+   }
+};
+
+#else
 
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
 //typedef thrust::tuple<HYPRE_Int, HYPRE_Int, HYPRe_Int> Tuple3;
@@ -182,6 +351,8 @@ struct XC_pred : public thrust::unary_function<Tuple, bool>
    }
 };
 
+#endif // #if defined(HYPRE_USING_SYCL)
+
 /* Option = 1:
  *    F is marked as -1, C is +1
  *    | AFF AFC |
@@ -268,10 +439,17 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    if (option == 2)
    {
+#if defined(HYPRE_USING_SYCL)
+      nF2_local = HYPRE_ONEDPL_CALL( std::count,
+                                     CF_marker,
+                                     CF_marker + n_local,
+                                     -2 );
+#else
       nF2_local = HYPRE_THRUST_CALL( count,
                                      CF_marker,
                                      CF_marker + n_local,
                                      -2 );
+#endif
 
       HYPRE_BigInt nF2_local_big = nF2_local;
 
@@ -1003,6 +1181,10 @@ hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
    return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, NULL,
                                                     ACC_ptr, 1);
 }
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,

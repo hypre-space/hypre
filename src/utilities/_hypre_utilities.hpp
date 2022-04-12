@@ -174,6 +174,28 @@ using dim3 = sycl::range<1>;
 #endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      device defined values
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_WARP_SIZE       64
+#define HYPRE_WARP_BITSHIFT   6
+#elif defined(HYPRE_USING_SYCL)
+#define HYPRE_WARP_SIZE       8
+#define HYPRE_WARP_BITSHIFT   3
+#endif
+
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
+#define HYPRE_FLT_LARGE       1e30
+#define HYPRE_1D_BLOCK_SIZE   512
+#define HYPRE_MAX_NUM_STREAMS 10
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *       macro for launching GPU kernels
  *       NOTE: IN HYPRE'S DEFAULT STREAM
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -361,25 +383,6 @@ using dim3 = sycl::range<1>;
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
            *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      device defined values
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       32
-#define HYPRE_WARP_BITSHIFT   5
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_WARP_SIZE       64
-#define HYPRE_WARP_BITSHIFT   6
-#endif
-
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
-#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
-#define HYPRE_FLT_LARGE       1e30
-#define HYPRE_1D_BLOCK_SIZE   512
-#define HYPRE_MAX_NUM_STREAMS 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device info data structures
@@ -1100,6 +1103,97 @@ hypre_int hypre_sycl_get_grid_warp_id(sycl::nd_item<>& item)
    return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
           item.get_sub_group().get_group_linear_id();
 }
+
+template <typename T>
+static __forceinline__
+T warp_reduce_sum(T in, sycl::sub_group& SG)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in += SG.shuffle_down(in, d);
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_sum(T in, sycl::sub_group& SG)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in += SG.shuffle_xor(in, d);
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_reduce_max(T in, sycl::sub_group& SG)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, SG.shuffle_down(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_max(T in, sycl::sub_group& SG)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, SG.shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_reduce_min(T in, sycl::sub_group& SG)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, SG.shuffle_down(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_min(T in, sycl::sub_group& SG)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, SG.shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template<typename T>
+struct is_negative
+{
+   is_negative() {}
+
+   constexpr bool operator()(const T &x) const { return (x < 0); }
+};
+
+template<typename T>
+struct is_positive
+{
+   is_positive() {}
+
+   constexpr bool operator()(const T &x) const { return (x < 0); }
+};
+
+template<typename T>
+struct is_nonnegative
+{
+   is_nonnegative() {}
+
+   constexpr bool operator()(const T &x) const { return (x < 0); }
+};
+
 template<typename T>
 struct in_range
 {
@@ -1107,6 +1201,42 @@ struct in_range
    in_range(T low_, T high_) { low = low_; high = high_; }
 
    constexpr bool operator()(const T &x) const { return (x >= low && x <= high); }
+};
+
+template<typename T>
+struct out_of_range
+{
+   T low, high;
+   out_of_range(T low_, T high_) { low = low_; high = high_; }
+
+   constexpr bool operator()(const T &x) const { return (x < low || x > high); }
+};
+
+template<typename T>
+struct less_than
+{
+   T val;
+   less_than(T val_) { val = val_; }
+
+   constexpr bool operator()(const T &x) const { return (x < val); }
+};
+
+template<typename T>
+struct modulo
+{
+   T val;
+   modulo(T val_) { val = val_; }
+
+   constexpr bool operator()(const T &x) const { return (x % val); }
+};
+
+template<typename T>
+struct equal
+{
+   T val;
+   equal(T val_) { val = val_; }
+
+   constexpr bool operator()(const T &x) const { return (x == val); }
 };
 
 template<typename... T>
@@ -1170,6 +1300,10 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *val
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
                                                                                         T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+
+template <typename T>
+HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
+
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1177,9 +1311,6 @@ template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByT
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
-
-template <typename T>
-HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);
