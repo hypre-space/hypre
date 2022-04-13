@@ -589,8 +589,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       AFF_diag_j  = hypre_TAlloc(HYPRE_Int,     AFF_diag_nnz, HYPRE_MEMORY_DEVICE);
       AFF_diag_a  = hypre_TAlloc(HYPRE_Complex, AFF_diag_nnz, HYPRE_MEMORY_DEVICE);
 
-      /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
 #if defined(HYPRE_USING_SYCL)
+      /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
       auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
                                         oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
                                         oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
@@ -610,42 +610,14 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         AFF_diag_ii );
 
       hypre_assert( std::get<0>(new_end.base()) == AFF_diag_ii + AFF_diag_nnz );
-
-      hypreSycl_gather( AFF_diag_j,
-                        AFF_diag_j + AFF_diag_nnz,
-                        map2FC,
-                        AFF_diag_j );
-
-      hypreSycl_gather( AFF_diag_ii,
-                        AFF_diag_ii + AFF_diag_nnz,
-                        option == 1 ? map2FC : map2F2,
-                        AFF_diag_ii );
 #else
+      /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
       auto new_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(AFF_diag_ii, AFF_diag_j, AFF_diag_a)),
                                         AFF_pred_diag );
-
-      hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AFF_diag_ii + AFF_diag_nnz );
-
-      HYPRE_THRUST_CALL ( gather,
-                          AFF_diag_j,
-                          AFF_diag_j + AFF_diag_nnz,
-                          map2FC,
-                          AFF_diag_j );
-
-      HYPRE_THRUST_CALL ( gather,
-                          AFF_diag_ii,
-                          AFF_diag_ii + AFF_diag_nnz,
-                          option == 1 ? map2FC : map2F2,
-                          AFF_diag_ii );
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(AFF_diag_ii, AFF_diag_j, AFF_diag_a)),
-                                   AFF_pred_diag );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AFF_diag_ii + AFF_diag_nnz );
 
@@ -749,7 +721,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AFF,
-                                                     [] (const auto & x) {return -x - 1;} );
+      [] (const auto & x) {return -x - 1;} );
       hypre_assert(tmp_end_big - col_map_offd_AFF == num_cols_AFF_offd);
 #else
       HYPRE_THRUST_CALL( sort,
@@ -975,7 +947,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AFC,
-                                                     [] (const auto & x) {return x;});
+      [] (const auto & x) {return x;});
 #else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
@@ -1201,7 +1173,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACF,
-                                                     [] (const auto & x) {return -x - 1;} );
+      [] (const auto & x) {return -x - 1;} );
 #else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
@@ -1428,7 +1400,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACC,
-                                                     [] (const auto & x) {return x;} );
+      [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
