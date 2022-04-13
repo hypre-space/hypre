@@ -12,7 +12,7 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 __global__ void
-hypreCUDAKernel_InterpTruncation( 
+hypreCUDAKernel_InterpTruncation(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
@@ -41,7 +41,7 @@ hypreCUDAKernel_InterpTruncation(
 #else
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
 #endif
-   HYPRE_Int p,q;
+   HYPRE_Int p, q;
 
    /* 1. compute row max, rowsum */
    if (lane < 2)
@@ -182,7 +182,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    /* offd col id := -2 - offd col id */
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL(std::transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag,
-                     [] (const auto & x) {return -x - 2;} );
+   [] (const auto & x) {return -x - 2;} );
 #else
    HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag, -_1 - 2);
 #endif
@@ -256,7 +256,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
 
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL(std::transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j,
-                        [] (const auto & x) {return -x - 2;} );
+      [] (const auto & x) {return -x - 2;} );
 #else
       HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j, -_1 - 2);
 #endif

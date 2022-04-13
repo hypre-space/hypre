@@ -20,7 +20,7 @@
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
 __global__ void
-hypreCUDAKernel_compute_weak_rowsums( 
+hypreCUDAKernel_compute_weak_rowsums(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
@@ -127,7 +127,7 @@ hypreCUDAKernel_compute_weak_rowsums(
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc( 
+void hypreCUDAKernel_compute_aff_afc(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
@@ -426,7 +426,8 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
       HYPRE_ONEDPL_CALL( std::copy,
                          oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
                          oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data) + W_diag_nnz,
-                         oneapi::dpl::make_permutation_iterator(oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data), shift) );
+                         oneapi::dpl::make_permutation_iterator(oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data),
+                                                                shift) );
    }
 #else
    HYPRE_THRUST_CALL( transform,
@@ -489,7 +490,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 //-----------------------------------------------------------------------
 // For Ext+i Interp, scale AFF from the left and the right
 __global__
-void hypreCUDAKernel_compute_twiaff_w( 
+void hypreCUDAKernel_compute_twiaff_w(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
@@ -754,7 +755,7 @@ void hypreCUDAKernel_compute_twiaff_w(
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc_epe( 
+void hypreCUDAKernel_compute_aff_afc_epe(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif

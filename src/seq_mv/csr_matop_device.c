@@ -903,7 +903,7 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
  */
 template<HYPRE_Int type>
 __global__ void
-hypreCUDAKernel_CSRRowSum( 
+hypreCUDAKernel_CSRRowSum(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
@@ -1130,7 +1130,7 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
 
    auto zipped_begin = oneapi::dpl::make_zip_iterator(Cii, Cjj, idx);
    HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + nnzA + nnzB,
-                      [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( sequence, idx, idx + nnzA + nnzB );
 

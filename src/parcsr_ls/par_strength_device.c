@@ -554,7 +554,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
 #if defined(HYPRE_USING_SYCL)
    tmp = HYPRE_ONEDPL_CALL(std::copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j,
-                            is_nonnegative<HYPRE_Int>());
+                           is_nonnegative<HYPRE_Int>());
 #else
    tmp = HYPRE_THRUST_CALL(copy_if, S_temp_diag_j, S_temp_diag_j + num_nonzeros_diag, S_diag_j,
                            is_nonnegative<HYPRE_Int>());
@@ -564,7 +564,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
 #if defined(HYPRE_USING_SYCL)
    tmp = HYPRE_ONEDPL_CALL(std::copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j,
-                            is_nonnegative<HYPRE_Int>());
+                           is_nonnegative<HYPRE_Int>());
 #else
    tmp = HYPRE_THRUST_CALL(copy_if, S_temp_offd_j, S_temp_offd_j + num_nonzeros_offd, S_offd_j,
                            is_nonnegative<HYPRE_Int>());
@@ -744,12 +744,13 @@ hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray 
                       1 );
 
    /* update values in CF_marker to -2 wherever new_CF_marker == -1 */
-   hypreSycl_transform_if( oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices),
+   hypreSycl_transform_if( oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker),
+                                                                  indices),
                            oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices) + n_coarse,
                            hypre_IntArrayData(new_CF_marker),
                            oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker), indices),
-                           [] (const auto & x) { return -2; },
-                           equal<HYPRE_Int>(-1) );
+   [] (const auto & x) { return -2; },
+   equal<HYPRE_Int>(-1) );
 #else
    /* save C point indices */
    HYPRE_THRUST_CALL( copy_if,
