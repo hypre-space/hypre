@@ -195,18 +195,22 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int               lane_id,
 
    /* copy shared memory hash table into C */
 //#pragma unroll UNROLL_FACTOR
-   for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
-   {
-      HYPRE_Int sum;
-      HYPRE_Int key = s_HashKeys ? s_HashKeys[k] : -1;
-      HYPRE_Int pos = group_prefix_sum<HYPRE_Int, STEP_SIZE>(lane_id, (HYPRE_Int) (key != -1), sum);
 
-      if (key != -1)
+   if (__any_sync(HYPRE_WARP_FULL_MASK, s_HashKeys != NULL))
+   {
+      for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
       {
-         jc_start[j + pos] = key;
-         ac_start[j + pos] = s_HashVals[k];
+         HYPRE_Int sum;
+         HYPRE_Int key = s_HashKeys ? s_HashKeys[k] : -1;
+         HYPRE_Int pos = group_prefix_sum<HYPRE_Int, STEP_SIZE>(lane_id, (HYPRE_Int) (key != -1), sum);
+
+         if (key != -1)
+         {
+            jc_start[j + pos] = key;
+            ac_start[j + pos] = s_HashVals[k];
+         }
+         j += sum;
       }
-      j += sum;
    }
 
    if (HAS_GHASH)
@@ -373,9 +377,10 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
       {
          jsum = hypre_spgemm_copy_from_hash_into_C_row<GROUP_SIZE, SHMEM_HASH_SIZE, HAS_GHASH, UNROLL_FACTOR>
                 (lane_id,
-                 GROUP_SIZE >= HYPRE_WARP_SIZE || i < M ? group_s_HashKeys : NULL,
+                 (iend_a > istart_a + 1) && (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M) ? group_s_HashKeys : NULL,
                  group_s_HashVals,
-                 ghash_size, jg + istart_g, ag + istart_g,
+                 ghash_size,
+                 jg + istart_g, ag + istart_g,
                  jc + istart_c, ac + istart_c);
 
 #if defined(HYPRE_DEBUG)
