@@ -65,7 +65,6 @@ struct hypre_device_allocator
 #ifndef HYPRE_DEVICE_UTILS_H
 #define HYPRE_DEVICE_UTILS_H
 
-/* WM: Q - do we need this macro gaurd? Where should it be placed? */
 #if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -153,7 +152,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* WM: Q - is this the best way to deal with dim3 vs. sycl::range? */
+/* The following definitions facilitate code reuse and limits 
+ * if/def-ing when unifying cuda/hip code with sycl code */
 using dim3 = sycl::range<1>;
 #define __global__
 #define __host__
@@ -172,6 +172,28 @@ using dim3 = sycl::range<1>;
 #include <oneapi/mkl/rng.hpp>
 #endif
 #endif // defined(HYPRE_USING_SYCL)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      device defined values
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_WARP_SIZE       64
+#define HYPRE_WARP_BITSHIFT   6
+#elif defined(HYPRE_USING_SYCL)
+#define HYPRE_WARP_SIZE       8
+#define HYPRE_WARP_BITSHIFT   3
+#endif
+
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
+#define HYPRE_FLT_LARGE       1e30
+#define HYPRE_1D_BLOCK_SIZE   512
+#define HYPRE_MAX_NUM_STREAMS 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *       macro for launching GPU kernels
@@ -292,7 +314,6 @@ using dim3 = sycl::range<1>;
  *      macros for wrapping vendor library calls for error reporting
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-/* WM: Q - any need to macro guard these definitions? */
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
@@ -361,25 +382,6 @@ using dim3 = sycl::range<1>;
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
            *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #endif
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      device defined values
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       32
-#define HYPRE_WARP_BITSHIFT   5
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_WARP_SIZE       64
-#define HYPRE_WARP_BITSHIFT   6
-#endif
-
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
-#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
-#define HYPRE_FLT_LARGE       1e30
-#define HYPRE_1D_BLOCK_SIZE   512
-#define HYPRE_MAX_NUM_STREAMS 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device info data structures
@@ -1088,7 +1090,7 @@ struct print_functor
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: sycl functions
+ *      sycl functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
@@ -1152,7 +1154,7 @@ struct TupleComp3
 #endif // #if defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: end of functions defined here
+ *      end of functions defined here
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 /* device_utils.c */

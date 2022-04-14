@@ -922,7 +922,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 {
    hypre_CSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
                                                       hypre_CSRMatrixMemoryLocation(B) );
 

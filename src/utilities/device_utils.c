@@ -573,7 +573,6 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                                    HYPRE_Int *d_row_ptr)
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: onedpl lower_bound currently does not accept zero length input */
    if (nnz <= 0 || nrows <= 0)
    {
       return hypre_error_flag;
@@ -1007,97 +1006,6 @@ void hypre_CudaCompileFlagCheck()
    }
 
 #endif // defined(HYPRE_USING_CUDA)
-}
-
-__global__ void
-hypreCUDAKernel_CopyParCSRRows(HYPRE_Int      nrows,
-                               HYPRE_Int     *d_row_indices,
-                               HYPRE_Int      has_offd,
-                               HYPRE_BigInt   first_col,
-                               HYPRE_BigInt  *d_col_map_offd_A,
-                               HYPRE_Int     *d_diag_i,
-                               HYPRE_Int     *d_diag_j,
-                               HYPRE_Complex *d_diag_a,
-                               HYPRE_Int     *d_offd_i,
-                               HYPRE_Int     *d_offd_j,
-                               HYPRE_Complex *d_offd_a,
-                               HYPRE_Int     *d_ib,
-                               HYPRE_BigInt  *d_jb,
-                               HYPRE_Complex *d_ab)
-{
-   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
-
-   if (global_warp_id >= nrows)
-   {
-      return;
-   }
-
-   /* lane id inside the warp */
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int i, j, k, p, row, istart, iend, bstart;
-
-   /* diag part */
-   if (lane_id < 2)
-   {
-      /* row index to work on */
-      if (d_row_indices)
-      {
-         row = read_only_load(d_row_indices + global_warp_id);
-      }
-      else
-      {
-         row = global_warp_id;
-      }
-      /* start/end position of the row */
-      j = read_only_load(d_diag_i + row + lane_id);
-      /* start position of b */
-      k = d_ib ? read_only_load(d_ib + global_warp_id) : 0;
-   }
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-   bstart = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
-
-   p = bstart - istart;
-   for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
-   {
-      d_jb[p + i] = read_only_load(d_diag_j + i) + first_col;
-      if (d_ab)
-      {
-         d_ab[p + i] = read_only_load(d_diag_a + i);
-      }
-   }
-
-   if (!has_offd)
-   {
-      return;
-   }
-
-   /* offd part */
-   if (lane_id < 2)
-   {
-      j = read_only_load(d_offd_i + row + lane_id);
-   }
-   bstart += iend - istart;
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-
-   p = bstart - istart;
-   for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
-   {
-      if (d_col_map_offd_A)
-      {
-         d_jb[p + i] = d_col_map_offd_A[read_only_load(d_offd_j + i)];
-      }
-      else
-      {
-         d_jb[p + i] = -1 - read_only_load(d_offd_j + i);
-      }
-
-      if (d_ab)
-      {
-         d_ab[p + i] = read_only_load(d_offd_a + i);
-      }
-   }
 }
 
 HYPRE_Int
