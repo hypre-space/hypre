@@ -101,6 +101,9 @@ void
 hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
                                 HYPRE_Int               iend_a,
                                 HYPRE_Int               istart_c,
+#if defined(HYPRE_DEBUG)
+                                HYPRE_Int               iend_c,
+#endif
                                 const    HYPRE_Int     *ja,
                                 const    HYPRE_Complex *aa,
                                 const    HYPRE_Int     *ib,
@@ -145,6 +148,10 @@ hypre_spgemm_compute_row_numer( HYPRE_Int               istart_a,
       }
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
       const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
+
+#if defined(HYPRE_DEBUG)
+      if (IA1) { hypre_device_assert(rowB == -1 || rowB_end - rowB_start == iend_c - istart_c); }
+#endif
 
       for (HYPRE_Int k = rowB_start + threadIdx.x; __any_sync(HYPRE_WARP_FULL_MASK, k < rowB_end);
            k += blockDim.x)
@@ -354,13 +361,21 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
       if (iend_a == istart_a + 1)
       {
          hypre_spgemm_compute_row_numer<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, true, UNROLL_FACTOR>
-            (istart_a, iend_a, istart_c, ja, aa, ib, jb, ab, jc, ac, group_s_HashKeys, group_s_HashVals, ghash_size,
+            (istart_a, iend_a, istart_c,
+#if defined(HYPRE_DEBUG)
+             iend_c,
+#endif
+             ja, aa, ib, jb, ab, jc, ac, group_s_HashKeys, group_s_HashVals, ghash_size,
              jg + istart_g, ag + istart_g);
       }
       else
       {
          hypre_spgemm_compute_row_numer<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, false, UNROLL_FACTOR>
-            (istart_a, iend_a, istart_c, ja, aa, ib, jb, ab, jc, ac, group_s_HashKeys, group_s_HashVals, ghash_size,
+            (istart_a, iend_a, istart_c,
+#if defined(HYPRE_DEBUG)
+             iend_c,
+#endif
+             ja, aa, ib, jb, ab, jc, ac, group_s_HashKeys, group_s_HashVals, ghash_size,
              jg + istart_g, ag + istart_g);
       }
 
@@ -384,13 +399,16 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
                  jc + istart_c, ac + istart_c);
 
 #if defined(HYPRE_DEBUG)
-         if (FAILED_SYMBL)
+         if (iend_a != istart_a + 1)
          {
-            hypre_device_assert(istart_c + jsum <= iend_c);
-         }
-         else
-         {
-            hypre_device_assert(istart_c + jsum == iend_c);
+            if (FAILED_SYMBL)
+            {
+               hypre_device_assert(istart_c + jsum <= iend_c);
+            }
+            else
+            {
+               hypre_device_assert(istart_c + jsum == iend_c);
+            }
          }
 #endif
       }
