@@ -1134,7 +1134,7 @@ struct is_nonnegative
 {
    is_nonnegative() {}
 
-   constexpr bool operator()(const T &x) const { return (x < 0); }
+   constexpr bool operator()(const T &x) const { return (x >= 0); }
 };
 
 template<typename T>

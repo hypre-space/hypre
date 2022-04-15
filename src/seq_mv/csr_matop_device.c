@@ -546,9 +546,12 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( std::sort,
-                      col_map_offd_C,
-                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   /* WM: todo - swap for the oneDPL version of sort... this is currently this way in order 
+    * to avoid a linking error caused by a bug in oneAPI that should go away soon */
+   std::sort( col_map_offd_C, col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   /* HYPRE_ONEDPL_CALL( std::sort, */
+   /*                    col_map_offd_C, */
+   /*                    col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B ); */
 
    HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique,
                                               col_map_offd_C,
@@ -1002,6 +1005,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
                                     HYPRE_Complex    scal,
                                     const char      *set_or_add)
 {
+   hypre_printf("WM: debug - inside hypre_CSRMatrixComputeRowSumDevice()\n");
    HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
@@ -1027,6 +1031,7 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
    }
 
    hypre_SyncComputeStream(hypre_handle());
+   hypre_printf("WM: debug - finished hypre_CSRMatrixComputeRowSumDevice()\n");
 }
 
 /* mark is of size nA

@@ -9,6 +9,491 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
+/* WM: debug */
+HYPRE_Int hypre_ParCSRCommPkgPrint(hypre_ParCSRCommPkg *comm_pkg, const char *filename);
+HYPRE_Int hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name);
+HYPRE_Int hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *name);
+HYPRE_Int hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayCSRMatrix(hypre_CSRMatrix *A, HYPRE_Int max_display_size, const char *name);
+HYPRE_Int hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name);
+HYPRE_Int hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B);
+HYPRE_Int hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB);
+
+HYPRE_Int
+hypre_ParCSRCommPkgPrint(hypre_ParCSRCommPkg *comm_pkg, const char *filename)
+{
+   FILE *file;
+   if ((file = fopen(filename, "w")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int i;
+
+   HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int *send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+   HYPRE_Int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   HYPRE_Int num_send_elmts = send_map_starts[num_sends];
+   HYPRE_Int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+   HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   HYPRE_Int *recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+   HYPRE_Int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   HYPRE_Int num_recv_elmts = recv_vec_starts[num_recvs];
+
+   hypre_fprintf(file, "%d %d %d %d\n", num_sends, num_recvs, num_send_elmts, num_recv_elmts);
+
+   for (i = 0; i < num_sends; i++)
+   {
+      hypre_fprintf(file, "%d ", send_procs[i]);
+   }
+   hypre_fprintf(file, "\n");
+
+   for (i = 0; i < num_sends + 1; i++)
+   {
+      hypre_fprintf(file, "%d ", send_map_starts[i]);
+   }
+   hypre_fprintf(file, "\n");
+
+   for (i = 0; i < num_send_elmts; i++)
+   {
+      hypre_fprintf(file, "%d ", send_map_elmts[i]);
+   }
+   hypre_fprintf(file, "\n");
+
+   for (i = 0; i < num_recvs; i++)
+   {
+      hypre_fprintf(file, "%d ", recv_procs[i]);
+   }
+   hypre_fprintf(file, "\n");
+
+   for (i = 0; i < num_recvs + 1; i++)
+   {
+      hypre_fprintf(file, "%d ", recv_vec_starts[i]);
+   }
+   hypre_fprintf(file, "\n");
+
+   fclose(file);
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name)
+{
+   if (row >= hypre_CSRMatrixNumRows(A)) return 0;
+
+   HYPRE_Int i;
+   hypre_CSRMatrix *mat;
+   hypre_MemoryLocation memory_location;
+
+   // Copy to host if necessary
+   hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      mat = hypre_CSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      mat = A;
+   }
+   
+   // Print row 
+   hypre_printf("%s_diag row %d\nj = ", name, row);
+   for (i = hypre_CSRMatrixI(mat)[row]; i < hypre_CSRMatrixI(mat)[row+1]; i++) {
+      hypre_printf("%d ", hypre_CSRMatrixJ(mat)[i]);
+   }
+   hypre_printf("\ndata = ");
+   for (i = hypre_CSRMatrixI(mat)[row]; i < hypre_CSRMatrixI(mat)[row+1]; i++)
+   {
+      hypre_printf("%.2e ", hypre_CSRMatrixData(mat)[i]);
+   }
+   hypre_printf("\n");
+   
+   // Destroy copy if necessary
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(mat);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *name)
+{
+   char csrName[256];
+
+   strcpy(csrName, name);
+   strcat(csrName, "_diag");
+   
+   hypre_DisplayCSRMatrixRow(hypre_ParCSRMatrixDiag(A), row, csrName);
+
+   strcpy(csrName, name);
+   strcat(csrName, "_offd");
+   
+   hypre_DisplayCSRMatrixRow(hypre_ParCSRMatrixOffd(A), row, csrName);
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name)
+{
+
+   HYPRE_Int *disp_array;
+   hypre_MemoryLocation memory_location;
+   hypre_GetPointerLocation(array, &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_array = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(disp_array, array, HYPRE_Int, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      disp_array = array;
+   }
+   hypre_printf("%s = ", name);
+   HYPRE_Int i;
+   for (i = 0; i < hypre_min(size, display_size); i++)
+   {
+      hypre_printf("%d ", disp_array[i]);
+   }
+   hypre_printf("\n");
+
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_TFree(disp_array, HYPRE_MEMORY_HOST);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name)
+{
+
+   HYPRE_Complex *disp_array;
+   hypre_MemoryLocation memory_location;
+   hypre_GetPointerLocation(array, &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_array = hypre_TAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(disp_array, array, HYPRE_Complex, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      disp_array = array;
+   }
+   hypre_printf("%s = ", name);
+   HYPRE_Int i;
+   for (i = 0; i < hypre_min(size, display_size); i++)
+   {
+      hypre_printf("%.2e ", disp_array[i]);
+   }
+   hypre_printf("\n");
+
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_TFree(disp_array, HYPRE_MEMORY_HOST);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayCSRMatrix(hypre_CSRMatrix *A, HYPRE_Int max_display_size, const char *name)
+{
+
+   HYPRE_Int i;
+   hypre_CSRMatrix *disp_mat;
+   hypre_MemoryLocation memory_location;
+
+   // Copy to host if necessary
+   hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_mat = hypre_CSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      disp_mat = A;
+   }
+
+   // Print info
+   hypre_printf("\n");
+   hypre_printf("%s: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_i = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_j = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_data = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+
+   // Destroy host copy if necessary
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(disp_mat);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name)
+{
+
+   HYPRE_Int i;
+   hypre_CSRMatrix *disp_mat;
+   hypre_MemoryLocation memory_location;
+
+   // Diag part
+
+   // Copy to host if necessary
+   hypre_GetPointerLocation(hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A)), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_mat = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      disp_mat = hypre_ParCSRMatrixDiag(A);
+   }
+
+   // Print info
+   hypre_printf("\n");
+   hypre_printf("%s_diag: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_diag_i = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag_j = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_diag_data = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+
+   // Destroy host copy if necessary
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(disp_mat);
+   }
+
+   // Offd part
+
+   // Copy to host if necessary
+   hypre_GetPointerLocation(hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A)), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      disp_mat = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      disp_mat = hypre_ParCSRMatrixOffd(A);
+   }
+
+   // Print info
+   hypre_printf("%s_offd: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_offd_i = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixI(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_offd_j = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%d ", hypre_CSRMatrixJ(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+   hypre_printf("%s_offd_data = ", name);
+   for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumNonzeros(disp_mat)); i++)
+   {
+      hypre_printf("%.2e ", hypre_CSRMatrixData(disp_mat)[i]);
+   }
+   hypre_printf("\n");
+
+   // Destroy host copy if necessary
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(disp_mat);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B)
+{
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   HYPRE_Int i, j, k, col, found;
+   HYPRE_Int equal = 1;
+   hypre_CSRMatrix *A_host, *B_host;
+   hypre_MemoryLocation memory_location;
+
+   // Get matrices
+   hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      A_host = hypre_CSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      A_host = A;
+   }
+   hypre_GetPointerLocation(hypre_CSRMatrixI(B), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      B_host = hypre_CSRMatrixClone_v2(B, 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      B_host = B;
+   }
+
+   // Compare matrices
+   if (hypre_CSRMatrixNumRows(A_host) != hypre_CSRMatrixNumRows(B_host))
+   {
+      hypre_printf("Rank %d: %s num rows = %d, %s num rows = %d\n", myid,  nameA, hypre_CSRMatrixNumRows(A_host), nameB, hypre_CSRMatrixNumRows(B_host));
+      equal = 0;
+   }
+   if (col_map_offd_A == NULL)
+   {
+      if (hypre_CSRMatrixNumCols(A_host) != hypre_CSRMatrixNumCols(B_host))
+      {
+         hypre_printf("Rank %d: %s num cols = %d, %s num cols = %d\n", myid,  nameA, hypre_CSRMatrixNumCols(A_host), nameB, hypre_CSRMatrixNumCols(B_host));
+         equal = 0;
+      }
+   }
+   if (hypre_CSRMatrixNumNonzeros(A_host) != hypre_CSRMatrixNumNonzeros(B_host))
+   {
+      hypre_printf("Rank %d: %s nnz = %d, %snnz = %d\n", myid,  nameA, hypre_CSRMatrixNumNonzeros(A_host), nameB, hypre_CSRMatrixNumNonzeros(B_host));
+      equal = 0;
+   }
+   if (equal)
+   {
+      for (i = 0; i < hypre_CSRMatrixNumRows(A_host) + 1; i++)
+      {
+         if (hypre_CSRMatrixI(A_host)[i] != hypre_CSRMatrixI(B_host)[i])
+         {
+            hypre_printf("Rank %d: %s_i[%d] = %d, %s_i[%d] = %d\n", myid,  nameA, i, hypre_CSRMatrixI(A_host)[i], nameB, i, hypre_CSRMatrixI(B_host)[i]);
+            equal = 0;
+         }
+      }
+      for (i = 0; i < hypre_CSRMatrixNumRows(A_host); i++)
+      {
+         for (j = hypre_CSRMatrixI(A_host)[i]; j < hypre_CSRMatrixI(A_host)[i+1]; j++)
+         {
+            col = hypre_CSRMatrixJ(A_host)[j];
+            if (col_map_offd_A) col = col_map_offd_A[col];
+            found = 0;
+            for (k = hypre_CSRMatrixI(B_host)[i]; k < hypre_CSRMatrixI(B_host)[i+1]; k++)
+            {
+               HYPRE_Int colB = hypre_CSRMatrixJ(B_host)[k];
+               if (col_map_offd_B) colB = col_map_offd_B[colB];
+               if (col == colB)
+               {
+                  found = 1;
+                  break;
+               }
+            }
+            if (found)
+            {
+               HYPRE_Real diff = hypre_cabs(hypre_CSRMatrixData(A_host)[j] - hypre_CSRMatrixData(B_host)[k]);
+               HYPRE_Real rel_diff = diff / hypre_cabs(hypre_CSRMatrixData(A_host)[j]);
+               if ( rel_diff > 0.01)
+               /* if ( diff > 0.000001 ) */
+               {
+                  hypre_printf("Rank %d: col = %d, rel_diff = %.2e, diff = %.2e, %s_data = %.2e, %s_data = %.2e\n", myid, col, rel_diff, diff, nameA, hypre_CSRMatrixData(A_host)[j], nameB, hypre_CSRMatrixData(B_host)[k]);
+                  equal = 0;
+                  break;
+               }
+            }
+            else
+            {
+               hypre_printf("Rank %d: %s_j = %d not found in %s\n", myid,  nameA, col, nameB);
+               equal = 0;
+               break;
+            }
+         }
+         if (!equal)
+         {
+            hypre_printf("row %i does not agree:\n");
+            hypre_DisplayCSRMatrixRow(A, i, nameA);
+            hypre_DisplayCSRMatrixRow(B, i, nameB);
+            break;
+         }
+      }
+   }
+
+   // Destroy copies if necessary
+   hypre_GetPointerLocation(hypre_CSRMatrixI(A), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(A_host);
+   }
+   hypre_GetPointerLocation(hypre_CSRMatrixI(B), &memory_location);
+   if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
+   {
+      hypre_CSRMatrixDestroy(B_host);
+   }
+
+   return equal;
+}
+
+HYPRE_Int
+hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB)
+{
+
+   HYPRE_Int equal;
+   char csrNameA[256];
+   char csrNameB[256];
+
+   strcpy(csrNameA, nameA);
+   strcat(csrNameA, "_diag");
+   strcpy(csrNameB, nameB);
+   strcat(csrNameB, "_diag");
+   
+   equal = hypre_CompareCSRMatrix(hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B), csrNameA, csrNameB, NULL, NULL);
+
+   if (equal)
+   {
+      strcpy(csrNameA, nameA);
+      strcat(csrNameA, "_offd");
+      strcpy(csrNameB, nameB);
+      strcat(csrNameB, "_offd");
+
+      equal = hypre_CompareCSRMatrix(hypre_ParCSRMatrixOffd(A), hypre_ParCSRMatrixOffd(B), csrNameA, csrNameB, hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixColMapOffd(B));
+   }
+
+   return equal;
+}
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /*-----------------------------------------------------------------------*/
@@ -405,6 +890,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                              HYPRE_Int             *dof_func,
                              hypre_ParCSRMatrix   **S_ptr)
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGCreateSDevice()\n");
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
 #endif
@@ -597,6 +1083,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_ParCSRMatrixSocOffdJ(S) = S_temp_offd_j;
 
    *S_ptr = S;
+   hypre_ParCSRMatrixPrint(S, "S");
 
    hypre_TFree(dof_func_offd_dev, HYPRE_MEMORY_DEVICE);
    /*
@@ -608,6 +1095,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
 #endif
 
+   hypre_printf("WM: debug - finished hypre_BoomerAMGCreateSDevice()\n");
    return (ierr);
 }
 
@@ -616,6 +1104,7 @@ HYPRE_Int
 hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
                                    hypre_ParCSRMatrix *S)
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGMakeSocFromSDevice()\n");
    if (!hypre_ParCSRMatrixSocDiagJ(S))
    {
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -636,6 +1125,7 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixSocOffdJ(S) = soc_offd;
    }
 
+   hypre_printf("WM: debug - finished hypre_BoomerAMGMakeSocFromSDevice()\n");
    return hypre_error_flag;
 }
 
@@ -645,6 +1135,7 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 HYPRE_Int
 hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGCorrectCFMarkerDevice()\n");
 
    HYPRE_Int n_fine     = hypre_IntArraySize(CF_marker);
    HYPRE_Int n_coarse   = hypre_IntArraySize(new_CF_marker);
@@ -713,6 +1204,7 @@ hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *
    hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_C, HYPRE_MEMORY_DEVICE);
 
+   hypre_printf("WM: debug - finished hypre_BoomerAMGCorrectCFMarkerDevice()\n");
    return 0;
 }
 /*--------------------------------------------------------------------------
@@ -722,6 +1214,7 @@ hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *
 HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGCorrectCFMarker2Device()\n");
 
    HYPRE_Int n_fine     = hypre_IntArraySize(CF_marker);
    HYPRE_Int n_coarse   = hypre_IntArraySize(new_CF_marker);
@@ -779,6 +1272,7 @@ hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray 
 
    hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
 
+   hypre_printf("WM: debug - finished hypre_BoomerAMGCorrectCFMarker2Device()\n");
    return 0;
 }
 
