@@ -910,7 +910,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
    /* WM: onedpl reduce_by_segment currently does not accept zero length input */
    if (N <= 0)
    {
-      return hypre_error_flag;
+      return 0;
    }
    auto begin_keys_in  = oneapi::dpl::make_zip_iterator(keys1_in,  keys2_in );
    auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out, keys2_out);

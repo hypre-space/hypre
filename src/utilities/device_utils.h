@@ -95,7 +95,7 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* The following definitions facilitate code reuse and limits 
+/* The following definitions facilitate code reuse and limits
  * if/def-ing when unifying cuda/hip code with sycl code */
 using dim3 = sycl::range<1>;
 #define __global__
