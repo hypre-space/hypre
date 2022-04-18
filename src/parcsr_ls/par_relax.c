@@ -643,7 +643,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    HYPRE_Int           *A_offd_j      = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int            num_rows      = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int            num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
    hypre_Vector        *u_local       = hypre_ParVectorLocalVector(u);
    HYPRE_Complex       *u_data        = hypre_VectorData(u_local);
    hypre_Vector        *f_local       = hypre_ParVectorLocalVector(f);
@@ -660,8 +659,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 
    const HYPRE_Real     one_minus_omega  = 1.0 - omega;
    HYPRE_Int            num_procs, my_id, num_threads, j, num_sends;
-
-   hypre_ParCSRCommHandle *comm_handle;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -708,6 +705,8 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
       v_buf_data = (HYPRE_Real *) hypre_ParCSRCommHandleSendDataBuffer(persistent_comm_handle);
       v_ext_data  = (HYPRE_Real *) hypre_ParCSRCommHandleRecvDataBuffer(persistent_comm_handle);
 #else
+      HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+
       v_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                  HYPRE_MEMORY_HOST);
       v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
@@ -731,6 +730,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_PERSISTENT_COMM)
       hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, v_buf_data);
 #else
+      hypre_ParCSRCommHandle *comm_handle;
       comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, v_ext_data);
 #endif
 
@@ -739,7 +739,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #else
       hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
-      comm_handle = NULL;
 
 #ifdef HYPRE_PROFILE
       hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
@@ -1717,4 +1716,3 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-
