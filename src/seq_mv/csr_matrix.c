@@ -195,14 +195,22 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
                                                          old_num_nonzeros, HYPRE_Complex, new_num_nonzeros, memory_location);
       }
 
-      if (!hypre_CSRMatrixJ(matrix))
+      if (hypre_CSRMatrixBigJ(matrix))
       {
-         hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_nonzeros, memory_location);
+         hypre_CSRMatrixBigJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixBigJ(matrix), HYPRE_BigInt, old_num_nonzeros,
+                                                         HYPRE_BigInt, new_num_nonzeros, memory_location);
       }
       else
       {
-         hypre_CSRMatrixJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixJ(matrix), HYPRE_Int, old_num_nonzeros,
-                                                      HYPRE_Int, new_num_nonzeros, memory_location);
+          if (!hypre_CSRMatrixJ(matrix))
+          {
+             hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_nonzeros, memory_location);
+          }
+          else
+          {
+             hypre_CSRMatrixJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixJ(matrix), HYPRE_Int, old_num_nonzeros,
+                                                          HYPRE_Int, new_num_nonzeros, memory_location);
+          }
       }
    }
 
