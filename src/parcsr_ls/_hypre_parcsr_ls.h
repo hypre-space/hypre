@@ -3355,6 +3355,10 @@ HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_gr
                                HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz, HYPRE_Int *kg_marker, HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                             hypre_ParVector *u );
+HYPRE_Int hypre_FSAISetupNative ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                  hypre_ParVector *u );
+HYPRE_Int hypre_FSAISetupOMPDyn ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                  hypre_ParVector *u );
 HYPRE_Int hypre_FSAIPrintStats ( void *fsai_vdata, hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_FSAIComputeOmega ( void *fsai_vdata, hypre_ParCSRMatrix *A );
 void hypre_swap2_ci ( HYPRE_Complex *v, HYPRE_Int *w, HYPRE_Int i, HYPRE_Int j );
@@ -3364,9 +3368,12 @@ void hypre_qsort2_ci ( HYPRE_Complex *v, HYPRE_Int *w, HYPRE_Int left, HYPRE_Int
 HYPRE_Int hypre_FSAISolve ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b,
                             hypre_ParVector *x );
 
+/* par_fsai_device.c */
+HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                 hypre_ParVector *u );
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

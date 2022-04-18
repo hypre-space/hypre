@@ -172,6 +172,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_2s_interp_device.c
     par_relax_device.c
     par_mgr_device.c
+    par_fsai_device.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

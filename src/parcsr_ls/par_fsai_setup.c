@@ -495,10 +495,10 @@ hypre_FSAISetupNative( void               *fsai_vdata,
       kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
 
-      hypre_SeqVectorInitialize(G_temp);
-      hypre_SeqVectorInitialize(A_subrow);
-      hypre_SeqVectorInitialize(kap_grad);
-      hypre_SeqVectorInitialize(A_sub);
+      hypre_SeqVectorInitialize_v2(G_temp, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
       hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
@@ -771,10 +771,10 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
       kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
 
-      hypre_SeqVectorInitialize(G_temp);
-      hypre_SeqVectorInitialize(A_subrow);
-      hypre_SeqVectorInitialize(kap_grad);
-      hypre_SeqVectorInitialize(A_sub);
+      hypre_SeqVectorInitialize_v2(G_temp, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
       hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
@@ -931,6 +931,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int                algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
    HYPRE_Int                print_level   = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int                eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   HYPRE_MemoryLocation     memory_loc_A  = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* ParCSRMatrix A variables */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
@@ -973,19 +974,31 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data) = G;
 
-   /* Compute G */
-   switch (algo_type)
+   /* Compute lower triangular factor G */
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_loc_A);
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      case 1:
-         hypre_FSAISetupNative(fsai_vdata, A, f, u);
-         break;
+      hypre_FSAISetupDevice(fsai_vdata, A, f, u);
+   }
+   else
+#endif
+   {
+      switch (algo_type)
+      {
+         case 1:
+            hypre_FSAISetupNative(fsai_vdata, A, f, u);
+            break;
 
-      case 2:
-         hypre_FSAISetupOMPDyn(fsai_vdata, A, f, u);
-         break;
+         case 2:
+            hypre_FSAISetupOMPDyn(fsai_vdata, A, f, u);
+            break;
 
-      default:
-         hypre_FSAISetupNative(fsai_vdata, A, f, u);
+         default:
+            hypre_FSAISetupNative(fsai_vdata, A, f, u);
+            break;
+      }
    }
 
    /* Compute G^T */
@@ -998,7 +1011,7 @@ hypre_FSAISetup( void               *fsai_vdata,
       hypre_FSAIComputeOmega(fsai_vdata, A);
    }
 
-   /* Print Setup info */
+   /* Print setup info */
    if (print_level == 1)
    {
       hypre_FSAIPrintStats(fsai_data, A);
