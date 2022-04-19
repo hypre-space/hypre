@@ -931,7 +931,6 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int                algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
    HYPRE_Int                print_level   = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int                eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
-   HYPRE_MemoryLocation     memory_loc_A  = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* ParCSRMatrix A variables */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
@@ -976,7 +975,8 @@ hypre_FSAISetup( void               *fsai_vdata,
 
    /* Compute lower triangular factor G */
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_loc_A);
+   HYPRE_MemoryLocation  memloc_A = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memloc_A);
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1020,6 +1020,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 #if DEBUG
    char filename[] = "FSAI.out.G.ij";
    hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
+   hypre_FSAIDumpLocalLSDense(fsai_vdata, "fsai_dense_ls.out", A);
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -1147,6 +1148,155 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    /* Update omega */
    omega = 1.0 / lambda;
    hypre_FSAISetOmega(fsai_vdata, omega);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FSAIDumpLocalLSDense
+ *
+ * Dump local linear systems to file. Matrices are written in dense format.
+ * This functions serves for debugging.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_FSAIDumpLocalLSDense( void               *fsai_vdata,
+                            const char         *filename,
+                            hypre_ParCSRMatrix *A )
+{
+   hypre_ParFSAIData      *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
+
+   /* Data structure variables */
+   MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int               max_steps = hypre_ParFSAIDataMaxSteps(fsai_data);
+   HYPRE_Int               max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_CSRMatrix        *G_diag = hypre_ParCSRMatrixDiag(G);
+   HYPRE_Int              *G_i = hypre_CSRMatrixI(G_diag);
+   HYPRE_Int              *G_j = hypre_CSRMatrixJ(G_diag);
+   HYPRE_Int               num_rows_diag_G = hypre_CSRMatrixNumRows(G_diag);
+
+   /* CSRMatrix A_diag variables */
+   hypre_CSRMatrix        *A_diag           = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int              *A_j              = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex          *A_a              = hypre_CSRMatrixData(A_diag);
+
+   FILE                   *fp;
+   char                    new_filename[1024];
+   HYPRE_Int               myid;
+   HYPRE_Int               i, j, k, m, n;
+   HYPRE_Int               ii, jj;
+   HYPRE_Int               nnz, col, index;
+   HYPRE_Int              *indices;
+   HYPRE_Int              *marker;
+   HYPRE_Real             *data;
+   HYPRE_Int               data_size;
+   HYPRE_Real              density;
+   HYPRE_Int               width = 20; //6
+   HYPRE_Int               prec  = 16; //2
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((fp = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      return hypre_error_flag;
+   }
+
+   /* Allocate memory */
+   data_size = (max_steps * max_step_size) *
+               (max_steps * max_step_size + 1);
+   indices = hypre_CTAlloc(HYPRE_Int, data_size, HYPRE_MEMORY_HOST);
+   data    = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_HOST);
+   marker  = hypre_TAlloc(HYPRE_Int, num_rows_diag_G, HYPRE_MEMORY_HOST);
+   hypre_Memset(marker, -1, num_rows_diag_G * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+
+   /* Write header info */
+   hypre_fprintf(fp, "num_linear_sys = %d\n", num_rows_diag_G);
+   hypre_fprintf(fp, "max_data_size = %d\n", data_size);
+   hypre_fprintf(fp, "max_num_steps = %d\n", hypre_ParFSAIDataMaxSteps(fsai_data));
+   hypre_fprintf(fp, "max_step_size = %d\n", hypre_ParFSAIDataMaxStepSize(fsai_data));
+   hypre_fprintf(fp, "max_step_size = %g\n", hypre_ParFSAIDataKapTolerance(fsai_data));
+   hypre_fprintf(fp, "algo_type = %d\n\n", hypre_ParFSAIDataAlgoType(fsai_data));
+
+   /* Write local full linear systems */
+   for (i = 0; i < num_rows_diag_G; i++)
+   {
+      /* Build marker array */
+      n = G_i[i + 1] - G_i[i] - 1;
+      m = n + 1;
+      for (j = (G_i[i] + 1); j < G_i[i + 1]; j++)
+      {
+         marker[G_j[j]] = j - G_i[i] - 1;
+      }
+
+      /* Gather matrix coefficients */
+      nnz = 0;
+      for (j = (G_i[i] + 1); j < G_i[i + 1]; j++)
+      {
+         for (k = A_i[G_j[j]]; k < A_i[G_j[j] + 1]; k++)
+         {
+            if ((col = marker[A_j[k]]) >= 0)
+            {
+               /* Add A(i,j) entry */
+               index = (j - G_i[i] - 1) * n + col;
+               data[index] = A_a[k];
+               indices[nnz] = index;
+               nnz++;
+            }
+         }
+      }
+      density = (n > 0) ? (HYPRE_Real) nnz / (n * n) : 0.0;
+
+      /* Gather RHS coefficients */
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
+      {
+         if ((col = marker[A_j[j]]) >= 0)
+         {
+            index = (m - 1) * n + col;
+            data[index] = A_a[j];
+            indices[nnz] = index;
+            nnz++;
+         }
+      }
+
+      /* Write coefficients to file */
+      hypre_fprintf(fp, "id = %d, (m, n) = (%d, %d), rho = %.3f\n", i, m, n, density);
+      for (ii = 0; ii < n; ii++)
+      {
+         for (jj = 0; jj < n; jj++)
+         {
+            hypre_fprintf(fp, "%*.*f ", width, prec, data[ii*n + jj]);
+         }
+         hypre_fprintf(fp, "\n");
+      }
+      for (jj = 0; jj < n; jj++)
+      {
+         hypre_fprintf(fp, "%*.*f ", width, prec, data[ii*n + jj]);
+      }
+      hypre_fprintf(fp, "\n");
+
+
+      /* Reset work arrays */
+      for (j = (G_i[i] + 1); j < G_i[i + 1]; j++)
+      {
+         marker[G_j[j]] = -1;
+      }
+
+      for (k = 0; k < nnz; k++)
+      {
+         data[indices[k]] = 0.0;
+      }
+   }
+
+   /* Close stream */
+   fclose(fp);
+
+   /* Free memory */
+   hypre_TFree(indices, HYPRE_MEMORY_HOST);
+   hypre_TFree(marker, HYPRE_MEMORY_HOST);
+   hypre_TFree(data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
