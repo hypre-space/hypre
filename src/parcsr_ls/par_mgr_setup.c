@@ -1036,7 +1036,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             {  
                 restrict_type[lev] = 2;
             } 
-            if (restrict_type[lev] > 0)
+//            if (restrict_type[lev] > 0)
             {
                wall_time = time_getWallclockSeconds();
 
@@ -1044,7 +1044,6 @@ hypre_MGRSetup( void               *mgr_vdata,
                                       debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, block_num_f_points, &RT,
                                       restrict_type[lev], num_restrict_sweeps);
                wall_time = time_getWallclockSeconds() - wall_time;
-               //  if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
 
                RT_array[lev] = RT;
             }

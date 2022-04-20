@@ -2857,8 +2857,10 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix    *A_CF,
 
 /************************************************************
 * Available methods:
-*   0: inv(A_FF) approximated by its diagonal inverse
-*   1: inv(A_FF) approximated by sparse approximate inverse
+*   1: inv(A_FF) approximated by its (block) diagonal inverse
+*   2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
+*   3: CPR-like approximation with inv(A_FF) approximated by its block diagonal inverse
+*   4: inv(A_FF) approximated by sparse approximate inverse
 *************************************************************/
 HYPRE_Int
 hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
@@ -2937,12 +2939,18 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
          // Build block diagonal inverse for A_FF
          hypre_ParCSRMatrixBlockDiagMatrix(A_ff, 1, -1, NULL, &A_ff_inv, 1);
          // compute Wp = A_ff_inv * A_fc
-         hypre_ParCSRMatrix *Wp_tmp = hypre_ParCSRMatMat(A_ff_inv, A_fc);
+// NOTE: Use hypre_ParMatmul here instead of hypre_ParCSRMatMat to avoid padding 
+// zero entries at diagonals for the latter routine. Use MatMat once this padding 
+// issue is resolved since it is more efficient.
+//         hypre_ParCSRMatrix *Wp_tmp = hypre_ParCSRMatMat(A_ff_inv, A_fc);
+         hypre_ParCSRMatrix *Wp_tmp = hypre_ParMatmul(A_ff_inv, A_fc);
          // compute correction A_h_correction = A_cf * (A_ff_inv * A_fc);
+//         A_h_correction = hypre_ParMatmul(A_cf, Wp_tmp);
          A_h_correction = hypre_ParCSRMatMat(A_cf, Wp_tmp);
          hypre_ParCSRMatrixDestroy(Wp_tmp);
          hypre_ParCSRMatrixDestroy(A_ff_inv);
       }
+#endif
    }
    else if (method == 2 || method == 3)
    {
@@ -3112,7 +3120,6 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
    alpha = -1;
    hypre_ParCSRMatrixAdd(1.0, A_cc, alpha, A_h_correction, &A_h);
    *A_h_ptr = A_h;
-
    hypre_ParCSRMatrixDestroy(A_cc);
    hypre_ParCSRMatrixDestroy(A_h_correction);
    hypre_TFree(c_marker, memory_location);
