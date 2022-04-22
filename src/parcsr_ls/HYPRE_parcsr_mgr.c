@@ -309,6 +309,16 @@ HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver solver, HYPRE_Int *relax_method )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelFRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelFRelaxType( HYPRE_Solver solver, HYPRE_Int *relax_type )
+{
+   return hypre_MGRSetLevelFRelaxType( solver, relax_type );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetCoarseGridMethod
  *--------------------------------------------------------------------------*/
 

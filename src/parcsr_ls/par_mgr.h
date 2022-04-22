@@ -111,8 +111,10 @@ typedef struct
    HYPRE_Int set_non_Cpoints_to_F;
    HYPRE_BigInt *idx_array;
 
-   /* F-relaxation method */
+   /* F-relaxation type */
    HYPRE_Int *Frelax_method;
+   HYPRE_Int *Frelax_type;
+
    HYPRE_Int *Frelax_num_functions;
 
    /* Non-Galerkin coarse grid */
@@ -139,6 +141,9 @@ typedef struct
    HYPRE_Int  block_jacobi_bsize;
 
    HYPRE_Real  cg_convergence_factor;
+
+   /* Data for Gaussian elimination F-relaxation */
+   hypre_ParAMGData    **GSElimData;
 
 } hypre_ParMGRData;
 

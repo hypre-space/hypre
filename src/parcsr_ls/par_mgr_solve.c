@@ -581,7 +581,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Real    alpha;
    HYPRE_Real    beta;
 
-   HYPRE_Int           *Frelax_method = (mgr_data -> Frelax_method);
+   HYPRE_Int           *Frelax_type = (mgr_data -> Frelax_type);
    HYPRE_Int           *interp_type = (mgr_data -> interp_type);
    hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);
    HYPRE_Real          **frelax_diaginv = (mgr_data -> frelax_diaginv);
@@ -700,7 +700,7 @@ hypre_MGRCycle( void               *mgr_vdata,
          relax_points = -1;
 
          //wall_time = time_getWallclockSeconds();
-         if (Frelax_method[level] == 0)
+         if (Frelax_type[level] == 0)
          {
             /* (single level) relaxation for A_ff */
             if (interp_type[level] == 12)
@@ -767,7 +767,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                }
             }
          }
-         else if (Frelax_method[level] == 1)
+         else if (Frelax_type[level] == 1)
          {
             /* v-cycle smoother for A_ff */
             //HYPRE_Real convergence_factor_frelax;
@@ -853,7 +853,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
-         else if (Frelax_method[level] == 2)
+         else if (Frelax_type[level] == 2)
          {
             // We need to first compute residual to ensure that
             // F-relaxation is reducing the global residual

@@ -3770,6 +3770,8 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
+ *
+ *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetFLevelRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
@@ -3779,11 +3781,29 @@ HYPRE_Int
 HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
 
 /**
+ * (Optional) Set the relaxation type for F-relaxation at each level.
+ * This function takes precedence over, and will replace \e HYPRE_MGRSetFRelaxMethod 
+ * and HYPRE_MGRSetRelaxType. 
+ * Options for \e relax_type entries are:
+ *
+ *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
+ *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
+ *    - 2 : AMG.
+ **/
+HYPRE_Int
+HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
+                         HYPRE_Int *relax_type );
+
+/**
  * (Optional) Set the strategy for coarse grid computation.
  * Options for \e cg_method are:
  *
  *    - 0 : Galerkin coarse grid computation using RAP.
- *    - 1 : Non-Galerkin coarse grid computation with dropping strategy.
+ *    - 1 - 4 : Non-Galerkin coarse grid computation with dropping strategy.
+ *         - 1: inv(A_FF) approximated by its (block) diagonal inverse
+ *         - 2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
+ *         - 3: CPR-like approximation with inv(A_FF) approximated by its block diagonal inverse
+ *         - 4: inv(A_FF) approximated by sparse approximate inverse
  **/
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
@@ -3808,6 +3828,8 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_function
  *    - 3    : approximate inverse
  *    - 4    : pAIR distance 1
  *    - 5    : pAIR distance 2
+ *    - 12   : Block Jacobi
+ *    - 13   : CPR-like restriction operator
  *    - else : use classical modified interpolation
  *
  * The default is injection.
@@ -3833,10 +3855,11 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
  * Options for \e interp_type are:
  *
  *    - 0    : injection \f$[0  I]^{T}\f$
- *    - 1    : unscaled (not recommended)
+ *    - 1    : L1-Jacobi
  *    - 2    : diagonal scaling (Jacobi)
  *    - 3    : classical modified interpolation
  *    - 4    : approximate inverse
+ *    - 12   : Block Jacobi
  *    - else : classical modified interpolation
  *
  * The default is diagonal scaling.
@@ -3870,8 +3893,9 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
                              HYPRE_Int nsweeps );
 
 /**
- * (Optional) Set block size for block Jacobi interp/relax.
- * This option is for \e interp_type == 12, and \e relax_type == 12.
+ * (Optional) Set block size for block (global) smoother and interp/restriction.
+ * This option is for \e interp_type/restrict_type == 12, and 
+ * \e smooth_type == 0 or 1.
  **/
 HYPRE_Int
 HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver,
@@ -3984,14 +4008,14 @@ HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
  * Options for \e smooth_type are:
  *
  *    - 0 : block Jacobi (default)
- *    - 1 : Jacobi
- *    - 2 : Gauss-Seidel, sequential (very slow!)
- *    - 3 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
- *    - 4 : hybrid Gauss-Seidel or SOR, forward solve
- *    - 5 : hybrid Gauss-Seidel or SOR, backward solve
- *    - 6 : hybrid chaotic Gauss-Seidel (works only with OpenMP)
- *    - 7 : hybrid symmetric Gauss-Seidel or SSOR
+ *    - 1 : block Gauss-Siedel
+ *    - 2 : Jacobi
+ *    - 3 : Gauss-Seidel, sequential (very slow!)
+ *    - 4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
+ *    - 5 : hybrid Gauss-Seidel or SOR, forward solve
+ *    - 6 : hybrid Gauss-Seidel or SOR, backward solve
  *    - 8 : Euclid (ILU)
+ *    - 16 : HYPRE_ILU
  **/
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,

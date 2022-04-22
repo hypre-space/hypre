@@ -102,6 +102,7 @@ hypre_MGRCreate()
    (mgr_data -> max_iter) = 20;
    (mgr_data -> tol) = 1.0e-6;
    (mgr_data -> relax_type) = 0;
+   (mgr_data -> Frelax_type) = NULL;   
    (mgr_data -> relax_order) = 1; // not fully utilized. Only used to compute L1-norms.
    (mgr_data -> num_relax_sweeps) = NULL;
    (mgr_data -> relax_weight) = 1.0;
@@ -151,6 +152,8 @@ hypre_MGRCreate()
    (mgr_data -> blk_size) = NULL;
 
    (mgr_data -> truncate_coarse_grid_threshold) = 0.0;
+
+   (mgr_data -> GSElimData) = NULL;
 
    return (void *) mgr_data;
 }
@@ -421,6 +424,12 @@ hypre_MGRDestroy( void *data )
       hypre_TFree(mgr_data -> interp_type, HYPRE_MEMORY_HOST);
       (mgr_data -> interp_type) = NULL;
    }
+   /* Frelax_type */
+   if (mgr_data -> Frelax_type)
+   {
+      hypre_TFree(mgr_data -> Frelax_type, HYPRE_MEMORY_HOST);
+      (mgr_data -> Frelax_type) = NULL;
+   }
    /* Frelax_method */
    if (mgr_data -> Frelax_method)
    {
@@ -522,8 +531,50 @@ hypre_MGRDestroy( void *data )
       (mgr_data -> num_relax_sweeps) = NULL;
    }
 
+
+   if (mgr_data -> GSElimData)
+   {
+      for (i = 0; i < num_coarse_levels; i++)
+      {
+         if ((mgr_data -> GSElimData)[i])
+         {
+            hypre_MGRDestroyGSElimData((mgr_data -> GSElimData)[i]);      
+            (mgr_data -> GSElimData) = NULL;
+         }
+      }
+      hypre_TFree(mgr_data -> GSElimData, HYPRE_MEMORY_HOST);
+      (mgr_data -> GSElimData) = NULL;
+   }
+
    /* mgr data */
    hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/* create data for Gaussian Elim. for F-relaxation */
+void *
+hypre_MGRCreateGSElimData()
+{
+   hypre_ParAMGData  *gsdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
+   
+   hypre_ParAMGDataGSSetup(gsdata) = 0;
+   hypre_ParAMGDataAMat(gsdata) = NULL;
+   hypre_ParAMGDataAInv(gsdata) = NULL;
+   hypre_ParAMGDataBVec(gsdata) = NULL;
+   hypre_ParAMGDataCommInfo(gsdata) = NULL;
+}
+
+/* Destroy data for V-cycle F-relaxation */
+HYPRE_Int
+hypre_MGRDestroyGSElimData( void *data )
+{
+   hypre_ParAMGData * gsdata = (hypre_ParAMGData*) data;
+
+   if (hypre_ParAMGDataAMat(gsdata)) { hypre_TFree(hypre_ParAMGDataAMat(gsdata), HYPRE_MEMORY_HOST); }
+   if (hypre_ParAMGDataAInv(gsdata)) { hypre_TFree(hypre_ParAMGDataAInv(gsdata), HYPRE_MEMORY_HOST); }
+   if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
+   if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
 
    return hypre_error_flag;
 }
@@ -539,10 +590,10 @@ hypre_MGRCreateFrelaxVcycleData()
    hypre_ParAMGDataFArray(vdata) = NULL;
    hypre_ParAMGDataCFMarkerArray(vdata) = NULL;
    hypre_ParAMGDataVtemp(vdata)  = NULL;
-   hypre_ParAMGDataAMat(vdata)  = NULL;
-   hypre_ParAMGDataBVec(vdata)  = NULL;
+//   hypre_ParAMGDataAMat(vdata)  = NULL;
+//   hypre_ParAMGDataBVec(vdata)  = NULL;
    hypre_ParAMGDataZtemp(vdata)  = NULL;
-   hypre_ParAMGDataCommInfo(vdata) = NULL;
+//   hypre_ParAMGDataCommInfo(vdata) = NULL;
    hypre_ParAMGDataUArray(vdata) = NULL;
    hypre_ParAMGDataNewComm(vdata) = hypre_MPI_COMM_NULL;
    hypre_ParAMGDataNumLevels(vdata) = 0;
@@ -553,6 +604,13 @@ hypre_MGRCreateFrelaxVcycleData()
    hypre_ParAMGDataMaxCoarseSize(vdata) = 9;
    hypre_ParAMGDataMinCoarseSize(vdata) = 0;
    hypre_ParAMGDataUserCoarseRelaxType(vdata) = 9;
+   
+   /* Gaussian Elim data */
+   hypre_ParAMGDataGSSetup(vdata) = 0;
+   hypre_ParAMGDataAMat(vdata) = NULL;
+   hypre_ParAMGDataAInv(vdata) = NULL;
+   hypre_ParAMGDataBVec(vdata) = NULL;
+   hypre_ParAMGDataCommInfo(vdata) = NULL;
 
    return (void *) vdata;
 }
@@ -607,6 +665,7 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
    */
 
    if (hypre_ParAMGDataAMat(vdata)) { hypre_TFree(hypre_ParAMGDataAMat(vdata), HYPRE_MEMORY_HOST); }
+   if (hypre_ParAMGDataAInv(vdata)) { hypre_TFree(hypre_ParAMGDataAInv(vdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataBVec(vdata)) { hypre_TFree(hypre_ParAMGDataBVec(vdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataCommInfo(vdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(vdata), HYPRE_MEMORY_HOST); }
 
@@ -2950,7 +3009,6 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
          hypre_ParCSRMatrixDestroy(Wp_tmp);
          hypre_ParCSRMatrixDestroy(A_ff_inv);
       }
-#endif
    }
    else if (method == 2 || method == 3)
    {
@@ -5128,6 +5186,7 @@ hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
 }
 
 /* Set the F-relaxation strategy: 0=single level, 1=multi level */
+/* This will be removed later. Use SetLevelFrelaxType */
 HYPRE_Int
 hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
 {
@@ -5155,6 +5214,42 @@ hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
       }
    }
    (mgr_data -> Frelax_method) = Frelax_method;
+   return hypre_error_flag;
+}
+
+/* Set the F-relaxation type:
+ * 0: Jacobi
+ * 1: Vcycle smoother
+ * 2: AMG
+ * Otherwise: use standard BoomerAMGRelax options
+*/
+HYPRE_Int
+hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int i;
+   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   if ((mgr_data -> Frelax_type) != NULL)
+   {
+      hypre_TFree(mgr_data -> Frelax_type, HYPRE_MEMORY_HOST);
+      (mgr_data -> Frelax_type) = NULL;
+   }
+   HYPRE_Int *Frelax_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   if (relax_type != NULL)
+   {
+      for (i = 0; i < max_num_coarse_levels; i++)
+      {
+         Frelax_type[i] = relax_type[i];
+      }
+   }
+   else
+   {
+      for (i = 0; i < max_num_coarse_levels; i++)
+      {
+         Frelax_type[i] = 0;
+      }
+   }
+   (mgr_data -> Frelax_type) = Frelax_type;
    return hypre_error_flag;
 }
 
@@ -6280,14 +6375,14 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    hypre_printf("MGR Setup parameters: \n");
    hypre_printf("Block size: %d\n", (mgr_data -> block_size));
    hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
-   hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
+//   hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
    hypre_printf("Set non-Cpoints to F-points: %d\n", (mgr_data -> set_non_Cpoints_to_F));
    hypre_printf("Set Cpoints method: %d\n", (mgr_data -> set_c_points_method));
    for (i = 0; i < max_num_coarse_levels; i++)
    {
       hypre_printf("Lev = %d, Interpolation type: %d\n", i, (mgr_data -> interp_type)[i]);
       hypre_printf("Lev = %d, Restriction type: %d\n", i, (mgr_data -> restrict_type)[i]);
-      hypre_printf("Lev = %d, F-relaxation method: %d\n", i, (mgr_data -> Frelax_method)[i]);
+      hypre_printf("Lev = %d, F-relaxation type: %d\n", i, (mgr_data -> Frelax_type)[i]);
       hypre_printf("lev = %d, Number of relax sweeps: %d\n", i, (mgr_data -> num_relax_sweeps)[i]);
       hypre_printf("Lev = %d, Use non-Galerkin coarse grid: %d\n", i,
                    (mgr_data -> mgr_coarse_grid_method)[i]);
