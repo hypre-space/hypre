@@ -26,10 +26,6 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
-#if defined(HYPRE_USING_UMPIRE)
-#include "umpire/interface/umpire.h"
-#endif
-
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
