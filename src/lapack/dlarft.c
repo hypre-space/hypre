@@ -113,21 +113,21 @@ extern "C" {
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static doublereal c_b8 = 0.;
+     integer c__1 = 1;
+     doublereal c_b8 = 0.;
     
     /* System generated locals */
     integer t_dim1, t_offset, v_dim1, v_offset, i__1, i__2, i__3;
     doublereal d__1;
     /* Local variables */
-    static integer i__, j;
+     integer i__, j;
     extern logical lsame_(const char *,const char *);
     extern /* Subroutine */ integer dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), dtrmv_(const char *, 
 	    const char *,const char *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
-    static doublereal vii;
+     doublereal vii;
 #define t_ref(a_1,a_2) t[(a_2)*t_dim1 + a_1]
 #define v_ref(a_1,a_2) v[(a_2)*v_dim1 + a_1]
 

@@ -17,7 +17,7 @@ extern "C" {
 typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -161,6 +161,11 @@ typedef struct
    HYPRE_Int            ilu_max_iter;
    HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_reordering_type;
+
+   HYPRE_Int            fsai_max_steps;
+   HYPRE_Int            fsai_max_step_size;
+   HYPRE_Int            fsai_eig_max_iters;
+   HYPRE_Real           fsai_kap_tolerance;
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
@@ -403,6 +408,10 @@ typedef struct
 #define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
+#define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
+#define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
+#define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)
@@ -531,7 +540,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -725,7 +734,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -779,7 +788,80 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef hypre_ParFSAI_DATA_HEADER
+#define hypre_ParFSAI_DATA_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_ParFSAIData
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_ParFSAIData_struct
+{
+   /* FSAI Setup data */
+   HYPRE_Int             algo_type;       /* FSAI algorithm implementation type */
+   HYPRE_Int             max_steps;       /* Maximum iterations run per row */
+   HYPRE_Int
+   max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
+   HYPRE_Real            kap_tolerance;   /* Minimum amount of change between two steps */
+   hypre_ParCSRMatrix   *Gmat;            /* Matrix holding FSAI factor. M^(-1) = G'G */
+   hypre_ParCSRMatrix   *GTmat;           /* Matrix holding the transpose of the FSAI factor */
+
+   /* FSAI Setup info */
+   HYPRE_Real            density;         /* Density of matrix G wrt A */
+
+   /* Solver Problem Data */
+   HYPRE_Int             zero_guess;      /* Flag indicating x0 = 0 */
+   HYPRE_Int             eig_max_iters;   /* Iters for computing max. eigenvalue of G^T*G*A */
+   HYPRE_Int             max_iterations;  /* Maximum iterations run for the solver */
+   HYPRE_Int             num_iterations;  /* Number of iterations the solver ran */
+   HYPRE_Real            omega;           /* Step size for Preconditioned Richardson Solver */
+   HYPRE_Real            tolerance;         /* Tolerance for the solver */
+   HYPRE_Real            rel_resnorm;     /* available if logging > 1 */
+   hypre_ParVector      *r_work;          /* work vector used to compute the residual */
+   hypre_ParVector      *z_work;          /* work vector used for applying FSAI */
+
+   /* log info */
+   HYPRE_Int             logging;
+   HYPRE_Int             print_level;
+} hypre_ParFSAIData;
+
+/*--------------------------------------------------------------------------
+ *  Accessor functions for the hypre_ParFSAIData structure
+ *--------------------------------------------------------------------------*/
+
+/* FSAI Setup data */
+#define hypre_ParFSAIDataAlgoType(fsai_data)                ((fsai_data) -> algo_type)
+#define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
+#define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
+#define hypre_ParFSAIDataKapTolerance(fsai_data)            ((fsai_data) -> kap_tolerance)
+#define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> Gmat)
+#define hypre_ParFSAIDataGTmat(fsai_data)                   ((fsai_data) -> GTmat)
+#define hypre_ParFSAIDataDensity(fsai_data)                 ((fsai_data) -> density)
+
+/* Solver problem data */
+#define hypre_ParFSAIDataZeroGuess(fsai_data)               ((fsai_data) -> zero_guess)
+#define hypre_ParFSAIDataEigMaxIters(fsai_data)             ((fsai_data) -> eig_max_iters)
+#define hypre_ParFSAIDataMaxIterations(fsai_data)           ((fsai_data) -> max_iterations)
+#define hypre_ParFSAIDataNumIterations(fsai_data)           ((fsai_data) -> num_iterations)
+#define hypre_ParFSAIDataOmega(fsai_data)                   ((fsai_data) -> omega)
+#define hypre_ParFSAIDataRelResNorm(fsai_data)              ((fsai_data) -> rel_resnorm)
+#define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
+#define hypre_ParFSAIDataRWork(fsai_data)                   ((fsai_data) -> r_work)
+#define hypre_ParFSAIDataZWork(fsai_data)                   ((fsai_data) -> z_work)
+
+/* log info data */
+#define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
+#define hypre_ParFSAIDataPrintLevel(fsai_data)              ((fsai_data) -> print_level)
+
+#endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1288,6 +1370,10 @@ HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_ma
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters ( HYPRE_Solver solver, HYPRE_Int eig_max_iters );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance ( HYPRE_Solver solver, HYPRE_Real kap_tolerance );
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
 HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver, HYPRE_Int *num_functions );
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver, HYPRE_Int nodal );
@@ -1673,6 +1759,34 @@ HYPRE_Int HYPRE_ParaSailsSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
 HYPRE_Int HYPRE_ParaSailsGetLogging ( HYPRE_Solver solver, HYPRE_Int *logging );
 HYPRE_Int HYPRE_ParaSailsBuildIJMatrix ( HYPRE_Solver solver, HYPRE_IJMatrix *pij_A );
 
+/* HYPRE_parcsr_fsai.c */
+HYPRE_Int HYPRE_FSAICreate ( HYPRE_Solver *solver);
+HYPRE_Int HYPRE_FSAIDestroy ( HYPRE_Solver solver );
+HYPRE_Int HYPRE_FSAISetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
+                            HYPRE_ParVector x );
+HYPRE_Int HYPRE_FSAISolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
+                            HYPRE_ParVector x );
+HYPRE_Int HYPRE_FSAISetAlgoType ( HYPRE_Solver solver, HYPRE_Int algo_type );
+HYPRE_Int HYPRE_FSAIGetAlgoType ( HYPRE_Solver solver, HYPRE_Int *algo_type );
+HYPRE_Int HYPRE_FSAISetMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
+HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver, HYPRE_Int *max_steps );
+HYPRE_Int HYPRE_FSAISetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
+HYPRE_Int HYPRE_FSAIGetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int *max_step_size );
+HYPRE_Int HYPRE_FSAISetKapTolerance ( HYPRE_Solver solver, HYPRE_Real  kap_tolerance );
+HYPRE_Int HYPRE_FSAIGetKapTolerance ( HYPRE_Solver solver, HYPRE_Real *kap_tolerance );
+HYPRE_Int HYPRE_FSAISetTolerance ( HYPRE_Solver solver, HYPRE_Real tolerance );
+HYPRE_Int HYPRE_FSAIGetTolerance ( HYPRE_Solver solver, HYPRE_Real *tolerance );
+HYPRE_Int HYPRE_FSAISetOmega ( HYPRE_Solver solver, HYPRE_Real omega );
+HYPRE_Int HYPRE_FSAIGetOmega ( HYPRE_Solver solver, HYPRE_Real *omega );
+HYPRE_Int HYPRE_FSAISetMaxIterations ( HYPRE_Solver solver, HYPRE_Int max_iterations );
+HYPRE_Int HYPRE_FSAIGetMaxIterations ( HYPRE_Solver solver, HYPRE_Int *max_iterations );
+HYPRE_Int HYPRE_FSAISetEigMaxIters ( HYPRE_Solver solver, HYPRE_Int eig_max_iters );
+HYPRE_Int HYPRE_FSAIGetEigMaxIters ( HYPRE_Solver solver, HYPRE_Int *eig_max_iters );
+HYPRE_Int HYPRE_FSAISetZeroGuess ( HYPRE_Solver solver, HYPRE_Int zero_guess );
+HYPRE_Int HYPRE_FSAIGetZeroGuess ( HYPRE_Solver solver, HYPRE_Int *zero_guess );
+HYPRE_Int HYPRE_FSAISetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
+HYPRE_Int HYPRE_FSAIGetPrintLevel ( HYPRE_Solver solver, HYPRE_Int *print_level );
+
 /* HYPRE_parcsr_pcg.c */
 HYPRE_Int HYPRE_ParCSRPCGCreate ( MPI_Comm comm, HYPRE_Solver *solver );
 HYPRE_Int HYPRE_ParCSRPCGDestroy ( HYPRE_Solver solver );
@@ -1895,6 +2009,10 @@ HYPRE_Int hypre_BoomerAMGSetILUDroptol( void *data, HYPRE_Real ilu_droptol);
 HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter);
 HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz);
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type);
+HYPRE_Int hypre_BoomerAMGSetFSAIMaxSteps ( void *data, HYPRE_Int fsai_max_steps);
+HYPRE_Int hypre_BoomerAMGSetFSAIMaxStepSize ( void *data, HYPRE_Int fsai_max_step_size);
+HYPRE_Int hypre_BoomerAMGSetFSAIEigMaxIters ( void *data, HYPRE_Int fsai_eig_max_iters);
+HYPRE_Int hypre_BoomerAMGSetFSAIKapTolerance ( void *data, HYPRE_Real fsai_kap_tolerance);
 HYPRE_Int hypre_BoomerAMGSetChebyOrder ( void *data, HYPRE_Int order );
 HYPRE_Int hypre_BoomerAMGSetChebyFraction ( void *data, HYPRE_Real ratio );
 HYPRE_Int hypre_BoomerAMGSetChebyEigEst ( void *data, HYPRE_Int eig_est );
@@ -3214,6 +3332,55 @@ HYPRE_Int hypre_BoomerAMGDD_UnpackSendFlagBuffer ( hypre_AMGDDCompGrid **compGri
 HYPRE_Int hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo ( hypre_ParAMGDDData* amgdd_data );
 HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid,
                                             hypre_AMGDDCommPkg *compGridCommPkg, HYPRE_Int start_level, HYPRE_Int num_levels );
+
+/* par_fsai.c */
+void* hypre_FSAICreate();
+HYPRE_Int hypre_FSAIDestroy ( void *data );
+HYPRE_Int hypre_FSAISetAlgoType ( void *data, HYPRE_Int algo_type );
+HYPRE_Int hypre_FSAISetMaxSteps ( void *data, HYPRE_Int max_steps );
+HYPRE_Int hypre_FSAISetMaxStepSize ( void *data, HYPRE_Int max_step_size );
+HYPRE_Int hypre_FSAISetKapTolerance ( void *data, HYPRE_Real kap_tolerance );
+HYPRE_Int hypre_FSAISetMaxIterations ( void *data, HYPRE_Int max_iterations );
+HYPRE_Int hypre_FSAISetEigMaxIters ( void *data, HYPRE_Int eig_max_iters );
+HYPRE_Int hypre_FSAISetZeroGuess ( void *data, HYPRE_Int zero_guess );
+HYPRE_Int hypre_FSAISetTolerance ( void *data, HYPRE_Real tolerance );
+HYPRE_Int hypre_FSAISetOmega ( void *data, HYPRE_Real omega );
+HYPRE_Int hypre_FSAISetLogging ( void *data, HYPRE_Int logging );
+HYPRE_Int hypre_FSAISetNumIterations ( void *data, HYPRE_Int num_iterations );
+HYPRE_Int hypre_FSAISetPrintLevel ( void *data, HYPRE_Int print_level );
+HYPRE_Int hypre_FSAIGetAlgoType ( void *data, HYPRE_Int *algo_type );
+HYPRE_Int hypre_FSAIGetMaxSteps ( void *data, HYPRE_Int *max_steps );
+HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data, HYPRE_Int *max_step_size );
+HYPRE_Int hypre_FSAIGetKapTolerance ( void *data, HYPRE_Real *kap_tolerance );
+HYPRE_Int hypre_FSAIGetMaxIterations ( void *data, HYPRE_Int *max_iterations );
+HYPRE_Int hypre_FSAIGetEigMaxIters ( void *data, HYPRE_Int *eig_max_iters );
+HYPRE_Int hypre_FSAIGetZeroGuess ( void *data, HYPRE_Int *zero_guess );
+HYPRE_Int hypre_FSAIGetTolerance ( void *data, HYPRE_Real *tolerance );
+HYPRE_Int hypre_FSAIGetOmega ( void *data, HYPRE_Real *omega );
+HYPRE_Int hypre_FSAIGetLogging ( void *data, HYPRE_Int *logging );
+HYPRE_Int hypre_FSAIGetNumIterations ( void *data, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_FSAIGetPrintLevel ( void *data, HYPRE_Int *print_level );
+
+/* par_fsai_setup.c */
+HYPRE_Int hypre_CSRMatrixExtractDenseMat ( hypre_CSRMatrix *A, hypre_Vector *A_sub,
+                                           HYPRE_Int *S_Pattern, HYPRE_Int S_nnz, HYPRE_Int *marker );
+HYPRE_Int hypre_CSRMatrixExtractDenseRow ( hypre_CSRMatrix *A, hypre_Vector *A_subrow,
+                                           HYPRE_Int *marker, HYPRE_Int row_num );
+HYPRE_Int hypre_FindKapGrad ( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient,
+                              HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz,
+                              HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *kg_marker );
+HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros,
+                               HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz, HYPRE_Int *kg_marker, HYPRE_Int max_step_size );
+HYPRE_Int hypre_FSAISetup ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                            hypre_ParVector *u );
+HYPRE_Int hypre_FSAIPrintStats ( void *fsai_vdata, hypre_ParCSRMatrix *A );
+HYPRE_Int hypre_FSAIComputeOmega ( void *fsai_vdata, hypre_ParCSRMatrix *A );
+void hypre_swap2_ci ( HYPRE_Complex *v, HYPRE_Int *w, HYPRE_Int i, HYPRE_Int j );
+void hypre_qsort2_ci ( HYPRE_Complex *v, HYPRE_Int *w, HYPRE_Int left, HYPRE_Int right );
+
+/* par_fsai_solve.c */
+HYPRE_Int hypre_FSAISolve ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b,
+                            hypre_ParVector *x );
 
 #ifdef __cplusplus
 }

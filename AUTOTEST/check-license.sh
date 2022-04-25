@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -33,7 +33,7 @@ cd $top_dir
 
 ### First check for files that do not have the license, but should
 
-#LicStr='Copyright 1998-2019 Lawrence Livermore'
+#LicStr='Copyright (c) 1998 Lawrence Livermore'
 LicStr='SPDX-License-Identifier: \(Apache-2.0 OR MIT\)'
 
 # Remove these files from the list of all files without 'SPDX'

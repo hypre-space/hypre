@@ -8,156 +8,156 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dormbr_(const char *vect,const char *side,const char *trans, integer *m, 
-	integer *n, integer *k, doublereal *a, integer *lda, doublereal *tau, 
-	doublereal *c__, integer *ldc, doublereal *work, integer *lwork, 
+/* Subroutine */ integer dormbr_(const char *vect,const char *side,const char *trans, integer *m,
+	integer *n, integer *k, doublereal *a, integer *lda, doublereal *tau,
+	doublereal *c__, integer *ldc, doublereal *work, integer *lwork,
 	integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    If VECT = 'Q', DORMBR overwrites the general real M-by-N matrix C   
-    with   
-                    SIDE = 'L'     SIDE = 'R'   
-    TRANS = 'N':      Q * C          C * Q   
-    TRANS = 'T':      Q**T * C       C * Q**T   
+    If VECT = 'Q', DORMBR overwrites the general real M-by-N matrix C
+    with
+                    SIDE = 'L'     SIDE = 'R'
+    TRANS = 'N':      Q * C          C * Q
+    TRANS = 'T':      Q**T * C       C * Q**T
 
-    If VECT = 'P', DORMBR overwrites the general real M-by-N matrix C   
-    with   
-                    SIDE = 'L'     SIDE = 'R'   
-    TRANS = 'N':      P * C          C * P   
-    TRANS = 'T':      P**T * C       C * P**T   
+    If VECT = 'P', DORMBR overwrites the general real M-by-N matrix C
+    with
+                    SIDE = 'L'     SIDE = 'R'
+    TRANS = 'N':      P * C          C * P
+    TRANS = 'T':      P**T * C       C * P**T
 
-    Here Q and P**T are the orthogonal matrices determined by DGEBRD when   
-    reducing a real matrix A to bidiagonal form: A = Q * B * P**T. Q and   
-    P**T are defined as products of elementary reflectors H(i) and G(i)   
-    respectively.   
+    Here Q and P**T are the orthogonal matrices determined by DGEBRD when
+    reducing a real matrix A to bidiagonal form: A = Q * B * P**T. Q and
+    P**T are defined as products of elementary reflectors H(i) and G(i)
+    respectively.
 
-    Let nq = m if SIDE = 'L' and nq = n if SIDE = 'R'. Thus nq is the   
-    order of the orthogonal matrix Q or P**T that is applied.   
+    Let nq = m if SIDE = 'L' and nq = n if SIDE = 'R'. Thus nq is the
+    order of the orthogonal matrix Q or P**T that is applied.
 
-    If VECT = 'Q', A is assumed to have been an NQ-by-K matrix:   
-    if nq >= k, Q = H(1) H(2) . . . H(k);   
-    if nq < k, Q = H(1) H(2) . . . H(nq-1).   
+    If VECT = 'Q', A is assumed to have been an NQ-by-K matrix:
+    if nq >= k, Q = H(1) H(2) . . . H(k);
+    if nq < k, Q = H(1) H(2) . . . H(nq-1).
 
-    If VECT = 'P', A is assumed to have been a K-by-NQ matrix:   
-    if k < nq, P = G(1) G(2) . . . G(k);   
-    if k >= nq, P = G(1) G(2) . . . G(nq-1).   
+    If VECT = 'P', A is assumed to have been a K-by-NQ matrix:
+    if k < nq, P = G(1) G(2) . . . G(k);
+    if k >= nq, P = G(1) G(2) . . . G(nq-1).
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    VECT    (input) CHARACTER*1   
-            = 'Q': apply Q or Q**T;   
-            = 'P': apply P or P**T.   
+    VECT    (input) CHARACTER*1
+            = 'Q': apply Q or Q**T;
+            = 'P': apply P or P**T.
 
-    SIDE    (input) CHARACTER*1   
-            = 'L': apply Q, Q**T, P or P**T from the Left;   
-            = 'R': apply Q, Q**T, P or P**T from the Right.   
+    SIDE    (input) CHARACTER*1
+            = 'L': apply Q, Q**T, P or P**T from the Left;
+            = 'R': apply Q, Q**T, P or P**T from the Right.
 
-    TRANS   (input) CHARACTER*1   
-            = 'N':  No transpose, apply Q  or P;   
-            = 'T':  Transpose, apply Q**T or P**T.   
+    TRANS   (input) CHARACTER*1
+            = 'N':  No transpose, apply Q  or P;
+            = 'T':  Transpose, apply Q**T or P**T.
 
-    M       (input) INTEGER   
-            The number of rows of the matrix C. M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix C. M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix C. N >= 0.   
+    N       (input) INTEGER
+            The number of columns of the matrix C. N >= 0.
 
-    K       (input) INTEGER   
-            If VECT = 'Q', the number of columns in the original   
-            matrix reduced by DGEBRD.   
-            If VECT = 'P', the number of rows in the original   
-            matrix reduced by DGEBRD.   
-            K >= 0.   
+    K       (input) INTEGER
+            If VECT = 'Q', the number of columns in the original
+            matrix reduced by DGEBRD.
+            If VECT = 'P', the number of rows in the original
+            matrix reduced by DGEBRD.
+            K >= 0.
 
-    A       (input) DOUBLE PRECISION array, dimension   
-                                  (LDA,min(nq,K)) if VECT = 'Q'   
-                                  (LDA,nq)        if VECT = 'P'   
-            The vectors which define the elementary reflectors H(i) and   
-            G(i), whose products determine the matrices Q and P, as   
-            returned by DGEBRD.   
+    A       (input) DOUBLE PRECISION array, dimension
+                                  (LDA,min(nq,K)) if VECT = 'Q'
+                                  (LDA,nq)        if VECT = 'P'
+            The vectors which define the elementary reflectors H(i) and
+            G(i), whose products determine the matrices Q and P, as
+            returned by DGEBRD.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.   
-            If VECT = 'Q', LDA >= max(1,nq);   
-            if VECT = 'P', LDA >= max(1,min(nq,K)).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.
+            If VECT = 'Q', LDA >= max(1,nq);
+            if VECT = 'P', LDA >= max(1,min(nq,K)).
 
-    TAU     (input) DOUBLE PRECISION array, dimension (min(nq,K))   
-            TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i) or G(i) which determines Q or P, as returned   
-            by DGEBRD in the array argument TAUQ or TAUP.   
+    TAU     (input) DOUBLE PRECISION array, dimension (min(nq,K))
+            TAU(i) must contain the scalar factor of the elementary
+            reflector H(i) or G(i) which determines Q or P, as returned
+            by DGEBRD in the array argument TAUQ or TAUP.
 
-    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)   
-            On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q   
-            or P*C or P**T*C or C*P or C*P**T.   
+    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)
+            On entry, the M-by-N matrix C.
+            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q
+            or P*C or P**T*C or C*P or C*P**T.
 
-    LDC     (input) INTEGER   
-            The leading dimension of the array C. LDC >= max(1,M).   
+    LDC     (input) INTEGER
+            The leading dimension of the array C. LDC >= max(1,M).
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.   
-            If SIDE = 'L', LWORK >= max(1,N);   
-            if SIDE = 'R', LWORK >= max(1,M).   
-            For optimum performance LWORK >= N*NB if SIDE = 'L', and   
-            LWORK >= M*NB if SIDE = 'R', where NB is the optimal   
-            blocksize.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK.
+            If SIDE = 'L', LWORK >= max(1,N);
+            if SIDE = 'R', LWORK >= max(1,M).
+            For optimum performance LWORK >= N*NB if SIDE = 'L', and
+            LWORK >= M*NB if SIDE = 'R', where NB is the optimal
+            blocksize.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__2 = 2;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__2 = 2;
+
     /* System generated locals */
     address a__1[2];
     integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2, i__3[2];
     char ch__1[2];
-    /* Builtin functions   
+    /* Builtin functions
        Subroutine */ integer s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
-    static logical left;
+    logical left;
     extern logical lsame_(const char *,const char *);
-    static integer iinfo, i1, i2, nb, mi, ni, nq, nw;
+    integer iinfo, i1, i2, nb, mi, ni, nq, nw;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ integer dormlq_(const char *,const char *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dormlq_(const char *,const char *, integer *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, doublereal *,
 	    integer *, doublereal *, integer *, integer *);
-    static logical notran;
-    extern /* Subroutine */ integer dormqr_(const char *,const char *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
+    logical notran;
+    extern /* Subroutine */ integer dormqr_(const char *,const char *, integer *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, doublereal *,
 	    integer *, doublereal *, integer *, integer *);
-    static logical applyq;
-    static char transt[1];
-    static integer lwkopt;
-    static logical lquery;
+    logical applyq;
+    char transt[1];
+    integer lwkopt;
+    logical lquery;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
 
@@ -202,7 +202,7 @@ extern "C" {
     } else /* if(complicated condition) */ {
 /* Computing MAX */
 	i__1 = 1, i__2 = min(nq,*k);
-	if (((applyq) && (*lda < max(1,nq))) || 
+	if (((applyq) && (*lda < max(1,nq))) ||
             ((! applyq) && (*lda < max(i__1,i__2)))) {
 	    *info = -8;
 	} else if (*ldc < max(1,*m)) {
@@ -299,7 +299,7 @@ extern "C" {
 		i2 = 2;
 	    }
 	    i__1 = nq - 1;
-	    dormqr_(side, trans, &mi, &ni, &i__1, &a_ref(2, 1), lda, &tau[1], 
+	    dormqr_(side, trans, &mi, &ni, &i__1, &a_ref(2, 1), lda, &tau[1],
 		    &c___ref(i1, i2), ldc, &work[1], lwork, &iinfo);
 	}
     } else {
