@@ -581,7 +581,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    {
       map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-      /* WM: onedpl lower bound currently does not accept zero length input */
+      /* WM: NOTE - onedpl lower bound currently does not accept zero length input */
       if (num_cols_offd_C > 0)
       {
          HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
@@ -602,7 +602,6 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
    }
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: onedpl lower bound currently does not accept zero length input */
    if (num_cols_offd_C > 0 && B_ext_offd_nnz > 0)
    {
       HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,

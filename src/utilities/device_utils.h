@@ -8,7 +8,6 @@
 #ifndef HYPRE_DEVICE_UTILS_H
 #define HYPRE_DEVICE_UTILS_H
 
-/* WM: Q - do we need this macro gaurd? Where should it be placed? */
 #if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -96,7 +95,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* WM: Q - is this the best way to deal with dim3 vs. sycl::range? */
+/* The following definitions facilitate code reuse and limits
+ * if/def-ing when unifying cuda/hip code with sycl code */
 using dim3 = sycl::range<1>;
 #define __global__
 #define __host__
@@ -257,7 +257,6 @@ using dim3 = sycl::range<1>;
  *      macros for wrapping vendor library calls for error reporting
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-/* WM: Q - any need to macro guard these definitions? */
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
@@ -1034,7 +1033,7 @@ struct print_functor
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: sycl functions
+ *      sycl functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
@@ -1225,7 +1224,7 @@ struct TupleComp3
 #endif // #if defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: end of functions defined here
+ *      end of functions defined here
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 /* device_utils.c */

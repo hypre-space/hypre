@@ -118,7 +118,6 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    const dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A_diag), "warp", bDim);
 
-   /* WM: Q - need to pass variables intead of hypre_CSRMatrix...() ? Why? */
    HYPRE_Int  nrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int  diag_ncol = hypre_CSRMatrixNumCols(A_diag);
    HYPRE_Int *d_diag_i = hypre_CSRMatrixI(A_diag);
@@ -148,7 +147,6 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 
    return B;
 }
-/* WM: Q - necessary to keep the implementation below? */
 #else
 hypre_CSRMatrix*
 hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
@@ -246,7 +244,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_ParCSRMatrixNumRows(A), "warp", bDim);
 
-   /* WM: Q - need to pass variables intead of hypre_CSRMatrix...() ? Why? */
    HYPRE_Int  nrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int  diag_ncol = hypre_CSRMatrixNumCols(A_diag);
    HYPRE_Int *d_diag_i = hypre_CSRMatrixI(A_diag);
@@ -299,7 +296,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
 
    hypre_assert(hypre_CSRMatrixNumCols(E_diag) == hypre_CSRMatrixNumCols(A_diag));
 
-   /* WM: Q - need to pass variables intead of hypre_CSRMatrix...() ? Why? */
    nrows = hypre_CSRMatrixNumRows(E_diag);
    diag_ncol = hypre_CSRMatrixNumCols(E_diag);
    d_diag_i = hypre_CSRMatrixI(E_diag);
@@ -336,7 +332,6 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-/* WM: Q - necessary to keep the implementation below? */
 #else
 HYPRE_Int
 hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
