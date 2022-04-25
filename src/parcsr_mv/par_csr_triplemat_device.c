@@ -368,8 +368,25 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 #if PARCSRGEMM_TIMING > 1
       t1 = hypre_MPI_Wtime();
 #endif
-      hypre_CSRMatrixTranspose(A_diag, &AT_diag, 1);
-      hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
+
+      if (hypre_ParCSRMatrixDiagT(A))
+      {
+         AT_diag = hypre_ParCSRMatrixDiagT(A);
+      }
+      else
+      {
+         hypre_CSRMatrixTranspose(A_diag, &AT_diag, 1);
+      }
+
+      if (hypre_ParCSRMatrixOffdT(A))
+      {
+         AT_offd = hypre_ParCSRMatrixOffdT(A);
+      }
+      else
+      {
+         hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
+      }
+
 #if PARCSRGEMM_TIMING > 1
       hypre_ForceSyncComputeStream(hypre_handle());
       t2 = hypre_MPI_Wtime() - t1;
@@ -386,15 +403,28 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_ParPrintf(comm, "Time Stack %f\n", t2);
 #endif
 
-      if (keep_transpose)
+      if (!hypre_ParCSRMatrixDiagT(A))
       {
-         hypre_ParCSRMatrixDiagT(A) = AT_diag;
-         hypre_ParCSRMatrixOffdT(A) = AT_offd;
+         if (keep_transpose)
+         {
+            hypre_ParCSRMatrixDiagT(A) = AT_diag;
+         }
+         else
+         {
+            hypre_CSRMatrixDestroy(AT_diag);
+         }
       }
-      else
+
+      if (!hypre_ParCSRMatrixOffdT(A))
       {
-         hypre_CSRMatrixDestroy(AT_diag);
-         hypre_CSRMatrixDestroy(AT_offd);
+         if (keep_transpose)
+         {
+            hypre_ParCSRMatrixOffdT(A) = AT_offd;
+         }
+         else
+         {
+            hypre_CSRMatrixDestroy(AT_offd);
+         }
       }
 
 #if PARCSRGEMM_TIMING > 1
@@ -632,19 +662,48 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
       Abar = hypre_ConcatDiagAndOffdDevice(A);
 
-      hypre_CSRMatrixTransposeDevice(R_diag, &R_diagT, 1);
-      hypre_CSRMatrixTransposeDevice(R_offd, &R_offdT, 1);
-      RbarT = hypre_CSRMatrixStack2Device(R_diagT, R_offdT);
-
-      if (keep_transpose)
+      if (hypre_ParCSRMatrixDiagT(R))
       {
-         hypre_ParCSRMatrixDiagT(R) = R_diagT;
-         hypre_ParCSRMatrixOffdT(R) = R_offdT;
+         R_diagT = hypre_ParCSRMatrixDiagT(R);
       }
       else
       {
-         hypre_CSRMatrixDestroy(R_diagT);
-         hypre_CSRMatrixDestroy(R_offdT);
+         hypre_CSRMatrixTransposeDevice(R_diag, &R_diagT, 1);
+      }
+
+      if (hypre_ParCSRMatrixOffdT(R))
+      {
+         R_offdT = hypre_ParCSRMatrixOffdT(R);
+      }
+      else
+      {
+         hypre_CSRMatrixTransposeDevice(R_offd, &R_offdT, 1);
+      }
+
+      RbarT = hypre_CSRMatrixStack2Device(R_diagT, R_offdT);
+
+      if (!hypre_ParCSRMatrixDiagT(R))
+      {
+         if (keep_transpose)
+         {
+            hypre_ParCSRMatrixDiagT(R) = R_diagT;
+         }
+         else
+         {
+            hypre_CSRMatrixDestroy(R_diagT);
+         }
+      }
+
+      if (!hypre_ParCSRMatrixOffdT(R))
+      {
+         if (keep_transpose)
+         {
+            hypre_ParCSRMatrixOffdT(R) = R_offdT;
+         }
+         else
+         {
+            hypre_CSRMatrixDestroy(R_offdT);
+         }
       }
 
       Pext = hypre_ParCSRMatrixExtractBExtDeviceWait(request);
