@@ -679,7 +679,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         restrict_type = 0;
+         restrict_type[i] = 0;
       }
       (mgr_data -> restrict_type) = restrict_type;
    }
@@ -688,7 +688,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       num_relax_sweeps = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         num_relax_sweeps = 1;
+         num_relax_sweeps[i] = 1;
       }
       (mgr_data -> num_relax_sweeps) = num_relax_sweeps;
    }

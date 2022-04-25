@@ -539,7 +539,7 @@ hypre_MGRDestroy( void *data )
          if ((mgr_data -> GSElimData)[i])
          {
             hypre_MGRDestroyGSElimData((mgr_data -> GSElimData)[i]);      
-            (mgr_data -> GSElimData) = NULL;
+            (mgr_data -> GSElimData)[i] = NULL;
          }
       }
       hypre_TFree(mgr_data -> GSElimData, HYPRE_MEMORY_HOST);
@@ -563,6 +563,8 @@ hypre_MGRCreateGSElimData()
    hypre_ParAMGDataAInv(gsdata) = NULL;
    hypre_ParAMGDataBVec(gsdata) = NULL;
    hypre_ParAMGDataCommInfo(gsdata) = NULL;
+
+   return (void *) gsdata;
 }
 
 /* Destroy data for V-cycle F-relaxation */
