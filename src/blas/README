@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -33,3 +33,7 @@ the following:
   the C files (search for 'auxiliary').
 
 - Add the filename in Makefile
+
+- Remove any instance of the 'static' identifier in local variables. 'static' variables
+  are initialized only once and shared between all threads executing the code; thus,
+  they lead to code that may not be thread-safe.

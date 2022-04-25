@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -30,11 +30,13 @@ HYPRE_Complex hypre_conj( HYPRE_Complex value );
 HYPRE_Real    hypre_cabs( HYPRE_Complex value );
 HYPRE_Real    hypre_creal( HYPRE_Complex value );
 HYPRE_Real    hypre_cimag( HYPRE_Complex value );
+HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
 #define hypre_cabs(value)  fabs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
+#define hypre_csqrt(value) sqrt(value)
 #endif
 
 /* general.c */

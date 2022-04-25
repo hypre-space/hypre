@@ -80,7 +80,7 @@ doublereal dlansy_(const char *norm,const char *uplo, integer *n, doublereal *a,
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
+     integer c__1 = 1;
     
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2;
@@ -88,14 +88,14 @@ doublereal dlansy_(const char *norm,const char *uplo, integer *n, doublereal *a,
     /* Builtin functions */
     /*doublereal sqrt(doublereal);*/
     /* Local variables */
-    static doublereal absa;
-    static integer i__, j;
-    static doublereal scale;
+     doublereal absa;
+     integer i__, j;
+     doublereal scale;
     extern logical lsame_(const char *,const char *);
-    static doublereal value;
+     doublereal value;
     extern /* Subroutine */ integer dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
-    static doublereal sum;
+     doublereal sum;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 

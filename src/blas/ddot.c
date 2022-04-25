@@ -20,9 +20,9 @@ doublereal ddot_(integer*n,doublereal* dx,integer* incx,doublereal* dy,integer* 
     doublereal ret_val;
 
     /* Local variables */
-    static integer i__, m;
-    static doublereal dtemp;
-    static integer ix, iy, mp1;
+    integer i__, m;
+    doublereal dtemp;
+    integer ix, iy, mp1;
 
 
 /*     forms the dot product of two vectors. */
@@ -88,7 +88,7 @@ L40:
     i__1 = *n;
     for (i__ = mp1; i__ <= i__1; i__ += 5) {
 	dtemp = dtemp + dx[i__] * dy[i__] + dx[i__ + 1] * dy[i__ + 1] + dx[
-		i__ + 2] * dy[i__ + 2] + dx[i__ + 3] * dy[i__ + 3] + dx[i__ + 
+		i__ + 2] * dy[i__ + 2] + dx[i__ + 3] * dy[i__ + 3] + dx[i__ +
 		4] * dy[i__ + 4];
 /* L50: */
     }

@@ -14,8 +14,8 @@ extern "C" {
 #include "hypre_blas.h"
 
 /* Subroutine */ integer dgemm_(const char *transa,const char *transb, integer *m, integer *
-	n, integer *k, doublereal *alpha, doublereal *a, integer *lda, 
-	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer 
+	n, integer *k, doublereal *alpha, doublereal *a, integer *lda,
+	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer
 	*ldc)
 {
 
@@ -23,175 +23,175 @@ extern "C" {
     /* System generated locals */
 
     /* Local variables */
-    static integer info;
-    static logical nota, notb;
-    static doublereal temp;
-    static integer i, j, l;
+    integer info;
+    logical nota, notb;
+    doublereal temp;
+    integer i, j, l;
     extern logical lsame_(const char *,const char *);
-    static integer nrowa, nrowb;
+    integer nrowa, nrowb;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
-/*  Purpose   
-    =======   
+/*  Purpose
+    =======
 
-    DGEMM  performs one of the matrix-matrix operations   
+    DGEMM  performs one of the matrix-matrix operations
 
-       C := alpha*op( A )*op( B ) + beta*C,   
+       C := alpha*op( A )*op( B ) + beta*C,
 
-    where  op( X ) is one of   
+    where  op( X ) is one of
 
-       op( X ) = X   or   op( X ) = X',   
+       op( X ) = X   or   op( X ) = X',
 
-    alpha and beta are scalars, and A, B and C are matrices, with op( A ) 
-  
-    an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix. 
-  
+    alpha and beta are scalars, and A, B and C are matrices, with op( A )
 
-    Parameters   
-    ==========   
-
-    TRANSA - CHARACTER*1.   
-             On entry, TRANSA specifies the form of op( A ) to be used in 
-  
-             the matrix multiplication as follows:   
-
-                TRANSA = 'N' or 'n',  op( A ) = A.   
-
-                TRANSA = 'T' or 't',  op( A ) = A'.   
-
-                TRANSA = 'C' or 'c',  op( A ) = A'.   
-
-             Unchanged on exit.   
-
-    TRANSB - CHARACTER*1.   
-             On entry, TRANSB specifies the form of op( B ) to be used in 
-  
-             the matrix multiplication as follows:   
-
-                TRANSB = 'N' or 'n',  op( B ) = B.   
-
-                TRANSB = 'T' or 't',  op( B ) = B'.   
-
-                TRANSB = 'C' or 'c',  op( B ) = B'.   
-
-             Unchanged on exit.   
-
-    M      - INTEGER.   
-             On entry,  M  specifies  the number  of rows  of the  matrix 
-  
-             op( A )  and of the  matrix  C.  M  must  be at least  zero. 
-  
-             Unchanged on exit.   
-
-    N      - INTEGER.   
-             On entry,  N  specifies the number  of columns of the matrix 
-  
-             op( B ) and the number of columns of the matrix C. N must be 
-  
-             at least zero.   
-             Unchanged on exit.   
-
-    K      - INTEGER.   
-             On entry,  K  specifies  the number of columns of the matrix 
-  
-             op( A ) and the number of rows of the matrix op( B ). K must 
-  
-             be at least  zero.   
-             Unchanged on exit.   
-
-    ALPHA  - DOUBLE PRECISION.   
-             On entry, ALPHA specifies the scalar alpha.   
-             Unchanged on exit.   
-
-    A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is 
-  
-             k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.   
-             Before entry with  TRANSA = 'N' or 'n',  the leading  m by k 
-  
-             part of the array  A  must contain the matrix  A,  otherwise 
-  
-             the leading  k by m  part of the array  A  must contain  the 
-  
-             matrix A.   
-             Unchanged on exit.   
-
-    LDA    - INTEGER.   
-             On entry, LDA specifies the first dimension of A as declared 
-  
-             in the calling (sub) program. When  TRANSA = 'N' or 'n' then 
-  
-             LDA must be at least  max( 1, m ), otherwise  LDA must be at 
-  
-             least  max( 1, k ).   
-             Unchanged on exit.   
-
-    B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is 
-  
-             n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.   
-             Before entry with  TRANSB = 'N' or 'n',  the leading  k by n 
-  
-             part of the array  B  must contain the matrix  B,  otherwise 
-  
-             the leading  n by k  part of the array  B  must contain  the 
-  
-             matrix B.   
-             Unchanged on exit.   
-
-    LDB    - INTEGER.   
-             On entry, LDB specifies the first dimension of B as declared 
-  
-             in the calling (sub) program. When  TRANSB = 'N' or 'n' then 
-  
-             LDB must be at least  max( 1, k ), otherwise  LDB must be at 
-  
-             least  max( 1, n ).   
-             Unchanged on exit.   
-
-    BETA   - DOUBLE PRECISION.   
-             On entry,  BETA  specifies the scalar  beta.  When  BETA  is 
-  
-             supplied as zero then C need not be set on input.   
-             Unchanged on exit.   
-
-    C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).   
-             Before entry, the leading  m by n  part of the array  C must 
-  
-             contain the matrix  C,  except when  beta  is zero, in which 
-  
-             case C need not be set on entry.   
-             On exit, the array  C  is overwritten by the  m by n  matrix 
-  
-             ( alpha*op( A )*op( B ) + beta*C ).   
-
-    LDC    - INTEGER.   
-             On entry, LDC specifies the first dimension of C as declared 
-  
-             in  the  calling  (sub)  program.   LDC  must  be  at  least 
-  
-             max( 1, m ).   
-             Unchanged on exit.   
+    an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 
 
-    Level 3 Blas routine.   
+    Parameters
+    ==========
 
-    -- Written on 8-February-1989.   
-       Jack Dongarra, Argonne National Laboratory.   
-       Iain Duff, AERE Harwell.   
-       Jeremy Du Croz, Numerical Algorithms Group Ltd.   
-       Sven Hammarling, Numerical Algorithms Group Ltd.   
+    TRANSA - CHARACTER*1.
+             On entry, TRANSA specifies the form of op( A ) to be used in
+
+             the matrix multiplication as follows:
+
+                TRANSA = 'N' or 'n',  op( A ) = A.
+
+                TRANSA = 'T' or 't',  op( A ) = A'.
+
+                TRANSA = 'C' or 'c',  op( A ) = A'.
+
+             Unchanged on exit.
+
+    TRANSB - CHARACTER*1.
+             On entry, TRANSB specifies the form of op( B ) to be used in
+
+             the matrix multiplication as follows:
+
+                TRANSB = 'N' or 'n',  op( B ) = B.
+
+                TRANSB = 'T' or 't',  op( B ) = B'.
+
+                TRANSB = 'C' or 'c',  op( B ) = B'.
+
+             Unchanged on exit.
+
+    M      - INTEGER.
+             On entry,  M  specifies  the number  of rows  of the  matrix
+
+             op( A )  and of the  matrix  C.  M  must  be at least  zero.
+
+             Unchanged on exit.
+
+    N      - INTEGER.
+             On entry,  N  specifies the number  of columns of the matrix
+
+             op( B ) and the number of columns of the matrix C. N must be
+
+             at least zero.
+             Unchanged on exit.
+
+    K      - INTEGER.
+             On entry,  K  specifies  the number of columns of the matrix
+
+             op( A ) and the number of rows of the matrix op( B ). K must
+
+             be at least  zero.
+             Unchanged on exit.
+
+    ALPHA  - DOUBLE PRECISION.
+             On entry, ALPHA specifies the scalar alpha.
+             Unchanged on exit.
+
+    A      - DOUBLE PRECISION array of DIMENSION ( LDA, ka ), where ka is
+
+             k  when  TRANSA = 'N' or 'n',  and is  m  otherwise.
+             Before entry with  TRANSA = 'N' or 'n',  the leading  m by k
+
+             part of the array  A  must contain the matrix  A,  otherwise
+
+             the leading  k by m  part of the array  A  must contain  the
+
+             matrix A.
+             Unchanged on exit.
+
+    LDA    - INTEGER.
+             On entry, LDA specifies the first dimension of A as declared
+
+             in the calling (sub) program. When  TRANSA = 'N' or 'n' then
+
+             LDA must be at least  max( 1, m ), otherwise  LDA must be at
+
+             least  max( 1, k ).
+             Unchanged on exit.
+
+    B      - DOUBLE PRECISION array of DIMENSION ( LDB, kb ), where kb is
+
+             n  when  TRANSB = 'N' or 'n',  and is  k  otherwise.
+             Before entry with  TRANSB = 'N' or 'n',  the leading  k by n
+
+             part of the array  B  must contain the matrix  B,  otherwise
+
+             the leading  n by k  part of the array  B  must contain  the
+
+             matrix B.
+             Unchanged on exit.
+
+    LDB    - INTEGER.
+             On entry, LDB specifies the first dimension of B as declared
+
+             in the calling (sub) program. When  TRANSB = 'N' or 'n' then
+
+             LDB must be at least  max( 1, k ), otherwise  LDB must be at
+
+             least  max( 1, n ).
+             Unchanged on exit.
+
+    BETA   - DOUBLE PRECISION.
+             On entry,  BETA  specifies the scalar  beta.  When  BETA  is
+
+             supplied as zero then C need not be set on input.
+             Unchanged on exit.
+
+    C      - DOUBLE PRECISION array of DIMENSION ( LDC, n ).
+             Before entry, the leading  m by n  part of the array  C must
+
+             contain the matrix  C,  except when  beta  is zero, in which
+
+             case C need not be set on entry.
+             On exit, the array  C  is overwritten by the  m by n  matrix
+
+             ( alpha*op( A )*op( B ) + beta*C ).
+
+    LDC    - INTEGER.
+             On entry, LDC specifies the first dimension of C as declared
+
+             in  the  calling  (sub)  program.   LDC  must  be  at  least
+
+             max( 1, m ).
+             Unchanged on exit.
+
+
+    Level 3 Blas routine.
+
+    -- Written on 8-February-1989.
+       Jack Dongarra, Argonne National Laboratory.
+       Iain Duff, AERE Harwell.
+       Jeremy Du Croz, Numerical Algorithms Group Ltd.
+       Sven Hammarling, Numerical Algorithms Group Ltd.
 
 
 
-       Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not 
-  
-       transposed and set  NROWA, NCOLA and  NROWB  as the number of rows 
-  
-       and  columns of  A  and the  number of  rows  of  B  respectively. 
-  
+       Set  NOTA  and  NOTB  as  true if  A  and  B  respectively are not
 
-    
-   Parameter adjustments   
+       transposed and set  NROWA, NCOLA and  NROWB  as the number of rows
+
+       and  columns of  A  and the  number of  rows  of  B  respectively.
+
+
+
+   Parameter adjustments
        Function Body */
 
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
@@ -216,7 +216,7 @@ extern "C" {
     info = 0;
     if (! nota && ! lsame_(transa, "C") && ! lsame_(transa, "T")) {
 	info = 1;
-    } else if (! notb && ! lsame_(transb, "C") && ! lsame_(transb, 
+    } else if (! notb && ! lsame_(transb, "C") && ! lsame_(transb,
 	    "T")) {
 	info = 2;
     } else if (*m < 0) {

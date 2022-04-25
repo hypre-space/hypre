@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -66,7 +66,7 @@ typedef double                 hypre_double;
 #endif /* hypre_GENERAL_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -98,7 +98,7 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -149,7 +149,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif /* hypre_ERROR_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -500,7 +500,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -513,7 +513,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #define HYPRE_SMP_SCHEDULE schedule(static)
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -590,7 +590,14 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
 
 #if defined(HYPRE_USING_UMPIRE)
+#include "umpire/config.hpp"
+#if UMPIRE_VERSION_MAJOR >= 2022
+#include "umpire/interface/c_fortran/umpire.h"
+#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_quick_pool
+#else
 #include "umpire/interface/umpire.h"
+#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_pool
+#endif
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
 #endif
 
@@ -843,7 +850,7 @@ typedef void (*GPUMfreeFunc)(void *);
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -957,7 +964,7 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #endif /* HYPRE_OMP_DEVICE_H */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -987,7 +994,7 @@ void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1105,7 +1112,7 @@ HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1147,7 +1154,7 @@ typedef hypre_ListElement *hypre_LinkList;
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1199,7 +1206,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
 #endif /* end of header */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1277,7 +1284,7 @@ static char hypre__markname[1024];
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1386,7 +1393,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1455,7 +1462,7 @@ typedef struct
 #endif /* #ifndef HYPRE_GSELIM_H */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1494,7 +1501,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1525,11 +1532,13 @@ HYPRE_Complex hypre_conj( HYPRE_Complex value );
 HYPRE_Real    hypre_cabs( HYPRE_Complex value );
 HYPRE_Real    hypre_creal( HYPRE_Complex value );
 HYPRE_Real    hypre_cimag( HYPRE_Complex value );
+HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
 #define hypre_cabs(value)  fabs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
+#define hypre_csqrt(value) sqrt(value)
 #endif
 
 /* general.c */
@@ -1845,7 +1854,7 @@ hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x,
 hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)

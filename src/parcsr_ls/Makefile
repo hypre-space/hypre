@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,6 +37,7 @@ HEADERS =\
  par_amg.h\
  par_amgdd.h\
  par_amgdd_comp_grid.h\
+ par_fsai.h\
  schwarz.h
 
 FILES =\
@@ -76,6 +77,7 @@ FILES =\
  HYPRE_parcsr_int.c\
  HYPRE_parcsr_mgr.c\
  HYPRE_parcsr_ilu.c \
+ HYPRE_parcsr_fsai.c \
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
@@ -93,6 +95,9 @@ FILES =\
  par_amgdd_helpers.c\
  par_amg_solve.c\
  par_amg_solveT.c\
+ par_fsai.c\
+ par_fsai_setup.c\
+ par_fsai_solve.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
  par_cgc_coarsen.c\

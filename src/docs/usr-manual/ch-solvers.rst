@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -18,18 +18,19 @@ interfaces:
    -----------  ----------------------------------
    Solvers      Struct   SStruct    FEI      IJ
    ===========  =======  =======  =======  =======
-   Jacobi          X        X                  
-   SMG             X        X                  
-   PFMG            X        X                  
-   Split                    X                  
-   SysPFMG                  X                  
-   FAC                      X                  
-   Maxwell                  X                  
+   Jacobi          X        X
+   SMG             X        X
+   PFMG            X        X
+   Split                    X
+   SysPFMG                  X
+   FAC                      X
+   Maxwell                  X
    BoomerAMG                X        X        X
    AMS                      X        X        X
    ADS                      X        X        X
    MLI                      X        X        X
    MGR                                        X
+   FSAI                                       X
    ParaSails                X        X        X
    hypre-ILU                                  X
    Euclid                   X        X        X
@@ -115,10 +116,10 @@ following routines, where ``A`` is the matrix, ``b`` the right hand side and
 ``x`` the solution vector of the linear system to be solved:
 
 .. code-block:: c
-   
+
    /* Create Solver */
-   int HYPRE_SOLVERCreate(MPI_COMM_WORLD, &solver); 
-   
+   int HYPRE_SOLVERCreate(MPI_COMM_WORLD, &solver);
+
    /* Set certain parameters if desired */
    HYPRE_SOLVERSetTol(solver, 1.e-8);
    ...
@@ -152,10 +153,10 @@ be found in the reference manual.
    solvers-ads
    solvers-mli
    solvers-mgr
+   solvers-fsai
    solvers-parasails
-   solvers-hypre-ilu   
+   solvers-hypre-ilu
    solvers-euclid
    solvers-pilut
    solvers-lobpcg
    solvers-fei
-

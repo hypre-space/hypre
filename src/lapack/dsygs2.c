@@ -8,103 +8,103 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dsygs2_(integer *itype,const char *uplo, integer *n, 
+/* Subroutine */ integer dsygs2_(integer *itype,const char *uplo, integer *n,
 	doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *
 	info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       February 29, 1992   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       February 29, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DSYGS2 reduces a real symmetric-definite generalized eigenproblem   
-    to standard form.   
+    DSYGS2 reduces a real symmetric-definite generalized eigenproblem
+    to standard form.
 
-    If ITYPE = 1, the problem is A*x = lambda*B*x,   
-    and A is overwritten by inv(U')*A*inv(U) or inv(L)*A*inv(L')   
+    If ITYPE = 1, the problem is A*x = lambda*B*x,
+    and A is overwritten by inv(U')*A*inv(U) or inv(L)*A*inv(L')
 
-    If ITYPE = 2 or 3, the problem is A*B*x = lambda*x or   
-    B*A*x = lambda*x, and A is overwritten by U*A*U` or L'*A*L.   
+    If ITYPE = 2 or 3, the problem is A*B*x = lambda*x or
+    B*A*x = lambda*x, and A is overwritten by U*A*U` or L'*A*L.
 
-    B must have been previously factorized as U'*U or L*L' by DPOTRF.   
+    B must have been previously factorized as U'*U or L*L' by DPOTRF.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    ITYPE   (input) INTEGER   
-            = 1: compute inv(U')*A*inv(U) or inv(L)*A*inv(L');   
-            = 2 or 3: compute U*A*U' or L'*A*L.   
+    ITYPE   (input) INTEGER
+            = 1: compute inv(U')*A*inv(U) or inv(L)*A*inv(L');
+            = 2 or 3: compute U*A*U' or L'*A*L.
 
-    UPLO    (input) CHARACTER   
-            Specifies whether the upper or lower triangular part of the   
-            symmetric matrix A is stored, and how B has been factorized.   
-            = 'U':  Upper triangular   
-            = 'L':  Lower triangular   
+    UPLO    (input) CHARACTER
+            Specifies whether the upper or lower triangular part of the
+            symmetric matrix A is stored, and how B has been factorized.
+            = 'U':  Upper triangular
+            = 'L':  Lower triangular
 
-    N       (input) INTEGER   
-            The order of the matrices A and B.  N >= 0.   
+    N       (input) INTEGER
+            The order of the matrices A and B.  N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the symmetric matrix A.  If UPLO = 'U', the leading   
-            n by n upper triangular part of A contains the upper   
-            triangular part of the matrix A, and the strictly lower   
-            triangular part of A is not referenced.  If UPLO = 'L', the   
-            leading n by n lower triangular part of A contains the lower   
-            triangular part of the matrix A, and the strictly upper   
-            triangular part of A is not referenced.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the symmetric matrix A.  If UPLO = 'U', the leading
+            n by n upper triangular part of A contains the upper
+            triangular part of the matrix A, and the strictly lower
+            triangular part of A is not referenced.  If UPLO = 'L', the
+            leading n by n lower triangular part of A contains the lower
+            triangular part of the matrix A, and the strictly upper
+            triangular part of A is not referenced.
 
-            On exit, if INFO = 0, the transformed matrix, stored in the   
-            same format as A.   
+            On exit, if INFO = 0, the transformed matrix, stored in the
+            same format as A.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
 
-    B       (input) DOUBLE PRECISION array, dimension (LDB,N)   
-            The triangular factor from the Cholesky factorization of B,   
-            as returned by DPOTRF.   
+    B       (input) DOUBLE PRECISION array, dimension (LDB,N)
+            The triangular factor from the Cholesky factorization of B,
+            as returned by DPOTRF.
 
-    LDB     (input) INTEGER   
-            The leading dimension of the array B.  LDB >= max(1,N).   
+    LDB     (input) INTEGER
+            The leading dimension of the array B.  LDB >= max(1,N).
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit.   
-            < 0:  if INFO = -i, the i-th argument had an illegal value.   
+    INFO    (output) INTEGER
+            = 0:  successful exit.
+            < 0:  if INFO = -i, the i-th argument had an illegal value.
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input parameters.   
+       Test the input parameters.
 
        Parameter adjustments */
     /* Table of constant values */
-    static doublereal c_b6 = -1.;
-    static integer c__1 = 1;
-    static doublereal c_b27 = 1.;
-    
+    doublereal c_b6 = -1.;
+    integer c__1 = 1;
+    doublereal c_b27 = 1.;
+
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     doublereal d__1;
     /* Local variables */
-    extern /* Subroutine */ integer dsyr2_(const char *, integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dsyr2_(const char *, integer *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    integer *);
-    static integer k;
-    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
+    integer k;
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *,
 	    integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ integer daxpy_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer daxpy_(integer *, doublereal *, doublereal *,
 	    integer *, doublereal *, integer *);
-    static logical upper;
-    extern /* Subroutine */ integer dtrmv_(const char *,const char *,const char *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *), dtrsv_(const char *,const char *,const char *, integer *, doublereal *, 
+    logical upper;
+    extern /* Subroutine */ integer dtrmv_(const char *,const char *,const char *, integer *,
+	    doublereal *, integer *, doublereal *, integer *), dtrsv_(const char *,const char *,const char *, integer *, doublereal *,
 	    integer *, doublereal *, integer *);
-    static doublereal ct;
+    doublereal ct;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    static doublereal akk, bkk;
+    doublereal akk, bkk;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
 
@@ -193,16 +193,16 @@ extern "C" {
 		    dscal_(&i__2, &d__1, &a_ref(k + 1, k), &c__1);
 		    ct = akk * -.5;
 		    i__2 = *n - k;
-		    daxpy_(&i__2, &ct, &b_ref(k + 1, k), &c__1, &a_ref(k + 1, 
+		    daxpy_(&i__2, &ct, &b_ref(k + 1, k), &c__1, &a_ref(k + 1,
 			    k), &c__1);
 		    i__2 = *n - k;
 		    dsyr2_(uplo, &i__2, &c_b6, &a_ref(k + 1, k), &c__1, &
 			    b_ref(k + 1, k), &c__1, &a_ref(k + 1, k + 1), lda);
 		    i__2 = *n - k;
-		    daxpy_(&i__2, &ct, &b_ref(k + 1, k), &c__1, &a_ref(k + 1, 
+		    daxpy_(&i__2, &ct, &b_ref(k + 1, k), &c__1, &a_ref(k + 1,
 			    k), &c__1);
 		    i__2 = *n - k;
-		    dtrsv_(uplo, "No transpose", "Non-unit", &i__2, &b_ref(k 
+		    dtrsv_(uplo, "No transpose", "Non-unit", &i__2, &b_ref(k
 			    + 1, k + 1), ldb, &a_ref(k + 1, k), &c__1);
 		}
 /* L20: */
@@ -221,7 +221,7 @@ extern "C" {
 		akk = a_ref(k, k);
 		bkk = b_ref(k, k);
 		i__2 = k - 1;
-		dtrmv_(uplo, "No transpose", "Non-unit", &i__2, &b[b_offset], 
+		dtrmv_(uplo, "No transpose", "Non-unit", &i__2, &b[b_offset],
 			ldb, &a_ref(1, k), &c__1);
 		ct = akk * .5;
 		i__2 = k - 1;
@@ -250,13 +250,13 @@ extern "C" {
 		akk = a_ref(k, k);
 		bkk = b_ref(k, k);
 		i__2 = k - 1;
-		dtrmv_(uplo, "Transpose", "Non-unit", &i__2, &b[b_offset], 
+		dtrmv_(uplo, "Transpose", "Non-unit", &i__2, &b[b_offset],
 			ldb, &a_ref(k, 1), lda);
 		ct = akk * .5;
 		i__2 = k - 1;
 		daxpy_(&i__2, &ct, &b_ref(k, 1), ldb, &a_ref(k, 1), lda);
 		i__2 = k - 1;
-		dsyr2_(uplo, &i__2, &c_b27, &a_ref(k, 1), lda, &b_ref(k, 1), 
+		dsyr2_(uplo, &i__2, &c_b27, &a_ref(k, 1), lda, &b_ref(k, 1),
 			ldb, &a[a_offset], lda);
 		i__2 = k - 1;
 		daxpy_(&i__2, &ct, &b_ref(k, 1), ldb, &a_ref(k, 1), lda);

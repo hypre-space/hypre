@@ -19,7 +19,7 @@ extern "C" {
     integer i__1;
 
     /* Local variables */
-    static integer i__, m, ix, iy, mp1;
+    integer i__, m, ix, iy, mp1;
 
 
 /*     copies a vector, x, to a vector, y. */
