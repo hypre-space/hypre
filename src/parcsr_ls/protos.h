@@ -2011,7 +2011,7 @@ HYPRE_Int hypre_MGRDestroy ( void *mgr_vdata );
 HYPRE_Int hypre_MGRCycle( void *mgr_vdata, hypre_ParVector **F_array, hypre_ParVector **U_array );
 void *hypre_MGRCreateFrelaxVcycleData();
 HYPRE_Int hypre_MGRDestroyFrelaxVcycleData( void *mgr_vdata );
-void *hypre_MGRCreateGSElimData(void * mgr_vdata);
+void *hypre_MGRCreateGSElimData();
 HYPRE_Int hypre_MGRDestroyGSElimData( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata, hypre_ParCSRMatrix *A,
                                           hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int level);
