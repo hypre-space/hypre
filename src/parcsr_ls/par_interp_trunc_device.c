@@ -61,6 +61,7 @@ hypreCUDAKernel_InterpTruncation(
    {
       HYPRE_Real v = read_only_load(&P_a[i]);
       row_max = hypre_max(row_max, fabs(v));
+      row_sum += v;
    }
 
 #if defined(HYPRE_USING_SYCL)
@@ -213,8 +214,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
                                         P_j,
                                         oneapi::dpl::make_zip_iterator(tmp_rowid, P_diag_j,  P_diag_a),
                                         is_nonnegative<HYPRE_Int>() );
-      /* WM: Q - why do I have to dereference this with *? Don't have to do something similar elsewhere? */
-      new_nnz_diag = *std::get<0>(new_end.base());
+      new_nnz_diag = std::get<0>(new_end.base()) - tmp_rowid;
 #else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,

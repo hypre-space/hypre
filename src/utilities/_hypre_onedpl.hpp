@@ -124,9 +124,13 @@ void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
       typename std::iterator_traits<OutputIter>::iterator_category,
       std::random_access_iterator_tag >::value,
       "Iterators passed to algorithms must be random-access iterators.");
-   /* WM: todo - check this... Abhishek had something different here, but I don't know why */
-   hypreSycl_copy_if( first, last, mask,
-                      oneapi::dpl::make_permutation_iterator(result, map), pred );
+   /* WM: Q - why doesn't my usage of copy_if below work? It seems like it should... the transform_if version
+    * was recommended by Intel folks (seem email thread with Brian and Abhishek) */
+   /* hypreSycl_copy_if( first, last, mask, */
+   /*                    oneapi::dpl::make_permutation_iterator(result, map), pred ); */
+   hypreSycl_transform_if(first, last, mask,
+                          oneapi::dpl::make_permutation_iterator(result, map),
+   [ = ](auto &&v) { return v; }, [ = ](auto &&m) { return pred(m); });
 }
 
 // Equivalent of thrust::gather
@@ -147,7 +151,7 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
       "Iterators passed to algorithms must be random-access iterators.");
    auto perm_begin =
       oneapi::dpl::make_permutation_iterator(input_first, map_first);
-   const int n = ::std::distance(map_first, map_last);
+   const auto n = ::std::distance(map_first, map_last);
    return HYPRE_ONEDPL_CALL( oneapi::dpl::copy, perm_begin, perm_begin + n, result);
 }
 
