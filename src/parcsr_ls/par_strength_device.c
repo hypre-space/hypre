@@ -13,12 +13,17 @@
 HYPRE_Int hypre_ParCSRCommPkgPrint(hypre_ParCSRCommPkg *comm_pkg, const char *filename);
 HYPRE_Int hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name);
 HYPRE_Int hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *name);
-HYPRE_Int hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
-HYPRE_Int hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size, const char *name);
+HYPRE_Int hypre_DisplayInt(HYPRE_Int *array, HYPRE_Int size, HYPRE_Int display_size,
+                           const char *name);
+HYPRE_Int hypre_DisplayComplex(HYPRE_Complex *array, HYPRE_Int size, HYPRE_Int display_size,
+                               const char *name);
 HYPRE_Int hypre_DisplayCSRMatrix(hypre_CSRMatrix *A, HYPRE_Int max_display_size, const char *name);
-HYPRE_Int hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, const char *name);
-HYPRE_Int hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B);
-HYPRE_Int hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB);
+HYPRE_Int hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size,
+                                    const char *name);
+HYPRE_Int hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA,
+                                 const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B);
+HYPRE_Int hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA,
+                                    const char *nameB);
 
 HYPRE_Int
 hypre_ParCSRCommPkgPrint(hypre_ParCSRCommPkg *comm_pkg, const char *filename)
@@ -83,7 +88,7 @@ hypre_ParCSRCommPkgPrint(hypre_ParCSRCommPkg *comm_pkg, const char *filename)
 HYPRE_Int
 hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name)
 {
-   if (row >= hypre_CSRMatrixNumRows(A)) return 0;
+   if (row >= hypre_CSRMatrixNumRows(A)) { return 0; }
 
    HYPRE_Int i;
    hypre_CSRMatrix *mat;
@@ -99,19 +104,20 @@ hypre_DisplayCSRMatrixRow(hypre_CSRMatrix *A, HYPRE_Int row, const char *name)
    {
       mat = A;
    }
-   
-   // Print row 
+
+   // Print row
    hypre_printf("%s_diag row %d\nj = ", name, row);
-   for (i = hypre_CSRMatrixI(mat)[row]; i < hypre_CSRMatrixI(mat)[row+1]; i++) {
+   for (i = hypre_CSRMatrixI(mat)[row]; i < hypre_CSRMatrixI(mat)[row + 1]; i++)
+   {
       hypre_printf("%d ", hypre_CSRMatrixJ(mat)[i]);
    }
    hypre_printf("\ndata = ");
-   for (i = hypre_CSRMatrixI(mat)[row]; i < hypre_CSRMatrixI(mat)[row+1]; i++)
+   for (i = hypre_CSRMatrixI(mat)[row]; i < hypre_CSRMatrixI(mat)[row + 1]; i++)
    {
       hypre_printf("%.2e ", hypre_CSRMatrixData(mat)[i]);
    }
    hypre_printf("\n");
-   
+
    // Destroy copy if necessary
    if (memory_location == hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE))
    {
@@ -128,12 +134,12 @@ hypre_DisplayParCSRMatrixRow(hypre_ParCSRMatrix *A, HYPRE_Int row, const char *n
 
    strcpy(csrName, name);
    strcat(csrName, "_diag");
-   
+
    hypre_DisplayCSRMatrixRow(hypre_ParCSRMatrixDiag(A), row, csrName);
 
    strcpy(csrName, name);
    strcat(csrName, "_offd");
-   
+
    hypre_DisplayCSRMatrixRow(hypre_ParCSRMatrixOffd(A), row, csrName);
 
    return 0;
@@ -224,7 +230,8 @@ hypre_DisplayCSRMatrix(hypre_CSRMatrix *A, HYPRE_Int max_display_size, const cha
 
    // Print info
    hypre_printf("\n");
-   hypre_printf("%s: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat),
+                hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
    hypre_printf("%s_i = ", name);
    for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
    {
@@ -276,7 +283,9 @@ hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, con
 
    // Print info
    hypre_printf("\n");
-   hypre_printf("%s_diag: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_diag: num row, num col, nnz = %d, %d, %d\n", name,
+                hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat),
+                hypre_CSRMatrixNumNonzeros(disp_mat));
    hypre_printf("%s_diag_i = ", name);
    for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
    {
@@ -316,7 +325,9 @@ hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, con
    }
 
    // Print info
-   hypre_printf("%s_offd: num row, num col, nnz = %d, %d, %d\n", name, hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat), hypre_CSRMatrixNumNonzeros(disp_mat));
+   hypre_printf("%s_offd: num row, num col, nnz = %d, %d, %d\n", name,
+                hypre_CSRMatrixNumRows(disp_mat), hypre_CSRMatrixNumCols(disp_mat),
+                hypre_CSRMatrixNumNonzeros(disp_mat));
    hypre_printf("%s_offd_i = ", name);
    for (i = 0; i < hypre_min(max_display_size, hypre_CSRMatrixNumRows(disp_mat) + 1); i++)
    {
@@ -346,7 +357,8 @@ hypre_DisplayParCSRMatrix(hypre_ParCSRMatrix *A, HYPRE_Int max_display_size, con
 }
 
 HYPRE_Int
-hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB, HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B)
+hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA, const char *nameB,
+                       HYPRE_BigInt *col_map_offd_A, HYPRE_BigInt *col_map_offd_B)
 {
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
@@ -379,20 +391,23 @@ hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA
    // Compare matrices
    if (hypre_CSRMatrixNumRows(A_host) != hypre_CSRMatrixNumRows(B_host))
    {
-      hypre_printf("Rank %d: %s num rows = %d, %s num rows = %d\n", myid,  nameA, hypre_CSRMatrixNumRows(A_host), nameB, hypre_CSRMatrixNumRows(B_host));
+      hypre_printf("Rank %d: %s num rows = %d, %s num rows = %d\n", myid,  nameA,
+                   hypre_CSRMatrixNumRows(A_host), nameB, hypre_CSRMatrixNumRows(B_host));
       equal = 0;
    }
    if (col_map_offd_A == NULL)
    {
       if (hypre_CSRMatrixNumCols(A_host) != hypre_CSRMatrixNumCols(B_host))
       {
-         hypre_printf("Rank %d: %s num cols = %d, %s num cols = %d\n", myid,  nameA, hypre_CSRMatrixNumCols(A_host), nameB, hypre_CSRMatrixNumCols(B_host));
+         hypre_printf("Rank %d: %s num cols = %d, %s num cols = %d\n", myid,  nameA,
+                      hypre_CSRMatrixNumCols(A_host), nameB, hypre_CSRMatrixNumCols(B_host));
          equal = 0;
       }
    }
    if (hypre_CSRMatrixNumNonzeros(A_host) != hypre_CSRMatrixNumNonzeros(B_host))
    {
-      hypre_printf("Rank %d: %s nnz = %d, %snnz = %d\n", myid,  nameA, hypre_CSRMatrixNumNonzeros(A_host), nameB, hypre_CSRMatrixNumNonzeros(B_host));
+      hypre_printf("Rank %d: %s nnz = %d, %snnz = %d\n", myid,  nameA, hypre_CSRMatrixNumNonzeros(A_host),
+                   nameB, hypre_CSRMatrixNumNonzeros(B_host));
       equal = 0;
    }
    if (equal)
@@ -401,21 +416,22 @@ hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA
       {
          if (hypre_CSRMatrixI(A_host)[i] != hypre_CSRMatrixI(B_host)[i])
          {
-            hypre_printf("Rank %d: %s_i[%d] = %d, %s_i[%d] = %d\n", myid,  nameA, i, hypre_CSRMatrixI(A_host)[i], nameB, i, hypre_CSRMatrixI(B_host)[i]);
+            hypre_printf("Rank %d: %s_i[%d] = %d, %s_i[%d] = %d\n", myid,  nameA, i,
+                         hypre_CSRMatrixI(A_host)[i], nameB, i, hypre_CSRMatrixI(B_host)[i]);
             equal = 0;
          }
       }
       for (i = 0; i < hypre_CSRMatrixNumRows(A_host); i++)
       {
-         for (j = hypre_CSRMatrixI(A_host)[i]; j < hypre_CSRMatrixI(A_host)[i+1]; j++)
+         for (j = hypre_CSRMatrixI(A_host)[i]; j < hypre_CSRMatrixI(A_host)[i + 1]; j++)
          {
             col = hypre_CSRMatrixJ(A_host)[j];
-            if (col_map_offd_A) col = col_map_offd_A[col];
+            if (col_map_offd_A) { col = col_map_offd_A[col]; }
             found = 0;
-            for (k = hypre_CSRMatrixI(B_host)[i]; k < hypre_CSRMatrixI(B_host)[i+1]; k++)
+            for (k = hypre_CSRMatrixI(B_host)[i]; k < hypre_CSRMatrixI(B_host)[i + 1]; k++)
             {
                HYPRE_Int colB = hypre_CSRMatrixJ(B_host)[k];
-               if (col_map_offd_B) colB = col_map_offd_B[colB];
+               if (col_map_offd_B) { colB = col_map_offd_B[colB]; }
                if (col == colB)
                {
                   found = 1;
@@ -427,9 +443,11 @@ hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA
                HYPRE_Real diff = hypre_cabs(hypre_CSRMatrixData(A_host)[j] - hypre_CSRMatrixData(B_host)[k]);
                HYPRE_Real rel_diff = diff / hypre_cabs(hypre_CSRMatrixData(A_host)[j]);
                if ( rel_diff > 0.01)
-               /* if ( diff > 0.000001 ) */
+                  /* if ( diff > 0.000001 ) */
                {
-                  hypre_printf("Rank %d: col = %d, rel_diff = %.2e, diff = %.2e, %s_data = %.2e, %s_data = %.2e\n", myid, col, rel_diff, diff, nameA, hypre_CSRMatrixData(A_host)[j], nameB, hypre_CSRMatrixData(B_host)[k]);
+                  hypre_printf("Rank %d: col = %d, rel_diff = %.2e, diff = %.2e, %s_data = %.2e, %s_data = %.2e\n",
+                               myid, col, rel_diff, diff, nameA, hypre_CSRMatrixData(A_host)[j], nameB,
+                               hypre_CSRMatrixData(B_host)[k]);
                   equal = 0;
                   break;
                }
@@ -467,7 +485,8 @@ hypre_CompareCSRMatrix(hypre_CSRMatrix *A, hypre_CSRMatrix *B, const char *nameA
 }
 
 HYPRE_Int
-hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA, const char *nameB)
+hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const char *nameA,
+                          const char *nameB)
 {
 
    HYPRE_Int equal;
@@ -478,8 +497,9 @@ hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const ch
    strcat(csrNameA, "_diag");
    strcpy(csrNameB, nameB);
    strcat(csrNameB, "_diag");
-   
-   equal = hypre_CompareCSRMatrix(hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B), csrNameA, csrNameB, NULL, NULL);
+
+   equal = hypre_CompareCSRMatrix(hypre_ParCSRMatrixDiag(A), hypre_ParCSRMatrixDiag(B), csrNameA,
+                                  csrNameB, NULL, NULL);
 
    if (equal)
    {
@@ -488,7 +508,8 @@ hypre_CompareParCSRMatrix(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B, const ch
       strcpy(csrNameB, nameB);
       strcat(csrNameB, "_offd");
 
-      equal = hypre_CompareCSRMatrix(hypre_ParCSRMatrixOffd(A), hypre_ParCSRMatrixOffd(B), csrNameA, csrNameB, hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixColMapOffd(B));
+      equal = hypre_CompareCSRMatrix(hypre_ParCSRMatrixOffd(A), hypre_ParCSRMatrixOffd(B), csrNameA,
+                                     csrNameB, hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixColMapOffd(B));
    }
 
    return equal;
