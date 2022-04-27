@@ -133,7 +133,7 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
       "Iterators passed to algorithms must be random-access iterators.");
    auto perm_begin =
       oneapi::dpl::make_permutation_iterator(input_first, map_first);
-   const int n = ::std::distance(map_first, map_last);
+   const auto n = ::std::distance(map_first, map_last);
    return HYPRE_ONEDPL_CALL( oneapi::dpl::copy, perm_begin, perm_begin + n, result);
 }
 
