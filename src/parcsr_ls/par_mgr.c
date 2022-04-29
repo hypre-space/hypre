@@ -6425,8 +6425,9 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
 void *
 hypre_MGRDirectSolverCreate()
 {
-   hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
-   return (void *) dslu_data;
+//   hypre_DSLUData *dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
+//   return (void *) dslu_data;
+   return NULL;
 }
 
 HYPRE_Int
