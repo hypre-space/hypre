@@ -109,8 +109,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
 
    HYPRE_Int use_VcycleSmoother = 0;
-   HYPRE_Int use_GSElimSmoother = 0;
-   HYPRE_Int use_ComplexSmoother = 0;
+//   HYPRE_Int use_GSElimSmoother = 0;
+//   HYPRE_Int use_ComplexSmoother = 0;
    hypre_ParVector     *VcycleRelaxZtemp;
    hypre_ParVector     *VcycleRelaxVtemp;
    hypre_ParAMGData    **FrelaxVcycleData;
@@ -151,7 +151,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_BigInt iupper =  hypre_ParCSRMatrixLastRowIndex(A);
 
-   hypre_ParAMGData    **GSElimData;
+   //hypre_ParAMGData    **GSElimData;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1357,7 +1357,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          if (Frelax_type[lev] == 1)
          {
             use_VcycleSmoother = 1;
-            use_ComplexSmoother = 1;
+//            use_ComplexSmoother = 1;
          }
       }
       else
@@ -1375,8 +1375,8 @@ hypre_MGRSetup( void               *mgr_vdata,
          Frelax_type[lev] == 9 ||
          Frelax_type[lev] == 199 )
       {
-         use_GSElimSmoother = 1;
-         use_ComplexSmoother = 1;
+//         use_GSElimSmoother = 1;
+//         use_ComplexSmoother = 1;
       }
 
       /* check if last level */

@@ -14,6 +14,8 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "par_mgr.h"
+#include "_hypre_blas.h"
+#include "_hypre_lapack.h"
 
 #ifdef HYPRE_USING_DSUPERLU
 #include "dsuperlu.h"
@@ -2697,7 +2699,7 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix    *A,
    HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
    HYPRE_Complex *A_diag_data = hypre_CSRMatrixData(A_diag);
 
-   HYPRE_Int total_cpts, total_fpts, n_fpoints;
+   HYPRE_Int total_fpts, n_fpoints;
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int nnz_diag_new = 0;
    HYPRE_Int num_procs, my_id;
@@ -2709,9 +2711,8 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix    *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   // Count total C-points, F-points
+   // Count total F-points
    // Also setup F to C column map
-   total_cpts = 0;
    total_fpts = 0;
    HYPRE_Int *f_to_c_col_map = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_rows; i++)
@@ -2726,7 +2727,7 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix    *A,
          total_fpts++;
       }
    }
-   n_fpoints = blk_size;//total_fpts / total_cpts;
+   n_fpoints = blk_size;
    /* get the number of coarse rows */
    wrap_cf = hypre_IntArrayCreate(num_rows);
    hypre_IntArrayMemoryLocation(wrap_cf) = HYPRE_MEMORY_HOST;
@@ -4125,7 +4126,7 @@ HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
 
    HYPRE_Int        i, j, k;
    HYPRE_Int        ii, jj;
-   HYPRE_Int        bidx, bidx1, bidxm1, bidxp1;
+   HYPRE_Int        bidx, bidx1, bidxm1;
    HYPRE_Int        num_sends;
    HYPRE_Int        index, start;
    HYPRE_Int        num_procs, my_id;
@@ -4199,7 +4200,6 @@ HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
    for (i = 0; i < n_block; i++)
    {
       bidxm1 = i * blk_size;
-      bidxp1 = (i + 1) * blk_size;
       for (j = 0; j < blk_size; j++)
       {
          bidx = bidxm1 + j;
