@@ -14,8 +14,8 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "par_mgr.h"
-#include "_hypre_blas.h"
-#include "_hypre_lapack.h"
+//#include "_hypre_blas.h"
+//#include "_hypre_lapack.h"
 
 #ifdef HYPRE_USING_DSUPERLU
 #include "dsuperlu.h"
