@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
+#define HYPRE_MAX_NUM_VECTORS 2
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
@@ -166,41 +167,201 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
 
       if (num_rownnz < xpar * num_rows)
       {
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i,j,jj,m,tempx) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rownnz; i++)
+         switch (num_vectors)
          {
-            m = A_rownnz[i];
-            for (j = 0; j < num_vectors; j++)
-            {
-               tempx = 0.0;
-               for (jj = A_i[m]; jj < A_i[m + 1]; jj++)
+            case 2:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj,m) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rownnz; i++)
                {
-                  tempx += A_data[jj] * x_data[j * vecstride_x + A_j[jj] * idxstride_x];
+                  m = A_rownnz[i];
+
+                  HYPRE_Complex tmp[2] = {0.0, 0.0};
+                  for (jj = A_i[m]; jj < A_i[m + 1]; jj++)
+                  {
+                     HYPRE_Int     xidx = A_j[jj] * idxstride_x;
+                     HYPRE_Complex coef = A_data[jj];
+
+                     tmp[0] += coef * x_data[xidx];
+                     tmp[1] += coef * x_data[xidx + vecstride_x];
+                  }
+                  HYPRE_Int yidx = m * idxstride_y;
+
+                  y_data[yidx] += tmp[0];
+                  y_data[yidx + vecstride_y] += tmp[1];
                }
-               y_data[j * vecstride_y + m * idxstride_y] += tempx;
-            }
-         }
+               break;
+
+            case 3:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj,m) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rownnz; i++)
+               {
+                  m = A_rownnz[i];
+
+                  HYPRE_Complex tmp[3] = {0.0, 0.0, 0.0};
+                  for (jj = A_i[m]; jj < A_i[m + 1]; jj++)
+                  {
+                     HYPRE_Int     xidx = A_j[jj] * idxstride_x;
+                     HYPRE_Complex coef = A_data[jj];
+
+                     tmp[0] += coef * x_data[xidx];
+                     tmp[1] += coef * x_data[xidx +   vecstride_x];
+                     tmp[2] += coef * x_data[xidx + 2*vecstride_x];
+                  }
+                  HYPRE_Int yidx = m * idxstride_y;
+
+                  y_data[yidx] += tmp[0];
+                  y_data[yidx +   vecstride_y] += tmp[1];
+                  y_data[yidx + 2*vecstride_y] += tmp[2];
+               }
+               break;
+
+            case 4:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj,m) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rownnz; i++)
+               {
+                  m = A_rownnz[i];
+
+                  HYPRE_Complex tmp[4] = {0.0, 0.0, 0.0, 0.0};
+                  for (jj = A_i[m]; jj < A_i[m + 1]; jj++)
+                  {
+                     HYPRE_Int     xidx = A_j[jj] * idxstride_x;
+                     HYPRE_Complex coef = A_data[jj];
+
+                     tmp[0] += coef * x_data[xidx];
+                     tmp[1] += coef * x_data[xidx +   vecstride_x];
+                     tmp[2] += coef * x_data[xidx + 2*vecstride_x];
+                     tmp[3] += coef * x_data[xidx + 3*vecstride_x];
+                  }
+                  HYPRE_Int yidx = m * idxstride_y;
+
+                  y_data[yidx] += tmp[0];
+                  y_data[yidx +   vecstride_y] += tmp[1];
+                  y_data[yidx + 2*vecstride_y] += tmp[2];
+                  y_data[yidx + 3*vecstride_y] += tmp[3];
+               }
+               break;
+
+            default:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj,m,tempx) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rownnz; i++)
+               {
+                  m = A_rownnz[i];
+                  for (j = 0; j < num_vectors; j++)
+                  {
+                     tempx = 0.0;
+                     for (jj = A_i[m]; jj < A_i[m + 1]; jj++)
+                     {
+                        tempx += A_data[jj] * x_data[j * vecstride_x + A_j[jj] * idxstride_x];
+                     }
+                     y_data[j * vecstride_y + m * idxstride_y] += tempx;
+                  }
+               }
+               break;
+         } /* switch (num_vectors) */
       }
       else
       {
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i,j,jj,tempx) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rows; i++)
+         switch (num_vectors)
          {
-            for (j = 0; j < num_vectors; ++j)
-            {
-               tempx = 0.0;
-               for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
+            case 2:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rows; i++)
                {
-                  tempx += A_data[jj] * x_data[j * vecstride_x + A_j[jj] * idxstride_x];
+                  HYPRE_Complex tmp[2] = {0.0, 0.0};
+                  for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
+                  {
+                     HYPRE_Int     xidx = A_j[jj] * idxstride_x;
+                     HYPRE_Complex coef = A_data[jj];
+
+                     tmp[0] += coef * x_data[xidx];
+                     tmp[1] += coef * x_data[xidx + vecstride_x];
+                  }
+                  HYPRE_Int yidx = m * idxstride_y;
+
+                  y_data[yidx] += tmp[0];
+                  y_data[yidx + vecstride_y] += tmp[1];
                }
-               y_data[j * vecstride_y + i * idxstride_y] += tempx;
-            }
-         }
-      }
+               break;
+
+            case 3:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rows; i++)
+               {
+                  HYPRE_Complex tmp[3] = {0.0, 0.0, 0.0};
+                  for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
+                  {
+                     HYPRE_Int     xidx = A_j[jj] * idxstride_x;
+                     HYPRE_Complex coef = A_data[jj];
+
+                     tmp[0] += coef * x_data[xidx];
+                     tmp[1] += coef * x_data[xidx +   vecstride_x];
+                     tmp[2] += coef * x_data[xidx + 2*vecstride_x];
+                  }
+                  HYPRE_Int yidx = m * idxstride_y;
+
+                  y_data[yidx] += tmp[0];
+                  y_data[yidx +   vecstride_y] += tmp[1];
+                  y_data[yidx + 2*vecstride_y] += tmp[2];
+               }
+               break;
+
+            case 4:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rows; i++)
+               {
+                  HYPRE_Complex tmp[4] = {0.0, 0.0, 0.0, 0.0};
+                  for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
+                  {
+                     HYPRE_Int     xidx = A_j[jj] * idxstride_x;
+                     HYPRE_Complex coef = A_data[jj];
+
+                     tmp[0] += coef * x_data[xidx];
+                     tmp[1] += coef * x_data[xidx +   vecstride_x];
+                     tmp[2] += coef * x_data[xidx + 2*vecstride_x];
+                     tmp[3] += coef * x_data[xidx + 3*vecstride_x];
+                  }
+                  HYPRE_Int yidx = m * idxstride_y;
+
+                  y_data[yidx] += tmp[0];
+                  y_data[yidx +   vecstride_y] += tmp[1];
+                  y_data[yidx + 2*vecstride_y] += tmp[2];
+                  y_data[yidx + 3*vecstride_y] += tmp[3];
+               }
+               break;
+
+            default:
+#ifdef HYPRE_USING_OPENMP
+               #pragma omp parallel for private(i,j,jj,tempx) HYPRE_SMP_SCHEDULE
+#endif
+               for (i = 0; i < num_rows; i++)
+               {
+                  for (j = 0; j < num_vectors; ++j)
+                  {
+                     tempx = 0.0;
+                     for (jj = A_i[i]; jj < A_i[i + 1]; jj++)
+                     {
+                        tempx += A_data[jj] * x_data[j * vecstride_x + A_j[jj] * idxstride_x];
+                     }
+                     y_data[j * vecstride_y + i * idxstride_y] += tempx;
+                  }
+               }
+               break;
+         } /* switch (num_vectors) */
+      } /* if (num_rownnz < xpar * num_rows) */
 
       /*-----------------------------------------------------------------
        * y = alpha*y
