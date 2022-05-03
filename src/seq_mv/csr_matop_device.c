@@ -546,12 +546,9 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - swap for the oneDPL version of sort... this is currently this way in order
-    * to avoid a linking error caused by a bug in oneAPI that should go away soon */
-   std::sort( col_map_offd_C, col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-   /* HYPRE_ONEDPL_CALL( std::sort, */
-   /*                    col_map_offd_C, */
-   /*                    col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B ); */
+   HYPRE_ONEDPL_CALL( std::sort,
+                      col_map_offd_C,
+                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
    HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique,
                                               col_map_offd_C,
