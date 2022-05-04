@@ -418,6 +418,7 @@ sycl::range<1> hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *gra
 #include <thrust/replace.h>
 #include <thrust/sequence.h>
 #include <thrust/for_each.h>
+#include <thrust/remove.h>
 
 using namespace thrust::placeholders;
 
