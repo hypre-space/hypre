@@ -911,7 +911,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                              HYPRE_Int             *dof_func,
                              hypre_ParCSRMatrix   **S_ptr)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGCreateSDevice()\n");
+   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCreateSDevice()\n"); */
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
 #endif
@@ -1116,7 +1116,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
 #endif
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGCreateSDevice()\n");
+   /* hypre_printf("WM: debug - finished hypre_BoomerAMGCreateSDevice()\n"); */
    return (ierr);
 }
 
@@ -1125,7 +1125,7 @@ HYPRE_Int
 hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
                                    hypre_ParCSRMatrix *S)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGMakeSocFromSDevice()\n");
+   /* hypre_printf("WM: debug - inside hypre_BoomerAMGMakeSocFromSDevice()\n"); */
    if (!hypre_ParCSRMatrixSocDiagJ(S))
    {
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -1146,7 +1146,7 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixSocOffdJ(S) = soc_offd;
    }
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGMakeSocFromSDevice()\n");
+   /* hypre_printf("WM: debug - finished hypre_BoomerAMGMakeSocFromSDevice()\n"); */
    return hypre_error_flag;
 }
 
@@ -1156,7 +1156,7 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 HYPRE_Int
 hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGCorrectCFMarkerDevice()\n");
+   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCorrectCFMarkerDevice()\n"); */
 
    HYPRE_Int n_fine     = hypre_IntArraySize(CF_marker);
    HYPRE_Int n_coarse   = hypre_IntArraySize(new_CF_marker);
@@ -1225,7 +1225,7 @@ hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *
    hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
    hypre_TFree(CF_C, HYPRE_MEMORY_DEVICE);
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGCorrectCFMarkerDevice()\n");
+   /* hypre_printf("WM: debug - finished hypre_BoomerAMGCorrectCFMarkerDevice()\n"); */
    return 0;
 }
 /*--------------------------------------------------------------------------
@@ -1235,7 +1235,7 @@ hypre_BoomerAMGCorrectCFMarkerDevice(hypre_IntArray *CF_marker, hypre_IntArray *
 HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGCorrectCFMarker2Device()\n");
+   /* hypre_printf("WM: debug - inside hypre_BoomerAMGCorrectCFMarker2Device()\n"); */
 
    HYPRE_Int n_fine     = hypre_IntArraySize(CF_marker);
    HYPRE_Int n_coarse   = hypre_IntArraySize(new_CF_marker);
@@ -1293,7 +1293,7 @@ hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray 
 
    hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGCorrectCFMarker2Device()\n");
+   /* hypre_printf("WM: debug - finished hypre_BoomerAMGCorrectCFMarker2Device()\n"); */
    return 0;
 }
 

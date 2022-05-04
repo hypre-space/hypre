@@ -1026,7 +1026,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                     HYPRE_Int            max_elmts,
                                     hypre_ParCSRMatrix **P_ptr)
 {
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtInterpDevice()\n"); */
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtInterpDevice()\n");
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1079,7 +1079,11 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    rsW = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *new_end;
+   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
+                                               rsWA + A_nr_of_rows,
+                                               CF_marker,
+                                               rsW,
+                                               is_negative<HYPRE_Int>() );
 #else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
@@ -1229,7 +1233,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPIInterpDevice()\n"); */
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPIInterpDevice()\n");
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1278,6 +1282,9 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Extract Submatrix");
    hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, num_cpts_global, S, &AFC, &AFF);
    hypre_GpuProfilingPopRange();
+   /* WM: debug */
+   /* hypre_ParCSRMatrixPrint(AFF, "AFF"); */
+   /* hypre_ParCSRMatrixPrint(AFC, "AFC"); */
 
    W_nr_of_rows  = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(AFF));
    hypre_assert(A_nr_of_rows == W_nr_of_rows + hypre_ParCSRMatrixNumCols(AFC));
@@ -1408,8 +1415,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    W = hypre_ParCSRMatMatDevice(AFF, AFC);
    /* WM: debug */
    /* hypre_ParCSRMatrixPrint(W, "W"); */
-   /* hypre_ParCSRMatrixPrint(AFF, "AFF"); */
-   /* hypre_ParCSRMatrixPrint(AFC, "AFC"); */
    /* hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPIInterpDevice() 2.3\n"); */
    hypre_GpuProfilingPopRange();
 
@@ -1520,7 +1525,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            max_elmts,
                                       hypre_ParCSRMatrix **P_ptr)
 {
-   /* hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPEInterpDevice()\n"); */
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPEInterpDevice()\n");
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);

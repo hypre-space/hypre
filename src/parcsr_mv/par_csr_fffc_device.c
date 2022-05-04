@@ -715,11 +715,18 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         tmp_j,
                         AFF_offd_j );
       col_map_offd_AFF = hypre_TAlloc(HYPRE_BigInt, num_cols_AFF_offd, HYPRE_MEMORY_DEVICE);
+      /* WM: for some reason, I can't figure out how to fuse this with a transform iterator as is done in thrust below? */
+      /*     I'm getting issues at compile time */ 
       HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_AFF,
-      [] (const auto & x) {return -x - 1;} );
+                                                     [] (const auto & x) {return x;} );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         col_map_offd_AFF,
+                         col_map_offd_AFF + num_cols_AFF_offd,
+                         col_map_offd_AFF,
+                         [] (auto const & x) { return -x - 1; } );
       hypre_assert(tmp_end_big - col_map_offd_AFF == num_cols_AFF_offd);
 #else
       HYPRE_THRUST_CALL( sort,
@@ -1171,7 +1178,12 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
                                                      col_map_offd_ACF,
-      [] (const auto & x) {return -x - 1;} );
+                                                     [] (const auto & x) {return x;} );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         col_map_offd_ACF, 
+                         col_map_offd_ACF + num_cols_ACF_offd,
+                         col_map_offd_ACF,
+                         [] (const auto & x) {return -x - 1;} );
 #else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
