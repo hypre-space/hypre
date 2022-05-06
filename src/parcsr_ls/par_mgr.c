@@ -4329,7 +4329,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                                    HYPRE_Int            *CF_marker,
                                    HYPRE_Int            *blk_diag_size,
                                    HYPRE_Real           **diag_ptr,
-                                   HYPRE_Int     diag_type)
+                                   HYPRE_Int            diag_type)
 {
    MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -4355,7 +4355,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm, &my_id);
    //HYPRE_Int num_threads = hypre_NumThreads();
 
-   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST; //hypre_ParCSRMatrixMemoryLocation(A);
 
    // First count the number of points matching point_type in CF_marker
    num_points = 0;

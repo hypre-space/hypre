@@ -728,7 +728,7 @@ hypre_MGRCycle( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
                   for (i = 0; i < nsweeps[level]; i++)
                   {
-                     hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+                     hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid], hypre_IntArrayData(CF_marker[fine_grid]),
                                                   relax_points, relax_weight,
                                                   relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                                                   U_array[fine_grid], Vtemp);
