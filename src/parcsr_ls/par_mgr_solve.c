@@ -716,7 +716,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                   hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
 
                   hypre_MGRBlockRelaxSolve(A_ff_array[fine_grid], F_fine_array[coarse_grid],
-                                           U_fine_array[coarse_grid], blk_size[fine_grid], n_block, left_size, 0, frelax_diaginv[fine_grid], Vtemp);
+                                           U_fine_array[coarse_grid], blk_size[fine_grid], n_block, left_size, 0, frelax_diaginv[fine_grid],
+                                           Vtemp);
                   hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0,
                                       &(U_array[fine_grid]));
                }
@@ -728,7 +729,8 @@ hypre_MGRCycle( void               *mgr_vdata,
 #if defined(HYPRE_USING_CUDA)
                   for (i = 0; i < nsweeps[level]; i++)
                   {
-                     hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid], hypre_IntArrayData(CF_marker[fine_grid]),
+                     hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
+                                                  hypre_IntArrayData(CF_marker[fine_grid]),
                                                   relax_points, relax_weight,
                                                   relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
                                                   U_array[fine_grid], Vtemp);

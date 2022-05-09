@@ -7932,7 +7932,7 @@ main( hypre_int argc,
       /* set max iterations */
       HYPRE_MGRSetMaxIter(mgr_solver, max_iter);
       HYPRE_MGRSetTol(mgr_solver, tol);
-       /* set global smoother */
+      /* set global smoother */
       HYPRE_MGRSetGlobalSmoothType(mgr_solver, mgr_gsmooth_type);
       HYPRE_MGRSetMaxGlobalSmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
 

@@ -3944,8 +3944,8 @@ HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
 
 /**
  * (Optional) Set the relaxation type for F-relaxation at each level.
- * This function takes precedence over, and will replace \e HYPRE_MGRSetFRelaxMethod 
- * and HYPRE_MGRSetRelaxType. 
+ * This function takes precedence over, and will replace \e HYPRE_MGRSetFRelaxMethod
+ * and HYPRE_MGRSetRelaxType.
  * Options for \e relax_type entries are:
  *
  *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
@@ -3954,7 +3954,7 @@ HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
  **/
 HYPRE_Int
 HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
-                         HYPRE_Int *relax_type );
+                            HYPRE_Int *relax_type );
 
 /**
  * (Optional) Set the strategy for coarse grid computation.
@@ -4056,7 +4056,7 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
 
 /**
  * (Optional) Set block size for block (global) smoother and interp/restriction.
- * This option is for \e interp_type/restrict_type == 12, and 
+ * This option is for \e interp_type/restrict_type == 12, and
  * \e smooth_type == 0 or 1.
  **/
 HYPRE_Int
@@ -4152,6 +4152,11 @@ HYPRE_MGRSetTol( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver,
                                   HYPRE_Int smooth_iter );
+
+/**
+ * (Optional) Determines how many sweeps of global smoothing to do on each level.
+ * Default is 0 (no global smoothing).
+ **/
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
                               HYPRE_Int *smooth_iters );
@@ -4183,6 +4188,10 @@ HYPRE_Int
 HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
                               HYPRE_Int smooth_type );
 
+/**
+ * (Optional) Determines type of global smoother for each level.
+ * See \e HYPRE_MGRSetGlobalSmoothType for global smoother options.
+ **/
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
                              HYPRE_Int *smooth_type );

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -38,6 +38,10 @@ extern "C" {
 #define SECOND_TIME 0
 
 
+HYPRE_Int BuildParFromFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                            HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int ReadParVectorFromFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                 HYPRE_ParVector *b_ptr );
 
 
 hypre_int
@@ -134,6 +138,11 @@ main( hypre_int argc,
    HYPRE_Int mgr_interp_type = 2;
 
 
+   HYPRE_Int  *lvl_cg_method = NULL;
+   HYPRE_Int  *lvl_interp_type = NULL;
+   HYPRE_Int  *lvl_gsmooth_type = NULL;
+   HYPRE_Int  *lvl_gsmooth_iters = NULL;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -170,6 +179,18 @@ main( hypre_int argc,
          arg_index++;
          build_matrix_type      = -1;
          build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-fromparcsrfile") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 0;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rhsparcsrfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 1;
+         build_rhs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
       {
@@ -281,8 +302,15 @@ main( hypre_int argc,
    }
    time_index = hypre_InitializeTiming("Reading Input Matrix");
    hypre_BeginTiming(time_index);
-   ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
-                              HYPRE_PARCSR, &ij_A );
+   if (build_matrix_type == -1)
+   {
+      ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
+                                 HYPRE_PARCSR, &ij_A );
+   }
+   else if ( build_matrix_type == 0 )
+   {
+      ierr = BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
+   }
    if (ierr)
    {
       hypre_printf("ERROR: Problem reading in the system matrix!\n");
@@ -290,8 +318,9 @@ main( hypre_int argc,
    }
    else
    {
-      hypre_printf("Done reading the system matrix\n");
+      if (myid == 0) { hypre_printf("Done reading the system matrix\n"); }
    }
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Reading Input Matrix", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -308,7 +337,19 @@ main( hypre_int argc,
       ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
       parcsr_A = (HYPRE_ParCSRMatrix) object;
    }
+   else
+   {
+      /*-----------------------------------------------------------
+       * Copy the parcsr matrix into the IJMatrix through interface calls
+       *-----------------------------------------------------------*/
+      ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
+                                              &first_local_row, &last_local_row,
+                                              &first_local_col, &last_local_col );
 
+      local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
+      local_num_cols = (HYPRE_Int)(last_local_col - first_local_col + 1);
+   }
+   // build rhs from file in IJ format
    if ( build_rhs_type == 0 )
    {
       if (myid == 0)
@@ -329,6 +370,26 @@ main( hypre_int argc,
       b = (HYPRE_ParVector) object;
 
       /* Initial guess */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+      HYPRE_IJVectorAssemble(ij_x);
+
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+   }
+   else if (build_rhs_type == 1) // build rhs from parcsr file
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
+         hypre_printf("  Initial guess is 0\n");
+      }
+
+      ij_b = NULL;
+      ReadParVectorFromFile(argc, argv, build_rhs_arg_index, &b);
+
+      /* initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
@@ -381,13 +442,16 @@ main( hypre_int argc,
       mgr_point_marker_array = hypre_CTAlloc(HYPRE_Int, local_num_rows, HYPRE_MEMORY_HOST);
       FILE *ifp;
       char fname[80];
-      hypre_sprintf(fname, "%s.%05i", argv[build_marker_array_arg_index], myid);
-      hypre_printf("Reading marker array from %s \n", fname);
+      hypre_sprintf(fname, "%s.%d", argv[build_marker_array_arg_index], myid);
       ifp = fopen(fname, "r");
       if (ifp == NULL)
       {
          fprintf(stderr, "Can't open input file for marker array!\n");
          exit(1);
+      }
+      else
+      {
+         if (myid == 0) { hypre_printf("  Cpoint marker array read from file %s\n", argv[build_rhs_arg_index]); }
       }
       for (i = 0; i < local_num_rows; i++)
       {
@@ -478,7 +542,7 @@ main( hypre_int argc,
       if (myid == 0) { hypre_printf("MGR example: 3x3 Block System\n"); }
       /* mgr options */
       mgr_bsize = 3;  // block size of the system
-      mgr_nlevels = 2;  // number of reduction levels (3-level method means 2-level reduction)
+      mgr_nlevels = 2;  // number of reduction levels
       mgr_non_c_to_f = 1;  // option to use user-provided reduction strategy
 
       /* F-relaxation option
@@ -522,7 +586,7 @@ main( hypre_int argc,
    {
       /*
        * Example for 4x4 block system
-       * E.g. 2-phase, 2-component flow with TPFA
+       * E.g. Compositional flow with wells
        *
        * A = [ A_{pp}       A_{p\rho_1}       A_{p\rho_2}
        *       A_{\rho_1p}  A_{\rho_1\rho_1}  A_{\rho_1\rho_2}
@@ -539,15 +603,34 @@ main( hypre_int argc,
 
       if (myid == 0) { hypre_printf("MGR example: 4x4 Block System\n"); }
       /* mgr options */
-      mgr_bsize = 4;  // block size of the system
-      mgr_nlevels = 1;  // number of reduction levels (3-level method means 2-level reduction)
+      mgr_bsize = 7;  // block size of the system
+      mgr_nlevels = 3;  // number of reduction levels
       mgr_non_c_to_f = 1;  // option to use user-provided reduction strategy
+
+      // Set global smoothing type/iterations at each level
+      // Use block-GS for the condensed system
+
+      lvl_cg_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+      lvl_interp_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+      lvl_gsmooth_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+      lvl_gsmooth_iters = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+
+      lvl_cg_method[0] = 0; // Standard Galerkin
+      lvl_cg_method[1] = 0; // Standard Galerkin
+      lvl_cg_method[2] = 3; // Quasi-IMPES reduction
+
+      lvl_interp_type[0] = 12; // Exact well block elimination with block-Jacobi
+      lvl_interp_type[1] = 2; // Diagonal scaling (Jacobi)
+      lvl_interp_type[2] = 0; // Injection
+
+      lvl_gsmooth_type[1] = 1;
+      lvl_gsmooth_iters[1] = 1;
 
       /* F-relaxation option
        * 0  - Jacobi (only CPU)
        * 18 - L1 Jacobi (GPU-enabled)
        */
-      mgr_relax_type = 18;
+      mgr_relax_type = 0;
       mgr_num_relax_sweeps = 1;  // number of F-relax iterations, 0 for traditional CPR
 
       /* Global smoother option
@@ -566,24 +649,24 @@ main( hypre_int argc,
 
       /* array for number of C-points at each level */
       mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-      mgr_num_cindexes[0] = 1;  // 2 C-points for 1st-level reduction, i.e. p, \rho_1
-      //mgr_num_cindexes[1] = 1;  // 1 C-point for 2nd-level reduction, i.e. p
-      //mgr_num_cindexes[2] = 1;  // 1 C-point for 2nd-level reduction, i.e. p
+      mgr_num_cindexes[0] = 3;  // 3 C-points for 1st-level reduction, i.e. p, \rho_1, \rho_2
+      mgr_num_cindexes[1] = 2;  // 2 C-point for 2nd-level reduction, i.e. p, \rho_1
+      mgr_num_cindexes[2] = 1;  // 1 C-point for 3rd-level reduction, i.e. p
 
       /* array for indices of C-points at each level */
       mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
       lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-      //lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
-      //lv3 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+      lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+      lv3 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
       lv1[0] = 0;  // pressure is a C-point at level 1
-      //lv1[1] = 1;  // \rho_1 is also a C-point at level 1
-      //lv1[2] = 2;  // \rho_1 is also a C-point at level 1
-      //lv2[0] = 0;  // only pressure is a C-point at level 2
-      //lv2[1] = 1;  // only pressure is a C-point at level 2
-      //lv3[0] = 0;  // only pressure is a C-point at level 2
+      lv1[1] = 1;  // \rho_1 is also a C-point at level 1
+      lv1[2] = 2;  // \rho_2 is also a C-point at level 1
+      lv2[0] = 0;  // pressure is a C-point at level 2
+      lv2[1] = 1;  // \rho_1 pressure is a C-point at level 2
+      lv3[0] = 0;  // only pressure is a C-point at level 3
       mgr_cindexes[0] = lv1;
-      //mgr_cindexes[1] = lv2;
-      //mgr_cindexes[2] = lv3;
+      mgr_cindexes[1] = lv2;
+      mgr_cindexes[2] = lv3;
       /* end mgr options */
    }
 
@@ -637,7 +720,8 @@ main( hypre_int argc,
    HYPRE_MGRSetRelaxType(krylov_precond, mgr_relax_type);
    HYPRE_MGRSetNumRelaxSweeps(krylov_precond, mgr_num_relax_sweeps);
    /* set interpolation type */
-   HYPRE_MGRSetInterpType(krylov_precond, mgr_interp_type);
+   //   HYPRE_MGRSetInterpType(krylov_precond, mgr_interp_type);
+   HYPRE_MGRSetLevelInterpType(krylov_precond, lvl_interp_type);
    /* set restriction type */
    HYPRE_MGRSetRestrictType(krylov_precond, mgr_restrict_type);
    /* set print level */
@@ -648,8 +732,14 @@ main( hypre_int argc,
    HYPRE_MGRSetTruncateCoarseGridThreshold(krylov_precond, 1e-20);
 
    /* set global smoother options */
-   HYPRE_MGRSetGlobalsmoothType(krylov_precond, mgr_gsmooth_type);
-   HYPRE_MGRSetMaxGlobalsmoothIters( krylov_precond, mgr_num_gsmooth_sweeps );
+   HYPRE_MGRSetLevelSmoothType( krylov_precond, lvl_gsmooth_type );
+   HYPRE_MGRSetLevelSmoothIters( krylov_precond, lvl_gsmooth_iters );
+   //   HYPRE_MGRSetGlobalsmoothType(krylov_precond, mgr_gsmooth_type);
+   //   HYPRE_MGRSetMaxGlobalsmoothIters( krylov_precond, mgr_num_gsmooth_sweeps );
+
+   HYPRE_MGRSetCoarseGridMethod( krylov_precond, lvl_cg_method );
+   HYPRE_MGRSetTruncateCoarseGridThreshold( krylov_precond,
+                                            1e-20 ); // Low tolerance to remove only zeros
 
    /* Create MGR coarse solver */
    HYPRE_BoomerAMGCreate(&amg_solver);
@@ -940,12 +1030,13 @@ main( hypre_int argc,
    HYPRE_IJVectorDestroy(ij_b);
    HYPRE_IJVectorDestroy(ij_x);
 
-   if (mgr_num_cindexes) { hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST); }
-   if (mgr_point_marker_array) { hypre_TFree(mgr_point_marker_array, HYPRE_MEMORY_HOST); }
-   if (lv1) { hypre_TFree(lv1, HYPRE_MEMORY_HOST); }
-   if (lv2) { hypre_TFree(lv2, HYPRE_MEMORY_HOST); }
-   if (lv3) { hypre_TFree(lv3, HYPRE_MEMORY_HOST); }
-   if (mgr_cindexes) { hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST); }
+   hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_point_marker_array, HYPRE_MEMORY_HOST);
+   for (i = 0; i < mgr_nlevels; i++)
+   {
+      hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
 
    HYPRE_Finalize();
    hypre_MPI_Finalize();
@@ -956,3 +1047,126 @@ main( hypre_int argc,
 
    return (0);
 }
+
+/*----------------------------------------------------------------------
+ * Build rhs from file. Expects two files on each processor.
+ * filename.n contains the data and
+ * and filename.INFO.n contains global row
+ * numbers
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+ReadParVectorFromFile( HYPRE_Int            argc,
+                       char                *argv[],
+                       HYPRE_Int            arg_index,
+                       HYPRE_ParVector      *b_ptr     )
+{
+   char               *filename;
+
+   HYPRE_ParVector b;
+
+   HYPRE_Int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      hypre_printf("  Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      hypre_printf("  From ParFile: %s\n", filename);
+   }
+
+   /*-----------------------------------------------------------
+    * Generate the matrix
+    *-----------------------------------------------------------*/
+
+   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, filename, &b);
+
+   *b_ptr = b;
+
+   return (0);
+}
+
+
+/*----------------------------------------------------------------------
+ * Build matrix from file. Expects three files on each processor.
+ * filename.D.n contains the diagonal part, filename.O.n contains
+ * the offdiagonal part and filename.INFO.n contains global row
+ * and column numbers, number of columns of offdiagonal matrix
+ * and the mapping of offdiagonal column numbers to global column numbers.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildParFromFile( HYPRE_Int                  argc,
+                  char                *argv[],
+                  HYPRE_Int                  arg_index,
+                  HYPRE_ParCSRMatrix  *A_ptr     )
+{
+   char               *filename;
+
+   HYPRE_ParCSRMatrix A;
+
+   HYPRE_Int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      hypre_printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      hypre_printf("  FromFile: %s\n", filename);
+   }
+
+   /*-----------------------------------------------------------
+    * Generate the matrix
+    *-----------------------------------------------------------*/
+
+   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, filename, &A);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+
