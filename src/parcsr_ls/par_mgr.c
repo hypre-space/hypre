@@ -3406,7 +3406,9 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix    *P_ptr = NULL;
    //HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+#if defined(HYPRE_USING_CUDA)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    /* Interpolation for each level */
    if (interp_type < 3)
@@ -3514,7 +3516,9 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    hypre_ParCSRMatrix    *ST = NULL;
    //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+#if defined(HYPRE_USING_CUDA)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#endif
 
    /* Build AT (transpose A) */
    if (restrict_type > 0)
@@ -3594,7 +3598,13 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
          HYPRE_Int point_type = CF_marker[i];
          f_marker[i] = -point_type;
       }
-      if (exec == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA)
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_NoGPUSupport("restriction");
+      }
+      else
+#endif
       {
          /* get block A_cf */
          hypre_MGRGetAcfCPR(A, blk_size, c_marker, f_marker, &blk_A_cf);
@@ -3607,12 +3617,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
          /* compute restriction operator R = [-Wr  I] (transposed for use with RAP) */
          hypre_MGRBuildPFromWp(AT, Wr_transpose, CF_marker, debug_flag, &R_ptr);
       }
-#if defined(HYPRE_USING_CUDA)
-      else
-      {
-         hypre_NoGPUSupport("restriction");
-      }
-#endif
       hypre_ParCSRMatrixDestroy(blk_A_cf);
       hypre_ParCSRMatrixDestroy(blk_A_cf_transpose);
       hypre_ParCSRMatrixDestroy(Wr_transpose);
