@@ -3406,12 +3406,12 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix    *P_ptr = NULL;
    //HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    /* Interpolation for each level */
    if (interp_type < 3)
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
@@ -3439,7 +3439,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    else if (interp_type == 4)
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("interpolation");
@@ -3468,16 +3467,16 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 12)
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         hypre_MGRBuildPBlockJacobi(A, aux_mat, blk_size, CF_marker, num_cpts_global, debug_flag, &P_ptr);
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("interpolation");
       }
+      else
 #endif
+      {
+         hypre_MGRBuildPBlockJacobi(A, aux_mat, blk_size, CF_marker, num_cpts_global, debug_flag, &P_ptr);
+      }
    }
    else
    {
@@ -3515,6 +3514,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    hypre_ParCSRMatrix    *ST = NULL;
    //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    /* Build AT (transpose A) */
    if (restrict_type > 0)
@@ -3526,7 +3526,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    if (restrict_type == 0)
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R_ptr);
@@ -3542,7 +3541,6 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    else if (restrict_type == 1 || restrict_type == 2)
    {
 #if defined(HYPRE_USING_CUDA)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R_ptr);
@@ -3564,16 +3562,16 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    }
    else if (restrict_type == 12)
    {
-      if (exec == HYPRE_EXEC_HOST)
-      {
-         hypre_MGRBuildPBlockJacobi(AT, NULL, blk_size, CF_marker, num_cpts_global, debug_flag, &R_ptr);
-      }
 #if defined(HYPRE_USING_CUDA)
-      else
+      if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("restriction");
       }
+      else
 #endif
+      {
+         hypre_MGRBuildPBlockJacobi(AT, NULL, blk_size, CF_marker, num_cpts_global, debug_flag, &R_ptr);
+      }
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
