@@ -5,16 +5,21 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
  */
 template<HYPRE_Int option, typename T>
+#if defined(HYPRE_USING_SYCL)
+struct RAP_functor
+#else
 struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
+#endif
 {
    HYPRE_Int num_col;
    T         first_col;
@@ -106,10 +111,17 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
 
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
+                                                hypre_CSRMatrixJ(Cbar),
+                                                hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                                                pred );
+#else
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 hypre_CSRMatrixJ(Cbar),
                                                 hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
                                                 pred );
+#endif
       HYPRE_Int nnz_C_offd = hypre_CSRMatrixNumNonzeros(Cbar) - nnz_C_diag;
 
       C_diag = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumRows(A), hypre_ParCSRMatrixNumCols(B),
@@ -122,7 +134,16 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int *Cbar_ii = hypreDevice_CsrRowPtrsToIndices(hypre_ParCSRMatrixNumRows(A),
                                                            hypre_CSRMatrixNumNonzeros(Cbar),
                                                            hypre_CSRMatrixI(Cbar));
-
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                       hypre_CSRMatrixData(Cbar)),
+                                        oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                       hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
+                                        hypre_CSRMatrixJ(Cbar),
+                                        oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
+                                        pred );
+      hypre_assert( std::get<0>(new_end.base()) == C_diag_ii + nnz_C_diag );
+#else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
                         thrust::make_zip_iterator(thrust::make_tuple(Cbar_ii, hypre_CSRMatrixJ(Cbar),
@@ -133,6 +154,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                         thrust::make_zip_iterator(thrust::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
                         pred );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii,
                                          hypre_CSRMatrixI(C_diag));
       hypre_TFree(C_diag_ii, HYPRE_MEMORY_DEVICE);
@@ -142,6 +164,16 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_offd_ii = hypre_TAlloc(HYPRE_Int, nnz_C_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                  hypre_CSRMatrixData(Cbar)),
+                                   oneapi::dpl::make_zip_iterator(Cbar_ii, hypre_CSRMatrixJ(Cbar),
+                                                                  hypre_CSRMatrixData(Cbar)) + hypre_CSRMatrixNumNonzeros(Cbar),
+                                   hypre_CSRMatrixJ(Cbar),
+                                   oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
+                                   std::not_fn(pred) );
+      hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
+#else
       new_end = HYPRE_THRUST_CALL(
                    copy_if,
                    thrust::make_zip_iterator(thrust::make_tuple(Cbar_ii, hypre_CSRMatrixJ(Cbar),
@@ -152,16 +184,26 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                    thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
                    thrust::not1(pred) );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
+#endif
+
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii,
                                          hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         C_offd_j,
+                         C_offd_j + nnz_C_offd,
+                         C_offd_j,
+      [const_val = hypre_ParCSRMatrixNumCols(B)] (const auto & x) {return x - const_val;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
                          C_offd_j,
                          thrust::minus<HYPRE_Int>() );
+#endif
 
       hypre_TFree(Cbar_ii, HYPRE_MEMORY_DEVICE);
       hypre_CSRMatrixDestroy(Cbar);
@@ -217,8 +259,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int num_procs;
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   //HYPRE_Int my_id;
-   //hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
    if (hypre_ParCSRMatrixGlobalNumRows(A) != hypre_ParCSRMatrixGlobalNumRows(B) ||
        hypre_ParCSRMatrixNumRows(A)       != hypre_ParCSRMatrixNumRows(B))
@@ -271,12 +311,20 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(A);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixI(Cint),
+                         hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
+                         hypre_CSRMatrixI(Cint),
+      [const_val = local_nnz_Cbar] (const auto & x) {return x - const_val;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
                          thrust::make_constant_iterator(local_nnz_Cbar),
                          hypre_CSRMatrixI(Cint),
                          thrust::minus<HYPRE_Int>() );
+#endif
 
       hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint),
                                                HYPRE_MEMORY_DEVICE);
@@ -284,11 +332,19 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       RAP_functor<1, HYPRE_BigInt> func1( hypre_ParCSRMatrixNumCols(B),
                                           hypre_ParCSRMatrixFirstColDiag(B),
                                           hypre_ParCSRMatrixDeviceColMapOffd(B) );
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                         hypre_CSRMatrixBigJ(Cint),
+                         func1 );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
                          hypre_CSRMatrixBigJ(Cint),
                          func1 );
+#endif
 
       hypre_CSRMatrixData(Cint) = hypre_CSRMatrixData(Cbar) + local_nnz_Cbar;
 
@@ -356,6 +412,18 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRMatrixCommPkg(A));
 
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather( tmp_i + local_nnz_Cbar,
+                        tmp_i + tmp_s,
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(A)),
+                        tmp_i + local_nnz_Cbar );
+
+      HYPRE_ONEDPL_CALL( std::transform,
+                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+                         tmp_j + tmp_s,
+                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+      [const_val = hypre_ParCSRMatrixNumCols(B)] (const auto & x) {return x + const_val;} );
+#else
       HYPRE_THRUST_CALL( gather,
                          tmp_i + local_nnz_Cbar,
                          tmp_i + tmp_s,
@@ -368,17 +436,26 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          thrust::plus<HYPRE_Int>() );
+#endif
 
       hypreDevice_CsrRowPtrsToIndices_v2(hypre_ParCSRMatrixNumCols(A), local_nnz_Cbar,
                                          hypre_CSRMatrixI(Cbar), tmp_i);
       hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(Cbar), HYPRE_Complex, local_nnz_Cbar, HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_DEVICE);
       RAP_functor<2, HYPRE_Int> func2(hypre_ParCSRMatrixNumCols(B), 0, offd_map_to_C);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar),
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         tmp_j,
+                         func2 );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar),
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          tmp_j,
                          func2 );
+#endif
 
       hypre_CSRMatrixDestroy(Cbar);
       hypre_TFree(offd_map_to_C, HYPRE_MEMORY_DEVICE);
@@ -400,10 +477,17 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(B) - 1);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
+                                                zmp_j,
+                                                zmp_j + local_nnz_C,
+                                                pred );
+#else
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 zmp_j,
                                                 zmp_j + local_nnz_C,
                                                 pred );
+#endif
       HYPRE_Int nnz_C_offd = local_nnz_C - nnz_C_diag;
 
       C_diag = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumCols(A), hypre_ParCSRMatrixNumCols(B),
@@ -413,6 +497,14 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_diag_j = hypre_CSRMatrixJ(C_diag);
       HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                        oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
+                                        zmp_j,
+                                        oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
+                                        pred );
+      hypre_assert( std::get<0>(new_end.base()) == C_diag_ii + nnz_C_diag );
+#else
       auto new_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
                                         thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
@@ -420,6 +512,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                                         thrust::make_zip_iterator(thrust::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
                                         pred );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii,
                                          hypre_CSRMatrixI(C_diag));
       hypre_TFree(C_diag_ii, HYPRE_MEMORY_DEVICE);
@@ -429,6 +522,14 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int     *C_offd_ii = hypre_TAlloc(HYPRE_Int, nnz_C_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
+                                   zmp_j,
+                                   oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
+                                   std::not_fn(pred) );
+      hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
@@ -436,16 +537,25 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                                    thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
                                    thrust::not1(pred) );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii,
                                          hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         C_offd_j,
+                         C_offd_j + nnz_C_offd,
+                         C_offd_j,
+      [const_val = hypre_ParCSRMatrixNumCols(B)] (const auto & x) {return x - const_val;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(B)),
                          C_offd_j,
                          thrust::minus<HYPRE_Int>() );
+#endif
 
       hypre_TFree(zmp_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_j, HYPRE_MEMORY_DEVICE);
@@ -502,7 +612,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    return C;
 }
 
-
 /* C = R^{T} * A * P */
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
@@ -521,8 +630,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    HYPRE_Int num_procs;
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
-   //HYPRE_Int my_id;
-   //hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
    if ( hypre_ParCSRMatrixGlobalNumRows(R) != hypre_ParCSRMatrixGlobalNumRows(A) ||
         hypre_ParCSRMatrixGlobalNumCols(A) != hypre_ParCSRMatrixGlobalNumRows(P) )
@@ -590,23 +697,39 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixOwnsData(Cint) = 0;
 
       hypre_CSRMatrixI(Cint) = hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixI(Cint),
+                         hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
+                         hypre_CSRMatrixI(Cint),
+      [const_val = local_nnz_Cbar] (const auto & x) {return x - const_val;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixI(Cint),
                          hypre_CSRMatrixI(Cint) + hypre_CSRMatrixNumRows(Cint) + 1,
                          thrust::make_constant_iterator(local_nnz_Cbar),
                          hypre_CSRMatrixI(Cint),
                          thrust::minus<HYPRE_Int>() );
+#endif
 
       hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint),
                                                HYPRE_MEMORY_DEVICE);
 
       RAP_functor<1, HYPRE_BigInt> func1(hypre_ParCSRMatrixNumCols(P), hypre_ParCSRMatrixFirstColDiag(P),
                                          col_map_offd);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
+                         hypre_CSRMatrixBigJ(Cint),
+                         func1 );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          hypre_CSRMatrixJ(Cbar) + hypre_CSRMatrixNumNonzeros(Cbar),
                          hypre_CSRMatrixBigJ(Cint),
                          func1 );
+#endif
 
       hypre_CSRMatrixData(Cint) = hypre_CSRMatrixData(Cbar) + local_nnz_Cbar;
 
@@ -675,6 +798,18 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRMatrixCommPkg(R));
 
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather( tmp_i + local_nnz_Cbar,
+                        tmp_i + tmp_s,
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(R)),
+                        tmp_i + local_nnz_Cbar );
+
+      HYPRE_ONEDPL_CALL( std::transform,
+                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+                         tmp_j + tmp_s,
+                         tmp_j + local_nnz_Cbar + Cext_diag_nnz,
+      [const_val = hypre_ParCSRMatrixNumCols(P)] (const auto & x) {return x + const_val;} );
+#else
       HYPRE_THRUST_CALL( gather,
                          tmp_i + local_nnz_Cbar,
                          tmp_i + tmp_s,
@@ -687,17 +822,26 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
                          tmp_j + local_nnz_Cbar + Cext_diag_nnz,
                          thrust::plus<HYPRE_Int>() );
+#endif
 
       hypreDevice_CsrRowPtrsToIndices_v2(hypre_ParCSRMatrixNumCols(R), local_nnz_Cbar,
                                          hypre_CSRMatrixI(Cbar), tmp_i);
       hypre_TMemcpy(tmp_a, hypre_CSRMatrixData(Cbar), HYPRE_Complex, local_nnz_Cbar, HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_DEVICE);
       RAP_functor<2, HYPRE_Int> func2(hypre_ParCSRMatrixNumCols(P), 0, offd_map_to_C);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(Cbar),
+                         hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
+                         tmp_j,
+                         func2 );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(Cbar),
                          hypre_CSRMatrixJ(Cbar) + local_nnz_Cbar,
                          tmp_j,
                          func2 );
+#endif
 
       hypre_CSRMatrixDestroy(Cbar);
       hypre_TFree(offd_map_to_C, HYPRE_MEMORY_DEVICE);
@@ -719,10 +863,17 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       // split into diag and offd
       in_range<HYPRE_Int> pred(0, hypre_ParCSRMatrixNumCols(P) - 1);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_Int nnz_C_diag = HYPRE_ONEDPL_CALL( std::count_if,
+                                                zmp_j,
+                                                zmp_j + local_nnz_C,
+                                                pred );
+#else
       HYPRE_Int nnz_C_diag = HYPRE_THRUST_CALL( count_if,
                                                 zmp_j,
                                                 zmp_j + local_nnz_C,
                                                 pred );
+#endif
       HYPRE_Int nnz_C_offd = local_nnz_C - nnz_C_diag;
 
       C_diag = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumCols(R), hypre_ParCSRMatrixNumCols(P),
@@ -732,6 +883,14 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Int     *C_diag_j = hypre_CSRMatrixJ(C_diag);
       HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                        oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
+                                        zmp_j,
+                                        oneapi::dpl::make_zip_iterator(C_diag_ii, C_diag_j, C_diag_a),
+                                        pred );
+      hypre_assert( std::get<0>(new_end.base()) == C_diag_ii + nnz_C_diag );
+#else
       auto new_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
                                         thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
@@ -739,6 +898,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                         thrust::make_zip_iterator(thrust::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
                                         pred );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii,
                                          hypre_CSRMatrixI(C_diag));
       hypre_TFree(C_diag_ii, HYPRE_MEMORY_DEVICE);
@@ -748,6 +908,14 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       HYPRE_Int     *C_offd_ii = hypre_TAlloc(HYPRE_Int, nnz_C_offd, HYPRE_MEMORY_DEVICE);
       HYPRE_Int     *C_offd_j = hypre_CSRMatrixJ(C_offd);
       HYPRE_Complex *C_offd_a = hypre_CSRMatrixData(C_offd);
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
+                                   oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
+                                   zmp_j,
+                                   oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
+                                   std::not_fn(pred) );
+      hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
@@ -755,16 +923,25 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                    thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
                                    thrust::not1(pred) );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
+#endif
       hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii,
                                          hypre_CSRMatrixI(C_offd));
       hypre_TFree(C_offd_ii, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         C_offd_j,
+                         C_offd_j + nnz_C_offd,
+                         C_offd_j,
+      [const_val = hypre_ParCSRMatrixNumCols(P)] (const auto & x) {return x - const_val;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          C_offd_j,
                          C_offd_j + nnz_C_offd,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixNumCols(P)),
                          C_offd_j,
                          thrust::minus<HYPRE_Int>() );
+#endif
 
       hypre_TFree(zmp_i, HYPRE_MEMORY_DEVICE);
       hypre_TFree(zmp_j, HYPRE_MEMORY_DEVICE);
@@ -822,4 +999,4 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    return C;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

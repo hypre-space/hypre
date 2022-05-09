@@ -103,19 +103,19 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
-                      gDim, bDim,
-                      A_nr_local,
-                      A_offd_nnz > 0,
-                      CF_marker,
-                      A_diag_i,
-                      A_diag_data,
-                      Soc_diag_j,
-                      A_offd_i,
-                      A_offd_data,
-                      Soc_offd_j,
-                      rsWA,
-                      -1 );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+                     gDim, bDim,
+                     A_nr_local,
+                     A_offd_nnz > 0,
+                     CF_marker,
+                     A_diag_i,
+                     A_diag_data,
+                     Soc_diag_j,
+                     A_offd_i,
+                     A_offd_data,
+                     Soc_offd_j,
+                     rsWA,
+                     -1 );
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
@@ -154,19 +154,19 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
    gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
-                      gDim, bDim,
-                      AF2F_nr_local,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
-                      Dbeta,
-                      Dbeta_offd,
-                      map_F2_to_F,
-                      rsW );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
+                     gDim, bDim,
+                     AF2F_nr_local,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
+                     Dbeta,
+                     Dbeta_offd,
+                     map_F2_to_F,
+                     rsW );
 
    hypre_TFree(Dbeta, HYPRE_MEMORY_DEVICE);
    hypre_TFree(Dbeta_offd, HYPRE_MEMORY_DEVICE);
@@ -315,17 +315,17 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    dlam = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
    dtmp = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
-                      gDim, bDim,
-                      AFC_nr_local,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_FF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_FF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF)),
-                      Dbeta,
-                      dlam,
-                      dtmp );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
+                     gDim, bDim,
+                     AFC_nr_local,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_FF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_FF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF)),
+                     Dbeta,
+                     dlam,
+                     dtmp );
 
    hypre_ParCSRMatrixDestroy(As_FF);
    hypre_TFree(Dbeta, HYPRE_MEMORY_DEVICE);
@@ -374,19 +374,19 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
-                      gDim, bDim,
-                      A_nr_local,
-                      A_offd_nnz > 0,
-                      CF_marker,
-                      A_diag_i,
-                      A_diag_data,
-                      Soc_diag_j,
-                      A_offd_i,
-                      A_offd_data,
-                      Soc_offd_j,
-                      rsWA,
-                      -1 );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+                     gDim, bDim,
+                     A_nr_local,
+                     A_offd_nnz > 0,
+                     CF_marker,
+                     A_diag_i,
+                     A_diag_data,
+                     Soc_diag_j,
+                     A_offd_i,
+                     A_offd_data,
+                     Soc_offd_j,
+                     rsWA,
+                     -1 );
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
@@ -424,21 +424,21 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
    gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
-                      gDim, bDim,
-                      AF2F_nr_local,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
-                      dtmp,
-                      dtmp_offd,
-                      dlam,
-                      dlam_offd,
-                      map_F2_to_F,
-                      rsW );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
+                     gDim, bDim,
+                     AF2F_nr_local,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
+                     dtmp,
+                     dtmp_offd,
+                     dlam,
+                     dlam_offd,
+                     map_F2_to_F,
+                     rsW );
 
    hypre_TFree(dlam,        HYPRE_MEMORY_DEVICE);
    hypre_TFree(dlam_offd,   HYPRE_MEMORY_DEVICE);

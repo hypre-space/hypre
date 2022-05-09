@@ -47,6 +47,16 @@ void hypre_SortCSRRocsparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA, rocsparse
                              const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
 #endif
 
+#if defined(HYPRE_USING_ONEMKLSPARSE)
+HYPRE_Int hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
+                                            oneapi::mkl::sparse::matrix_handle_t handle_A,
+                                            HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
+                                            oneapi::mkl::sparse::matrix_handle_t handle_B,
+                                            HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,
+                                            oneapi::mkl::sparse::matrix_handle_t handle_C,
+                                            HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

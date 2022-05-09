@@ -155,19 +155,19 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
-                     gDim,
-                     bDim,
-                     A_num_rows,
-                     A_diag_i,
-                     A_diag_j,
-                     A_diag_data,
-                     A_offd_i,
-                     A_offd_j,
-                     A_offd_data,
-                     rowsums_lower,
-                     rowsums_upper,
-                     scale);
+   HYPRE_GPU_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
+                    gDim,
+                    bDim,
+                    A_num_rows,
+                    A_diag_i,
+                    A_diag_j,
+                    A_diag_data,
+                    A_offd_i,
+                    A_offd_j,
+                    A_offd_data,
+                    rowsums_lower,
+                    rowsums_upper,
+                    scale);
 
    hypre_SyncComputeStream(hypre_handle());
 

@@ -229,7 +229,9 @@ HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HY
  * HYPRE handle
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+/* Backwards compatibility with HYPRE_SetSpGemmUseCusparse() */
+#define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
+HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
 
 #ifdef __cplusplus

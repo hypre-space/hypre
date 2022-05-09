@@ -139,8 +139,8 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
 
 #if defined(HYPRE_USING_GPU)
-   /* use cuSPARSE for SpGEMM */
-   HYPRE_SetSpGemmUseCusparse(0);
+   /* use vendor implementation for SpGEMM */
+   HYPRE_SetSpGemmUseVendor(0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(1);
 #endif

@@ -65,7 +65,7 @@ main( hypre_int argc,
    void                      *object;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Int spgemm_use_cusparse = 1;
+   HYPRE_Int spgemm_use_vendor = 1;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #endif
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
@@ -242,10 +242,10 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
-      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
-         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
       {
@@ -289,7 +289,7 @@ main( hypre_int argc,
    hypre_HandleMemoryLocation(hypre_handle())    = memory_location;
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = spgemm_use_cusparse;
+   hypre_HandleSpgemmUseVendor(hypre_handle()) = spgemm_use_vendor;
 #endif
 
 
