@@ -1060,7 +1060,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
     *--------------------------------------------------------------*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   if (!num_nnzs_A)
+   if (!num_nnzs_A && A_i)
    {
       num_nnzs_A = A_i[num_rows_A];
    }
