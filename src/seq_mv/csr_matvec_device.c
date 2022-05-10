@@ -17,6 +17,14 @@
 
 #if defined(HYPRE_USING_GPU)
 
+#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+#define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_SPMV_CSR_ALG2
+#define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_SPMM_CSR_ALG2
+#else
+#define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_CSRMV_ALG2
+#define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_CSRMM_ALG1
+#endif
+
 /* y = alpha * A * x + beta * y
  * This function is supposed to be only used inside the other functions in this file
  */
@@ -136,11 +144,22 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      hypre_Vector    *y,
                                      HYPRE_Int        offset )
 {
+   HYPRE_Int                 num_rows        = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int                 num_cols        = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int                 num_vectors     = hypre_VectorNumVectors(x);
+   HYPRE_Int                 x_size_override = trans ? num_rows : num_cols;
+   HYPRE_Int                 y_size_override = trans ? num_cols : num_rows;
+   hypre_CSRMatrix          *AT;
+
+   /* SpMV data */
+   size_t                    bufferSize = 0;
+   char                     *dBuffer    = hypre_CSRMatrixGPUMatSpMVBuffer(A);
    const cudaDataType        data_type  = hypre_HYPREComplexToCudaDataType();
    const cusparseIndexType_t index_type = hypre_HYPREIntToCusparseIndexType();
-   cusparseSpMatDescr_t      matA;
    cusparseHandle_t          handle     = hypre_HandleCusparseHandle(hypre_handle());
-   hypre_CSRMatrix          *AT;
+   cusparseSpMatDescr_t      matA;
+   cusparseDnVecDescr_t      vecX, vecY;
+   cusparseDnMatDescr_t      matX, matY;
 
    if (trans)
    {
@@ -154,50 +173,80 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
       matA = hypre_CSRMatrixToCusparseSpMat(A, offset);
    }
 
-   /* SpMV */
-   size_t bufferSize = 0;
-   char  *dBuffer    = hypre_CSRMatrixGPUMatSpMVBuffer(A);
-   HYPRE_Int x_size_override = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
-   HYPRE_Int y_size_override = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
-   cusparseDnVecDescr_t vecX = hypre_VectorToCusparseDnVec(x,      0, x_size_override);
-   cusparseDnVecDescr_t vecY = hypre_VectorToCusparseDnVec(y, offset, y_size_override - offset);
+   /* Create cuSPARSE vector data structures */
+   if (num_vectors == 1)
+   {
+      vecX = hypre_VectorToCusparseDnVec(x,      0, x_size_override);
+      vecY = hypre_VectorToCusparseDnVec(y, offset, y_size_override - offset);
+   }
+   else
+   {
+      matX = hypre_VectorToCusparseDnMat(x);
+      matY = hypre_VectorToCusparseDnMat(y);
+   }
 
    if (!dBuffer)
    {
-      HYPRE_CUSPARSE_CALL( cusparseSpMV_bufferSize(handle,
-                                                   CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   &alpha,
-                                                   matA,
-                                                   vecX,
-                                                   &beta,
-                                                   vecY,
-                                                   data_type,
-#if CUSPARSE_VERSION >= 11400
-                                                   CUSPARSE_SPMV_CSR_ALG2,
-#else
-                                                   CUSPARSE_CSRMV_ALG2,
-#endif
-                                                   &bufferSize) );
+      if (num_vectors == 1)
+      {
+         HYPRE_CUSPARSE_CALL( cusparseSpMV_bufferSize(handle,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      &alpha,
+                                                      matA,
+                                                      vecX,
+                                                      &beta,
+                                                      vecY,
+                                                      data_type,
+                                                      HYPRE_CUSPARSE_SPMV_ALG,
+                                                      &bufferSize) );
+      }
+      else
+      {
+         HYPRE_CUSPARSE_CALL( cusparseSpMM_bufferSize(handle,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      &alpha,
+                                                      matA,
+                                                      matX,
+                                                      &beta,
+                                                      matY,
+                                                      data_type,
+                                                      HYPRE_CUSPARSE_SPMM_ALG,
+                                                      &bufferSize) );
+      }
 
       dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
 
       hypre_CSRMatrixGPUMatSpMVBuffer(A) = dBuffer;
    }
 
-   HYPRE_CUSPARSE_CALL( cusparseSpMV(handle,
-                                     CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                     &alpha,
-                                     matA,
-                                     vecX,
-                                     &beta,
-                                     vecY,
-                                     data_type,
-#if CUSPARSE_VERSION >= 11400
-                                     CUSPARSE_SPMV_CSR_ALG2,
-#else
-                                     CUSPARSE_CSRMV_ALG2,
-#endif
-                                     dBuffer) );
+   if (num_vectors == 1)
+   {
+      HYPRE_CUSPARSE_CALL( cusparseSpMV(handle,
+                                        CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                        &alpha,
+                                        matA,
+                                        vecX,
+                                        &beta,
+                                        vecY,
+                                        data_type,
+                                        HYPRE_CUSPARSE_SPMV_ALG,
+                                        dBuffer) );
+   }
+   else
+   {
+      HYPRE_CUSPARSE_CALL( cusparseSpMM(handle,
+                                        CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                        CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                        &alpha,
+                                        matA,
+                                        matX,
+                                        &beta,
+                                        matY,
+                                        data_type,
+                                        HYPRE_CUSPARSE_SPMM_ALG,
+                                        dBuffer) );
+   }
 
    hypre_SyncComputeStream(hypre_handle());
 
@@ -208,8 +257,16 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
 
    /* This function releases the host memory allocated for the sparse matrix descriptor */
    HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
+   if (num_vectors == 1)
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
+   }
+   else
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matX) );
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matY) );
+   }
 
    return hypre_error_flag;
 }
@@ -390,4 +447,3 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
 #endif // #if defined(HYPRE_USING_GPU)
-
