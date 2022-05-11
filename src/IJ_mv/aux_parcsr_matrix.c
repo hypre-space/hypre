@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -264,7 +264,7 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix,
       return 0;
    }
 
-   /* WM: Q - added the macro guards here (since IJ assembly not yet ported to sycl)... is this OK/correct? */
+   /* WM: todo sycl */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (memory_location != HYPRE_MEMORY_HOST)
    {

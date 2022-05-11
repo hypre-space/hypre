@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -26,10 +26,10 @@ hypre_SetSpMVUseCusparse( HYPRE_Int use_cusparse )
 
 /* GPU SpGemm */
 HYPRE_Int
-hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse )
+hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = use_cusparse;
+   hypre_HandleSpgemmUseVendor(hypre_handle()) = use_vendor;
 #endif
    return hypre_error_flag;
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -185,40 +185,40 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
       const HYPRE_Int group_size = 32;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else if (rownnz >= 32)
    {
       const HYPRE_Int group_size = 16;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else if (rownnz >= 16)
    {
       const HYPRE_Int group_size = 8;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else if (rownnz >= 8)
    {
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else
    {
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                         nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
 
    return hypre_error_flag;

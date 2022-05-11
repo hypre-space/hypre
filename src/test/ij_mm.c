@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -423,7 +423,7 @@ main( hypre_int argc,
 
    HYPRE_Int          print_system = 0;
    HYPRE_Int          verify       = 0;
-   HYPRE_Int          use_cusparse = 0;
+   HYPRE_Int          use_vendor = 0;
    HYPRE_Int          spgemm_alg = 1;
    HYPRE_Int          rowest_mtd = 3;
    HYPRE_Int          rowest_nsamples = 32;
@@ -550,10 +550,10 @@ main( hypre_int argc,
          arg_index++;
          mult_order = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-vendor") == 0 )
       {
          arg_index++;
-         use_cusparse = 1;
+         use_vendor = 1;
       }
       else if ( strcmp(argv[arg_index], "-spgemmalg") == 0 )
       {
@@ -661,7 +661,7 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmHashType(hash_type);
    hypre_assert(errcode == 0);
-   errcode = HYPRE_SetSpGemmUseCusparse(use_cusparse);
+   errcode = HYPRE_SetSpGemmUseVendor(use_vendor);
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);

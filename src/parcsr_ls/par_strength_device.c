@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -145,23 +145,23 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (abs_soc)
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
    else
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
 
    hypre_Memset(S_diag_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);

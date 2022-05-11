@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -86,7 +86,7 @@ HYPRE_Int Ul_timer;
 #define jr (globals->_jr)
 #define jw (globals->_jw)
 #define lastjr (globals->_lastjr)
-#define lr (globals->_lr)
+#define hypre_lr (globals->_lr)
 #define lastlr (globals->_lastlr)
 #define w (globals->_w)
 #define firstrow (globals->_firstrow)

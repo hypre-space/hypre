@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -894,6 +894,10 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
  * (Optional) Enables the use of more complex smoothers.
  * The following options exist for \e smooth_type:
  *
+ *    - 4 : FSAI (routines needed to set: HYPRE_BoomerAMGSetFSAIMaxSteps,
+ *          HYPRE_BoomerAMGSetFSAIMaxStepSize, HYPRE_BoomerAMGSetFSAIEigMaxIters,
+ *          HYPRE_BoomerAMGSetFSAIKapTolerance)
+ *    - 5 : ParILUK (routines needed to set: HYPRE_ILUSetLevelOfFill, HYPRE_ILUSetType)
  *    - 6 : Schwarz (routines needed to set: HYPRE_BoomerAMGSetDomainType,
  *          HYPRE_BoomerAMGSetOverlap, HYPRE_BoomerAMGSetVariant,
  *          HYPRE_BoomerAMGSetSchwarzRlxWeight)
@@ -903,7 +907,6 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
  *          HYPRE_BoomerAMGSetLevel, HYPRE_BoomerAMGSetFilter,
  *          HYPRE_BoomerAMGSetThreshold)
  *    - 9 : Euclid (routines needed to set: HYPRE_BoomerAMGSetEuclidFile)
- *    - 5 : ParILUK (routines needed to set: HYPRE_ILUSetLevelOfFill, HYPRE_ILUSetType)
  *
  * The default is 6.  Also, if no smoother parameters are set via the routines
  * mentioned in the table above, default values are used.
@@ -1085,6 +1088,35 @@ HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
                                         HYPRE_Real        ilu_droptol);
+
+/**
+ * (Optional) Defines maximum number of steps for FSAI.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps(HYPRE_Solver solver,
+                                         HYPRE_Int    max_steps);
+
+/**
+ * (Optional) Defines maximum step size for FSAI.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
+                                            HYPRE_Int    max_step_size);
+
+/**
+ * (Optional) Defines maximum number of iterations for estimating the
+ * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
+                                            HYPRE_Int    eig_max_iters);
+
+/**
+ * (Optional) Defines the kaporin dropping tolerance.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
+                                             HYPRE_Real   kap_tolerance);
 
 /**
  * (Optional) Defines which parallel restriction operator is used.
@@ -1449,6 +1481,136 @@ HYPRE_BoomerAMGDDGetNumIterations( HYPRE_Solver   solver,
                                    HYPRE_Int     *num_iterations );
 
 /**@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR FSAI Solver and Preconditioner
+ *
+ * An adaptive factorized sparse approximate inverse solver/preconditioner/smoother
+ * that computes a sparse approximation G to the inverse of the lower cholesky
+ * factor of A such that M^{-1} \approx G^T * G.
+ *
+ * @{
+ **/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_FSAICreate( HYPRE_Solver *solver );
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_FSAIDestroy( HYPRE_Solver solver );
+
+/**
+ * Set up the FSAI solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_FSAISetup( HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x );
+
+/**
+ * Solve the system or apply FSAI as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver \e SetPrecond function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_FSAISolve( HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector    b,
+                           HYPRE_ParVector    x );
+
+/**
+ * (Optional) Sets the algorithm type used to compute the lower triangular factor G
+ *
+ *      - 1: Native (can use OpenMP with static scheduling)
+ *      - 2: OpenMP with dynamic scheduling
+ **/
+HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
+                                 HYPRE_Int    algo_type );
+
+/**
+ * (Optional) Sets the maximum number of steps for computing the sparsity
+ * pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetMaxSteps( HYPRE_Solver solver,
+                                 HYPRE_Int    max_steps  );
+
+/**
+ * (Optional) Sets the maximum step size for computing the sparsity pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
+                                    HYPRE_Int    max_step_size  );
+
+/**
+ * (Optional) Sets the kaporin gradient reduction factor for computing the
+ *  sparsity pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetKapTolerance( HYPRE_Solver solver,
+                                     HYPRE_Real   kap_tolerance  );
+
+/**
+ * (Optional) Sets the relaxation factor for FSAI
+ **/
+HYPRE_Int HYPRE_FSAISetOmega( HYPRE_Solver solver,
+                              HYPRE_Real   omega );
+
+/**
+ * (Optional) Sets the maximum number of iterations (sweeps) for FSAI
+ **/
+HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
+                                      HYPRE_Int    max_iterations );
+
+/**
+ * (Optional) Set number of iterations for computing maximum
+ * eigenvalue of the preconditioned operator.
+ **/
+HYPRE_Int HYPRE_FSAISetEigMaxIters( HYPRE_Solver solver,
+                                    HYPRE_Int    eig_max_iters );
+
+/**
+ * (Optional) Set the convergence tolerance, if FSAI is used
+ * as a solver. When using FSAI as a preconditioner, set the tolerance
+ * to 0.0. The default is \f$10^{-6}\f$.
+ **/
+HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
+                                  HYPRE_Real   tolerance );
+
+/**
+ * (Optional) Requests automatic printing of setup information.
+ *
+ *    - 0 : no printout (default)
+ *    - 1 : print setup information
+ **/
+HYPRE_Int HYPRE_FSAISetPrintLevel(HYPRE_Solver solver,
+                                  HYPRE_Int    print_level);
+
+/**
+ * (Optional) Use a zero initial guess. This allows the solver to cut corners
+ * in the case where a zero initial guess is needed (e.g., for preconditioning)
+ * to reduce compuational cost.
+ **/
+HYPRE_Int HYPRE_FSAISetZeroGuess(HYPRE_Solver solver,
+                                 HYPRE_Int    zero_guess);
+
+
+/**@}*/
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -3770,6 +3932,8 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
+ *
+ *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetFLevelRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
@@ -3779,11 +3943,29 @@ HYPRE_Int
 HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
 
 /**
+ * (Optional) Set the relaxation type for F-relaxation at each level.
+ * This function takes precedence over, and will replace \e HYPRE_MGRSetFRelaxMethod
+ * and HYPRE_MGRSetRelaxType.
+ * Options for \e relax_type entries are:
+ *
+ *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
+ *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
+ *    - 2 : AMG.
+ **/
+HYPRE_Int
+HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
+                            HYPRE_Int *relax_type );
+
+/**
  * (Optional) Set the strategy for coarse grid computation.
  * Options for \e cg_method are:
  *
  *    - 0 : Galerkin coarse grid computation using RAP.
- *    - 1 : Non-Galerkin coarse grid computation with dropping strategy.
+ *    - 1 - 4 : Non-Galerkin coarse grid computation with dropping strategy.
+ *         - 1: inv(A_FF) approximated by its (block) diagonal inverse
+ *         - 2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
+ *         - 3: CPR-like approximation with inv(A_FF) approximated by its block diagonal inverse
+ *         - 4: inv(A_FF) approximated by sparse approximate inverse
  **/
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
@@ -3808,6 +3990,8 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_function
  *    - 3    : approximate inverse
  *    - 4    : pAIR distance 1
  *    - 5    : pAIR distance 2
+ *    - 12   : Block Jacobi
+ *    - 13   : CPR-like restriction operator
  *    - else : use classical modified interpolation
  *
  * The default is injection.
@@ -3833,10 +4017,11 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
  * Options for \e interp_type are:
  *
  *    - 0    : injection \f$[0  I]^{T}\f$
- *    - 1    : unscaled (not recommended)
+ *    - 1    : L1-Jacobi
  *    - 2    : diagonal scaling (Jacobi)
  *    - 3    : classical modified interpolation
  *    - 4    : approximate inverse
+ *    - 12   : Block Jacobi
  *    - else : classical modified interpolation
  *
  * The default is diagonal scaling.
@@ -3857,6 +4042,10 @@ HYPRE_Int
 HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
                             HYPRE_Int nsweeps );
 
+HYPRE_Int
+HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver,
+                                 HYPRE_Int *nsweeps );
+
 /**
  * (Optional) Set number of interpolation sweeps.
  * This option is for \e interp_type > 2.
@@ -3865,6 +4054,14 @@ HYPRE_Int
 HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
                              HYPRE_Int nsweeps );
 
+/**
+ * (Optional) Set block size for block (global) smoother and interp/restriction.
+ * This option is for \e interp_type/restrict_type == 12, and
+ * \e smooth_type == 0 or 1.
+ **/
+HYPRE_Int
+HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver,
+                                  HYPRE_Int blk_size );
 
 HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                               HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
@@ -3953,26 +4150,51 @@ HYPRE_MGRSetTol( HYPRE_Solver solver,
  * Default is 0 (no global smoothing).
  **/
 HYPRE_Int
-HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver,
+HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver,
                                   HYPRE_Int smooth_iter );
+
+/**
+ * (Optional) Determines how many sweeps of global smoothing to do on each level.
+ * Default is 0 (no global smoothing).
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
+                              HYPRE_Int *smooth_iters );
+/**
+ * (Optional) Set the smoothing order for global smoothing at each level.
+ * Options for \e level_smooth_order are:
+ *    - 1 : Pre-smoothing (default)
+ *    - 2 : Post-smoothing
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
+                              HYPRE_Int level_smooth_order );
 
 /**
  * (Optional) Determines type of global smoother.
  * Options for \e smooth_type are:
  *
  *    - 0 : block Jacobi (default)
- *    - 1 : Jacobi
- *    - 2 : Gauss-Seidel, sequential (very slow!)
- *    - 3 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
- *    - 4 : hybrid Gauss-Seidel or SOR, forward solve
- *    - 5 : hybrid Gauss-Seidel or SOR, backward solve
- *    - 6 : hybrid chaotic Gauss-Seidel (works only with OpenMP)
- *    - 7 : hybrid symmetric Gauss-Seidel or SSOR
+ *    - 1 : block Gauss-Siedel
+ *    - 2 : Jacobi
+ *    - 3 : Gauss-Seidel, sequential (very slow!)
+ *    - 4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
+ *    - 5 : hybrid Gauss-Seidel or SOR, forward solve
+ *    - 6 : hybrid Gauss-Seidel or SOR, backward solve
  *    - 8 : Euclid (ILU)
+ *    - 16 : HYPRE_ILU
  **/
 HYPRE_Int
-HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver,
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
                               HYPRE_Int smooth_type );
+
+/**
+ * (Optional) Determines type of global smoother for each level.
+ * See \e HYPRE_MGRSetGlobalSmoothType for global smoother options.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
+                             HYPRE_Int *smooth_type );
 
 /**
  * (Optional) Return the number of MGR iterations.

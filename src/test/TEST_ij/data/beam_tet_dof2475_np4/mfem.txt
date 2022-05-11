@@ -1,0 +1,19 @@
+$ mpirun -np 4 ./ex2p -m ../beam-tet.mesh -sr 0 -sp 2 -no-vis
+
+Produced with mfem-4.4 (https://github.com/mfem/mfem/archive/refs/tags/v4.4.tar.gz)
+
+Options used:
+   --mesh ../beam-tet.mesh
+   --order 1
+   --serial_ref 0
+   --parallel_ref 2
+   --amg-for-systems
+   --no-static-condensation
+   --no-visualization
+   --by-vdim
+   --device cpu
+Device configuration: cpu
+Memory configuration: host-std
+Number of finite element unknowns: 2475
+Assembling: r.h.s. ... matrix ... done.
+Size of linear system: 2475

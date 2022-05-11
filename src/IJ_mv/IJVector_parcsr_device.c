@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -251,9 +251,9 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
-                         vec_start, new_sora,
-                         hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
+                        vec_start, new_sora,
+                        hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
 
       hypre_TFree(new_i,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data, HYPRE_MEMORY_DEVICE);
