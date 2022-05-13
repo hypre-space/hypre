@@ -19,7 +19,7 @@
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 #define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_SPMV_CSR_ALG2
-#define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_SPMM_CSR_ALG2
+#define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_SPMM_CSR_ALG3
 #else
 #define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_CSRMV_ALG2
 #define HYPRE_CUSPARSE_SPMM_ALG CUSPARSE_CSRMM_ALG1
@@ -244,8 +244,22 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
       }
 
       dBuffer = hypre_TAlloc(char, bufferSize, HYPRE_MEMORY_DEVICE);
-
       hypre_CSRMatrixGPUMatSpMVBuffer(A) = dBuffer;
+
+      if (num_vectors > 1)
+      {
+         HYPRE_CUSPARSE_CALL( cusparseSpMM_preprocess(handle,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      &alpha,
+                                                      matA,
+                                                      matX,
+                                                      &beta,
+                                                      matY,
+                                                      data_type,
+                                                      HYPRE_CUSPARSE_SPMM_ALG,
+                                                      dBuffer) );
+      }
    }
 
    if (num_vectors == 1)

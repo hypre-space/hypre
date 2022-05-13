@@ -117,18 +117,15 @@ hypre_VectorToCusparseDnMat(const hypre_Vector *x)
    HYPRE_Complex        *data = hypre_VectorData(x);
 
    cudaDataType          data_type = hypre_HYPREComplexToCudaDataType();
-   cusparseOrder_t       order;
    cusparseDnMatDescr_t  matX;
 
-
-   order = (storage == 0) ? CUSPARSE_ORDER_COL : CUSPARSE_ORDER_ROW;
    HYPRE_CUSPARSE_CALL( cusparseCreateDnMat(&matX,
                                             size,
                                             num_vectors,
-                                            size,
+                                            (storage == 0) ? size : num_vectors,
                                             data,
                                             data_type,
-                                            order) );
+                                            (storage == 0) ? CUSPARSE_ORDER_COL : CUSPARSE_ORDER_ROW) );
    return matX;
 }
 
