@@ -157,32 +157,60 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
    const cudaDataType        data_type  = hypre_HYPREComplexToCudaDataType();
    const cusparseIndexType_t index_type = hypre_HYPREIntToCusparseIndexType();
    cusparseHandle_t          handle     = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseSpMatDescr_t      matA;
-   cusparseDnVecDescr_t      vecX, vecY;
-   cusparseDnMatDescr_t      matX, matY;
+   cusparseSpMatDescr_t      matA       = hypre_CSRMatrixGPUMatSpMatA(A);
+   cusparseDnVecDescr_t      vecX       = hypre_CSRMatrixGPUMatDnVecX(A);
+   cusparseDnVecDescr_t      vecY       = hypre_CSRMatrixGPUMatDnVecY(A);
+   cusparseDnMatDescr_t      matX       = hypre_CSRMatrixGPUMatDnMatX(A);
+   cusparseDnMatDescr_t      matY       = hypre_CSRMatrixGPUMatDnMatY(A);
 
    if (trans)
    {
       /* We handle the transpose explicitly to ensure the same output each run
        * and for potential performance improvement memory for AT */
       hypre_CSRMatrixTransposeDevice(A, &AT, 1);
-      matA = hypre_CSRMatrixToCusparseSpMat(AT, offset);
+      if (!matA)
+      {
+         matA = hypre_CSRMatrixToCusparseSpMat(AT, offset);
+         hypre_CSRMatrixGPUMatSpMatA(A) = matA;
+      }
    }
    else
    {
-      matA = hypre_CSRMatrixToCusparseSpMat(A, offset);
+      if (!matA)
+      {
+         matA = hypre_CSRMatrixToCusparseSpMat(A, offset);
+         hypre_CSRMatrixGPUMatSpMatA(A) = matA;
+      }
    }
 
    /* Create cuSPARSE vector data structures */
    if (num_vectors == 1)
    {
-      vecX = hypre_VectorToCusparseDnVec(x,      0, x_size_override);
-      vecY = hypre_VectorToCusparseDnVec(y, offset, y_size_override - offset);
+      if (!vecX)
+      {
+         vecX = hypre_VectorToCusparseDnVec(x, 0, x_size_override);
+         hypre_CSRMatrixGPUMatDnVecX(A) = vecX;
+      }
+
+      if (!vecY)
+      {
+         vecY = hypre_VectorToCusparseDnVec(y, offset, y_size_override - offset);
+         hypre_CSRMatrixGPUMatDnVecX(A) = vecY;
+      }
    }
    else
    {
-      matX = hypre_VectorToCusparseDnMat(x);
-      matY = hypre_VectorToCusparseDnMat(y);
+      if (!matX)
+      {
+         matX = hypre_VectorToCusparseDnMat(x);
+         hypre_CSRMatrixGPUMatDnMatX(A) = matX;
+      }
+
+      if (!vecY)
+      {
+         matY = hypre_VectorToCusparseDnMat(y);
+         hypre_CSRMatrixGPUMatDnMatY(A) = matY;
+      }
    }
 
    if (!dBuffer)
@@ -253,19 +281,6 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
    if (trans)
    {
       hypre_CSRMatrixDestroy(AT);
-   }
-
-   /* This function releases the host memory allocated for the sparse matrix descriptor */
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
-   if (num_vectors == 1)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
-   }
-   else
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matX) );
-      HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matY) );
    }
 
    return hypre_error_flag;

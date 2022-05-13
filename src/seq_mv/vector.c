@@ -275,45 +275,59 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #endif
 
    HYPRE_Complex *vector_data = hypre_VectorData(v);
+   HYPRE_Int      num_vectors = hypre_VectorNumVectors(v);
    HYPRE_Int      size        = hypre_VectorSize(v);
-   HYPRE_Int      ierr  = 0;
+   HYPRE_Int      total_size  = size * num_vectors;
 
-   size *= hypre_VectorNumVectors(v);
-
-   //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (size > 0)
+   /* Trivial case */
+   if (total_size > 0)
    {
-      HYPRE_THRUST_CALL( fill_n, vector_data, size, value );
+      return hypre_error_flag;
    }
-#elif defined(HYPRE_USING_SYCL)
-   if (size > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::fill_n, vector_data, size, value );
-   }
-#else
-   HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   #pragma omp target teams distribute parallel for private(i) is_device_ptr(vector_data)
-#elif defined(HYPRE_USING_OPENMP)
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < size; i++)
-   {
-      vector_data[i] = value;
-   }
-#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncComputeStream(hypre_handle());
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(v));
+
+   //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      HYPRE_THRUST_CALL(fill_n, vector_data, total_size, value);
+
+#elif defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL(std::fill_n, vector_data, total_size, value);
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+      HYPRE_Int i;
+
+      #pragma omp target teams distribute parallel for private(i) is_device_ptr(vector_data)
+      for (i = 0; i < total_size; i++)
+      {
+         vector_data[i] = value;
+      }
 #endif
+
+      hypre_SyncComputeStream(hypre_handle());
+   }
+   else
+#endif /* defined(HYPRE_USING_GPU) */
+   {
+      HYPRE_Int i;
+
+#if defined(HYPRE_USING_OPENMP)
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < total_size; i++)
+      {
+         vector_data[i] = value;
+      }
+   }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
