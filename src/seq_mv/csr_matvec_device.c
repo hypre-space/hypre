@@ -36,7 +36,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    }
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
-   if ( hypre_HandleSpMVUseCusparse(hypre_handle()) )
+   if ( hypre_HandleSpMVUseVendor(hypre_handle()) )
    {
 #if defined(HYPRE_USING_CUSPARSE)
       hypre_CSRMatrixMatvecCusparse(trans, alpha, A, x, beta, y, offset);

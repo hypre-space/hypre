@@ -469,15 +469,15 @@ struct hypre_DeviceData
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
    /* device spgemm options */
-   HYPRE_Int                         spgemm_use_vendor;
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
    /* cusparse */
-   HYPRE_Int                         spmv_use_cusparse;
-   HYPRE_Int                         sptrans_use_cusparse;
+   HYPRE_Int                         spmv_use_vendor;
+   HYPRE_Int                         sptrans_use_vendor;
+   HYPRE_Int                         spgemm_use_vendor;
    /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
@@ -497,8 +497,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_DeviceDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
-#define hypre_DeviceDataSpMVUseCusparse(data)                ((data) -> spmv_use_cusparse)
-#define hypre_DeviceDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
+#define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
+#define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)

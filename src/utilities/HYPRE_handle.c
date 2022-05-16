@@ -14,12 +14,12 @@
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetSpMVUseCusparse
+ * HYPRE_SetSpMVUseVendor
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SetSpMVUseCusparse( HYPRE_Int use_cusparse )
+HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor )
 {
-   return hypre_SetSpMVUseCusparse(use_cusparse);
+   return hypre_SetSpMVUseVendor(use_vendor);
 }
 
 /*--------------------------------------------------------------------------

@@ -16,10 +16,10 @@
 
 /* GPU SpMV */
 HYPRE_Int
-hypre_SetSpMVUseCusparse( HYPRE_Int use_cusparse )
+hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_HandleSpMVUseCusparse(hypre_handle()) = use_cusparse;
+   hypre_HandleSpMVUseVendor(hypre_handle()) = use_vendor;
 #endif
    return hypre_error_flag;
 }

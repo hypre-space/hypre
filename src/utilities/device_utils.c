@@ -27,15 +27,19 @@ hypre_DeviceDataCreate()
 #endif
    hypre_DeviceDataComputeStreamNum(data)  = 0;
 
-   /* SpGeMM */
+   /* SpMV, SpGeMM, SpTrans: use vendor's lib by default */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
-   hypre_DeviceDataSpgemmUseVendor(data) = 1;
-   hypre_DeviceDataSpMVUseCusparse(data) = 1;
+   hypre_DeviceDataSpgemmUseVendor(data)  = 1;
+   hypre_DeviceDataSpMVUseVendor(data)    = 1;
+   hypre_DeviceDataSpTransUseVendor(data) = 1;
 #else
    hypre_DeviceDataSpgemmUseVendor(data) = 0;
 #endif
 
-   hypre_DeviceDataSpTransUseCusparse(data) = 0;
+   /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
+#if defined(HYPRE_USING_CUDA)
+   hypre_DeviceDataSpTransUseVendor(data) = 0;
+#endif
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
