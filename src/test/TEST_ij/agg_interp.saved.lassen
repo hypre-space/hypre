@@ -166,3 +166,9 @@ Final Relative Residual Norm = 6.953099e-09
 Iterations = 11
 Final Relative Residual Norm = 9.091177e-09
 
+# Output file: agg_interp.out.21
+
+
+BoomerAMG Iterations = 9
+Final Relative Residual Norm = 2.176372e-09
+

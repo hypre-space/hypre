@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -331,8 +331,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int *new_end;
 
    /* init CF_marker_diag and measure_diag: remove some special nodes */
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
-                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
+                     num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
    HYPRE_THRUST_CALL(gather,
@@ -494,17 +494,17 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
-                      gDim, bDim,
-                      graph_diag_size,
-                      graph_diag,
-                      S_diag_i,
-                      S_diag_j,
-                      S_offd_i,
-                      S_offd_j,
-                      measure_diag,
-                      CF_marker_diag,
-                      CF_marker_offd );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
+                     gDim, bDim,
+                     graph_diag_size,
+                     graph_diag,
+                     S_diag_i,
+                     S_diag_j,
+                     S_offd_i,
+                     S_offd_j,
+                     measure_diag,
+                     CF_marker_diag,
+                     CF_marker_offd );
 
    hypre_ParCSRCommHandle *comm_handle;
 

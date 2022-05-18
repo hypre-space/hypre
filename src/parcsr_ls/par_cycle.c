@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -421,9 +421,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                /*-----------------------------------------------
                   Choose Smoother
                 -----------------------------------------------*/
-               if ( smooth_num_levels > level && (smooth_type ==  7 || smooth_type ==  8 ||
-                                                  smooth_type ==  9 || smooth_type == 19 ||
-                                                  smooth_type == 17 || smooth_type == 18) )
+               if ( smooth_num_levels > level &&
+                    (smooth_type == 7 || smooth_type == 17 ||
+                     smooth_type == 8 || smooth_type == 18 ||
+                     smooth_type == 9 || smooth_type == 19) )
                {
                   hypre_VectorSize(hypre_ParVectorLocalVector(Utemp)) = local_size;
                   alpha = -1.0;
@@ -452,6 +453,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                        (HYPRE_ParVector) Utemp);
                   }
                   hypre_ParVectorAxpy(relax_weight[level], Utemp, Aux_U);
+               }
+               else if ( smooth_num_levels > level && (smooth_type == 4) )
+               {
+                  HYPRE_FSAISetZeroGuess(smoother[level], cycle_param - 2);
+                  HYPRE_FSAISetMaxIterations(smoother[level], num_grid_sweeps[cycle_param]);
+                  HYPRE_FSAISolve(smoother[level],
+                                  (HYPRE_ParCSRMatrix) A_array[level],
+                                  (HYPRE_ParVector) Aux_F,
+                                  (HYPRE_ParVector) Aux_U);
                }
                else if ( smooth_num_levels > level && (smooth_type == 5 || smooth_type == 15) )
                {

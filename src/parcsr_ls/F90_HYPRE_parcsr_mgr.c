@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -717,7 +717,7 @@ hypre_F90_IFACE(hypre_mgrsetmaxglobalsmoothit, HYPRE_MGRSETMAXGLOBALSMOOTHIT)
   hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int)
-           ( HYPRE_MGRSetMaxGlobalsmoothIters(
+           ( HYPRE_MGRSetMaxGlobalSmoothIters(
                 hypre_F90_PassObj (HYPRE_Solver, solver),
                 hypre_F90_PassInt (max_iter) ) );
 }
@@ -733,7 +733,7 @@ hypre_F90_IFACE(hypre_mgrsetglobalsmoothtype, HYPRE_MGRSETGLOBALSMOOTHTYPE)
   hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int)
-           ( HYPRE_MGRSetGlobalsmoothType(
+           ( HYPRE_MGRSetGlobalSmoothType(
                 hypre_F90_PassObj (HYPRE_Solver, solver),
                 hypre_F90_PassInt (iter_type) ) );
 }

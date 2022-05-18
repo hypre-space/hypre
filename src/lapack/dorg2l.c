@@ -68,17 +68,17 @@ extern "C" {
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
+     integer c__1 = 1;
     
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3;
     doublereal d__1;
     /* Local variables */
-    static integer i__, j, l;
+     integer i__, j, l;
     extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *), dlarf_(const char *, integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *);
-    static integer ii;
+     integer ii;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 

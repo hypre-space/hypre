@@ -13,13 +13,7 @@ extern "C" {
 	-lf2c -lm   (in that order)
 */
 
-/* Table of constant values */
-
-static integer c__1 = 1;
-static integer c__2 = 2;
-static integer c__0 = 0;
-
-/* Subroutine */ integer dlasq1_(integer *n, doublereal *d__, doublereal *e, 
+/* Subroutine */ integer dlasq1_(integer *n, doublereal *d__, doublereal *e,
 	doublereal *work, integer *info)
 {
     /* System generated locals */
@@ -27,77 +21,83 @@ static integer c__0 = 0;
     doublereal d__1, d__2, d__3;
 
     /* Local variables */
-    extern /* Subroutine */ integer dlas2_(doublereal *, doublereal *, doublereal 
+    extern /* Subroutine */ integer dlas2_(doublereal *, doublereal *, doublereal
 	    *, doublereal *, doublereal *);
-    static integer i__;
-    static doublereal scale;
-    static integer iinfo;
-    static doublereal sigmn;
-    extern /* Subroutine */ integer dcopy_(integer *, doublereal *, integer *, 
+    integer i__;
+    doublereal scale;
+    integer iinfo;
+    doublereal sigmn;
+    extern /* Subroutine */ integer dcopy_(integer *, doublereal *, integer *,
 	    doublereal *, integer *);
-    static doublereal sigmx;
+    doublereal sigmx;
     extern /* Subroutine */ integer dlasq2_(integer *, doublereal *, integer *);
     extern doublereal dlamch_(const char *);
-    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, integer *, doublereal *,
 	    integer *, integer *);
-    static doublereal safmin;
+    doublereal safmin;
     extern /* Subroutine */ integer xerbla_(const char *, integer *), dlasrt_(
 	    const char *, integer *, doublereal *, integer *);
-    static doublereal eps;
+    doublereal eps;
+
+    /* Table of constant values */
+    integer c__1 = 1;
+    integer c__2 = 2;
+    integer c__0 = 0;
 
 
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1999   
+
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLASQ1 computes the singular values of a real N-by-N bidiagonal   
-    matrix with diagonal D and off-diagonal E. The singular values   
-    are computed to high relative accuracy, in the absence of   
-    denormalization, underflow and overflow. The algorithm was first   
-    presented in   
+    DLASQ1 computes the singular values of a real N-by-N bidiagonal
+    matrix with diagonal D and off-diagonal E. The singular values
+    are computed to high relative accuracy, in the absence of
+    denormalization, underflow and overflow. The algorithm was first
+    presented in
 
-    "Accurate singular values and differential qd algorithms" by K. V.   
-    Fernando and B. N. Parlett, Numer. Math., Vol-67, No. 2, pp. 191-230,   
-    1994,   
+    "Accurate singular values and differential qd algorithms" by K. V.
+    Fernando and B. N. Parlett, Numer. Math., Vol-67, No. 2, pp. 191-230,
+    1994,
 
-    and the present implementation is described in "An implementation of   
-    the dqds Algorithm (Positive Case)", LAPACK Working Note.   
+    and the present implementation is described in "An implementation of
+    the dqds Algorithm (Positive Case)", LAPACK Working Note.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    N     (input) INTEGER   
-          The number of rows and columns in the matrix. N >= 0.   
+    N     (input) INTEGER
+          The number of rows and columns in the matrix. N >= 0.
 
-    D     (input/output) DOUBLE PRECISION array, dimension (N)   
-          On entry, D contains the diagonal elements of the   
-          bidiagonal matrix whose SVD is desired. On normal exit,   
-          D contains the singular values in decreasing order.   
+    D     (input/output) DOUBLE PRECISION array, dimension (N)
+          On entry, D contains the diagonal elements of the
+          bidiagonal matrix whose SVD is desired. On normal exit,
+          D contains the singular values in decreasing order.
 
-    E     (input/output) DOUBLE PRECISION array, dimension (N)   
-          On entry, elements E(1:N-1) contain the off-diagonal elements   
-          of the bidiagonal matrix whose SVD is desired.   
-          On exit, E is overwritten.   
+    E     (input/output) DOUBLE PRECISION array, dimension (N)
+          On entry, elements E(1:N-1) contain the off-diagonal elements
+          of the bidiagonal matrix whose SVD is desired.
+          On exit, E is overwritten.
 
-    WORK  (workspace) DOUBLE PRECISION array, dimension (4*N)   
+    WORK  (workspace) DOUBLE PRECISION array, dimension (4*N)
 
-    INFO  (output) INTEGER   
-          = 0: successful exit   
-          < 0: if INFO = -i, the i-th argument had an illegal value   
-          > 0: the algorithm failed   
-               = 1, a split was marked by a positive value in E   
-               = 2, current block of Z not diagonalized after 30*N   
-                    iterations (in inner while loop)   
-               = 3, termination criterion of outer while loop not met   
-                    (program created more than N unreduced blocks)   
+    INFO  (output) INTEGER
+          = 0: successful exit
+          < 0: if INFO = -i, the i-th argument had an illegal value
+          > 0: the algorithm failed
+               = 1, a split was marked by a positive value in E
+               = 2, current block of Z not diagonalized after 30*N
+                    iterations (in inner while loop)
+               = 3, termination criterion of outer while loop not met
+                    (program created more than N unreduced blocks)
 
-    =====================================================================   
+    =====================================================================
 
 
        Parameter adjustments */
@@ -152,7 +152,7 @@ static integer c__0 = 0;
 /* L20: */
     }
 
-/*     Copy D and E into WORK (in the Z format) and scale (squaring the   
+/*     Copy D and E into WORK (in the Z format) and scale (squaring the
        input data makes scaling by a power of the radix pointless). */
 
     eps = dlamch_("Precision");
@@ -163,7 +163,7 @@ static integer c__0 = 0;
     dcopy_(&i__1, &e[1], &c__1, &work[2], &c__2);
     i__1 = (*n << 1) - 1;
     i__2 = (*n << 1) - 1;
-    dlascl_("G", &c__0, &c__0, &sigmx, &scale, &i__1, &c__1, &work[1], &i__2, 
+    dlascl_("G", &c__0, &c__0, &sigmx, &scale, &i__1, &c__1, &work[1], &i__2,
 	    &iinfo);
 
 /*     Compute the q's and e's. */

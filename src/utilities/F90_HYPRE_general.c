@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -44,10 +44,10 @@ hypre_F90_IFACE(hypre_setexecutionpolicy, HYPRE_SETEXECUTIONPOLICY)
 }
 
 void
-hypre_F90_IFACE(hypre_setspgemmusecusparse, HYPRE_SETSPGEMMUSECUSPARSE)
-(hypre_F90_Int *use_cusparse, hypre_F90_Int *ierr)
+hypre_F90_IFACE(hypre_setspgemmusevendor, HYPRE_SETSPGEMMUSEVENDOR)
+(hypre_F90_Int *use_vendor, hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int) HYPRE_SetSpGemmUseCusparse(*use_cusparse);
+   *ierr = (hypre_F90_Int) HYPRE_SetSpGemmUseVendor(*use_vendor);
 }
 
 #ifdef __cplusplus

@@ -10,7 +10,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 ## -------------------- ##
 ## M4sh Initialization. ##
@@ -1822,7 +1822,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 _ACEOF
   exit

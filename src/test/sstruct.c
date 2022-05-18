@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -2434,7 +2434,7 @@ main( hypre_int argc,
    /* end lobpcg */
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_Int spgemm_use_cusparse = 0;
+   HYPRE_Int spgemm_use_vendor = 0;
 #endif
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
@@ -2836,10 +2836,10 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
-      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
-         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
       }
 #endif
       else
@@ -2857,7 +2857,7 @@ main( hypre_int argc,
    HYPRE_SetStructExecutionPolicy(HYPRE_EXEC_DEVICE);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
+   HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 #endif
 
    if ( solver_id == 39 && lobpcgFlag )
