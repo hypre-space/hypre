@@ -152,7 +152,7 @@ main( hypre_int argc,
    HYPRE_IJMatrix      ij_A = NULL;
    HYPRE_IJVector      ij_b = NULL;
    HYPRE_IJVector      ij_x = NULL;
-   HYPRE_IJVector      *ij_rbm;
+   HYPRE_IJVector      *ij_rbm = NULL;
 
    HYPRE_ParCSRMatrix  parcsr_A = NULL;
    HYPRE_ParVector     b = NULL;
@@ -8148,7 +8148,7 @@ final:
 
    if (test_ij || build_matrix_type == -1)
    {
-      HYPRE_IJMatrixDestroy(ij_A);
+      if (ij_A) { HYPRE_IJMatrixDestroy(ij_A); }
    }
    else
    {
@@ -8169,9 +8169,12 @@ final:
 
    if (build_rbm)
    {
-      for (i = 0; i < num_interp_vecs; i++)
+      if (ij_rbm)
       {
-         HYPRE_IJVectorDestroy(ij_rbm[i]);
+         for (i = 0; i < num_interp_vecs; i++)
+         {
+            if (ij_rbm[i]) { HYPRE_IJVectorDestroy(ij_rbm[i]); }
+         }
       }
       hypre_TFree(ij_rbm, HYPRE_MEMORY_HOST);
       hypre_TFree(interp_vecs, HYPRE_MEMORY_HOST);
