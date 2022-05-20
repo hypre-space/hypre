@@ -8162,10 +8162,10 @@ final:
    }
    else
    {
-      HYPRE_IJVectorDestroy(ij_b);
+      if (ij_b) { HYPRE_IJVectorDestroy(ij_b); }
    }
 
-   HYPRE_IJVectorDestroy(ij_x);
+   if (ij_x) { HYPRE_IJVectorDestroy(ij_x); }
 
    if (build_rbm)
    {
