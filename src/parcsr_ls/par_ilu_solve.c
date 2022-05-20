@@ -29,7 +29,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
    hypre_ParILUData     *ilu_data      = (hypre_ParILUData*) ilu_vdata;
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* pointers to cusparse data, note that they are not NULL only when needed */
    cusparseMatDescr_t      matL_des          = hypre_ParILUDataMatLMatrixDescription(ilu_data);
    cusparseMatDescr_t      matU_des          = hypre_ParILUDataMatUMatrixDescription(ilu_data);
@@ -59,11 +59,9 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matL          = hypre_ParILUDataMatL(ilu_data);
    HYPRE_Real           *matD          = hypre_ParILUDataMatD(ilu_data);
    hypre_ParCSRMatrix   *matU          = hypre_ParILUDataMatU(ilu_data);
-#ifndef HYPRE_USING_CUDA
    hypre_ParCSRMatrix   *matmL         = hypre_ParILUDataMatLModified(ilu_data);
    HYPRE_Real           *matmD         = hypre_ParILUDataMatDModified(ilu_data);
    hypre_ParCSRMatrix   *matmU         = hypre_ParILUDataMatUModified(ilu_data);
-#endif
    hypre_ParCSRMatrix   *matS          = hypre_ParILUDataMatS(ilu_data);
 
    HYPRE_Int            iter, num_procs,  my_id;
@@ -97,7 +95,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real           operat_cmplxty = hypre_ParILUDataOperatorComplexity(ilu_data);
 
    HYPRE_Int            Solve_err_flag;
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    HYPRE_Int            test_opt;
 #endif
 
@@ -247,7 +245,7 @@ hypre_ILUSolve( void               *ilu_vdata,
       switch (ilu_type)
       {
          case 0: case 1:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
             hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
                                      ilu_solve_policy,
@@ -257,7 +255,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 #endif
             break;
          case 10: case 11:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
             hypre_ILUSolveCusparseSchurGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp,
                                              schur_solver, schur_precond, rhs, x, u_end,
@@ -280,7 +278,7 @@ hypre_ILUSolve( void               *ilu_vdata,
                                      Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
             break;
          case 50:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             test_opt = hypre_ParILUDataTestOption(ilu_data);
             hypre_ILUSolveRAPGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp, Xtemp, Ytemp,
                                    schur_solver, schur_precond, rhs, x, u_end,
@@ -293,7 +291,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 #endif
             break;
          default:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
             hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
                                      ilu_solve_policy,
@@ -988,13 +986,15 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    return hypre_error_flag;
 }
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /* Permutation function (for GPU version, can just call thrust)
  * option 00: perm integer array
  * option 01: rperm integer array
  * option 10: perm real array
  * option 11: rperm real array
+ *
+ * TODO: Move this code to seq_mv/vector.c
  * */
 HYPRE_Int
 hypre_ILUSeqVectorPerm(void *vectori, void *vectoro, HYPRE_Int size, HYPRE_Int *perm,
