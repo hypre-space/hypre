@@ -4223,7 +4223,7 @@ main( hypre_int argc,
       HYPRE_IJMatrixGetObject(ij_A, &object);
       parcsr_A = (HYPRE_ParCSRMatrix) object;
 
-      HYPRE_ParaSailsSetup(pcg_precond, parcsr_A, NULL, NULL);
+      HYPRE_ParaSailsSetup(pcg_precond, parcsr_M, NULL, NULL);
       HYPRE_ParaSailsBuildIJMatrix(pcg_precond, &ij_N);
       HYPRE_IJMatrixPrint(ij_M, "parasails.out");
 
