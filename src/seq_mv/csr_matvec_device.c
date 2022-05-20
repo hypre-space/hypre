@@ -62,7 +62,13 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
 #else // #ifdef HYPRE_USING_CUSPARSE
-#error HYPRE SPMV TODO
+   if (trans)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Matrix transpose multiplication not implemented yet!");
+      return hypre_error_flag;
+   }
+
+   hypre_CSRMatrixSpMVDevice(alpha, A, x, beta, y, 0);
 #endif
 
    return hypre_error_flag;
