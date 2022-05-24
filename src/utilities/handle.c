@@ -14,6 +14,16 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+/* GPU SpTrans */
+HYPRE_Int
+hypre_SetSpTransUseVendor( HYPRE_Int use_vendor )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpTransUseVendor(hypre_handle()) = use_vendor;
+#endif
+   return hypre_error_flag;
+}
+
 /* GPU SpMV */
 HYPRE_Int
 hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
