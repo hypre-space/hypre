@@ -381,6 +381,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                            HYPRE_Int            option )
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   if (!hypre_ParCSRMatrixCommPkg(A))
+   {
+      hypre_MatvecCommPkgCreate(A);
+   }
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int                num_sends     = hypre_ParCSRCommPkgNumSends(comm_pkg);
