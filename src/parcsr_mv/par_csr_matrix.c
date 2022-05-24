@@ -490,7 +490,7 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    hypre_fscanf(fp, "%b", &global_num_cols);
    hypre_fscanf(fp, "%d", &num_cols_offd);
    /* the bgl input file should only contain the EXACT range for local processor */
-   hypre_fscanf(fp, "%d %d %d %d", &row_s, &row_e, &col_s, &col_e);
+   hypre_fscanf(fp, "%b %b %b %b", &row_s, &row_e, &col_s, &col_e);
    row_starts[0] = row_s;
    row_starts[1] = row_e;
    col_starts[0] = col_s;
