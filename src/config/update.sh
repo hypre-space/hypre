@@ -34,7 +34,7 @@ sed -e 's#m4_define.*HYPRE_DATE[^)]*#m4_define([M4_HYPRE_DATE],    ['$hypre_reld
 > config/configure.in.tmp
 mv config/configure.in.tmp config/configure.in
 
-ln -s config/configure.in .
+ln -s -f config/configure.in .
 rm -rf aclocal.m4 configure autom4te.cache
 autoconf --include=config
 autoheader configure.in
