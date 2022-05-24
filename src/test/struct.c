@@ -1342,7 +1342,7 @@ main( hypre_int argc,
       /* linear system complete  */
 
       hypre_EndTiming(time_index);
-      if ( reps == 1 )
+      if ( reps == 1 || (solver_id != 0 && solver_id != 1 && solver_id != 3 && solver_id != 4) )
       {
          hypre_PrintTiming("Struct Interface", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
@@ -2889,7 +2889,6 @@ main( hypre_int argc,
          {
             HYPRE_StructPFMGDestroy(precond);
          }
-
       }
 
       /*-----------------------------------------------------------

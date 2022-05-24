@@ -329,9 +329,10 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
    diag = hypre_ParCSRMatrixDiag(matrix);
    offd = hypre_ParCSRMatrixOffd(matrix);
 
-   /* TODO in HYPRE_DEBUG ? */
+#if defined(HYPRE_DEBUG)
    hypre_CSRMatrixCheckSetNumNonzeros(diag);
    hypre_CSRMatrixCheckSetNumNonzeros(offd);
+#endif
 
    if (format[0] == 'I')
    {
