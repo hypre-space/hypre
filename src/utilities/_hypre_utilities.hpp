@@ -151,6 +151,7 @@ struct hypre_device_allocator
 #include <thrust/replace.h>
 #include <thrust/sequence.h>
 #include <thrust/for_each.h>
+#include <thrust/remove.h>
 
 using namespace thrust::placeholders;
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
