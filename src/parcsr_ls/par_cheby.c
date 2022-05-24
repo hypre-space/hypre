@@ -411,21 +411,21 @@ hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ParCSRRelaxChebySolve");
 #endif
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
    HYPRE_Int             ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_ParCSRRelax_Cheby_SolveHost(A, f, ds_data, coefs, order, scale, variant, u, v, r,
-                                               orig_u_vec, tmp_vec);
-   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_ParCSRRelax_Cheby_SolveDevice(A, f, ds_data, coefs, order, scale, variant, u, v, r,
                                                  orig_u_vec, tmp_vec);
    }
+   else
 #endif
+   {
+      ierr = hypre_ParCSRRelax_Cheby_SolveHost(A, f, ds_data, coefs, order, scale, variant, u, v, r,
+                                               orig_u_vec, tmp_vec);
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();

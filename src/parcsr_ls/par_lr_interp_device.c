@@ -258,12 +258,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       W_diag_i,
                       P_diag_i );
 
-   HYPRE_THRUST_CALL( transform,
-                      P_diag_i,
-                      P_diag_i + P_nr_of_rows + 1,
-                      PWoffset,
-                      P_diag_i,
-                      thrust::plus<HYPRE_Int>() );
+   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    if (W_offd_i && P_offd_i)
@@ -789,19 +784,19 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
-                      gDim, bDim,
-                      A_nr_of_rows,
-                      A_offd_nnz > 0,
-                      CF_marker,
-                      A_diag_i,
-                      A_diag_data,
-                      Soc_diag_j,
-                      A_offd_i,
-                      A_offd_data,
-                      Soc_offd_j,
-                      rsWA,
-                      0 );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+                     gDim, bDim,
+                     A_nr_of_rows,
+                     A_offd_nnz > 0,
+                     CF_marker,
+                     A_diag_i,
+                     A_diag_data,
+                     Soc_diag_j,
+                     A_offd_i,
+                     A_offd_data,
+                     Soc_offd_j,
+                     rsWA,
+                     0 );
 
    // AFF AFC
    hypre_GpuProfilingPushRange("Extract Submatrix");
@@ -830,20 +825,20 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc,
-                      gDim, bDim,
-                      W_nr_of_rows,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFC)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFC)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFC)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFC)),
-                      rsW,
-                      rsFC );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_aff_afc,
+                     gDim, bDim,
+                     W_nr_of_rows,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFC)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFC)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFC)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFC)),
+                     rsW,
+                     rsFC );
    hypre_TFree(rsW,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(rsFC, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
@@ -975,19 +970,19 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp",   bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
-                      gDim, bDim,
-                      A_nr_of_rows,
-                      A_offd_nnz > 0,
-                      CF_marker,
-                      A_diag_i,
-                      A_diag_data,
-                      Soc_diag_j,
-                      A_offd_i,
-                      A_offd_data,
-                      Soc_offd_j,
-                      rsWA,
-                      0 );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+                     gDim, bDim,
+                     A_nr_of_rows,
+                     A_offd_nnz > 0,
+                     CF_marker,
+                     A_diag_i,
+                     A_diag_data,
+                     Soc_diag_j,
+                     A_offd_i,
+                     A_offd_data,
+                     Soc_offd_j,
+                     rsWA,
+                     0 );
 
    // AFF AFC
    hypre_GpuProfilingPushRange("Extract Submatrix");
@@ -1031,6 +1026,12 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       rsFC,
                       send_buf );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, rsFC_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -1054,23 +1055,23 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_twiaff_w,
-                      gDim, bDim,
-                      W_nr_of_rows,
-                      hypre_ParCSRMatrixFirstRowIndex(AFF),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
-                      AFF_diag_data_old,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
-                      AFF_ext ? hypre_CSRMatrixI(AFF_ext)    : NULL,
-                      AFF_ext ? hypre_CSRMatrixBigJ(AFF_ext) : NULL,
-                      AFF_ext ? hypre_CSRMatrixData(AFF_ext) : NULL,
-                      rsW,
-                      rsFC,
-                      rsFC_offd );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_twiaff_w,
+                     gDim, bDim,
+                     W_nr_of_rows,
+                     hypre_ParCSRMatrixFirstRowIndex(AFF),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
+                     AFF_diag_data_old,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
+                     AFF_ext ? hypre_CSRMatrixI(AFF_ext)    : NULL,
+                     AFF_ext ? hypre_CSRMatrixBigJ(AFF_ext) : NULL,
+                     AFF_ext ? hypre_CSRMatrixData(AFF_ext) : NULL,
+                     rsW,
+                     rsFC,
+                     rsFC_offd );
    hypre_TFree(rsW,               HYPRE_MEMORY_DEVICE);
    hypre_TFree(rsFC,              HYPRE_MEMORY_DEVICE);
    hypre_TFree(rsFC_offd,         HYPRE_MEMORY_DEVICE);
@@ -1204,19 +1205,19 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
-                      gDim, bDim,
-                      A_nr_of_rows,
-                      A_offd_nnz > 0,
-                      CF_marker,
-                      A_diag_i,
-                      A_diag_data,
-                      Soc_diag_j,
-                      A_offd_i,
-                      A_offd_data,
-                      Soc_offd_j,
-                      rsWA,
-                      0 );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+                     gDim, bDim,
+                     A_nr_of_rows,
+                     A_offd_nnz > 0,
+                     CF_marker,
+                     A_diag_i,
+                     A_diag_data,
+                     Soc_diag_j,
+                     A_offd_i,
+                     A_offd_data,
+                     Soc_offd_j,
+                     rsWA,
+                     0 );
 
    // AFF AFC
    hypre_GpuProfilingPushRange("Extract Submatrix");
@@ -1247,17 +1248,17 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    dtmp = hypre_TAlloc(HYPRE_Complex, W_nr_of_rows, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPushRange("Compute D_tmp");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
-                      gDim, bDim,
-                      W_nr_of_rows,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
-                      rsFC,
-                      dlam,
-                      dtmp );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
+                     gDim, bDim,
+                     W_nr_of_rows,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
+                     rsFC,
+                     dlam,
+                     dtmp );
 
    /* collect off-processor dtmp */
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(AFF);
@@ -1278,6 +1279,12 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       dtmp,
                       send_buf );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, dtmp_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -1289,23 +1296,23 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_compute_aff_afc_epe,
-                      gDim, bDim,
-                      W_nr_of_rows,
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFC)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFC)),
-                      hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFC)),
-                      hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFC)),
-                      rsW,
-                      dlam,
-                      dtmp,
-                      dtmp_offd );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_aff_afc_epe,
+                     gDim, bDim,
+                     W_nr_of_rows,
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AFC)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFC)),
+                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFC)),
+                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFC)),
+                     rsW,
+                     dlam,
+                     dtmp,
+                     dtmp_offd );
    hypre_TFree(rsW,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(rsFC, HYPRE_MEMORY_DEVICE);
    hypre_TFree(dlam, HYPRE_MEMORY_DEVICE);

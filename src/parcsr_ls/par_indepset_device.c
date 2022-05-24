@@ -170,14 +170,19 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IndepSetMain, gDim, bDim,
-                      graph_diag_size, graph_diag, measure_diag, measure_offd,
-                      S_diag_i, S_diag_j, S_offd_i, S_offd_j,
-                      IS_marker_diag, IS_marker_offd, IS_offd_temp_mark );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IndepSetMain, gDim, bDim,
+                     graph_diag_size, graph_diag, measure_diag, measure_offd,
+                     S_diag_i, S_diag_j, S_offd_i, S_offd_j,
+                     IS_marker_diag, IS_marker_offd, IS_offd_temp_mark );
 
    /*--------------------------------------------------------------------
     * Exchange boundary data for IS_marker: send external IS to internal
     *-------------------------------------------------------------------*/
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure IS_marker_offd is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(12, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, IS_marker_offd,
                                                  HYPRE_MEMORY_DEVICE, int_send_buf);
@@ -186,9 +191,9 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /* adjust IS_marker_diag from the received */
    gDim = hypre_GetDefaultDeviceGridDimension(num_elmts_send, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IndepSetFixMarker, gDim, bDim,
-                      IS_marker_diag, num_elmts_send, send_map_elmts,
-                      int_send_buf, IS_offd_temp_mark );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IndepSetFixMarker, gDim, bDim,
+                     IS_marker_diag, num_elmts_send, send_map_elmts,
+                     int_send_buf, IS_offd_temp_mark );
 
    /* Note that IS_marker_offd is not sync'ed (communicated) here */
 
@@ -239,9 +244,7 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       hypre_CurandUniform(num_rows_diag, urand, 0, 0, 0, 0);
    }
 
-   thrust::plus<HYPRE_Real> op;
-   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
-                     urand, measure_array, op);
+   hypreDevice_ComplexAxpyn(measure_array, num_rows_diag, urand, measure_array, 1.0);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
 

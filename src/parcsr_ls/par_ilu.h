@@ -323,7 +323,7 @@ typedef struct hypre_ParNSHData_struct
 #define hypre_ParNSHDataNSHTol(nsh_data)                 ((nsh_data) -> nsh_tol)
 #define hypre_ParNSHDataNSHMaxRowNnz(nsh_data)           ((nsh_data) -> nsh_max_row_nnz)
 
-#define DIVIDE_TOL 1e-32
+//#define DIVIDE_TOL 1e-32
 
 #ifdef HYPRE_USING_CUDA
 HYPRE_Int hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des,

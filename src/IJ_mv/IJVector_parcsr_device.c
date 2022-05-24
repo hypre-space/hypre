@@ -115,7 +115,7 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_AuxParVectorMaxStackElmts(aux_vector) = stack_elmts_max_new;
    }
 
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, num_values, SorA);
+   hypreDevice_CharFilln(stack_sora + stack_elmts_current, num_values, SorA);
 
    hypre_TMemcpy(stack_i    + stack_elmts_current, indices, HYPRE_BigInt,  num_values,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -251,9 +251,9 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
-                         vec_start, new_sora,
-                         hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
+                        vec_start, new_sora,
+                        hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
 
       hypre_TFree(new_i,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data, HYPRE_MEMORY_DEVICE);
