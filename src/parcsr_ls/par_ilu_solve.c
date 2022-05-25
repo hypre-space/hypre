@@ -24,6 +24,7 @@ hypre_ILUSolve( void               *ilu_vdata,
                 hypre_ParVector    *f,
                 hypre_ParVector    *u )
 {
+   hypre_printf("WM: debug - hypre_ILUSolve()\n");
    MPI_Comm             comm           = hypre_ParCSRMatrixComm(A);
    //   HYPRE_Int            i;
 
@@ -391,6 +392,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+   hypre_printf("WM: debug - done hypre_ILUSolve()\n");
    return hypre_error_flag;
 }
 

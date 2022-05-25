@@ -25,9 +25,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            weight_option,
                                    hypre_ParCSRMatrix **P_ptr )
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildMultipassHost()\n");
-   /* WM: debug */
-   /* hypre_ParCSRMatrixPrint(S, "S"); */
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
 #endif
@@ -242,7 +239,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildMultipassHost() 1\n");
 
    if (n_fine) { fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
 
@@ -454,7 +450,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Mark all local neighbors of C points as 'assigned'.
     *-----------------------------------------------------------------------*/
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildMultipassHost() 2\n");
 
    pass_pointer[0] = 0;
    pass_pointer[1] = 0;
@@ -625,7 +620,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Pass 1: now we consider points of pass 1, with strong C_neighbors,
     *-----------------------------------------------------------------------*/
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildMultipassHost() 3\n");
 
    cnt_nz = 0;
    cnt_nz_offd = 0;
@@ -1161,7 +1155,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    }
 
    /* determine P for coarse points */
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildMultipassHost() 4 - rank %d\n", my_id);
    MPI_Barrier(MPI_COMM_WORLD);
 
 #ifdef HYPRE_USING_OPENMP
@@ -1174,7 +1167,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
       P_diag_data[P_diag_i[i1]] = 1.0;
    }
 
-   hypre_printf("WM: debug - weight_option = %d\n", weight_option);
 
    if (weight_option) /*if this is set, weights are separated into
                         negative and positive offdiagonals and accumulated
@@ -1954,7 +1946,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
          }
       }
    }
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildMultipassHost() 5 - rank %d\n", my_id);
    MPI_Barrier(MPI_COMM_WORLD);
 
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);

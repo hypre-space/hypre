@@ -1438,8 +1438,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
 
+         hypre_printf("WM: debug - num_C_points_coarse = %d\n", num_C_points_coarse);
          if (num_C_points_coarse > 0)
          {
+            hypre_printf("WM: debug - hypre_ParAMGDataCPointsLevel(amg_data) = %d\n",
+                         hypre_ParAMGDataCPointsLevel(amg_data));
             if (block_mode)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Keeping coarse nodes in block mode is not implemented\n");
@@ -1449,6 +1452,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                for (j = 0; j < num_C_points_coarse; j++)
                {
                   hypre_IntArrayData(CF_marker_host)[C_points_local_marker[j]] = 2;
+                  hypre_printf("WM: debug - setting cf marker to 2\n");
                }
 
                local_coarse_size = 0;
@@ -1575,6 +1579,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_printf("WM: debug - interpolation\n");
+         /* WM: debug */
+         if (my_id == 0)
+         {
+            hypre_printf("CF_marker = ");
+            for (i = 0; i < 10; i++)
+            {
+               hypre_printf("%d ", CF_marker[i]);
+            }
+            hypre_printf("\n");
+         }
 
          if (level < agg_num_levels)
          {
