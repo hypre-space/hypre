@@ -87,7 +87,7 @@ devhelp:
 	@echo "Build finished."
 	@echo "To view the help file:"
 	@echo "# mkdir -p $$HOME/.local/share/devhelp/hypre"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/hypre"
+	@echo "# ln -s -f $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/hypre"
 	@echo "# devhelp"
 
 epub:

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -350,7 +350,6 @@ hypre_CSRMatrixSplitDevice( hypre_CSRMatrix  *B_ext,
    return ierr;
 }
 
-
 HYPRE_Int
 hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
                                 HYPRE_BigInt  *col_map_offd_B,
@@ -371,18 +370,13 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   HYPRE_BigInt *new_end = col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B;
-   if (B_ext_offd_nnz + num_cols_offd_B > 0)
-   {
-      HYPRE_ONEDPL_CALL( std::sort,
-                         col_map_offd_C,
-                         col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
+   HYPRE_ONEDPL_CALL( std::sort,
+                      col_map_offd_C,
+                      col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 
-      new_end = HYPRE_ONEDPL_CALL( std::unique,
-                                   col_map_offd_C,
-                                   col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
-   }
+   HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              col_map_offd_C,
+                                              col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 #else
    HYPRE_THRUST_CALL( sort,
                       col_map_offd_C,
@@ -412,7 +406,7 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
    if (num_cols_offd_B)
    {
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
+      /* WM: NOTE - onedpl lower bound currently does not accept zero length input */
       if (num_cols_offd_C > 0)
       {
          HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
@@ -483,15 +477,10 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    {
       /* query the nnz's */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: necessary? */
-      B_ext_diag_nnz = 0;
-      if (B_ext_nnz > 0)
-      {
-         B_ext_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
-                                             B_ext_bigj,
-                                             B_ext_bigj + B_ext_nnz,
-                                             pred1 );
-      }
+      B_ext_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                          B_ext_bigj,
+                                          B_ext_bigj + B_ext_nnz,
+                                          pred1 );
 #else
       B_ext_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                           B_ext_bigj,
@@ -647,7 +636,6 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
                                   &num_cols_offd_C, &col_map_offd_C, &map_B_to_C);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
    if (num_cols_offd_C > 0 && B_ext_offd_nnz > 0)
    {
       HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
@@ -891,6 +879,8 @@ hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A )
 hypre_CSRMatrix*
 hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
 {
+   hypre_GpuProfilingPushRange("CSRMatrixStack2");
+
    hypre_assert( hypre_CSRMatrixNumCols(A) == hypre_CSRMatrixNumCols(B) );
 
    hypre_CSRMatrix *C = hypre_CSRMatrixCreate( hypre_CSRMatrixNumRows(A) + hypre_CSRMatrixNumRows(B),
@@ -940,6 +930,8 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
    hypre_CSRMatrixJ(C) = C_j;
    hypre_CSRMatrixData(C) = C_a;
    hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+
+   hypre_GpuProfilingPopRange();
 
    return C;
 }
@@ -1857,7 +1849,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    }
    else
    {
-      if ( !hypre_HandleSpTransUseCusparse(hypre_handle()) )
+      if ( !hypre_HandleSpTransUseVendor(hypre_handle()) )
       {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
          hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);

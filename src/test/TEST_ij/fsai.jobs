@@ -1,0 +1,89 @@
+#!/bin/sh
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# Instructions for new adding new regression tests:
+#
+# 1) Given a new scenario, add matching tests for FSAI as a preconditioner and
+#    FSAI as a smoother to BoomerAMG, e.g., see fsai.out.0 and fsai.out.100
+#
+#=============================================================================
+
+#=============================================================================
+# Preconditioner to Krylov methods
+#=============================================================================
+
+# Computes the full inverse of the lower Cholesky factor. Not practical, but it's a good sanity check.
+mpirun -np 1 ./ij -n 5 5 5 -solver 31 -fs_max_steps 125 -fs_max_step_size 1 -fs_kap_tol 0 > fsai.out.0
+
+# The FSAI factor G is simply sqrt(1/D_A). This should give the same result as DS-PCG
+mpirun -np 1 ./ij -n 10 10 10 -solver 31 -fs_max_steps 0 -fs_max_step_size 0 -fs_kap_tol 0 > fsai.out.1
+mpirun -np 1 ./ij -n 10 10 10 -solver 31 -fs_max_steps 0 -fs_max_step_size 1 -fs_kap_tol 0 > fsai.out.2
+mpirun -np 1 ./ij -n 10 10 10 -solver 2 > fsai.out.3
+
+# Test different setup combinations for FSAI
+mpirun -np 1 ./ij -n 10 10 10 -solver 31 -fs_max_steps 5 -fs_max_step_size 1 -fs_kap_tol 0 > fsai.out.4
+mpirun -np 1 ./ij -n 10 10 10 -solver 31 -fs_max_steps 5 -fs_max_step_size 4 -fs_kap_tol 0 > fsai.out.5
+mpirun -np 1 ./ij -n 10 10 10 -solver 31 -fs_max_steps 5 -fs_max_step_size 4 -fs_kap_tol 1e-3 > fsai.out.6
+mpirun -np 1 ./ij -n 10 10 10 -solver 31 -fs_max_steps 5 -fs_max_step_size 4 -fs_kap_tol 1e-1 > fsai.out.7
+
+# Test with larger problem stencils
+mpirun -np 1 ./ij -n 10 10 10 -27pt -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.8
+mpirun -np 2 ./ij -n 10 10 10 -P 2 1 1 -27pt -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.9
+mpirun -np 3 ./ij -n 10 10 10 -P 3 1 1 -27pt -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.10
+mpirun -np 1 ./ij -n 10 10 10 -sysL 3 -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.11
+mpirun -np 2 ./ij -n 10 10 10 -P 2 1 1 -sysL 3 -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.12
+mpirun -np 3 ./ij -n 10 10 10 -P 3 1 1 -sysL 3 -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.13
+
+# Test with linear elasticity problems
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ -rhsfromfile data/beam_tet_dof459_np1/b.IJ \
+                  -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.14
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ -rhsfromfile data/beam_hex_dof459_np2/b.IJ \
+                  -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.15
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -rhsfromfile data/beam_tet_dof2475_np4/b.IJ \
+                  -solver 31 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 > fsai.out.16
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -rhsfromfile data/beam_tet_dof2475_np4/b.IJ \
+                  -solver 31 -fs_max_steps 15 -fs_max_step_size 4 -fs_kap_tol 0 > fsai.out.17
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -rhsfromfile data/beam_tet_dof2475_np4/b.IJ \
+                  -solver 31 > fsai.out.18
+
+#=============================================================================
+# Complex smoother to BoomerAMG
+#=============================================================================
+
+# Computes the full inverse of the lower Cholesky factor. Not practical, but it's a good sanity check.
+mpirun -np 1 ./ij -n 5 5 5 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 125 -fs_max_step_size 1 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.100
+
+# The FSAI factor G is simply sqrt(1/D_A). This should give the same result as BoomerAMG(Jac)-PCG
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -smtype 4 -smlv 4 -fs_max_steps 0 -fs_max_step_size 0 -fs_kap_tol 0 -fs_eig_max_iters 0 > fsai.out.101
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -smtype 4 -smlv 4 -fs_max_steps 0 -fs_max_step_size 1 -fs_kap_tol 0 -fs_eig_max_iters 0 > fsai.out.102
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -rlx 7 > fsai.out.103
+
+# Test different setup combinations for FSAI
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 1 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.104
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 4 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.105
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 4 -fs_kap_tol 1e-3 -fs_eig_max_iters 5 > fsai.out.106
+mpirun -np 1 ./ij -n 10 10 10 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 4 -fs_kap_tol 1e-1 -fs_eig_max_iters 5 > fsai.out.107
+
+# Test with larger problem stencils
+mpirun -np 1 ./ij -n 10 10 10 -27pt -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.108
+mpirun -np 2 ./ij -n 10 10 10 -P 2 1 1 -27pt -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.109
+mpirun -np 3 ./ij -n 10 10 10 -P 3 1 1 -27pt -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.110
+mpirun -np 1 ./ij -n 10 10 10 -sysL 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.111
+mpirun -np 2 ./ij -n 10 10 10 -P 2 1 1 -sysL 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.112
+mpirun -np 3 ./ij -n 10 10 10 -P 3 1 1 -sysL 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.113
+
+# Test with linear elasticity problems
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ -rhsfromfile data/beam_tet_dof459_np1/b.IJ \
+                  -nf 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.114
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ -rhsfromfile data/beam_hex_dof459_np2/b.IJ \
+                  -nf 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.115
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -rhsfromfile data/beam_tet_dof2475_np4/b.IJ \
+                  -nf 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 5 -fs_max_step_size 3 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.116
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -rhsfromfile data/beam_tet_dof2475_np4/b.IJ \
+                  -nf 3 -solver 1 -smtype 4 -smlv 25 -fs_max_steps 15 -fs_max_step_size 4 -fs_kap_tol 0 -fs_eig_max_iters 5 > fsai.out.117
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -rhsfromfile data/beam_tet_dof2475_np4/b.IJ \
+                  -nf 3 -solver 1 -smtype 4 -smlv 25 > fsai.out.118

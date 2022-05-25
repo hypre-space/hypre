@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -3363,7 +3363,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          {
             /* Add a discrete divergence term to A before computing  Pi^t A Pi */
             {
-               hypre_ParCSRMatrix *Gt, *GGt, *ApGGt;
+               hypre_ParCSRMatrix *Gt, *GGt = NULL, *ApGGt;
                hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
 
                /* scale GGt by h^2 */

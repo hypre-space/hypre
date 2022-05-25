@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1606,9 +1606,9 @@ hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpireHostPoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpireHostPoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
       hypre_HandleOwnUmpireHostPool(handle) = 1;
    }
 
@@ -1674,9 +1674,9 @@ hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpireDevicePoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpireDevicePoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
 
       hypre_HandleOwnUmpireDevicePool(handle) = 1;
    }
@@ -1723,9 +1723,9 @@ hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpireUMPoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpireUMPoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
 
       hypre_HandleOwnUmpireUMPool(handle) = 1;
    }
@@ -1772,9 +1772,9 @@ hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpirePinnedPoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpirePinnedPoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
 
       hypre_HandleOwnUmpirePinnedPool(handle) = 1;
    }

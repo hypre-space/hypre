@@ -8,97 +8,97 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dlasv2_(doublereal *f, doublereal *g, doublereal *h__, 
+/* Subroutine */ integer dlasv2_(doublereal *f, doublereal *g, doublereal *h__,
 	doublereal *ssmin, doublereal *ssmax, doublereal *snr, doublereal *
 	csr, doublereal *snl, doublereal *csl)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLASV2 computes the singular value decomposition of a 2-by-2   
-    triangular matrix   
-       [  F   G  ]   
-       [  0   H  ].   
-    On return, abs(SSMAX) is the larger singular value, abs(SSMIN) is the   
-    smaller singular value, and (CSL,SNL) and (CSR,SNR) are the left and   
-    right singular vectors for abs(SSMAX), giving the decomposition   
+    DLASV2 computes the singular value decomposition of a 2-by-2
+    triangular matrix
+       [  F   G  ]
+       [  0   H  ].
+    On return, abs(SSMAX) is the larger singular value, abs(SSMIN) is the
+    smaller singular value, and (CSL,SNL) and (CSR,SNR) are the left and
+    right singular vectors for abs(SSMAX), giving the decomposition
 
-       [ CSL  SNL ] [  F   G  ] [ CSR -SNR ]  =  [ SSMAX   0   ]   
-       [-SNL  CSL ] [  0   H  ] [ SNR  CSR ]     [  0    SSMIN ].   
+       [ CSL  SNL ] [  F   G  ] [ CSR -SNR ]  =  [ SSMAX   0   ]
+       [-SNL  CSL ] [  0   H  ] [ SNR  CSR ]     [  0    SSMIN ].
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    F       (input) DOUBLE PRECISION   
-            The (1,1) element of the 2-by-2 matrix.   
+    F       (input) DOUBLE PRECISION
+            The (1,1) element of the 2-by-2 matrix.
 
-    G       (input) DOUBLE PRECISION   
-            The (1,2) element of the 2-by-2 matrix.   
+    G       (input) DOUBLE PRECISION
+            The (1,2) element of the 2-by-2 matrix.
 
-    H       (input) DOUBLE PRECISION   
-            The (2,2) element of the 2-by-2 matrix.   
+    H       (input) DOUBLE PRECISION
+            The (2,2) element of the 2-by-2 matrix.
 
-    SSMIN   (output) DOUBLE PRECISION   
-            abs(SSMIN) is the smaller singular value.   
+    SSMIN   (output) DOUBLE PRECISION
+            abs(SSMIN) is the smaller singular value.
 
-    SSMAX   (output) DOUBLE PRECISION   
-            abs(SSMAX) is the larger singular value.   
+    SSMAX   (output) DOUBLE PRECISION
+            abs(SSMAX) is the larger singular value.
 
-    SNL     (output) DOUBLE PRECISION   
-    CSL     (output) DOUBLE PRECISION   
-            The vector (CSL, SNL) is a unit left singular vector for the   
-            singular value abs(SSMAX).   
+    SNL     (output) DOUBLE PRECISION
+    CSL     (output) DOUBLE PRECISION
+            The vector (CSL, SNL) is a unit left singular vector for the
+            singular value abs(SSMAX).
 
-    SNR     (output) DOUBLE PRECISION   
-    CSR     (output) DOUBLE PRECISION   
-            The vector (CSR, SNR) is a unit right singular vector for the   
-            singular value abs(SSMAX).   
+    SNR     (output) DOUBLE PRECISION
+    CSR     (output) DOUBLE PRECISION
+            The vector (CSR, SNR) is a unit right singular vector for the
+            singular value abs(SSMAX).
 
-    Further Details   
-    ===============   
+    Further Details
+    ===============
 
-    Any input parameter may be aliased with any output parameter.   
+    Any input parameter may be aliased with any output parameter.
 
-    Barring over/underflow and assuming a guard digit in subtraction, all   
-    output quantities are correct to within a few units in the last   
-    place (ulps).   
+    Barring over/underflow and assuming a guard digit in subtraction, all
+    output quantities are correct to within a few units in the last
+    place (ulps).
 
-    In IEEE arithmetic, the code works correctly if one matrix element is   
-    infinite.   
+    In IEEE arithmetic, the code works correctly if one matrix element is
+    infinite.
 
-    Overflow will not occur unless the largest singular value itself   
-    overflows or is within a few ulps of overflow. (On machines with   
-    partial overflow, like the Cray, overflow may occur if the largest   
-    singular value is within a factor of 2 of overflow.)   
+    Overflow will not occur unless the largest singular value itself
+    overflows or is within a few ulps of overflow. (On machines with
+    partial overflow, like the Cray, overflow may occur if the largest
+    singular value is within a factor of 2 of overflow.)
 
-    Underflow is harmless if underflow is gradual. Otherwise, results   
-    may correspond to a matrix modified by perturbations of size near   
-    the underflow threshold.   
+    Underflow is harmless if underflow is gradual. Otherwise, results
+    may correspond to a matrix modified by perturbations of size near
+    the underflow threshold.
 
    ===================================================================== */
     /* Table of constant values */
-    static doublereal c_b3 = 2.;
-    static doublereal c_b4 = 1.;
-    
+    doublereal c_b3 = 2.;
+    doublereal c_b4 = 1.;
+
     /* System generated locals */
     doublereal d__1;
     /* Builtin functions */
     doublereal d_sign(doublereal *, doublereal *);
     /* Local variables */
-    static integer pmax;
-    static doublereal temp;
-    static logical swap;
-    static doublereal a, d__, l, m, r__, s, t, tsign, fa, ga, ha;
+    integer pmax;
+    doublereal temp;
+    logical swap;
+    doublereal a, d__, l, m, r__, s, t, tsign, fa, ga, ha;
     extern doublereal dlamch_(const char *);
-    static doublereal ft, gt, ht, mm;
-    static logical gasmal;
-    static doublereal tt, clt, crt, slt, srt;
+    doublereal ft, gt, ht, mm;
+    logical gasmal;
+    doublereal tt, clt, crt, slt, srt;
 
 
 
@@ -108,9 +108,9 @@ extern "C" {
     ht = *h__;
     ha = abs(*h__);
 
-/*     PMAX points to the maximum absolute element of matrix   
-         PMAX = 1 if F largest in absolute values   
-         PMAX = 2 if G largest in absolute values   
+/*     PMAX points to the maximum absolute element of matrix
+         PMAX = 1 if F largest in absolute values
+         PMAX = 2 if G largest in absolute values
          PMAX = 3 if H largest in absolute values */
 
     pmax = 1;

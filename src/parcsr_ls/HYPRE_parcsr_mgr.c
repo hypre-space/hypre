@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -309,6 +309,16 @@ HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver solver, HYPRE_Int *relax_method )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelFRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelFRelaxType( HYPRE_Solver solver, HYPRE_Int *relax_type )
+{
+   return hypre_MGRSetLevelFRelaxType( solver, relax_type );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetCoarseGridMethod
  *--------------------------------------------------------------------------*/
 
@@ -346,6 +356,15 @@ HYPRE_Int
 HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 {
    return hypre_MGRSetNumRelaxSweeps(solver, nsweeps);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelNumRelaxSweeps
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int *nsweeps )
+{
+   return hypre_MGRSetLevelNumRelaxSweeps(solver, nsweeps);
 }
 
 /*--------------------------------------------------------------------------
@@ -396,6 +415,15 @@ HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver, HYPRE_Real threshold)
 {
    return hypre_MGRSetTruncateCoarseGridThreshold( solver, threshold );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetBlockJacobiBlockSize
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver, HYPRE_Int blk_size )
+{
+   return hypre_MGRSetBlockJacobiBlockSize(solver, blk_size);
 }
 
 /*--------------------------------------------------------------------------
@@ -463,19 +491,45 @@ HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   return hypre_MGRSetMaxGlobalsmoothIters(solver, max_iter);
+   return hypre_MGRSetMaxGlobalSmoothIters(solver, max_iter);
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelsmoothIters
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
+                              HYPRE_Int *smooth_iters )
+{
+   return hypre_MGRSetLevelSmoothIters(solver, smooth_iters);
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
-HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 {
-   return hypre_MGRSetGlobalsmoothType(solver, iter_type);
+   return hypre_MGRSetGlobalSmoothType(solver, iter_type);
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelsmoothType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
+                             HYPRE_Int *smooth_type )
+{
+   return hypre_MGRSetLevelSmoothType(solver, smooth_type);
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetGlobalSmoothCycle
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
+                               HYPRE_Int global_smooth_cycle )
+{
+   return hypre_MGRSetGlobalSmoothCycle(solver, global_smooth_cycle);
 }
 
 /*--------------------------------------------------------------------------

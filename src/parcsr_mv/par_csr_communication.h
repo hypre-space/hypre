@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -102,10 +102,6 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
 #define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
-#define hypre_ParCSRCommPkgSendMapN(comm_pkg)            ((comm_pkg) -> send_map_n)
-#define hypre_ParCSRCommPkgSendMapJ(comm_pkg)            ((comm_pkg) -> send_map_j)
-#define hypre_ParCSRCommPkgSendMapI(comm_pkg)            ((comm_pkg) -> send_map_i)
-#define hypre_ParCSRCommPkgSendMapRowInd(comm_pkg)       ((comm_pkg) -> send_map_rowind)
 #endif
 
 static inline void

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -141,18 +141,18 @@ hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate");
 #endif
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    HYPRE_Int ierr = 0;
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_ParCSRMaxEigEstimateHost(A, scale, max_eig, min_eig);
-   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_ParCSRMaxEigEstimateDevice(A, scale, max_eig, min_eig);
    }
+   else
 #endif
+   {
+      ierr = hypre_ParCSRMaxEigEstimateHost(A, scale, max_eig, min_eig);
+   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
 #endif
@@ -179,18 +179,18 @@ hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A,     /* matrix to relax with 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimateCG");
 #endif
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
    HYPRE_Int             ierr = 0;
-   if (exec == HYPRE_EXEC_HOST)
-   {
-      ierr = hypre_ParCSRMaxEigEstimateCGHost(A, scale, max_iter, max_eig, min_eig);
-   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   if (exec == HYPRE_EXEC_DEVICE)
    {
       ierr = hypre_ParCSRMaxEigEstimateCGDevice(A, scale, max_iter, max_eig, min_eig);
    }
+   else
 #endif
+   {
+      ierr = hypre_ParCSRMaxEigEstimateCGHost(A, scale, max_iter, max_eig, min_eig);
+   }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
 #endif

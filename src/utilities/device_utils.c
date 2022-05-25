@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -9,12 +9,364 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      generic device functions (HYPRE_USING_GPU)
+ *      NOTE: This includes device openmp for now
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+#if defined(HYPRE_USING_GPU)
+
+hypre_DeviceData*
+hypre_DeviceDataCreate()
+{
+   hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_SYCL)
+   hypre_DeviceDataDevice(data)            = nullptr;
+#else
+   hypre_DeviceDataDevice(data)            = 0;
+#endif
+   hypre_DeviceDataComputeStreamNum(data)  = 0;
+
+   /* SpMV, SpGeMM, SpTrans: use vendor's lib by default */
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_DeviceDataSpgemmUseVendor(data)  = 1;
+   hypre_DeviceDataSpMVUseVendor(data)    = 1;
+   hypre_DeviceDataSpTransUseVendor(data) = 1;
+#else
+   hypre_DeviceDataSpgemmUseVendor(data) = 0;
+#endif
+
+   /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
+#if defined(HYPRE_USING_CUDA)
+   hypre_DeviceDataSpTransUseVendor(data) = 0;
+#endif
+
+   hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
+   hypre_DeviceDataSpgemmAlgorithmBinned(data)          = 0;
+   hypre_DeviceDataSpgemmAlgorithmNumBin(data)          = 0;
+   /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
+   hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
+   const HYPRE_Int Nsamples = 64;
+   const HYPRE_Real sigma = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
+   hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
+   hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
+
+   /* pmis */
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+   hypre_DeviceDataUseGpuRand(data) = 1;
+#else
+   hypre_DeviceDataUseGpuRand(data) = 0;
+#endif
+
+   /* device pool */
+#ifdef HYPRE_USING_DEVICE_POOL
+   hypre_DeviceDataCubBinGrowth(data)      = 8u;
+   hypre_DeviceDataCubMinBin(data)         = 1u;
+   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) - 1;
+   hypre_DeviceDataCubMaxCachedBytes(data) = (size_t) -1;
+   hypre_DeviceDataCubDevAllocator(data)   = NULL;
+   hypre_DeviceDataCubUvmAllocator(data)   = NULL;
+#endif
+
+   return data;
+}
+
+void
+hypre_DeviceDataDestroy(hypre_DeviceData *data)
+{
+   if (!data)
+   {
+      return;
+   }
+
+   hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_DeviceDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_CURAND)
+   if (data->curand_generator)
+   {
+      HYPRE_CURAND_CALL( curandDestroyGenerator(data->curand_generator) );
+   }
+#endif
+
+#if defined(HYPRE_USING_ROCRAND)
+   if (data->curand_generator)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_destroy_generator(data->curand_generator) );
+   }
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
+   if (data->cublas_handle)
+   {
+      HYPRE_CUBLAS_CALL( cublasDestroy(data->cublas_handle) );
+   }
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+   if (data->cusparse_handle)
+   {
+#if defined(HYPRE_USING_CUSPARSE)
+      HYPRE_CUSPARSE_CALL( cusparseDestroy(data->cusparse_handle) );
+#elif defined(HYPRE_USING_ROCSPARSE)
+      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_handle(data->cusparse_handle) );
+#endif
+   }
+#endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+
+#if defined(HYPRE_USING_CUDA_STREAMS)
+   for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
+   {
+      if (data->streams[i])
+      {
+#if defined(HYPRE_USING_CUDA)
+         HYPRE_CUDA_CALL( cudaStreamDestroy(data->streams[i]) );
+#elif defined(HYPRE_USING_HIP)
+         HYPRE_HIP_CALL( hipStreamDestroy(data->streams[i]) );
+#elif defined(HYPRE_USING_SYCL)
+         delete data->streams[i];
+         data->streams[i] = nullptr;
+#endif
+      }
+   }
+#endif
+
+#ifdef HYPRE_USING_DEVICE_POOL
+   hypre_DeviceDataCubCachingAllocatorDestroy(data);
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   delete data->device;
+   data->device = nullptr;
+#endif
+
+   hypre_TFree(data, HYPRE_MEMORY_HOST);
+}
+
+HYPRE_Int
+hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipDeviceSynchronize() );
+#elif defined(HYPRE_USING_SYCL)
+   try
+   {
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+   }
+   catch (sycl::exception const &exc)
+   {
+      std::cerr << exc.what() << "Exception caught at file:" << __FILE__
+                << ", line:" << __LINE__ << std::endl;
+      std::exit(1);
+   }
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaDeviceReset();
+#elif defined(HYPRE_USING_HIP)
+   hipDeviceReset();
+#endif
+   return hypre_error_flag;
+}
+
+/* synchronize the Hypre compute stream
+ * action: 0: set sync stream to false
+ *         1: set sync stream to true
+ *         2: restore sync stream to default
+ *         3: return the current value of cuda_compute_stream_sync
+ *         4: sync stream based on cuda_compute_stream_sync
+ */
+HYPRE_Int
+hypre_SyncComputeStream_core(HYPRE_Int     action,
+                             hypre_Handle *hypre_handle,
+                             HYPRE_Int    *cuda_compute_stream_sync_ptr)
+{
+   /* with UVM the default is to sync at kernel completions, since host is also able to
+    * touch GPU memory */
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
+   static const HYPRE_Int cuda_compute_stream_sync_default = 1;
+#else
+   static const HYPRE_Int cuda_compute_stream_sync_default = 0;
+#endif
+
+   /* this controls if synchronize the stream after computations */
+   static HYPRE_Int cuda_compute_stream_sync = cuda_compute_stream_sync_default;
+
+   switch (action)
+   {
+      case 0:
+         cuda_compute_stream_sync = 0;
+         break;
+      case 1:
+         cuda_compute_stream_sync = 1;
+         break;
+      case 2:
+         cuda_compute_stream_sync = cuda_compute_stream_sync_default;
+         break;
+      case 3:
+         *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
+         break;
+      case 4:
+         if (cuda_compute_stream_sync)
+         {
+#if defined(HYPRE_USING_CUDA)
+            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
+#elif defined(HYPRE_USING_HIP)
+            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
+#elif defined(HYPRE_USING_SYCL)
+            HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->ext_oneapi_submit_barrier() );
+#endif
+         }
+         break;
+      default:
+         hypre_printf("hypre_SyncComputeStream_core invalid action\n");
+         hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SetSyncCudaCompute(HYPRE_Int action)
+{
+   /* convert to 1/0 */
+   action = action != 0;
+   hypre_SyncComputeStream_core(action, NULL, NULL);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_RestoreSyncCudaCompute()
+{
+   hypre_SyncComputeStream_core(2, NULL, NULL);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
+{
+   hypre_SyncComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SyncComputeStream(hypre_Handle *hypre_handle)
+{
+   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
+{
+   HYPRE_Int sync_stream;
+   hypre_GetSyncCudaCompute(&sync_stream);
+   hypre_SetSyncCudaCompute(1);
+   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
+   hypre_SetSyncCudaCompute(sync_stream);
+
+   return hypre_error_flag;
+}
+
+#endif // #if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      generic device functions (cuda/hip/sycl)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+/* CUDA/HIP stream */
+#if defined(HYPRE_USING_CUDA)
+cudaStream_t
+#elif defined(HYPRE_USING_HIP)
+hipStream_t
+#elif defined(HYPRE_USING_SYCL)
+sycl::queue*
+#endif
+hypre_DeviceDataComputeStream(hypre_DeviceData *data)
+{
+   return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
+}
+
+#if defined(HYPRE_USING_CUDA)
+cudaStream_t
+#elif defined(HYPRE_USING_HIP)
+hipStream_t
+#elif defined(HYPRE_USING_SYCL)
+sycl::queue*
+#endif
+hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
+{
+#if defined(HYPRE_USING_CUDA)
+   cudaStream_t stream = 0;
+#elif defined(HYPRE_USING_HIP)
+   hipStream_t stream = 0;
+#elif defined(HYPRE_USING_SYCL)
+   sycl::queue *stream = NULL;
+#endif
+
+#if defined(HYPRE_USING_CUDA_STREAMS)
+   if (i >= HYPRE_MAX_NUM_STREAMS)
+   {
+      /* return the default stream, i.e., the NULL stream */
+      /*
+      hypre_printf("device stream %d exceeds the max number %d\n",
+                   i, HYPRE_MAX_NUM_STREAMS);
+      */
+      return NULL;
+   }
+
+   if (data->streams[i])
+   {
+      return data->streams[i];
+   }
+
+#if defined(HYPRE_USING_CUDA)
+   //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
+   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
+#elif defined(HYPRE_USING_SYCL)
+   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+   {
+      for (std::exception_ptr const& e : exceptions)
+      {
+         try
+         {
+            std::rethrow_exception(e);
+         }
+         catch (sycl::exception const& ex)
+         {
+            std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+         }
+      }
+   };
+
+   sycl::device* sycl_device = data->device;
+   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
+   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+#endif
+
+   data->streams[i] = stream;
+#endif
+
+   return stream;
+}
 
 dim3
 hypre_GetDefaultDeviceBlockDimension()
@@ -244,7 +596,6 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
                                    HYPRE_Int *d_row_ptr)
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
    if (nnz <= 0 || nrows <= 0)
    {
       return hypre_error_flag;
@@ -329,11 +680,6 @@ HYPRE_Int
 hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
    HYPRE_ONEDPL_CALL(oneapi::dpl::inclusive_scan, d_i, d_i + n, d_i);
 #else
    HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
@@ -517,11 +863,6 @@ HYPRE_Int
 hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
    /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
    HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
    /* HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0); */
@@ -546,11 +887,6 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
 {
 #if defined(HYPRE_USING_SYCL)
    auto zipped_begin = oneapi::dpl::make_zip_iterator(keys1, keys2, vals);
-   /* WM: necessary? */
-   if (N <= 0)
-   {
-      return hypre_error_flag;
-   }
 
    if (opt == 0)
    {
@@ -582,7 +918,6 @@ hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HY
    {
       HYPRE_THRUST_CALL(stable_sort_by_key, begin_keys, end_keys, vals, TupleComp3<T1, T2>());
    }
-
 #endif
    return hypre_error_flag;
 }
@@ -600,7 +935,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
                              T1 *keys1_out, T2 *keys2_out, T3 *vals_out)
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: necessary? */
+   /* WM: onedpl reduce_by_segment currently does not accept zero length input */
    if (N <= 0)
    {
       return hypre_error_flag;
@@ -630,7 +965,7 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in,
                                                 HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out,
                                                 HYPRE_Complex *vals_out);
-#endif
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions
@@ -1151,8 +1486,6 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigI
                                                          HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #endif
 
-#endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
-
 #if defined(HYPRE_USING_CUSPARSE)
 /*
  * @brief Determines the associated CudaDataType for the HYPRE_Complex typedef
@@ -1212,89 +1545,6 @@ hypre_HYPREIntToCusparseIndexType()
 #endif
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE)
-
-/* CUDA/HIP stream */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t
-#elif defined(HYPRE_USING_HIP)
-hipStream_t
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*
-#endif
-hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
-{
-#if defined(HYPRE_USING_CUDA)
-   cudaStream_t stream = 0;
-#elif defined(HYPRE_USING_HIP)
-   hipStream_t stream = 0;
-#elif defined(HYPRE_USING_SYCL)
-   sycl::queue *stream = NULL;
-#endif
-
-#if defined(HYPRE_USING_CUDA_STREAMS)
-   if (i >= HYPRE_MAX_NUM_STREAMS)
-   {
-      /* return the default stream, i.e., the NULL stream */
-      /*
-      hypre_printf("device stream %d exceeds the max number %d\n",
-                   i, HYPRE_MAX_NUM_STREAMS);
-      */
-      return NULL;
-   }
-
-   if (data->streams[i])
-   {
-      return data->streams[i];
-   }
-
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
-   HYPRE_CUDA_CALL(cudaStreamCreateWithFlags(&stream, cudaStreamDefault));
-#elif defined(HYPRE_USING_HIP)
-   HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
-#elif defined(HYPRE_USING_SYCL)
-   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
-   {
-      for (std::exception_ptr const& e : exceptions)
-      {
-         try
-         {
-            std::rethrow_exception(e);
-         }
-         catch (sycl::exception const& ex)
-         {
-            std::cout << "Caught asynchronous SYCL exception:" << std::endl
-                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
-         }
-      }
-   };
-
-   sycl::device* sycl_device = data->device;
-   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
-   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
-#endif
-
-   data->streams[i] = stream;
-#endif
-
-   return stream;
-}
-
-#if defined(HYPRE_USING_CUDA)
-cudaStream_t
-#elif defined(HYPRE_USING_HIP)
-hipStream_t
-#elif defined(HYPRE_USING_SYCL)
-sycl::queue*
-#endif
-hypre_DeviceDataComputeStream(hypre_DeviceData *data)
-{
-   return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
-}
-
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_CURAND)
 curandGenerator_t
@@ -1512,272 +1762,11 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 }
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
+#endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 
-#if defined(HYPRE_USING_GPU)
-
-hypre_DeviceData*
-hypre_DeviceDataCreate()
-{
-   hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
-
-#if defined(HYPRE_USING_SYCL)
-   hypre_DeviceDataDevice(data)            = nullptr;
-#else
-   hypre_DeviceDataDevice(data)            = 0;
-#endif
-   hypre_DeviceDataComputeStreamNum(data)  = 0;
-
-   /* SpGeMM */
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
-   hypre_DeviceDataSpgemmUseVendor(data) = 1;
-   hypre_DeviceDataSpMVUseCusparse(data) = 1;
-#else
-   hypre_DeviceDataSpgemmUseVendor(data) = 0;
-#endif
-
-   hypre_DeviceDataSpTransUseCusparse(data) = 0;
-
-   hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
-   hypre_DeviceDataSpgemmAlgorithmBinned(data)          = 0;
-   hypre_DeviceDataSpgemmAlgorithmNumBin(data)          = 0;
-   /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
-   hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
-   const HYPRE_Int Nsamples = 64;
-   const HYPRE_Real sigma = 1.0 / sqrt(Nsamples - 2.0);
-   const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
-   hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
-   hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
-
-   /* pmis */
-#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-   hypre_DeviceDataUseGpuRand(data) = 1;
-#else
-   hypre_DeviceDataUseGpuRand(data) = 0;
-#endif
-
-   /* device pool */
-#ifdef HYPRE_USING_DEVICE_POOL
-   hypre_DeviceDataCubBinGrowth(data)      = 8u;
-   hypre_DeviceDataCubMinBin(data)         = 1u;
-   hypre_DeviceDataCubMaxBin(data)         = (hypre_uint) - 1;
-   hypre_DeviceDataCubMaxCachedBytes(data) = (size_t) -1;
-   hypre_DeviceDataCubDevAllocator(data)   = NULL;
-   hypre_DeviceDataCubUvmAllocator(data)   = NULL;
-#endif
-
-   return data;
-}
-
-void
-hypre_DeviceDataDestroy(hypre_DeviceData *data)
-{
-   if (!data)
-   {
-      return;
-   }
-
-   hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_DeviceDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_DeviceDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_CURAND)
-   if (data->curand_generator)
-   {
-      HYPRE_CURAND_CALL( curandDestroyGenerator(data->curand_generator) );
-   }
-#endif
-
-#if defined(HYPRE_USING_ROCRAND)
-   if (data->curand_generator)
-   {
-      HYPRE_ROCRAND_CALL( rocrand_destroy_generator(data->curand_generator) );
-   }
-#endif
-
-#if defined(HYPRE_USING_CUBLAS)
-   if (data->cublas_handle)
-   {
-      HYPRE_CUBLAS_CALL( cublasDestroy(data->cublas_handle) );
-   }
-#endif
-
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-   if (data->cusparse_handle)
-   {
-#if defined(HYPRE_USING_CUSPARSE)
-      HYPRE_CUSPARSE_CALL( cusparseDestroy(data->cusparse_handle) );
-#elif defined(HYPRE_USING_ROCSPARSE)
-      HYPRE_ROCSPARSE_CALL( rocsparse_destroy_handle(data->cusparse_handle) );
-#endif
-   }
-#endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-
-#if defined(HYPRE_USING_CUDA_STREAMS)
-   for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
-   {
-      if (data->streams[i])
-      {
-#if defined(HYPRE_USING_CUDA)
-         HYPRE_CUDA_CALL( cudaStreamDestroy(data->streams[i]) );
-#elif defined(HYPRE_USING_HIP)
-         HYPRE_HIP_CALL( hipStreamDestroy(data->streams[i]) );
-#elif defined(HYPRE_USING_SYCL)
-         delete data->streams[i];
-         data->streams[i] = nullptr;
-#endif
-      }
-   }
-#endif
-
-#ifdef HYPRE_USING_DEVICE_POOL
-   hypre_DeviceDataCubCachingAllocatorDestroy(data);
-#endif
-
-#if defined(HYPRE_USING_SYCL)
-   delete data->device;
-   data->device = nullptr;
-#endif
-
-   hypre_TFree(data, HYPRE_MEMORY_HOST);
-}
-
-HYPRE_Int
-hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
-{
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
-#elif defined(HYPRE_USING_HIP)
-   HYPRE_HIP_CALL( hipDeviceSynchronize() );
-#elif defined(HYPRE_USING_SYCL)
-   try
-   {
-      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
-   }
-   catch (sycl::exception const &exc)
-   {
-      std::cerr << exc.what() << "Exception caught at file:" << __FILE__
-                << ", line:" << __LINE__ << std::endl;
-      std::exit(1);
-   }
-#endif
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
-{
-#if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
-#elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
-#endif
-   return hypre_error_flag;
-}
-
-/* synchronize the Hypre compute stream
- * action: 0: set sync stream to false
- *         1: set sync stream to true
- *         2: restore sync stream to default
- *         3: return the current value of cuda_compute_stream_sync
- *         4: sync stream based on cuda_compute_stream_sync
- */
-HYPRE_Int
-hypre_SyncComputeStream_core(HYPRE_Int     action,
-                             hypre_Handle *hypre_handle,
-                             HYPRE_Int    *cuda_compute_stream_sync_ptr)
-{
-   /* with UVM the default is to sync at kernel completions, since host is also able to
-    * touch GPU memory */
-#if defined(HYPRE_USING_UNIFIED_MEMORY)
-   static const HYPRE_Int cuda_compute_stream_sync_default = 1;
-#else
-   static const HYPRE_Int cuda_compute_stream_sync_default = 0;
-#endif
-
-   /* this controls if synchronize the stream after computations */
-   static HYPRE_Int cuda_compute_stream_sync = cuda_compute_stream_sync_default;
-
-   switch (action)
-   {
-      case 0:
-         cuda_compute_stream_sync = 0;
-         break;
-      case 1:
-         cuda_compute_stream_sync = 1;
-         break;
-      case 2:
-         cuda_compute_stream_sync = cuda_compute_stream_sync_default;
-         break;
-      case 3:
-         *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
-         break;
-      case 4:
-         if (cuda_compute_stream_sync)
-         {
-#if defined(HYPRE_USING_CUDA)
-            HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
-#elif defined(HYPRE_USING_HIP)
-            HYPRE_HIP_CALL( hipStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
-#elif defined(HYPRE_USING_SYCL)
-            HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->ext_oneapi_submit_barrier() );
-#endif
-         }
-         break;
-      default:
-         hypre_printf("hypre_SyncComputeStream_core invalid action\n");
-         hypre_error_in_arg(1);
-   }
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SetSyncCudaCompute(HYPRE_Int action)
-{
-   /* convert to 1/0 */
-   action = action != 0;
-   hypre_SyncComputeStream_core(action, NULL, NULL);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_RestoreSyncCudaCompute()
-{
-   hypre_SyncComputeStream_core(2, NULL, NULL);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
-{
-   hypre_SyncComputeStream_core(3, NULL, cuda_compute_stream_sync_ptr);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SyncComputeStream(hypre_Handle *hypre_handle)
-{
-   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
-{
-   HYPRE_Int sync_stream;
-   hypre_GetSyncCudaCompute(&sync_stream);
-   hypre_SetSyncCudaCompute(1);
-   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
-   hypre_SetSyncCudaCompute(sync_stream);
-
-   return hypre_error_flag;
-}
-
-#endif // #if defined(HYPRE_USING_GPU)
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      sycl functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
 HYPRE_Int
@@ -1805,7 +1794,12 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
 
    return hypre_error_flag;
 }
-#endif
+
+#endif // #if defined(HYPRE_USING_SYCL)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      additional functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 /* This function is supposed to be used in the test drivers to mimic
  * users' GPU binding approaches
@@ -1853,11 +1847,3 @@ hypre_bind_device( HYPRE_Int myid,
    return hypre_error_flag;
 }
 
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      sycl functions
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-#if defined(HYPRE_USING_SYCL)
-
-
-#endif // #if defined(HYPRE_USING_SYCL)

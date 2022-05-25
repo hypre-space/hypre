@@ -1,6 +1,5 @@
-
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -11,8 +10,6 @@
 #include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_ONEMKLSPARSE)
-
-/* WM: Q - is there any requirement for the matrices to be sorted as in cusparse/rocsparse? */
 
 HYPRE_Int
 hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
@@ -72,7 +69,6 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* do work_estimation */
    req = oneapi::mkl::sparse::matmat_request::work_estimation;
-   /* WM: Q - if I do a wait for each matmat call, do I still need to pass dependencies (last arguemnt) to subsequent matmat calls below? */
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
                                                   handle_A,
                                                   handle_B,

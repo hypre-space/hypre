@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -305,6 +305,13 @@ HYPRE_Init()
    hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
    hypre_GetDeviceMaxShmemSize(device_id, _hypre_handle);
+
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+   cudaMemPool_t mempool;
+   cudaDeviceGetDefaultMemPool(&mempool, device_id);
+   uint64_t threshold = UINT64_MAX;
+   cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
+#endif
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
    cudaMemPool_t mempool;
