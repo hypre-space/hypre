@@ -91,6 +91,12 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       Dbeta,
                       send_buf );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, Dbeta_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -353,6 +359,12 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       dtmp,
                       send_buf );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, dtmp_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -362,6 +374,12 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       dlam,
                       send_buf );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, dlam_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);

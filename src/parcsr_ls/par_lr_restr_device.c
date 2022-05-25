@@ -228,6 +228,11 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                          send_buf_i,
                          thrust::plus<HYPRE_BigInt>() );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure send_buf_i is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_Z, HYPRE_MEMORY_DEVICE, send_buf_i,
                                                     HYPRE_MEMORY_DEVICE, Fmap_offd_global);
       hypre_ParCSRCommHandleDestroy(comm_handle);
