@@ -4397,13 +4397,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
                                              HYPRE_Real tol, HYPRE_Real eps_tol, HYPRE_Int max_row_nnz, HYPRE_Int max_iter,
                                              HYPRE_Int print_level )
 {
-   /* WM: debug */
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
-   char filename[256];
-   hypre_sprintf(filename, "matA.%d", my_id);
-   hypre_CSRMatrixPrint(matA, filename);
-   hypre_printf("WM: debug - hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal()\n");
    HYPRE_Int         i, k1, k2;
    HYPRE_Real        value, trace1, trace2, alpha, r_norm;
 
@@ -4505,7 +4498,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    /* main loop */
    for (i = 0 ; i < max_iter ; i ++)
    {
-      hypre_printf("WM: debug - hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal() iteration %d\n", i);
       nnzM = hypre_CSRMatrixNumNonzeros(matM);
       /* R = I - AM */
       matR_temp = hypre_CSRMatrixMultiply(matA, matM);
@@ -4527,26 +4519,30 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       //hypre_CSRMatrixNormFro(matZ, &z_norm);
       hypre_CSRMatrixDropInplace(matZ, droptol, max_row_nnz);
 
+      /* WM: debug */
+      HYPRE_Int my_id;
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
+      if (my_id == 0) hypre_printf("WM: debug - C = A * Z\n");
       /* C = A*Z */
       matC = hypre_CSRMatrixMultiply(matA, matZ);
+      /* WM: debug */
+      char filename[256];
+      hypre_sprintf(filename, "matA.%d", my_id);
+      hypre_CSRMatrixPrint(matA, filename);
+      hypre_sprintf(filename, "matZ.%d", my_id);
+      hypre_CSRMatrixPrint(matZ, filename);
+      hypre_sprintf(filename, "matC.%d", my_id);
+      hypre_CSRMatrixPrint(matC, filename);
+      hypre_MPI_Finalize();
+      exit(0);
 
       /* W = R' * C */
       hypre_CSRMatrixTranspose(matR, &matR_temp, 1);
       matW = hypre_CSRMatrixMultiply(matR_temp, matC);
-      hypre_printf("WM: debug - hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal() iteration %d - 1\n", i);
-      /* WM: debug */
-      hypre_sprintf(filename, "matW.%d", my_id);
-      hypre_CSRMatrixPrint(matW, filename);
-      hypre_sprintf(filename, "matR_temp.%d", my_id);
-      hypre_CSRMatrixPrint(matR_temp, filename);
-      hypre_sprintf(filename, "matC.%d", my_id);
-      hypre_CSRMatrixPrint(matC, filename);
 
       /* trace and alpha */
       hypre_CSRMatrixTrace(matW, &trace1);
-      hypre_printf("WM: debug - hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal() iteration %d - 2\n", i);
       hypre_CSRMatrixNormFro(matC, &trace2);
-      hypre_printf("WM: debug - hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal() iteration %d - 3\n", i);
       trace2 *= trace2;
 
       if (hypre_abs(trace2) < eps_tol)
@@ -4558,7 +4554,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
 
       /* M - M + alpha * Z */
       hypre_CSRMatrixScale(matZ, alpha);
-      hypre_printf("WM: debug - hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal() iteration %d - 4\n", i);
 
       hypre_CSRMatrixDestroy(matR);
       matR = hypre_CSRMatrixAdd(1.0, matM, 1.0, matZ);
@@ -4591,7 +4586,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    }
    *M = matM;
 
-   hypre_printf("WM: debug - done hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal()\n");
    return hypre_error_flag;
 
 }
@@ -4617,7 +4611,6 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
                           HYPRE_Int mr_max_iter, HYPRE_Int nsh_max_iter, HYPRE_Int mr_col_version,
                           HYPRE_Int print_level)
 {
-   hypre_printf("WM: debug - hypre_ILUParCSRInverseNSH()\n");
    HYPRE_Int               i;
 
    /* data slots for matrices */
@@ -4749,6 +4742,5 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    }
    *M = matM;
 
-   hypre_printf("WM: debug - done hypre_ILUParCSRInverseNSH()\n");
    return hypre_error_flag;
 }

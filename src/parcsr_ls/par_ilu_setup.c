@@ -16,7 +16,6 @@ hypre_ILUSetup( void               *ilu_vdata,
                 hypre_ParVector    *f,
                 hypre_ParVector    *u )
 {
-   hypre_printf("WM: debug - hypre_ILUSetup()\n");
    MPI_Comm             comm                 = hypre_ParCSRMatrixComm(A);
    hypre_ParILUData     *ilu_data            = (hypre_ParILUData*) ilu_vdata;
    hypre_ParILUData     *schur_precond_ilu;
@@ -286,7 +285,6 @@ hypre_ILUSetup( void               *ilu_vdata,
       hypre_TFree(CF_marker_array, HYPRE_MEMORY_HOST);
       CF_marker_array = NULL;
    }
-   hypre_printf("WM: debug - hypre_ILUSetup() 1\n");
 
 
    /* clear old l1_norm data, if created */
@@ -417,7 +415,6 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    //   m = n - nLU;
    /* factorization */
-   hypre_printf("WM: debug - hypre_ILUSetup() ilu_type = %d\n", ilu_type);
    switch (ilu_type)
    {
       case 0:
@@ -528,7 +525,6 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
    }
    /* setup Schur solver */
-   hypre_printf("WM: debug - hypre_ILUSetup() 2\n");
    switch (ilu_type)
    {
       case 10: case 11:
@@ -692,10 +688,8 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
          break;
       case 20: case 21:
-         hypre_printf("WM: debug - hypre_ILUSetup() 2.1\n");
          if (matS)
          {
-            hypre_printf("WM: debug - hypre_ILUSetup() 2.2\n");
             /* approximate inverse preconditioner */
             schur_solver = (HYPRE_Solver)hypre_NSHCreate();
 
@@ -1033,7 +1027,6 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
    }
    /* set pointers to ilu data */
-   hypre_printf("WM: debug - hypre_ILUSetup() 3\n");
 #ifdef HYPRE_USING_CUDA
    /* set cusparse pointers */
    //hypre_ParILUDataILUSolveBuffer(ilu_data)  = ilu_solve_buffer;
@@ -1203,7 +1196,6 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUDataRelResNorms(ilu_data) = rel_res_norms;
    HYPRE_ANNOTATE_FUNC_END;
 
-   hypre_printf("WM: debug - done hypre_ILUSetup()\n");
    return hypre_error_flag;
 }
 
@@ -6140,7 +6132,6 @@ hypre_NSHSetup( void               *nsh_vdata,
                 hypre_ParVector    *f,
                 hypre_ParVector    *u )
 {
-   hypre_printf("WM: debug - hypre_NSHSetup()\n");
    MPI_Comm             comm              = hypre_ParCSRMatrixComm(A);
    hypre_ParNSHData     *nsh_data         = (hypre_ParNSHData*) nsh_vdata;
 
@@ -6275,7 +6266,6 @@ hypre_NSHSetup( void               *nsh_vdata,
    rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParNSHDataMaxIter(nsh_data), HYPRE_MEMORY_HOST);
    hypre_ParNSHDataRelResNorms(nsh_data) = rel_res_norms;
 
-   hypre_printf("WM: debug - done hypre_NSHSetup()\n");
    return hypre_error_flag;
 }
 

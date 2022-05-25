@@ -31,6 +31,32 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                   HYPRE_Int                          **d_jc_out,
                                   HYPRE_Complex                      **d_c_out)
 {
+   /* WM: debug */
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
+   if (my_id == 0)
+   {
+      hypre_printf("WM: debug - in hypreDevice_CSRSpGemmOnemklsparse()\n");
+      hypre_printf("WM: debug - m = %d, k = %d, n = %d, nnzA = %d, nnzB = %d\n", m, k, n, nnzA, nnzB);
+      hypre_printf("WM: debug - d_ia = ");
+      for (int i = 0; i < 10; i++) { hypre_printf("%d ", d_ia[i]); }
+      hypre_printf("\n");
+      hypre_printf("WM: debug - d_ja = ");
+      for (int i = 0; i < 10; i++) { hypre_printf("%d ", d_ja[i]); }
+      hypre_printf("\n");
+      hypre_printf("WM: debug - d_a = ");
+      for (int i = 0; i < 10; i++) { hypre_printf("%f ", d_a[i]); }
+      hypre_printf("\n");
+      hypre_printf("WM: debug - d_ib = ");
+      for (int i = 0; i < 10; i++) { hypre_printf("%d ", d_ib[i]); }
+      hypre_printf("\n");
+      hypre_printf("WM: debug - d_jb = ");
+      for (int i = 0; i < 10; i++) { hypre_printf("%d ", d_jb[i]); }
+      hypre_printf("\n");
+      hypre_printf("WM: debug - d_b = ");
+      for (int i = 0; i < 10; i++) { hypre_printf("%f ", d_b[i]); }
+      hypre_printf("\n");
+   }
    std::int64_t *tmp_size1 = NULL, *tmp_size2, *nnzC = NULL;
    void *tmp_buffer1 = NULL;
    void *tmp_buffer2 = NULL;
@@ -63,6 +89,7 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                                   tmp_size1,
                                                   NULL,
                                                   {}).wait() );
+   if (my_id == 0) hypre_printf("WM: debug - tmp_size1 = %d\n", *tmp_size1);
 
    /* allocate tmp_buffer1 for work estimation */
    tmp_buffer1 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size1, HYPRE_MEMORY_DEVICE);
@@ -91,6 +118,7 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                                   tmp_size2,
                                                   NULL,
                                                   {}).wait() );
+   if (my_id == 0) hypre_printf("WM: debug - tmp_size2 = %d\n", *tmp_size2);
 
    /* allocate tmp_buffer2 for computation */
    tmp_buffer2 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size2, HYPRE_MEMORY_DEVICE);
@@ -119,6 +147,7 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                                   nnzC,
                                                   NULL,
                                                   {}).wait() );
+   if (my_id == 0) hypre_printf("WM: debug - nnzC = %d\n", *nnzC);
 
    /* allocate col index and data arrays */
    d_jc = hypre_CTAlloc(HYPRE_Int, *nnzC, HYPRE_MEMORY_DEVICE);
