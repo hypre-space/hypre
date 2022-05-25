@@ -1083,7 +1083,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**** Do the appropriate coarsening ****/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarsening");
-         hypre_printf("WM: debug - coarsening\n");
 
          if (nodal == 0) /* no nodal coarsening */
          {
@@ -1438,11 +1437,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
 
-         hypre_printf("WM: debug - num_C_points_coarse = %d\n", num_C_points_coarse);
          if (num_C_points_coarse > 0)
          {
-            hypre_printf("WM: debug - hypre_ParAMGDataCPointsLevel(amg_data) = %d\n",
-                         hypre_ParAMGDataCPointsLevel(amg_data));
             if (block_mode)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Keeping coarse nodes in block mode is not implemented\n");
@@ -1452,7 +1448,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                for (j = 0; j < num_C_points_coarse; j++)
                {
                   hypre_IntArrayData(CF_marker_host)[C_points_local_marker[j]] = 2;
-                  hypre_printf("WM: debug - setting cf marker to 2\n");
                }
 
                local_coarse_size = 0;
@@ -1578,17 +1573,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-         hypre_printf("WM: debug - interpolation\n");
-         /* WM: debug */
-         if (my_id == 0)
-         {
-            hypre_printf("CF_marker = ");
-            for (i = 0; i < 10; i++)
-            {
-               hypre_printf("%d ", CF_marker[i]);
-            }
-            hypre_printf("\n");
-         }
 
          if (level < agg_num_levels)
          {
@@ -1648,13 +1632,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
                                              num_functions, dof_func_array[level], CF_marker_array[level],
                                              &coarse_dof_func, coarse_pnts_global);
-                  hypre_printf("WM: debug - calling build multipass\n");
                   hypre_BoomerAMGBuildMultipass(A_array[level],
                                                 CF_marker, S, coarse_pnts_global,
                                                 num_functions, dof_func_data, debug_flag,
                                                 agg_trunc_factor, agg_P_max_elmts, sep_weight,
                                                 &P);
-                  hypre_printf("WM: debug - done with build multipass\n");
                }
                else if (agg_interp_type == 8)
                {
@@ -2610,7 +2592,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-            hypre_printf("WM: debug - RAP\n");
             if (ns == 1)
             {
                hypre_ParCSRMatrix *Q = NULL;
@@ -2810,7 +2791,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
 
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-      hypre_printf("WM: debug - RAP\n");
       if (debug_flag == 1) { wall_time = time_getWallclockSeconds(); }
 
       if (block_mode)
@@ -2993,7 +2973,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }  /* end of coarsening loop: while (not_finished_coarsening) */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
-   hypre_printf("WM: debug - coarse solve\n");
 
    /* redundant coarse grid solve */
    if ((seq_threshold >= coarse_threshold) &&
@@ -3132,7 +3111,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-      hypre_printf("WM: debug - relaxation\n");
 
       if (j < num_levels - 1 &&
           (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
@@ -3188,7 +3166,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-         hypre_printf("WM: debug - relaxation\n");
 
          hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
 
@@ -3207,7 +3184,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-      hypre_printf("WM: debug - relaxation\n");
 
       if (j < num_levels - 1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 ||
                                  grid_relax_type[1] == 14 ||
@@ -3258,7 +3234,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-      hypre_printf("WM: debug - relaxation\n");
 
       if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 &&
                                                                  j == (num_levels - 1)))

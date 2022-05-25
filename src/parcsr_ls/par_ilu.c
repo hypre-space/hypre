@@ -4519,22 +4519,8 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       //hypre_CSRMatrixNormFro(matZ, &z_norm);
       hypre_CSRMatrixDropInplace(matZ, droptol, max_row_nnz);
 
-      /* WM: debug */
-      HYPRE_Int my_id;
-      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
-      if (my_id == 0) hypre_printf("WM: debug - C = A * Z\n");
       /* C = A*Z */
       matC = hypre_CSRMatrixMultiply(matA, matZ);
-      /* WM: debug */
-      char filename[256];
-      hypre_sprintf(filename, "matA.%d", my_id);
-      hypre_CSRMatrixPrint(matA, filename);
-      hypre_sprintf(filename, "matZ.%d", my_id);
-      hypre_CSRMatrixPrint(matZ, filename);
-      hypre_sprintf(filename, "matC.%d", my_id);
-      hypre_CSRMatrixPrint(matC, filename);
-      hypre_MPI_Finalize();
-      exit(0);
 
       /* W = R' * C */
       hypre_CSRMatrixTranspose(matR, &matR_temp, 1);

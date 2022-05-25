@@ -1001,7 +1001,6 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
                                     HYPRE_Complex    scal,
                                     const char      *set_or_add)
 {
-   /* hypre_printf("WM: debug - inside hypre_CSRMatrixComputeRowSumDevice()\n"); */
    HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
@@ -1028,7 +1027,6 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
    }
 
    hypre_SyncComputeStream(hypre_handle());
-   /* hypre_printf("WM: debug - finished hypre_CSRMatrixComputeRowSumDevice()\n"); */
 }
 
 /* mark is of size nA

@@ -1991,9 +1991,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
    if (trunc_factor != 0.0 || P_max_elmts != 0)
    {
-      hypre_printf("WM: calling interp truncation\n");
       hypre_BoomerAMGInterpTruncation(P, trunc_factor, P_max_elmts);
-      hypre_printf("WM: done with interp truncation\n");
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);

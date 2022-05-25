@@ -124,10 +124,6 @@ void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
       typename std::iterator_traits<OutputIter>::iterator_category,
       std::random_access_iterator_tag >::value,
       "Iterators passed to algorithms must be random-access iterators.");
-   /* WM: Q - why doesn't my usage of copy_if below work? It seems like it should... the transform_if version
-    * was recommended by Intel folks (seem email thread with Brian and Abhishek) */
-   /* hypreSycl_copy_if( first, last, mask, */
-   /*                    oneapi::dpl::make_permutation_iterator(result, map), pred ); */
    hypreSycl_transform_if(first, last, mask,
                           oneapi::dpl::make_permutation_iterator(result, map),
    [ = ](auto &&v) { return v; }, [ = ](auto &&m) { return pred(m); });

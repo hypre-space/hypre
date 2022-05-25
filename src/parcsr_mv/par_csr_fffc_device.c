@@ -551,9 +551,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
 
-   /* WM: OK to eliminate this declaration in favor of auto later? */
-   /* thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end; */
-
    A_diag_ii = hypre_TAlloc(HYPRE_Int, A_diag_nnz,      HYPRE_MEMORY_DEVICE);
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
    offd_mark = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
@@ -719,8 +716,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         tmp_j,
                         AFF_offd_j );
       col_map_offd_AFF = hypre_TAlloc(HYPRE_BigInt, num_cols_AFF_offd, HYPRE_MEMORY_DEVICE);
-      /* WM: for some reason, I can't figure out how to fuse this with a transform iterator as is done in thrust below? */
-      /*     I'm getting issues at compile time */
       HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
                                                      recv_buf + num_cols_A_offd,
                                                      offd_mark,
