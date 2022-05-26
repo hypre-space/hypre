@@ -1354,7 +1354,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *AFF_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(AFF));
    HYPRE_Complex *AFF_offd_a = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFF));
    HYPRE_Int *AFF_ext_i = NULL;
-   HYPRE_Int *AFF_ext_bigj = NULL;
+   HYPRE_BigInt *AFF_ext_bigj = NULL;
    HYPRE_Complex *AFF_ext_a = NULL;
    if (AFF_ext)
    {

@@ -1155,7 +1155,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    }
 
    /* determine P for coarse points */
-   MPI_Barrier(MPI_COMM_WORLD);
 
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for private(i,i1) HYPRE_SMP_SCHEDULE
@@ -1946,7 +1945,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
          }
       }
    }
-   MPI_Barrier(MPI_COMM_WORLD);
 
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(Pext_send_map_start, HYPRE_MEMORY_HOST);
