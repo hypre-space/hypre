@@ -2,43 +2,43 @@
 
 
 Iterations = 10
-Final Relative Residual Norm = 4.388902e-09
+Final Relative Residual Norm = 5.547280e-09
 
 # Output file: agg_interp.out.2
 
 
 Iterations = 10
-Final Relative Residual Norm = 2.666346e-09
+Final Relative Residual Norm = 2.899267e-09
 
 # Output file: agg_interp.out.3
 
 
 Iterations = 11
-Final Relative Residual Norm = 7.674336e-09
+Final Relative Residual Norm = 8.096815e-09
 
 # Output file: agg_interp.out.4
 
 
 Iterations = 13
-Final Relative Residual Norm = 9.269625e-09
+Final Relative Residual Norm = 8.703813e-09
 
 # Output file: agg_interp.out.4.1
 
 
 Iterations = 13
-Final Relative Residual Norm = 9.700123e-09
+Final Relative Residual Norm = 9.537157e-09
 
 # Output file: agg_interp.out.4.2
 
 
 Iterations = 13
-Final Relative Residual Norm = 9.269625e-09
+Final Relative Residual Norm = 8.703813e-09
 
 # Output file: agg_interp.out.5
 
 
 Iterations = 13
-Final Relative Residual Norm = 1.946737e-09
+Final Relative Residual Norm = 3.650373e-09
 
 # Output file: agg_interp.out.6
 
@@ -49,8 +49,8 @@ Final Relative Residual Norm = 7.695137e-09
 # Output file: agg_interp.out.7
 
 
-Iterations = 14
-Final Relative Residual Norm = 2.842004e-09
+Iterations = 13
+Final Relative Residual Norm = 6.076752e-09
 
 # Output file: agg_interp.out.8
 
@@ -74,7 +74,7 @@ Final Relative Residual Norm = 3.373869e-09
 
 
 Iterations = 11
-Final Relative Residual Norm = 6.748116e-09
+Final Relative Residual Norm = 9.291244e-09
 
 # Output file: agg_interp.out.10
 
@@ -98,7 +98,7 @@ Final Relative Residual Norm = 7.801695e-09
 
 
 Iterations = 19
-Final Relative Residual Norm = 5.374460e-09
+Final Relative Residual Norm = 5.513923e-09
 
 # Output file: agg_interp.out.12
 
@@ -121,50 +121,50 @@ Final Relative Residual Norm = 5.479668e-09
 # Output file: agg_interp.out.13
 
 
-Iterations = 17
-Final Relative Residual Norm = 3.903195e-09
+Iterations = 45
+Final Relative Residual Norm = 7.523745e-09
 
 # Output file: agg_interp.out.14
 
 
 Iterations = 11
-Final Relative Residual Norm = 4.118605e-09
+Final Relative Residual Norm = 4.071482e-09
 
 # Output file: agg_interp.out.15
 
 
 Iterations = 11
-Final Relative Residual Norm = 7.720203e-09
+Final Relative Residual Norm = 8.099980e-09
 
 # Output file: agg_interp.out.16
 
 
 Iterations = 10
-Final Relative Residual Norm = 6.688862e-09
+Final Relative Residual Norm = 7.199711e-09
 
 # Output file: agg_interp.out.17
 
 
 Iterations = 20
-Final Relative Residual Norm = 7.920118e-09
+Final Relative Residual Norm = 4.212985e-09
 
 # Output file: agg_interp.out.18
 
 
-Iterations = 18
-Final Relative Residual Norm = 4.166535e-09
+Iterations = 45
+Final Relative Residual Norm = 7.520754e-09
 
 # Output file: agg_interp.out.19
 
 
 Iterations = 10
-Final Relative Residual Norm = 8.418964e-09
+Final Relative Residual Norm = 8.422060e-09
 
 # Output file: agg_interp.out.20
 
 
 Iterations = 12
-Final Relative Residual Norm = 5.314023e-09
+Final Relative Residual Norm = 2.375934e-09
 
 # Output file: agg_interp.out.21
 

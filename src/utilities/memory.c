@@ -1383,7 +1383,8 @@ hypre_PrintMemoryTracker()
           tracker->data[i]._memory_location == hypre_MEMORY_HOST &&
           tracker->data[i]._memory_location2 == hypre_MEMORY_DEVICE )
       {
-         fprintf(file, " %6zu %12s        %16p  %16p  %10s %16s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
+         fprintf(file,
+                 " %6zu %12s        %16p  %16p  %10s %16s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
                  i,
                  tracker->data[i]._action,
                  tracker->data[i]._ptr,
@@ -1398,7 +1399,7 @@ hypre_PrintMemoryTracker()
                  curr_bytes[hypre_MEMORY_HOST_PINNED],
                  curr_bytes[hypre_MEMORY_DEVICE],
                  curr_bytes[hypre_MEMORY_UNIFIED]
-               );
+                );
       }
       else
 #endif
@@ -1416,7 +1417,7 @@ hypre_PrintMemoryTracker()
                  curr_bytes[hypre_MEMORY_HOST_PINNED],
                  curr_bytes[hypre_MEMORY_DEVICE],
                  curr_bytes[hypre_MEMORY_UNIFIED]
-               );
+                );
       }
    }
 
