@@ -313,13 +313,6 @@ HYPRE_Init()
    cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
 #endif
 
-#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
-   cudaMemPool_t mempool;
-   cudaDeviceGetDefaultMemPool(&mempool, device_id);
-   uint64_t threshold = UINT64_MAX;
-   cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
-#endif
-
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
 #if defined(HYPRE_USING_CUDA_STREAMS)
