@@ -2691,11 +2691,6 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* cusparse */
-   HYPRE_Int               isDoublePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int               isSinglePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   hypre_assert(isDoublePrecision || isSinglePrecision);
-
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
    /* compute P = -UB\(LB\F)
@@ -2727,8 +2722,7 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* check buffer size and create buffer */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
-                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
                                                            BLUm_diag_j, rhs, n, malL_info, policy, &buffer_size));
@@ -2757,8 +2751,7 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* check buffer size and create buffer */
 
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
-                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
                                                            BLUm_diag_j, rhs, n, malU_info, policy, &buffer_size));
