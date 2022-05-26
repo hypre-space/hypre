@@ -27,6 +27,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                                     hypre_ParVector    *b,
                                     hypre_ParVector    *y )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Matvec");
+#endif
+
    hypre_ParCSRCommHandle **comm_handle;
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
@@ -276,7 +280,20 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK]   += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+#endif
+
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
+   /* when using GPUs, start local matvec first in order to overlap with communication */
+#if defined(HYPRE_USING_GPU)
+   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
+#endif
+
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
 
@@ -300,8 +317,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
+#if !defined(HYPRE_USING_GPU)
    /* overlapped local computation */
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0 );
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
@@ -366,6 +385,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    HYPRE_ANNOTATE_FUNC_END;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
    return ierr;
 }
 
@@ -385,7 +408,6 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
  *   Performs y <- alpha * A^T * x + beta * y
  *
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                            hypre_ParCSRMatrix *A,
@@ -393,6 +415,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                            HYPRE_Complex       beta,
                            hypre_ParVector    *y )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("MatvecT");
+#endif
+
    hypre_ParCSRCommHandle **comm_handle;
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
@@ -593,6 +619,24 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       }
    }
 
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
+   /* when using GPUs, start local matvec first in order to overlap with communication */
+#if defined(HYPRE_USING_GPU)
+   if (diagT)
+   {
+      // diagT is optional. Used only if it's present.
+      hypre_CSRMatrixMatvec(alpha, diagT, x_local, beta, y_local);
+   }
+   else
+   {
+      hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+   }
+#endif
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
@@ -618,6 +662,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
+#if !defined(HYPRE_USING_GPU)
    /* overlapped local computation */
    if (diagT)
    {
@@ -628,6 +673,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
    }
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
@@ -676,6 +722,11 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* unpack recv data on device */
+#if 1
+      hypre_ParCSRMatrixMatvecT_unpack( locl_data,
+                                        recv_data,
+                                        comm_pkg );
+#else
       if (!hypre_ParCSRCommPkgWorkSpace(comm_pkg))
       {
          hypre_ParCSRCommPkgWorkSpace(comm_pkg) =
@@ -688,6 +739,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                                 hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                                 recv_data,
                                 hypre_ParCSRCommPkgWorkSpace(comm_pkg));
+#endif
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_Int i, j;
       /* unpack recv data on device */
@@ -741,6 +793,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
 
    return ierr;
 }
@@ -853,7 +909,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       if (num_sends)
          int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart
                                       (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
-      if (num_cols_offd) { CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST); }
+      if (num_cols_offd) { CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -880,3 +936,112 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
    return ierr;
 }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+HYPRE_Int
+hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
+                                  HYPRE_Complex       *recv_data,
+                                  hypre_ParCSRCommPkg *comm_pkg )
+{
+   HYPRE_Int  num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int  num_elemt       = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_Int *send_map        = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
+   HYPRE_Int  send_map_n      = hypre_ParCSRCommPkgSendMapN(comm_pkg);
+   HYPRE_Int *send_map_j      = hypre_ParCSRCommPkgSendMapJ(comm_pkg);
+   HYPRE_Int *send_map_i      = hypre_ParCSRCommPkgSendMapI(comm_pkg);
+   HYPRE_Int *send_map_rowind = hypre_ParCSRCommPkgSendMapRowInd(comm_pkg);
+
+   if (num_elemt == 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (send_map_j == NULL || send_map_i == NULL || send_map_rowind == NULL)
+   {
+      HYPRE_Int *send_map_sort, *send_map_rowcount;
+
+      send_map_j        = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+      send_map_rowind   = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+      send_map_sort     = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+      send_map_rowcount = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+
+      hypre_TMemcpy(send_map_sort, send_map, HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
+
+      HYPRE_THRUST_CALL( sequence,
+                         send_map_j,
+                         send_map_j + num_elemt);
+
+      HYPRE_THRUST_CALL( stable_sort_by_key,
+                         send_map_sort,
+                         send_map_sort + num_elemt,
+                         send_map_j );
+
+      thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
+         HYPRE_THRUST_CALL( reduce_by_key,
+                            send_map_sort,
+                            send_map_sort + num_elemt,
+                            thrust::make_constant_iterator(1),
+                            send_map_rowind,
+                            send_map_rowcount);
+
+      hypre_TFree(send_map_sort, HYPRE_MEMORY_DEVICE);
+
+      send_map_n = new_end.first - send_map_rowind;
+
+      send_map_rowind = hypre_TReAlloc_v2(send_map_rowind, HYPRE_Int, num_elemt, HYPRE_Int, send_map_n,
+                                          HYPRE_MEMORY_DEVICE);
+      send_map_i = hypre_TAlloc(HYPRE_Int, send_map_n + 1, HYPRE_MEMORY_DEVICE);
+
+      hypre_Memset(send_map_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+      HYPRE_THRUST_CALL( inclusive_scan,
+                         send_map_rowcount,
+                         send_map_rowcount + send_map_n,
+                         send_map_i + 1 );
+
+#ifdef HYPRE_DEBUG
+      {
+         HYPRE_Int tmp;
+         hypre_TMemcpy(&tmp, &send_map_i[send_map_n], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+         hypre_assert(tmp == num_elemt);
+      }
+#endif
+
+      hypre_TFree(send_map_rowcount, HYPRE_MEMORY_DEVICE);
+
+      hypre_ParCSRCommPkgSendMapN(comm_pkg)      = send_map_n;
+      hypre_ParCSRCommPkgSendMapJ(comm_pkg)      = send_map_j;
+      hypre_ParCSRCommPkgSendMapI(comm_pkg)      = send_map_i;
+      hypre_ParCSRCommPkgSendMapRowInd(comm_pkg) = send_map_rowind;
+   }
+
+#if 0
+   HYPRE_THRUST_CALL( reduce_by_key,
+                      hypre_ParCSRCommPkgSendMapJSort(comm_pkg),
+                      hypre_ParCSRCommPkgSendMapJSort(comm_pkg) + num_elemt,
+                      thrust::make_permutation_iterator(recv_data, hypre_ParCSRCommPkgSendMapJ(comm_pkg)),
+                      thrust::make_discard_iterator(),
+                      /* TODO: FIXME addto */
+                      thrust::make_permutation_iterator(locl_data, hypre_ParCSRCommPkgSendMapRowInd(comm_pkg) );
+#else
+   hypre_CSRMatrix csr;
+   hypre_CSRMatrixNumRows(&csr)     = hypre_ParCSRCommPkgSendMapN(comm_pkg);
+   hypre_CSRMatrixNumCols(&csr)     = num_elemt;
+   hypre_CSRMatrixNumNonzeros(&csr) = num_elemt;
+   hypre_CSRMatrixI(&csr)           = hypre_ParCSRCommPkgSendMapI(comm_pkg);
+   hypre_CSRMatrixJ(&csr)           = hypre_ParCSRCommPkgSendMapJ(comm_pkg);
+   hypre_CSRMatrixData(&csr)        = NULL; /* all ones */
+
+   hypre_Vector vec_x, vec_y;
+   hypre_VectorData(&vec_x) = recv_data;
+   hypre_VectorSize(&vec_x) = num_elemt;
+   hypre_VectorData(&vec_y) = locl_data;
+
+   hypre_CSRMatrixSpMVDevice(0, 1.0, &csr, &vec_x, 1.0, &vec_y,
+                             hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
+#endif
+
+                      return hypre_error_flag;
+}
+#endif
+

@@ -504,6 +504,11 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                          int_buf_data );
 #endif
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                     HYPRE_MEMORY_DEVICE, dof_func_offd_dev);
       hypre_ParCSRCommHandleDestroy(comm_handle);

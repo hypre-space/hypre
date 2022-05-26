@@ -354,12 +354,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                       W_diag_i,
                       P_diag_i );
 
-   HYPRE_THRUST_CALL( transform,
-                      P_diag_i,
-                      P_diag_i + P_nr_of_rows + 1,
-                      PWoffset,
-                      P_diag_i,
-                      thrust::plus<HYPRE_Int>() );
+   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    if (W_offd_i && P_offd_i)
@@ -1322,6 +1317,12 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       rsFC,
                       send_buf );
 #endif
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, rsFC_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -1614,6 +1615,12 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                       dtmp,
                       send_buf );
 #endif
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg, HYPRE_MEMORY_DEVICE, send_buf,
                                                  HYPRE_MEMORY_DEVICE, dtmp_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);

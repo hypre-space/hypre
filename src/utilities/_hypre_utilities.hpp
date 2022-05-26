@@ -95,6 +95,14 @@ struct hypre_device_allocator
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
+#define CUDA_MALLOCASYNC_VERSION 11020
+#define THRUST_CALL_BLOCKING 1
+
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+#if CUDA_VERSION < CUDA_MALLOCASYNC_VERSION
+#error cudaMalloc/FreeAsync needs CUDA 11.2
+#endif
+#endif
 #endif // defined(HYPRE_USING_CUDA)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -143,6 +151,7 @@ struct hypre_device_allocator
 #include <thrust/replace.h>
 #include <thrust/sequence.h>
 #include <thrust/for_each.h>
+#include <thrust/remove.h>
 
 using namespace thrust::placeholders;
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -314,6 +323,73 @@ using dim3 = sycl::range<1>;
  *      macros for wrapping vendor library calls for error reporting
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#if defined(HYPRE_COMPLEX) /* Double Complex */
+/* TODO */
+#elif defined(HYPRE_SINGLE) /* Single */
+/* cublas */
+#define hypre_cublas_scal                      cublasSscal
+#define hypre_cublas_axpy                      cublasSaxpy
+#define hypre_cublas_dot                       cublasSdot
+/* cusparse */
+#define hypre_cusparse_csru2csr_bufferSizeExt  cusparseScsru2csr_bufferSizeExt
+#define hypre_cusparse_csru2csr                cusparseScsru2csr
+#define hypre_cusparse_csrsv2_bufferSize       cusparseScsrsv2_bufferSize
+#define hypre_cusparse_csrsv2_analysis         cusparseScsrsv2_analysis
+#define hypre_cusparse_csrsv2_solve            cusparseScsrsv2_solve
+#define hypre_cusparse_csrmv                   cusparseScsrmv
+#define hypre_cusparse_csrgemm                 cusparseScsrgemm
+#define hypre_cusparse_csr2csc                 cusparseScsr2csc
+#define hypre_cusparse_csrilu02_bufferSize     cusparseScsrilu02_bufferSize
+#define hypre_cusparse_csrilu02_analysis       cusparseScsrilu02_analysis
+#define hypre_cusparse_csrilu02                cusparseScsrilu02
+#define hypre_cusparse_csrsm2_bufferSizeExt    cusparseScsrsm2_bufferSizeExt
+#define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
+#define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
+/* rocsparse */
+#define hypre_rocsparse_csrsv_buffer_size      rocsparse_scsrsv_buffer_size
+#define hypre_rocsparse_csrsv_analysis         rocsparse_scsrsv_analysis
+#define hypre_rocsparse_csrsv_solve            rocsparse_scsrsv_solve
+#define hypre_rocsparse_gthr                   rocsparse_sgthr
+#define hypre_rocsparse_csrmv_analysis         rocsparse_scsrmv_analysis
+#define hypre_rocsparse_csrmv                  rocsparse_scsrmv
+#define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
+#define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
+#define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
+#elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
+/* ... */
+#else /* Double */
+/* cublas */
+#define hypre_cublas_scal                      cublasDscal
+#define hypre_cublas_axpy                      cublasDaxpy
+#define hypre_cublas_dot                       cublasDdot
+/* cusparse */
+#define hypre_cusparse_csru2csr_bufferSizeExt  cusparseDcsru2csr_bufferSizeExt
+#define hypre_cusparse_csru2csr                cusparseDcsru2csr
+#define hypre_cusparse_csrsv2_bufferSize       cusparseDcsrsv2_bufferSize
+#define hypre_cusparse_csrsv2_analysis         cusparseDcsrsv2_analysis
+#define hypre_cusparse_csrsv2_solve            cusparseDcsrsv2_solve
+#define hypre_cusparse_csrmv                   cusparseDcsrmv
+#define hypre_cusparse_csrgemm                 cusparseDcsrgemm
+#define hypre_cusparse_csr2csc                 cusparseDcsr2csc
+#define hypre_cusparse_csrilu02_bufferSize     cusparseDcsrilu02_bufferSize
+#define hypre_cusparse_csrilu02_analysis       cusparseDcsrilu02_analysis
+#define hypre_cusparse_csrilu02                cusparseDcsrilu02
+#define hypre_cusparse_csrsm2_bufferSizeExt    cusparseDcsrsm2_bufferSizeExt
+#define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
+#define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
+/* rocsparse */
+#define hypre_rocsparse_csrsv_buffer_size      rocsparse_dcsrsv_buffer_size
+#define hypre_rocsparse_csrsv_analysis         rocsparse_dcsrsv_analysis
+#define hypre_rocsparse_csrsv_solve            rocsparse_dcsrsv_solve
+#define hypre_rocsparse_gthr                   rocsparse_dgthr
+#define hypre_rocsparse_csrmv_analysis         rocsparse_dcsrmv_analysis
+#define hypre_rocsparse_csrmv                  rocsparse_dcsrmv
+#define hypre_rocsparse_csrgemm_buffer_size    rocsparse_dcsrgemm_buffer_size
+#define hypre_rocsparse_csrgemm                rocsparse_dcsrgemm
+#define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
+#endif
+
+
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \
@@ -422,7 +498,7 @@ struct hypre_DeviceData
 #endif
 #endif
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    hypre_uint                        cub_bin_growth;
    hypre_uint                        cub_min_bin;
    hypre_uint                        cub_max_bin;
@@ -451,13 +527,16 @@ struct hypre_DeviceData
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
    /* device spgemm options */
-   HYPRE_Int                         spgemm_use_vendor;
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    char                              spgemm_hash_type;
-   /* PMIS */
+   /* cusparse */
+   HYPRE_Int                         spmv_use_vendor;
+   HYPRE_Int                         sptrans_use_vendor;
+   HYPRE_Int                         spgemm_use_vendor;
+   /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
 
@@ -476,6 +555,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_DeviceDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
+#define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
+#define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
@@ -935,6 +1016,15 @@ hypre_int next_power_of_2(hypre_int n)
 
    return n;
 }
+
+template<typename T1, typename T2>
+struct type_cast : public thrust::unary_function<T1, T2>
+{
+   __host__ __device__ T2 operator()(const T1 &x) const
+   {
+      return (T2) x;
+   }
+};
 
 template<typename T>
 struct absolute_value : public thrust::unary_function<T, T>

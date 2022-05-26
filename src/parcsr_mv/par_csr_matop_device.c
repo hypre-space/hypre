@@ -10,7 +10,6 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* return B = [Adiag, Aoffd] */
@@ -44,7 +43,7 @@ hypreGPUKernel_ConcatDiagAndOffd(
 #else
    const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
 #endif
-   HYPRE_Int i, j, k, p, istart, iend, bstart;
+   HYPRE_Int i, j = 0, k = 0, p, istart, iend, bstart;
 
    /* diag part */
    if (lane_id < 2)
@@ -101,6 +100,8 @@ hypreGPUKernel_ConcatDiagAndOffd(
 hypre_CSRMatrix*
 hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 {
+   hypre_GpuProfilingPushRange("ConcatDiagAndOffdDevice");
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
 
@@ -144,6 +145,8 @@ hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A)
                      d_ib,
                      d_jb,
                      d_ab );
+
+   hypre_GpuProfilingPopRange();
 
    return B;
 }
@@ -235,6 +238,7 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
                              hypre_ParCSRMatrixNumCols(A) + num_cols_offd,
                              hypre_CSRMatrixNumNonzeros(A_diag) + hypre_CSRMatrixNumNonzeros(A_offd) +
                              hypre_CSRMatrixNumNonzeros(E));
+
    hypre_CSRMatrixInitialize_v2(B, 0, HYPRE_MEMORY_DEVICE);
 
    hypreDevice_GetRowNnz(hypre_ParCSRMatrixNumRows(A), NULL, hypre_CSRMatrixI(A_diag),
@@ -574,7 +578,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
 
    B_int_nnz = B_int_i_h[B_int_nrows];
 
-   B_int_j_d = hypre_TAlloc(HYPRE_BigInt,  B_int_nnz, HYPRE_MEMORY_DEVICE);
+   B_int_j_d = hypre_TAlloc(HYPRE_BigInt, B_int_nnz, HYPRE_MEMORY_DEVICE);
    if (want_data)
    {
       B_int_a_d = hypre_TAlloc(HYPRE_Complex, B_int_nnz, HYPRE_MEMORY_DEVICE);
@@ -589,6 +593,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = jdata_send_map_starts;
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg_j) = jdata_recv_vec_starts;
 
+   /* RL: assume B_ext_a_d and B_ext_j_d are ready at input */
    /* send/recv CSR rows */
    if (want_data)
    {
@@ -859,6 +864,11 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommPkgRecvProcs    (comm_pkg_j) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = recv_jstarts;
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure d_send_j/d_send_a is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    /* init communication */
    /* ja */
    comm_handle_j = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg_j,
@@ -1003,12 +1013,6 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 
    return B;
 }
-
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 
 HYPRE_Int
 hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
@@ -1155,7 +1159,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    }
 
    HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p_diag, p_offd, q_diag, q_offd;
+   HYPRE_Int p_diag = 0, p_offd = 0, q_diag, q_offd;
 
    /* sum row norm over diag part */
    if (lane < 2)
@@ -1414,6 +1418,11 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
                          thrust::make_constant_iterator(hypre_ParCSRMatrixFirstRowIndex(A)),
                          hypre_CSRMatrixBigJ(A_offdT),
                          thrust::plus<HYPRE_BigInt>() );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure A_offdT is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
       if (!hypre_ParCSRMatrixCommPkg(A))
       {
