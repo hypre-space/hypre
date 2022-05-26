@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -26,6 +26,9 @@ typedef struct
    //general data
    HYPRE_Int max_num_coarse_levels;
    hypre_ParCSRMatrix **A_array;
+#if defined(HYPRE_USING_CUDA)
+   hypre_ParCSRMatrix **P_FF_array;
+#endif
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **RT_array;
    hypre_ParCSRMatrix *RAP;
@@ -66,14 +69,18 @@ typedef struct
    HYPRE_Int     cg_print_level;
    HYPRE_Int     max_iter;
    HYPRE_Int     relax_order;
-   HYPRE_Int     num_relax_sweeps;
+   HYPRE_Int     *num_relax_sweeps;
 
    HYPRE_Solver coarse_grid_solver;
    HYPRE_Int     (*coarse_grid_solver_setup)(void*, void*, void*, void*);
    HYPRE_Int     (*coarse_grid_solver_solve)(void*, void*, void*, void*);
 
    HYPRE_Int     use_default_cgrid_solver;
-   HYPRE_Int     use_default_fsolver;
+   // Mode to use an external AMG solver for F-relaxation
+   // 0: use an external AMG solver that is already setup
+   // 1: use an external AMG solver but do setup inside MGR
+   // 2: use default internal AMG solver
+   HYPRE_Int     fsolver_mode;
    //  HYPRE_Int     fsolver_type;
    HYPRE_Real    omega;
 
@@ -83,13 +90,16 @@ typedef struct
    hypre_ParVector   *Utemp;
    hypre_ParVector   *Ftemp;
 
-   HYPRE_Real          *diaginv;
-   hypre_ParCSRMatrix  *A_ff_inv;
+   HYPRE_Real          **level_diaginv;
+   HYPRE_Real          **frelax_diaginv;
    HYPRE_Int           n_block;
    HYPRE_Int           left_size;
-   HYPRE_Int           global_smooth_iters;
-   HYPRE_Int           global_smooth_type;
-   HYPRE_Solver global_smoother;
+   HYPRE_Int           *blk_size;
+   HYPRE_Int           *level_smooth_iters;
+   HYPRE_Int           *level_smooth_type;
+   HYPRE_Solver        *level_smoother;
+   HYPRE_Int           global_smooth_cycle;
+
    /*
     Number of points that remain part of the coarse grid throughout the hierarchy.
     For example, number of well equations
@@ -101,12 +111,14 @@ typedef struct
    HYPRE_Int set_non_Cpoints_to_F;
    HYPRE_BigInt *idx_array;
 
-   /* F-relaxation method */
+   /* F-relaxation type */
    HYPRE_Int *Frelax_method;
+   HYPRE_Int *Frelax_type;
+
    HYPRE_Int *Frelax_num_functions;
 
    /* Non-Galerkin coarse grid */
-   HYPRE_Int *use_non_galerkin_cg;
+   HYPRE_Int *mgr_coarse_grid_method;
 
    /* V-cycle F relaxation method */
    hypre_ParAMGData    **FrelaxVcycleData;
@@ -125,9 +137,35 @@ typedef struct
    /* this might be necessary for some applications, e.g. phase transitions */
    HYPRE_Int   lvl_to_keep_cpoints;
 
+   /* block size for block Jacobi interpolation and relaxation */
+   HYPRE_Int  block_jacobi_bsize;
+
    HYPRE_Real  cg_convergence_factor;
 
+   /* Data for Gaussian elimination F-relaxation */
+   hypre_ParAMGData    **GSElimData;
+
 } hypre_ParMGRData;
+
+// F-relaxation struct for future refactoring of F-relaxation in MGR
+typedef struct
+{
+   HYPRE_Int relax_type;
+   HYPRE_Int relax_nsweeps;
+
+   hypre_ParCSRMatrix *A;
+   hypre_ParVector    *b;
+
+   // for hypre's smoother options
+   HYPRE_Int *CF_marker;
+
+   // for block Jacobi/GS option
+   HYPRE_Complex *diaginv;
+
+   // for ILU option
+   HYPRE_Solver frelax_solver;
+
+} hypre_MGRRelaxData;
 
 
 #define FMRK  -1
@@ -138,7 +176,7 @@ typedef struct
 #define FPT(i, bsize) (((i) % (bsize)) == FMRK)
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
-#define SMALLREAL 1e-20
-#define DIVIDE_TOL 1e-32
+//#define SMALLREAL 1e-20
+//#define DIVIDE_TOL 1e-32
 
 #endif

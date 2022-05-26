@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -703,10 +703,10 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
 
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
          if (n)
          {
-            A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-            f_vector = hypre_ParVectorToVectorAll(f);
             A_CSR_i = hypre_CSRMatrixI(A_CSR);
             A_CSR_j = hypre_CSRMatrixJ(A_CSR);
             A_CSR_data = hypre_CSRMatrixData(A_CSR);

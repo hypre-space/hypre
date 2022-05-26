@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -77,7 +77,7 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
 
 
    ierr = HYPRE_ParCSRMatrixGetLocalRange( Parcsr_matrix, row_start, row_end,
-					col_start, col_end );
+                                           col_start, col_end );
 
    return(ierr);
 }
@@ -102,7 +102,7 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
 
    // RL: if HYPRE_ParCSRMatrixGetRow was on device, need the next line to guarantee it's done
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaComputeStream(hypre_handle());
+   hypre_SyncComputeStream(hypre_handle());
 #endif
 
    return(ierr);

@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -7,6 +7,18 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.24.0 released 2022/02/11
+
+- Added SYCL support for the structured interface and solvers
+- Added SYCL support for AMG solve phase.
+- Enabled GPU setup for the MGR solver.
+- Enabled new interpolation options for MGR (L1-Jacobi, MM-ext, MM-ext+i,
+  MM-ext+e) for both CPU and GPU.
+- Added GPU examples for Fortran users ('ex5f.f' and 'ex12f.f').
+- Added source file indentation with Artistic Style (astyle).
+- Various bug fixes.
+
+#====================================
 Version 2.23.0 released 2021/10/01
 
 - Added GPU support for multipass interpolation.

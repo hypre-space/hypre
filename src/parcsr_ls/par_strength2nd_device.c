@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,7 +21,7 @@
 //-----------------------------------------------------------------------
 HYPRE_Int
 hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
-                                 HYPRE_Int           *CF_marker_host,
+                                 HYPRE_Int           *CF_marker,
                                  HYPRE_Int            num_paths,
                                  HYPRE_BigInt        *coarse_row_starts,
                                  hypre_ParCSRMatrix **S2_ptr)
@@ -33,7 +33,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    HYPRE_Int           S_offd_nnz = hypre_CSRMatrixNumNonzeros(S_offd);
    hypre_CSRMatrix    *Id, *SI_diag;
    hypre_ParCSRMatrix *S_XC, *S_CX, *S2;
-   HYPRE_Int          *CF_marker, *new_end;
+   HYPRE_Int          *new_end;
    HYPRE_Complex       coeff = 2.0;
 
    /*
@@ -42,10 +42,6 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_MPI_Comm_size(comm, &num_proc);
    hypre_MPI_Comm_rank(comm, &myid);
    */
-
-   CF_marker = hypre_TAlloc(HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker, CF_marker_host, HYPRE_Int, S_nr_local, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_HOST);
 
    /* 1. Create new matrix with added diagonal */
    hypre_GpuProfilingPushRange("Setup");
@@ -66,7 +62,7 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    hypre_MatvecCommPkgCreate(S);
 
    /* S(C, :) and S(:, C) */
-   hypre_ParCSRMatrixGenerate1DCFDevice(S, CF_marker_host, coarse_row_starts, NULL, &S_CX, &S_XC);
+   hypre_ParCSRMatrixGenerate1DCFDevice(S, CF_marker, coarse_row_starts, NULL, &S_CX, &S_XC);
 
    hypre_assert(S_nr_local == hypre_ParCSRMatrixNumCols(S_CX));
 
@@ -90,8 +86,6 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
                                 is_nonnegative<HYPRE_Int>()  );
 
    hypre_assert(new_end - hypre_CSRMatrixJ(Id) == hypre_ParCSRMatrixNumRows(S_CX));
-
-   hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
 
    HYPRE_THRUST_CALL( fill,
                       hypre_CSRMatrixData(Id),

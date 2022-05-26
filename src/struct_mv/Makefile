@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -99,6 +99,6 @@ libHYPRE_struct_mv.a: ${OBJS}
 libHYPRE_struct_mv.so libHYPRE_struct_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

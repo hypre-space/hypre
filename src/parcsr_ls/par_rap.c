@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -234,7 +234,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    num_nz_cols_A = num_cols_diag_A + num_cols_offd_A;
 
    n_coarse_RT = hypre_ParCSRMatrixGlobalNumCols(RT);
-   if (n_coarse != n_coarse_RT)
+
+   if (n_coarse != n_coarse_RT || num_cols_diag_RT != num_cols_diag_P)
    {
       square = 0;
    }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -251,7 +251,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   return hypre_ParCSRDiagScale(HA, Hy, Hx);
+   return hypre_ParCSRDiagScaleVector(HA, Hy, Hx);
 }
 
 /*--------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -102,6 +102,15 @@
 
 /* Use NVTX */
 #cmakedefine HYPRE_USING_NVTX 1
+
+/* Use oneMLK spasre */
+#cmakedefine HYPRE_USING_ONEMKLSPARSE 1
+
+/* Use oneMLK blas */
+#cmakedefine HYPRE_USING_ONEMKLBLAS 1
+
+/* Use oneMLK rand */
+#cmakedefine HYPRE_USING_ONEMKLRAND 1
 
 /* Use SuperLU_Dist */
 #cmakedefine HYPRE_USING_DSUPERLU 1

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -217,7 +217,7 @@ hypre_BoomerAMGDD_FAC_Jacobi( void      *amgdd_vdata,
                               HYPRE_Int  level,
                               HYPRE_Int  cycle_param )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_ParAMGDDData      *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid     *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_MemoryLocation     memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);
@@ -558,7 +558,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void      *amgdd_vdata,
                                   HYPRE_Int  level,
                                   HYPRE_Int  cycle_param )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_ParAMGDDData      *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid     *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_MemoryLocation     memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);

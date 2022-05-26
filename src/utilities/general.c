@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -82,7 +82,6 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 {
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
    omp_set_default_device(device_id);
 #endif
 
@@ -227,10 +226,6 @@ hypre_GetDeviceCount(hypre_int *device_count)
 HYPRE_Int
 hypre_GetDeviceLastError()
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaGetLastError() );
-#endif
-
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
 #endif
@@ -289,9 +284,18 @@ HYPRE_Init()
    hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
 
+#if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+   cudaMemPool_t mempool;
+   cudaDeviceGetDefaultMemPool(&mempool, device_id);
+   uint64_t threshold = UINT64_MAX;
+   cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
+#endif
+
    /* To include the cost of creating streams/cudahandles in HYPRE_Init */
    /* If not here, will be done at the first use */
+#if defined(HYPRE_USING_CUDA_STREAMS)
    hypre_HandleComputeStream(_hypre_handle);
+#endif
 
    /* A separate stream for prefetching */
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
@@ -318,7 +322,7 @@ HYPRE_Init()
    HYPRE_OMPOffloadOn();
 #endif
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    /* Keep this check here at the end of HYPRE_Init()
     * Make sure that device pool allocator has not been setup in HYPRE_Init,
     * otherwise users are not able to set all the parameters
@@ -373,16 +377,6 @@ HYPRE_Finalize()
 HYPRE_Int
 HYPRE_PrintDeviceInfo()
 {
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_int dev;
-   struct cudaDeviceProp deviceProp;
-
-   HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
-   HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
-#endif
-
 #if defined(HYPRE_USING_CUDA)
    hypre_int dev;
    struct cudaDeviceProp deviceProp;

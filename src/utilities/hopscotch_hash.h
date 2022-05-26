@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -47,13 +47,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
-#include <math.h>
+//#include <math.h>
 
 #ifdef HYPRE_USING_OPENMP
 #include <omp.h>
 #endif
 
-#include "_hypre_utilities.h"
+//#include "_hypre_utilities.h"
 
 // Potentially architecture specific features used here:
 // __sync_val_compare_and_swap

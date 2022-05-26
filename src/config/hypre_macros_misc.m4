@@ -1,4 +1,4 @@
-dnl Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+dnl Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 dnl HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 dnl
 dnl SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -106,7 +106,7 @@ then
           LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
-      icc|mpiicc)
+      icc|mpiicc|icx|mpiicx)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qopenmp"
@@ -145,7 +145,7 @@ then
           CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
-      icpc|icc|mpiicpc|mpiicc)
+      icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qopenmp"
@@ -226,7 +226,7 @@ then
           LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
-      icc|mpiicc)
+      icc|mpiicc|icx|mpiicx)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qopenmp"
@@ -265,7 +265,7 @@ then
           CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
-      icpc|icc|mpiicpc|mpiicc)
+      icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qopenmp"
@@ -301,7 +301,7 @@ then
           FFLAGS="$FFLAGS -fopenmp"
         fi
         ;;
-      ifort|mpiifort)
+      ifort|mpiifort|ifx|mpiifx)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qopenmp"

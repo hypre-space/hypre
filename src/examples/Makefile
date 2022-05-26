@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -25,7 +25,7 @@ HYPRE_DIR = ../hypre
 ########################################################################
 ifeq ($(use_cuda), 1)
    CUDA_INCL = -I${CUDA_HOME}/include
-   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
    CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
    NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
    COPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
@@ -33,14 +33,14 @@ ifeq ($(use_cuda), 1)
 endif
 
 ifeq ($(use_cuf), 1)
-   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
 endif
 
 ########################################################################
 # Device OMP
 ########################################################################
 ifeq ($(use_domp), 1)
-   DOMP_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+   DOMP_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
    COPTS_DOMP = -DHYPRE_EXAMPLE_USING_DEVICE_OMP
    FOPTS_DOMP = -qoffload -W@,-v -qsmp=omp -qinfo=omperrtrace -DHYPRE_EXAMPLE_USING_DEVICE_OMP
    LOPTS_DOMP = -qoffload -W@,-v -qsmp=omp

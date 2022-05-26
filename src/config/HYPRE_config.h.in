@@ -163,7 +163,7 @@
 /* Define to 1 if executing on device with CUDA */
 #undef HYPRE_USING_CUDA
 
-/* Define to 1 if using CUDA streams */
+/* Define to 1 if using streams */
 #undef HYPRE_USING_CUDA_STREAMS
 
 /* Define to 1 if using cuRAND */
@@ -171,6 +171,9 @@
 
 /* Define to 1 if using cuSPARSE */
 #undef HYPRE_USING_CUSPARSE
+
+/* Define to 1 if using device async malloc */
+#undef HYPRE_USING_DEVICE_MALLOC_ASYNC
 
 /* Define to 1 if using device memory without UM */
 #undef HYPRE_USING_DEVICE_MEMORY
@@ -214,7 +217,7 @@
 /* Define to 1 if Node Aware MPI library is used */
 #undef HYPRE_USING_NODE_AWARE_MPI
 
-/* NVTX being used */
+/* Define to 1 if using NVIDIA Tools Extension (NVTX) */
 #undef HYPRE_USING_NVTX
 
 /* onemkl::BLAS being used */

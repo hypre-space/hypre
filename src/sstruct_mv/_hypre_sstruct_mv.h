@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -314,7 +314,7 @@ typedef struct hypre_SStructGrid_struct
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -362,7 +362,7 @@ hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -533,7 +533,7 @@ typedef struct hypre_SStructGraph_struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -672,7 +672,7 @@ hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -781,7 +781,7 @@ typedef struct hypre_SStructVector_struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -802,6 +802,9 @@ HYPRE_Int HYPRE_SStructGraphAddEntries ( HYPRE_SStructGraph graph, HYPRE_Int par
                                          HYPRE_Int var, HYPRE_Int to_part, HYPRE_Int *to_index, HYPRE_Int to_var );
 HYPRE_Int HYPRE_SStructGraphAssemble ( HYPRE_SStructGraph graph );
 HYPRE_Int HYPRE_SStructGraphSetObjectType ( HYPRE_SStructGraph graph, HYPRE_Int type );
+HYPRE_Int HYPRE_SStructGraphPrint ( FILE *file, HYPRE_SStructGraph graph );
+HYPRE_Int HYPRE_SStructGraphRead ( FILE *file, HYPRE_SStructGrid grid,
+                                   HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr );
 
 /* HYPRE_sstruct_grid.c */
 HYPRE_Int HYPRE_SStructGridCreate ( MPI_Comm comm, HYPRE_Int ndim, HYPRE_Int nparts,
@@ -861,6 +864,8 @@ HYPRE_Int HYPRE_SStructMatrixSetObjectType ( HYPRE_SStructMatrix matrix, HYPRE_I
 HYPRE_Int HYPRE_SStructMatrixGetObject ( HYPRE_SStructMatrix matrix, void **object );
 HYPRE_Int HYPRE_SStructMatrixPrint ( const char *filename, HYPRE_SStructMatrix matrix,
                                      HYPRE_Int all );
+HYPRE_Int HYPRE_SStructMatrixRead ( MPI_Comm comm, const char *filename,
+                                    HYPRE_SStructMatrix *matrix_ptr );
 HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha, HYPRE_SStructMatrix A,
                                       HYPRE_SStructVector x, HYPRE_Complex beta, HYPRE_SStructVector y );
 
@@ -870,6 +875,9 @@ HYPRE_Int HYPRE_SStructStencilCreate ( HYPRE_Int ndim, HYPRE_Int size,
 HYPRE_Int HYPRE_SStructStencilDestroy ( HYPRE_SStructStencil stencil );
 HYPRE_Int HYPRE_SStructStencilSetEntry ( HYPRE_SStructStencil stencil, HYPRE_Int entry,
                                          HYPRE_Int *offset, HYPRE_Int var );
+HYPRE_Int HYPRE_SStructStencilPrint ( FILE *file, HYPRE_SStructStencil stencil );
+HYPRE_Int HYPRE_SStructStencilRead ( FILE *file, HYPRE_SStructStencil *stencil_ptr );
+
 
 /* HYPRE_sstruct_vector.c */
 HYPRE_Int HYPRE_SStructVectorCreate ( MPI_Comm comm, HYPRE_SStructGrid grid,
@@ -899,6 +907,8 @@ HYPRE_Int HYPRE_SStructVectorSetObjectType ( HYPRE_SStructVector vector, HYPRE_I
 HYPRE_Int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector, void **object );
 HYPRE_Int HYPRE_SStructVectorPrint ( const char *filename, HYPRE_SStructVector vector,
                                      HYPRE_Int all );
+HYPRE_Int HYPRE_SStructVectorRead ( MPI_Comm comm, const char *filename,
+                                    HYPRE_SStructVector *vector );
 HYPRE_Int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x, HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructVectorScale ( HYPRE_Complex alpha, HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x, HYPRE_SStructVector y,
@@ -940,6 +950,7 @@ HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid, HYPRE_Int 
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid, hypre_Box *pneighbor_box,
                                            hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
+HYPRE_Int hypre_SStructPGridGetMaxBoxSize ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid, hypre_SStructGrid **grid_ref );
 HYPRE_Int hypre_SStructGridAssembleBoxManagers ( hypre_SStructGrid *grid );
 HYPRE_Int hypre_SStructGridAssembleNborBoxManagers ( hypre_SStructGrid *grid );
@@ -983,6 +994,9 @@ HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box, hypre_Index offset, hyp
                                          HYPRE_Int *valid );
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid, HYPRE_Int part, HYPRE_Int var,
                                        hypre_Box *box, HYPRE_Int action, hypre_BoxManEntry ***entries_ptr, HYPRE_Int *nentries_ptr );
+HYPRE_Int hypre_SStructGridGetMaxBoxSize ( hypre_SStructGrid *grid );
+HYPRE_Int hypre_SStructGridPrint ( FILE *file, hypre_SStructGrid *grid );
+HYPRE_Int hypre_SStructGridRead ( MPI_Comm comm, FILE *file, hypre_SStructGrid **grid_ptr );
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px, hypre_SStructPVector *py,
@@ -1089,7 +1103,6 @@ HYPRE_Int hypre_SStructVectorParRestore ( hypre_SStructVector *vector, hypre_Par
 HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
-
 
 #ifdef __cplusplus
 }

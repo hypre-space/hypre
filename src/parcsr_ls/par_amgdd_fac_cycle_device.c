@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_JacobiDevice( void     *amgdd_vdata,
@@ -149,4 +149,4 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

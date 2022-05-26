@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -456,6 +456,11 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                                      num_sends),
                                edge_bc,
                                int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+            /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+            hypre_ForceSyncComputeStream(hypre_handle());
+#endif
          }
          else
 #endif
@@ -471,6 +476,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                }
             }
          }
+
          comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg,
                                                        memory_location, int_buf_data,
                                                        memory_location, offd_edge_bc);
@@ -496,8 +502,8 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          {
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(nv, "warp", bDim);
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_GtEliminateBoundary, gDim, bDim,
-                               nv, GtdI, GtdJ, GtdA, GtoI, GtoJ, GtoA, edge_bc, offd_edge_bc );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_GtEliminateBoundary, gDim, bDim,
+                              nv, GtdI, GtdJ, GtdA, GtoI, GtoJ, GtoA, edge_bc, offd_edge_bc );
          }
          else
 #endif

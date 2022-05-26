@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -74,6 +74,10 @@ main( hypre_int argc,
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Init();
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::initialize (argc, argv);
+#endif
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -413,6 +417,10 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(from_vector);
    HYPRE_StructVectorDestroy(to_vector);
    HYPRE_StructVectorDestroy(check_vector);
+
+#if defined(HYPRE_USING_KOKKOS)
+   Kokkos::finalize ();
+#endif
 
    /* Finalize Hypre */
    HYPRE_Finalize();

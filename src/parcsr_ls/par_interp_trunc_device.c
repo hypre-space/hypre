@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -162,8 +162,8 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P, HYPRE_Real trunc_f
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_InterpTruncation, gDim, bDim,
-                      nrows, trunc_factor, max_elmts, P_rowptr, P_j, P_a );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_InterpTruncation, gDim, bDim,
+                     nrows, trunc_factor, max_elmts, P_rowptr, P_j, P_a );
 
    /* build new P_diag and P_offd */
    if (nnz_diag)

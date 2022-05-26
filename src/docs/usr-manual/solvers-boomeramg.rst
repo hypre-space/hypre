@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -193,8 +193,8 @@ on GPUs is shown below.
  HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
  /* setup AMG on GPUs */
  HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
- /* use hypre's SpGEMM instead of cuSPARSE */
- HYPRE_SetSpGemmUseCusparse(FALSE);
+ /* use hypre's SpGEMM instead of vendor implementation */
+ HYPRE_SetSpGemmUseVendor(FALSE);
  /* use GPU RNG */
  HYPRE_SetUseGpuRand(TRUE);
  if (useHypreGpuMemPool)

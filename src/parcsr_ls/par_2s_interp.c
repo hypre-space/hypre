@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -632,25 +632,24 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("PartialExtInterp");
 #endif
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGBuildModPartialExtInterpDevice(A, CF_marker, S, num_cpts_global,
+                                                           num_old_cpts_global,
+                                                           debug_flag, trunc_factor, max_elmts, P_ptr);
+   }
+   else
+#endif
    {
       ierr = hypre_BoomerAMGBuildModPartialExtInterpHost(A, CF_marker, S, num_cpts_global,
                                                          num_old_cpts_global,
                                                          num_functions, dof_func,
                                                          debug_flag, trunc_factor, max_elmts, P_ptr);
    }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
-   {
-      ierr = hypre_BoomerAMGBuildModPartialExtInterpDevice(A, CF_marker, S, num_cpts_global,
-                                                           num_old_cpts_global,
-                                                           debug_flag, trunc_factor, max_elmts, P_ptr);
-   }
-#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
@@ -1338,25 +1337,24 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("PartialExtPEInterp");
 #endif
 
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
    HYPRE_Int ierr = 0;
 
-   if (exec == HYPRE_EXEC_HOST)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      ierr = hypre_BoomerAMGBuildModPartialExtPEInterpDevice(A, CF_marker, S, num_cpts_global,
+                                                             num_old_cpts_global,
+                                                             debug_flag, trunc_factor, max_elmts, P_ptr);
+   }
+   else
+#endif
    {
       ierr = hypre_BoomerAMGBuildModPartialExtPEInterpHost(A, CF_marker, S, num_cpts_global,
                                                            num_old_cpts_global,
                                                            num_functions, dof_func,
                                                            debug_flag, trunc_factor, max_elmts, P_ptr);
    }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   else
-   {
-      ierr = hypre_BoomerAMGBuildModPartialExtPEInterpDevice(A, CF_marker, S, num_cpts_global,
-                                                             num_old_cpts_global,
-                                                             debug_flag, trunc_factor, max_elmts, P_ptr);
-   }
-#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();

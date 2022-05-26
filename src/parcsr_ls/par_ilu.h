@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -323,7 +323,7 @@ typedef struct hypre_ParNSHData_struct
 #define hypre_ParNSHDataNSHTol(nsh_data)                 ((nsh_data) -> nsh_tol)
 #define hypre_ParNSHDataNSHMaxRowNnz(nsh_data)           ((nsh_data) -> nsh_max_row_nnz)
 
-#define DIVIDE_TOL 1e-32
+//#define DIVIDE_TOL 1e-32
 
 #ifdef HYPRE_USING_CUDA
 HYPRE_Int hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des,

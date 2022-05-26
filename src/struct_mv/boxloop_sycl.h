@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -17,6 +17,8 @@
 
 #ifndef HYPRE_BOXLOOP_SYCL_HEADER
 #define HYPRE_BOXLOOP_SYCL_HEADER
+
+#if defined(HYPRE_USING_SYCL) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 typedef struct hypre_Boxloop_struct
 {
@@ -427,3 +429,6 @@ else                                                            \
         hypre_newBoxLoop2ReductionEnd(i1, i2, reducesum)
 
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_SYCL_HEADER */
+

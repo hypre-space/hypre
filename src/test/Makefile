@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,11 +37,17 @@ F77_COMPILE_FLAGS = \
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
-# WM: currently have to add the absolute path to libHYPRE.a when building sycl code
+LIBFLAGS = ${LDFLAGS} ${LIBS}
+
+# WM: currently have to add the absolute path to libHYPRE.a when building sycl code; RL: reorg
 ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
-	LIBFLAGS = ${LDFLAGS} ${LIBS} ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicx)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicpx)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
 else
-	LIBFLAGS = ${LDFLAGS} ${LIBS}
+   LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
 endif
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
@@ -51,7 +57,7 @@ else
 endif
 
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib -lHYPRE\
+ $(LIBHYPRE)\
  ${XLINK}\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
@@ -188,6 +194,10 @@ struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_mgr: test_mgr.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mgr_gpu: test_mgr_gpu.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -47,6 +47,7 @@ CUFILES =\
  csr_spgemm_device_confident.c\
  csr_spgemm_device_cusparse.c\
  csr_spgemm_device_rocsparse.c \
+ csr_spgemm_device_onemklsparse.c\
  csr_spgemm_device_rowbound.c\
  csr_spgemm_device_rowest.c\
  csr_spgemm_device_util.c\
@@ -92,6 +93,6 @@ libHYPRE_seq_mv.a: ${OBJS}
 libHYPRE_seq_mv.so libHYPRE_seq_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

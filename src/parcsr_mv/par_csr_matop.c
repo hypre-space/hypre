@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -4113,7 +4113,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
-      hypre_SyncCudaComputeStream(hypre_handle());
+      hypre_SyncComputeStream(hypre_handle());
    }
 #endif
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -800,7 +800,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    hypre_IndexRef        start;
    HYPRE_Int             i, d, size;
 
-   size = (HYPRE_Int)(pow(3, ndim) + 0.5);
+   size = (HYPRE_Int)(pow(3.0, ndim) + 0.5);
    stencil_shape = hypre_CTAlloc(hypre_Index,  size, HYPRE_MEMORY_HOST);
    box = hypre_BoxCreate(ndim);
    for (d = 0; d < ndim; d++)

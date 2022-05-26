@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -47,6 +47,7 @@ set(SRCS
   HYPRE_parcsr_pcg.c
   HYPRE_parcsr_pilut.c
   HYPRE_parcsr_schwarz.c
+  HYPRE_parcsr_fsai.c
   HYPRE_ams.c
   HYPRE_ads.c
   HYPRE_ame.c
@@ -73,6 +74,9 @@ set(SRCS
   par_cycle.c
   par_add_cycle.c
   par_difconv.c
+  par_fsai.c
+  par_fsai_setup.c
+  par_fsai_solve.c
   par_gauss_elim.c
   par_gsmg.c
   par_indepset.c
@@ -132,6 +136,7 @@ set(SRCS
   par_2s_interp_device.c
   par_relax_device.c
   par_mod_multi_interp_device.c
+  par_mgr_device.c
 )
 
 if (HYPRE_USING_DSUPERLU)
@@ -148,6 +153,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     ams.c
     ads.c
     ame.c
+    par_amg_setup.c
     par_ilu.c
     par_ilu_setup.c
     par_ilu_solve.c
@@ -166,6 +172,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_amgdd_fac_cycle_device.c
     par_2s_interp_device.c
     par_relax_device.c
+    par_mgr_device.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -264,12 +264,15 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix,
       return 0;
    }
 
+   /* WM: todo sycl */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (memory_location != HYPRE_MEMORY_HOST)
    {
       /* GPU assembly */
       hypre_AuxParCSRMatrixNeedAux(matrix) = 1;
    }
    else
+#endif
    {
       /* CPU assembly */
       /* allocate stash for setting or adding off processor values */

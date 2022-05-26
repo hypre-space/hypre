@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -17,6 +17,8 @@
 
 #ifndef HYPRE_BOXLOOP_CUDA_HEADER
 #define HYPRE_BOXLOOP_CUDA_HEADER
+
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)) && !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS)
 
 #define HYPRE_LAMBDA [=] __host__  __device__
 
@@ -74,7 +76,7 @@ extern "C++"
          const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
          const dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
-         HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
+         HYPRE_GPU_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
       }
    }
 
@@ -135,7 +137,7 @@ extern "C++"
          hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
          */
 
-         HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
+         HYPRE_GPU_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
       }
    }
 
@@ -424,4 +426,7 @@ else                                                            \
 #define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
 
+#endif
+
 #endif /* #ifndef HYPRE_BOXLOOP_CUDA_HEADER */
+
