@@ -12,7 +12,7 @@ main( int argc,
       char *argv[] )
 {
    HYPRE_Init();
-   
+
    hypre_printf("Read in matrices\n");
    char filename[256];
    sprintf(filename, "matA.0");
