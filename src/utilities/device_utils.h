@@ -94,6 +94,7 @@
 #include <thrust/replace.h>
 #include <thrust/sequence.h>
 #include <thrust/for_each.h>
+#include <thrust/remove.h>
 
 using namespace thrust::placeholders;
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -103,7 +104,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* WM: Q - is this the best way to deal with dim3 vs. sycl::range? */
+/* The following definitions facilitate code reuse and limits
+ * if/def-ing when unifying cuda/hip code with sycl code */
 using dim3 = sycl::range<1>;
 #define __global__
 #define __host__
@@ -122,6 +124,29 @@ using dim3 = sycl::range<1>;
 #include <oneapi/mkl/rng.hpp>
 #endif
 #endif // defined(HYPRE_USING_SYCL)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      device defined values
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_WARP_SIZE       64
+#define HYPRE_WARP_BITSHIFT   6
+#elif defined(HYPRE_USING_SYCL)
+#define HYPRE_WARP_SIZE       8
+#define HYPRE_WARP_BITSHIFT   3
+#endif
+
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
+#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
+#define HYPRE_FLT_LARGE       1e30
+#define HYPRE_1D_BLOCK_SIZE   512
+#define HYPRE_MAX_NUM_STREAMS 10
+#define HYPRE_SPGEMM_MAX_NBIN 10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *       macro for launching GPU kernels
@@ -379,26 +404,6 @@ using dim3 = sycl::range<1>;
 #endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      device defined values
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       32
-#define HYPRE_WARP_BITSHIFT   5
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_WARP_SIZE       64
-#define HYPRE_WARP_BITSHIFT   6
-#endif
-
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
-#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
-#define HYPRE_FLT_LARGE       1e30
-#define HYPRE_1D_BLOCK_SIZE   512
-#define HYPRE_MAX_NUM_STREAMS 10
-#define HYPRE_SPGEMM_MAX_NBIN 10
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device info data structures
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -467,7 +472,6 @@ struct hypre_DeviceData
    HYPRE_Int                         struct_comm_recv_buffer_size;
    HYPRE_Int                         struct_comm_send_buffer_size;
    /* device spgemm options */
-   HYPRE_Int                         spgemm_use_vendor;
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_algorithm_binned;
    HYPRE_Int                         spgemm_algorithm_num_bin;
@@ -476,8 +480,9 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
    /* cusparse */
-   HYPRE_Int                         spmv_use_cusparse;
-   HYPRE_Int                         sptrans_use_cusparse;
+   HYPRE_Int                         spmv_use_vendor;
+   HYPRE_Int                         sptrans_use_vendor;
+   HYPRE_Int                         spgemm_use_vendor;
    /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
@@ -498,8 +503,8 @@ struct hypre_DeviceData
 #define hypre_DeviceDataStructCommRecvBufferSize(data)       ((data) -> struct_comm_recv_buffer_size)
 #define hypre_DeviceDataStructCommSendBufferSize(data)       ((data) -> struct_comm_send_buffer_size)
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
-#define hypre_DeviceDataSpMVUseCusparse(data)                ((data) -> spmv_use_cusparse)
-#define hypre_DeviceDataSpTransUseCusparse(data)             ((data) -> sptrans_use_cusparse)
+#define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
+#define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmAlgorithmBinned(data)          ((data) -> spgemm_algorithm_binned)
 #define hypre_DeviceDataSpgemmAlgorithmNumBin(data)          ((data) -> spgemm_algorithm_num_bin)
@@ -1125,7 +1130,7 @@ struct print_functor
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: sycl functions
+ *      sycl functions
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
@@ -1189,7 +1194,7 @@ struct TupleComp3
 #endif // #if defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      WM: end of functions defined here
+ *      end of functions defined here
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 /* device_utils.c */
@@ -1217,20 +1222,6 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int n
 
 template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
-
-HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
-                                HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-
-HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
-                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
-                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
-                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
-HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
-HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);

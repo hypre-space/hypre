@@ -2691,6 +2691,11 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* cusparse */
+   HYPRE_Int               isDoublePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double);
+   HYPRE_Int               isSinglePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
+
+   hypre_assert(isDoublePrecision || isSinglePrecision);
+
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
    /* compute P = -UB\(LB\F)
@@ -6043,7 +6048,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    U_array = u;
 
    /* NSH compute approximate inverse, see par_ilu.c */
-   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, DIVIDE_TOL, mr_max_row_nnz,
+   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, HYPRE_REAL_MIN, mr_max_row_nnz,
                              nsh_max_row_nnz, mr_max_iter, nsh_max_iter, mr_col_version, print_level);
 
    /* set pointers to NSH data */

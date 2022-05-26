@@ -151,7 +151,7 @@ main( hypre_int argc,
    HYPRE_IJMatrix      ij_A = NULL;
    HYPRE_IJVector      ij_b = NULL;
    HYPRE_IJVector      ij_x = NULL;
-   HYPRE_IJVector      *ij_rbm;
+   HYPRE_IJVector      *ij_rbm = NULL;
 
    HYPRE_ParCSRMatrix  parcsr_A = NULL;
    HYPRE_ParVector     b = NULL;
@@ -282,7 +282,7 @@ main( hypre_int argc,
    coarsen_type  = 8;
    mod_rap2      = 1;
    HYPRE_Int spgemm_use_vendor = 0;
-   HYPRE_Int spmv_use_cusparse = 1;
+   HYPRE_Int spmv_use_vendor = 1;
    HYPRE_Int use_curand = 1;
 #if defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    spgemm_use_vendor = 1;
@@ -1222,10 +1222,10 @@ main( hypre_int argc,
          arg_index++;
          spgemm_use_vendor = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-mv_cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-mv_vendor") == 0 )
       {
          arg_index++;
-         spmv_use_cusparse = atoi(argv[arg_index++]);
+         spmv_use_vendor = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_alg") == 0 )
       {
@@ -2365,7 +2365,7 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-   ierr = HYPRE_SetSpMVUseCusparse(spmv_use_cusparse); hypre_assert(ierr == 0);
+   ierr = HYPRE_SetSpMVUseVendor(spmv_use_vendor); hypre_assert(ierr == 0);
    /* use vendor implementation for SpGEMM */
    ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
@@ -4180,8 +4180,11 @@ main( hypre_int argc,
     * Solve the system using PCG
     *-----------------------------------------------------------*/
 
+   /* begin lobpcg */
    if (!lobpcgFlag && (solver_id == 1 || solver_id == 2 || solver_id == 8 ||
-                       solver_id == 12 || solver_id == 14 || solver_id == 43 || solver_id == 71))
+                       solver_id == 12 || solver_id == 14 || solver_id == 31 ||
+                       solver_id == 43 || solver_id == 71))
+      /*end lobpcg */
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -4600,8 +4603,12 @@ main( hypre_int argc,
          HYPRE_MGRSetRelaxType(pcg_precond, 0);
          HYPRE_MGRSetNumRelaxSweeps(pcg_precond, 2);
          /* set interpolation type */
-         HYPRE_MGRSetInterpType(pcg_precond, 2);
+         HYPRE_MGRSetRestrictType(pcg_precond, mgr_restrict_type);
+         HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
          HYPRE_MGRSetNumInterpSweeps(pcg_precond, 2);
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
          /* set print level */
          HYPRE_MGRSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -6797,9 +6804,9 @@ main( hypre_int argc,
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
-
-         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
 
          /* create AMG coarse grid solver */
 
@@ -7269,9 +7276,9 @@ main( hypre_int argc,
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
-
-         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
 
          /* create AMG coarse grid solver */
 
@@ -7641,9 +7648,9 @@ main( hypre_int argc,
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
-
-         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
-         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+         /* set global smoother */
+         HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
 
          /* create AMG coarse grid solver */
 
@@ -8015,9 +8022,9 @@ main( hypre_int argc,
       /* set max iterations */
       HYPRE_MGRSetMaxIter(mgr_solver, max_iter);
       HYPRE_MGRSetTol(mgr_solver, tol);
-
-      HYPRE_MGRSetGlobalsmoothType(mgr_solver, mgr_gsmooth_type);
-      HYPRE_MGRSetMaxGlobalsmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
+      /* set global smoother */
+      HYPRE_MGRSetGlobalSmoothType(mgr_solver, mgr_gsmooth_type);
+      HYPRE_MGRSetMaxGlobalSmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
 
       /* create AMG coarse grid solver */
 
@@ -8243,7 +8250,7 @@ final:
 
    if (test_ij || build_matrix_type == -1)
    {
-      HYPRE_IJMatrixDestroy(ij_A);
+      if (ij_A) { HYPRE_IJMatrixDestroy(ij_A); }
    }
    else
    {
@@ -8257,16 +8264,19 @@ final:
    }
    else
    {
-      HYPRE_IJVectorDestroy(ij_b);
+      if (ij_b) { HYPRE_IJVectorDestroy(ij_b); }
    }
 
-   HYPRE_IJVectorDestroy(ij_x);
+   if (ij_x) { HYPRE_IJVectorDestroy(ij_x); }
 
    if (build_rbm)
    {
-      for (i = 0; i < num_interp_vecs; i++)
+      if (ij_rbm)
       {
-         HYPRE_IJVectorDestroy(ij_rbm[i]);
+         for (i = 0; i < num_interp_vecs; i++)
+         {
+            if (ij_rbm[i]) { HYPRE_IJVectorDestroy(ij_rbm[i]); }
+         }
       }
       hypre_TFree(ij_rbm, HYPRE_MEMORY_HOST);
       hypre_TFree(interp_vecs, HYPRE_MEMORY_HOST);
