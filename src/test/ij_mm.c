@@ -293,7 +293,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
          //cudaProfilerStart();
       }
 
-      parcsr_B = hypre_ParCSRTMatMat(parcsr_A, parcsr_A);
+      parcsr_B = hypre_ParCSRTMatMatKT(parcsr_A, parcsr_A, 0);
 
       if (i == rep - 1)
       {

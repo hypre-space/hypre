@@ -1640,11 +1640,13 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matU_info)));
 
    /* 2. Get working array size */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, nnz_A,
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
+                                                        nnz_A,
                                                         matL_des, A_data, A_i, A_j,
                                                         matL_info, &matL_buffersize));
 
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, nnz_A,
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
+                                                        nnz_A,
                                                         matU_des, A_data, A_i, A_j,
                                                         matU_info, &matU_buffersize));
 
