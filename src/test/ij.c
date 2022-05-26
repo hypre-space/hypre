@@ -2855,7 +2855,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up the interp vector
     *-----------------------------------------------------------*/
-   if ( build_rbm)
+   if (build_rbm)
    {
       char new_file_name[80];
       /* RHS */
@@ -3512,7 +3512,7 @@ main( hypre_int argc,
    hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
    hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle()));
    hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));
-   if (parcsr_M != parcsr_A)
+   if (build_matrix_M == 1)
    {
       hypre_ParCSRMatrixMigrate(parcsr_M, hypre_HandleMemoryLocation(hypre_handle()));
    }
