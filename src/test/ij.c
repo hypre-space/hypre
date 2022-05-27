@@ -288,7 +288,7 @@ main( hypre_int argc,
    spgemm_use_vendor = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
-   HYPRE_Int  spgemm_alg_binned = 0;
+   HYPRE_Int  spgemm_binned = 0;
    HYPRE_Int  spgemm_rowest_mtd = 3;
    HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
@@ -1232,10 +1232,10 @@ main( hypre_int argc,
          arg_index++;
          spgemm_alg  = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-spgemm_alg_binned") == 0 )
+      else if ( strcmp(argv[arg_index], "-spgemm_binned") == 0 )
       {
          arg_index++;
-         spgemm_alg_binned  = atoi(argv[arg_index++]);
+         spgemm_binned  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_rowest") == 0 )
       {
@@ -2369,7 +2369,7 @@ main( hypre_int argc,
    /* use vendor implementation for SpGEMM */
    ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
-   ierr = hypre_SetSpGemmBinned(spgemm_alg_binned); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmBinned(spgemm_binned); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
    if (spgemm_rowest_nsamples > 0) { ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0); }
    if (spgemm_rowest_mult > 0.0) { ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0); }

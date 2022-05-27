@@ -749,7 +749,7 @@ main( hypre_int argc,
    HYPRE_Int           verify       = 0;
    HYPRE_Int           use_vendor = 0;
    HYPRE_Int           spgemm_alg = 1;
-   HYPRE_Int           spgemm_alg_binned = 0;
+   HYPRE_Int           spgemm_binned = 0;
    HYPRE_Int           rowest_mtd = 3;
    HYPRE_Int           rowest_nsamples = -1; /* default */
    HYPRE_Real          rowest_mult = -1.0; /* default */
@@ -901,10 +901,10 @@ main( hypre_int argc,
          arg_index++;
          spgemm_alg = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-spgemm_alg_binned") == 0 )
+      else if ( strcmp(argv[arg_index], "-spgemm_binned") == 0 )
       {
          arg_index++;
-         spgemm_alg_binned  = atoi(argv[arg_index++]);
+         spgemm_binned  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rowest") == 0 )
       {
@@ -1018,7 +1018,7 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);
-   ierr = hypre_SetSpGemmBinned(spgemm_alg_binned);
+   ierr = hypre_SetSpGemmBinned(spgemm_binned);
    hypre_assert(ierr == 0);
 
    /*-----------------------------------------------------------
