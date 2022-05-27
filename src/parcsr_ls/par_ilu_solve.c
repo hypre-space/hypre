@@ -1430,7 +1430,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
          /* solve L^{-1} */
          if (nLU > 0)
          {
-               /* L solve */
+            /* L solve */
             HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                             nLU, BLU_nnz, &one, matL_des,
                                                             BLU_data, BLU_i, BLU_j, matBL_info,
