@@ -148,7 +148,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, exact_rownnz, false);  /* 4096,  512 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(10,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 32,
-                                             HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, exact_rownnz, true);   /* 8192, 1024 */
+                                             HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, exact_rownnz,  true);   /* 8192, 1024 */
 #elif defined(HYPRE_USING_HIP)
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, exact_rownnz, true);   /* 4096,  512 */
