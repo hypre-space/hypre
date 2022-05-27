@@ -121,7 +121,7 @@ using dim3 = sycl::range<1>;
 #include <oneapi/mkl/blas.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
-#include <oneapi/mkl/rng.hpp>
+#include "oneapi/mkl/rng/device.hpp"
 #endif
 #endif // defined(HYPRE_USING_SYCL)
 
@@ -1336,6 +1336,9 @@ template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByT
 template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
+                                    char *work);
+
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1347,9 +1350,6 @@ HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
-
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
-                                    char *work);
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
