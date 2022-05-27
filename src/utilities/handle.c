@@ -61,10 +61,10 @@ hypre_SetSpGemmAlgorithm( HYPRE_Int value )
 }
 
 HYPRE_Int
-hypre_SetSpGemmAlgorithmBinned( HYPRE_Int value )
+hypre_SetSpGemmBinned( HYPRE_Int value )
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_HandleSpgemmAlgorithmBinned(hypre_handle()) = value;
+   hypre_HandleSpgemmBinned(hypre_handle()) = value;
 #endif
    return hypre_error_flag;
 }

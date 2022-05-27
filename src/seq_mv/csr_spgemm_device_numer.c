@@ -115,7 +115,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
-   HYPRE_Int  num_bins = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
+   HYPRE_Int  num_bins = hypre_HandleSpgemmNumBin(hypre_handle());
    const char s = 8, t = 2;
 #if defined(HYPRE_USING_CUDA)
    const char u = num_bins;
@@ -198,7 +198,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
-   const HYPRE_Int binned = hypre_HandleSpgemmAlgorithmBinned(hypre_handle());
+   const HYPRE_Int binned = hypre_HandleSpgemmBinned(hypre_handle());
 
    if (binned)
    {

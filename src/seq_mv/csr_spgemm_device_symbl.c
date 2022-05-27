@@ -67,7 +67,7 @@ hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
 
    /* Binning (bins 3-10) with d_rc */
    HYPRE_Int h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
-   const char s = 32, t = 3, u = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
+   const char s = 32, t = 3, u = hypre_HandleSpgemmNumBin(hypre_handle());
 
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
 
@@ -121,7 +121,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 
    char *d_rf = hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE);
 
-   const HYPRE_Int binned = hypre_HandleSpgemmAlgorithmBinned(hypre_handle());
+   const HYPRE_Int binned = hypre_HandleSpgemmBinned(hypre_handle());
 
    if (binned)
    {
@@ -303,7 +303,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
          hypre_assert(new_end - d_rind == num_failed_rows);
 
          /* Binning (bins 6-10) with d_rc which is a **rownnz-bound** now */
-         const char t = 6, u = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
+         const char t = 6, u = hypre_HandleSpgemmNumBin(hypre_handle());
 
          hypre_SpGemmCreateBins(num_failed_rows, s, t, u, d_rc, true, d_rind, h_bin_ptr);
 
@@ -351,7 +351,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
-   const HYPRE_Int binned = hypre_HandleSpgemmAlgorithmBinned(hypre_handle());
+   const HYPRE_Int binned = hypre_HandleSpgemmBinned(hypre_handle());
 
    if (binned)
    {

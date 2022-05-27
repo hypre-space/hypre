@@ -10,13 +10,13 @@
 
 #include "csr_spgemm_device.h"
 
-HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
+HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 {
    hypre_int multiProcessorCount = 0;
    /* bins 1, 2, ..., num_bins, are effective; 0 is reserved for empty rows */
    const HYPRE_Int num_bins = 10;
 
-   hypre_HandleSpgemmAlgorithmNumBin(hypre_handle()) = num_bins;
+   hypre_HandleSpgemmNumBin(hypre_handle()) = num_bins;
 
 #if defined(HYPRE_USING_CUDA)
    cudaDeviceGetAttribute(&multiProcessorCount, cudaDevAttrMultiProcessorCount, hypre_HandleDevice(hypre_handle()));
@@ -26,7 +26,7 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks()
    hipDeviceGetAttribute(&multiProcessorCount, hipDeviceAttributeMultiprocessorCount, hypre_HandleDevice(hypre_handle()));
 #endif
 
-   auto max_nblocks = hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle());
+   auto max_nblocks = hypre_HandleSpgemmBlockNumDim(hypre_handle());
 
    for (HYPRE_Int i = 0; i < num_bins + 1; i++)
    {

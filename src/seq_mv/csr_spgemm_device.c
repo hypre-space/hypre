@@ -86,9 +86,9 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       HYPRE_Int *d_rc = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
       const HYPRE_Int alg = hypre_HandleSpgemmAlgorithm(hypre_handle());
 
-      if (hypre_HandleSpgemmAlgorithmNumBin(hypre_handle()) == 0)
+      if (hypre_HandleSpgemmNumBin(hypre_handle()) == 0)
       {
-         hypreDevice_CSRSpGemmBinnedGetMaxNumBlocks();
+         hypreDevice_CSRSpGemmBinnedGetBlockNumDim();
       }
 
       if (alg == 1)

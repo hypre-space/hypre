@@ -230,7 +230,7 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
-   HYPRE_Int  num_bins = hypre_HandleSpgemmAlgorithmNumBin(hypre_handle());
+   HYPRE_Int  num_bins = hypre_HandleSpgemmNumBin(hypre_handle());
    HYPRE_Int *d_bin_ptr = hypre_TAlloc(HYPRE_Int, num_bins + 1, HYPRE_MEMORY_DEVICE);
 
    /* assume there are no more than 127 = 2^7-1 bins, which should be enough */

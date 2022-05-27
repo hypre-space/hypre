@@ -355,7 +355,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    dim3 bDim(BDIMX, BDIMY, num_groups_per_block);
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
-   const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[0][BIN],
+   const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmBlockNumDim(hypre_handle())[0][BIN],
                                            (m + bDim.z - 1) / bDim.z );
    dim3 gDim( num_blocks );
    // number of active groups

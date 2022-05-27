@@ -41,14 +41,14 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
 
+   const HYPRE_Int  Nsamples   = 64;
+   const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
-   hypre_DeviceDataSpgemmAlgorithmBinned(data)          = 0;
-   hypre_DeviceDataSpgemmAlgorithmNumBin(data)          = 0;
+   hypre_DeviceDataSpgemmBinned(data)                   = 0;
+   hypre_DeviceDataSpgemmNumBin(data)                   = 0;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
-   const HYPRE_Int Nsamples = 64;
-   const HYPRE_Real sigma = 1.0 / sqrt(Nsamples - 2.0);
-   const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
    hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
    hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
 

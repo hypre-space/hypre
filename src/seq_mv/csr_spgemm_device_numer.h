@@ -461,7 +461,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    dim3 bDim(BDIMX, BDIMY, num_groups_per_block);
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
-   const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmAlgorithmMaxNumBlocks(hypre_handle())[1][BIN],
+   const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmBlockNumDim(hypre_handle())[1][BIN],
                                            (m + bDim.z - 1) / bDim.z );
    dim3 gDim( num_blocks );
    // number of active groups

@@ -1018,7 +1018,7 @@ main( hypre_int argc,
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);
-   ierr = hypre_SetSpGemmAlgorithmBinned(spgemm_alg_binned);
+   ierr = hypre_SetSpGemmBinned(spgemm_alg_binned);
    hypre_assert(ierr == 0);
 
    /*-----------------------------------------------------------

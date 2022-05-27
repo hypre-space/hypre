@@ -530,9 +530,11 @@ struct hypre_DeviceData
    HYPRE_Int                         struct_comm_send_buffer_size;
    /* device spgemm options */
    HYPRE_Int                         spgemm_algorithm;
-   HYPRE_Int                         spgemm_algorithm_binned;
-   HYPRE_Int                         spgemm_algorithm_num_bin;
-   HYPRE_Int                         spgemm_algorithm_max_num_blocks[4][HYPRE_SPGEMM_MAX_NBIN + 1];
+   HYPRE_Int                         spgemm_binned;
+   HYPRE_Int                         spgemm_num_bin;
+   /* for bin i: ([0][i], [2][i]) = (max #block to launch, block dimension) for symbl
+    *            ([1][i], [3][i]) = (max #block to launch, block dimension) for numer */
+   HYPRE_Int                         spgemm_block_num_dim[4][HYPRE_SPGEMM_MAX_NBIN + 1];
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
@@ -563,9 +565,9 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
 #define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
-#define hypre_DeviceDataSpgemmAlgorithmBinned(data)          ((data) -> spgemm_algorithm_binned)
-#define hypre_DeviceDataSpgemmAlgorithmNumBin(data)          ((data) -> spgemm_algorithm_num_bin)
-#define hypre_DeviceDataSpgemmAlgorithmMaxNumBlocks(data)    ((data) -> spgemm_algorithm_max_num_blocks)
+#define hypre_DeviceDataSpgemmBinned(data)                   ((data) -> spgemm_binned)
+#define hypre_DeviceDataSpgemmNumBin(data)                   ((data) -> spgemm_num_bin)
+#define hypre_DeviceDataSpgemmBlockNumDim(data)              ((data) -> spgemm_block_num_dim)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
