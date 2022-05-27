@@ -8,6 +8,9 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+
+
+
 #include <csr_spgemm_device_numer.h>
 
 template HYPRE_Int
@@ -29,13 +32,15 @@ hypre_spgemm_numerical_with_rownnz
   HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
 template HYPRE_Int
-hypre_spgemm_numerical_max_num_blocks<HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_SPGEMM_BASE_GROUP_SIZE>
+hypre_spgemm_numerical_max_num_blocks
+< HYPRE_SPGEMM_NUMER_HASH_SIZE, HYPRE_SPGEMM_BASE_GROUP_SIZE >
 ( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 template HYPRE_Int
-hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>
+hypreDevice_CSRSpGemmNumerPostCopy
+< HYPRE_SPGEMM_BASE_GROUP_SIZE >
 ( HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc,
-  HYPRE_Complex **d_c);
+  HYPRE_Complex **d_c );
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 
