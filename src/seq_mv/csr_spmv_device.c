@@ -286,7 +286,8 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    }
    else if (fill == -1)
    {
-      return hypreDevice_CSRMatrixMatvec < -1 > (nrows, rowid, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      return hypreDevice_CSRMatrixMatvec < -1 > (nrows, rowid, nnz, alpha, d_ia, d_ja, d_a, d_x, beta,
+                                                 d_y);
    }
    else if (fill == 2)
    {
@@ -294,7 +295,8 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    }
    else if (fill == -2)
    {
-      return hypreDevice_CSRMatrixMatvec < -2 > (nrows, rowid, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      return hypreDevice_CSRMatrixMatvec < -2 > (nrows, rowid, nnz, alpha, d_ia, d_ja, d_a, d_x, beta,
+                                                 d_y);
    }
 
    if (trans)

@@ -19,7 +19,8 @@ hypre_spgemm_symbolic_rownnz<10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32, HYPRE_SPGEMM
 ( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash, HYPRE_Int *d_ia,
   HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, bool can_fail, char *d_rf );
 
-template HYPRE_Int hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32>
+template HYPRE_Int
+hypre_spgemm_symbolic_max_num_blocks<HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32>
 ( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */

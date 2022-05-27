@@ -372,7 +372,8 @@ HYPRE_Int hypreDevice_CSRSpGemmRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_
                                                 HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc,
                                                 HYPRE_Int *d_rc, HYPRE_Int *rownnz_exact_ptr);
 
-HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
+HYPRE_Int hypreDevice_CSRSpGemmRownnz(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n, HYPRE_Int nnzA,
+                                      HYPRE_Int *d_ia,
                                       HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int in_rc, HYPRE_Int *d_rc);
 
 HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
@@ -380,24 +381,28 @@ HYPRE_Int hypreDevice_CSRSpGemmNumerWithRownnzUpperbound(HYPRE_Int m, HYPRE_Int 
                                                          HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int exact_rownnz, HYPRE_Int **d_ic_out,
                                                          HYPRE_Int **d_jc_out, HYPRE_Complex **d_c_out, HYPRE_Int *nnzC);
 
-HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int m, char s, char t, char u, HYPRE_Int *d_rc, bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
+HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int m, char s, char t, char u, HYPRE_Int *d_rc,
+                                  bool d_rc_indice_in, HYPRE_Int *d_rc_indice, HYPRE_Int *h_bin_ptr );
 
-template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND> 
+template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
 HYPRE_Int hypre_spgemm_symbolic_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n,
                                         bool need_ghash, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
                                         HYPRE_Int *d_rc, bool can_fail, char *d_rf );
 
 template <HYPRE_Int BIN, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE, bool HAS_RIND>
-HYPRE_Int hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
+HYPRE_Int hypre_spgemm_numerical_with_rownnz( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k,
+                                              HYPRE_Int n, bool need_ghash,
                                               HYPRE_Int exact_rownnz, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                               HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b, HYPRE_Int *d_rc, HYPRE_Int *d_ic,
                                               HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
-HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
+HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int multiProcessorCount,
+                                                HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 template <HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int GROUP_SIZE>
-HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
+HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount,
+                                                 HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim();
 

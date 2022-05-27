@@ -56,11 +56,12 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 
    /* even with exact rownnz, still may need global hash, since shared hash is smaller than symbol */
    hypre_spgemm_numerical_with_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
-      (m, NULL, k, n, true, exact_rownnz, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c);
+   (m, NULL, k, n, true, exact_rownnz, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, d_ic, d_jc, d_c);
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
+      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc,
+                                                                       &d_c);
    }
 
    *d_ic_out = d_ic;
@@ -147,7 +148,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, exact_rownnz, false);  /* 4096,  512 */
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(10,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 32,
-                                              HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, exact_rownnz, true);   /* 8192, 1024 */
+                                             HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, exact_rownnz, true);   /* 8192, 1024 */
 #elif defined(HYPRE_USING_HIP)
    HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_NUMER_HASH_SIZE * 16,
                                               HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, exact_rownnz, true);   /* 4096,  512 */
@@ -155,7 +156,8 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
+      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc,
+                                                                       &d_c);
    }
 
    *d_ic_out = d_ic;
@@ -203,12 +205,12 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    if (binned)
    {
       hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned
-         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
+      (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
    }
    else
    {
       hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin
-         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
+      (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, d_ic_out, d_jc_out, d_c_out, nnzC_out);
    }
 
 #ifdef HYPRE_SPGEMM_TIMING

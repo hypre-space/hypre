@@ -434,8 +434,8 @@ HYPRE_PrintDeviceInfo()
 #endif
 
    hypre_printf("MaxSharedMemoryPerBlock %d, MaxSharedMemoryPerBlockOptin %d\n",
-         hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[0],
-         hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1]);
+                hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[0],
+                hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1]);
 
    return hypre_error_flag;
 }

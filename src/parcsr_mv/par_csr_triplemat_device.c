@@ -881,7 +881,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    hypre_CSRMatrix *Cz;
 
    // local part of Cbar
-   hypre_CSRMatrix *Cbar_local = hypre_CSRMatrixCreate(num_rows, hypre_CSRMatrixNumCols(Cbar), local_nnz_Cbar);
+   hypre_CSRMatrix *Cbar_local = hypre_CSRMatrixCreate(num_rows, hypre_CSRMatrixNumCols(Cbar),
+                                                       local_nnz_Cbar);
    hypre_CSRMatrixI(Cbar_local) = hypre_CSRMatrixI(Cbar);
    hypre_CSRMatrixJ(Cbar_local) = hypre_CSRMatrixJ(Cbar);
    hypre_CSRMatrixData(Cbar_local) = hypre_CSRMatrixData(Cbar);
@@ -915,7 +916,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 #else
       auto off_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0), Cext_bigj)),
-                                        thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0), Cext_bigj)) + Cext_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0),
+                                                                                     Cext_bigj)) + Cext_nnz,
                                         Cext_bigj,
                                         thrust::make_zip_iterator(thrust::make_tuple(work, big_work)),
                                         thrust::not1(pred1) );
@@ -948,7 +950,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 #else
       auto dia_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0), Cext_bigj)),
-                                        thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0), Cext_bigj)) + Cext_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0),
+                                                                                     Cext_bigj)) + Cext_nnz,
                                         Cext_bigj,
                                         thrust::make_zip_iterator(thrust::make_tuple(work, big_work)),
                                         pred1 );
@@ -1001,7 +1004,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       HYPRE_Int *send_map  = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
 
       hypre_CSRMatrix *IE = hypre_CSRMatrixCreate(num_rows, num_rows + num_elemt,
-                                                         num_rows + num_elemt);
+                                                  num_rows + num_elemt);
       hypre_CSRMatrixMemoryLocation(IE) = HYPRE_MEMORY_DEVICE;
 
       HYPRE_Int *ie_ii = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);

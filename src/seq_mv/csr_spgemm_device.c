@@ -94,10 +94,10 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       if (alg == 1)
       {
          hypreDevice_CSRSpGemmRownnz
-            (m, k, n, nnza, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
+         (m, k, n, nnza, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
 
          hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
       }
       else /* if (alg == 3) */
       {
@@ -108,10 +108,10 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          HYPRE_Int rownnz_exact;
 
          hypreDevice_CSRSpGemmRownnzUpperbound
-            (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, &rownnz_exact);
+         (m, k, n, d_ia, d_ja, d_ib, d_jb, 1 /* with input rc */, d_rc, &rownnz_exact);
 
          hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
-            (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, rownnz_exact, &d_ic, &d_jc, &d_c, &nnzC);
+         (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, rownnz_exact, &d_ic, &d_jc, &d_c, &nnzC);
       }
 
       hypre_TFree(d_rc, HYPRE_MEMORY_DEVICE);

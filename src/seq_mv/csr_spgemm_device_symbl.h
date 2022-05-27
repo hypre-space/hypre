@@ -152,12 +152,12 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int           istart_a,
                const HYPRE_Int k_idx = read_only_load(jb + k);
                /* first try to insert into shared memory hash table */
                HYPRE_Int pos = hypre_spgemm_hash_insert_symbl<SHMEM_HASH_SIZE, HASHTYPE, UNROLL_FACTOR>
-                  (s_HashKeys, k_idx, num_new_insert);
+                               (s_HashKeys, k_idx, num_new_insert);
 
                if (HAS_GHASH && -1 == pos)
                {
                   pos = hypre_spgemm_hash_insert_symbl<HASHTYPE>
-                     (g_HashSize, g_HashKeys, k_idx, num_new_insert);
+                        (g_HashSize, g_HashKeys, k_idx, num_new_insert);
                }
                /* if failed again, both hash tables must have been full
                   (hash table size estimation was too small).
@@ -275,12 +275,12 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
       if (iend_a == istart_a + 1)
       {
          jsum = hypre_spgemm_compute_row_symbl<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, true, UNROLL_FACTOR>
-            (istart_a, iend_a, ja, ib, jb, group_s_HashKeys, ghash_size, jg + istart_g, failed);
+                (istart_a, iend_a, ja, ib, jb, group_s_HashKeys, ghash_size, jg + istart_g, failed);
       }
       else
       {
          jsum = hypre_spgemm_compute_row_symbl<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, false, UNROLL_FACTOR>
-            (istart_a, iend_a, ja, ib, jb, group_s_HashKeys, ghash_size, jg + istart_g, failed);
+                (istart_a, iend_a, ja, ib, jb, group_s_HashKeys, ghash_size, jg + istart_g, failed);
       }
 
 #if defined(HYPRE_DEBUG)
@@ -309,7 +309,8 @@ hypre_spgemm_symbolic( const HYPRE_Int               M, /* HYPRE_Int K, HYPRE_In
          }
          else
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed, s_HashKeys);
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed,
+                                                                                          s_HashKeys);
          }
       }
 
@@ -382,10 +383,11 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_SPGEMM_PRINT("%s[%d], BIN[%d]: m %d k %d n %d, HASH %c, SHMEM_HASH_SIZE %d, GROUP_SIZE %d, "
-                 "can_fail %d, need_ghash %d, ghash %p size %d\n",
-                 __FILE__, __LINE__, BIN, m, k, n,
-                 HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, can_fail, need_ghash, d_ghash_i, ghash_size);
-   HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y, bDim.z);
+                      "can_fail %d, need_ghash %d, ghash %p size %d\n",
+                      __FILE__, __LINE__, BIN, m, k, n,
+                      HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, can_fail, need_ghash, d_ghash_i, ghash_size);
+   HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y,
+                      bDim.z);
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
@@ -462,20 +464,20 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+                       hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, false>,
-         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+                       hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, false>,
+                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, true>,
-         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+                       hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, true>,
+                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, false>,
-         cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+                       hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, false>,
+                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
    /*
    HYPRE_CUDA_CALL( cudaFuncSetAttribute(
@@ -487,16 +489,16 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 
 #if defined(HYPRE_USING_CUDA)
    cudaOccupancyMaxActiveBlocksPerMultiprocessor(
-         &numBlocksPerSm,
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-         block_size, dynamic_shmem_size);
+      &numBlocksPerSm,
+      hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+      block_size, dynamic_shmem_size);
 #endif
 
 #if defined(HYPRE_USING_HIP)
    hipOccupancyMaxActiveBlocksPerMultiprocessor(
-         &numBlocksPerSm,
-         hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-         block_size, dynamic_shmem_size);
+      &numBlocksPerSm,
+      hypre_spgemm_symbolic<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+      block_size, dynamic_shmem_size);
 #endif
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;

@@ -595,7 +595,8 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
                                                           hypre_ParCSRMatrixNumRows(parcsr_A),
                                                           0);
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_D));
-   hypre_ParCSRMatrixDiag(parcsr_D) = hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_ParCSRMatrixDiag(parcsr_A), 0);
+   hypre_ParCSRMatrixDiag(parcsr_D) = hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_ParCSRMatrixDiag(
+                                                                                   parcsr_A), 0);
 
    // Diag Scale on host
    if (verify)
