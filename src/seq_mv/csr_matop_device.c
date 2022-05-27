@@ -753,27 +753,38 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    reduced_col_nnz     = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: better way to get around lack of constant iterator in DPL? */
-   HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
-   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                                     A_j_sorted,
-                                     A_j_sorted + nnz_A,
-                                     ones,
-                                     reduced_col_indices,
-                                     reduced_col_nnz);
-   hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
+
+   /* WM: onedpl reduce_by_segment currently does not accept zero length input */
+   /* WM: todo - is this really the right way to guard against this? */
+   if (nnz_A > 0)
+   {
+      /* WM: better way to get around lack of constant iterator in DPL? */
+      HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
+      HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
+      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                        A_j_sorted,
+                                        A_j_sorted + nnz_A,
+                                        ones,
+                                        reduced_col_indices,
+                                        reduced_col_nnz);
+      hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
+      hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
+      num_reduced_col_indices = new_end.first - reduced_col_indices;
+   }
+   else
+   {
+      num_reduced_col_indices = 0;
+   }
 #else
    thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
       HYPRE_THRUST_CALL(reduce_by_key, A_j_sorted, A_j_sorted + nnz_A,
                         thrust::make_constant_iterator(1),
                         reduced_col_indices,
                         reduced_col_nnz);
+   hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
+   num_reduced_col_indices = new_end.first - reduced_col_indices;
 #endif
 
-   hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
-
-   num_reduced_col_indices = new_end.first - reduced_col_indices;
 
    hypre_Memset(colnnz, 0, ncols_A * sizeof(HYPRE_Real), HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)

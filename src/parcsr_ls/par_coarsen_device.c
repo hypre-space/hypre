@@ -203,7 +203,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
       HYPRE_Int *new_end = hypreSycl_remove_if( graph_diag,
                                                 graph_diag + graph_diag_size,
                                                 diag_iwork,
-                           [] (const auto & x) {return x;} );
+      [] (const auto & x) {return x;} );
 #else
       HYPRE_THRUST_CALL( gather,
                          graph_diag,
@@ -381,6 +381,11 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    /* communicate for measure_offd */
 #if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     measure_diag,
+                     real_send_buf );
 #else
    HYPRE_THRUST_CALL(gather,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -403,14 +408,19 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    /* graph_diag consists points with CF_marker_diag == 0 */
 #if defined(HYPRE_USING_SYCL)
+   oneapi:dpl::counting_iterator<HYPRE_Int> count(0);
+   new_end = hypreSycl_remove_copy_if( count,
+                                       count + num_rows_diag,
+                                       CF_marker_diag,
+                                       graph_diag,
+                                       [] (const auto & x) {return x;} );
 #else
-   new_end =
-      HYPRE_THRUST_CALL(remove_copy_if,
-                        thrust::make_counting_iterator(0),
-                        thrust::make_counting_iterator(num_rows_diag),
-                        CF_marker_diag,
-                        graph_diag,
-                        thrust::identity<HYPRE_Int>());
+   new_end = HYPRE_THRUST_CALL( remove_copy_if,
+                                thrust::make_counting_iterator(0),
+                                thrust::make_counting_iterator(num_rows_diag),
+                                CF_marker_diag,
+                                graph_diag,
+                                thrust::identity<HYPRE_Int>());
 #endif
 
    *graph_diag_size = new_end - graph_diag;
@@ -604,6 +614,11 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 
    /* communicate for measure_offd */
 #if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     measure_diag,
+                     real_send_buf );
 #else
    HYPRE_THRUST_CALL(gather,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),

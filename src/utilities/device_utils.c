@@ -1028,7 +1028,7 @@ hypreGPUKernel_ScatterAdd(
 #if defined(HYPRE_USING_SYCL)
    sycl::nd_item<1>& item,
 #endif
-      HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+   HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
@@ -1088,7 +1088,7 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 #if defined(HYPRE_USING_SYCL)
       auto zipped_begin = oneapi::dpl::make_zip_iterator(map2, y);
       HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
-                        [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
+      [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
 
       // WM: todo - ABB: The below code has issues because of name mangling issues,
       //       similar to https://github.com/oneapi-src/oneDPL/pull/166
