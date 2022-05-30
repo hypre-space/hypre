@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -18,7 +18,7 @@ case $1 in
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
 
-   This script runs a number of tests suitable for the syrah cluster.
+   This script runs a number of tests suitable for the lassen cluster.
 
    Example usage: $0 ../src
 
@@ -67,6 +67,12 @@ co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enabl
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
+#CUDA with UM and single precision
+co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-single -rt -mpibind -save ${save}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
+./renametest.sh basic $output_dir/basic-cuda-um-single
+
 # CUDA with UM without MPI [no run]
 #co="--with-cuda --enable-unified-memory --without-MPI --with-gpu-arch=\\'60 70\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -89,7 +95,7 @@ ro="-bench -struct -rt -mpibind -save ${save}"
 
 # OMP 4.5 without UM in debug mode [struct]
 co="--with-device-openmp --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-ro="-struct -rt -mpibind -save ${host}"
+ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
 
@@ -113,12 +119,15 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
 
-################################
-## CUDA 11 build (only) tests ##
-################################
-co="--with-cuda --enable-unified-memory --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+####################################
+## latest CUDA build (only) tests ##
+####################################
+
 module -q load cuda/11
 module list cuda/11 |& grep "None found"
+
+# CUDA with UM with async malloc [no run]
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda11
 

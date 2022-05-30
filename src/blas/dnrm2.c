@@ -17,10 +17,10 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 {
     /* Initialized data */
 
-    static doublereal zero = 0.;
-    static doublereal one = 1.;
-    static doublereal cutlo = 8.232e-11;
-    static doublereal cuthi = 1.304e19;
+     doublereal zero = 0.;
+     doublereal one = 1.;
+     doublereal cutlo = 8.232e-11;
+     doublereal cuthi = 1.304e19;
 
     /* Format strings */
 
@@ -32,9 +32,9 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
     /*doublereal sqrt(doublereal);*/
 
     /* Local variables */
-    static doublereal xmax;
-    static integer next, i__, j, ix;
-    static doublereal hitest, sum;
+     doublereal xmax;
+     integer next, i__, j, ix;
+     doublereal hitest, sum;
 
     /* Parameter adjustments */
     --dx;

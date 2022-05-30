@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -194,8 +194,8 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(size_ * dim, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ParVectorBlockSplitGather<0>, gDim, bDim,
-                         size_, dim, x_data_[0], x_data_[1], x_data_[2], x_data);
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ParVectorBlockSplitGather<0>, gDim, bDim,
+                        size_, dim, x_data_[0], x_data_[1], x_data_[2], x_data);
    }
    else
 #endif
@@ -241,8 +241,8 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(size_ * dim, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ParVectorBlockSplitGather<1>, gDim, bDim,
-                         size_, dim, x_data_[0], x_data_[1], x_data_[2], x_data);
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ParVectorBlockSplitGather<1>, gDim, bDim,
+                        size_, dim, x_data_[0], x_data_[1], x_data_[2], x_data);
    }
    else
 #endif
@@ -456,8 +456,8 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsDevice(hypre_ParCSRMatrix *A)
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH(hypreCUDAKernel_ParCSRMatrixFixZeroRows, gDim, bDim,
-                     nrows, A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_data, num_cols_offd);
+   HYPRE_GPU_LAUNCH(hypreCUDAKernel_ParCSRMatrixFixZeroRows, gDim, bDim,
+                    nrows, A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_data, num_cols_offd);
 
    //hypre_SyncComputeStream(hypre_handle());
 
@@ -569,6 +569,11 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                                   num_sends),
                             cf_marker,
                             int_buf_data );
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+         /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+         hypre_ForceSyncComputeStream(hypre_handle());
+#endif
       }
       else
 #endif
@@ -787,8 +792,8 @@ HYPRE_Int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, HYPRE_Real d)
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_ParCSRMatrixSetDiagRows, gDim, bDim,
-                         num_rows, A_diag_I, A_diag_J, A_diag_data, A_offd_I, num_cols_offd, d);
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_ParCSRMatrixSetDiagRows, gDim, bDim,
+                        num_rows, A_diag_I, A_diag_J, A_diag_data, A_offd_I, num_cols_offd, d);
    }
    else
 #endif
@@ -1614,23 +1619,19 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_THRUST_CALL( transform,
-                               G_diag_I,
-                               G_diag_I + G_diag_nrows + 1,
-                               Pi_diag_I,
-                               dim * _1 );
+            hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, Pi_diag_I, dim );
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nnz, "thread", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
-                               G_diag_nnz, dim, G_diag_J, Pi_diag_J );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
+                              G_diag_nnz, dim, G_diag_J, Pi_diag_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
-                               G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, Gz_data,
-                               Pi_diag_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
+                              G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, Gz_data,
+                              Pi_diag_data );
          }
          else
 #endif
@@ -1686,24 +1687,20 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          {
             if (G_offd_ncols)
             {
-               HYPRE_THRUST_CALL( transform,
-                                  G_offd_I,
-                                  G_offd_I + G_offd_nrows + 1,
-                                  Pi_offd_I,
-                                  dim * _1 );
+               hypreDevice_IntScalen( G_offd_I, G_offd_nrows + 1, Pi_offd_I, dim );
             }
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nnz, "thread", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
-                               G_offd_nnz, dim, G_offd_J, Pi_offd_J );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
+                              G_offd_nnz, dim, G_offd_J, Pi_offd_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
-                               G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
-                               Pi_offd_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy2, gDim, bDim,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
+                              Pi_offd_data );
          }
          else
 #endif
@@ -1944,9 +1941,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, Gz_data,
-                               Pix_diag_data, Piy_diag_data, Piz_diag_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                              G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, Gz_data,
+                              Pix_diag_data, Piy_diag_data, Piz_diag_data );
          }
          else
 #endif
@@ -2010,9 +2007,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, NULL,
-                               Pix_diag_data, Piy_diag_data, NULL );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                              G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, NULL,
+                              Pix_diag_data, Piy_diag_data, NULL );
          }
          else
 #endif
@@ -2068,9 +2065,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, NULL, NULL,
-                               Pix_diag_data, NULL, NULL );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                              G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, NULL, NULL,
+                              Pix_diag_data, NULL, NULL );
          }
          else
 #endif
@@ -2145,9 +2142,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
-                               Pix_offd_data, Piy_offd_data, Piz_offd_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
+                              Pix_offd_data, Piy_offd_data, Piz_offd_data );
          }
          else
 #endif
@@ -2227,9 +2224,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, NULL,
-                               Pix_offd_data, Piy_offd_data, NULL );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, NULL,
+                              Pix_offd_data, Piy_offd_data, NULL );
          }
          else
 #endif
@@ -2299,9 +2296,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
-                               G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, NULL, NULL,
-                               Pix_offd_data, NULL, NULL );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePixyz_copy, gDim, bDim,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, NULL, NULL,
+                              Pix_offd_data, NULL, NULL );
          }
          else
 #endif
@@ -2492,23 +2489,19 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_THRUST_CALL( transform,
-                               G_diag_I,
-                               G_diag_I + G_diag_nrows + 1,
-                               GPi_diag_I,
-                               dim * _1 );
+            hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, GPi_diag_I, dim );
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nnz, "thread", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
-                               G_diag_nnz, dim, G_diag_J, GPi_diag_J );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
+                              G_diag_nnz, dim, G_diag_J, GPi_diag_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputeGPi_copy2, gDim, bDim,
-                               G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, Gz_data,
-                               GPi_diag_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputeGPi_copy2, gDim, bDim,
+                              G_diag_nrows, dim, G_diag_I, G_diag_data, Gx_data, Gy_data, Gz_data,
+                              GPi_diag_data );
          }
          else
 #endif
@@ -2565,24 +2558,20 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
          {
             if (G_offd_ncols)
             {
-               HYPRE_THRUST_CALL( transform,
-                                  G_offd_I,
-                                  G_offd_I + G_offd_nrows + 1,
-                                  GPi_offd_I,
-                                  dim * _1 );
+               hypreDevice_IntScalen( G_offd_I, G_offd_nrows + 1, GPi_offd_I, dim );
             }
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nnz, "thread", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
-                               G_offd_nnz, dim, G_offd_J, GPi_offd_J );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputePi_copy1, gDim, bDim,
+                              G_offd_nnz, dim, G_offd_J, GPi_offd_J );
 
             gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
 
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSComputeGPi_copy2, gDim, bDim,
-                               G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
-                               GPi_offd_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSComputeGPi_copy2, gDim, bDim,
+                              G_offd_nrows, dim, G_offd_I, G_offd_data, Gx_data, Gy_data, Gz_data,
+                              GPi_offd_data );
          }
          else
 #endif
@@ -2815,8 +2804,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          {
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(nv, "warp", bDim);
-            HYPRE_CUDA_LAUNCH( hypreCUDAKernel_FixInterNodes, gDim, bDim,
-                               nv, G0tdI, G0tdA, G0toI, G0toA, interior_nodes_data );
+            HYPRE_GPU_LAUNCH( hypreCUDAKernel_FixInterNodes, gDim, bDim,
+                              nv, G0tdI, G0tdA, G0toI, G0toA, interior_nodes_data );
          }
          else
 #endif
@@ -3374,7 +3363,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          {
             /* Add a discrete divergence term to A before computing  Pi^t A Pi */
             {
-               hypre_ParCSRMatrix *Gt, *GGt, *ApGGt;
+               hypre_ParCSRMatrix *Gt, *GGt = NULL, *ApGGt;
                hypre_ParCSRMatrixTranspose(ams_data -> G, &Gt, 1);
 
                /* scale GGt by h^2 */
@@ -3401,9 +3390,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   {
                      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
                      dim3 gDim = hypre_GetDefaultDeviceGridDimension(Gt_num_rows, "warp", bDim);
-                     HYPRE_CUDA_LAUNCH( hypreCUDAKernel_AMSSetupScaleGGt, gDim, bDim,
-                                        Gt_num_rows, Gt_diag_I, Gt_diag_J, Gt_diag_data, Gt_offd_I, Gt_offd_data,
-                                        Gx_data, Gy_data, Gz_data );
+                     HYPRE_GPU_LAUNCH( hypreCUDAKernel_AMSSetupScaleGGt, gDim, bDim,
+                                       Gt_num_rows, Gt_diag_I, Gt_diag_J, Gt_diag_data, Gt_offd_I, Gt_offd_data,
+                                       Gx_data, Gy_data, Gz_data );
                   }
                   else
 #endif

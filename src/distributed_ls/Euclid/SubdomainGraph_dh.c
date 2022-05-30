@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -164,8 +164,8 @@ hypre_fprintf(stderr, "blocks= %i\n", blocks);
 void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 {
   START_FUNC_DH
-    HYPRE_Int i, j, k; 
-    HYPRE_Real max = 0, min = INT_MAX;
+    HYPRE_Int i, j, k;
+    HYPRE_Real max = 0, min = (HYPRE_Real) INT_MAX;
 
     hypre_fprintf(fp, "\n------------- SubdomainGraph_dhPrintStatsLong -----------\n");
     hypre_fprintf(fp, "colors used     = %i\n", s->colors);
@@ -243,7 +243,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 
   } else {
     /*-----------------------------------------
-     * local n2o_row permutation 
+     * local n2o_row permutation
      *-----------------------------------------*/
     hypre_fprintf(fp, "\nlocal n2o_row permutation:\n");
     hypre_fprintf(fp, "--------------------------\n");
@@ -1427,7 +1427,7 @@ void SubdomainGraph_dhDump(SubdomainGraph_dh s, char *filename)
       hypre_fprintf(fp, "%i ", s->bdry_count[i]);
     }
     hypre_fprintf(fp, "\n");
-     
+
   }
 
   /* write subdomain graph */
@@ -1567,7 +1567,7 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
     tmp = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) tmp[i] = 0;
 
-    /*------------------------------------------ 
+    /*------------------------------------------
      * mark all boundary nodes
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {

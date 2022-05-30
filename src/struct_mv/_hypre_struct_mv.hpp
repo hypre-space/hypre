@@ -11,7 +11,7 @@
 extern "C++" {
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -352,7 +352,7 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif /* #ifndef HYPRE_BOXLOOP_RAJA_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -733,7 +733,7 @@ struct ColumnSums
 #endif /* #ifndef HYPRE_BOXLOOP_KOKKOS_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -810,7 +810,7 @@ extern "C++"
          const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
          const dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
-         HYPRE_CUDA_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
+         HYPRE_GPU_LAUNCH( forall_kernel, gDim, bDim, loop_body, length );
       }
    }
 
@@ -871,7 +871,7 @@ extern "C++"
          hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
          */
 
-         HYPRE_CUDA_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
+         HYPRE_GPU_LAUNCH( reductionforall_kernel, gDim, bDim, length, reducer, loop_body );
       }
    }
 
@@ -1165,7 +1165,7 @@ else                                                            \
 #endif /* #ifndef HYPRE_BOXLOOP_CUDA_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)

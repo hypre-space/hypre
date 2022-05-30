@@ -1,81 +1,81 @@
 # Output file: benchmark_ij.out.1
-PCG Setup wall clock time = 0.259651 seconds
-PCG Solve wall clock time = 0.605893 seconds
+PCG Setup wall clock time = 0.192594 seconds
+PCG Solve wall clock time = 0.513506 seconds
 # Output file: benchmark_ij.out.2
-PCG Setup wall clock time = 0.249620 seconds
-PCG Solve wall clock time = 0.498876 seconds
+PCG Setup wall clock time = 0.197835 seconds
+PCG Solve wall clock time = 0.423320 seconds
 # Output file: benchmark_ij.out.3
-PCG Setup wall clock time = 0.333260 seconds
-PCG Solve wall clock time = 1.167002 seconds
+PCG Setup wall clock time = 0.242082 seconds
+PCG Solve wall clock time = 1.059623 seconds
 # Output file: benchmark_ij.out.4
-PCG Setup wall clock time = 0.380806 seconds
-PCG Solve wall clock time = 0.240735 seconds
+PCG Setup wall clock time = 0.319622 seconds
+PCG Solve wall clock time = 0.202258 seconds
 # Output file: benchmark_ij.out.5
-PCG Setup wall clock time = 0.470697 seconds
-PCG Solve wall clock time = 0.212337 seconds
+PCG Setup wall clock time = 0.428441 seconds
+PCG Solve wall clock time = 0.193905 seconds
 # Output file: benchmark_ij.out.6
-PCG Setup wall clock time = 0.324167 seconds
-PCG Solve wall clock time = 1.091553 seconds
+PCG Setup wall clock time = 0.242097 seconds
+PCG Solve wall clock time = 1.006556 seconds
 # Output file: benchmark_ij.out.7
-PCG Setup wall clock time = 0.456757 seconds
-PCG Solve wall clock time = 0.267483 seconds
+PCG Setup wall clock time = 0.397352 seconds
+PCG Solve wall clock time = 0.246269 seconds
 # Output file: benchmark_ij.out.8
-PCG Setup wall clock time = 0.238781 seconds
-PCG Solve wall clock time = 0.593405 seconds
+PCG Setup wall clock time = 0.185731 seconds
+PCG Solve wall clock time = 0.508116 seconds
 # Output file: benchmark_ij.out.9
-PCG Setup wall clock time = 0.239434 seconds
-PCG Solve wall clock time = 0.506490 seconds
+PCG Setup wall clock time = 0.177787 seconds
+PCG Solve wall clock time = 0.420296 seconds
 # Output file: benchmark_ij.out.10
-PCG Setup wall clock time = 0.315130 seconds
-PCG Solve wall clock time = 1.194219 seconds
+PCG Setup wall clock time = 0.216028 seconds
+PCG Solve wall clock time = 1.084462 seconds
 # Output file: benchmark_ij.out.11
-PCG Setup wall clock time = 0.355021 seconds
-PCG Solve wall clock time = 0.239230 seconds
+PCG Setup wall clock time = 0.304049 seconds
+PCG Solve wall clock time = 0.202125 seconds
 # Output file: benchmark_ij.out.12
-PCG Setup wall clock time = 0.442632 seconds
-PCG Solve wall clock time = 0.212282 seconds
+PCG Setup wall clock time = 0.387323 seconds
+PCG Solve wall clock time = 0.192510 seconds
 # Output file: benchmark_ij.out.13
-PCG Setup wall clock time = 0.311922 seconds
-PCG Solve wall clock time = 1.098295 seconds
+PCG Setup wall clock time = 0.212567 seconds
+PCG Solve wall clock time = 1.002757 seconds
 # Output file: benchmark_ij.out.14
-PCG Setup wall clock time = 1.449750 seconds
-PCG Solve wall clock time = 0.747511 seconds
+PCG Setup wall clock time = 1.449234 seconds
+PCG Solve wall clock time = 0.758782 seconds
 # Output file: benchmark_ij.out.15
-PCG Setup wall clock time = 1.429561 seconds
-PCG Solve wall clock time = 0.796699 seconds
+PCG Setup wall clock time = 1.424043 seconds
+PCG Solve wall clock time = 0.809160 seconds
 # Output file: benchmark_ij.out.16
-PCG Setup wall clock time = 1.425530 seconds
-PCG Solve wall clock time = 0.748051 seconds
+PCG Setup wall clock time = 1.429622 seconds
+PCG Solve wall clock time = 0.759243 seconds
 # Output file: benchmark_ij.out.17
-PCG Setup wall clock time = 0.444488 seconds
-PCG Solve wall clock time = 0.200816 seconds
+PCG Setup wall clock time = 0.372463 seconds
+PCG Solve wall clock time = 0.194575 seconds
 # Output file: benchmark_ij.out.18
-PCG Setup wall clock time = 0.301099 seconds
-PCG Solve wall clock time = 0.168984 seconds
+PCG Setup wall clock time = 0.246613 seconds
+PCG Solve wall clock time = 0.147918 seconds
 # Output file: benchmark_ij.out.19
-PCG Setup wall clock time = 0.363469 seconds
-PCG Solve wall clock time = 0.439261 seconds
+PCG Setup wall clock time = 0.316965 seconds
+PCG Solve wall clock time = 0.381078 seconds
 # Output file: benchmark_ij.out.20
-PCG Setup wall clock time = 0.242483 seconds
-PCG Solve wall clock time = 0.260942 seconds
+PCG Setup wall clock time = 0.182183 seconds
+PCG Solve wall clock time = 0.225424 seconds
 # Output file: benchmark_ij.out.21
-PCG Setup wall clock time = 0.314690 seconds
-PCG Solve wall clock time = 0.254777 seconds
+PCG Setup wall clock time = 0.251124 seconds
+PCG Solve wall clock time = 0.237412 seconds
 # Output file: benchmark_ij.out.22
-PCG Setup wall clock time = 0.384040 seconds
-PCG Solve wall clock time = 0.197680 seconds
+PCG Setup wall clock time = 0.324677 seconds
+PCG Solve wall clock time = 0.181542 seconds
 # Output file: benchmark_ij.out.23
-PCG Setup wall clock time = 0.372455 seconds
-PCG Solve wall clock time = 0.201243 seconds
+PCG Setup wall clock time = 0.323610 seconds
+PCG Solve wall clock time = 0.175681 seconds
 # Output file: benchmark_ij.out.24
-PCG Setup wall clock time = 0.343731 seconds
-PCG Solve wall clock time = 0.225914 seconds
+PCG Setup wall clock time = 0.295776 seconds
+PCG Solve wall clock time = 0.209049 seconds
 # Output file: benchmark_ij.out.25
-PCG Setup wall clock time = 0.347147 seconds
-PCG Solve wall clock time = 0.224026 seconds
+PCG Setup wall clock time = 0.297761 seconds
+PCG Solve wall clock time = 0.202050 seconds
 # Output file: benchmark_ij.out.26
-PCG Setup wall clock time = 0.399291 seconds
-PCG Solve wall clock time = 0.721765 seconds
+PCG Setup wall clock time = 0.354974 seconds
+PCG Solve wall clock time = 0.720001 seconds
 # Output file: benchmark_ij.out.27
-PCG Setup wall clock time = 0.425114 seconds
-PCG Solve wall clock time = 0.489332 seconds
+PCG Setup wall clock time = 0.380817 seconds
+PCG Solve wall clock time = 0.490908 seconds

@@ -1,0 +1,61 @@
+#!/bin/sh
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# Sequential I/O tests
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.block -r 6 6 6 -solver 18 -print > io.out.0P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.0R
+
+mpirun -np 1 ./sstruct -in sstruct.in.amr.2D -r 8 8 1 -solver 18 -print > io.out.1P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.1R
+
+mpirun -np 1 ./sstruct -in sstruct.in.amr.graphadd -r 3 3 1 -solver 18 -print > io.out.2P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.2R
+
+mpirun -np 1 ./sstruct -in sstruct.in.laps -r 4 4 1 -solver 18 -print > io.out.3P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.3R
+
+mpirun -np 1 ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 18 -print > io.out.4P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.4R
+
+mpirun -np 1 ./sstruct -in sstruct.in.marinak -solver 18 -tol 1e-3 -print > io.out.5P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print -tol 1e-3 > io.out.5R
+
+mpirun -np 1 ./sstruct -in sstruct.in.p7iso -r 2 2 2 -solver 18 -print > io.out.6P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.6R
+
+mpirun -np 1 ./sstruct -in sstruct.in.symm3 -r 4 4 4 -solver 18 -print > io.out.7P
+mpirun -np 1 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.7R
+
+#=============================================================================
+# Parallel I/O tests
+#=============================================================================
+
+mpirun -np 8 ./sstruct -in ../TEST_sstruct/sstruct.in.block -r 3 3 3 -P 2 2 2 -solver 18 -print > io.out.100P
+mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.100R
+
+mpirun -np 4 ./sstruct -in sstruct.in.amr.2D -r 4 4 1 -P 2 2 1 -solver 18 -print > io.out.101P
+mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.101R
+
+mpirun -np 2 ./sstruct -in sstruct.in.amr.graphadd -r 3 3 1 -pooldist 1 -solver 18 -print > io.out.102P
+mpirun -np 2 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.102R
+
+mpirun -np 4 ./sstruct -in sstruct.in.laps -r 2 2 1 -P 2 2 1 -solver 18 -print > io.out.103P
+mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.103R
+
+mpirun -np 4 ./sstruct -in sstruct.in.miller_3blk -r 2 2 1 -P 2 2 1 -solver 18 -print > io.out.104P
+mpirun -np 4 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.104R
+
+mpirun -np 8 ./sstruct -in sstruct.in.marinak -pooldist 1 -solver 18 -tol 1e-3 -print > io.out.105P
+mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print -tol 1e-3 > io.out.105R
+
+mpirun -np 8 ./sstruct -in sstruct.in.p7iso -P 2 2 2 -solver 18 -print > io.out.106P
+mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.106R
+
+mpirun -np 8 ./sstruct -in sstruct.in.symm3 -r 2 2 2 -P 2 2 2 -solver 18 -print > io.out.107P
+mpirun -np 8 ./sstruct -fromfile sstruct.out.A -rhsfromfile sstruct.out.b -x0fromfile sstruct.out.x0 -solver 18 -print > io.out.107R

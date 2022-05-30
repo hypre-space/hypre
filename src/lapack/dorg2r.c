@@ -11,72 +11,72 @@ extern "C" {
 /* Subroutine */ integer dorg2r_(integer *m, integer *n, integer *k, doublereal *
 	a, integer *lda, doublereal *tau, doublereal *work, integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       February 29, 1992   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       February 29, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DORG2R generates an m by n real matrix Q with orthonormal columns,   
-    which is defined as the first n columns of a product of k elementary   
-    reflectors of order m   
+    DORG2R generates an m by n real matrix Q with orthonormal columns,
+    which is defined as the first n columns of a product of k elementary
+    reflectors of order m
 
-          Q  =  H(1) H(2) . . . H(k)   
+          Q  =  H(1) H(2) . . . H(k)
 
-    as returned by DGEQRF.   
+    as returned by DGEQRF.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    M       (input) INTEGER   
-            The number of rows of the matrix Q. M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix Q. M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix Q. M >= N >= 0.   
+    N       (input) INTEGER
+            The number of columns of the matrix Q. M >= N >= 0.
 
-    K       (input) INTEGER   
-            The number of elementary reflectors whose product defines the   
-            matrix Q. N >= K >= 0.   
+    K       (input) INTEGER
+            The number of elementary reflectors whose product defines the
+            matrix Q. N >= K >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the i-th column must contain the vector which   
-            defines the elementary reflector H(i), for i = 1,2,...,k, as   
-            returned by DGEQRF in the first k columns of its array   
-            argument A.   
-            On exit, the m-by-n matrix Q.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the i-th column must contain the vector which
+            defines the elementary reflector H(i), for i = 1,2,...,k, as
+            returned by DGEQRF in the first k columns of its array
+            argument A.
+            On exit, the m-by-n matrix Q.
 
-    LDA     (input) INTEGER   
-            The first dimension of the array A. LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The first dimension of the array A. LDA >= max(1,M).
 
-    TAU     (input) DOUBLE PRECISION array, dimension (K)   
-            TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by DGEQRF.   
+    TAU     (input) DOUBLE PRECISION array, dimension (K)
+            TAU(i) must contain the scalar factor of the elementary
+            reflector H(i), as returned by DGEQRF.
 
-    WORK    (workspace) DOUBLE PRECISION array, dimension (N)   
+    WORK    (workspace) DOUBLE PRECISION array, dimension (N)
 
-    INFO    (output) INTEGER   
-            = 0: successful exit   
-            < 0: if INFO = -i, the i-th argument has an illegal value   
+    INFO    (output) INTEGER
+            = 0: successful exit
+            < 0: if INFO = -i, the i-th argument has an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    
+    integer c__1 = 1;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2;
     doublereal d__1;
     /* Local variables */
-    static integer i__, j, l;
-    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
-	    integer *), dlarf_(const char *, integer *, integer *, doublereal *, 
+    integer i__, j, l;
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *,
+	    integer *), dlarf_(const char *, integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *, doublereal *), xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 

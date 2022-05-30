@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,7 +37,7 @@ void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYP
 
 HYPRE_Int
 hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
-                      HYPRE_Int           *CF_marker_host,
+                      HYPRE_Int           *CF_marker,
                       HYPRE_BigInt        *num_cpts_global,
                       HYPRE_Int            method,
                       hypre_ParCSRMatrix **P_ptr)
@@ -46,7 +46,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Int           num_procs, my_id;
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
 
-   HYPRE_Int          *CF_marker_dev;
    hypre_ParCSRMatrix *A_FF = NULL, *A_FC = NULL, *P = NULL;
    hypre_CSRMatrix    *W_diag = NULL, *W_offd = NULL;
    HYPRE_Int           W_nr_of_rows, P_diag_nnz, nfpoints;
@@ -57,18 +56,14 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   CF_marker_dev = hypre_TAlloc(HYPRE_Int, A_nr_of_rows, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(CF_marker_dev, CF_marker_host, HYPRE_Int, A_nr_of_rows,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
    nfpoints = HYPRE_THRUST_CALL( count,
-                                 CF_marker_dev,
-                                 CF_marker_dev + A_nr_of_rows,
+                                 CF_marker,
+                                 CF_marker + A_nr_of_rows,
                                  -1);
 
    if (method > 0)
    {
-      hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker_host, num_cpts_global, NULL, &A_FC, &A_FF);
+      hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
       diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, HYPRE_MEMORY_DEVICE);
       if (method == 1)
       {
@@ -134,7 +129,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_CSRMatrixNumCols(W_diag),
-                           CF_marker_dev,
+                           CF_marker,
                            hypre_CSRMatrixNumNonzeros(W_diag),
                            hypre_CSRMatrixI(W_diag),
                            hypre_CSRMatrixJ(W_diag),
@@ -144,7 +139,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(W_offd),
                            P_offd_i );
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
    //hypre_NvtxPopRange();
 
    // final P
@@ -210,27 +204,15 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
 HYPRE_Int
 hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
                               hypre_ParVector    *f,
-                              HYPRE_Int          *CF_marker_host,
+                              HYPRE_Int          *CF_marker,
                               HYPRE_Int           relax_points,
                               HYPRE_Real          relax_weight,
                               HYPRE_Real         *l1_norms,
                               hypre_ParVector    *u,
                               hypre_ParVector    *Vtemp )
 {
-   HYPRE_Int *CF_marker_dev = NULL;
-
-   // Copy CF_marker_host to device
-   if (CF_marker_host != NULL)
-   {
-      CF_marker_dev = hypre_TAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(CF_marker_dev, CF_marker_host, HYPRE_Int, hypre_ParCSRMatrixNumRows(A),
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   }
-
-   hypre_BoomerAMGRelax(A, f, CF_marker_dev, 18, relax_points, relax_weight, 1.0, l1_norms, u, Vtemp,
+   hypre_BoomerAMGRelax(A, f, CF_marker, 18, relax_points, relax_weight, 1.0, l1_norms, u, Vtemp,
                         NULL);
-
-   hypre_TFree(CF_marker_dev, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

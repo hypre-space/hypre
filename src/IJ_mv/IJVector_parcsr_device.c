@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -115,7 +115,7 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
       hypre_AuxParVectorMaxStackElmts(aux_vector) = stack_elmts_max_new;
    }
 
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, num_values, SorA);
+   hypreDevice_CharFilln(stack_sora + stack_elmts_current, num_values, SorA);
 
    hypre_TMemcpy(stack_i    + stack_elmts_current, indices, HYPRE_BigInt,  num_values,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -251,9 +251,9 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
-                         vec_start, new_sora,
-                         hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
+                        vec_start, new_sora,
+                        hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
 
       hypre_TFree(new_i,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data, HYPRE_MEMORY_DEVICE);
@@ -274,9 +274,14 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
  * Note: (I1, X1, A1) are not resized to N1 but have size N0
  */
 HYPRE_Int
-hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0,
+hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int       N0,
+                                     HYPRE_BigInt   *I0,
+                                     char           *X0,
                                      HYPRE_Complex  *A0,
-                                     HYPRE_Int *N1, HYPRE_BigInt **I1, char **X1, HYPRE_Complex **A1 )
+                                     HYPRE_Int      *N1,
+                                     HYPRE_BigInt  **I1,
+                                     char          **X1,
+                                     HYPRE_Complex **A1 )
 {
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -291,10 +296,10 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, char  *X0
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
       make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),     /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),        /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),         /* output value begin */
-      char(0),                                                                  /* init */
+      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
+      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),          /* output value begin */
+      char(0),                                                                   /* init */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 

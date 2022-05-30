@@ -1,4 +1,4 @@
-dnl Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+dnl Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 dnl HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 dnl
 dnl SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -63,7 +63,7 @@ AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
-AC_COPYRIGHT([Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+AC_COPYRIGHT([Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 HYPRE Project Developers. See the top-level COPYRIGHT file for details.])
 
 AC_CONFIG_AUX_DIR(config)
@@ -105,7 +105,7 @@ AC_SUBST(HYPRE_BUGS)
 
 AC_SUBST(HYPRE_SRCDIR)
 
-AC_CHECK_FILE([$HYPRE_SRCDIR/../.git],
+AS_IF([test -d "$HYPRE_SRCDIR/../.git"],
   [
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
@@ -173,9 +173,10 @@ hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
-hypre_using_cublas=no
+hypre_using_cublas=yes
 hypre_using_curand=yes
 hypre_using_device_pool=no
+hypre_using_device_malloc_async=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -442,15 +443,26 @@ AS_HELP_STRING([--enable-device-memory-pool],
 [hypre_using_device_pool=no]
 )
 
+AC_ARG_ENABLE(device-malloc-async,
+AS_HELP_STRING([--enable-device-malloc-async],
+               [Use device async malloc (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_device_malloc_async=yes ;;
+    no)  hypre_using_device_malloc_async=no ;;
+    *)   hypre_using_device_malloc_async=no ;;
+ esac],
+[hypre_using_device_malloc_async=no]
+)
+
 AC_ARG_ENABLE(cublas,
 AS_HELP_STRING([--enable-cublas],
-               [Use cuBLAS (default is NO).]),
+               [Use cuBLAS (default is YES).]),
 [case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=yes ;;
  esac],
-[hypre_using_cublas=no]
+[hypre_using_cublas=yes]
 )
 
 AC_ARG_ENABLE(curand,
@@ -2263,6 +2275,11 @@ then
       AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
    fi
 
+   if test "$hypre_using_device_malloc_async" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_DEVICE_MALLOC_ASYNC, 1, [Define to 1 if using device async malloc])
+   fi
+
    if test "x$hypre_using_cuda_streams" = "xyes"
    then
       AC_DEFINE([HYPRE_USING_CUDA_STREAMS], 1, [Define to 1 if using streams])
@@ -2311,7 +2328,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall
         dnl plus flags for debugging symbols
         AS_IF([test x"$hypre_using_debug" == x"yes"],
-              [HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"],
+              [HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"],
               [HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"],)
 
 

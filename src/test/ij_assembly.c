@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -940,7 +940,7 @@ test_SetSet(MPI_Comm             comm,
    else
    {
       hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
-      hypreDevice_Scalen(new_coefs, num_nonzeros, 2.0);
+      hypreDevice_ComplexScalen(new_coefs, num_nonzeros, new_coefs, 2.0);
    }
 #endif
 
@@ -1067,7 +1067,7 @@ test_AddSet(MPI_Comm             comm,
    else
    {
       hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
-      hypreDevice_Scalen(new_coefs, num_nonzeros, 2.0);
+      hypreDevice_ComplexScalen(new_coefs, num_nonzeros, new_coefs, 2.0);
    }
 #endif
 

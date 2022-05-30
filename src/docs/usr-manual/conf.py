@@ -57,7 +57,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'hypre'
-copyright = u'1998-2019 Lawrence Livermore National Security, LLC and other HYPRE Project Developers. See the top-level COPYRIGHT file for details.'
+copyright = u'1998 Lawrence Livermore National Security, LLC and other HYPRE Project Developers. See the top-level COPYRIGHT file for details.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

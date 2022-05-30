@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -791,6 +791,14 @@ HYPRE_SStructMatrixPrint(const char          *filename,
                          HYPRE_SStructMatrix  matrix,
                          HYPRE_Int            all);
 
+/**
+ * Read the matrix from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixRead( MPI_Comm              comm,
+                         const char           *filename,
+                         HYPRE_SStructMatrix  *matrix_ptr );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -1048,6 +1056,14 @@ HYPRE_SStructVectorPrint(const char          *filename,
                          HYPRE_SStructVector  vector,
                          HYPRE_Int            all);
 
+/**
+ * Read the vector from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorRead( MPI_Comm             comm,
+                         const char          *filename,
+                         HYPRE_SStructVector *vector_ptr );
+
 /**@}*/
 /**@}*/
 
@@ -1059,4 +1075,3 @@ HYPRE_SStructVectorPrint(const char          *filename,
 #endif
 
 #endif
-

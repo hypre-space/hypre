@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -329,6 +329,10 @@ if (HYPRE_WITH_SYCL)
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
+
+  if (HYPRE_ENABLE_CUDA_STREAMS)
+    set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
+  endif (HYPRE_ENABLE_CUDA_STREAMS)
 
 endif (HYPRE_WITH_SYCL)
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -11,14 +11,14 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the lassen cluster ****
+   **** Only run this script on the redwood cluster ****
 
    $0 [-h|-help] {src_dir}
 
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
 
-   This script runs a number of tests suitable for the syrah cluster.
+   This script runs a number of tests suitable for the redwood cluster.
 
    Example usage: $0 ../src
 
@@ -54,6 +54,11 @@ co="--with-hip --with-MPI-include=/opt/cray/pe/cray-mvapich2_nogpu/2.3.5/infinib
 ro="-bench -struct -rt -save ${save} -D MV2_USE_CUDA=1"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-hip-nonum
+
+#HIP with UM and single precision [no run]
+co="--with-hip --enable-unified-memory --enable-single --enable-debug --with-MPI-include=/opt/cray/pe/cray-mvapich2_nogpu/2.3.5/infiniband/cray/10.0/include --with-MPI-lib-dirs=/opt/cray/pe/cray-mvapich2_nogpu/2.3.5/infiniband/cray/10.0/lib --with-MPI-libs=mpi --with-gpu-arch=\\'gfx906,gfx908\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-hip-um-single
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

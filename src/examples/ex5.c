@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -75,8 +75,8 @@ int main (int argc, char *argv[])
    /* Print GPU info */
    /* HYPRE_PrintDeviceInfo(); */
 #if defined(HYPRE_USING_GPU)
-   /* use cuSPARSE for SpGEMM */
-   HYPRE_SetSpGemmUseCusparse(0);
+   /* use vendor implementation for SpGEMM */
+   HYPRE_SetSpGemmUseVendor(0);
 #endif
 
    /* Default problem parameters */

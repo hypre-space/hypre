@@ -1,4 +1,4 @@
-!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 !     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 !
 !     SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -84,7 +84,7 @@
       call HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE, ierr)
       call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)
 
-      call HYPRE_SetSpGemmUseCusparse(0, ierr)
+      call HYPRE_SetSpGemmUseVendor(0, ierr)
 
 !   Call omp target after HYPRE_Init()
 

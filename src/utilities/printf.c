@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -227,6 +227,33 @@ hypre_sscanf( char *s, const char *format, ...)
    return ierr;
 }
 
+HYPRE_Int
+hypre_ParPrintf(MPI_Comm comm, const char *format, ...)
+{
+   HYPRE_Int my_id;
+   HYPRE_Int ierr = hypre_MPI_Comm_rank(comm, &my_id);
+
+   if (ierr)
+   {
+      return ierr;
+   }
+
+   if (!my_id)
+   {
+      va_list ap;
+      char   *newformat;
+
+      va_start(ap, format);
+      new_format(format, &newformat);
+      ierr = vprintf(newformat, ap);
+      free_format(newformat);
+      va_end(ap);
+
+      fflush(stdout);
+   }
+
+   return ierr;
+}
 // #else
 //
 // /* this is used only to eliminate compiler warnings */

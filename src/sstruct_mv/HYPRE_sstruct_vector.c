@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -784,6 +784,10 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructVectorPrint
+ *
+ * This function prints a SStructVector to file. For the assumptions used
+ * here, see HYPRE_SStructMatrixPrint.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -791,17 +795,120 @@ HYPRE_SStructVectorPrint( const char          *filename,
                           HYPRE_SStructVector  vector,
                           HYPRE_Int            all )
 {
-   HYPRE_Int  nparts = hypre_SStructVectorNParts(vector);
-   HYPRE_Int  part;
-   char new_filename[255];
+   /* Vector variables */
+   MPI_Comm              comm = hypre_SStructVectorComm(vector);
+   HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
+   hypre_SStructGrid    *grid = hypre_SStructVectorGrid(vector);
 
+   /* Local variables */
+   hypre_SStructPVector *pvector;
+   hypre_StructVector   *svector;
+
+   FILE                 *file;
+   HYPRE_Int             myid;
+   HYPRE_Int             part, var, nvars;
+   char                  new_filename[255];
+
+   /* Print auxiliary data */
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_printf("Error: can't open output file %s\n", new_filename);
+      hypre_error_in_arg(1);
+
+      return hypre_error_flag;
+   }
+
+   hypre_fprintf(file, "SStructVector\n");
+   hypre_SStructGridPrint(file, grid);
+
+   /* Print (part, var) vectors */
    for (part = 0; part < nparts; part++)
    {
-      hypre_sprintf(new_filename, "%s.%02d", filename, part);
-      hypre_SStructPVectorPrint(new_filename,
-                                hypre_SStructVectorPVector(vector, part),
-                                all);
+      pvector = hypre_SStructVectorPVector(vector, part);
+      nvars = hypre_SStructPVectorNVars(pvector);
+      for (var = 0; var < nvars; var++)
+      {
+         svector = hypre_SStructPVectorSVector(pvector, var);
+
+         hypre_fprintf(file, "\nData - (Part %d, Var %d):\n", part, var);
+         hypre_StructVectorPrintData(file, svector, all);
+      }
    }
+
+   fclose(file);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructVectorRead
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorRead( MPI_Comm             comm,
+                         const char          *filename,
+                         HYPRE_SStructVector *vector_ptr )
+{
+   /* Vector variables */
+   HYPRE_SStructVector    vector;
+   hypre_SStructPVector  *pvector;
+   hypre_StructVector    *svector;
+   hypre_SStructGrid     *grid;
+   HYPRE_Int              nparts;
+   HYPRE_Int              nvars;
+
+   /* Local variables */
+   FILE                  *file;
+   char                   new_filename[255];
+   HYPRE_Int              p, v, part, var;
+   HYPRE_Int              myid;
+
+   /* Read auxiliary data */
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      hypre_printf("Error: can't open input file %s\n", new_filename);
+      hypre_error_in_arg(2);
+
+      return hypre_error_flag;
+   }
+
+   hypre_fscanf(file, "SStructVector\n");
+   hypre_SStructGridRead(comm, file, &grid);
+
+   /* Create and initialize vector */
+   HYPRE_SStructVectorCreate(comm, grid, &vector);
+   HYPRE_SStructVectorInitialize(vector);
+
+   /* Read values from file */
+   nparts = hypre_SStructVectorNParts(vector);
+   for (p = 0; p < nparts; p++)
+   {
+      pvector = hypre_SStructVectorPVector(vector, p);
+      nvars = hypre_SStructPVectorNVars(pvector);
+
+      for (v = 0; v < nvars; v++)
+      {
+         hypre_fscanf(file, "\nData - (Part %d, Var %d):\n", &part, &var);
+
+         pvector = hypre_SStructVectorPVector(vector, part);
+         svector = hypre_SStructPVectorSVector(pvector, var);
+
+         hypre_StructVectorReadData(file, svector);
+      }
+   }
+   fclose(file);
+
+   /* Assemble vector */
+   HYPRE_SStructVectorAssemble(vector);
+
+   /* Decrease ref counters */
+   HYPRE_SStructGridDestroy(grid);
+
+   *vector_ptr = vector;
 
    return hypre_error_flag;
 }

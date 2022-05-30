@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -224,7 +224,7 @@ main( hypre_int argc,
     * Print driver parameters
     *-----------------------------------------------------------*/
 
-   HYPRE_SetSpGemmUseCusparse(0);
+   HYPRE_SetSpGemmUseVendor(0);
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(1);
 

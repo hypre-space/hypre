@@ -22,18 +22,18 @@ integer idamax_(integer *n, doublereal *dx, integer *incx)
     doublereal d__1;
 
     /* Local variables */
-    static doublereal dmax__;
-    static integer i, ix;
+    doublereal dmax__;
+    integer i, ix;
 
 
-/*     finds the index of element having max. absolute value.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 3/93 to return if incx .le. 0.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     finds the index of element having max. absolute value.
+       jack dongarra, linpack, 3/11/78.
+       modified 3/93 to return if incx .le. 0.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #define DX(I) dx[(I)-1]
 
