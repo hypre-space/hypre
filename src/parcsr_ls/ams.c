@@ -409,12 +409,12 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( HYPRE_Int      nrows,
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
    {
-      l1_norm += hypre_cabs(A_diag_data[j]);
+      l1_norm += fabs(A_diag_data[j]);
    }
 
    for (HYPRE_Int j = p2 + lane; j < q2; j += HYPRE_WARP_SIZE)
    {
-      l1_norm += hypre_cabs(A_offd_data[j]);
+      l1_norm += fabs(A_offd_data[j]);
    }
 
    l1_norm = warp_allreduce_sum(l1_norm);

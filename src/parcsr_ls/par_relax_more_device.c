@@ -68,7 +68,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
       }
       else
       {
-         row_sum_i += hypre_cabs(aij);
+         row_sum_i += fabs(aij);
       }
    }
 
@@ -87,7 +87,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
       }
 
       HYPRE_Complex aij = read_only_load(&offd_aa[j]);
-      row_sum_i += hypre_cabs(aij);
+      row_sum_i += fabs(aij);
    }
 
    // Get the row_sum and diagonal value on lane 0
