@@ -408,7 +408,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 
    /* graph_diag consists points with CF_marker_diag == 0 */
 #if defined(HYPRE_USING_SYCL)
-   oneapi:dpl::counting_iterator<HYPRE_Int> count(0);
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
    new_end = hypreSycl_remove_copy_if( count,
                                        count + num_rows_diag,
                                        CF_marker_diag,
