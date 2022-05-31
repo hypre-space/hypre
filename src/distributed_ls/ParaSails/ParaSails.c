@@ -41,8 +41,6 @@ static void bzero(char *a, HYPRE_Int n) {HYPRE_Int i; for (i=0; i<n; i++) {a[i]=
 #endif
 #endif
 
-//#define PARASAILS_DEBUG
-
 /******************************************************************************
  *
  * ParaSails private functions
