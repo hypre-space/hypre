@@ -1051,7 +1051,6 @@ hypreGPUKernel_ScatterAdd(
 HYPRE_Int
 hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work)
 {
-   hypre_printf("WM: debug - inside hypreDevice_GenScatterAdd()\n");
    if (ny <= 0)
    {
       return hypre_error_flag;
@@ -1132,7 +1131,6 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
       }
    }
 
-   hypre_printf("WM: debug - finished hypreDevice_GenScatterAdd()\n");
    return hypre_error_flag;
 }
 
@@ -1314,7 +1312,6 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   hypre_printf("WM: debug - inside hypre_CurandUniform_core()\n");
    static_assert(std::is_same_v<T, float> || std::is_same_v<T, hypre_double>,
                  "oneMKL: rng/uniform: T is not supported");
 
@@ -1329,7 +1326,6 @@ hypre_CurandUniform_core( HYPRE_Int          n,
       urand[idx] = oneapi::mkl::rng::device::generate(distr, engine);
    }).wait();
 
-   hypre_printf("WM: debug - finished hypre_CurandUniform_core()\n");
    return hypre_error_flag;
 }
 #endif /* #if defined(HYPRE_USING_ONEMKLRAND) */
