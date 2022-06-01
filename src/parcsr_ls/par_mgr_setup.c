@@ -26,13 +26,16 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int    num_c_levels, nc, index_i, cflag;
    HYPRE_Int      set_c_points_method;
    HYPRE_Int    debug_flag = 0;
-   //  HYPRE_Int num_threads;
+   HYPRE_Int    block_jacobi_bsize;
+   HYPRE_Int    *blk_size = mgr_data -> blk_size;
+   //  HYPRE_Int  num_threads;
 
    hypre_ParCSRMatrix  *RT = NULL;
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *S = NULL;
    hypre_ParCSRMatrix  *ST = NULL;
    hypre_ParCSRMatrix  *AT = NULL;
+   hypre_ParCSRMatrix  *Wp = NULL;
 
    hypre_IntArray      *dof_func_buff = NULL;
    HYPRE_Int           *dof_func_buff_data = NULL;
@@ -53,6 +56,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int  *interp_type = (mgr_data -> interp_type);
    HYPRE_Int  *restrict_type = (mgr_data -> restrict_type);
+   HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
    HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
    HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
    HYPRE_Int max_elmts = (mgr_data -> P_max_elmts);
@@ -85,6 +89,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParVector    **U_array = (mgr_data -> U_array);
    hypre_ParVector    *residual = (mgr_data -> residual);
    HYPRE_Real    *rel_res_norms = (mgr_data -> rel_res_norms);
+   HYPRE_Real    **frelax_diaginv = (mgr_data -> frelax_diaginv);
+   HYPRE_Real    **level_diaginv = (mgr_data -> level_diaginv);
 
    HYPRE_Solver      default_cg_solver;
    HYPRE_Int (*coarse_grid_solver_setup)(void*, void*, void*, void*) = (HYPRE_Int (*)(void*, void*,
@@ -92,8 +98,9 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int (*coarse_grid_solver_solve)(void*, void*, void*, void*) = (HYPRE_Int (*)(void*, void*,
                                                                                       void*, void*)) (mgr_data -> coarse_grid_solver_solve);
 
-   HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
-   HYPRE_Int    global_smooth_iters = (mgr_data -> global_smooth_iters);
+   HYPRE_Int    *level_smooth_type =  (mgr_data -> level_smooth_type);
+   HYPRE_Int    *level_smooth_iters = (mgr_data -> level_smooth_iters);
+   HYPRE_Solver *level_smoother = (mgr_data -> level_smoother);
 
    HYPRE_Int    reserved_coarse_size = (mgr_data -> reserved_coarse_size);
 
@@ -102,27 +109,31 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
 
    HYPRE_Int use_VcycleSmoother = 0;
+   //   HYPRE_Int use_GSElimSmoother = 0;
+   //   HYPRE_Int use_ComplexSmoother = 0;
    hypre_ParVector     *VcycleRelaxZtemp;
    hypre_ParVector     *VcycleRelaxVtemp;
    hypre_ParAMGData    **FrelaxVcycleData;
    HYPRE_Int *Frelax_method = (mgr_data -> Frelax_method);
    HYPRE_Int *Frelax_num_functions = (mgr_data -> Frelax_num_functions);
 
-   HYPRE_Int *use_non_galerkin_cg = (mgr_data -> use_non_galerkin_cg);
+   HYPRE_Int *Frelax_type = (mgr_data -> Frelax_type);
 
-   //   hypre_ParCSRMatrix *A_ff_inv = (mgr_data -> A_ff_inv);
+   HYPRE_Int *mgr_coarse_grid_method = (mgr_data -> mgr_coarse_grid_method);
 
    HYPRE_Int use_air = 0;
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( memory_location );
    HYPRE_Real truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
-   //  HYPRE_Real wall_time;
+   HYPRE_Real wall_time;
+   //   HYPRE_Real wall_time_lev;
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
    //  num_threads = hypre_NumThreads();
 
    block_size = (mgr_data -> block_size);
+   block_jacobi_bsize = (mgr_data -> block_jacobi_bsize);
    block_cf_marker = (mgr_data -> block_cf_marker);
    block_num_coarse_indexes = (mgr_data -> block_num_coarse_indexes);
    point_marker_array = (mgr_data -> point_marker_array);
@@ -133,11 +144,14 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int setNonCpointToF = (mgr_data -> set_non_Cpoints_to_F);
    HYPRE_BigInt *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
    HYPRE_BigInt *idx_array = (mgr_data -> idx_array);
-   HYPRE_Int lvl_to_keep_cpoints = (mgr_data -> lvl_to_keep_cpoints);
+   HYPRE_Int lvl_to_keep_cpoints = (mgr_data -> lvl_to_keep_cpoints) > (mgr_data ->
+                                                                        max_num_coarse_levels) ? (mgr_data -> max_num_coarse_levels) : (mgr_data -> lvl_to_keep_cpoints);
 
    HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_BigInt iupper =  hypre_ParCSRMatrixLastRowIndex(A);
+
+   //hypre_ParAMGData    **GSElimData;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -416,6 +430,21 @@ hypre_MGRSetup( void               *mgr_vdata,
       (mgr_data -> FrelaxVcycleData) = NULL;
    }
 
+   /* destroy previously allocated Gaussian Elim. data */
+   if ((mgr_data -> GSElimData))
+   {
+      for (j = 0; j < old_num_coarse_levels; j++)
+      {
+         if ((mgr_data -> GSElimData)[j])
+         {
+            hypre_MGRDestroyGSElimData((mgr_data -> GSElimData)[j]);
+            (mgr_data -> GSElimData)[j] = NULL;
+         }
+      }
+      hypre_TFree((mgr_data -> GSElimData), HYPRE_MEMORY_HOST);
+      (mgr_data -> GSElimData) = NULL;
+   }
+
    /* destroy final coarse grid matrix, if not previously destroyed */
    if ((mgr_data -> RAP))
    {
@@ -442,39 +471,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       mgr_data -> n_block = n;
       mgr_data -> left_size = 0;
    }
-   //wall_time = time_getWallclockSeconds();
-   if (global_smooth_iters > 0)
-   {
-      if (global_smooth_type == 0)
-      {
-         if (set_c_points_method == 0)
-         {
-            hypre_blockRelax_setup(A, block_size, reserved_coarse_size, &(mgr_data -> diaginv));
-         }
-         else
-         {
-            hypre_blockRelax_setup(A, 1, reserved_coarse_size, &(mgr_data -> diaginv));
-         }
-      }
-      else if (global_smooth_type == 8)
-      {
-         HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
-         HYPRE_EuclidSetLevel(mgr_data -> global_smoother, 0);
-         HYPRE_EuclidSetBJ(mgr_data -> global_smoother, 1);
-         HYPRE_EuclidSetup(mgr_data -> global_smoother, A, f, u);
-      }
-      else if (global_smooth_type == 16)
-      {
-         HYPRE_ILUCreate(&(mgr_data -> global_smoother));
-         HYPRE_ILUSetType(mgr_data -> global_smoother, 0);
-         HYPRE_ILUSetLevelOfFill(mgr_data -> global_smoother, 0);
-         HYPRE_ILUSetMaxIter(mgr_data -> global_smoother, global_smooth_iters);
-         HYPRE_ILUSetTol(mgr_data -> global_smoother, 0.0);
-         HYPRE_ILUSetup(mgr_data -> global_smoother, A, f, u);
-      }
-   }
-   //wall_time = time_getWallclockSeconds() - wall_time;
-   //hypre_printf("Proc = %d     Global smoother setup: %f\n", my_id, wall_time);
 
    /* clear old l1_norm data, if created */
    if ((mgr_data -> l1_norms))
@@ -489,6 +485,32 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       hypre_TFree((mgr_data -> l1_norms), HYPRE_MEMORY_HOST);
+   }
+
+   if ((mgr_data -> frelax_diaginv))
+   {
+      for (j = 0; j < (old_num_coarse_levels); j++)
+      {
+         if ((mgr_data -> frelax_diaginv)[j])
+         {
+            hypre_TFree((mgr_data -> frelax_diaginv)[j], HYPRE_MEMORY_HOST);
+            (mgr_data -> frelax_diaginv)[j] = NULL;
+         }
+      }
+      hypre_TFree((mgr_data -> frelax_diaginv), HYPRE_MEMORY_HOST);
+   }
+
+   if ((mgr_data -> level_diaginv))
+   {
+      for (j = 0; j < (old_num_coarse_levels); j++)
+      {
+         if ((mgr_data -> level_diaginv)[j])
+         {
+            hypre_TFree((mgr_data -> level_diaginv)[j], HYPRE_MEMORY_HOST);
+            (mgr_data -> level_diaginv)[j] = NULL;
+         }
+      }
+      hypre_TFree((mgr_data -> level_diaginv), HYPRE_MEMORY_HOST);
    }
 
    /* setup temporary storage */
@@ -517,11 +539,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParVectorDestroy((mgr_data -> residual));
       (mgr_data -> residual) = NULL;
    }
-   if ((mgr_data -> rel_res_norms))
-   {
-      hypre_TFree((mgr_data -> rel_res_norms), HYPRE_MEMORY_HOST);
-      (mgr_data -> rel_res_norms) = NULL;
-   }
+   hypre_TFree((mgr_data -> rel_res_norms), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> blk_size), HYPRE_MEMORY_HOST);
 
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
@@ -571,25 +590,59 @@ hypre_MGRSetup( void               *mgr_vdata,
       CF_marker_array = hypre_CTAlloc(hypre_IntArray*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
 
-   /* Set default for Frelax_method and Frelax_num_functions if not set already */
-   if (Frelax_method == NULL)
-   {
-      Frelax_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < max_num_coarse_levels; i++)
+   /* Set default for Frelax_method if not set already -- Supports deprecated function */
+   /*
+      if (Frelax_method == NULL)
       {
-         Frelax_method[i] = 0;
+         Frelax_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+         for (i = 0; i < max_num_coarse_levels; i++)
+         {
+            Frelax_method[i] = 0;
+         }
+         (mgr_data -> Frelax_method) = Frelax_method;
       }
-      (mgr_data -> Frelax_method) = Frelax_method;
+   */
+   /* Set default for Frelax_type if not set already.
+    * We also consolidate inputs from relax_type and Frelax_method here.
+    * This should be simplified once the other options are removed.
+   */
+   if (Frelax_type == NULL)
+   {
+      Frelax_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+
+      /* Use relax type/ frelax_method data or set default type to use */
+      if (Frelax_method)
+      {
+         for (i = 0; i < max_num_coarse_levels; i++)
+         {
+            Frelax_type[i] = Frelax_method[i] > 0 ? Frelax_method[i] : relax_type;
+         }
+      }
+      else if (relax_type)
+      {
+         for (i = 0; i < max_num_coarse_levels; i++)
+         {
+            Frelax_type[i] = relax_type;
+         }
+      }
+      else /* set default here */
+      {
+         for (i = 0; i < max_num_coarse_levels; i++)
+         {
+            Frelax_type[i] = 0;
+         }
+      }
+      (mgr_data -> Frelax_type) = Frelax_type;
    }
    /* Set default for using non-Galerkin coarse grid */
-   if (use_non_galerkin_cg == NULL)
+   if (mgr_coarse_grid_method == NULL)
    {
-      use_non_galerkin_cg = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         use_non_galerkin_cg[i] = 0;
+         mgr_coarse_grid_method[i] = 0;
       }
-      (mgr_data -> use_non_galerkin_cg) = use_non_galerkin_cg;
+      (mgr_data -> mgr_coarse_grid_method) = mgr_coarse_grid_method;
    }
 
    /*
@@ -618,43 +671,52 @@ hypre_MGRSetup( void               *mgr_vdata,
       restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         (mgr_data -> restrict_type) = 0;
+         restrict_type[i] = 0;
       }
       (mgr_data -> restrict_type) = restrict_type;
    }
+   if (num_relax_sweeps == NULL)
+   {
+      num_relax_sweeps = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      for (i = 0; i < max_num_coarse_levels; i++)
+      {
+         num_relax_sweeps[i] = 1;
+      }
+      (mgr_data -> num_relax_sweeps) = num_relax_sweeps;
+   }
 
-   /* set interp_type, restrict_type, and Frelax_method if we reduce the reserved C-points */
+   /* set interp_type, restrict_type, and Frelax_type if we reduce the reserved C-points */
    reserved_cpoints_eliminated = 0;
    if (lvl_to_keep_cpoints > 0 && reserved_coarse_size > 0)
    {
       HYPRE_Int *level_interp_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
       HYPRE_Int *level_restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-      HYPRE_Int *level_frelax_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      HYPRE_Int *level_frelax_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
       for (i = 0; i < max_num_coarse_levels; i++)
       {
          if (i == lvl_to_keep_cpoints)
          {
             level_interp_type[i] = 2;
             level_restrict_type[i] = 0;
-            level_frelax_method[i] = 99;
+            level_frelax_type[i] = 2; //99;
             reserved_cpoints_eliminated++;
          }
          else
          {
             level_interp_type[i] = interp_type[i - reserved_cpoints_eliminated];
             level_restrict_type[i] = restrict_type[i - reserved_cpoints_eliminated];
-            level_frelax_method[i] = Frelax_method[i - reserved_cpoints_eliminated];
+            level_frelax_type[i] = Frelax_type[i - reserved_cpoints_eliminated];
          }
       }
       hypre_TFree(interp_type, HYPRE_MEMORY_HOST);
       hypre_TFree(restrict_type, HYPRE_MEMORY_HOST);
-      hypre_TFree(Frelax_method, HYPRE_MEMORY_HOST);
+      hypre_TFree(Frelax_type, HYPRE_MEMORY_HOST);
       interp_type = level_interp_type;
       restrict_type = level_restrict_type;
-      Frelax_method = level_frelax_method;
+      Frelax_type = level_frelax_type;
       (mgr_data -> interp_type) = level_interp_type;
       (mgr_data -> restrict_type) = level_restrict_type;
-      (mgr_data -> Frelax_method) = level_frelax_method;
+      (mgr_data -> Frelax_type) = level_frelax_type;
    }
 
    /* set pointers to mgr data */
@@ -760,6 +822,31 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       A_ff_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
+   if (frelax_diaginv == NULL)
+   {
+      frelax_diaginv = hypre_CTAlloc(HYPRE_Real*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   if (level_diaginv == NULL)
+   {
+      level_diaginv = hypre_CTAlloc(HYPRE_Real*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   if (blk_size == NULL)
+   {
+      blk_size = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+
+   if (level_smooth_type == NULL)
+   {
+      level_smooth_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   if (level_smooth_iters == NULL)
+   {
+      level_smooth_iters = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   if (level_smoother == NULL)
+   {
+      level_smoother = hypre_CTAlloc(HYPRE_Solver, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
 
    /* set solution and rhs pointers */
    F_array[0] = f;
@@ -772,6 +859,12 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> U_fine_array) = U_fine_array;
    (mgr_data -> aff_solver) = aff_solver;
    (mgr_data -> A_ff_array) = A_ff_array;
+   (mgr_data -> frelax_diaginv) = frelax_diaginv;
+   (mgr_data -> level_diaginv) = level_diaginv;
+   (mgr_data -> blk_size) = blk_size;
+   (mgr_data -> level_smooth_type) = level_smooth_type;
+   (mgr_data -> level_smooth_iters) = level_smooth_iters;
+   (mgr_data -> level_smoother) = level_smoother;
 
    /* begin coarsening loop */
    num_coarsening_levs = max_num_coarse_levels;
@@ -780,6 +873,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* loop over levels of coarsening */
    for (lev = 0; lev < num_coarsening_levs; lev++)
    {
+      // wall_time_lev = time_getWallclockSeconds();
       /* check if this is the last level */
       last_level = ((lev == num_coarsening_levs - 1));
 
@@ -787,11 +881,44 @@ hypre_MGRSetup( void               *mgr_vdata,
       A_array[lev] = RAP_ptr;
       nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
 
+      wall_time = time_getWallclockSeconds();
+      if (level_smooth_iters[lev] > 0)
+      {
+         HYPRE_Int level_blk_size = lev == 0 ? block_size : block_num_coarse_indexes[lev - 1];
+         if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
+         {
+            hypre_MGRBlockRelaxSetup(A_array[lev], level_blk_size,
+                                     &(mgr_data -> level_diaginv)[lev]);
+         }
+         else if (level_smooth_type[lev] == 8)
+         {
+            HYPRE_EuclidCreate(comm, &(level_smoother[lev]));
+            HYPRE_EuclidSetLevel(level_smoother[lev], 0);
+            HYPRE_EuclidSetBJ(level_smoother[lev], 1);
+            HYPRE_EuclidSetup(level_smoother[lev], A_array[lev], NULL, NULL);
+         }
+         else if (level_smooth_type[lev] == 16)
+         {
+            HYPRE_ILUCreate(&(level_smoother[lev]));
+            HYPRE_ILUSetType(level_smoother[lev], 0);
+            HYPRE_ILUSetLevelOfFill(level_smoother[lev], 0);
+            HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
+            HYPRE_ILUSetTol(level_smoother[lev], 0.0);
+            HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
+         }
+      }
+      wall_time = time_getWallclockSeconds() - wall_time;
+      // if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Global smoother setup: %f\n", lev, my_id, wall_time); }
+
       /* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
-      hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);
+      cflag = last_level || setNonCpointToF;
+      if (!cflag || interp_type[lev] == 3 || interp_type[lev] == 5 || interp_type[lev] == 6 ||
+          interp_type[lev] == 7)
+      {
+         hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);
+      }
 
       /* Coarsen: Build CF_marker array based on rows of A */
-      cflag = ((last_level || setNonCpointToF));
       hypre_MGRCoarsen(S, A_array[lev], level_coarse_size[lev], level_coarse_indexes[lev], debug_flag,
                        &CF_marker_array[lev], cflag);
       CF_marker = hypre_IntArrayData(CF_marker_array[lev]);
@@ -803,7 +930,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       fout = fopen(fname,"w");
       for (i=0; i < nloc; i++)
       {
-        fprintf(fout, "%d %d\n", i, CF_marker_array[lev][i]);
+        fprintf(fout, "%d %d\n", i, CF_marker[i]);
       }
       fclose(fout);
       */
@@ -820,23 +947,70 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Interpolation operator */
       num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 
-      //wall_time = time_getWallclockSeconds();
+      if (mgr_data -> block_jacobi_bsize == 0)
+      {
+         block_jacobi_bsize = (lev == 0 ? block_size : block_num_coarse_indexes[lev - 1]) -
+                              block_num_coarse_indexes[lev];
+      }
+      if (block_jacobi_bsize == 1 && interp_type[lev] == 12)
+      {
+         interp_type[lev] = 2;
+      }
+      //hypre_printf("MyID = %d, Lev = %d, Block jacobi size = %d\n", my_id, lev, block_jacobi_bsize);
+
+      if (interp_type[lev] == 12)
+      {
+         if (mgr_coarse_grid_method[lev] != 0)
+         {
+            wall_time = time_getWallclockSeconds();
+            hypre_MGRBuildBlockJacobiWp(A_array[lev], block_jacobi_bsize, CF_marker, coarse_pnts_global, &Wp);
+            wall_time = time_getWallclockSeconds() - wall_time;
+            //   if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     Build Wp: %f\n", lev, interp_type[lev], my_id, wall_time); }
+         }
+         wall_time = time_getWallclockSeconds();
+         hypre_MGRBuildInterp(A_array[lev], CF_marker, Wp, coarse_pnts_global, 1, dof_func_buff_data,
+                              debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
+         wall_time = time_getWallclockSeconds() - wall_time;
+         //  if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
+      }
+      else
+      {
+         wall_time = time_getWallclockSeconds();
+         hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
+                              debug_flag, trunc_factor, max_elmts, block_jacobi_bsize, &P, interp_type[lev], num_interp_sweeps);
+         wall_time = time_getWallclockSeconds() - wall_time;
+         //  if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
+      }
       /*
-          if (interp_type[lev] == 99)
-          {
-            hypre_MGRBuildInterp(A_array[lev], CF_marker, A_ff_inv, coarse_pnts_global, 1, dof_func_buff_data,
-                                debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
-          }
-          else
-          {
-            hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
-                                debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
-          }
+      char fname[256];
+      sprintf(fname, "P_lev_%d", lev);
+      hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);
       */
-      hypre_MGRBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
-                           debug_flag, trunc_factor, max_elmts, &P, interp_type[lev], num_interp_sweeps);
-      //wall_time = time_getWallclockSeconds() - wall_time;
-      //hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time);
+      /* Use block Jacobi F-relaxation with block Jacobi interpolation */
+      if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
+      {
+         HYPRE_Real *diag_inv = NULL;
+         HYPRE_Int inv_size;
+         hypre_ParCSRMatrixExtractBlockDiag(A_array[lev], block_jacobi_bsize, -1, CF_marker, &inv_size,
+                                            &diag_inv, 1);
+         frelax_diaginv[lev] = diag_inv;
+         blk_size[lev] = block_jacobi_bsize;
+         hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
+
+         F_fine_array[lev + 1] =
+            hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                                  hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                                  hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+         hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+
+         U_fine_array[lev + 1] =
+            hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
+                                  hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
+                                  hypre_ParCSRMatrixRowStarts(A_ff_ptr));
+         hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+
+         A_ff_array[lev] = A_ff_ptr;
+      }
 
       P_array[lev] = P;
 
@@ -902,60 +1076,89 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else
       {
-         //wall_time = time_getWallclockSeconds();
-         hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
-                                debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, &RT,
-                                restrict_type[lev], num_restrict_sweeps);
-         //wall_time = time_getWallclockSeconds() - wall_time;
-         //hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time);
-
-         RT_array[lev] = RT;
-
-         //wall_time = time_getWallclockSeconds();
-         /* Compute RAP for next level */
-         if (use_non_galerkin_cg[lev] != 0)
+         if (mgr_coarse_grid_method[lev] != 0)
          {
             HYPRE_Int block_num_f_points = (lev == 0 ? block_size : block_num_coarse_indexes[lev - 1]) -
                                            block_num_coarse_indexes[lev];
-            hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], P, RT, block_num_f_points,
-                                                  /* ordering */set_c_points_method, /* method (approx. inverse or not) */ 0,
-                                                  max_elmts, /* keep_stencil */ 0, CF_marker, &RAP_ptr);
+            if (block_num_f_points == 1 && restrict_type[lev] == 12)
+            {
+               restrict_type[lev] = 2;
+            }
+            //            if (restrict_type[lev] > 0)
+            {
+               wall_time = time_getWallclockSeconds();
+
+               hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
+                                      debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, block_num_f_points, &RT,
+                                      restrict_type[lev], num_restrict_sweeps);
+               wall_time = time_getWallclockSeconds() - wall_time;
+
+               RT_array[lev] = RT;
+            }
+
+            wall_time = time_getWallclockSeconds();
+            hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], Wp, RT, block_num_f_points,
+                                                  /* ordering */set_c_points_method, /* method (approx. inverse or not) */
+                                                  mgr_coarse_grid_method[lev], max_elmts, CF_marker, &RAP_ptr);
+
+            if (interp_type[lev] == 12)
+            {
+               hypre_ParCSRMatrixDeviceColMapOffd(Wp) = NULL;
+               hypre_ParCSRMatrixColMapOffd(Wp)       = NULL;
+               hypre_ParCSRMatrixDestroy(Wp);
+               Wp = NULL;
+            }
+            wall_time = time_getWallclockSeconds() - wall_time;
+            //  if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %1.8f\n", lev, my_id, wall_time); }
          }
          else
          {
-            //wall_time = time_getWallclockSeconds();
+            wall_time = time_getWallclockSeconds();
+            if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
+            {
+               restrict_type[lev] = 2;
+            }
+            hypre_MGRBuildRestrict(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data,
+                                   debug_flag, trunc_factor, max_elmts, strong_threshold, max_row_sum, block_jacobi_bsize, &RT,
+                                   restrict_type[lev], num_restrict_sweeps);
+            RT_array[lev] = RT;
+
+            wall_time = time_getWallclockSeconds() - wall_time;
+            // if (my_id == 0) { hypre_printf("Lev = %d, restrict type = %d, proc = %d     BuildRestrict: %f\n", lev, restrict_type[lev], my_id, wall_time); }
+
+            wall_time = time_getWallclockSeconds();
             //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
             RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
-            //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, "RAP_device");
             //char fname[256];
             //sprintf(fname, "RAP_%d", lev);
             //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
-            //wall_time = time_getWallclockSeconds() - wall_time;
-            //hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time);
+            wall_time = time_getWallclockSeconds() - wall_time;
+            //  if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     BuildCoarseGrid: %f\n", lev, my_id, wall_time); }
          }
       }
 
-      //wall_time = time_getWallclockSeconds();
-      // truncate the coarse grid
-      if (exec == HYPRE_EXEC_HOST)
+      if (truncate_cg_threshold > 0.0)
       {
-         hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
-      }
+         // truncate the coarse grid
+         if (exec == HYPRE_EXEC_HOST)
+         {
+            hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
+         }
 #if defined(HYPRE_USING_CUDA)
-      else
-      {
-         hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
-      }
+         else
+         {
+            hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
+         }
 #endif
-      //wall_time = time_getWallclockSeconds() - wall_time;
-      //hypre_printf("Lev = %d, proc = %d     Truncate Coarse Grid: %f\n", lev, my_id, wall_time);
+      }
 
-      if (Frelax_method[lev] == 2) // full AMG
+      if (Frelax_type[lev] == 2) // full AMG
       {
          //wall_time = time_getWallclockSeconds();
          // user provided AMG solver
          // only support AMG at the first level
          // TODO: input check to avoid crashing
+         //*** This part needs some refactoring wrt use of fsolver_mode - DOK ***/
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
             if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
@@ -1009,7 +1212,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             }
 #endif
             aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
-            hypre_BoomerAMGSetMaxIter(aff_solver[lev], mgr_data -> num_relax_sweeps);
+            hypre_BoomerAMGSetMaxIter(aff_solver[lev], (mgr_data -> num_relax_sweeps)[lev]);
             hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
             //hypre_BoomerAMGSetStrongThreshold(aff_solver[lev], 0.6);
 #if defined(HYPRE_USING_CUDA)
@@ -1144,23 +1347,35 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* check if Vcycle smoother setup required */
       if ((mgr_data -> max_local_lvls) > 1)
       {
-         if (Frelax_method[lev] == 1)
+         if (Frelax_type[lev] == 1)
          {
             use_VcycleSmoother = 1;
+            //            use_ComplexSmoother = 1;
          }
       }
       else
       {
          /* Only check for vcycle smoother option.
-         * Currently leaves Frelax_method[lev] = 99 (full amg) option as is
+         * Currently leaves Frelax_type[lev] = 2 (full amg) option as is
          */
-         if (Frelax_method[lev] == 1)
+         if (Frelax_type[lev] == 1)
          {
-            Frelax_method[lev] = 0;
+            Frelax_type[lev] = 0;
          }
       }
 
+      if (Frelax_type[lev] == 9 ||
+          Frelax_type[lev] == 9 ||
+          Frelax_type[lev] == 199 )
+      {
+         //         use_GSElimSmoother = 1;
+         //         use_ComplexSmoother = 1;
+      }
+
       /* check if last level */
+      //      wall_time_lev = time_getWallclockSeconds() - wall_time_lev;
+      //      if (my_id == 0) { hypre_printf("Lev = %d, proc = %d     Setup time: %f\n", lev, my_id, wall_time_lev); }
+
       if (last_level) { break; }
    }
 
@@ -1204,91 +1419,118 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 
    /* setup coarse grid solver */
-   //wall_time = time_getWallclockSeconds();
+   //   wall_time = time_getWallclockSeconds();
    coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels],
                             U_array[num_c_levels]);
-   //wall_time = time_getWallclockSeconds() - wall_time;
-   //hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time);
+   //   wall_time = time_getWallclockSeconds() - wall_time;
+   //   if (my_id == 0) { hypre_printf("Proc = %d   Coarse grid setup: %f\n", my_id, wall_time); }
 
    /* Setup smoother for fine grid */
-   if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
-   {
-      l1_norms = hypre_CTAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
-      (mgr_data -> l1_norms) = l1_norms;
-   }
+   /* Always allocate l1_norms data, for now. Avoids looping over frelax_type -- DOK */
+   //   if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
+   //   {
+   l1_norms = hypre_CTAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
+   (mgr_data -> l1_norms) = l1_norms;
+   //   }
 
    for (j = 0; j < num_c_levels; j++)
    {
-      HYPRE_Real *l1_norm_data = NULL;
-      CF_marker = hypre_IntArrayData(CF_marker_array[j]);
+      HYPRE_Int frelax_type = Frelax_type[j];
+      if ((mgr_data -> num_relax_sweeps)[j] > 0)
+      {
+         HYPRE_Real *l1_norm_data = NULL;
+         CF_marker = hypre_IntArrayData(CF_marker_array[j]);
 
-      if (relax_type == 8 || relax_type == 13 || relax_type == 14)
-      {
-         if (relax_order)
+         if (frelax_type == 8 || frelax_type == 13 || frelax_type == 14)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker, &l1_norm_data);
+            if (relax_order)
+            {
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker, &l1_norm_data);
+            }
+            else
+            {
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
+            }
          }
-         else
+         else if (frelax_type == 18)
          {
-            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
+            if (relax_order)
+            {
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker, &l1_norm_data);
+            }
+            else
+            {
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
+            }
          }
-      }
-      else if (relax_type == 18)
-      {
-         if (relax_order)
-         {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker, &l1_norm_data);
-         }
-         else
-         {
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
-         }
-      }
 
-      if (l1_norm_data)
-      {
-         l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-         hypre_VectorData(l1_norms[j]) = l1_norm_data;
-         hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
+         if (l1_norm_data)
+         {
+            l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
+            hypre_VectorData(l1_norms[j]) = l1_norm_data;
+            hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
+         }
       }
    }
 
-   /* Setup Vcycle data for Frelax_method > 0 */
+   /* Setup Vcycle data for Frelax_type == 1 */
    if (use_VcycleSmoother)
    {
-      /* setup temporary storage */
-      VcycleRelaxVtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                               hypre_ParCSRMatrixGlobalNumRows(A),
-                                               hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(VcycleRelaxVtemp);
-      (mgr_data ->VcycleRelaxVtemp) = VcycleRelaxVtemp;
-
-      VcycleRelaxZtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                               hypre_ParCSRMatrixGlobalNumRows(A),
-                                               hypre_ParCSRMatrixRowStarts(A));
-      hypre_ParVectorInitialize(VcycleRelaxZtemp);
-      (mgr_data -> VcycleRelaxZtemp) = VcycleRelaxZtemp;
       /* allocate memory and set pointer to (mgr_data -> FrelaxVcycleData) */
       FrelaxVcycleData = hypre_CTAlloc(hypre_ParAMGData*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
       (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;
-
-      /* loop over levels */
-      for (i = 0; i < (mgr_data->num_coarse_levels); i++)
+      if (use_VcycleSmoother)
       {
-         if (Frelax_method[i] == 1)
-         {
-            FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
-            if (Frelax_num_functions != NULL)
-            {
-               hypre_ParAMGDataNumFunctions(FrelaxVcycleData[i]) = Frelax_num_functions[i];
-            }
-            (FrelaxVcycleData[i] -> Vtemp) = VcycleRelaxVtemp;
-            (FrelaxVcycleData[i] -> Ztemp) = VcycleRelaxZtemp;
+         /* setup temporary storage */
+         VcycleRelaxVtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                                  hypre_ParCSRMatrixGlobalNumRows(A),
+                                                  hypre_ParCSRMatrixRowStarts(A));
+         hypre_ParVectorInitialize(VcycleRelaxVtemp);
+         (mgr_data ->VcycleRelaxVtemp) = VcycleRelaxVtemp;
 
-            // setup variables for the V-cycle in the F-relaxation step //
-            hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
+         VcycleRelaxZtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                                  hypre_ParCSRMatrixGlobalNumRows(A),
+                                                  hypre_ParCSRMatrixRowStarts(A));
+         hypre_ParVectorInitialize(VcycleRelaxZtemp);
+         (mgr_data -> VcycleRelaxZtemp) = VcycleRelaxZtemp;
+
+         /* loop over levels */
+         for (i = 0; i < (mgr_data->num_coarse_levels); i++)
+         {
+            if (Frelax_type[i] == 1)
+            {
+               FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
+               if (Frelax_num_functions != NULL)
+               {
+                  hypre_ParAMGDataNumFunctions(FrelaxVcycleData[i]) = Frelax_num_functions[i];
+               }
+               (FrelaxVcycleData[i] -> Vtemp) = VcycleRelaxVtemp;
+               (FrelaxVcycleData[i] -> Ztemp) = VcycleRelaxZtemp;
+
+               // setup variables for the V-cycle in the F-relaxation step //
+               hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
+            }
          }
       }
+#if 0
+      else if (use_GSElimSmoother)
+      {
+         /* loop over levels */
+         for (i = 0; i < (mgr_data->num_coarse_levels); i++)
+         {
+            if (Frelax_type[i] == 9 || Frelax_type[i] == 99 || Frelax_type[i] == 199)
+            {
+               FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
+               (FrelaxVcycleData[i] -> A_Array) = A_Array;
+               (FrelaxVcycleData[i] -> F_Array) = F_Array;
+               (FrelaxVcycleData[i] -> U_Array) = U_Array;
+
+               // setup variables for the V-cycle in the F-relaxation step //
+               //               hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
+            }
+         }
+      }
+#endif
    }
 
    if ( logging > 1 )

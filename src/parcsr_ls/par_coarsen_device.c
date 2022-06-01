@@ -160,6 +160,11 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                             CF_marker_diag,
                             (HYPRE_Int *) send_buf );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+         /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
+         hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
          comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg,
                                                        HYPRE_MEMORY_DEVICE, (HYPRE_Int *) send_buf,
                                                        HYPRE_MEMORY_DEVICE, CF_marker_offd);
@@ -227,6 +232,11 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    /* Compute global column nnz */
    /* compute local column nnz of the offd part */
    hypre_CSRMatrixColNNzRealDevice(S_offd, measure_offd);
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure measure_offd is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
    /* send local column nnz of the offd part to neighbors */
    comm_handle = hypre_ParCSRCommHandleCreate_v2(2, comm_pkg, HYPRE_MEMORY_DEVICE, measure_offd,
@@ -331,8 +341,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int *new_end;
 
    /* init CF_marker_diag and measure_diag: remove some special nodes */
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
-                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
+                     num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
    HYPRE_THRUST_CALL(gather,
@@ -341,6 +351,11 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      measure_diag,
                      real_send_buf);
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, real_send_buf,
@@ -494,17 +509,17 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
-                      gDim, bDim,
-                      graph_diag_size,
-                      graph_diag,
-                      S_diag_i,
-                      S_diag_j,
-                      S_offd_i,
-                      S_offd_j,
-                      measure_diag,
-                      CF_marker_diag,
-                      CF_marker_offd );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
+                     gDim, bDim,
+                     graph_diag_size,
+                     graph_diag,
+                     S_diag_i,
+                     S_diag_j,
+                     S_offd_i,
+                     S_offd_j,
+                     measure_diag,
+                     CF_marker_diag,
+                     CF_marker_offd );
 
    hypre_ParCSRCommHandle *comm_handle;
 
@@ -515,6 +530,11 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      measure_diag,
                      real_send_buf);
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, real_send_buf,
@@ -531,6 +551,11 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      CF_marker_diag,
                      int_send_buf);
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* RL: make sure int_send_buf is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, int_send_buf,

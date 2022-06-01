@@ -1341,7 +1341,7 @@ main( hypre_int argc,
    HYPRE_Int             arg_index, part, box, var, entry, s, i, j, k;
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_Int spgemm_use_cusparse = 0;
+   HYPRE_Int spgemm_use_vendor = 0;
 #endif
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
@@ -1486,10 +1486,10 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
-      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
-         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
       }
 #endif
       else if ( strcmp(argv[arg_index], "-help") == 0 )
@@ -1511,7 +1511,7 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
+   HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 #endif
 
 

@@ -22,6 +22,10 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] -= hypre_MPI_Wtime();
 #endif
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("GaussElimSetup");
+#endif
+
    /* Par Data Structure variables */
    hypre_ParCSRMatrix *A      = hypre_ParAMGDataAArray(amg_data)[level];
    hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -191,6 +195,10 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
    hypre_ParAMGDataGSSetup(amg_data) = 1;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] += hypre_MPI_Wtime();
 #endif
@@ -203,6 +211,10 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("GaussElimSolve");
 #endif
 
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
@@ -327,6 +339,10 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] += hypre_MPI_Wtime();
 #endif
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
    return hypre_error_flag;
 }
 
@@ -424,7 +440,7 @@ HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real
    dim3 bDim(BLOCK_SIZE, 1, 1);
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(m, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
 
    return hypre_error_flag;
 }

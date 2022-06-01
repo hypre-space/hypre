@@ -109,34 +109,39 @@
    const HYPRE_Int col = read_only_load(&d_ja[p]);                   \
    if (F == 0)                                                       \
    {                                                                 \
-      sum += read_only_load(&d_a[p]) * read_only_load(&d_x[col]);    \
+      const T val = d_a ? read_only_load(&d_a[p]) : 1.0;             \
+      sum += val * read_only_load(&d_x[col]);                        \
    }                                                                 \
    else if (F == -1)                                                 \
    {                                                                 \
       if (col <= grid_group_id)                                      \
       {                                                              \
-         sum += read_only_load(&d_a[p]) * read_only_load(&d_x[col]); \
+         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
    else if (F == 1)                                                  \
    {                                                                 \
       if (col >= grid_group_id)                                      \
       {                                                              \
-         sum += read_only_load(&d_a[p]) * read_only_load(&d_x[col]); \
+         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
    else if (F == -2)                                                 \
    {                                                                 \
       if (col < grid_group_id)                                       \
       {                                                              \
-         sum += read_only_load(&d_a[p]) * read_only_load(&d_x[col]); \
+         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
    else if (F == 2)                                                  \
    {                                                                 \
       if (col > grid_group_id)                                       \
       {                                                              \
-         sum += read_only_load(&d_a[p]) * read_only_load(&d_x[col]); \
+         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
+         sum += val * read_only_load(&d_x[col]);                     \
       }                                                              \
    }                                                                 \
 }
@@ -151,7 +156,8 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
                       T * __restrict__             d_a,
                       T * __restrict__             d_x,
                       T             beta,
-                      T * __restrict__             d_y)
+                      T            *d_y,
+                      HYPRE_Int    *d_yind)
 {
    /*------------------------------------------------------------*
     *               CSR spmv-vector kernel
@@ -223,7 +229,15 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
       }
       if (grid_group_id < n && group_lane == 0)
       {
-         d_y[grid_group_id] = alpha * sum + beta * d_y[grid_group_id];
+         HYPRE_Int row = d_yind ? read_only_load(&d_yind[grid_group_id]) : grid_group_id;
+         if (beta)
+         {
+            d_y[row] = alpha * sum + beta * d_y[row];
+         }
+         else
+         {
+            d_y[row] = alpha * sum;
+         }
       }
    }
 }
@@ -434,175 +448,139 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
                              HYPRE_Complex * __restrict__ d_a,
                              HYPRE_Complex * __restrict__ d_x,
                              HYPRE_Complex  beta,
-                             HYPRE_Complex * __restrict__ d_y )
+                             HYPRE_Complex *d_y,
+                             HYPRE_Int     *d_yind)
 {
    const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
    const dim3 bDim(SPMV_BLOCKDIM);
 
    if (num_vectors == 1)
    {
-      if (rownnz >= 64)
-      {
-         const HYPRE_Int group_size = 32;
-         const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-         const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-         HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                            nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-      }
-      else if (rownnz >= 32)
-      {
-         const HYPRE_Int group_size = 16;
-         const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-         const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-         HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                            nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-      }
-      else if (rownnz >= 16)
-      {
-         const HYPRE_Int group_size = 8;
-         const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-         const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-         HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                            nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-      }
-      else if (rownnz >= 8)
-      {
-         const HYPRE_Int group_size = 4;
-         const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-         const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-         HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                            nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-      }
-      else
-      {
-         const HYPRE_Int group_size = 4;
-         const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-         const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-         HYPRE_CUDA_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                            nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-      }
+      const HYPRE_Int group_size = 32;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+   }
+   else if (rownnz >= 32)
+   {
+      const HYPRE_Int group_size = 16;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+   }
+   else if (rownnz >= 16)
+   {
+      const HYPRE_Int group_size = 8;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+   }
+   else if (rownnz >= 8)
+   {
+      const HYPRE_Int group_size = 4;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
    else
    {
-      if (num_vectors == 2)
-      {
-         HYPRE_SPMM_KERNEL_LAUNCH(2);
-      }
-      else if (num_vectors == 3)
-      {
-         HYPRE_SPMM_KERNEL_LAUNCH(3);
-      }
-      else if (num_vectors == 4)
-      {
-#if 0
-         HYPRE_SPMM_KERNEL_LAUNCH(4);
-#else
-         if (rownnz >= 64)
-         {
-            const HYPRE_Int group_size = 32;
-            const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-            const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-            HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle4<F, group_size, HYPRE_Real>), gDim, bDim,
-                               nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-         }
-         else if (rownnz >= 32)
-         {
-            const HYPRE_Int group_size = 16;
-            const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-            const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-            HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle4<F, group_size, HYPRE_Real>), gDim, bDim,
-                               nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-         }
-         else if (rownnz >= 16)
-         {
-            const HYPRE_Int group_size = 8;
-            const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-            const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-            HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle4<F, group_size, HYPRE_Real>), gDim, bDim,
-                               nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-         }
-         else if (rownnz >= 8)
-         {
-            const HYPRE_Int group_size = 4;
-            const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-            const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-            HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle4<F, group_size, HYPRE_Real>), gDim, bDim,
-                               nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-         }
-         else
-         {
-            const HYPRE_Int group_size = 4;
-            const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-            const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-            HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle4<F, group_size, HYPRE_Real>), gDim, bDim,
-                               nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
-         }
-#endif
-      }
-      else if (num_vectors == 8)
-      {
-         HYPRE_SPMM_KERNEL_LAUNCH(8);
-      }
-      else
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_vectors > 8 not implemented yet!");
-         return hypre_error_flag;
-      }
+      const HYPRE_Int group_size = 4;
+      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
+                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
    }
 
    return hypre_error_flag;
 }
 
+/* ind != NULL, y(ind) = alpha*op(B)*x + beta*y(ind)
+ * ind == NULL, y      = alpha*op(B)*x + beta*y
+ * op(B) = B or B^T
+ * the size of y_ind = the number of rows of op(B)
+ * Note: if B has no numrical values, assume the values are all ones
+ */
 HYPRE_Int
-hypre_CSRMatrixSpMVDevice( HYPRE_Complex    alpha,
-                           hypre_CSRMatrix *A,
+hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
+                           HYPRE_Complex    alpha,
+                           hypre_CSRMatrix *B,
                            hypre_Vector    *x,
                            HYPRE_Complex    beta,
                            hypre_Vector    *y,
+                           HYPRE_Int       *y_ind,
                            HYPRE_Int        fill )
 {
-   HYPRE_Int      nrows       = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      nnz         = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int      num_vectors = hypre_VectorNumVectors(x);
-   HYPRE_Int     *d_ia        = hypre_CSRMatrixI(A);
-   HYPRE_Int     *d_ja        = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *d_a         = hypre_CSRMatrixData(A);
-   HYPRE_Complex *d_x         = hypre_VectorData(x);
-   HYPRE_Complex *d_y         = hypre_VectorData(y);
+   HYPRE_Int      nrows = trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B);
+   HYPRE_Int      nnz   = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Complex *d_y   = hypre_VectorData(y);
 
    if (nnz <= 0 || alpha == 0.0)
    {
-      hypre_SeqVectorScale(beta, y);
+      if (y_ind)
+      {
+         HYPRE_THRUST_CALL( transform,
+                            thrust::make_permutation_iterator(d_y, y_ind),
+                            thrust::make_permutation_iterator(d_y, y_ind) + nrows,
+                            thrust::make_permutation_iterator(d_y, y_ind),
+                            beta * _1 );
+      }
+      else
+      {
+         hypre_SeqVectorScale(beta, y);
+      }
 
       return hypre_error_flag;
    }
 
-   hypre_assert(nrows > 0);
+   hypre_CSRMatrix *A = NULL;
 
-   if (fill == 0)
+   if (trans)
    {
-      return hypreDevice_CSRMatrixMatvec<0>(nrows, nnz, num_vectors, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
-   }
-   else if (fill == 1)
-   {
-      return hypreDevice_CSRMatrixMatvec<1>(nrows, nnz, num_vectors, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
-   }
-   else if (fill == -1)
-   {
-      return hypreDevice_CSRMatrixMatvec<-1>(nrows, nnz, num_vectors, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
-   }
-   else if (fill == 2)
-   {
-      return hypreDevice_CSRMatrixMatvec<2>(nrows, nnz, num_vectors, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
-   }
-   else if (fill == -2)
-   {
-      return hypreDevice_CSRMatrixMatvec<-2>(nrows, nnz, num_vectors, alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      hypre_CSRMatrixTransposeDevice(B, &A, hypre_CSRMatrixData(B) != NULL);
    }
    else
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Fill mode for SpMV unavailable!");
-      return hypre_error_flag;
+      A = B;
+   }
+
+   hypre_assert(nrows == hypre_CSRMatrixNumRows(A));
+   hypre_assert(nrows > 0);
+
+   HYPRE_Int     *d_ia = hypre_CSRMatrixI(A);
+   HYPRE_Int     *d_ja = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *d_a  = hypre_CSRMatrixData(A);
+   HYPRE_Complex *d_x  = hypre_VectorData(x);
+
+   if (fill == 0)
+   {
+      return hypreDevice_CSRMatrixMatvec<0>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+   }
+   else if (fill == 1)
+   {
+      return hypreDevice_CSRMatrixMatvec<1>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+   }
+   else if (fill == -1)
+   {
+      return hypreDevice_CSRMatrixMatvec < -1 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
+                                                 y_ind);
+   }
+   else if (fill == 2)
+   {
+      return hypreDevice_CSRMatrixMatvec<2>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+   }
+   else if (fill == -2)
+   {
+      return hypreDevice_CSRMatrixMatvec < -2 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
+                                                 y_ind);
+   }
+
+   if (trans)
+   {
+      hypre_CSRMatrixDestroy(A);
    }
 
    return hypre_error_flag;

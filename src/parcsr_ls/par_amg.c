@@ -868,27 +868,14 @@ hypre_BoomerAMGDestroy( void *data )
    }
 
    /* destroy input CF_marker data */
-   if (hypre_ParAMGDataCPointsMarker(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-   }
-   if (hypre_ParAMGDataCPointsLocalMarker(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_HOST);
-   }
-   if (hypre_ParAMGDataFPointsMarker(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-   }
-   if (hypre_ParAMGDataIsolatedFPointsMarker(amg_data))
-   {
-      hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParAMGDataAMat(amg_data)) { hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataAInv(amg_data)) { hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataBVec(amg_data)) { hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataCommInfo(amg_data)) { hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST); }
+   hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {
@@ -4840,10 +4827,8 @@ hypre_BoomerAMGSetCPoints(void         *data,
    /* free data not previously destroyed */
    if (hypre_ParAMGDataCPointsLevel(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_ParAMGDataCPointsMarker(amg_data) = NULL;
-      hypre_ParAMGDataCPointsLocalMarker(amg_data) = NULL;
+      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_DEVICE);
    }
 
    /* set Cpoint data */
@@ -4858,8 +4843,8 @@ hypre_BoomerAMGSetCPoints(void         *data,
 
    if (cpt_level)
    {
-      C_points_marker       = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, HYPRE_MEMORY_HOST);
-      C_points_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, HYPRE_MEMORY_HOST);
+      C_points_marker       = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, HYPRE_MEMORY_DEVICE);
+      C_points_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, HYPRE_MEMORY_DEVICE);
 
       /* copy Cpoints indexes */
       for (i = 0; i < num_cpt_coarse; i++)

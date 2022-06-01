@@ -119,13 +119,15 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
 
-################################
-## CUDA 11 build (only) tests ##
-################################
+####################################
+## latest CUDA build (only) tests ##
+####################################
 
-co="--with-cuda --enable-unified-memory --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 module -q load cuda/11
 module list cuda/11 |& grep "None found"
+
+# CUDA with UM with async malloc [no run]
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda11
 

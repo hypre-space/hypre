@@ -280,7 +280,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    HYPRE_Int      total_size  = size * num_vectors;
 
    /* Trivial case */
-   if (total_size > 0)
+   if (total_size <= 0)
    {
       return hypre_error_flag;
    }
@@ -292,7 +292,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    if (exec == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      HYPRE_THRUST_CALL(fill_n, vector_data, total_size, value);
+      hypreDevice_ComplexFilln(vector_data, total_size, value);
 
 #elif defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL(std::fill_n, vector_data, total_size, value);
@@ -492,17 +492,18 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDscal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data, 1) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_scal(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, y_data,
+                                        1) );
 #else
-   HYPRE_THRUST_CALL( transform, y_data, y_data + size, y_data, alpha * _1 );
+   hypreDevice_ComplexScalen( y_data, size, y_data, alpha );
 #endif // #if defined(HYPRE_USING_CUBLAS)
 
 #elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()),
-                                            size, alpha,
-                                            y_data, 1).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::scal(*hypre_HandleComputeStream(hypre_handle()),
+                                              size, alpha,
+                                              y_data, 1).wait() );
 #else
    HYPRE_ONEDPL_CALL( std::transform, y_data, y_data + size,
                       y_data, [alpha](HYPRE_Complex y) -> HYPRE_Complex { return alpha * y; } );
@@ -563,18 +564,19 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDaxpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data, 1,
-                                  y_data, 1) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_axpy(hypre_HandleCublasHandle(hypre_handle()), size, &alpha, x_data,
+                                        1,
+                                        y_data, 1) );
 #else
-   HYPRE_THRUST_CALL( transform, x_data, x_data + size, y_data, y_data, alpha * _1 + _2 );
+   hypreDevice_ComplexAxpyn(x_data, size, y_data, y_data, alpha);
 #endif // #if defined(HYPRE_USING_CUBLAS)
 
 #elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
-                                            size, alpha,
-                                            x_data, 1, y_data, 1).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::axpy(*hypre_HandleComputeStream(hypre_handle()),
+                                              size, alpha,
+                                              x_data, 1, y_data, 1).wait() );
 #else
    HYPRE_ONEDPL_CALL( std::transform, x_data, x_data + size, y_data, y_data,
                       [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
@@ -741,8 +743,9 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_CUBLAS)
-   HYPRE_CUBLAS_CALL( cublasDdot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1, y_data, 1,
-                                 &result) );
+   HYPRE_CUBLAS_CALL( hypre_cublas_dot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1,
+                                       y_data, 1,
+                                       &result) );
 #else
    result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
 #endif // #if defined(HYPRE_USING_CUBLAS)
@@ -751,9 +754,9 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 
 #if defined(HYPRE_USING_ONEMKLBLAS)
    HYPRE_Real *result_dev = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_SYCL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()),
-                                           size, x_data, 1,
-                                           y_data, 1, result_dev).wait() );
+   HYPRE_ONEMKL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()),
+                                             size, x_data, 1,
+                                             y_data, 1, result_dev).wait() );
    hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else

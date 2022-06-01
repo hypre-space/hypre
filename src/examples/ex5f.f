@@ -84,7 +84,7 @@
       call HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE, ierr)
       call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)
 
-      call HYPRE_SetSpGemmUseCusparse(0, ierr)
+      call HYPRE_SetSpGemmUseVendor(0, ierr)
 
 !   Call omp target after HYPRE_Init()
 

@@ -127,6 +127,11 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                          dof_func,
                          int_buf_data );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                     HYPRE_MEMORY_DEVICE, dof_func_offd_dev);
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -140,23 +145,23 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (abs_soc)
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
    else
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
 
    hypre_Memset(S_diag_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
