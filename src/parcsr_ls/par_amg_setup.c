@@ -3618,7 +3618,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          for (j = 0; j < coorddim; j++)
          {
-            hypre_fprintf (fp, "% f ", coordinates[coorddim * i + j]);
+            hypre_fprintf (fp, "% f ", (HYPRE_Real) coordinates[coorddim * i + j]);
          }
          hypre_fprintf(fp, "%d\n", CF[i]);
       }

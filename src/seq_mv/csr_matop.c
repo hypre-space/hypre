@@ -1851,7 +1851,7 @@ hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
          }
          else if (type == 1)
          {
-            row_sum_i += scal * fabs(A_data[j]);
+            row_sum_i += scal * hypre_cabs(A_data[j]);
          }
          else if (type == 2)
          {
@@ -1926,7 +1926,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 1)
             {
-               d_i = fabs(A_data[j]);
+               d_i = hypre_cabs(A_data[j]);
             }
             else if (type == 2)
             {
@@ -1938,7 +1938,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 4)
             {
-               d_i = 1.0 / (sqrt(fabs(A_data[j])));
+               d_i = 1.0 / (sqrt(hypre_cabs(A_data[j])));
             }
             break;
          }
@@ -2079,4 +2079,3 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    return hypre_error_flag;
 }
-
