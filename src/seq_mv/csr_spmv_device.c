@@ -16,160 +16,39 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-#define SPMV_BLOCKDIM 512
-#define VERSION 1
+#include "csr_spmv_device.h"
 
-/* #define SPMM_ADD_SUM(p)                                              \ */
-/* {                                                                    \ */
-/*    const HYPRE_Int col = read_only_load(&d_ja[p]);                   \ */
-/*    const T aij = read_only_load(&d_a[p]);                            \ */
-/*    if (F == 0)                                                       \ */
-/*    {                                                                 \ */
-/*       sum0 += aij * read_only_load(&d_x[col]);                       \ */
-/*       sum1 += aij * read_only_load(&d_x[col + n]);                   \ */
-/*    }                                                                 \ */
-/*    else if (F == -1)                                                 \ */
-/*    {                                                                 \ */
-/*       if (col <= grid_group_id)                                      \ */
-/*       {                                                              \ */
-/*          sum0 += aij * read_only_load(&d_x[col]);                    \ */
-/*          sum1 += aij * read_only_load(&d_x[col + n]);                \ */
-/*       }                                                              \ */
-/*    }                                                                 \ */
-/*    else if (F == 1)                                                  \ */
-/*    {                                                                 \ */
-/*       if (col >= grid_group_id)                                      \ */
-/*       {                                                              \ */
-/*          sum0 += aij * read_only_load(&d_x[col]);                    \ */
-/*          sum1 += aij * read_only_load(&d_x[col + n]);                \ */
-/*       }                                                              \ */
-/*    }                                                                 \ */
-/*    else if (F == -2)                                                 \ */
-/*    {                                                                 \ */
-/*       if (col < grid_group_id)                                       \ */
-/*       {                                                              \ */
-/*          sum0 += aij * read_only_load(&d_x[col]);                    \ */
-/*          sum1 += aij * read_only_load(&d_x[col + n]);                \ */
-/*       }                                                              \ */
-/*    }                                                                 \ */
-/*    else if (F == 2)                                                  \ */
-/*    {                                                                 \ */
-/*       if (col > grid_group_id)                                       \ */
-/*       {                                                              \ */
-/*          sum0 += aij * read_only_load(&d_x[col]);                    \ */
-/*          sum1 += aij * read_only_load(&d_x[col + n]);                \ */
-/*       }                                                              \ */
-/*    }                                                                 \ */
-/* } */
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRMatvecShuffle
+ *
+ * Templated SpMV device kernel based of warp-shuffle reduction.
+ * Uses groups of K threads per row
+ *
+ * Template parameters:
+ *   1) K:  the number of threads working on a single row. K = 2, 4, 8, 16, 32
+ *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
+ *   3) NV: number of vectors (> 1 for multivectors)
+ *   4) T:  data type of matrix/vector coefficients
+ *--------------------------------------------------------------------------*/
 
-#define HYPRE_SPMM_KERNEL_LAUNCH(num_vectors)                                             \
-   if (rownnz >= 64)                                                                      \
-   {                                                                                      \
-      const HYPRE_Int group_size = 32;                                                    \
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;                  \
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);         \
-      HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle<F, group_size, num_vectors, HYPRE_Real>),    \
-                         gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );     \
-   }                                                                                      \
-   else if (rownnz >= 32)                                                                 \
-   {                                                                                      \
-      const HYPRE_Int group_size = 16;                                                    \
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;                  \
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);         \
-      HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle<F, group_size, num_vectors, HYPRE_Real>),    \
-                         gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );     \
-   }                                                                                      \
-   else if (rownnz >= 16)                                                                 \
-   {                                                                                      \
-      const HYPRE_Int group_size = 8;                                                     \
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;                  \
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);         \
-      HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle<F, group_size, num_vectors, HYPRE_Real>),    \
-                         gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );     \
-   }                                                                                      \
-   else if (rownnz >= 8)                                                                  \
-   {                                                                                      \
-      const HYPRE_Int group_size = 4;                                                     \
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;                  \
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);         \
-      HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle<F, group_size, num_vectors, HYPRE_Real>),    \
-                         gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );     \
-   }                                                                                      \
-   else                                                                                   \
-   {                                                                                      \
-      const HYPRE_Int group_size = 4;                                                     \
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;                  \
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);         \
-      HYPRE_CUDA_LAUNCH( (hypre_spmm_shuffle<F, group_size, num_vectors, HYPRE_Real>),    \
-                         gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );     \
-   }
-
-#define SPMV_ADD_SUM(p)                                              \
-{                                                                    \
-   const HYPRE_Int col = read_only_load(&d_ja[p]);                   \
-   if (F == 0)                                                       \
-   {                                                                 \
-      const T val = d_a ? read_only_load(&d_a[p]) : 1.0;             \
-      sum += val * read_only_load(&d_x[col]);                        \
-   }                                                                 \
-   else if (F == -1)                                                 \
-   {                                                                 \
-      if (col <= grid_group_id)                                      \
-      {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
-         sum += val * read_only_load(&d_x[col]);                     \
-      }                                                              \
-   }                                                                 \
-   else if (F == 1)                                                  \
-   {                                                                 \
-      if (col >= grid_group_id)                                      \
-      {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
-         sum += val * read_only_load(&d_x[col]);                     \
-      }                                                              \
-   }                                                                 \
-   else if (F == -2)                                                 \
-   {                                                                 \
-      if (col < grid_group_id)                                       \
-      {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
-         sum += val * read_only_load(&d_x[col]);                     \
-      }                                                              \
-   }                                                                 \
-   else if (F == 2)                                                  \
-   {                                                                 \
-      if (col > grid_group_id)                                       \
-      {                                                              \
-         const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
-         sum += val * read_only_load(&d_x[col]);                     \
-      }                                                              \
-   }                                                                 \
-}
-
-/* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
-template <HYPRE_Int F, HYPRE_Int K, typename T>
+template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
-hypre_csr_v_k_shuffle(HYPRE_Int     n,
-                      T             alpha,
-                      HYPRE_Int * __restrict__     d_ia,
-                      HYPRE_Int * __restrict__     d_ja,
-                      T * __restrict__             d_a,
-                      T * __restrict__             d_x,
-                      T             beta,
-                      T            *d_y,
-                      HYPRE_Int    *d_yind)
+hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
+                                T             alpha,
+                                HYPRE_Int    *d_ia,
+                                HYPRE_Int    *d_ja,
+                                T            *d_a,
+                                T            *d_x,
+                                T             beta,
+                                T            *d_y,
+                                HYPRE_Int    *d_yind)
 {
-   /*------------------------------------------------------------*
-    *               CSR spmv-vector kernel
-    *               warp-shuffle reduction
-    *            (Group of K threads) per row
-    *------------------------------------------------------------*/
-   const HYPRE_Int grid_ngroups = gridDim.x * (SPMV_BLOCKDIM / K);
-   HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
-   const HYPRE_Int group_lane = threadIdx.x & (K - 1);
-   const HYPRE_Int warp_lane = threadIdx.x & (HYPRE_WARP_SIZE - 1);
-   const HYPRE_Int warp_group_id = warp_lane / K;
-   const HYPRE_Int warp_ngroups = HYPRE_WARP_SIZE / K;
+   const HYPRE_Int  grid_ngroups  = gridDim.x * (HYPRE_SPMV_BLOCKDIM / K);
+   HYPRE_Int        grid_group_id = (blockIdx.x * HYPRE_SPMV_BLOCKDIM + threadIdx.x) / K;
+   const HYPRE_Int  group_lane    = threadIdx.x & (K - 1);
+   const HYPRE_Int  warp_lane     = threadIdx.x & (HYPRE_WARP_SIZE - 1);
+   const HYPRE_Int  warp_group_id = warp_lane / K;
+   const HYPRE_Int  warp_ngroups  = HYPRE_WARP_SIZE / K;
 
    for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
    {
@@ -191,128 +70,34 @@ hypre_csr_v_k_shuffle(HYPRE_Int     n,
       q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id + 1);
       p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id);
 #endif
-      T sum = 0.0;
-#if VERSION == 1
+
+      T sum[NV] = {0.0};
+#if HYPRE_SPMV_VERSION == 1
 #pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
+      for (p += group_lane; p < q; p += K * 2)
       {
-         if (p < q)
+         HYPRE_SPMV_ADD_SUM(p)
+         if (p + K < q)
          {
-            SPMV_ADD_SUM(p)
-            if (p + K < q)
-            {
-               SPMV_ADD_SUM((p + K))
-            }
+            HYPRE_SPMV_ADD_SUM((p + K))
          }
       }
-#elif VERSION == 2
+#elif HYPRE_SPMV_VERSION == 2
 #pragma unroll 1
       for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
          if (p < q)
          {
-            SPMV_ADD_SUM(p)
+            HYPRE_SPMV_ADD_SUM(p)
          }
       }
 #else
 #pragma unroll 1
       for (p += group_lane;  p < q; p += K)
       {
-         SPMV_ADD_SUM(p)
+         HYPRE_SPMV_ADD_SUM(p)
       }
 #endif
-      // parallel reduction
-#pragma unroll
-      for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
-      {
-         sum += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum, d);
-      }
-      if (grid_group_id < n && group_lane == 0)
-      {
-         HYPRE_Int row = d_yind ? read_only_load(&d_yind[grid_group_id]) : grid_group_id;
-         if (beta)
-         {
-            d_y[row] = alpha * sum + beta * d_y[row];
-         }
-         else
-         {
-            d_y[row] = alpha * sum;
-         }
-      }
-   }
-}
-
-/* Assumes only two vectors for now */
-/* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
-template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
-__global__ void
-hypre_spmm_shuffle(HYPRE_Int     n,
-                   T             alpha,
-                   HYPRE_Int * __restrict__   d_ia,
-                   HYPRE_Int * __restrict__   d_ja,
-                   T * __restrict__           d_a,
-                   T * __restrict__           d_x,
-                   T             beta,
-                   T * __restrict__           d_y)
-{
-   /*------------------------------------------------------------*
-    *             CSR spmv-multivector kernel
-    *               warp-shuffle reduction
-    *            (Group of K threads) per row
-    *------------------------------------------------------------*/
-   const HYPRE_Int grid_ngroups = gridDim.x * (SPMV_BLOCKDIM / K);
-   HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
-   const HYPRE_Int group_lane = threadIdx.x & (K - 1);
-   const HYPRE_Int warp_lane = threadIdx.x & (HYPRE_WARP_SIZE - 1);
-   const HYPRE_Int warp_group_id = warp_lane / K;
-   const HYPRE_Int warp_ngroups = HYPRE_WARP_SIZE / K;
-
-   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
-   {
-      const HYPRE_Int s = grid_group_id - warp_group_id + warp_lane;
-      HYPRE_Int p = 0, q = 0;
-      if (s <= n && warp_lane <= warp_ngroups)
-      {
-         p = read_only_load(&d_ia[s]);
-      }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id + 1);
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id);
-
-      T sum[NV] = {0.0};
-#pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
-      {
-         if (p < q)
-         {
-            const HYPRE_Int col = read_only_load(&d_ja[p]);
-            const T aij = read_only_load(&d_a[p]);
-
-            if (F == 0)
-            {
-#pragma unroll
-               for (HYPRE_Int i = 0; i < NV; i++)
-               {
-                  sum[i] += aij * read_only_load(&d_x[col + i*n]);
-               }
-            }
-
-            if (p + K < q)
-            {
-               const HYPRE_Int col = read_only_load(&d_ja[p + K]);
-               const T aij = read_only_load(&d_a[p + K]);
-
-               if (F == 0)
-               {
-#pragma unroll
-                  for (HYPRE_Int i = 0; i < NV; i++)
-                  {
-                     sum[i] += aij * read_only_load(&d_x[col + i*n]);
-                  }
-               }
-            }
-         }
-      }
-
       // parallel reduction
 #pragma unroll
       for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
@@ -326,184 +111,103 @@ hypre_spmm_shuffle(HYPRE_Int     n,
 
       if (grid_group_id < n && group_lane == 0)
       {
-#pragma unroll
-         for (HYPRE_Int i = 0; i < NV; i++)
+         HYPRE_Int row = d_yind ? read_only_load(&d_yind[grid_group_id]) : grid_group_id;
+         if (beta)
          {
-            d_y[grid_group_id + i*n] = alpha * sum[i] + beta * d_y[grid_group_id + i*n];
+#pragma unroll
+            for (HYPRE_Int i = 0; i < NV; i++)
+            {
+               d_y[row + i * n] = alpha * sum[i] + beta * d_y[row + i * n];
+            }
+         }
+         else
+         {
+#pragma unroll
+            for (HYPRE_Int i = 0; i < NV; i++)
+            {
+               d_y[row + i * n] = alpha * sum[i];
+            }
          }
       }
    }
 }
 
-/* Assumes only two vectors for now */
-/* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
-template <HYPRE_Int F, HYPRE_Int K, typename T>
-__global__ void
-hypre_spmm_shuffle4(HYPRE_Int     n,
-                   T             alpha,
-                   const HYPRE_Int * __restrict__    d_ia,
-                   const HYPRE_Int * __restrict__    d_ja,
-                   const T * __restrict__            d_a,
-                   const T * __restrict__            d_x,
-                   T             beta,
-                   T * __restrict__            d_y)
-{
-   /*------------------------------------------------------------*
-    *             CSR spmv-multivector kernel
-    *               warp-shuffle reduction
-    *            (Group of K threads) per row
-    *------------------------------------------------------------*/
-   const HYPRE_Int grid_ngroups = gridDim.x * (SPMV_BLOCKDIM / K);
-   HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
-   const HYPRE_Int group_lane = threadIdx.x & (K - 1);
-   const HYPRE_Int warp_lane = threadIdx.x & (HYPRE_WARP_SIZE - 1);
-   const HYPRE_Int warp_group_id = warp_lane / K;
-   const HYPRE_Int warp_ngroups = HYPRE_WARP_SIZE / K;
-   const HYPRE_Int nn = n + n;
-   const HYPRE_Int nnn = n + n + n;
-
-   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
-   {
-      const HYPRE_Int s = grid_group_id - warp_group_id + warp_lane;
-      HYPRE_Int p = 0, q = 0;
-      if (s <= n && warp_lane <= warp_ngroups)
-      {
-         p = read_only_load(&d_ia[s]);
-      }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id + 1);
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id);
-
-      //T sum[4] = {0.0};
-      T sum0 = 0.0f;
-      T sum1 = 0.0f;
-      T sum2 = 0.0f;
-      T sum3 = 0.0f;
-#pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
-      {
-         if (p < q)
-         {
-            const HYPRE_Int col = read_only_load(&d_ja[p]);
-            const T aij = read_only_load(&d_a[p]);
-
-            if (F == 0)
-            {
-               sum0 += aij * read_only_load(&d_x[col]);
-               sum1 += aij * read_only_load(&d_x[col + n]);
-               sum2 += aij * read_only_load(&d_x[col + nn]);
-               sum3 += aij * read_only_load(&d_x[col + nnn]);
-            }
-
-            if (p + K < q)
-            {
-               const HYPRE_Int col = read_only_load(&d_ja[p + K]);
-               const T aij = read_only_load(&d_a[p + K]);
-
-               if (F == 0)
-               {
-                  sum0 += aij * read_only_load(&d_x[col]);
-                  sum1 += aij * read_only_load(&d_x[col + n]);
-                  sum2 += aij * read_only_load(&d_x[col + nn]);
-                  sum3 += aij * read_only_load(&d_x[col + nnn]);
-               }
-            }
-         }
-      }
-
-      // parallel reduction
-#pragma unroll
-      for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
-      {
-         sum0 += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum0, d);
-         sum1 += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum1, d);
-         sum2 += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum2, d);
-         sum3 += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum3, d);
-      }
-
-      if (grid_group_id < n && group_lane == 0)
-      {
-         d_y[grid_group_id]       = alpha * sum0 + beta * d_y[grid_group_id];
-         d_y[grid_group_id + n]   = alpha * sum1 + beta * d_y[grid_group_id + n];
-         d_y[grid_group_id + nn]  = alpha * sum2 + beta * d_y[grid_group_id + nn];
-         d_y[grid_group_id + nnn] = alpha * sum3 + beta * d_y[grid_group_id + nnn];
-      }
-   }
-}
-
-/* F is fill-mode
+/*--------------------------------------------------------------------------
+ * hypreDevice_CSRMatrixMatvec
+ *
+ * Templated host function for launching the device kernels for SpMV.
+ *
+ * The template parameter F is the fill-mode. Supported values:
  *    0: whole matrix
  *   -1: lower
  *    1: upper
  *   -2: strict lower
  *    2: strict upper
- */
+ *--------------------------------------------------------------------------*/
+
 template <HYPRE_Int F>
 HYPRE_Int
-hypreDevice_CSRMatrixMatvec( HYPRE_Int      nrows,
-                             HYPRE_Int      nnz,
-                             HYPRE_Int      num_vectors,
+hypreDevice_CSRMatrixMatvec( HYPRE_Int      num_vectors,
+                             HYPRE_Int      nrows,
+                             HYPRE_Int      num_nonzeros,
                              HYPRE_Complex  alpha,
-                             HYPRE_Int * __restrict__     d_ia,
-                             HYPRE_Int * __restrict__     d_ja,
-                             HYPRE_Complex * __restrict__ d_a,
-                             HYPRE_Complex * __restrict__ d_x,
+                             HYPRE_Int     *d_ia,
+                             HYPRE_Int     *d_ja,
+                             HYPRE_Complex *d_a,
+                             HYPRE_Complex *d_x,
                              HYPRE_Complex  beta,
                              HYPRE_Complex *d_y,
-                             HYPRE_Int     *d_yind)
+                             HYPRE_Int     *d_yind )
 {
-   const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
-   const dim3 bDim(SPMV_BLOCKDIM);
+   const HYPRE_Int avg_rownnz = (num_nonzeros + nrows - 1) / nrows;
+   const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
 
-   if (num_vectors == 1)
+   switch (num_vectors)
    {
-      const HYPRE_Int group_size = 32;
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
-   }
-   else if (rownnz >= 32)
-   {
-      const HYPRE_Int group_size = 16;
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
-   }
-   else if (rownnz >= 16)
-   {
-      const HYPRE_Int group_size = 8;
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
-   }
-   else if (rownnz >= 8)
-   {
-      const HYPRE_Int group_size = 4;
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
-   }
-   else
-   {
-      const HYPRE_Int group_size = 4;
-      const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
-      const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
-      HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, HYPRE_Real>), gDim, bDim,
-                        nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );
+      case 1:
+         HYPRE_SPMV_GPU_LAUNCH(1);
+         break;
+
+      case 2:
+         HYPRE_SPMV_GPU_LAUNCH(2);
+         break;
+
+      case 3:
+         HYPRE_SPMV_GPU_LAUNCH(3);
+         break;
+
+      case 4:
+         HYPRE_SPMV_GPU_LAUNCH(4);
+         break;
+
+      default:
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre's SpMV: (num_vectors > 4) not implemented");
+         return hypre_error_flag;
    }
 
    return hypre_error_flag;
 }
 
-/* ind != NULL, y(ind) = alpha*op(B)*x + beta*y(ind)
- * ind == NULL, y      = alpha*op(B)*x + beta*y
- * op(B) = B or B^T
- * the size of y_ind = the number of rows of op(B)
- * Note: if B has no numrical values, assume the values are all ones
- */
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSpMVDevice
+ *
+ * hypre's internal implementation of sparse matrix/vector multiplication
+ * (SpMV) on GPUs.
+ *
+ * Supported cases:
+ *   1) ind != NULL, y(ind) = alpha*op(B)*x + beta*y(ind)
+ *      ind == NULL, y      = alpha*op(B)*x + beta*y
+ *      y_ind has size equal to the number of rows of op(B)
+ *
+ *   2) op(B) = B (trans = 0) or B^T (trans = 1)
+ *      op(B) = B^T: not recommended since it computes B^T at every call
+ *
+ *   3) multivectors up to 4 components (1 <= num_vectors <= 4)
+ *
+ * Notes:
+ *   1) if B has no numerical values, assume the values are all ones
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                            HYPRE_Complex    alpha,
@@ -514,11 +218,21 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                            HYPRE_Int       *y_ind,
                            HYPRE_Int        fill )
 {
-   HYPRE_Int      nrows = trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B);
-   HYPRE_Int      nnz   = hypre_CSRMatrixNumNonzeros(B);
-   HYPRE_Complex *d_y   = hypre_VectorData(y);
+   /* Input data variables */
+   HYPRE_Int        nrows        = trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B);
+   HYPRE_Int        num_nonzeros = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Int        num_vectors  = hypre_VectorNumVectors(x);
+   HYPRE_Complex   *d_x          = hypre_VectorData(x);
+   HYPRE_Complex   *d_y          = hypre_VectorData(y);
 
-   if (nnz <= 0 || alpha == 0.0)
+   /* Matrix A variables */
+   hypre_CSRMatrix *A = NULL;
+   HYPRE_Int       *d_ia;
+   HYPRE_Int       *d_ja;
+   HYPRE_Complex   *d_a;
+
+   /* Trivial case when alpha*op(B)*x = 0 */
+   if (num_nonzeros <= 0 || alpha == 0.0)
    {
       if (y_ind)
       {
@@ -536,8 +250,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
       return hypre_error_flag;
    }
 
-   hypre_CSRMatrix *A = NULL;
-
+   /* Select op(B) */
    if (trans)
    {
       hypre_CSRMatrixTransposeDevice(B, &A, hypre_CSRMatrixData(B) != NULL);
@@ -546,38 +259,53 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    {
       A = B;
    }
-
    hypre_assert(nrows == hypre_CSRMatrixNumRows(A));
    hypre_assert(nrows > 0);
 
-   HYPRE_Int     *d_ia = hypre_CSRMatrixI(A);
-   HYPRE_Int     *d_ja = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *d_a  = hypre_CSRMatrixData(A);
-   HYPRE_Complex *d_x  = hypre_VectorData(x);
+   /* Set pointers */
+   d_ia = hypre_CSRMatrixI(A);
+   d_ja = hypre_CSRMatrixJ(A);
+   d_a  = hypre_CSRMatrixData(A);
 
-   if (fill == 0)
+   /* Choose matrix fill mode */
+   switch (fill)
    {
-      return hypreDevice_CSRMatrixMatvec<0>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
-   }
-   else if (fill == 1)
-   {
-      return hypreDevice_CSRMatrixMatvec<1>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
-   }
-   else if (fill == -1)
-   {
-      return hypreDevice_CSRMatrixMatvec < -1 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
-                                                 y_ind);
-   }
-   else if (fill == 2)
-   {
-      return hypreDevice_CSRMatrixMatvec<2>(nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
-   }
-   else if (fill == -2)
-   {
-      return hypreDevice_CSRMatrixMatvec < -2 > (nrows, nnz, alpha, d_ia, d_ja, d_a, d_x, beta, d_y,
-                                                 y_ind);
+      case -2:
+         /* Strict lower matrix */
+         hypreDevice_CSRMatrixMatvec<-2>(num_vectors, nrows, num_nonzeros, alpha,
+                                         d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+         break;
+
+      case -1:
+         /* Lower matrix */
+         hypreDevice_CSRMatrixMatvec<-1>(num_vectors, nrows, num_nonzeros, alpha,
+                                         d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+         break;
+
+      case 0:
+         /* Whole matrix */
+         hypreDevice_CSRMatrixMatvec<0>(num_vectors, nrows, num_nonzeros, alpha,
+                                        d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+         break;
+
+      case 1:
+         /* Upper matrix */
+         hypreDevice_CSRMatrixMatvec<1>(num_vectors, nrows, num_nonzeros, alpha,
+                                        d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+         break;
+
+      case 2:
+         /* Strict upper matrix */
+         hypreDevice_CSRMatrixMatvec<2>(num_vectors, nrows, num_nonzeros, alpha,
+                                        d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
+         break;
+
+      default:
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Fill mode for SpMV unavailable!");
+         return hypre_error_flag;
    }
 
+   /* Free memory */
    if (trans)
    {
       hypre_CSRMatrixDestroy(A);
