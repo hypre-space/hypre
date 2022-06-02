@@ -952,7 +952,7 @@ template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in
  * Note that compute_XX refers to a PTX version and sm_XX refers to a cubin version.
 */
 __global__ void
-hypreGPUKernel_CompileFlagSafetyCheck(hypre_int *cuda_arch_compile)
+hypreGPUKernel_CompileFlagSafetyCheck(hypre_Item &item, hypre_int *cuda_arch_compile)
 {
 #if defined(__CUDA_ARCH__)
    cuda_arch_compile[0] = __CUDA_ARCH__;
@@ -1063,9 +1063,9 @@ hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z, H
 
 template<typename T>
 __global__ void
-hypreGPUKernel_scalen(T *x, size_t n, T *y, T v)
+hypreGPUKernel_scalen(hypre_Item &item, T *x, size_t n, T *y, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1108,9 +1108,9 @@ hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPR
 
 template<typename T>
 __global__ void
-hypreGPUKernel_filln(T *x, size_t n, T v)
+hypreGPUKernel_filln(hypre_Item &item, T *x, size_t n, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1195,7 +1195,7 @@ template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HY
 #endif
 
 __global__ void
-hypreGPUKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAddTrivial(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
    for (HYPRE_Int i = 0; i < n; i++)
    {
@@ -1205,9 +1205,9 @@ hypreGPUKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYP
 
 /* x[map[i]] += y[i], same index cannot appear more than once in map */
 __global__ void
-hypreGPUKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAdd(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -1290,9 +1290,9 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 /* x[map[i]] = v */
 template <typename T>
 __global__ void
-hypreGPUKernel_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
+hypreGPUKernel_ScatterConstant(hypre_Item &item, T *x, HYPRE_Int n, HYPRE_Int *map, T v)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -1327,10 +1327,10 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HY
                                                HYPRE_Complex v);
 
 __global__ void
-hypreGPUKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+hypreGPUKernel_DiagScaleVector(hypre_Item &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1366,10 +1366,10 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
 }
 
 __global__ void
-hypreGPUKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+hypreGPUKernel_DiagScaleVector2(hypre_Item &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                 HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1401,11 +1401,12 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
 }
 
 __global__ void
-hypreGPUKernel_BigToSmallCopy( HYPRE_Int*          __restrict__ tgt,
+hypreGPUKernel_BigToSmallCopy( hypre_Item                      &item,
+                               HYPRE_Int*          __restrict__ tgt,
                                const HYPRE_BigInt* __restrict__ src,
                                HYPRE_Int                        size )
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < size)
    {
