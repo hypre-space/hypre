@@ -407,7 +407,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
    }
 
 #if defined(HYPRE_USING_SYCL)
-   sycl::range<1> gDim(num_blocks);
+   dim3 gDim(num_blocks);
 #else
    dim3 gDim(num_blocks, 1, 1);
 #endif
@@ -416,17 +416,9 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
 }
 
 __global__ void
-hypreGPUKernel_IVAXPY(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+hypreGPUKernel_IVAXPY( hypre_Item &item, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
    if (i < n)
    {
       y[i] += x[i] / a[i];
@@ -452,18 +444,11 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
 }
 
 __global__ void
-hypreGPUKernel_IVAXPYMarked(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
-   HYPRE_Int *marker, HYPRE_Int marker_val)
+hypreGPUKernel_IVAXPYMarked( hypre_Item &item,
+                             HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
+                             HYPRE_Int *marker, HYPRE_Int marker_val)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
    if (i < n)
    {
       if (marker[i] == marker_val)
@@ -510,7 +495,7 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 
 #if defined(HYPRE_USING_SYCL)
 void
-hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
+hypreSYCLKernel_ScatterRowPtr(hypre_Item &item,
                               HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
 {
    HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
@@ -619,19 +604,12 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
  * d_rownnz can be the same as d_row_indices
  */
 __global__ void
-hypreGPUKernel_GetRowNnz(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1> item,
-#endif
-   HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
-   HYPRE_Int *d_offd_ia,
-   HYPRE_Int *d_rownnz)
+hypreGPUKernel_GetRowNnz( hypre_Item &item,
+                          HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+                          HYPRE_Int *d_offd_ia,
+                          HYPRE_Int *d_rownnz)
 {
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < nrows)
    {
@@ -685,24 +663,21 @@ hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 }
 
 __global__ void
-hypreGPUKernel_CopyParCSRRows(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int      nrows,
-   HYPRE_Int     *d_row_indices,
-   HYPRE_Int      has_offd,
-   HYPRE_BigInt   first_col,
-   HYPRE_BigInt  *d_col_map_offd_A,
-   HYPRE_Int     *d_diag_i,
-   HYPRE_Int     *d_diag_j,
-   HYPRE_Complex *d_diag_a,
-   HYPRE_Int     *d_offd_i,
-   HYPRE_Int     *d_offd_j,
-   HYPRE_Complex *d_offd_a,
-   HYPRE_Int     *d_ib,
-   HYPRE_BigInt  *d_jb,
-   HYPRE_Complex *d_ab)
+hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
+                               HYPRE_Int      nrows,
+                               HYPRE_Int     *d_row_indices,
+                               HYPRE_Int      has_offd,
+                               HYPRE_BigInt   first_col,
+                               HYPRE_BigInt  *d_col_map_offd_A,
+                               HYPRE_Int     *d_diag_i,
+                               HYPRE_Int     *d_diag_j,
+                               HYPRE_Complex *d_diag_a,
+                               HYPRE_Int     *d_offd_i,
+                               HYPRE_Int     *d_offd_j,
+                               HYPRE_Complex *d_offd_a,
+                               HYPRE_Int     *d_ib,
+                               HYPRE_BigInt  *d_jb,
+                               HYPRE_Complex *d_ab)
 {
 #if defined(HYPRE_USING_SYCL)
    sycl::sub_group SG = item.get_sub_group();
@@ -1042,9 +1017,9 @@ hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 
 template<typename T>
 __global__ void
-hypreGPUKernel_axpyn(T *x, size_t n, T *y, T *z, T a)
+hypreGPUKernel_axpyn(hypre_Item &item, T *x, size_t n, T *y, T *z, T a)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {

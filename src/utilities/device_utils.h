@@ -15,6 +15,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_CUDA)
+using hypre_Item = void*;
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -53,6 +54,7 @@
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_HIP)
+using hypre_Item = void*;
 #include <hip/hip_runtime.h>
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -107,6 +109,7 @@ using namespace thrust::placeholders;
 /* The following definitions facilitate code reuse and limits
  * if/def-ing when unifying cuda/hip code with sycl code */
 using dim3 = sycl::range<1>;
+using hypre_Item = sycl::nd_item<1>;
 #define __global__
 #define __host__
 #define __device__
@@ -160,20 +163,21 @@ using dim3 = sycl::range<1>;
 
 /* cuda/hip version */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                  \
-{                                                                                                                             \
-   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                           \
-        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                            \
-   {                                                                                                                          \
-      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                                \
-                 __FILE__, __LINE__,                                                                                          \
-                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                               \
-   }                                                                                                                          \
-   else                                                                                                                       \
-   {                                                                                                                          \
-      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (__VA_ARGS__);     \
-      GPU_LAUNCH_SYNC;                                                                                                        \
-   }                                                                                                                          \
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                                                        \
+{                                                                                                                                   \
+   if ( gridsize.x  == 0 || gridsize.y  == 0 || gridsize.z  == 0 ||                                                                 \
+        blocksize.x == 0 || blocksize.y == 0 || blocksize.z == 0 )                                                                  \
+   {                                                                                                                                \
+      /* printf("Warning %s %d: Zero CUDA grid/block (%d %d %d) (%d %d %d)\n",                                                      \
+                 __FILE__, __LINE__,                                                                                                \
+                 gridsize.x, gridsize.y, gridsize.z, blocksize.x, blocksize.y, blocksize.z); */                                     \
+   }                                                                                                                                \
+   else                                                                                                                             \
+   {                                                                                                                                \
+      hypre_Item item = NULL;                                                                                                       \
+      (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (item, __VA_ARGS__);     \
+      GPU_LAUNCH_SYNC;                                                                                                              \
+   }                                                                                                                                \
 }
 
 #define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
@@ -193,7 +197,7 @@ using dim3 = sycl::range<1>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+            [=] (hypre_Item item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]            \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -604,7 +608,7 @@ T read_only_load( const T *ptr )
    return *ptr;
 #endif
 }
-#endif
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions
@@ -721,7 +725,7 @@ hypre_int hypre_cuda_get_grid_num_threads()
 /* return the flattened thread id in grid */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_grid_thread_id()
+hypre_int hypre_cuda_get_grid_thread_id(hypre_Item &item)
 {
    return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_threads<bdim>() +
           hypre_cuda_get_thread_id<bdim>();
@@ -1127,6 +1131,14 @@ struct print_functor
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
+
+/* return the flattened thread id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_thread_id(hypre_Item &item)
+{
+   return static_cast<HYPRE_Int>(item.get_global_linear_id());
+}
 
 /* return the flattened warp id in nd_range */
 static __forceinline__
