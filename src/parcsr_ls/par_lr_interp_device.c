@@ -19,7 +19,8 @@
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
 __global__
-void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
+void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
+                                           HYPRE_Int      nr_of_rows,
                                            bool           has_offd,
                                            HYPRE_Int     *CF_marker,
                                            HYPRE_Int     *A_diag_i,
@@ -97,7 +98,8 @@ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int      nr_of_rows,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc( HYPRE_Int      nr_of_rows,
+void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
+                                      HYPRE_Int      nr_of_rows,
                                       HYPRE_Int     *AFF_diag_i,
                                       HYPRE_Int     *AFF_diag_j,
                                       HYPRE_Complex *AFF_diag_data,
@@ -338,7 +340,8 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
 //-----------------------------------------------------------------------
 // For Ext+i Interp, scale AFF from the left and the right
 __global__
-void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
+void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
+                                       HYPRE_Int      nr_of_rows,
                                        HYPRE_BigInt   first_index,
                                        HYPRE_Int     *AFF_diag_i,
                                        HYPRE_Int     *AFF_diag_j,
@@ -532,7 +535,8 @@ void hypreCUDAKernel_compute_twiaff_w( HYPRE_Int      nr_of_rows,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
+void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
+                                          HYPRE_Int      nr_of_rows,
                                           HYPRE_Int     *AFF_diag_i,
                                           HYPRE_Int     *AFF_diag_j,
                                           HYPRE_Complex *AFF_diag_data,
@@ -664,7 +668,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( HYPRE_Int      nr_of_rows,
 //-----------------------------------------------------------------------
 // For Ext+e Interp, compute D_lambda and D_tmp = D_mu / D_lambda
 __global__
-void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int      nr_of_rows,
+void hypreCUDAKernel_compute_dlam_dtmp( hypre_Item    &item,
+                                        HYPRE_Int      nr_of_rows,
                                         HYPRE_Int     *AFF_diag_i,
                                         HYPRE_Int     *AFF_diag_j,
                                         HYPRE_Complex *AFF_diag_data,

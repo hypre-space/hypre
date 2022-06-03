@@ -69,17 +69,17 @@ void hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int * pass_marker_o
                                                        HYPRE_Int color, HYPRE_Int num_cols_offd_A, HYPRE_Int & num_cols_offd,
                                                        HYPRE_Int ** fine_to_coarse_offd );
 
-__global__ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int nrows, HYPRE_Int *A_diag_i,
+__global__ void hypreCUDAKernel_cfmarker_masked_rowsum( hypre_Item &item, HYPRE_Int nrows, HYPRE_Int *A_diag_i,
                                                         HYPRE_Int *A_diag_j, HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
                                                         HYPRE_Complex *A_offd_data, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd,
                                                         HYPRE_Complex *row_sums );
 
-__global__ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int num_points, HYPRE_Int color,
+__global__ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_Item &item, HYPRE_Int num_points, HYPRE_Int color,
                                                           HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int *S_diag_i,
                                                           HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *P_diag_i,
                                                           HYPRE_Int *P_offd_i );
 
-__global__ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( HYPRE_Int num_points, HYPRE_Int color,
+__global__ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item &item, HYPRE_Int num_points, HYPRE_Int color,
                                                           HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
                                                           HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
                                                           HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data,
@@ -87,13 +87,13 @@ __global__ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( HYPRE_Int num_points, 
                                                           HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data, HYPRE_Int *P_offd_j, HYPRE_Complex *P_offd_data,
                                                           HYPRE_Complex *row_sums );
 
-__global__ void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int start, HYPRE_Int stop,
+__global__ void hypreCUDAKernel_insert_remaining_weights( hypre_Item &item, HYPRE_Int start, HYPRE_Int stop,
                                                           HYPRE_Int *pass_order, HYPRE_Int *Pi_diag_i, HYPRE_Int *Pi_diag_j, HYPRE_Real *Pi_diag_data,
                                                           HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *Pi_offd_i,
                                                           HYPRE_Int *Pi_offd_j, HYPRE_Real *Pi_offd_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j,
                                                           HYPRE_Real *P_offd_data );
 
-__global__ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int num_points, HYPRE_Int color,
+__global__ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item &item, HYPRE_Int num_points, HYPRE_Int color,
                                                           HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
                                                           HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
                                                           HYPRE_Complex *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j, HYPRE_Complex *A_offd_data,
@@ -101,15 +101,15 @@ __global__ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int num_points, 
                                                           HYPRE_Int *Q_diag_j, HYPRE_Complex *Q_diag_data, HYPRE_Int *Q_offd_j, HYPRE_Complex *Q_offd_data,
                                                           HYPRE_Complex *w_row_sum, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd );
 
-__global__ void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int num_points, HYPRE_Int *pass_order,
+__global__ void hypreCUDAKernel_mutli_pi_rowsum( hypre_Item &item, HYPRE_Int num_points, HYPRE_Int *pass_order,
                                                  HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_data, HYPRE_Int *Pi_diag_i, HYPRE_Complex *Pi_diag_data,
                                                  HYPRE_Int *Pi_offd_i, HYPRE_Complex *Pi_offd_data, HYPRE_Complex *w_row_sum );
 
-__global__ void hypreCUDAKernel_pass_order_count( HYPRE_Int num_points, HYPRE_Int color,
+__global__ void hypreCUDAKernel_pass_order_count( hypre_Item &item, HYPRE_Int num_points, HYPRE_Int color,
                                                   HYPRE_Int *points_left, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int *S_diag_i,
                                                   HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *diag_shifts );
 
-__global__ void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int start, HYPRE_Int stop,
+__global__ void hypreCUDAKernel_populate_big_P_offd_j( hypre_Item &item, HYPRE_Int start, HYPRE_Int stop,
                                                        HYPRE_Int *pass_order, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j, HYPRE_BigInt *col_map_offd_Pi,
                                                        HYPRE_BigInt *big_P_offd_j );
 
@@ -1372,7 +1372,8 @@ hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int  *pass_marker_offd,
 }
 
 __global__
-void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int      nrows,
+void hypreCUDAKernel_cfmarker_masked_rowsum( hypre_Item    &item,
+                                             HYPRE_Int      nrows,
                                              HYPRE_Int     *A_diag_i,
                                              HYPRE_Int     *A_diag_j,
                                              HYPRE_Complex *A_diag_data,
@@ -1466,7 +1467,8 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( HYPRE_Int      nrows,
 }
 
 __global__
-void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
+void hypreCUDAKernel_mutli_pi_rowsum( hypre_Item    &item,
+                                      HYPRE_Int      num_points,
                                       HYPRE_Int     *pass_order,
                                       HYPRE_Int     *A_diag_i,
                                       HYPRE_Complex *A_diag_data,
@@ -1570,7 +1572,8 @@ void hypreCUDAKernel_mutli_pi_rowsum( HYPRE_Int      num_points,
 }
 
 __global__
-void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
+void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_Item &item,
+                                               HYPRE_Int  num_points,
                                                HYPRE_Int  color,
                                                HYPRE_Int *pass_order,
                                                HYPRE_Int *pass_marker,
@@ -1687,7 +1690,8 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( HYPRE_Int  num_points,
 }
 
 __global__
-void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( HYPRE_Int      num_points,
+void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item    &item,
+                                               HYPRE_Int      num_points,
                                                HYPRE_Int      color,
                                                HYPRE_Int     *pass_order,
                                                HYPRE_Int     *pass_marker,
@@ -1848,7 +1852,8 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( HYPRE_Int      num_points,
 }
 
 __global__
-void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int   start,
+void hypreCUDAKernel_insert_remaining_weights( hypre_Item &item,
+                                               HYPRE_Int   start,
                                                HYPRE_Int   stop,
                                                HYPRE_Int  *pass_order,
                                                HYPRE_Int  *Pi_diag_i,
@@ -1920,7 +1925,8 @@ void hypreCUDAKernel_insert_remaining_weights( HYPRE_Int   start,
 
 
 __global__
-void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
+void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item    &item,
+                                               HYPRE_Int      num_points,
                                                HYPRE_Int      color,
                                                HYPRE_Int     *pass_order,
                                                HYPRE_Int     *pass_marker,
@@ -2124,7 +2130,8 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( HYPRE_Int      num_points,
 }
 
 __global__
-void hypreCUDAKernel_pass_order_count( HYPRE_Int  num_points,
+void hypreCUDAKernel_pass_order_count( hypre_Item &item,
+                                       HYPRE_Int  num_points,
                                        HYPRE_Int  color,
                                        HYPRE_Int *points_left,
                                        HYPRE_Int *pass_marker,
@@ -2223,7 +2230,8 @@ void hypreCUDAKernel_pass_order_count( HYPRE_Int  num_points,
 }
 
 __global__
-void hypreCUDAKernel_populate_big_P_offd_j( HYPRE_Int     start,
+void hypreCUDAKernel_populate_big_P_offd_j( hypre_Item   &item,
+                                            HYPRE_Int     start,
                                             HYPRE_Int     stop,
                                             HYPRE_Int    *pass_order,
                                             HYPRE_Int    *P_offd_i,

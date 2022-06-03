@@ -19,8 +19,8 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 template <char type>
 static __device__ __forceinline__
-void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
-                       HYPRE_Int *ib,
+void rownnz_naive_rowi(hypre_Item &item, HYPRE_Int rowi, HYPRE_Int lane_id, 
+                       HYPRE_Int *ia, HYPRE_Int *ja, HYPRE_Int *ib,
                        HYPRE_Int &row_nnz_sum, HYPRE_Int &row_nnz_max)
 {
    /* load the start and end position of row i of A */
@@ -57,7 +57,7 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
 
 template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
-void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
+void csr_spmm_rownnz_naive(hypre_Item &item, HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
                            HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
@@ -106,7 +106,7 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
                        COHEN
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 __global__
-void expdistfromuniform(HYPRE_Int n, float *x)
+void expdistfromuniform(hypre_Item &item, HYPRE_Int n, float *x)
 {
    const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
    const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
@@ -122,7 +122,7 @@ void expdistfromuniform(HYPRE_Int n, float *x)
 /* T = float: single precision should be enough */
 template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP, HYPRE_Int layer>
 __global__
-void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
+void cohen_rowest_kernel(hypre_Item &item, HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
                          HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;

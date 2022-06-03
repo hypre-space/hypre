@@ -22,7 +22,8 @@
  * to be used for the MaxEigEstimate
  */
 __global__ void
-hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
+hypreCUDAKernel_CSRMaxEigEstimate(hypre_Item    &item,
+                                  HYPRE_Int      nrows,
                                   HYPRE_Int     *diag_ia,
                                   HYPRE_Int     *diag_ja,
                                   HYPRE_Complex *diag_aa,

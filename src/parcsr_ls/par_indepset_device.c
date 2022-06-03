@@ -14,7 +14,8 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
+hypreCUDAKernel_IndepSetMain(hypre_Item &item,
+                             HYPRE_Int   graph_diag_size,
                              HYPRE_Int  *graph_diag,
                              HYPRE_Real *measure_diag,
                              HYPRE_Real *measure_offd,
@@ -106,7 +107,8 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
 }
 
 __global__ void
-hypreCUDAKernel_IndepSetFixMarker(HYPRE_Int  *IS_marker_diag,
+hypreCUDAKernel_IndepSetFixMarker(hypre_Item &item,
+                                  HYPRE_Int  *IS_marker_diag,
                                   HYPRE_Int   num_elmts_send,
                                   HYPRE_Int  *send_map_elmts,
                                   HYPRE_Int  *int_send_buf,

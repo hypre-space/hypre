@@ -10,14 +10,16 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGCreateS_rowcount( hypre_Item &item,
+                                                 HYPRE_Int nr_of_rows,
                                                  HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
                                                  HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
                                                  HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
                                                  HYPRE_Int* S_temp_diag_j, HYPRE_Int* S_temp_offd_j,
                                                  HYPRE_Int num_functions, HYPRE_Int* dof_func, HYPRE_Int* dof_func_offd,
                                                  HYPRE_Int* jS_diag, HYPRE_Int* jS_offd );
-__global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
+                                                    HYPRE_Int nr_of_rows,
                                                     HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
                                                     HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
                                                     HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
@@ -230,7 +232,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 }
 
 /*-----------------------------------------------------------------------*/
-__global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
+__global__ void hypre_BoomerAMGCreateS_rowcount( hypre_Item &item,
+                                                 HYPRE_Int   nr_of_rows,
                                                  HYPRE_Real  max_row_sum,
                                                  HYPRE_Real  strength_threshold,
                                                  HYPRE_Real *A_diag_data,
@@ -429,7 +432,8 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 }
 
 /*-----------------------------------------------------------------------*/
-__global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
+                                                    HYPRE_Int   nr_of_rows,
                                                     HYPRE_Real  max_row_sum,
                                                     HYPRE_Real  strength_threshold,
                                                     HYPRE_Real *A_diag_data,

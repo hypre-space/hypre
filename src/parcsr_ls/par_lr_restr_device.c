@@ -10,7 +10,8 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_Item &item,
+                                                                   HYPRE_Int nr_of_rows,
                                                                    HYPRE_Int *Fmap, HYPRE_Int *Cmap, HYPRE_Int *Z_diag_i, HYPRE_Int *Z_diag_j, HYPRE_Complex *Z_diag_a,
                                                                    HYPRE_Int *R_diag_i, HYPRE_Int *R_diag_j, HYPRE_Complex *R_diag_a);
 
@@ -316,7 +317,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
 /*-----------------------------------------------------------------------*/
 __global__ void
-hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
+hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_Item    &item,
+                                                   HYPRE_Int      nr_of_rows,
                                                    HYPRE_Int     *Fmap,
                                                    HYPRE_Int     *Cmap,
                                                    HYPRE_Int     *Z_diag_i,

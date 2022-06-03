@@ -267,7 +267,8 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
 }
 
 __global__ void
-hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
+hypreCUDAKernel_PMISCoarseningInit(hypre_Item &item,
+                                   HYPRE_Int   nrows,
                                    HYPRE_Int   CF_init,
                                    HYPRE_Int  *S_diag_i,
                                    HYPRE_Int  *S_offd_i,
@@ -378,7 +379,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 }
 
 __global__ void
-hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
+hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_Item &item,
+                                       HYPRE_Int   graph_diag_size,
                                        HYPRE_Int  *graph_diag,
                                        HYPRE_Int  *S_diag_i,
                                        HYPRE_Int  *S_diag_j,

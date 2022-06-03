@@ -15,15 +15,12 @@
 /* return B = [Adiag, Aoffd] */
 #if 1
 __global__ void
-hypreGPUKernel_ConcatDiagAndOffd(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
-   HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
-   HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
-   HYPRE_Int *cols_offd_map,
-   HYPRE_Int *d_ib,     HYPRE_Int *d_jb,     HYPRE_Complex *d_ab)
+hypreGPUKernel_ConcatDiagAndOffd( hypre_Item &item,
+                                  HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
+                                  HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
+                                  HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
+                                  HYPRE_Int *cols_offd_map,
+                                  HYPRE_Int *d_ib,     HYPRE_Int *d_jb,     HYPRE_Complex *d_ab)
 {
 #if defined(HYPRE_USING_SYCL)
    const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
@@ -1141,7 +1138,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
  */
 template<HYPRE_Int type>
 __global__ void
-hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
+hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_Item &item,
+                                                      HYPRE_Int      nrows,
                                                       HYPRE_Real     tol,
                                                       HYPRE_Int     *A_diag_i,
                                                       HYPRE_Int     *A_diag_j,

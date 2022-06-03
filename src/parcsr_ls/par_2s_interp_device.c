@@ -10,20 +10,20 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypreCUDAKernel_compute_weak_rowsums( HYPRE_Int nr_of_rows, bool has_offd,
+__global__ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item &item, HYPRE_Int nr_of_rows, bool has_offd,
                                                       HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
                                                       HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
 
-__global__ void hypreCUDAKernel_MMInterpScaleAFF( HYPRE_Int AFF_nrows, HYPRE_Int *AFF_diag_i,
+__global__ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item &item, HYPRE_Int AFF_nrows, HYPRE_Int *AFF_diag_i,
                                                   HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
                                                   HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
                                                   HYPRE_Real *rsW );
 
-__global__ void hypreCUDAKernel_compute_dlam_dtmp( HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i,
+__global__ void hypreCUDAKernel_compute_dlam_dtmp( hypre_Item &item, HYPRE_Int nr_of_rows, HYPRE_Int *AFF_diag_i,
                                                    HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
                                                    HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
-__global__ void hypreCUDAKernel_MMPEInterpScaleAFF( HYPRE_Int AFF_nrows, HYPRE_Int *AFF_diag_i,
+__global__ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item &item, HYPRE_Int AFF_nrows, HYPRE_Int *AFF_diag_i,
                                                     HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
                                                     HYPRE_Complex *AFF_offd_a, HYPRE_Complex *tmp_diag, HYPRE_Complex *tmp_offd,
                                                     HYPRE_Complex *lam_diag, HYPRE_Complex *lam_offd, HYPRE_Int *F2_to_F, HYPRE_Real *rsW );
@@ -557,7 +557,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_MMInterpScaleAFF( HYPRE_Int      AFF_nrows,
+void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
+                                       HYPRE_Int      AFF_nrows,
                                        HYPRE_Int     *AFF_diag_i,
                                        HYPRE_Int     *AFF_diag_j,
                                        HYPRE_Complex *AFF_diag_a,
@@ -687,7 +688,8 @@ void hypreCUDAKernel_MMInterpScaleAFF( HYPRE_Int      AFF_nrows,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_MMPEInterpScaleAFF( HYPRE_Int      AFF_nrows,
+void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
+                                         HYPRE_Int      AFF_nrows,
                                          HYPRE_Int     *AFF_diag_i,
                                          HYPRE_Int     *AFF_diag_j,
                                          HYPRE_Complex *AFF_diag_a,

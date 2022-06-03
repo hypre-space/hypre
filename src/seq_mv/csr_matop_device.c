@@ -771,14 +771,11 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 __global__ void
-hypreGPUKernel_CSRMoveDiagFirst(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int      nrows,
-   HYPRE_Int     *ia,
-   HYPRE_Int     *ja,
-   HYPRE_Complex *aa )
+hypreGPUKernel_CSRMoveDiagFirst( hypre_Item &item,
+                                 HYPRE_Int      nrows,
+                                 HYPRE_Int     *ia,
+                                 HYPRE_Int     *ja,
+                                 HYPRE_Complex *aa )
 {
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int row  = hypre_sycl_get_grid_warp_id(item);

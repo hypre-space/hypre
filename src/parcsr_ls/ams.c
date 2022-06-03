@@ -136,7 +136,8 @@ hypre_ParVector *hypre_ParVectorInDomainOf(hypre_ParCSRMatrix *A)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 template<HYPRE_Int dir>
 __global__ void
-hypreCUDAKernel_ParVectorBlockSplitGather(HYPRE_Int   size,
+hypreCUDAKernel_ParVectorBlockSplitGather(hypre_Item &item,
+                                          HYPRE_Int   size,
                                           HYPRE_Int   dim,
                                           HYPRE_Real *x0,
                                           HYPRE_Real *x1,
@@ -370,7 +371,8 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsHost(hypre_ParCSRMatrix *A)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_ParCSRMatrixFixZeroRows( HYPRE_Int      nrows,
+hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_Item    &item,
+                                         HYPRE_Int      nrows,
                                          HYPRE_Int     *A_diag_i,
                                          HYPRE_Int     *A_diag_j,
                                          HYPRE_Complex *A_diag_data,
@@ -748,7 +750,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_ParCSRMatrixSetDiagRows(HYPRE_Int      nrows,
+hypreCUDAKernel_ParCSRMatrixSetDiagRows(hypre_Item    &item,
+                                        HYPRE_Int      nrows,
                                         HYPRE_Int     *A_diag_I,
                                         HYPRE_Int     *A_diag_J,
                                         HYPRE_Complex *A_diag_data,
@@ -1464,7 +1467,8 @@ HYPRE_Int hypre_AMSSetBetaAMGCoarseRelaxType(void *solver,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int  nnz,
+hypreCUDAKernel_AMSComputePi_copy1(hypre_Item &item,
+                                   HYPRE_Int  nnz,
                                    HYPRE_Int  dim,
                                    HYPRE_Int *j_in,
                                    HYPRE_Int *j_out)
@@ -1483,7 +1487,8 @@ hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int  nnz,
 }
 
 __global__ void
-hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
+hypreCUDAKernel_AMSComputePi_copy2(hypre_Item &item,
+                                   HYPRE_Int   nrows,
                                    HYPRE_Int   dim,
                                    HYPRE_Int  *i_in,
                                    HYPRE_Real *data_in,
@@ -1759,7 +1764,8 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
+hypreCUDAKernel_AMSComputePixyz_copy(hypre_Item &item,
+                                     HYPRE_Int   nrows,
                                      HYPRE_Int   dim,
                                      HYPRE_Int  *i_in,
                                      HYPRE_Real *data_in,
@@ -2343,7 +2349,8 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_AMSComputeGPi_copy2(HYPRE_Int   nrows,
+hypreCUDAKernel_AMSComputeGPi_copy2(hypre_Item &item,
+                                    HYPRE_Int   nrows,
                                     HYPRE_Int   dim,
                                     HYPRE_Int  *i_in,
                                     HYPRE_Real *data_in,
@@ -2630,7 +2637,8 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
+hypreCUDAKernel_FixInterNodes( hypre_Item    &item,
+                               HYPRE_Int      nrows,
                                HYPRE_Int     *G0t_diag_i,
                                HYPRE_Complex *G0t_diag_data,
                                HYPRE_Int     *G0t_offd_i,
@@ -2690,7 +2698,8 @@ hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
 }
 
 __global__ void
-hypreCUDAKernel_AMSSetupScaleGGt( HYPRE_Int   Gt_num_rows,
+hypreCUDAKernel_AMSSetupScaleGGt( hypre_Item &item,
+                                  HYPRE_Int   Gt_num_rows,
                                   HYPRE_Int  *Gt_diag_i,
                                   HYPRE_Int  *Gt_diag_j,
                                   HYPRE_Real *Gt_diag_data,

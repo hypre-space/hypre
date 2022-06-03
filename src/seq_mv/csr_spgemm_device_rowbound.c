@@ -23,7 +23,8 @@
 template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash table */
+hypre_spgemm_hash_insert_symbl( hypre_Item &item,
+                                HYPRE_Int   HashSize, /* capacity of the hash table */
                                 volatile HYPRE_Int  *HashKeys, /* assumed to be initialized as all -1's */
                                 HYPRE_Int   key,      /* assumed to be nonnegative */
                                 HYPRE_Int  &count     /* increase by 1 if is a new entry */)
@@ -62,7 +63,8 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int   HashSize, /* capacity of the hash ta
 template <char HashType>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
+hypre_spgemm_compute_row_symbl( hypre_Item &item,
+                                HYPRE_Int  rowi,
                                 HYPRE_Int  lane_id,
                                 HYPRE_Int *ia,
                                 HYPRE_Int *ja,
@@ -146,7 +148,8 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int  rowi,
 
 template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE, HYPRE_Int ATTEMPT, char HashType>
 __global__ void
-hypre_spgemm_symbolic( HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
+hypre_spgemm_symbolic( hypre_Item &item,
+                       HYPRE_Int  M, /* HYPRE_Int K, HYPRE_Int N, */
                        HYPRE_Int *rind,
                        HYPRE_Int *ia,
                        HYPRE_Int *ja,

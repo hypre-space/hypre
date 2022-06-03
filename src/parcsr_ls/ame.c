@@ -249,7 +249,8 @@ HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
+hypreCUDAKernel_GtEliminateBoundary( hypre_Item    &item,
+                                     HYPRE_Int      nrows,
                                      HYPRE_Int     *Gt_diag_i,
                                      HYPRE_Int     *Gt_diag_j,
                                      HYPRE_Complex *Gt_diag_data,

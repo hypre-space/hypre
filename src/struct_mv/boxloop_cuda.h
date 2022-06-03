@@ -86,7 +86,8 @@ extern "C++"
 
    template <typename LOOP_BODY, typename REDUCER>
    __global__ void
-   reductionforall_kernel( HYPRE_Int length,
+   reductionforall_kernel( hypre_Item &item,
+                           HYPRE_Int length,
                            REDUCER   reducer,
                            LOOP_BODY loop_body )
    {
@@ -104,7 +105,8 @@ extern "C++"
 
    template<typename LOOP_BODY, typename REDUCER>
    void
-   ReductionBoxLoopforall( HYPRE_Int  length,
+   ReductionBoxLoopforall( hypre_Item &item,
+                           HYPRE_Int  length,
                            REDUCER   & reducer,
                            LOOP_BODY  loop_body )
    {

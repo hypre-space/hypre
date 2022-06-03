@@ -64,7 +64,8 @@
 /* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <HYPRE_Int F, HYPRE_Int K, typename T>
 __global__ void
-hypre_csr_v_k_shuffle(HYPRE_Int     n,
+hypre_csr_v_k_shuffle(hypre_Item   &item,
+                      HYPRE_Int     n,
                       T             alpha,
                       HYPRE_Int    *d_ia,
                       HYPRE_Int    *d_ja,

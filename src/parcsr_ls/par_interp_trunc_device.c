@@ -11,7 +11,8 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
-hypreCUDAKernel_InterpTruncation( HYPRE_Int   nrows,
+hypreCUDAKernel_InterpTruncation( hypre_Item &item,
+                                  HYPRE_Int   nrows,
                                   HYPRE_Real  trunc_factor,
                                   HYPRE_Int   max_elmts,
                                   HYPRE_Int  *P_i,

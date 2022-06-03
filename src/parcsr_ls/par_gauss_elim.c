@@ -389,7 +389,8 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 #define BLOCK_SIZE 512
 
 __global__ void
-hypreCUDAKernel_dgemv(HYPRE_Int   m,
+hypreCUDAKernel_dgemv(hypre_Item &item,
+                      HYPRE_Int   m,
                       HYPRE_Int   n,
                       HYPRE_Int   lda,
                       HYPRE_Real *a,
