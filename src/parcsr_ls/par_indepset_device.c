@@ -114,7 +114,7 @@ hypreCUDAKernel_IndepSetFixMarker(hypre_Item &item,
                                   HYPRE_Int  *int_send_buf,
                                   HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (thread_id >= num_elmts_send)
    {

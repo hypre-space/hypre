@@ -925,7 +925,7 @@ hypreCUDAKernel_CSRCheckDiagFirst( HYPRE_Int  nrows,
                                    HYPRE_Int *ja,
                                    HYPRE_Int *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>(item);
    if (row < nrows)
    {
       result[row] = (ia[row + 1] > ia[row]) && (ja[ia[row]] != row);
@@ -1616,7 +1616,7 @@ hypreCUDAKernel_CSRMatrixIntersectPattern(HYPRE_Int  n,
                                           HYPRE_Int *mark,
                                           HYPRE_Int  diag_option)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i >= n)
    {

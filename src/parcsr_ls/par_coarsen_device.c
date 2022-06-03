@@ -276,7 +276,7 @@ hypreCUDAKernel_PMISCoarseningInit(hypre_Item &item,
                                    HYPRE_Int  *CF_marker_diag)
 {
    /* global_thread_id */
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i >= nrows)
    {

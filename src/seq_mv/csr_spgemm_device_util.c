@@ -44,7 +44,7 @@ hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
                         HYPRE_Int *ghash_sizes,
                         HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id >= num_ghash)
    {
@@ -72,7 +72,7 @@ hypre_SpGemmGhashSize2( HYPRE_Int  num_rows,
                         HYPRE_Int *ghash_sizes,
                         HYPRE_Int  SHMEM_HASH_SIZE )
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < num_rows)
    {

@@ -144,7 +144,7 @@ hypreCUDAKernel_ParVectorBlockSplitGather(hypre_Item &item,
                                           HYPRE_Real *x2,
                                           HYPRE_Real *x)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i >= size * dim)
    {
@@ -759,7 +759,7 @@ hypreCUDAKernel_ParCSRMatrixSetDiagRows(hypre_Item    &item,
                                         HYPRE_Int      num_cols_offd,
                                         HYPRE_Real     d)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
    if (i >= nrows)
    {
       return;
@@ -1473,7 +1473,7 @@ hypreCUDAKernel_AMSComputePi_copy1(hypre_Item &item,
                                    HYPRE_Int *j_in,
                                    HYPRE_Int *j_out)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i < nnz)
    {

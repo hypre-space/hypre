@@ -383,7 +383,7 @@ __global__ void
 hypreCUDAKernel_IJVectorAssemblePar(hypre_Item &item, HYPRE_Int n, HYPRE_Complex *x, HYPRE_BigInt *map,
                                     HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
 
    if (i >= n)
    {

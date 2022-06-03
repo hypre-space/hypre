@@ -399,7 +399,7 @@ hypreCUDAKernel_dgemv(hypre_Item &item,
 {
    __shared__ HYPRE_Real sh_x[BLOCK_SIZE];
 
-   HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>(item);
    HYPRE_Int tid = hypre_cuda_get_thread_id<1>();
 
    HYPRE_Real y_row = 0.0;
