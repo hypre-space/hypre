@@ -60,13 +60,11 @@ hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
 HYPRE_Int
 hypre_SeqVectorDestroy( hypre_Vector *vector )
 {
-   HYPRE_Int ierr = 0;
-
    if (vector)
    {
       HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation(vector);
 
-      if ( hypre_VectorOwnsData(vector) )
+      if (hypre_VectorOwnsData(vector))
       {
          hypre_TFree(hypre_VectorData(vector), memory_location);
       }
@@ -74,7 +72,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -85,7 +83,6 @@ HYPRE_Int
 hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
-   HYPRE_Int  ierr = 0;
    HYPRE_Int  num_vectors = hypre_VectorNumVectors(vector);
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
@@ -95,37 +92,34 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_
     * to be consistent with `memory_location'
     * Otherwise, mismatches will exist and problems will be encountered
     * when being used, and freed */
-   if ( !hypre_VectorData(vector) )
+   if (!hypre_VectorData(vector))
    {
       hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
    }
 
-   if ( multivec_storage_method == 0 )
+   if (multivec_storage_method == 0)
    {
       hypre_VectorVectorStride(vector) = size;
-      hypre_VectorIndexStride(vector) = 1;
+      hypre_VectorIndexStride(vector)  = 1;
    }
-   else if ( multivec_storage_method == 1 )
+   else if (multivec_storage_method == 1)
    {
       hypre_VectorVectorStride(vector) = 1;
-      hypre_VectorIndexStride(vector) = num_vectors;
+      hypre_VectorIndexStride(vector)  = num_vectors;
    }
    else
    {
-      ++ierr;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid multivec storage method!\n");
+      return hypre_error_flag;
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_SeqVectorInitialize( hypre_Vector *vector )
 {
-   HYPRE_Int ierr;
-
-   ierr = hypre_SeqVectorInitialize_v2( vector, hypre_VectorMemoryLocation(vector) );
-
-   return ierr;
+   return hypre_SeqVectorInitialize_v2(vector, hypre_VectorMemoryLocation(vector));
 }
 
 /*--------------------------------------------------------------------------
@@ -136,11 +130,9 @@ HYPRE_Int
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
                              HYPRE_Int     owns_data   )
 {
-   HYPRE_Int    ierr = 0;
-
    hypre_VectorOwnsData(vector) = owns_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -195,15 +187,13 @@ HYPRE_Int
 hypre_SeqVectorPrint( hypre_Vector *vector,
                       char         *file_name )
 {
-   FILE    *fp;
+   FILE          *fp;
 
    HYPRE_Complex *data;
    HYPRE_Int      size, num_vectors, vecstride, idxstride;
 
    HYPRE_Int      i, j;
    HYPRE_Complex  value;
-
-   HYPRE_Int      ierr = 0;
 
    num_vectors = hypre_VectorNumVectors(vector);
    vecstride = hypre_VectorVectorStride(vector);
@@ -259,7 +249,7 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
 
    fclose(fp);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -343,9 +333,8 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
    HYPRE_Complex *vector_data = hypre_VectorData(v);
    HYPRE_Int      size        = hypre_VectorSize(v);
    HYPRE_Int      i;
-   HYPRE_Int      ierr  = 0;
-   hypre_SeedRand(seed);
 
+   hypre_SeedRand(seed);
    size *= hypre_VectorNumVectors(v);
 
    if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(v)) == hypre_MEMORY_HOST)
@@ -368,7 +357,7 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
       hypre_TFree(h_data, HYPRE_MEMORY_HOST);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -385,8 +374,6 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
-   HYPRE_Int ierr = 0;
-
    size_t size = hypre_min( hypre_VectorSize(x), hypre_VectorSize(y) ) * hypre_VectorNumVectors(x);
 
    hypre_TMemcpy( hypre_VectorData(y),
@@ -400,7 +387,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -481,7 +468,6 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(y);
-   HYPRE_Int      ierr = 0;
 
    size *= hypre_VectorNumVectors(y);
 
@@ -534,7 +520,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -552,7 +538,6 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
-   HYPRE_Int      ierr = 0;
 
    size *= hypre_VectorNumVectors(x);
 
@@ -607,7 +592,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* y = y + x ./ b */
@@ -821,7 +806,6 @@ HYPRE_Complex hypre_SeqVectorSumElts( hypre_Vector *vector )
 HYPRE_Int
 hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_MemoryLocation memory_location)
 {
-   HYPRE_Int      ierr = 0;
 #ifdef HYPRE_USING_UNIFIED_MEMORY
    if (hypre_VectorMemoryLocation(x) != HYPRE_MEMORY_DEVICE)
    {
@@ -834,13 +818,13 @@ hypre_SeqVectorPrefetch( hypre_Vector *x, HYPRE_MemoryLocation memory_location)
 
    if (size == 0)
    {
-      return ierr;
+      return hypre_error_flag;
    }
 
    hypre_MemPrefetch(x_data, sizeof(HYPRE_Complex)*size, memory_location);
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 #if 0
@@ -858,7 +842,6 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
-   HYPRE_Int      ierr = 0;
 
    size *= hypre_VectorNumVectors(x);
 
@@ -894,6 +877,6 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 #endif
