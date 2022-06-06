@@ -72,22 +72,30 @@ hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 3,  HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4,                         /* 128,   8 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, false, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 4,  HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2,                         /* 256,   16 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE /  2, false, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 5,  HYPRE_SPGEMM_SYMBL_HASH_SIZE,                              /* 512,   32 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE,      false, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 6,  HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2,                         /* 1024,  64 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, false, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 7,  HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4,                         /* 2048,  128 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, false, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 8,  HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8,                         /* 4096,  256 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, false, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,                         /* 8192,  512 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, 9 == high_bin, CAN_FAIL, d_rf);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,                         /* 16384, 1024 */
-                                   HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, true,  CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 3,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4,                         /* 128,   8 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, false, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 4,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2,                         /* 256,   16 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  2, false, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 5,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE,                              /* 512,   32 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE,      false, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 6,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2,                         /* 1024,  64 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, false, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 7,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4,                         /* 2048,  128 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, false, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 8,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8,                         /* 4096,  256 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, false, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 9,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,                         /* 8192,  512 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, 9 == high_bin, CAN_FAIL, d_rf);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 10,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,                         /* 16384, 1024 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE * 32, true,  CAN_FAIL, d_rf);
 
    hypre_TFree(d_rind, HYPRE_MEMORY_DEVICE);
 
@@ -268,21 +276,26 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 1, HYPRE_SPGEMM_SYMBL_HASH_SIZE / 16,                      /*  32,  2 */
-                                  HYPRE_SPGEMM_BASE_GROUP_SIZE / 16, false, false, NULL);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 2, HYPRE_SPGEMM_SYMBL_HASH_SIZE /  8,                      /*  64,  4 */
-                                  HYPRE_SPGEMM_BASE_GROUP_SIZE /  8, false, false, NULL);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 3, HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4,                      /* 128,  8 */
-                                  HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, false, false, NULL);
-   HYPRE_SPGEMM_ROWNNZ_BINNED( 4, HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2,                      /* 256, 16 */
-                                  HYPRE_SPGEMM_BASE_GROUP_SIZE /  2, false, false, NULL);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 1,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE / 16,                      /*  32,  2 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE / 16, false, false, NULL);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 2,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE /  8,                      /*  64,  4 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  8, false, false, NULL);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 3,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4,                      /* 128,  8 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  4, false, false, NULL);
+   HYPRE_SPGEMM_ROWNNZ_BINNED( 4,
+                               HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2,                      /* 256, 16 */
+                               HYPRE_SPGEMM_BASE_GROUP_SIZE /  2, false, false, NULL);
 
    if (h_bin_ptr[5] > h_bin_ptr[4])
    {
       char *d_rf = hypre_CTAlloc(char, m, HYPRE_MEMORY_DEVICE);
 
-      HYPRE_SPGEMM_ROWNNZ_BINNED( 5, HYPRE_SPGEMM_SYMBL_HASH_SIZE,
-                                     HYPRE_SPGEMM_BASE_GROUP_SIZE, false, true, d_rf); /* 512, 32 */
+      HYPRE_SPGEMM_ROWNNZ_BINNED( 5,
+                                  HYPRE_SPGEMM_SYMBL_HASH_SIZE,
+                                  HYPRE_SPGEMM_BASE_GROUP_SIZE, false, true, d_rf);    /* 512, 32 */
 
       HYPRE_Int num_failed_rows =
          HYPRE_THRUST_CALL( reduce,
@@ -311,16 +324,21 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 
          hypre_SpGemmCreateBins(num_failed_rows, s, t, u, d_rc, true, d_rind, h_bin_ptr);
 
-         HYPRE_SPGEMM_ROWNNZ_BINNED( 6,  HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2,                   /* 1024,   64 */
-                                         HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, false, false, NULL);
-         HYPRE_SPGEMM_ROWNNZ_BINNED( 7,  HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4,                   /* 2048,  128 */
-                                         HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, false, false, NULL);
-         HYPRE_SPGEMM_ROWNNZ_BINNED( 8,  HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8,                   /* 4096,  256 */
-                                         HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, false, false, NULL);
-         HYPRE_SPGEMM_ROWNNZ_BINNED( 9,  HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,                   /* 8192,  512 */
-                                         HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, 9 == high_bin, false, NULL);
-         HYPRE_SPGEMM_ROWNNZ_BINNED( 10, HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,                   /* 16384, 1024 */
-                                         HYPRE_SPGEMM_BASE_GROUP_SIZE * 32,  true, false, NULL);
+         HYPRE_SPGEMM_ROWNNZ_BINNED( 6,
+                                     HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2,                /* 1024,   64 */
+                                     HYPRE_SPGEMM_BASE_GROUP_SIZE *  2, false, false, NULL);
+         HYPRE_SPGEMM_ROWNNZ_BINNED( 7,
+                                     HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4,                /* 2048,  128 */
+                                     HYPRE_SPGEMM_BASE_GROUP_SIZE *  4, false, false, NULL);
+         HYPRE_SPGEMM_ROWNNZ_BINNED( 8,
+                                     HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8,                /* 4096,  256 */
+                                     HYPRE_SPGEMM_BASE_GROUP_SIZE *  8, false, false, NULL);
+         HYPRE_SPGEMM_ROWNNZ_BINNED( 9,
+                                     HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16,                /* 8192,  512 */
+                                     HYPRE_SPGEMM_BASE_GROUP_SIZE * 16, 9 == high_bin, false, NULL);
+         HYPRE_SPGEMM_ROWNNZ_BINNED( 10,
+                                     HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32,                /* 16384, 1024 */
+                                     HYPRE_SPGEMM_BASE_GROUP_SIZE * 32,  true, false, NULL);
       }
 
       hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);

@@ -133,8 +133,9 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 #if defined(HYPRE_SPGEMM_PRINTF)
    HYPRE_SPGEMM_PRINT("===========================================================================\n");
    HYPRE_SPGEMM_PRINT("SM count %d\n", multiProcessorCount);
-   HYPRE_SPGEMM_PRINT("Highest Bin Symbl %d, Numer %d\n", hypre_HandleSpgemmHighestBin(hypre_handle())[0],
-                                                          hypre_HandleSpgemmHighestBin(hypre_handle())[1]);
+   HYPRE_SPGEMM_PRINT("Highest Bin Symbl %d, Numer %d\n",
+                      hypre_HandleSpgemmHighestBin(hypre_handle())[0],
+                      hypre_HandleSpgemmHighestBin(hypre_handle())[1]);
    HYPRE_SPGEMM_PRINT("---------------------------------------------------------------------------\n");
    HYPRE_SPGEMM_PRINT("Bin:      ");
    for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", i); } HYPRE_SPGEMM_PRINT("\n");
