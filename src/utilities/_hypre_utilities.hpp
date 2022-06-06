@@ -532,6 +532,9 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_binned;
    HYPRE_Int                         spgemm_num_bin;
+   /* the highest bins for symbl [0] and numer [1]
+    * which are not necessary to be `spgemm_num_bin' due to shmem limit on GPUs */
+   HYPRE_Int                         spgemm_highest_bin[2];
    /* for bin i: ([0][i], [2][i]) = (max #block to launch, block dimension) for symbl
     *            ([1][i], [3][i]) = (max #block to launch, block dimension) for numer */
    HYPRE_Int                         spgemm_block_num_dim[4][HYPRE_SPGEMM_MAX_NBIN + 1];
@@ -567,6 +570,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmBinned(data)                   ((data) -> spgemm_binned)
 #define hypre_DeviceDataSpgemmNumBin(data)                   ((data) -> spgemm_num_bin)
+#define hypre_DeviceDataSpgemmHighestBin(data)               ((data) -> spgemm_highest_bin)
 #define hypre_DeviceDataSpgemmBlockNumDim(data)              ((data) -> spgemm_block_num_dim)
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)

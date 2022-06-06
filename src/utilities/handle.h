@@ -81,6 +81,7 @@ typedef struct
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmBinned(hypre_handle)                   hypre_DeviceDataSpgemmBinned(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmNumBin(hypre_handle)                   hypre_DeviceDataSpgemmNumBin(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmHighestBin(hypre_handle)               hypre_DeviceDataSpgemmHighestBin(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmBlockNumDim(hypre_handle)              hypre_DeviceDataSpgemmBlockNumDim(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_DeviceDataSpgemmRownnzEstimateMethod(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))

@@ -28,7 +28,8 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
                          hypre_HandleDevice(hypre_handle()));
 #endif
 
-   auto max_nblocks = hypre_HandleSpgemmBlockNumDim(hypre_handle());
+   typedef HYPRE_Int arrType[4][HYPRE_SPGEMM_MAX_NBIN + 1];
+   arrType &max_nblocks = hypre_HandleSpgemmBlockNumDim(hypre_handle());
 
    for (HYPRE_Int i = 0; i < num_bins + 1; i++)
    {
@@ -113,11 +114,16 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    < HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_SPGEMM_BASE_GROUP_SIZE * 16 >
    (multiProcessorCount, &max_nblocks[1][9], &max_nblocks[3][9]);
 
-#if defined(HYPRE_USING_CUDA)
    hypre_spgemm_numerical_max_num_blocks
    < HYPRE_SPGEMM_NUMER_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32 >
    (multiProcessorCount, &max_nblocks[1][10], &max_nblocks[3][10]);
-#endif
+
+   /* highest bin with nonzero num blocks */
+   typedef HYPRE_Int arr2Type[2];
+   arr2Type &high_bin = hypre_HandleSpgemmHighestBin(hypre_handle());
+
+   for (HYPRE_Int i = num_bins; i >= 0; i--) { if (max_nblocks[0][i] > 0) { high_bin[0] = i; break; } }
+   for (HYPRE_Int i = num_bins; i >= 0; i--) { if (max_nblocks[1][i] > 0) { high_bin[1] = i; break; } }
 
    /* this is just a heuristic; having more blocks (than max active) seems improving performance */
 #if defined(HYPRE_USING_CUDA)
@@ -125,20 +131,27 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 #endif
 
 #if defined(HYPRE_SPGEMM_PRINTF)
-   HYPRE_SPGEMM_PRINT("=======================================================================\n");
+   HYPRE_SPGEMM_PRINT("===========================================================================\n");
    HYPRE_SPGEMM_PRINT("SM count %d\n", multiProcessorCount);
-   HYPRE_SPGEMM_PRINT("Bin:  ");
+   HYPRE_SPGEMM_PRINT("Highest Bin Symbl %d, Numer %d\n", hypre_HandleSpgemmHighestBin(hypre_handle())[0],
+                                                          hypre_HandleSpgemmHighestBin(hypre_handle())[1]);
+   HYPRE_SPGEMM_PRINT("---------------------------------------------------------------------------\n");
+   HYPRE_SPGEMM_PRINT("Bin:      ");
    for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", i); } HYPRE_SPGEMM_PRINT("\n");
-   HYPRE_SPGEMM_PRINT("-----------------------------------------------------------------------\n");
-   HYPRE_SPGEMM_PRINT("Bdim: ");
-   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[2][i]); } HYPRE_SPGEMM_PRINT("\n");
-   HYPRE_SPGEMM_PRINT("Sym:  ");
-   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[0][i]); } HYPRE_SPGEMM_PRINT("\n");
-   HYPRE_SPGEMM_PRINT("Bdim: ");
-   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[3][i]); } HYPRE_SPGEMM_PRINT("\n");
-   HYPRE_SPGEMM_PRINT("Num:  ");
-   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", max_nblocks[1][i]); } HYPRE_SPGEMM_PRINT("\n");
-   HYPRE_SPGEMM_PRINT("=======================================================================\n");
+   HYPRE_SPGEMM_PRINT("---------------------------------------------------------------------------\n");
+   HYPRE_SPGEMM_PRINT("Sym-Bdim: ");
+   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", hypre_HandleSpgemmBlockNumDim(hypre_handle())[2][i]); }
+   HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("Sym-Gdim: ");
+   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", hypre_HandleSpgemmBlockNumDim(hypre_handle())[0][i]); }
+   HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("Num-Bdim: ");
+   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", hypre_HandleSpgemmBlockNumDim(hypre_handle())[3][i]); }
+   HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("Num-Gdim: ");
+   for (HYPRE_Int i = 0; i < num_bins + 1; i++) { HYPRE_SPGEMM_PRINT("%5d ", hypre_HandleSpgemmBlockNumDim(hypre_handle())[1][i]); }
+   HYPRE_SPGEMM_PRINT("\n");
+   HYPRE_SPGEMM_PRINT("===========================================================================\n");
 #endif
 
    return hypre_error_flag;

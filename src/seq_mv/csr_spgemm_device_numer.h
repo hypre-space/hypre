@@ -274,8 +274,8 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
    volatile HYPRE_Int     *s_HashKeys = shared_mem;
-   volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *) &s_HashKeys[NUM_GROUPS_PER_BLOCK *
-                                                                                                    SHMEM_HASH_SIZE];
+   volatile HYPRE_Complex *s_HashVals = (volatile HYPRE_Complex *)
+                                        &s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
 #else
    __shared__ volatile HYPRE_Int     s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
    __shared__ volatile HYPRE_Complex s_HashVals[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
@@ -666,8 +666,8 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
    hypre_int numBlocksPerSm = 0;
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
-   const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * (sizeof(HYPRE_Int) + sizeof(
-                                                                              HYPRE_Complex));
+   const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE *
+                                 (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
    hypre_int dynamic_shmem_size = shmem_bytes;
 #else
    hypre_int dynamic_shmem_size = 0;
@@ -675,27 +675,32 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-                       hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+   /* with CUDA, to use > 48K shared memory, must use dynamic and must opt-in. BIN = 10 requires 96K */
+   const hypre_int max_shmem_optin = hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1];
+   if (dynamic_shmem_size <= max_shmem_optin)
+   {
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
-   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-                       hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, false>,
-                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, false>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
-   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-                       hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, true>,
-                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true,  HASH_TYPE, true>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
-   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
-                       hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, HASH_TYPE, false>,
-                       cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
+      HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+                          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, true, HASH_TYPE, false>,
+                          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
 
-   /*
-   HYPRE_CUDA_CALL( cudaFuncSetAttribute(
+      /*
+         HYPRE_CUDA_CALL( cudaFuncSetAttribute(
          hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, false, false, HASH_TYPE, false>,
          cudaFuncAttributeMaxDynamicSharedMemorySize, dynamic_shmem_size) );
-   */
+      */
+   }
 #endif
 #endif
 

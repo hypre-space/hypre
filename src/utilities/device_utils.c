@@ -47,6 +47,8 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
    hypre_DeviceDataSpgemmBinned(data)                   = 0;
    hypre_DeviceDataSpgemmNumBin(data)                   = 0;
+   hypre_DeviceDataSpgemmHighestBin(data)[0]            = 0;
+   hypre_DeviceDataSpgemmHighestBin(data)[1]            = 0;
    /* 1: naive overestimate, 2: naive underestimate, 3: Cohen's algorithm */
    hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
    hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;

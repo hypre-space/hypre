@@ -165,7 +165,6 @@ hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_HIP)
    hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
-   //hipDeviceGetAttribute(&max_size_optin, hipDeviceAttributeMaxSharedMemoryPerBlockOptin, device_id);
 #endif
 
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
