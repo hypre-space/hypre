@@ -37,7 +37,8 @@ hypre_create_ija( HYPRE_Int       m,
 }
 
 __global__ void
-hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
+hypre_SpGemmGhashSize1( hypre_Item &item,
+                        HYPRE_Int  num_rows,
                         HYPRE_Int *row_id,
                         HYPRE_Int  num_ghash,
                         HYPRE_Int *row_sizes,
@@ -65,7 +66,8 @@ hypre_SpGemmGhashSize1( HYPRE_Int  num_rows,
 }
 
 __global__ void
-hypre_SpGemmGhashSize2( HYPRE_Int  num_rows,
+hypre_SpGemmGhashSize2( hypre_Item &item,
+                        HYPRE_Int  num_rows,
                         HYPRE_Int *row_id,
                         HYPRE_Int  num_ghash,
                         HYPRE_Int *row_sizes,

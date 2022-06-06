@@ -776,7 +776,8 @@ extern "C++"
 
    template <typename LOOP_BODY>
    __global__ void
-   forall_kernel( LOOP_BODY loop_body,
+   forall_kernel( hypre_Item &item,
+                  LOOP_BODY loop_body,
                   HYPRE_Int length )
    {
       const HYPRE_Int idx = hypre_cuda_get_grid_thread_id<1, 1>(item);
@@ -839,8 +840,7 @@ extern "C++"
 
    template<typename LOOP_BODY, typename REDUCER>
    void
-   ReductionBoxLoopforall( hypre_Item &item,
-                           HYPRE_Int  length,
+   ReductionBoxLoopforall( HYPRE_Int  length,
                            REDUCER   & reducer,
                            LOOP_BODY  loop_body )
    {

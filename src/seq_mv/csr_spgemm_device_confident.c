@@ -26,8 +26,7 @@
 template <char HashType, HYPRE_Int FAILED_SYMBL>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_numer( hypre_Item    &item,
-                                HYPRE_Int      HashSize,      /* capacity of the hash table */
+hypre_spgemm_hash_insert_numer( HYPRE_Int      HashSize,      /* capacity of the hash table */
                                 volatile HYPRE_Int     *HashKeys,      /* assumed to be initialized as all -1's */
                                 volatile HYPRE_Complex *HashVals,      /* assumed to be initialized as all 0's */
                                 HYPRE_Int      key,           /* assumed to be nonnegative */
@@ -73,8 +72,7 @@ hypre_spgemm_hash_insert_numer( hypre_Item    &item,
 template <HYPRE_Int FAILED_SYMBL, char HashType>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_compute_row_numer( hypre_Item    &item,
-                                HYPRE_Int      rowi,
+hypre_spgemm_compute_row_numer( HYPRE_Int      rowi,
                                 HYPRE_Int      lane_id,
                                 HYPRE_Int     *ia,
                                 HYPRE_Int     *ja,
@@ -160,8 +158,7 @@ hypre_spgemm_compute_row_numer( hypre_Item    &item,
 template <HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_HASH_SIZE>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_copy_from_hash_into_C_row( hypre_Item    &item,
-                                        HYPRE_Int      lane_id,
+hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int      lane_id,
                                         volatile HYPRE_Int     *s_HashKeys,
                                         volatile HYPRE_Complex *s_HashVals,
                                         HYPRE_Int      ghash_size,

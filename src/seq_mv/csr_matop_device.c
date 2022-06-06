@@ -771,7 +771,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 __global__ void
-hypreGPUKernel_CSRMoveDiagFirst( hypre_Item &item,
+hypreGPUKernel_CSRMoveDiagFirst( hypre_Item    &item,
                                  HYPRE_Int      nrows,
                                  HYPRE_Int     *ia,
                                  HYPRE_Int     *ja,
@@ -920,7 +920,8 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
  * RL: only check if it's a non-empty row
  */
 __global__ void
-hypreCUDAKernel_CSRCheckDiagFirst( HYPRE_Int  nrows,
+hypreCUDAKernel_CSRCheckDiagFirst( hypre_Item &item,
+                                   HYPRE_Int  nrows,
                                    HYPRE_Int *ia,
                                    HYPRE_Int *ja,
                                    HYPRE_Int *result )
@@ -960,7 +961,8 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 }
 
 __global__ void
-hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
+hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( hypre_Item    &item,
+                                            HYPRE_Complex  v,
                                             HYPRE_Int      nrows,
                                             HYPRE_Int     *ia,
                                             HYPRE_Int     *ja,
@@ -1057,7 +1059,8 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
 }
 
 __global__ void
-hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
+hypreCUDAKernel_CSRMatrixReplaceDiagDevice( hypre_Item    &item,
+                                            HYPRE_Complex *new_diag,
                                             HYPRE_Complex  v,
                                             HYPRE_Int      nrows,
                                             HYPRE_Int     *ia,
@@ -1241,7 +1244,8 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
  */
 template<HYPRE_Int type>
 __global__ void
-hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
+hypreCUDAKernel_CSRRowSum( hypre_Item    &item,
+                           HYPRE_Int      nrows,
                            HYPRE_Int     *ia,
                            HYPRE_Int     *ja,
                            HYPRE_Complex *aa,
@@ -1352,7 +1356,8 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
  *      4: abs diag inverse sqrt
  */
 __global__ void
-hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
+hypreCUDAKernel_CSRExtractDiag( hypre_Item    &item,
+                                HYPRE_Int      nrows,
                                 HYPRE_Int     *ia,
                                 HYPRE_Int     *ja,
                                 HYPRE_Complex *aa,
@@ -1608,7 +1613,8 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
  * diag_option: 1: special treatment for diag entries, mark as -2
  */
 __global__ void
-hypreCUDAKernel_CSRMatrixIntersectPattern(HYPRE_Int  n,
+hypreCUDAKernel_CSRMatrixIntersectPattern(hypre_Item &item,
+                                          HYPRE_Int  n,
                                           HYPRE_Int  nA,
                                           HYPRE_Int *rowid,
                                           HYPRE_Int *colid,
@@ -1715,7 +1721,8 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
 }
 
 __global__ void
-hypreCUDAKernel_CSRDiagScale( HYPRE_Int      nrows,
+hypreCUDAKernel_CSRDiagScale( hypre_Item    &item,
+                              HYPRE_Int      nrows,
                               HYPRE_Int     *ia,
                               HYPRE_Int     *ja,
                               HYPRE_Complex *aa,

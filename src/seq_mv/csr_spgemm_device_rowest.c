@@ -19,7 +19,7 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 template <char type>
 static __device__ __forceinline__
-void rownnz_naive_rowi(hypre_Item &item, HYPRE_Int rowi, HYPRE_Int lane_id, 
+void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, 
                        HYPRE_Int *ia, HYPRE_Int *ja, HYPRE_Int *ib,
                        HYPRE_Int &row_nnz_sum, HYPRE_Int &row_nnz_max)
 {
