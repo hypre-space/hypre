@@ -1048,8 +1048,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
       HYPRE_Int *ie_ii = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
       HYPRE_Int *ie_j  = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
-      //HYPRE_Complex *ie_a = hypre_TAlloc(HYPRE_Complex, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
-      //HYPRE_THRUST_CALL(fill, ie_a, ie_a + num_rows + num_elemt, 1.0);
 
       HYPRE_THRUST_CALL( sequence, ie_ii, ie_ii + num_rows);
       HYPRE_THRUST_CALL( copy, send_map, send_map + num_elemt, ie_ii + num_rows);
