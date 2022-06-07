@@ -128,7 +128,7 @@ hypre_spgemm_compute_row_attempt( HYPRE_Int      rowi,
       const HYPRE_Int rowB_start = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0, blockDim.x);
       const HYPRE_Int rowB_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1, blockDim.x);
 
-      for (HYPRE_Int k = rowB_start + threadIdx.x; warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
+      for (HYPRE_Int k = rowB_start + threadIdx.x; __any_sync(HYPRE_WARP_FULL_MASK, k < rowB_end);
            k += blockDim.x)
       {
          if (k < rowB_end)
