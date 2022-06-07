@@ -281,12 +281,12 @@ hypreCUDAKernel_GtEliminateBoundary( hypre_Item    &item,
       }
    }
 
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    if (nonempty_offd)
    {
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q1); j += HYPRE_WARP_SIZE)

@@ -354,13 +354,13 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_Item    &item,
    {
       p = read_only_load(R_diag_i + i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
    if (lane < 1)
    {
       pZ = read_only_load(Z_diag_i + i + lane);
    }
-   pZ = __shfl_sync(HYPRE_WARP_FULL_MASK, pZ, 0);
+   pZ = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pZ, 0);
 
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {

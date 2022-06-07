@@ -401,12 +401,12 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_Item    &item,
       }
    }
 
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    if (num_cols_offd)
    {
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
@@ -1517,8 +1517,8 @@ hypreCUDAKernel_AMSComputePi_copy2(hypre_Item &item,
       j = read_only_load(i_in + i + lane_id);
    }
 
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    if (lane_id < dim)
    {
@@ -1527,7 +1527,7 @@ hypreCUDAKernel_AMSComputePi_copy2(hypre_Item &item,
 
    for (HYPRE_Int d = 0; d < dim; d++)
    {
-      G[d] = __shfl_sync(HYPRE_WARP_FULL_MASK, t, d);
+      G[d] = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, d);
    }
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
@@ -1800,8 +1800,8 @@ hypreCUDAKernel_AMSComputePixyz_copy(hypre_Item &item,
       j = read_only_load(i_in + i + lane_id);
    }
 
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    if (lane_id < dim)
    {
@@ -1810,7 +1810,7 @@ hypreCUDAKernel_AMSComputePixyz_copy(hypre_Item &item,
 
    for (HYPRE_Int d = 0; d < dim; d++)
    {
-      G[d] = __shfl_sync(HYPRE_WARP_FULL_MASK, t, d);
+      G[d] = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, d);
    }
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
@@ -2379,8 +2379,8 @@ hypreCUDAKernel_AMSComputeGPi_copy2(hypre_Item &item,
       j = read_only_load(i_in + i + lane_id);
    }
 
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    if (lane_id < dim - 1)
    {
@@ -2389,7 +2389,7 @@ hypreCUDAKernel_AMSComputeGPi_copy2(hypre_Item &item,
 
    for (HYPRE_Int d = 0; d < dim - 1; d++)
    {
-      G[d] = __shfl_sync(HYPRE_WARP_FULL_MASK, t, d);
+      G[d] = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, d);
    }
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
@@ -2660,7 +2660,7 @@ hypreCUDAKernel_FixInterNodes( hypre_Item    &item,
       not1 = read_only_load(&interior_nodes_data[row_i]) != 1.0;
    }
 
-   not1 = __shfl_sync(HYPRE_WARP_FULL_MASK, not1, 0);
+   not1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, not1, 0);
 
    if (!not1)
    {
@@ -2679,12 +2679,12 @@ hypreCUDAKernel_FixInterNodes( hypre_Item    &item,
       }
    }
 
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    if (nonempty_offd)
    {
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
@@ -2724,8 +2724,8 @@ hypreCUDAKernel_AMSSetupScaleGGt( hypre_Item &item,
    {
       p1 = read_only_load(Gt_diag_i + row_i + lane);
    }
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    ne = q1 - p1;
 
    if (ne == 0)
@@ -2739,8 +2739,8 @@ hypreCUDAKernel_AMSSetupScaleGGt( hypre_Item &item,
       {
          p2 = read_only_load(Gt_offd_i + row_i + lane);
       }
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)

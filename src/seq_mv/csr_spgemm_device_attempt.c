@@ -225,7 +225,7 @@ hypre_spgemm_attempt( hypre_Item    &item,
          {
             j = rind[i];
          }
-         ii = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+         ii = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
       }
       else
       {
@@ -241,8 +241,8 @@ hypre_spgemm_attempt( hypre_Item    &item,
          {
             j = read_only_load(ig + ii + lane_id);
          }
-         istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-         iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+         istart_g = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+         iend_g   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
          /* size of global hash table allocated for this row
            (must be power of 2 and >= the actual size of the row of C - shmem hash size) */
@@ -400,8 +400,8 @@ hypre_spgemm_copy_from_hash_into_C( hypre_Item    &item,
          istart_c = read_only_load(ic + i);
          irf = read_only_load(rf + i);
       }
-      istart_c  = __shfl_sync(HYPRE_WARP_FULL_MASK, istart_c, 0);
-      irf = __shfl_sync(HYPRE_WARP_FULL_MASK, irf, 0);
+      istart_c  = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, istart_c, 0);
+      irf = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, irf, 0);
 
       if (irf)
       {
@@ -418,8 +418,8 @@ hypre_spgemm_copy_from_hash_into_C( hypre_Item    &item,
          {
             j = read_only_load(ig + i + lane_id);
          }
-         istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-         iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+         istart_g = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+         iend_g   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
       }
 
 #ifdef HYPRE_DEBUG

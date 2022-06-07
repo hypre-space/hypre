@@ -185,7 +185,7 @@ hypre_spgemm_symbolic( hypre_Item &item,
          {
             j = read_only_load(&rind[i]);
          }
-         ii = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+         ii = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
       }
       else
       {
@@ -201,8 +201,8 @@ hypre_spgemm_symbolic( hypre_Item &item,
          {
             j = read_only_load(ig + grid_warp_id + lane_id);
          }
-         istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-         iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+         istart_g = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+         iend_g   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
          /* size of global hash table allocated for this row
            (must be power of 2 and >= the actual size of the row of C - shmem hash size) */

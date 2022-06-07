@@ -791,15 +791,13 @@ hypreGPUKernel_CSRMoveDiagFirst( hypre_Item    &item,
    {
       p = read_only_load(ia + row + lane);
    }
-#if defined(HYPRE_USING_SYCL)
-   q = SG.shuffle(p, 1);
-   p = SG.shuffle(p, 0);
 
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+#if defined(HYPRE_USING_SYCL)
    for (HYPRE_Int j = p + lane + 1; sycl::any_of_group(SG, j < q); j += SG.get_local_range().get(0))
 #else
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
    for (HYPRE_Int j = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
 #endif
    {
@@ -979,8 +977,8 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( hypre_Item    &item,
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
@@ -1078,8 +1076,8 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( hypre_Item    &item,
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
@@ -1263,8 +1261,8 @@ hypreCUDAKernel_CSRRowSum( hypre_Item    &item,
    {
       p = read_only_load(ia + row_i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    HYPRE_Complex row_sum_i = 0.0;
 
@@ -1372,8 +1370,8 @@ hypreCUDAKernel_CSRExtractDiag( hypre_Item    &item,
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    HYPRE_Int has_diag = 0;
 
@@ -1737,8 +1735,8 @@ hypreCUDAKernel_CSRDiagScale( hypre_Item    &item,
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    HYPRE_Complex sl = 1.0;
 
@@ -1748,7 +1746,7 @@ hypreCUDAKernel_CSRDiagScale( hypre_Item    &item,
       {
          sl = read_only_load(ld + row);
       }
-      sl = __shfl_sync(HYPRE_WARP_FULL_MASK, sl, 0);
+      sl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, sl, 0);
    }
 
    if (rd)

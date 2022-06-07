@@ -437,7 +437,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
    {
       p = read_only_load(CF_marker + i);
    }
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    /*--------------------------------------------------------------------
     *  If i is a C-point, interpolation is the identity.
@@ -462,7 +462,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
       {
          dof_func_i = read_only_load(&dof_func[i]);
       }
-      dof_func_i = __shfl_sync(HYPRE_WARP_FULL_MASK, dof_func_i, 0);
+      dof_func_i = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, dof_func_i, 0);
    }
 
    /* diag part */
@@ -470,8 +470,8 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
    {
       p = read_only_load(S_diag_i + i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
@@ -492,8 +492,8 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
    {
       p = read_only_load(S_offd_i + i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
@@ -580,7 +580,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
    {
       k = read_only_load(CF_marker + i);
    }
-   k = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
+   k = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    /*--------------------------------------------------------------------
     *  If i is a C-point, interpolation is the identity.
@@ -606,7 +606,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
       {
          dof_func_i = read_only_load(&dof_func[i]);
       }
-      dof_func_i = __shfl_sync(HYPRE_WARP_FULL_MASK, dof_func_i, 0);
+      dof_func_i = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, dof_func_i, 0);
    }
 
    HYPRE_Real diagonal = 0.0, sum_N_pos = 0.0, sum_N_neg = 0.0, sum_P_pos = 0.0, sum_P_neg = 0.0;
@@ -618,10 +618,10 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
       p_diag_A = read_only_load(A_diag_i + i + lane);
       p_diag_P = read_only_load(P_diag_i + i + lane);
    }
-   q_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 1);
-   p_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 0);
-   q_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 1);
-   p_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
+   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
+   q_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 1);
+   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
 
    k = p_diag_P;
    for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A);
@@ -687,10 +687,10 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
       p_offd_A = read_only_load(A_offd_i + i + lane);
       p_offd_P = read_only_load(P_offd_i + i + lane);
    }
-   q_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 1);
-   p_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 0);
-   q_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 1);
-   p_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
+   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
+   q_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 1);
+   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
 
    k = p_offd_P;
    for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A);
@@ -853,7 +853,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
    {
       k = read_only_load(CF_marker + i);
    }
-   k = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
+   k = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    /*--------------------------------------------------------------------
     *  If i is a C-point, interpolation is the identity.
@@ -879,7 +879,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
       {
          dof_func_i = read_only_load(&dof_func[i]);
       }
-      dof_func_i = __shfl_sync(HYPRE_WARP_FULL_MASK, dof_func_i, 0);
+      dof_func_i = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, dof_func_i, 0);
    }
 
    HYPRE_Real diagonal = 0.0, sum_F = 0.0;
@@ -891,10 +891,10 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
       p_diag_A = read_only_load(A_diag_i + i + lane);
       p_diag_P = read_only_load(P_diag_i + i + lane);
    }
-   q_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 1);
-   p_diag_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_A, 0);
-   q_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 1);
-   p_diag_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag_P, 0);
+   q_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 1);
+   p_diag_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_A, 0);
+   q_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 1);
+   p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
 
    k = p_diag_P;
    for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A);
@@ -952,10 +952,10 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
       p_offd_A = read_only_load(A_offd_i + i + lane);
       p_offd_P = read_only_load(P_offd_i + i + lane);
    }
-   q_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 1);
-   p_offd_A = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_A, 0);
-   q_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 1);
-   p_offd_P = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd_P, 0);
+   q_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 1);
+   p_offd_A = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_A, 0);
+   q_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 1);
+   p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
 
    k = p_offd_P;
    for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A);
@@ -1403,7 +1403,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
    {
       p = read_only_load(CF_marker + i);
    }
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    /*--------------------------------------------------------------------
     *  If i is a C-point, interpolation is the identity.
@@ -1429,8 +1429,8 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
    {
       p = read_only_load(A_diag_i + i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
@@ -1453,8 +1453,8 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
    {
       p = read_only_load(A_offd_i + i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {

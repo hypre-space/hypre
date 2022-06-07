@@ -46,7 +46,7 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
    {
       ib = read_only_load(CF_marker + row);
    }
-   ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+   ib = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 0);
 
    if (ib >= flag)
    {
@@ -57,8 +57,8 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
    {
       ib = read_only_load(A_diag_i + row + lane);
    }
-   ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
-   ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+   ie = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 1);
+   ib = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 0);
 
    HYPRE_Complex rl = 0.0;
 
@@ -76,8 +76,8 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
       {
          ib = read_only_load(A_offd_i + row + lane);
       }
-      ie = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 1);
-      ib = __shfl_sync(HYPRE_WARP_FULL_MASK, ib, 0);
+      ie = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 1);
+      ib = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 0);
 
       for (HYPRE_Int i = ib + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
       {
@@ -129,8 +129,8 @@ void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
       iscale = -1.0 / read_only_load(&rsW[row]);
       beta = read_only_load(&rsFC[row]);
    }
-   iscale = __shfl_sync(HYPRE_WARP_FULL_MASK, iscale, 0);
-   beta   = __shfl_sync(HYPRE_WARP_FULL_MASK, beta,   0);
+   iscale = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, iscale, 0);
+   beta   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, beta,   0);
 
    // AFF
    /* Diag part */
@@ -138,8 +138,8 @@ void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
    {
       p = read_only_load(AFF_diag_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    // do not assume diag is the first element of row
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
@@ -162,8 +162,8 @@ void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
    {
       p = read_only_load(AFF_offd_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
@@ -183,8 +183,8 @@ void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
    {
       p = read_only_load(AFC_diag_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    /* Diag part */
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
@@ -200,8 +200,8 @@ void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
    {
       p = read_only_load(AFC_offd_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
@@ -373,8 +373,8 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
    {
       ib_diag = read_only_load(AFF_diag_i + row + lane);
    }
-   ie_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 1);
-   ib_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 0);
+   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
+   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
 
    HYPRE_Complex theta_i = 0.0;
 
@@ -388,7 +388,7 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       {
          j = read_only_load(&AFF_diag_j[indj]);
       }
-      j = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+      j = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
 
       if (j == row)
       {
@@ -407,8 +407,8 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       {
          kb = read_only_load(AFF_diag_i + j + lane);
       }
-      ke = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 1);
-      kb = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 0);
+      ke = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kb, 1);
+      kb = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kb, 0);
 
       HYPRE_Int kmatch = -1;
       for (HYPRE_Int indk = kb + lane; __any_sync(HYPRE_WARP_FULL_MASK, indk < ke);
@@ -449,8 +449,8 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
    {
       ib_offd = read_only_load(AFF_offd_i + row + lane);
    }
-   ie_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 1);
-   ib_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 0);
+   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
+   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
 
    for (HYPRE_Int indj = ib_offd; indj < ie_offd; indj++)
    {
@@ -460,7 +460,7 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       {
          j = read_only_load(&AFF_offd_j[indj]);
       }
-      j = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+      j = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
 
       HYPRE_Int kb, ke;
 
@@ -468,8 +468,8 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       {
          kb = read_only_load(AFF_ext_i + j + lane);
       }
-      ke = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 1);
-      kb = __shfl_sync(HYPRE_WARP_FULL_MASK, kb, 0);
+      ke = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kb, 1);
+      kb = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kb, 0);
 
       HYPRE_Int kmatch = -1;
       for (HYPRE_Int indk = kb + lane; __any_sync(HYPRE_WARP_FULL_MASK, indk < ke);
@@ -511,7 +511,7 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       theta_i += read_only_load(rsW + row);
       theta_i = theta_i ? -1.0 / theta_i : -1.0;
    }
-   theta_i = __shfl_sync(HYPRE_WARP_FULL_MASK, theta_i, 0);
+   theta_i = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, theta_i, 0);
 
    for (HYPRE_Int j = ib_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < ie_diag);
         j += HYPRE_WARP_SIZE)
@@ -573,14 +573,14 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
       xo = read_only_load(AFC_offd_i + row + lane);
    }
 
-   qd = __shfl_sync(HYPRE_WARP_FULL_MASK, pd, 1);
-   pd = __shfl_sync(HYPRE_WARP_FULL_MASK, pd, 0);
-   qo = __shfl_sync(HYPRE_WARP_FULL_MASK, po, 1);
-   po = __shfl_sync(HYPRE_WARP_FULL_MASK, po, 0);
-   yd = __shfl_sync(HYPRE_WARP_FULL_MASK, xd, 1);
-   xd = __shfl_sync(HYPRE_WARP_FULL_MASK, xd, 0);
-   yo = __shfl_sync(HYPRE_WARP_FULL_MASK, xo, 1);
-   xo = __shfl_sync(HYPRE_WARP_FULL_MASK, xo, 0);
+   qd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pd, 1);
+   pd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pd, 0);
+   qo = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, po, 1);
+   po = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, po, 0);
+   yd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, xd, 1);
+   xd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, xd, 0);
+   yo = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, xo, 1);
+   xo = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, xo, 0);
 
    /* D_\tau */
    /* do not assume the first element is the diagonal */
@@ -615,8 +615,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
       theta = read_only_load(&dlam[row]);
    }
 
-   value = __shfl_sync(HYPRE_WARP_FULL_MASK, value, 0);
-   theta = __shfl_sync(HYPRE_WARP_FULL_MASK, theta, 0);
+   value = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, value, 0);
+   theta = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, theta, 0);
 
    /* AFF Diag part */
    // do not assume diag is the first element of row
@@ -693,8 +693,8 @@ void hypreCUDAKernel_compute_dlam_dtmp( hypre_Item    &item,
    {
       p_diag = read_only_load(AFF_diag_i + row + lane);
    }
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
    HYPRE_Complex row_sum = 0.0;
    HYPRE_Int find_diag = 0;
@@ -720,8 +720,8 @@ void hypreCUDAKernel_compute_dlam_dtmp( hypre_Item    &item,
    {
       p_offd = read_only_load(AFF_offd_i + row + lane);
    }
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
    for (HYPRE_Int j = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd);
         j += HYPRE_WARP_SIZE)

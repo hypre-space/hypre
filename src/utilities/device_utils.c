@@ -708,16 +708,9 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
       /* start position of b */
       k = d_ib ? read_only_load(d_ib + global_warp_id) : 0;
    }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-   bstart = SG.shuffle(k, 0);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-   bstart = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
+   bstart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += warp_size)
@@ -740,14 +733,8 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
       j = read_only_load(d_offd_i + row + lane_id);
    }
    bstart += iend - istart;
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += warp_size)

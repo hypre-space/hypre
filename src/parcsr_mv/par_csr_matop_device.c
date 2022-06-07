@@ -42,17 +42,9 @@ hypreGPUKernel_ConcatDiagAndOffd( hypre_Item &item,
    {
       k = read_only_load(d_ib + row);
    }
-#if defined(HYPRE_USING_SYCL)
-   /* WM: NOTE - barriers seem to be required before shuffle to guarantee correct results */
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-   bstart = SG.shuffle(k, 0);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-   bstart = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
+   bstart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
@@ -67,14 +59,8 @@ hypreGPUKernel_ConcatDiagAndOffd( hypre_Item &item,
       j = read_only_load(d_offd_i + row + lane_id);
    }
    bstart += iend - istart;
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
@@ -1155,8 +1141,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_Item &item,
    {
       p_diag = read_only_load(A_diag_i + row_i + lane);
    }
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
    HYPRE_Real row_norm_i = 0.0;
 
@@ -1183,8 +1169,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_Item &item,
    {
       p_offd = read_only_load(A_offd_i + row_i + lane);
    }
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
    for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
    {

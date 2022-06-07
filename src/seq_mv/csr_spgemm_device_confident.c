@@ -261,8 +261,8 @@ hypre_spgemm_numeric( hypre_Item    &item,
          {
             j = read_only_load(ig + grid_warp_id + lane_id);
          }
-         istart_g = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-         iend_g   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+         istart_g = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+         iend_g   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
          /* size of global hash table allocated for this row
             (must be power of 2 and >= the actual size of the row of C) */
@@ -311,14 +311,14 @@ hypre_spgemm_numeric( hypre_Item    &item,
       {
          j = read_only_load(ic + i + lane_id);
       }
-      HYPRE_Int istart_c = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-      HYPRE_Int iend_c   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+      HYPRE_Int istart_c = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+      HYPRE_Int iend_c   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 #else
       if (lane_id < 1)
       {
          j = read_only_load(ic + i);
       }
-      HYPRE_Int istart_c = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
+      HYPRE_Int istart_c = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
 #endif
 
       j = hypre_spgemm_copy_from_hash_into_C_row<NUM_WARPS_PER_BLOCK, SHMEM_HASH_SIZE>
@@ -369,11 +369,11 @@ hypre_spgemm_copy_from_Cext_into_C( hypre_Item    &item,
          kc = read_only_load(ic + i + lane_id);
          kx = read_only_load(ix + i + lane_id);
       }
-      HYPRE_Int istart_c = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 0);
-      HYPRE_Int iend_c   = __shfl_sync(HYPRE_WARP_FULL_MASK, kc, 1);
-      HYPRE_Int istart_x = __shfl_sync(HYPRE_WARP_FULL_MASK, kx, 0);
+      HYPRE_Int istart_c = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kc, 0);
+      HYPRE_Int iend_c   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kc, 1);
+      HYPRE_Int istart_x = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kx, 0);
 #if defined(HYPRE_DEBUG)
-      HYPRE_Int iend_x   = __shfl_sync(HYPRE_WARP_FULL_MASK, kx, 1);
+      HYPRE_Int iend_x   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, kx, 1);
       hypre_device_assert(iend_c - istart_c <= iend_x - istart_x);
 #endif
 

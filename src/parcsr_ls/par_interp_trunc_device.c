@@ -34,8 +34,8 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
    {
       p = read_only_load(P_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int i = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
    {

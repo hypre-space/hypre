@@ -585,14 +585,14 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
    {
       rowF = read_only_load(&F2_to_F[row]);
    }
-   rowF = __shfl_sync(HYPRE_WARP_FULL_MASK, rowF, 0);
+   rowF = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rowF, 0);
 
    if (lane < 2)
    {
       ib_diag = read_only_load(AFF_diag_i + row + lane);
    }
-   ie_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 1);
-   ib_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 0);
+   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
+   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
 
    HYPRE_Complex rl = 0.0;
 
@@ -633,8 +633,8 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
    {
       ib_offd = read_only_load(AFF_offd_i + row + lane);
    }
-   ie_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 1);
-   ib_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 0);
+   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
+   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
 
    for (HYPRE_Int i = ib_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie_offd);
         i += HYPRE_WARP_SIZE)
@@ -665,7 +665,7 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
       rl = rl == 0.0 ? 0.0 : -1.0 / rl;
    }
 
-   rl = __shfl_sync(HYPRE_WARP_FULL_MASK, rl, 0);
+   rl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rl, 0);
 
    for (HYPRE_Int i = ib_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie_diag);
         i += HYPRE_WARP_SIZE)
@@ -718,14 +718,14 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
    {
       rowF = read_only_load(&F2_to_F[row]);
    }
-   rowF = __shfl_sync(HYPRE_WARP_FULL_MASK, rowF, 0);
+   rowF = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rowF, 0);
 
    if (lane < 2)
    {
       ib_diag = read_only_load(AFF_diag_i + row + lane);
    }
-   ie_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 1);
-   ib_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_diag, 0);
+   ie_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 1);
+   ib_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_diag, 0);
 
    HYPRE_Complex rl = 0.0;
 
@@ -767,8 +767,8 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
    {
       ib_offd = read_only_load(AFF_offd_i + row + lane);
    }
-   ie_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 1);
-   ib_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, ib_offd, 0);
+   ie_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 1);
+   ib_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib_offd, 0);
 
    for (HYPRE_Int i = ib_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie_offd);
         i += HYPRE_WARP_SIZE)
@@ -800,7 +800,7 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
       rl = rl == 0.0 ? 0.0 : -1.0 / rl;
    }
 
-   rl = __shfl_sync(HYPRE_WARP_FULL_MASK, rl, 0);
+   rl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, rl, 0);
 
    for (HYPRE_Int i = ib_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < ie_diag);
         i += HYPRE_WARP_SIZE)

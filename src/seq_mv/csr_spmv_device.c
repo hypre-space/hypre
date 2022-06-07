@@ -95,8 +95,8 @@ hypre_csr_v_k_shuffle(hypre_Item   &item,
       {
          p = read_only_load(&d_ia[grid_group_id + group_lane]);
       }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
+      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, K);
+      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, K);
 #else
       const HYPRE_Int s = grid_group_id - warp_group_id + warp_lane;
       HYPRE_Int p = 0, q = 0;
@@ -104,8 +104,8 @@ hypre_csr_v_k_shuffle(hypre_Item   &item,
       {
          p = read_only_load(&d_ia[s]);
       }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id + 1);
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, warp_group_id);
+      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, warp_group_id + 1);
+      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, warp_group_id);
 #endif
       T sum = 0.0;
 #if VERSION == 1

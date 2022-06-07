@@ -149,8 +149,8 @@ void cohen_rowest_kernel(hypre_Item &item, HYPRE_Int nrow, HYPRE_Int *rowptr, HY
       {
          tmp = read_only_load(rowptr + i + lane_id);
       }
-      const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0);
-      const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1);
+      const HYPRE_Int istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 0);
+      const HYPRE_Int iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 1);
 
       /* works on WARP_SIZE samples at a time */
       for (HYPRE_Int r = 0; r < nsamples; r += HYPRE_WARP_SIZE)
@@ -197,7 +197,7 @@ void cohen_rowest_kernel(hypre_Item &item, HYPRE_Int nrow, HYPRE_Int *rowptr, HY
 
             for (HYPRE_Int k = 0; k < HYPRE_WARP_SIZE; k++)
             {
-               HYPRE_Int colk = __shfl_sync(HYPRE_WARP_FULL_MASK, col, k);
+               HYPRE_Int colk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, col, k);
                if (colk == -1)
                {
                   hypre_device_assert(j + HYPRE_WARP_SIZE >= iend);
