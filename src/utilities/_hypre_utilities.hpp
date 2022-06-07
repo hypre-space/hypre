@@ -931,6 +931,12 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
    return in;
 }
 
+static __device__ __forceinline__
+hypre_int warp_any_sync(hypre_Item &item, unsigned mask, hypre_int predicate)
+{
+   return __any_sync(mask, predicate);
+}
+
 template <typename T>
 static __device__ __forceinline__
 T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
@@ -1236,7 +1242,13 @@ static __device__ __forceinline__
 hypre_int hypre_cuda_get_lane_id(hypre_Item &item)
 {
    sycl::sub_group SG = item.get_sub_group();
-   return (hypre_int) item.get_subgroup().get_local_linear_id();
+   return (hypre_int) item.get_sub_group().get_local_linear_id();
+}
+
+static __device__ __forceinline__
+hypre_int warp_any_sync(hypre_Item &item, unsigned mask, hypre_int predicate)
+{
+   return sycl::any_of_group(item.get_sub_group(), predicate);
 }
 
 template <typename T>
@@ -1246,7 +1258,7 @@ T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
    /* WM: NOTE - seems that barrier is required in order to produce correct results here, but I don't know why... */
    /* this may be a bug in the underlying sycl implementation that needs to be fixed */
    item.get_sub_group().barrier();
-   return = item.get_sub_group().shuffle(val, src_line);
+   return item.get_sub_group().shuffle(val, src_line);
 }
 
 template<typename T>

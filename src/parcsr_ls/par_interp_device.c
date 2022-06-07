@@ -473,7 +473,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       if (j < q)
       {
@@ -495,7 +495,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       if (j < q)
       {
@@ -624,7 +624,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
    p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
 
    k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A);
+   for (HYPRE_Int j = p_diag_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_A);
         j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
@@ -693,7 +693,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
    p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
 
    k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A);
+   for (HYPRE_Int j = p_offd_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_A);
         j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
@@ -763,7 +763,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
       beta = sum_N_pos / (sum_P_pos * diagonal);
    }
 
-   for (HYPRE_Int j = p_diag_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_P);
+   for (HYPRE_Int j = p_diag_P + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_P);
         j += HYPRE_WARP_SIZE)
    {
       /* if (P_diag_data[j] > 0.0)
@@ -776,7 +776,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
       }
    }
 
-   for (HYPRE_Int j = p_offd_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_P);
+   for (HYPRE_Int j = p_offd_P + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_P);
         j += HYPRE_WARP_SIZE)
    {
       /* if (P_offd_data[indp]> 0)
@@ -897,7 +897,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
    p_diag_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag_P, 0);
 
    k = p_diag_P;
-   for (HYPRE_Int j = p_diag_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_A);
+   for (HYPRE_Int j = p_diag_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_A);
         j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
@@ -958,7 +958,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
    p_offd_P = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd_P, 0);
 
    k = p_offd_P;
-   for (HYPRE_Int j = p_offd_A + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_A);
+   for (HYPRE_Int j = p_offd_A + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_A);
         j += HYPRE_WARP_SIZE)
    {
       HYPRE_Int col, sum, pos;
@@ -1007,7 +1007,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
 
    HYPRE_Complex beta = sum_F / (q_diag_P - p_diag_P + q_offd_P - p_offd_P);
 
-   for (HYPRE_Int j = p_diag_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_diag_P);
+   for (HYPRE_Int j = p_diag_P + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_diag_P);
         j += HYPRE_WARP_SIZE)
    {
       /* if (P_diag_data[j] > 0.0)
@@ -1020,7 +1020,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
       }
    }
 
-   for (HYPRE_Int j = p_offd_P + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q_offd_P);
+   for (HYPRE_Int j = p_offd_P + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q_offd_P);
         j += HYPRE_WARP_SIZE)
    {
       /* if (P_offd_data[indp]> 0)

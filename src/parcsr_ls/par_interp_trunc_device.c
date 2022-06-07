@@ -37,7 +37,7 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int i = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
    {
       if (i < q)
       {
@@ -52,7 +52,7 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
 
    /* 2. mark dropped entries by -1 in P_j, and compute row_scal */
    HYPRE_Int last_pos = -1;
-   for (HYPRE_Int i = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
    {
       HYPRE_Int cond = 0, cond_prev;
 

@@ -87,7 +87,7 @@ hypre_csr_v_k_shuffle(hypre_Item   &item,
    const HYPRE_Int warp_group_id = warp_lane / K;
    const HYPRE_Int warp_ngroups = HYPRE_WARP_SIZE / K;
 
-   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
+   for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
    {
 #if 0
       HYPRE_Int p = 0, q = 0;
@@ -110,7 +110,7 @@ hypre_csr_v_k_shuffle(hypre_Item   &item,
       T sum = 0.0;
 #if VERSION == 1
 #pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
+      for (p += group_lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
       {
          if (p < q)
          {
@@ -123,7 +123,7 @@ hypre_csr_v_k_shuffle(hypre_Item   &item,
       }
 #elif VERSION == 2
 #pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
+      for (p += group_lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
          if (p < q)
          {
