@@ -483,9 +483,20 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    if (num_rownnz_diag_A != num_rows_diag_A &&
        num_rownnz_offd_A != num_rows_offd_A )
    {
-      hypre_MergeOrderedArrays(num_rownnz_diag_A, A_diag_ir,
-                               num_rownnz_offd_A, A_offd_ir,
-                               &num_rownnz_A, &rownnz_A);
+      hypre_IntArray arr_diag;
+      hypre_IntArray arr_offd;
+      hypre_IntArray arr_rownnz;
+
+      hypre_IntArrayData(&arr_diag) = A_diag_ir;
+      hypre_IntArrayData(&arr_offd) = A_offd_ir;
+      hypre_IntArraySize(&arr_diag) = num_rownnz_diag_A;
+      hypre_IntArraySize(&arr_offd) = num_rownnz_offd_A;
+      hypre_IntArrayMemoryLocation(&arr_rownnz) = memory_location_A;
+
+      hypre_MergeOrderedArrays(&arr_diag, &arr_offd, &arr_rownnz);
+
+      num_rownnz_A = hypre_IntArraySize(&arr_rownnz);
+      rownnz_A     = hypre_IntArrayData(&arr_rownnz);
    }
    else
    {
@@ -5193,9 +5204,20 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    if ((num_rownnz_diag_A < num_rows_diag_A) &&
        (num_rownnz_diag_B < num_rows_diag_B))
    {
-      hypre_MergeOrderedArrays( num_rownnz_diag_A,  rownnz_diag_A,
-                                num_rownnz_diag_B,  rownnz_diag_B,
-                                &num_rownnz_diag_C, &rownnz_diag_C);
+      hypre_IntArray arr_diagA;
+      hypre_IntArray arr_diagB;
+      hypre_IntArray arr_diagC;
+
+      hypre_IntArrayData(&arr_diagA) = rownnz_diag_A;
+      hypre_IntArrayData(&arr_diagB) = rownnz_diag_B;
+      hypre_IntArraySize(&arr_diagA) = num_rownnz_diag_A;
+      hypre_IntArraySize(&arr_diagB) = num_rownnz_diag_B;
+      hypre_IntArrayMemoryLocation(&arr_diagC) = memory_location_C;
+
+      hypre_MergeOrderedArrays(&arr_diagA, &arr_diagB, &arr_diagC);
+
+      num_rownnz_diag_C = hypre_IntArraySize(&arr_diagC);
+      rownnz_diag_C     = hypre_IntArrayData(&arr_diagC);
    }
 
    /* Set nonzero rows data of offd_C */
@@ -5203,9 +5225,20 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    if ((num_rownnz_offd_A < num_rows_offd_A) &&
        (num_rownnz_offd_B < num_rows_offd_B))
    {
-      hypre_MergeOrderedArrays( num_rownnz_offd_A,  rownnz_offd_A,
-                                num_rownnz_offd_B,  rownnz_offd_B,
-                                &num_rownnz_offd_C, &rownnz_offd_C);
+      hypre_IntArray arr_offdA;
+      hypre_IntArray arr_offdB;
+      hypre_IntArray arr_offdC;
+
+      hypre_IntArrayData(&arr_offdA) = rownnz_offd_A;
+      hypre_IntArrayData(&arr_offdB) = rownnz_offd_B;
+      hypre_IntArraySize(&arr_offdA) = num_rownnz_offd_A;
+      hypre_IntArraySize(&arr_offdB) = num_rownnz_offd_B;
+      hypre_IntArrayMemoryLocation(&arr_offdC) = memory_location_C;
+
+      hypre_MergeOrderedArrays(&arr_offdA, &arr_offdB, &arr_offdC);
+
+      num_rownnz_offd_C = hypre_IntArraySize(&arr_offdC);
+      rownnz_offd_C     = hypre_IntArrayData(&arr_offdC);
    }
 
    /* Set diag_C */
