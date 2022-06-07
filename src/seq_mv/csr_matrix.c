@@ -655,13 +655,6 @@ hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix,
    return ierr;
 }
 
-HYPRE_Int
-hypre_CSRMatrixPrint2( hypre_CSRMatrix *matrix,
-                       const char      *file_name )
-{
-   return hypre_CSRMatrixPrintMM(matrix, 0, 0, 0, file_name);
-}
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixPrintHB: print a CSRMatrix in Harwell-Boeing format
  *--------------------------------------------------------------------------*/
