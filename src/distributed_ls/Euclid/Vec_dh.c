@@ -29,7 +29,9 @@ void Vec_dhCreate(Vec_dh *v)
 void Vec_dhDestroy(Vec_dh v)
 {
   START_FUNC_DH
-  if (v->vals != NULL) FREE_DH(v->vals); CHECK_V_ERROR;
+  if (v->vals != NULL) {
+    FREE_DH(v->vals); CHECK_V_ERROR;
+  }
   FREE_DH(v); CHECK_V_ERROR;
   END_FUNC_DH
 }

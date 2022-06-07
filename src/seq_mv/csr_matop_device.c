@@ -2355,4 +2355,3 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
                                                         hypre_CSRMatrixGPUMatInfo(matrix)) );
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }
-
