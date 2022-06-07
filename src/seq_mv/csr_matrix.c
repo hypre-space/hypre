@@ -588,62 +588,48 @@ hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix,
                         HYPRE_Int        trans,
                         const char      *file_name )
 {
-   FILE    *fp;
+   hypre_assert(hypre_CSRMatrixI(matrix)[hypre_CSRMatrixNumRows(matrix)] == hypre_CSRMatrixNumNonzeros(matrix));
 
-   HYPRE_Complex *matrix_data;
-   HYPRE_Int     *matrix_i;
-   HYPRE_Int     *matrix_j;
-   HYPRE_Int      num_rows, num_cols;
+   FILE *fp = file_name ? fopen(file_name, "w") : stdout;
 
-   /* HYPRE_Int      file_base = 1; */
-
-   HYPRE_Int      j, k;
-
-   HYPRE_Int      ierr = 0;
-
-   /*----------------------------------------------------------
-    * Print the matrix data
-    *----------------------------------------------------------*/
-
-   matrix_data = hypre_CSRMatrixData(matrix);
-   matrix_i    = hypre_CSRMatrixI(matrix);
-   matrix_j    = hypre_CSRMatrixJ(matrix);
-   num_rows    = hypre_CSRMatrixNumRows(matrix);
-   num_cols    = hypre_CSRMatrixNumCols(matrix);
-
-   if (file_name)
+   if (!fp)
    {
-      fp = fopen(file_name, "w");
+      hypre_error_w_msg(1, "Cannot open output file");
+      return hypre_error_flag;
+   }
+
+   const HYPRE_Complex *matrix_data = hypre_CSRMatrixData(matrix);
+   const HYPRE_Int     *matrix_i    = hypre_CSRMatrixI(matrix);
+   const HYPRE_Int     *matrix_j    = hypre_CSRMatrixJ(matrix);
+
+   if (matrix_data)
+   {
+      hypre_fprintf(fp, "%%%%MatrixMarket matrix coordinate real general\n");
    }
    else
    {
-      fp = stdout;
+      hypre_fprintf(fp, "%%%%MatrixMarket matrix coordinate pattern general\n");
    }
 
-   hypre_fprintf(fp, "%%%%MatrixMarket matrix coordinate real general\n");
+   hypre_fprintf(fp, "%d %d %d\n", trans ? hypre_CSRMatrixNumCols(matrix) : hypre_CSRMatrixNumRows(matrix),
+                                   trans ? hypre_CSRMatrixNumRows(matrix) : hypre_CSRMatrixNumCols(matrix),
+                                   hypre_CSRMatrixNumNonzeros(matrix));
 
-   hypre_assert(matrix_i[num_rows] == hypre_CSRMatrixNumNonzeros(matrix));
+   HYPRE_Int i, j;
 
-   if (!trans)
+   for (i = 0; i < hypre_CSRMatrixNumRows(matrix); i++)
    {
-      hypre_fprintf(fp, "%d %d %d\n", num_rows, num_cols, hypre_CSRMatrixNumNonzeros(matrix));
-   }
-   else
-   {
-      hypre_fprintf(fp, "%d %d %d\n", num_cols, num_rows, hypre_CSRMatrixNumNonzeros(matrix));
-   }
-
-   for (j = 0; j < num_rows; j++)
-   {
-      for (k = matrix_i[j]; k < matrix_i[j + 1]; k++)
+      for (j = matrix_i[i]; j < matrix_i[i + 1]; j++)
       {
-         if (!trans)
+         const HYPRE_Int row = (trans ? matrix_j[j] : i) + basei;
+         const HYPRE_Int col = (trans ? i : matrix_j[j]) + basej;
+         if (matrix_data)
          {
-            hypre_fprintf(fp, "%d %d %.15e\n", j + basei, matrix_j[k] + basej, matrix_data[k]);
+            hypre_fprintf(fp, "%d %d %.15e\n", row, col, matrix_data[j]);
          }
          else
          {
-            hypre_fprintf(fp, "%d %d %.15e\n", matrix_j[k] + basej, j + basei, matrix_data[k]);
+            hypre_fprintf(fp, "%d %d\n", row, col);
          }
       }
    }
@@ -653,7 +639,7 @@ hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix,
       fclose(fp);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
