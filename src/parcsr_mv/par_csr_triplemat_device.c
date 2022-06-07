@@ -10,7 +10,6 @@
 #include "_hypre_utilities.hpp"
 
 #define PARCSRGEMM_TIMING 2
-#define PARCSRGEMM_NEWPARADD 1
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
