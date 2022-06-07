@@ -722,7 +722,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* unpack recv data on device */
-      hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRMatrixNumRows(A), locl_data, recv_data, comm_pkg );
+      hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRMatrixNumCols(A), locl_data, recv_data, comm_pkg );
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_Int i, j;
       /* unpack recv data on device */
@@ -922,7 +922,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
-hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            nrows,
+hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            ncols,
                                   HYPRE_Complex       *locl_data,
                                   HYPRE_Complex       *recv_data,
                                   hypre_ParCSRCommPkg *comm_pkg )
@@ -937,7 +937,7 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            nrows,
 
    if (!hypre_ParCSRCommPkgMatrixE(comm_pkg))
    {
-      hypre_ParCSRCommPkgCreateMatrixE(comm_pkg, nrows);
+      hypre_ParCSRCommPkgCreateMatrixE(comm_pkg, ncols);
    }
 
    hypre_CSRMatrix *E = hypre_ParCSRCommPkgMatrixE(comm_pkg);
