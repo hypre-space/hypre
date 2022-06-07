@@ -34,14 +34,14 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_Item    &item,
                                   HYPRE_Complex *row_sum_upper,
                                   HYPRE_Int      scale)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p, q;
 
    HYPRE_Complex diag_value = 0.0;

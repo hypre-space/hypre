@@ -339,7 +339,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_Item    &item,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (i >= nr_of_rows)
    {
@@ -347,7 +347,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_Item    &item,
    }
 
    HYPRE_Int p, q, pZ;
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
 
    /* diag part */
    if (lane < 2)

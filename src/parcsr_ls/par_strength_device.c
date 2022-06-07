@@ -271,14 +271,14 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_Item &item,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, row_max = 0.0, row_min = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p_diag, q_diag, p_offd, q_offd;
 
    /* diag part */
@@ -471,14 +471,14 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p_diag, q_diag, p_offd, q_offd;
 
    /* diag part */

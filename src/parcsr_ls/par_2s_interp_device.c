@@ -570,14 +570,14 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
                                        HYPRE_Int     *F2_to_F,
                                        HYPRE_Real    *rsW )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= AFF_nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int ib_diag, ie_diag;
    HYPRE_Int rowF;
 
@@ -703,14 +703,14 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
                                          HYPRE_Int     *F2_to_F,
                                          HYPRE_Real    *rsW )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= AFF_nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int ib_diag, ie_diag;
    HYPRE_Int rowF;
 

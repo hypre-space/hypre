@@ -260,14 +260,14 @@ hypreCUDAKernel_GtEliminateBoundary( hypre_Item    &item,
                                      HYPRE_Int     *edge_bc,
                                      HYPRE_Int     *edge_bc_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p1, q1, p2 = 0, q2 = 0;
    bool nonempty_offd = Gt_offd_j != NULL;
    bool bdr = false;

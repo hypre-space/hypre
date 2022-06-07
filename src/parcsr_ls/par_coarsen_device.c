@@ -276,7 +276,7 @@ hypreCUDAKernel_PMISCoarseningInit(hypre_Item &item,
                                    HYPRE_Int  *CF_marker_diag)
 {
    /* global_thread_id */
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i >= nrows)
    {
@@ -390,14 +390,14 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_Item &item,
                                        HYPRE_Int  *CF_marker_diag,
                                        HYPRE_Int  *CF_marker_offd)
 {
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (warp_id >= graph_diag_size)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int row, i, marker_row, row_start, row_end;
 
    if (lane < 2)

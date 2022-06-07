@@ -418,7 +418,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
 __global__ void
 hypreGPUKernel_IVAXPY( hypre_Item &item, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (i < n)
    {
       y[i] += x[i] / a[i];
@@ -448,7 +448,7 @@ hypreGPUKernel_IVAXPYMarked( hypre_Item &item,
                              HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
                              HYPRE_Int *marker, HYPRE_Int marker_val)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (i < n)
    {
       if (marker[i] == marker_val)
@@ -609,7 +609,7 @@ hypreGPUKernel_GetRowNnz( hypre_Item &item,
                           HYPRE_Int *d_offd_ia,
                           HYPRE_Int *d_rownnz)
 {
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < nrows)
    {
@@ -679,8 +679,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
                                HYPRE_BigInt  *d_jb,
                                HYPRE_Complex *d_ab)
 {
-   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>(item);
-   const HYPRE_Int warp_size = hypre_gpu_get_warp_size(item);
+   const HYPRE_Int global_warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (global_warp_id >= nrows)
    {
@@ -688,7 +687,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
    }
 
    /* lane id inside the warp */
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>(item);
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int i, j = 0, k = 0, p, row, istart, iend, bstart;
 
    /* diag part */
@@ -713,7 +712,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
    bstart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    p = bstart - istart;
-   for (i = istart + lane_id; i < iend; i += warp_size)
+   for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
       d_jb[p + i] = read_only_load(d_diag_j + i) + first_col;
       if (d_ab)
@@ -737,7 +736,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
    iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    p = bstart - istart;
-   for (i = istart + lane_id; i < iend; i += warp_size)
+   for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
       if (d_col_map_offd_A)
       {
@@ -996,7 +995,7 @@ template<typename T>
 __global__ void
 hypreGPUKernel_axpyn(hypre_Item &item, T *x, size_t n, T *y, T *z, T a)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1042,7 +1041,7 @@ template<typename T>
 __global__ void
 hypreGPUKernel_scalen(hypre_Item &item, T *x, size_t n, T *y, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1087,7 +1086,7 @@ template<typename T>
 __global__ void
 hypreGPUKernel_filln(hypre_Item &item, T *x, size_t n, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1184,7 +1183,7 @@ hypreGPUKernel_ScatterAddTrivial(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, H
 __global__ void
 hypreGPUKernel_ScatterAdd(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -1269,7 +1268,7 @@ template <typename T>
 __global__ void
 hypreGPUKernel_ScatterConstant(hypre_Item &item, T *x, HYPRE_Int n, HYPRE_Int *map, T v)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -1307,7 +1306,7 @@ __global__ void
 hypreGPUKernel_DiagScaleVector(hypre_Item &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1346,7 +1345,7 @@ __global__ void
 hypreGPUKernel_DiagScaleVector2(hypre_Item &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                 HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1383,7 +1382,7 @@ hypreGPUKernel_BigToSmallCopy( hypre_Item                      &item,
                                const HYPRE_BigInt* __restrict__ src,
                                HYPRE_Int                        size )
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < size)
    {
