@@ -32,14 +32,14 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
                                            HYPRE_Real    *rs,
                                            HYPRE_Int      flag)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int ib, ie;
 
    if (lane == 0)
@@ -112,14 +112,14 @@ void hypreCUDAKernel_compute_aff_afc( hypre_Item    &item,
                                       HYPRE_Complex *rsW,
                                       HYPRE_Complex *rsFC )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p, q;
 
    HYPRE_Complex iscale, beta;
@@ -357,14 +357,14 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
                                        HYPRE_Complex *rsFC,
                                        HYPRE_Complex *rsFC_offd )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
 
    HYPRE_Int ib_diag, ie_diag, ib_offd, ie_offd;
 
@@ -552,14 +552,14 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
                                           HYPRE_Complex *dtmp,
                                           HYPRE_Complex *dtmp_offd )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int pd, qd, po, qo, xd, yd, xo, yo;
 
    HYPRE_Complex theta, value;
@@ -679,14 +679,14 @@ void hypreCUDAKernel_compute_dlam_dtmp( hypre_Item    &item,
                                         HYPRE_Complex *dlam,
                                         HYPRE_Complex *dtmp )
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p_diag, p_offd, q_diag, q_offd;
 
    if (lane < 2)

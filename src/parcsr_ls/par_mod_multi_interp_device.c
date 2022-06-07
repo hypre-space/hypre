@@ -1385,14 +1385,14 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( hypre_Item    &item,
                                              HYPRE_Int     *dof_func_offd,
                                              HYPRE_Complex *row_sums )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows || read_only_load(&CF_marker[row_i]) >= 0)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0;
    HYPRE_Int q = 0;
    HYPRE_Int func_i = dof_func ? read_only_load(&dof_func[row_i]) : 0;
@@ -1478,14 +1478,14 @@ void hypreCUDAKernel_mutli_pi_rowsum( hypre_Item    &item,
                                       HYPRE_Complex *Pi_offd_data,
                                       HYPRE_Complex *w_row_sum )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= num_points)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
    HYPRE_Real row_sum_C = 0.0;
 
@@ -1612,7 +1612,7 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_Item &item,
     }
    */
 
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= num_points)
    {
@@ -1620,7 +1620,7 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_Item &item,
    }
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0;
    HYPRE_Int q = 0;
    HYPRE_Int diag_increment = 0;
@@ -1714,7 +1714,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item    &item,
                                                HYPRE_Complex *P_offd_data,
                                                HYPRE_Complex *row_sums )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= num_points)
    {
@@ -1722,7 +1722,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item    &item,
    }
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p_diag_A, q_diag_A, p_diag_P, q_diag_P;
    HYPRE_Int k;
    HYPRE_Complex row_sum_C = 0.0, diagonal = 0.0;
@@ -1869,7 +1869,7 @@ void hypreCUDAKernel_insert_remaining_weights( hypre_Item &item,
                                                HYPRE_Int  *P_offd_j,
                                                HYPRE_Real *P_offd_data )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= stop - start)
    {
@@ -1877,7 +1877,7 @@ void hypreCUDAKernel_insert_remaining_weights( hypre_Item &item,
    }
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i + start]);
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0;
    HYPRE_Int q = 0;
    HYPRE_Int i2;
@@ -1952,7 +1952,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item    &item,
                                                HYPRE_Int     *dof_func,
                                                HYPRE_Int     *dof_func_offd )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= num_points)
    {
@@ -1960,7 +1960,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item    &item,
    }
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p_diag_A, q_diag_A, p_diag_P;
 #ifdef HYPRE_DEBUG
    HYPRE_Int q_diag_P;
@@ -2142,7 +2142,7 @@ void hypreCUDAKernel_pass_order_count( hypre_Item &item,
                                        HYPRE_Int *S_offd_j,
                                        HYPRE_Int *diag_shifts )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= num_points)
    {
@@ -2150,7 +2150,7 @@ void hypreCUDAKernel_pass_order_count( hypre_Item &item,
    }
 
    HYPRE_Int i1 = read_only_load(&points_left[row_i]);
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0;
    HYPRE_Int q = 0;
    hypre_int brk = 0;
@@ -2239,14 +2239,14 @@ void hypreCUDAKernel_populate_big_P_offd_j( hypre_Item   &item,
                                             HYPRE_BigInt *col_map_offd_Pi,
                                             HYPRE_BigInt *big_P_offd_j )
 {
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>() + start;
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item) + start;
 
    if (i >= stop)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int i1 = read_only_load(&pass_order[i]);
    HYPRE_Int p = 0;
    HYPRE_Int q = 0;

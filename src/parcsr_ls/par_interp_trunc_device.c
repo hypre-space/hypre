@@ -20,14 +20,14 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
                                   HYPRE_Real *P_a)
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(), p, q;
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item), p, q;
 
    /* 1. compute row max, rowsum */
    if (lane < 2)

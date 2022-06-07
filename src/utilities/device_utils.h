@@ -661,6 +661,13 @@ hypre_int hypre_cuda_get_num_warps()
    return hypre_cuda_get_num_threads<dim>() >> HYPRE_WARP_BITSHIFT;
 }
 
+/* get the warp size */
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_warp_size(hypre_Item &item)
+{
+   return HYPRE_WARP_SIZE;
+}
+
 /* return the warp id in block */
 template <hypre_int dim>
 static __device__ __forceinline__
@@ -672,7 +679,7 @@ hypre_int hypre_cuda_get_warp_id()
 /* return the thread lane id in warp */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_lane_id()
+hypre_int hypre_cuda_get_lane_id(hypre_Item &item)
 {
    return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE - 1);
 }
@@ -742,7 +749,7 @@ hypre_int hypre_cuda_get_grid_num_warps()
 /* return the flattened warp id in grid */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_grid_warp_id()
+hypre_int hypre_cuda_get_grid_warp_id(hypre_Item &item)
 {
    return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
           hypre_cuda_get_warp_id<bdim>();
@@ -1132,7 +1139,16 @@ struct print_functor
 
 #if defined(HYPRE_USING_SYCL)
 
+/* get the warp size */
+/* WM: todo - only supports bdim = gdim = 1 */
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_warp_size(hypre_Item &item)
+{
+   return (hypre_int) item.get_sub_group().get_local_range().get(0);
+}
+
 /* return the flattened thread id in grid */
+/* WM: todo - only supports bdim = gdim = 1 */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_cuda_get_grid_thread_id(hypre_Item &item)
@@ -1141,12 +1157,24 @@ hypre_int hypre_cuda_get_grid_thread_id(hypre_Item &item)
 }
 
 /* return the flattened warp id in nd_range */
-static __forceinline__
-hypre_int hypre_sycl_get_grid_warp_id(sycl::nd_item<>& item)
+/* WM: todo - only supports bdim = gdim = 1 */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_grid_warp_id(hypre_Item &item)
 {
    return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
           item.get_sub_group().get_group_linear_id();
 }
+
+/* return the thread lane id in warp */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_cuda_get_lane_id(hypre_Item &item)
+{
+   sycl::sub_group SG = item.get_sub_group();
+   return (hypre_int) item.get_subgroup().get_local_linear_id();
+}
+
 template<typename T>
 struct in_range
 {

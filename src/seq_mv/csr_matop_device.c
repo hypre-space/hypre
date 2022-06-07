@@ -777,14 +777,8 @@ hypreGPUKernel_CSRMoveDiagFirst( hypre_Item    &item,
                                  HYPRE_Int     *ja,
                                  HYPRE_Complex *aa )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int row  = hypre_sycl_get_grid_warp_id(item);
-   sycl::sub_group SG = item.get_sub_group();
-   HYPRE_Int lane = SG.get_local_linear_id();
-#else
-   HYPRE_Int row  = hypre_cuda_get_grid_warp_id<1, 1>();
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-#endif
+   HYPRE_Int row  = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
 
    if (row >= nrows)
    {
@@ -970,14 +964,14 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( hypre_Item    &item,
                                             HYPRE_Real     tol,
                                             HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
@@ -1069,14 +1063,14 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( hypre_Item    &item,
                                             HYPRE_Real     tol,
                                             HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
@@ -1255,14 +1249,14 @@ hypreCUDAKernel_CSRRowSum( hypre_Item    &item,
                            HYPRE_Complex  scal,
                            HYPRE_Int      set)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
@@ -1364,14 +1358,14 @@ hypreCUDAKernel_CSRExtractDiag( hypre_Item    &item,
                                 HYPRE_Complex *d,
                                 HYPRE_Int      type)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
@@ -1729,14 +1723,14 @@ hypreCUDAKernel_CSRDiagScale( hypre_Item    &item,
                               HYPRE_Complex *ld,
                               HYPRE_Complex *rd)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)

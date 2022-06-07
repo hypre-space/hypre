@@ -679,14 +679,8 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
                                HYPRE_BigInt  *d_jb,
                                HYPRE_Complex *d_ab)
 {
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int warp_size = SG.get_local_range().get(0);
-   const HYPRE_Int global_warp_id = hypre_sycl_get_grid_warp_id(item);
-#else
-   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
-   const HYPRE_Int warp_size = HYPRE_WARP_SIZE;
-#endif
+   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>(item);
+   const HYPRE_Int warp_size = hypre_gpu_get_warp_size(item);
 
    if (global_warp_id >= nrows)
    {
@@ -694,11 +688,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_Item    &item,
    }
 
    /* lane id inside the warp */
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int lane_id = SG.get_local_linear_id();
-#else
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-#endif
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int i, j = 0, k = 0, p, row, istart, iend, bstart;
 
    /* diag part */

@@ -22,11 +22,7 @@ hypreGPUKernel_ConcatDiagAndOffd( hypre_Item &item,
                                   HYPRE_Int *cols_offd_map,
                                   HYPRE_Int *d_ib,     HYPRE_Int *d_jb,     HYPRE_Complex *d_ab)
 {
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
-#else
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
+   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
@@ -34,12 +30,7 @@ hypreGPUKernel_ConcatDiagAndOffd( hypre_Item &item,
    }
 
    /* lane id inside the warp */
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int lane_id = SG.get_local_linear_id();
-#else
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-#endif
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int i, j = 0, k = 0, p, istart, iend, bstart;
 
    /* diag part */
@@ -1149,14 +1140,14 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_Item &item,
                                                       HYPRE_Real     *elmt_tols_diag,
                                                       HYPRE_Real     *elmt_tols_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int p_diag = 0, p_offd = 0, q_diag, q_offd;
 
    /* sum row norm over diag part */

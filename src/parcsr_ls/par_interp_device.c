@@ -422,7 +422,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nr_of_rows)
    {
@@ -431,7 +431,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
 
    HYPRE_Int p, q, dof_func_i;
    HYPRE_Int jPd = 0, jPo = 0;
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
 
    if (lane == 0)
    {
@@ -565,14 +565,14 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
    */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
 
    HYPRE_Int k, dof_func_i;
 
@@ -838,14 +838,14 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
    */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
 
    HYPRE_Int k, dof_func_i;
 
@@ -1386,7 +1386,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nr_of_rows)
    {
@@ -1395,7 +1395,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
 
    HYPRE_Int p, q;
    HYPRE_Int max_j_diag = -1, max_j_offd = -1;
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Real max_diag = -1.0, max_offd = -1.0;
    HYPRE_Real warp_max_diag = -1.0, warp_max_offd = -1.0;
 

@@ -380,14 +380,14 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_Item    &item,
                                          HYPRE_Complex *A_offd_data,
                                          HYPRE_Int      num_cols_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Real eps = 0.0; /* DBL_EPSILON * 1e+4; */
    HYPRE_Real l1_norm = 0.0;
    HYPRE_Int p1, q1, p2 = 0, q2 = 0;
@@ -1497,14 +1497,14 @@ hypreCUDAKernel_AMSComputePi_copy2(hypre_Item &item,
                                    HYPRE_Real *Gz_data,
                                    HYPRE_Real *data_out)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int j, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
@@ -1776,14 +1776,14 @@ hypreCUDAKernel_AMSComputePixyz_copy(hypre_Item &item,
                                      HYPRE_Real *data_y_out,
                                      HYPRE_Real *data_z_out )
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int j, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3], *Odata[3];
 
@@ -2359,14 +2359,14 @@ hypreCUDAKernel_AMSComputeGPi_copy2(hypre_Item &item,
                                     HYPRE_Real *Gz_data,
                                     HYPRE_Real *data_out)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
+   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int j, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
@@ -2645,14 +2645,14 @@ hypreCUDAKernel_FixInterNodes( hypre_Item    &item,
                                HYPRE_Complex *G0t_offd_data,
                                HYPRE_Real    *interior_nodes_data)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Int not1 = 0;
 
    if (lane == 0)
@@ -2709,14 +2709,14 @@ hypreCUDAKernel_AMSSetupScaleGGt( hypre_Item &item,
                                   HYPRE_Real *Gy_data,
                                   HYPRE_Real *Gz_data )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= Gt_num_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(item);
    HYPRE_Real h2 = 0.0;
    HYPRE_Int ne, p1, q1, p2 = 0, q2 = 0;
 
