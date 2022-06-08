@@ -35,17 +35,18 @@ hypre_DeviceDataCreate()
 #else
    hypre_DeviceDataSpgemmUseVendor(data) = 0;
 #endif
-
    /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
 #if defined(HYPRE_USING_CUDA)
    hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
 
+   /* hypre SpGEMM parameters */
    const HYPRE_Int  Nsamples   = 64;
    const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
+
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
-   hypre_DeviceDataSpgemmBinned(data)                   = 0;
+   hypre_DeviceDataSpgemmBinned(data)                   = 1;
    hypre_DeviceDataSpgemmNumBin(data)                   = 0;
    hypre_DeviceDataSpgemmHighestBin(data)[0]            = 0;
    hypre_DeviceDataSpgemmHighestBin(data)[1]            = 0;
