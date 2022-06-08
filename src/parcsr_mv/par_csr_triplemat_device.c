@@ -780,6 +780,14 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
       /* add Cext to local part of Cbar */
+      /* WM: debug */
+      HYPRE_Int my_id;
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
+      if (my_id == 0)
+      {
+         hypre_CSRMatrixPrint(Cbar, "Cbar");
+         hypre_CSRMatrixPrint(Cext, "Cext");
+      }
       hypre_ParCSRTMatMatPartialAddDevice(hypre_ParCSRMatrixCommPkg(R),
                                           hypre_ParCSRMatrixNumCols(R),
                                           hypre_ParCSRMatrixNumCols(P),
@@ -794,6 +802,12 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                           &C_offd,
                                           &num_cols_offd_C,
                                           &col_map_offd_C);
+      /* WM: debug */
+      if (my_id == 0)
+      {
+         hypre_CSRMatrixPrint(C_diag, "C_diag");
+         hypre_CSRMatrixPrint(C_offd, "C_offd");
+      }
 
       hypre_TFree(col_map_offd, HYPRE_MEMORY_DEVICE);
    }
@@ -973,7 +987,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                         oneapi::dpl::make_zip_iterator(work, big_work),
                                         pred1 );
 
-      HYPRE_Int Cext_diag_nnz = thrust::get<0>(dia_end.base()) - work;
+      HYPRE_Int Cext_diag_nnz = std::get<0>(dia_end.base()) - work;
 #else
       auto dia_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0), Cext_bigj)),
@@ -1049,10 +1063,19 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       HYPRE_Int *ie_ii = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
       HYPRE_Int *ie_j  = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_sequence(ie_ii, ie_ii + num_rows, 0);
+      HYPRE_ONEDPL_CALL( std::copy, send_map, send_map + num_elemt, ie_ii + num_rows);
+      hypreSycl_sequence(ie_j, ie_j + num_rows + num_elemt, 0);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(ie_ii, ie_j);
+      HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + num_rows + num_elemt,
+      [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+#else
       HYPRE_THRUST_CALL( sequence, ie_ii, ie_ii + num_rows);
       HYPRE_THRUST_CALL( copy, send_map, send_map + num_elemt, ie_ii + num_rows);
       HYPRE_THRUST_CALL( sequence, ie_j, ie_j + num_rows + num_elemt);
       HYPRE_THRUST_CALL( stable_sort_by_key, ie_ii, ie_ii + num_rows + num_elemt, ie_j );
+#endif
 
       HYPRE_Int *ie_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, num_rows + num_elemt, ie_ii);
       hypre_TFree(ie_ii, HYPRE_MEMORY_DEVICE);
