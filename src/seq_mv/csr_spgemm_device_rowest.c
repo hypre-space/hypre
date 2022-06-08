@@ -19,9 +19,13 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 template <char type>
 static __device__ __forceinline__
-void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
+void rownnz_naive_rowi(HYPRE_Int  rowi,
+                       HYPRE_Int  lane_id,
+                       HYPRE_Int *ia,
+                       HYPRE_Int *ja,
                        HYPRE_Int *ib,
-                       HYPRE_Int &row_nnz_sum, HYPRE_Int &row_nnz_max)
+                       HYPRE_Int &row_nnz_sum,
+                       HYPRE_Int &row_nnz_max)
 {
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
@@ -57,8 +61,14 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
 
 template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
-void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
-                           HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
+void csr_spmm_rownnz_naive(HYPRE_Int  M,
+                           HYPRE_Int  N,
+                           HYPRE_Int *ia,
+                           HYPRE_Int *ja,
+                           HYPRE_Int *ib,
+                           HYPRE_Int *jb,
+                           HYPRE_Int *rcL,
+                           HYPRE_Int *rcU)
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
@@ -106,7 +116,8 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
                        COHEN
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 __global__
-void expdistfromuniform(HYPRE_Int n, float *x)
+void expdistfromuniform(HYPRE_Int n,
+                        float    *x)
 {
    const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
    const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
@@ -122,8 +133,16 @@ void expdistfromuniform(HYPRE_Int n, float *x)
 /* T = float: single precision should be enough */
 template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP, HYPRE_Int layer>
 __global__
-void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
-                         HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
+void cohen_rowest_kernel(HYPRE_Int  nrow,
+                         HYPRE_Int *rowptr,
+                         HYPRE_Int *colidx,
+                         T         *V_in,
+                         T         *V_out,
+                         HYPRE_Int *rc,
+                         HYPRE_Int  nsamples,
+                         HYPRE_Int *low,
+                         HYPRE_Int *upp,
+                         T          mult)
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
@@ -268,9 +287,19 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 }
 
 template <typename T, HYPRE_Int BDIMX, HYPRE_Int BDIMY, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP>
-void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_ia, HYPRE_Int *d_ja,
-                           HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc,
-                           HYPRE_Int nsamples, T mult_factor, T *work)
+void csr_spmm_rownnz_cohen(HYPRE_Int  M,
+                           HYPRE_Int  K,
+                           HYPRE_Int  N,
+                           HYPRE_Int *d_ia,
+                           HYPRE_Int *d_ja,
+                           HYPRE_Int *d_ib,
+                           HYPRE_Int *d_jb,
+                           HYPRE_Int *d_low,
+                           HYPRE_Int *d_upp,
+                           HYPRE_Int *d_rc,
+                           HYPRE_Int  nsamples,
+                           T          mult_factor,
+                           T         *work)
 {
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
@@ -355,8 +384,8 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   size_t    cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
-   float     cohen_mult     = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
+   size_t cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
+   float  cohen_mult     = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
 
    //hypre_printf("Cohen Nsamples %d, mult %f\n", cohen_nsamples, cohen_mult);
 
@@ -377,7 +406,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
       /* [optional] first run naive estimate for naive lower and upper bounds,
                     which will be given to Cohen's alg as corrections */
       char *work_mem = hypre_TAlloc(char,
-                                    cohen_nsamples * (n + k) * sizeof(float) +2 * m * sizeof(HYPRE_Int),
+                                    cohen_nsamples * (n + k) * sizeof(float) + 2 * m * sizeof(HYPRE_Int),
                                     HYPRE_MEMORY_DEVICE);
       char *work_mem_saved = work_mem;
 
