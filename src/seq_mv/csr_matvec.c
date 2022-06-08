@@ -285,7 +285,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                      tmp[0] += coef * x_data[xidx];
                      tmp[1] += coef * x_data[xidx + vecstride_x];
                   }
-                  HYPRE_Int yidx = m * idxstride_y;
+                  HYPRE_Int yidx = i * idxstride_y;
 
                   y_data[yidx] += tmp[0];
                   y_data[yidx + vecstride_y] += tmp[1];
@@ -308,7 +308,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                      tmp[1] += coef * x_data[xidx +   vecstride_x];
                      tmp[2] += coef * x_data[xidx + 2*vecstride_x];
                   }
-                  HYPRE_Int yidx = m * idxstride_y;
+                  HYPRE_Int yidx = i * idxstride_y;
 
                   y_data[yidx] += tmp[0];
                   y_data[yidx +   vecstride_y] += tmp[1];
@@ -333,7 +333,7 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
                      tmp[2] += coef * x_data[xidx + 2*vecstride_x];
                      tmp[3] += coef * x_data[xidx + 3*vecstride_x];
                   }
-                  HYPRE_Int yidx = m * idxstride_y;
+                  HYPRE_Int yidx = i * idxstride_y;
 
                   y_data[yidx] += tmp[0];
                   y_data[yidx +   vecstride_y] += tmp[1];
