@@ -468,6 +468,8 @@ hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A,
 }
 #endif
 
+/* The input B_ext is a BigJ matrix, so is the output */
+/* RL: TODO FIX the num of columns of the output (from B_ext 'big' num cols) */
 HYPRE_Int
 hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
                                       hypre_ParCSRCommPkg  *comm_pkg_A,
