@@ -472,6 +472,8 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          thrust::minus<HYPRE_Int>() );
 #endif
 
+      // Change Cint into a BigJ matrix
+      // RL: TODO FIX the 'big' num of columns to global size
       hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint),
                                                HYPRE_MEMORY_DEVICE);
 
@@ -908,6 +910,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       HYPRE_Int    *work      = hypre_TAlloc(HYPRE_Int, Cext_nnz, HYPRE_MEMORY_DEVICE);
       HYPRE_Int    *map_offd_to_C;
 
+      // Convert Cext from BigJ to J
       // Cext offd
 #if defined(HYPRE_USING_SYCL)
       auto off_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
@@ -1003,6 +1006,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                          thrust::minus<HYPRE_BigInt>());
 #endif
 
+      hypre_CSRMatrixNumCols(Cext) = num_cols + num_cols_offd_C;
+
       // transform Cbar_local J index
       RAP_functor<2, HYPRE_Int> func2(num_cols, 0, map_offd_to_C);
 #if defined(HYPRE_USING_SYCL)
@@ -1018,6 +1023,8 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                          hypre_CSRMatrixJ(Cbar_local),
                          func2 );
 #endif
+
+      hypre_CSRMatrixNumCols(Cbar_local) = num_cols + num_cols_offd_C;
 
       hypre_TFree(big_work,      HYPRE_MEMORY_DEVICE);
       hypre_TFree(work,          HYPRE_MEMORY_DEVICE);
@@ -1059,7 +1066,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
       hypre_CSRMatrixI(IE) = ie_i;
       hypre_CSRMatrixJ(IE) = ie_j;
-      //hypre_CSRMatrixData(IE) = ie_a;
 
       // CC = [Cbar_local; Cext]
       hypre_CSRMatrix *CC = hypre_CSRMatrixStack2Device(Cbar_local, Cext);
