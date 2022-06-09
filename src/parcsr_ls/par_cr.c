@@ -2876,6 +2876,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    HYPRE_Int        num_nodes = num_variables / num_functions;
    HYPRE_Real       rho = 1.0;
    HYPRE_Real       gamma = 0.0;
+   HYPRE_Real       inner_prod;
    HYPRE_Real       rho0, rho1, *e0, *e1, *sum = NULL;
    HYPRE_Real       rho_old, relrho;
    HYPRE_Real       *e2;
@@ -2888,13 +2889,10 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
 
    hypre_ParVector    *Relax_temp = NULL;
 
-
-
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    num_threads = hypre_NumThreads();
-
 
    global_num_variables = hypre_ParCSRMatrixGlobalNumRows(A);
    /*if(CRaddCpoints == 0)
@@ -3065,8 +3063,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                for (j = 0; j < num_variables; j++)
                   if (CF_marker[j] == fpt) { e2[j] = e1[j]; }
             }
-            rho0 = hypre_ParVectorInnerProd(e0_vec, e0_vec);
-            rho1 = hypre_ParVectorInnerProd(e1_vec, e1_vec);
+            hypre_ParVectorInnerProd(e0_vec, e0_vec, &rho0);
+            hypre_ParVectorInnerProd(e1_vec, e1_vec, &rho1);
             rho_old = rho;
             rho = sqrt(rho1) / sqrt(rho0);
             relrho = fabs(rho - rho_old) / rho;
@@ -3079,8 +3077,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
         rho1 += pow(e1[i],2);
         }*/
 
-      /*rho0 = hypre_ParVectorInnerProd(e0_vec,e0_vec);
-        rho1 = hypre_ParVectorInnerProd(e1_vec,e1_vec);
+      /*hypre_ParVectorInnerProd(e0_vec,e0_vec,&rho0);
+        hypre_ParVectorInnerProd(e1_vec,e1_vec,&rho1);
         rho = sqrt(rho1)/sqrt(rho0);*/
       for (j = 0; j < num_variables; j++)
          if (CF_marker[j] == fpt) { e1[j] = e2[j]; }
@@ -3099,7 +3097,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             }
 
             hypre_ParVectorSetConstantValues(Rtemp, 0);
-            rho1 = hypre_ParVectorInnerProd(e1_vec, e1_vec);
+            hypre_ParVectorInnerProd(e1_vec, e1_vec, &rho1);
             rho0 = rho1;
             i = 0;
             while (rho1 / rho0 > 1.e-2 && i < num_CR_relax_steps)
@@ -3113,7 +3111,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                HYPRE_ParCSRDiagScale(NULL, (HYPRE_ParCSRMatrix) A, (HYPRE_ParVector) Rtemp,
                                      (HYPRE_ParVector) Ztemp);
                gammaold = gamma;
-               gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
+               hypre_ParVectorInnerProd(Rtemp, Ztemp, &gamma);
                if (i == 0)
                {
                   hypre_ParVectorCopy(Ztemp, Ptemp);
@@ -3129,12 +3127,13 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                      }
                }
                hypre_ParCSRMatrixMatvec_FF(1.0, A, Ptemp, 0.0, Qtemp, CF_marker, fpt);
-               alpha = gamma / hypre_ParVectorInnerProd(Ptemp, Qtemp);
+               hypre_ParVectorInnerProd(Ptemp, Qtemp, &inner_prod);
+               alpha = gamma / inner_prod;
                hypre_ParVectorAxpy(-alpha, Qtemp, Rtemp);
                for (j = 0; j < num_variables; j++)
                   if (CF_marker[j] == fpt) { e0[j] = e1[j]; }
                hypre_ParVectorAxpy(-alpha, Ptemp, e1_vec);
-               rho1 = hypre_ParVectorInnerProd(e1_vec, e1_vec);
+               hypre_ParVectorInnerProd(e1_vec, e1_vec, &rho1);
                i++;
             }
          }

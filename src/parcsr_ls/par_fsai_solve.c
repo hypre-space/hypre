@@ -100,7 +100,7 @@ hypre_FSAISolve( void               *fsai_vdata,
       if (tol > 0.0)
       {
          old_resnorm = resnorm;
-         resnorm = hypre_ParVectorInnerProd(r_work, r_work);
+         hypre_ParVectorInnerProd(r_work, r_work, &resnorm);
 
          /* Compute rel_resnorm */
          rel_resnorm = resnorm / old_resnorm;

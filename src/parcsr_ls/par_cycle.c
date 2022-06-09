@@ -84,6 +84,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real     *relax_weight;
    HYPRE_Real     *omega;
    HYPRE_Real      alfa, beta, gammaold;
+   HYPRE_Real      inner_prod;
    HYPRE_Real      gamma = 1.0;
    HYPRE_Int       local_size;
    /*   HYPRE_Int      *smooth_option; */
@@ -625,7 +626,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             if  (smooth_num_levels > level && smooth_type > 9)
             {
                gammaold = gamma;
-               gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
+               hypre_ParVectorInnerProd(Rtemp, Ztemp, &gamma);
                if (jj == 0)
                {
                   hypre_ParVectorCopy(Ztemp, Ptemp);
@@ -640,7 +641,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                }
 
                hypre_ParCSRMatrixMatvec(1.0, A_array[level], Ptemp, 0.0, Vtemp);
-               alfa = gamma / hypre_ParVectorInnerProd(Ptemp, Vtemp);
+               hypre_ParVectorInnerProd(Ptemp, Vtemp, &inner_prod);
+               alfa = gamma / inner_prod;
                hypre_ParVectorAxpy(alfa, Ptemp, U_array[level]);
                hypre_ParVectorAxpy(-alfa, Vtemp, Rtemp);
             }

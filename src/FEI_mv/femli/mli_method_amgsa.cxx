@@ -581,7 +581,8 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       {
          for (jj = 0; jj < ANRows; jj++) XData[jj] = nullspaceVec_[ii*ANRows+jj];
          hypre_ParCSRMatrixMatvec(1.0, hypreA, hypreX, 0.0, hypreY);
-         rnorm = sqrt(hypre_ParVectorInnerProd(hypreY, hypreY));
+         hypre_ParVectorInnerProd(hypreY, hypreY, &rnorm);
+         rnorm = sqrt(rnorm);
          if (mypid == 0) printf("HYPRE FEI: check null space = %e\n", rnorm);
       }
       HYPRE_IJVectorDestroy(IJX);
@@ -1791,4 +1792,3 @@ int MLI_Method_AMGSA::relaxNullSpaces(MLI_Matrix *mli_Amat)
 #endif
    return 0;
 }
-

@@ -703,14 +703,16 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
             XData[irow] = 0.5 * XData[irow] + 0.5;
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm0 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm0);
+         rnorm0 = sqrt(rnorm0);
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
 
          numSweeps = 5;
          smootherPtr->setParams(paramString, targc, targv);
          smootherPtr->solve(mli_Bvec, mli_Xvec);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
 
          rnorm0 = rnorm1;
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
@@ -718,7 +720,8 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          smootherPtr->setParams(paramString, targc, targv);
          smootherPtr->solve(mli_Bvec, mli_Xvec);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
 
          hypre_ParVectorAxpy(dOne, hypreX, hypreXacc);
          printf("\tTrial %3d : Jacobi norms = %16.8e %16.8e\n",iT,
@@ -750,14 +753,16 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
             XData[irow] = 0.5 * XData[irow] + 0.5;
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm0 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm0);
+         rnorm0 = sqrt(rnorm0);
 
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
          strcpy(paramString, "pJacobi");
          MLI_Utils_HypreGMRESSolve(hypreSolver, (HYPRE_Matrix) hypreAff,
                      (HYPRE_Vector) hypreB, (HYPRE_Vector) hypreX, paramString);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
          if (rnorm1 < rnorm0 * 1.0e-10 || rnorm1 < 1.0e-10)
          {
             printf("\tperformCR : rnorm0, rnorm1 = %e %e\n",rnorm0,rnorm1);
@@ -770,7 +775,8 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          MLI_Utils_HypreGMRESSolve(hypreSolver, (HYPRE_Matrix) hypreAff,
                      (HYPRE_Vector) hypreB, (HYPRE_Vector) hypreX, paramString);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
          rnorm1 = 0.2 * log10(rnorm1/rnorm0);
          rnorm1 = pow(1.0e1, rnorm1);
          ratio1 = rnorm1;
@@ -785,14 +791,16 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
             XData[irow] = 0.5 * XData[irow] + 0.5;
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm0 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm0);
+         rnorm0 = sqrt(rnorm0);
 
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
          strcpy(paramString, "pJacobi");
          MLI_Utils_HypreGMRESSolve(hypreSolver, (HYPRE_Matrix) hypreAffT,
                      (HYPRE_Vector) hypreB, (HYPRE_Vector) hypreX, paramString);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAffT, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
          if (rnorm1 < rnorm0 * 1.0e-10 || rnorm1 < 1.0e-10) break;
          rnorm0 = rnorm1;
 
@@ -801,7 +809,8 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          MLI_Utils_HypreGMRESSolve(hypreSolver, (HYPRE_Matrix) hypreAffT,
                      (HYPRE_Vector) hypreB, (HYPRE_Vector) hypreX, paramString);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAffT, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
          rnorm1 = 0.2 * log10(rnorm1/rnorm0);
          ratio2 = pow(1.0e1, rnorm1);
          if (ratio1 > ratio2) aratio += ratio1;

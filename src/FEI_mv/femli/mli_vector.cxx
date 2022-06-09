@@ -123,7 +123,10 @@ double MLI_Vector::norm2()
       exit(1);
    }
    hypre_ParVector *vec = (hypre_ParVector *) vector_;
-   return (sqrt(hypre_ParVectorInnerProd( vec, vec )));
+   HYPRE_Real       inner_prod;
+
+   hypre_ParVectorInnerProd(vec, vec, &inner_prod);
+   return sqrt(inner_prod);
 }
 
 /******************************************************************************

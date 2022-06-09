@@ -72,6 +72,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    HYPRE_Real    beta;
    HYPRE_Real    gamma = 1.0;
    HYPRE_Real    gammaold;
+   HYPRE_Real    inner_prod;
 
    HYPRE_Real   *tridiag;
    HYPRE_Real   *trioffd;
@@ -263,7 +264,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          }
       }
       gammaold = gamma;
-      gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
+      hypre_ParVectorInnerProd(Rtemp, Ztemp, &gamma);
       if (jj == 0)
       {
          hypre_ParVectorCopy(Ztemp, Ptemp);
@@ -278,7 +279,8 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          }
       }
       hypre_ParCSRMatrixMatvec(1.0, A, Ptemp, 0.0, Vtemp);
-      alpha = gamma / hypre_ParVectorInnerProd(Ptemp, Vtemp);
+      hypre_ParVectorInnerProd(Ptemp, Vtemp, &inner_prod);
+      alpha = gamma / inner_prod;
       alphinv = 1.0 / alpha;
       tridiag[jj + 1] = alphinv;
       tridiag[jj] *= beta;

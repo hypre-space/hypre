@@ -6086,10 +6086,10 @@ main( hypre_int argc,
       }
       else if (object_type == HYPRE_PARCSR)
       {
-         bnorm = hypre_ParVectorInnerProd(par_b, par_b);
+         hypre_ParVectorInnerProd(par_b, par_b, &bnorm);
          HYPRE_SStructVectorGetObject(xnew, (void **) &par_xnew);
          HYPRE_ParCSRMatrixMatvec(-1.0, par_A, par_xnew, 1.0, par_b );
-         rnorm = hypre_ParVectorInnerProd(par_b, par_b);
+         hypre_ParVectorInnerProd(par_b, par_b, &rnorm);
       }
       else if (object_type == HYPRE_STRUCT)
       {

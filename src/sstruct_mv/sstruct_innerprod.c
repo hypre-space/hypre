@@ -84,7 +84,7 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
       hypre_SStructVectorConvert(x, &x_par);
       hypre_SStructVectorConvert(y, &y_par);
 
-      result = hypre_ParVectorInnerProd(x_par, y_par);
+      hypre_ParVectorInnerProd(x_par, y_par, &result);
    }
 
    *result_ptr = result;

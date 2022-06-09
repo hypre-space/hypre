@@ -134,7 +134,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
    if (tol > 0.0)
    {
       /* eps = (tol^2) */
-      b_dot_b = hypre_ParVectorInnerProd(be_l[0], be_l[0]);
+      hypre_ParVectorInnerProd(be_l[0], be_l[0], &b_dot_b);
       eps = tol * tol;
 
       /* if rhs is zero, return a zero solution */
@@ -228,7 +228,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
       /* convergence check */
       if (tol > 0.0)
       {
-         r_dot_r = hypre_ParVectorInnerProd(rese_l[0], rese_l[0]);
+         hypre_ParVectorInnerProd(rese_l[0], rese_l[0], &r_dot_r);
 
          if (logging > 0)
          {
@@ -711,14 +711,14 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                      ee_l[0]);
             hypre_ParVectorZeroBCValues(ee_l[0], BdryRanks_l[0],
                                         BdryRanksCnts_l[0]);
-            e_dot_e = hypre_ParVectorInnerProd(ee_l[0], ee_l[0]);
+            hypre_ParVectorInnerProd(ee_l[0], ee_l[0], &e_dot_e);
 
             hypre_ParVectorCopy(xe_l[0], eVtemp_l[0]);
             hypre_ParCSRMatrixMatvec(1.0, Tgrad, xn_l[0], 1.0,
                                      eVtemp_l[0]);
             hypre_ParVectorZeroBCValues(eVtemp_l[0], BdryRanks_l[0],
                                         BdryRanksCnts_l[0]);
-            x_dot_x = hypre_ParVectorInnerProd(eVtemp_l[0], eVtemp_l[0]);
+            hypre_ParVectorInnerProd(eVtemp_l[0], eVtemp_l[0], &x_dot_x);
          }
          else
          {

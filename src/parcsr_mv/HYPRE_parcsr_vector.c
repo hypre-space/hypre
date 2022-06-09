@@ -194,8 +194,9 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
       return hypre_error_flag;
    }
 
-   *prod = hypre_ParVectorInnerProd( (hypre_ParVector *) x,
-                                     (hypre_ParVector *) y) ;
+   hypre_ParVectorInnerProd( (hypre_ParVector *) x,
+                             (hypre_ParVector *) y,
+                             prod );
    return hypre_error_flag;
 }
 

@@ -122,17 +122,16 @@ hypre_F90_IFACE(hypre_paraxpy, HYPRE_PARAXPY)
 
 void
 hypre_F90_IFACE(hypre_parinnerprod, HYPRE_PARINNERPROD)
-( hypre_F90_Obj *x,
-  hypre_F90_Obj *y,
-  hypre_F90_Complex *inner_prod,
-  hypre_F90_Int *ierr           )
+( hypre_F90_Obj  *x,
+  hypre_F90_Obj  *y,
+  hypre_F90_Real *inner_prod,
+  hypre_F90_Int  *ierr           )
 {
-   *inner_prod = (hypre_F90_Complex)
-                 ( hypre_ParVectorInnerProd(
-                      (hypre_ParVector *) *x,
-                      (hypre_ParVector *) *y  ) );
-
-   *ierr = 0;
+   *ierr = (hypre_F90_Int)
+           ( hypre_ParVectorInnerProd(
+                (hypre_ParVector *)   *x,
+                (hypre_ParVector *)   *y,
+                hypre_F90_PassRealRef (inner_prod) ) );
 }
 
 /*--------------------------------------------------------------------------

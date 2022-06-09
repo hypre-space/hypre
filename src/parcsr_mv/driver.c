@@ -107,9 +107,9 @@ main( HYPRE_Int   argc,
     * Do an inner product vector* tmp_vector
     *-----------------------------------------------------------*/
 
-   prod = hypre_ParVectorInnerProd(vector1, tmp_vector);
+   hypre_ParVectorInnerProd(vector1, tmp_vector, &prod);
 
-   hypre_printf (" prod: %8.2f \n", prod);
+   hypre_printf(" prod: %8.2f \n", prod);
 
    /*-----------------------------------------------------------
     * Finalize things

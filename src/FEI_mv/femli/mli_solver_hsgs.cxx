@@ -94,7 +94,8 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                            relaxOmega_,NULL,u,vTemp, zTemp);
       //hypre_ParVectorCopy( f, vTemp );
       //hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, vTemp );
-      //rnorm = sqrt(hypre_ParVectorInnerProd( vTemp, vTemp ));
+      //hypre_ParVectorInnerProd( vTemp, vTemp, &rnorm );
+      //rnorm = sqrt(rnorm);
       //if ( mypid == 0 )
       //   printf("\tMLI_Solver_HSGS iter = %4d, rnorm = %e (omega=%e)\n",
       //             iS, rnorm, relaxWeights_);

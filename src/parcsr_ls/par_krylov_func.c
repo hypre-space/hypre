@@ -172,8 +172,12 @@ HYPRE_Real
 hypre_ParKrylovInnerProd( void *x,
                           void *y )
 {
-   return ( hypre_ParVectorInnerProd( (hypre_ParVector *) x,
-                                      (hypre_ParVector *) y ) );
+   HYPRE_Real result;
+
+   hypre_ParVectorInnerProd( (hypre_ParVector *) x,
+                             (hypre_ParVector *) y,
+                             &result );
+   return (result);
 }
 
 /*--------------------------------------------------------------------------

@@ -3711,7 +3711,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
          }
 
-         rho1 = hypre_ParVectorInnerProd(u_vec, u_vec);
+         hypre_ParVectorInnerProd(u_vec, u_vec, &rho1);
          for (i = 0; i < 5; i++)
          {
             rho0 = rho1;
@@ -3719,7 +3719,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  grid_relax_type[0], -1,
                                  relax_weight[level], omega[level], l1_norms[level],
                                  u_vec, Vtemp, Ztemp);
-            rho1 = hypre_ParVectorInnerProd(u_vec, u_vec);
+            hypre_ParVectorInnerProd(u_vec, u_vec, &rho1);
             rho = sqrt(rho1 / rho0);
             if (rho < 0.01)
             {

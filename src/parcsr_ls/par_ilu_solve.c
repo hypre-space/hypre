@@ -145,7 +145,6 @@ hypre_ILUSolve( void               *ilu_vdata,
       hypre_printf("\n\n ILU SOLVER SOLUTION INFO:\n");
    }
 
-
    /*-----------------------------------------------------------------------
     *    Compute initial residual and print
     *-----------------------------------------------------------------------*/
@@ -153,12 +152,13 @@ hypre_ILUSolve( void               *ilu_vdata,
    {
       if ( logging > 1 )
       {
-         hypre_ParVectorCopy(f, residual );
+         hypre_ParVectorCopy(f, residual);
          if (tol > 0.0)
          {
-            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual );
+            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual);
          }
-         resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
+         hypre_ParVectorInnerProd(residual, residual, &resnorm);
+         resnorm = sqrt(resnorm);
       }
       else
       {
@@ -167,7 +167,8 @@ hypre_ILUSolve( void               *ilu_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A, u, beta, Ftemp);
          }
-         resnorm = sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
+         hypre_ParVectorInnerProd(Ftemp, Ftemp, &resnorm);
+         resnorm = sqrt(resnorm);
       }
 
       /* Since it is does not diminish performance, attempt to return an error flag
@@ -197,7 +198,8 @@ hypre_ILUSolve( void               *ilu_vdata,
       }
 
       init_resnorm = resnorm;
-      rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+      hypre_ParVectorInnerProd(f, f, &rhs_norm);
+      rhs_norm = sqrt(rhs_norm);
       if (rhs_norm > HYPRE_REAL_EPSILON)
       {
          rel_resnorm = init_resnorm / rhs_norm;
@@ -315,13 +317,15 @@ hypre_ILUSolve( void               *ilu_vdata,
          {
             hypre_ParVectorCopy(F_array, residual);
             hypre_ParCSRMatrixMatvec(alpha, matA, U_array, beta, residual );
-            resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
+            hypre_ParVectorInnerProd(residual, residual, &resnorm);
+            resnorm = sqrt(resnorm);
          }
          else
          {
             hypre_ParVectorCopy(F_array, Ftemp);
             hypre_ParCSRMatrixMatvec(alpha, matA, U_array, beta, Ftemp);
-            resnorm = sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
+            hypre_ParVectorInnerProd(Ftemp, Ftemp, &resnorm);
+            resnorm = sqrt(resnorm);
          }
 
          if (old_resnorm) { conv_factor = resnorm / old_resnorm; }
@@ -1994,7 +1998,8 @@ hypre_NSHSolve( void               *nsh_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual );
          }
-         resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
+         hypre_ParVectorInnerProd(residual, residual, &resnorm);
+         resnorm = sqrt(resnorm);
       }
       else
       {
@@ -2003,7 +2008,8 @@ hypre_NSHSolve( void               *nsh_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A, u, beta, Ftemp);
          }
-         resnorm = sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
+         hypre_ParVectorInnerProd(Ftemp, Ftemp, &resnorm);
+         resnorm = sqrt(resnorm);
       }
 
       /* Since it is does not diminish performance, attempt to return an error flag
@@ -2031,7 +2037,8 @@ hypre_NSHSolve( void               *nsh_vdata,
       }
 
       init_resnorm = resnorm;
-      rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+      hypre_ParVectorInnerProd(f, f, &rhs_norm);
+      rhs_norm = sqrt(rhs_norm);
       if (rhs_norm > HYPRE_REAL_EPSILON)
       {
          rel_resnorm = init_resnorm / rhs_norm;
@@ -2084,17 +2091,19 @@ hypre_NSHSolve( void               *nsh_vdata,
       {
          old_resnorm = resnorm;
 
-         if ( logging > 1 )
+         if (logging > 1)
          {
             hypre_ParVectorCopy(F_array, residual);
             hypre_ParCSRMatrixMatvec(alpha, matA, U_array, beta, residual );
-            resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
+            hypre_ParVectorInnerProd(residual, residual, &resnorm);
+            resnorm = sqrt(resnorm);
          }
          else
          {
             hypre_ParVectorCopy(F_array, Ftemp);
             hypre_ParCSRMatrixMatvec(alpha, matA, U_array, beta, Ftemp);
-            resnorm = sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
+            hypre_ParVectorInnerProd(Ftemp, Ftemp, &resnorm);
+            resnorm = sqrt(resnorm);
          }
 
          if (old_resnorm) { conv_factor = resnorm / old_resnorm; }

@@ -362,7 +362,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 #endif
 
    /* gamma = <r,Cr> */
-   gamma = hypre_ParVectorInnerProd(r, p);
+   hypre_ParVectorInnerProd(r, p, &gamma);
 
    /* for the initial filling of the tridiag matrix */
    beta = 1.0;
@@ -376,7 +376,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 
       /*gamma = <r,Cr> */
       gamma_old = gamma;
-      gamma     = hypre_ParVectorInnerProd(r, s);
+      hypre_ParVectorInnerProd(r, s, &gamma);
 
       if (gamma < HYPRE_REAL_EPSILON)
       {
@@ -417,7 +417,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       }
 
       /* <s,p> */
-      sdotp = hypre_ParVectorInnerProd(s, p);
+      hypre_ParVectorInnerProd(s, p, &sdotp);
 
       /* alpha = gamma / <s,p> */
       alpha = gamma / sdotp;

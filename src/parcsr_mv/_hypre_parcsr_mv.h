@@ -1135,7 +1135,7 @@ HYPRE_Int hypre_ParVectorScale ( HYPRE_Complex alpha, hypre_ParVector *y );
 HYPRE_Int hypre_ParVectorAxpy ( HYPRE_Complex alpha, hypre_ParVector *x, hypre_ParVector *y );
 HYPRE_Int hypre_ParVectorMassAxpy ( HYPRE_Complex *alpha, hypre_ParVector **x, hypre_ParVector *y,
                                     HYPRE_Int k, HYPRE_Int unroll);
-HYPRE_Real hypre_ParVectorInnerProd ( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorInnerProd ( hypre_ParVector *x, hypre_ParVector *y, HYPRE_Real *result );
 HYPRE_Int hypre_ParVectorMassInnerProd ( hypre_ParVector *x, hypre_ParVector **y, HYPRE_Int k,
                                          HYPRE_Int unroll, HYPRE_Real *prod );
 HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z,

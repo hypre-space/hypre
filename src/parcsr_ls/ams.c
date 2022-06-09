@@ -3748,9 +3748,11 @@ HYPRE_Int hypre_AMSSolve(void *solver,
       {
          hypre_ParVectorCopy(b, ams_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ams_data -> A, x, 1.0, ams_data -> r0);
-         r_norm = sqrt(hypre_ParVectorInnerProd(ams_data -> r0, ams_data -> r0));
+         hypre_ParVectorInnerProd(ams_data -> r0, ams_data -> r0, &r_norm);
+         r_norm = sqrt(r_norm);
          r0_norm = r_norm;
-         b_norm = sqrt(hypre_ParVectorInnerProd(b, b));
+         hypre_ParVectorInnerProd(b, b, &b_norm);
+         b_norm = sqrt(b_norm);
          if (b_norm)
          {
             relative_resid = r_norm / b_norm;
@@ -3793,7 +3795,8 @@ HYPRE_Int hypre_AMSSolve(void *solver,
          old_resid = r_norm;
          hypre_ParVectorCopy(b, ams_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ams_data -> A, x, 1.0, ams_data -> r0);
-         r_norm = sqrt(hypre_ParVectorInnerProd(ams_data -> r0, ams_data -> r0));
+         hypre_ParVectorInnerProd(ams_data -> r0, ams_data -> r0, &r_norm);
+         r_norm = sqrt(r_norm);
          if (b_norm)
          {
             relative_resid = r_norm / b_norm;

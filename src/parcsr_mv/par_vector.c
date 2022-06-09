@@ -399,15 +399,15 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
  * hypre_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
-HYPRE_Real
+HYPRE_Int
 hypre_ParVectorInnerProd( hypre_ParVector *x,
-                          hypre_ParVector *y )
+                          hypre_ParVector *y,
+                          HYPRE_Real      *result )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   HYPRE_Real    result;
    HYPRE_Real    local_result;
 
    hypre_SeqVectorInnerProd(x_local, y_local, &local_result);
@@ -415,13 +415,13 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
 #endif
-   hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL,
+   hypre_MPI_Allreduce(&local_result, result, 1, HYPRE_MPI_REAL,
                        hypre_MPI_SUM, comm);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
 #endif
 
-   return result;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

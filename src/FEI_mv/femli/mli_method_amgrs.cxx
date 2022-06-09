@@ -1264,14 +1264,16 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          hypre_ParVectorAxpy(dOne, hypreX, hypreXacc);
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm0 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm0);
+         rnorm0 = sqrt(rnorm0);
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
 
          numSweeps = 5;
          smootherPtr->setParams(paramString, targc, targv);
          smootherPtr->solve(mli_Bvec, mli_Xvec);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
 
          rnorm0 = rnorm1;
          hypre_ParVectorSetConstantValues(hypreB, 0.0);
@@ -1279,7 +1281,8 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
          smootherPtr->setParams(paramString, targc, targv);
          smootherPtr->solve(mli_Bvec, mli_Xvec);
          hypre_ParCSRMatrixMatvec(-1.0, hypreAff, hypreX, 1.0, hypreB);
-         rnorm1 = sqrt(hypre_ParVectorInnerProd(hypreB, hypreB));
+         hypre_ParVectorInnerProd(hypreB, hypreB, &rnorm1);
+         rnorm1 = sqrt(rnorm1);
 
          aratio = 0;
          for (irow = 0; irow < FNRows; irow++)

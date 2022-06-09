@@ -76,7 +76,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    y = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, global_num_rows, row_starts);
    hypre_ParVectorInitialize(y);
    hypre_ParCSRMatrixMatvec (1.0, par_matrix, x, 0.0, y);
-   ddata = hypre_ParVectorInnerProd(y, y);
+   hypre_ParVectorInnerProd(y, y, &ddata);
    if (mypid == 0) { hypre_printf("y inner product = %e\n", ddata); }
    hypre_ParVectorDestroy(x);
    hypre_ParVectorDestroy(y);
@@ -272,10 +272,10 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    y_data  = hypre_VectorData(y_local);
 
    hypre_BlockMatvecCommPkgCreate(par_blk_matrix);
-   ddata = hypre_ParVectorInnerProd(x, x);
+   hypre_ParVectorInnerProd(x, x, &ddata);
    if (mypid == 0) { hypre_printf("block x inner product = %e\n", ddata); }
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, x, 0.0, y);
-   ddata = hypre_ParVectorInnerProd(y, y);
+   hypre_ParVectorInnerProd(y, y, &ddata);
    if (mypid == 0) { hypre_printf("block y inner product = %e\n", ddata); }
 
    /* --------------------------------------------- */
@@ -289,11 +289,11 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, x, 0.0, y);
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, y, 0.0, x);
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrixT, x, 0.0, y);
-   ddata = hypre_ParVectorInnerProd(y, y);
+   hypre_ParVectorInnerProd(y, y, &ddata);
    if (mypid == 0) { hypre_printf("(1) A^2 block inner product = %e\n", ddata); }
    for (ii = 0; ii < local_size; ii++) { data[ii] = 1.0; }
    hypre_ParCSRBlockMatrixMatvec (1.0, rap_matrix, x, 0.0, y);
-   ddata = hypre_ParVectorInnerProd(y, y);
+   hypre_ParVectorInnerProd(y, y, &ddata);
    if (mypid == 0) { hypre_printf("(2) A^2 block inner product = %e\n", ddata); }
    if (mypid == 0) { hypre_printf("(1) and (2) should be equal.\n"); }
 

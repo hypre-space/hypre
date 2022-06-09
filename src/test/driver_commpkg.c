@@ -670,7 +670,7 @@ main( HYPRE_Int   argc,
 
       hypre_ParVectorSetRandomValues(y, 1);
 
-      ans = hypre_ParVectorInnerProd( y, y_new );
+      hypre_ParVectorInnerProd( y, y_new, &ans );
       if (!myid)
       {
 

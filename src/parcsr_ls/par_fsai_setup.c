@@ -1110,7 +1110,7 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    /* Power method iteration */
    for (i = 0; i < eig_max_iters; i++)
    {
-      norm = hypre_ParVectorInnerProd(eigvec, eigvec);
+      hypre_ParVectorInnerProd(eigvec, eigvec, &norm);
       invnorm = 1.0 / sqrt(norm);
       hypre_ParVectorScale(invnorm, eigvec);
 
@@ -1124,7 +1124,7 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
       hypre_ParCSRMatrixMatvec(1.0, G,  r_work, 0.0, z_work);
       hypre_ParCSRMatrixMatvec(1.0, GT, z_work, 0.0, eigvec);
    }
-   norm = hypre_ParVectorInnerProd(eigvec, eigvec_old);
+   hypre_ParVectorInnerProd(eigvec, eigvec_old, &norm);
    lambda = sqrt(norm);
 
    /* Free memory */

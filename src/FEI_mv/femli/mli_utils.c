@@ -252,16 +252,16 @@ int MLI_Utils_ScaleVec(hypre_ParCSRMatrix *Amat, hypre_ParVector *vec)
    /* -----------------------------------------------------------------
     * normalize vector
     * ----------------------------------------------------------------*/
-   norm2 = hypre_ParVectorInnerProd(vec, vec);
+   hypre_ParVectorInnerProd(vec, vec, &norm2);
    hypre_ParVectorScale(1./sqrt(norm2), vec);
 
    /* -----------------------------------------------------------------
     * multiply by matrix, perform inner product, and scale
     * ----------------------------------------------------------------*/
 
-   norm1 = hypre_ParVectorInnerProd(vec, vec);
+   hypre_ParVectorInnerProd(vec, vec, &norm1);
    hypre_ParCSRMatrixMatvec(1.0, Amat, vec, 0.0, temp);
-   norm2 = hypre_ParVectorInnerProd(vec, temp);
+   hypre_ParVectorInnerProd(vec, temp, &norm2);
    hypre_ParVectorScale(norm1/norm2, vec);
    /* printf("Rayleigh quotient: %f\n", norm2/norm1); */
 
@@ -316,7 +316,7 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *maxEigen)
    hypre_assert(!ierr);
    HYPRE_ParVectorSetRandomValues( vec1, 2934731 );
    HYPRE_ParCSRMatrixMatvec(1.0,(HYPRE_ParCSRMatrix) Amat,vec1,0.0,vec2 );
-   HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
+   HYPRE_ParVectorInnerProd(vec2, vec2, &norm2);
    for ( it = 0; it < maxits; it++ )
    {
       HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
@@ -324,7 +324,7 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *maxEigen)
       norm2 = 1.0 / sqrt(norm2);
       HYPRE_ParVectorScale( norm2, vec1 );
       HYPRE_ParCSRMatrixMatvec(1.0,(HYPRE_ParCSRMatrix) Amat,vec1,0.0,vec2 );
-      HYPRE_ParVectorInnerProd( vec1, vec2, &lambda);
+      HYPRE_ParVectorInnerProd(vec1, vec2, &lambda);
    }
    (*maxEigen) = lambda*1.05;
    HYPRE_IJVectorDestroy(IJvec1);
@@ -423,7 +423,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    hypre_ParVectorSetRandomValues(rVec, 1209837);
    hypre_ParVectorSetConstantValues(pVec, 0.0);
    hypre_ParVectorSetConstantValues(zVec, 0.0);
-   rho = hypre_ParVectorInnerProd(rVec, rVec);
+   hypre_ParVectorInnerProd(rVec, rVec, &rho);
    rnorm = sqrt(rho);
    rnormArray[0] = rnorm;
    if ( rnorm == 0.0 )
@@ -443,7 +443,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    for ( its = 0; its < maxIter; its++ )
    {
       rhom1 = rho;
-      rho   = hypre_ParVectorInnerProd(rVec, rVec);
+      hypre_ParVectorInnerProd(rVec, rVec, &rho);
       if (its == 0) beta = 0.0;
       else
       {
@@ -465,11 +465,12 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
       else
          for ( i = 0; i < localNRows; i++ ) apData[i] = zData[i];
 
-      sigma = hypre_ParVectorInnerProd(pVec, apVec);
+      hypre_ParVectorInnerProd(pVec, apVec, &sigma);
       alpha  = rho / sigma;
       alphaArray[its] = sigma;
       hypre_ParVectorAxpy( -alpha, apVec, rVec );
-      rnorm = sqrt(hypre_ParVectorInnerProd(rVec, rVec));
+      hypre_ParVectorInnerProd(rVec, rVec, &rnorm);
+      rnorm = sqrt(rnorm);
       rnormArray[its+1] = rnorm;
       if ( rnorm < 1.0E-8 * rnormArray[0] )
       {
@@ -569,7 +570,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    }
    hypre_TFree(alphaArray, HYPRE_MEMORY_HOST);
    hypre_TFree(rnormArray, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= maxIter; i++) 
+   for (i = 0; i <= maxIter; i++)
       hypre_TFree(Tmat[i], HYPRE_MEMORY_HOST);
    hypre_TFree(Tmat, HYPRE_MEMORY_HOST);
    hypre_TFree(srdiag, HYPRE_MEMORY_HOST);
@@ -1271,7 +1272,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    hypre_ParVectorSetRandomValues(rVec, 1209837);
    hypre_ParVectorSetConstantValues(pVec, 0.0);
    hypre_ParVectorSetConstantValues(zVec, 0.0);
-   rho = hypre_ParVectorInnerProd(rVec, rVec);
+   hypre_ParVectorInnerProd(rVec, rVec, &rho);
    rnorm = sqrt(rho);
    rnormArray[0] = rnorm;
    if ( rnorm == 0.0 )
@@ -1299,12 +1300,13 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
           zData[i] = rData[i];
 
       /* scale copy lanczos vector r for use later */
-      rVecNorm = sqrt(hypre_ParVectorInnerProd(rVec, rVec));
+      hypre_ParVectorInnerProd(rVec, rVec, &rVecNorm);
+      rVecNorm = sqrt(rVecNorm);
       for ( i = 0; i < localNRows; i++ )
           *lanczos_p++ = rData[i] / rVecNorm;
 
       rhom1 = rho;
-      rho = hypre_ParVectorInnerProd(rVec, zVec);
+      hypre_ParVectorInnerProd(rVec, zVec, &rho);
       if (its == 0) beta = 0.0;
       else
       {
@@ -1314,11 +1316,12 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
       HYPRE_ParVectorScale( beta, (HYPRE_ParVector) pVec );
       hypre_ParVectorAxpy( one, zVec, pVec );
       hypre_ParCSRMatrixMatvec(one, A, pVec, 0.0, apVec);
-      sigma = hypre_ParVectorInnerProd(pVec, apVec);
+      hypre_ParVectorInnerProd(pVec, apVec, &sigma);
       alpha  = rho / sigma;
       alphaArray[its] = sigma;
       hypre_ParVectorAxpy( -alpha, apVec, rVec );
-      rnorm = sqrt(hypre_ParVectorInnerProd(rVec, rVec));
+      hypre_ParVectorInnerProd(rVec, rVec, &rnorm);
+      rnorm = sqrt(rnorm);
       rnormArray[its+1] = rnorm;
       if ( rnorm < 1.0E-8 * rnormArray[0] )
       {
@@ -1410,7 +1413,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    }
    hypre_TFree(alphaArray, HYPRE_MEMORY_HOST);
    hypre_TFree(rnormArray, HYPRE_MEMORY_HOST);
-   for (i = 0; i <= maxIter; i++) 
+   for (i = 0; i <= maxIter; i++)
       hypre_TFree(Tmat[i], HYPRE_MEMORY_HOST);
    hypre_TFree(Tmat, HYPRE_MEMORY_HOST);
    return 0;
@@ -2984,4 +2987,3 @@ int MLI_Utils_DenseMatvec( double **Amat, int ndim, double *x, double *Ax )
    }
    return 0;
 }
-

@@ -55,11 +55,11 @@ int MLI_Solver_SGS::setup(MLI_Matrix *mat)
    MPI_Comm           comm;
 
    if      ( scheme_ == 0 ) doProcColoring();
-   else if ( scheme_ == 1 ) 
+   else if ( scheme_ == 1 )
    {
       myColor_   = 0;
       numColors_ = 1;
-      if ( findOmega_ == 1 ) findOmega();   
+      if ( findOmega_ == 1 ) findOmega();
    }
    else
    {
@@ -115,8 +115,8 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    uData      = hypre_VectorData(hypre_ParVectorLocalVector(u));
    f          = (hypre_ParVector *) fIn->getVector();
    fData      = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   MPI_Comm_size(comm,&nprocs);  
-   MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_size(comm,&nprocs);
+   MPI_Comm_rank(comm,&mypid);
 
    if ( printRNorm_ == 1 )
    {
@@ -141,10 +141,10 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    /*-----------------------------------------------------------------
     * perform SGS sweeps
     *-----------------------------------------------------------------*/
- 
+
 #if 0
-   if ( relaxWeights_ != NULL && relaxWeights_[0] != 0.0 && 
-        relaxWeights_[0] != 1.0 ) 
+   if ( relaxWeights_ != NULL && relaxWeights_[0] != 0.0 &&
+        relaxWeights_[0] != 1.0 )
       printf("\t SGS smoother : relax weight != 1.0 (%e).\n",relaxWeights_[0]);
 #endif
 
@@ -267,9 +267,10 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
       {
          hypre_ParVectorCopy( f, hypreR );
          hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, hypreR );
-         rnorm = sqrt(hypre_ParVectorInnerProd( hypreR, hypreR ));
+         hypre_ParVectorInnerProd(hypreR, hypreR, &rnorm);
+         rnorm = sqrt(rnorm);
          if ( mypid == 0 )
-            printf("\tMLI_Solver_SGS iter = %4d, rnorm = %e (omega=%e)\n", 
+            printf("\tMLI_Solver_SGS iter = %4d, rnorm = %e (omega=%e)\n",
                    is, rnorm, relaxWeight);
       }
    }
@@ -281,7 +282,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
    if ( vExtData != NULL ) delete [] vExtData;
    if ( vBufData != NULL ) delete [] vBufData;
-   return(relaxError); 
+   return(relaxError);
 }
 
 /******************************************************************************
@@ -297,7 +298,7 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
    sscanf(paramString, "%s", param1);
    if ( !strcmp(param1, "numSweeps") )
    {
-      if ( argc != 1 ) 
+      if ( argc != 1 )
       {
          printf("MLI_Solver_SGS::setParams ERROR : needs 1 arg.\n");
          return 1;
@@ -311,7 +312,7 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
    }
    else if ( !strcmp(param1, "relaxWeight") )
    {
-      if ( argc != 2 && argc != 1 ) 
+      if ( argc != 2 && argc != 1 )
       {
          printf("MLI_Solver_SGS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
@@ -349,7 +350,7 @@ int MLI_Solver_SGS::setParams( char *paramString, int argc, char **argv )
       findOmega_ = 1;
    }
    else
-   {   
+   {
       printf("MLI_Solver_SGS::setParams - parameter not recognized.\n");
       printf("                 Params = %s\n", paramString);
       return 1;
@@ -380,11 +381,11 @@ int MLI_Solver_SGS::setParams( int nsweeps, double *weights )
    }
    else
    {
-      for ( i = 0; i < nsweeps; i++ ) 
+      for ( i = 0; i < nsweeps; i++ )
       {
-         if (weights[i] >= 0. && weights[i] <= 2.) 
+         if (weights[i] >= 0. && weights[i] <= 2.)
             relaxWeights_[i] = weights[i];
-         else 
+         else
          {
             printf("MLI_Solver_SGS::setParams - some weights set to 0.5.\n");
             relaxWeights_[i] = 1.0;
@@ -421,13 +422,13 @@ int MLI_Solver_SGS::doProcColoring()
    MPI_Comm_rank(comm, &mypid);
    MPI_Comm_size(comm, &nprocs);
 
-   commGraphI = new int[nprocs+1]; 
+   commGraphI = new int[nprocs+1];
    recvCounts = new int[nprocs];
    MPI_Allgather(&nSends, 1, MPI_INT, recvCounts, 1, MPI_INT, comm);
    commGraphI[0] = 0;
    for ( i = 1; i <= nprocs; i++ )
       commGraphI[i] = commGraphI[i-1] + recvCounts[i-1];
-   commGraphJ = new int[commGraphI[nprocs]]; 
+   commGraphJ = new int[commGraphI[nprocs]];
    MPI_Allgatherv(sendProcs, nSends, MPI_INT, commGraphJ,
                   recvCounts, commGraphI, MPI_INT, comm);
    delete [] recvCounts;
@@ -452,7 +453,7 @@ int MLI_Solver_SGS::doProcColoring()
          pColor = colors[pIndex];
          if ( pColor >= 0 ) colorsAux[pColor] = 1;
       }
-      for ( j = 0; j < nprocs; j++ ) 
+      for ( j = 0; j < nprocs; j++ )
          if ( colorsAux[j] < 0 ) break;
       colors[i] = j;
       for ( j = commGraphI[i]; j < commGraphI[i+1]; j++ )
@@ -465,7 +466,7 @@ int MLI_Solver_SGS::doProcColoring()
    delete [] colorsAux;
    myColor_ = colors[mypid];
    numColors_ = 0;
-   for ( j = 0; j < nprocs; j++ ) 
+   for ( j = 0; j < nprocs; j++ )
       if ( colors[j]+1 > numColors_ ) numColors_ = colors[j]+1;
    delete [] colors;
    if ( mypid == 0 )
@@ -486,7 +487,7 @@ int MLI_Solver_SGS::findOmega()
    int                 index, nprocs, mypid, nSends, start;
    double              res;
    double              zero = 0.0, relaxWeight, rnorm, *relNorms;
-   double              *vBufData=NULL, *tmpData, *vExtData=NULL; 
+   double              *vBufData=NULL, *tmpData, *vExtData=NULL;
    MPI_Comm            comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
@@ -512,8 +513,8 @@ int MLI_Solver_SGS::findOmega()
    AOffdI     = hypre_CSRMatrixI(AOffd);
    AOffdJ     = hypre_CSRMatrixJ(AOffd);
    AOffdA     = hypre_CSRMatrixData(AOffd);
-   MPI_Comm_size(comm,&nprocs);  
-   MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_size(comm,&nprocs);
+   MPI_Comm_rank(comm,&mypid);
 
    /*-----------------------------------------------------------------
     * create temporary vectors
@@ -525,7 +526,7 @@ int MLI_Solver_SGS::findOmega()
    hypreF  = (hypre_ParVector *) mliFvec->getVector();
    mliRvec = Amat_->createVector();
    hypreR  = (hypre_ParVector *) mliRvec->getVector();
-   hypre_ParVectorSetRandomValues( hypreF, 23986131 ); 
+   hypre_ParVectorSetRandomValues( hypreF, 23986131 );
    fData   = hypre_VectorData(hypre_ParVectorLocalVector(hypreF));
    uData   = hypre_VectorData(hypre_ParVectorLocalVector(hypreU));
 
@@ -546,9 +547,10 @@ int MLI_Solver_SGS::findOmega()
    /*-----------------------------------------------------------------
     * perform SGS sweeps
     *-----------------------------------------------------------------*/
- 
+
    relNorms = new double[omegaNumIncr_+1];
-   relNorms[0] = sqrt(hypre_ParVectorInnerProd( hypreF, hypreF ));
+   hypre_ParVectorInnerProd(hypreF, hypreF, &relNorms[0]);
+   relNorms[0] = sqrt(relNorms[0]);
 
    for( iR = 0; iR < omegaNumIncr_; iR++ )
    {
@@ -635,7 +637,8 @@ int MLI_Solver_SGS::findOmega()
          zeroInitialGuess_ = 0;
          hypre_ParVectorCopy( hypreF, hypreR );
          hypre_ParCSRMatrixMatvec( -1.0, A, hypreU, 1.0, hypreR );
-         rnorm = sqrt(hypre_ParVectorInnerProd( hypreR, hypreR ));
+         hypre_ParVectorInnerProd(hypreR, hypreR, &rnorm);
+         rnorm = sqrt(rnorm);
          if ( rnorm > 1.0e20 ) break;
       }
       relNorms[iR+1] = rnorm;
@@ -644,7 +647,7 @@ int MLI_Solver_SGS::findOmega()
    jj = 0;
    for ( iR = 1; iR <= omegaNumIncr_; iR++ )
    {
-      if ( relNorms[iR] < rnorm ) 
+      if ( relNorms[iR] < rnorm )
       {
          rnorm = relNorms[iR];
          jj = iR;
@@ -656,7 +659,7 @@ int MLI_Solver_SGS::findOmega()
          printf("MLI_Solver_SGS::findOmega ERROR - omega = 0.0.\n");
       else
          printf("MLI_Solver_SGS::findOmega - optimal omega = %e(%e)\n",
-                omegaIncrement_*jj,rnorm/relNorms[0]); 
+                omegaIncrement_*jj,rnorm/relNorms[0]);
    }
    if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
    relaxWeights_ = new double[nSweeps_+1];
@@ -674,4 +677,3 @@ int MLI_Solver_SGS::findOmega()
    delete [] relNorms;
    return 0;
 }
-

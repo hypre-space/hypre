@@ -156,20 +156,22 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    if ( amg_logging > 1 )
    {
-      hypre_ParVectorCopy(F_array[0], Residual );
-      hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
-      resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+      hypre_ParVectorCopy(F_array[0], Residual);
+      hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual);
+      hypre_ParVectorInnerProd(Residual, Residual, &resid_nrm);
+      resid_nrm = sqrt(resid_nrm);
    }
    else
    {
       hypre_ParVectorCopy(F_array[0], Vtemp);
       hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+      hypre_ParVectorInnerProd(Vtemp, Vtemp, &resid_nrm);
+      resid_nrm = sqrt(resid_nrm);
    }
 
-
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+   hypre_ParVectorInnerProd(f, f, &rhs_norm);
+   rhs_norm = sqrt(rhs_norm);
    relative_resid = 9999;
    if (rhs_norm)
    {
@@ -206,15 +208,17 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
       if ( amg_logging > 1 )
       {
-         hypre_ParVectorCopy(F_array[0], Residual );
-         hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
-         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+         hypre_ParVectorCopy(F_array[0], Residual);
+         hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual);
+         hypre_ParVectorInnerProd(Residual, Residual, &resid_nrm);
+         resid_nrm = sqrt(resid_nrm);
       }
       else
       {
          hypre_ParVectorCopy(F_array[0], Vtemp);
          hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         hypre_ParVectorInnerProd(Vtemp, Vtemp, &resid_nrm);
+         resid_nrm = sqrt(resid_nrm);
       }
 
       conv_factor = resid_nrm / old_resid;
@@ -225,8 +229,6 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
       }
 
       ++cycle_count;
-
-
 
       hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
