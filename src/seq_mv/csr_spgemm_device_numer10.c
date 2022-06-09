@@ -6,6 +6,8 @@
  ******************************************************************************/
 #include "seq_mv.h"
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #define HYPRE_SPGEMM_DEVICE_USE_DSHMEM
 
 #include <csr_spgemm_device_numer.h>
@@ -23,4 +25,6 @@ template HYPRE_Int
 hypre_spgemm_numerical_max_num_blocks
 < HYPRE_SPGEMM_NUMER_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32 >
 ( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
+
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
 

@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include <math.h>
 #include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
