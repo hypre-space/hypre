@@ -61,7 +61,8 @@ hypre_MergeOrderedArrays( hypre_IntArray *array1,
       array3_data[k++] = array2_data[j++];
    }
 
-   array3_data = hypre_TReAlloc_v2(array3_data, HYPRE_Int, size1 + size2, HYPRE_Int, k, memory_location);
+   array3_data = hypre_TReAlloc_v2(array3_data, HYPRE_Int, size1 + size2, HYPRE_Int, k,
+                                   memory_location);
 
    hypre_IntArraySize(array3) = k;
    hypre_IntArrayData(array3) = array3_data;

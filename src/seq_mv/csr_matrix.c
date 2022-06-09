@@ -588,7 +588,8 @@ hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix,
                         HYPRE_Int        trans,
                         const char      *file_name )
 {
-   hypre_assert(hypre_CSRMatrixI(matrix)[hypre_CSRMatrixNumRows(matrix)] == hypre_CSRMatrixNumNonzeros(matrix));
+   hypre_assert(hypre_CSRMatrixI(matrix)[hypre_CSRMatrixNumRows(matrix)] == hypre_CSRMatrixNumNonzeros(
+                   matrix));
 
    FILE *fp = file_name ? fopen(file_name, "w") : stdout;
 
@@ -611,9 +612,10 @@ hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix,
       hypre_fprintf(fp, "%%%%MatrixMarket matrix coordinate pattern general\n");
    }
 
-   hypre_fprintf(fp, "%d %d %d\n", trans ? hypre_CSRMatrixNumCols(matrix) : hypre_CSRMatrixNumRows(matrix),
-                                   trans ? hypre_CSRMatrixNumRows(matrix) : hypre_CSRMatrixNumCols(matrix),
-                                   hypre_CSRMatrixNumNonzeros(matrix));
+   hypre_fprintf(fp, "%d %d %d\n",
+                 trans ? hypre_CSRMatrixNumCols(matrix) : hypre_CSRMatrixNumRows(matrix),
+                 trans ? hypre_CSRMatrixNumRows(matrix) : hypre_CSRMatrixNumCols(matrix),
+                 hypre_CSRMatrixNumNonzeros(matrix));
 
    HYPRE_Int i, j;
 
