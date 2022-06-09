@@ -750,7 +750,7 @@ main( hypre_int argc,
    HYPRE_Int           verify       = 0;
    HYPRE_Int           use_vendor = 0;
    HYPRE_Int           spgemm_alg = 1;
-   HYPRE_Int           spgemm_binned = 1;
+   HYPRE_Int           spgemm_binned = 0;
    HYPRE_Int           rowest_mtd = 3;
    HYPRE_Int           rowest_nsamples = -1; /* default */
    HYPRE_Real          rowest_mult = -1.0; /* default */

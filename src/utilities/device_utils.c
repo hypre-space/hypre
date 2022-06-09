@@ -47,7 +47,7 @@ hypre_DeviceDataCreate()
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
-   hypre_DeviceDataSpgemmBinned(data)                   = 1;
+   hypre_DeviceDataSpgemmBinned(data)                   = 0;
    hypre_DeviceDataSpgemmNumBin(data)                   = 0;
    hypre_DeviceDataSpgemmHighestBin(data)[0]            = 0;
    hypre_DeviceDataSpgemmHighestBin(data)[1]            = 0;

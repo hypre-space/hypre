@@ -292,7 +292,7 @@ main( hypre_int argc,
    spgemm_use_vendor = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
-   HYPRE_Int  spgemm_binned = 1;
+   HYPRE_Int  spgemm_binned = 0;
    HYPRE_Int  spgemm_rowest_mtd = 3;
    HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
