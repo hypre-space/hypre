@@ -1210,7 +1210,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    {
       hypre_TFree(map_B_to_C, HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(rownnz_A, HYPRE_MEMORY_HOST);
+   hypre_TFree(rownnz_A, memory_location_A);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();

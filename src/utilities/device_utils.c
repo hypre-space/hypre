@@ -8,6 +8,7 @@
 #include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
+#include <math.h>
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      generic device functions (HYPRE_USING_GPU)
@@ -21,11 +22,11 @@ hypre_DeviceDataCreate()
    hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_SYCL)
-   hypre_DeviceDataDevice(data)            = nullptr;
+   hypre_DeviceDataDevice(data)           = nullptr;
 #else
-   hypre_DeviceDataDevice(data)            = 0;
+   hypre_DeviceDataDevice(data)           = 0;
 #endif
-   hypre_DeviceDataComputeStreamNum(data)  = 0;
+   hypre_DeviceDataComputeStreamNum(data) = 0;
 
    /* SpMV, SpGeMM, SpTrans: use vendor's lib by default */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
@@ -33,19 +34,20 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpMVUseVendor(data)    = 1;
    hypre_DeviceDataSpTransUseVendor(data) = 1;
 #else
-   hypre_DeviceDataSpgemmUseVendor(data) = 0;
+   hypre_DeviceDataSpgemmUseVendor(data)  = 0;
 #endif
-
    /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
 #if defined(HYPRE_USING_CUDA)
    hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
 
+   /* hypre SpGEMM parameters */
    const HYPRE_Int  Nsamples   = 64;
    const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
+
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
-   hypre_DeviceDataSpgemmBinned(data)                   = 0;
+   hypre_DeviceDataSpgemmBinned(data)                   = 1;
    hypre_DeviceDataSpgemmNumBin(data)                   = 0;
    hypre_DeviceDataSpgemmHighestBin(data)[0]            = 0;
    hypre_DeviceDataSpgemmHighestBin(data)[1]            = 0;

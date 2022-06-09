@@ -746,6 +746,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          thrust::minus<HYPRE_Int>() );
 #endif
 
+      // Change Cint into a BigJ matrix
+      // RL: TODO FIX the 'big' num of columns to global size
       hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint),
                                                HYPRE_MEMORY_DEVICE);
 
@@ -782,14 +784,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
       /* add Cext to local part of Cbar */
-      /* WM: debug */
-      HYPRE_Int my_id;
-      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
-      if (my_id == 0 && hypre_ParCSRMatrixNumRows(A) > 400)
-      {
-         hypre_CSRMatrixPrint(Cbar, "Cbar");
-         hypre_CSRMatrixPrint(Cext, "Cext");
-      }
       hypre_ParCSRTMatMatPartialAddDevice(hypre_ParCSRMatrixCommPkg(R),
                                           hypre_ParCSRMatrixNumCols(R),
                                           hypre_ParCSRMatrixNumCols(P),
@@ -804,12 +798,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                           &C_offd,
                                           &num_cols_offd_C,
                                           &col_map_offd_C);
-      /* WM: debug */
-      if (my_id == 0 && hypre_ParCSRMatrixNumRows(A) > 400)
-      {
-         hypre_CSRMatrixPrint(C_diag, "C_diag");
-         hypre_CSRMatrixPrint(C_offd, "C_offd");
-      }
 
       hypre_TFree(col_map_offd, HYPRE_MEMORY_DEVICE);
    }
@@ -927,7 +915,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       // Convert Cext from BigJ to J
       // Cext offd
 #if defined(HYPRE_USING_SYCL)
-      /* WM: debug - the below is suspicious... */
       auto off_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
                                                                        Cext_bigj),
                                         oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
@@ -983,7 +970,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
       // Cext diag
 #if defined(HYPRE_USING_SYCL)
-      /* WM: debug - the below is suspicious... */
       auto dia_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
                                                                        Cext_bigj),
                                         oneapi::dpl::make_zip_iterator(oneapi::dpl::counting_iterator(0),
@@ -1069,8 +1055,19 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                                   num_rows + num_elemt);
       hypre_CSRMatrixMemoryLocation(IE) = HYPRE_MEMORY_DEVICE;
 
-      HYPRE_Int *ie_ii = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *ie_j  = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *ie_ii = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int     *ie_j  = hypre_TAlloc(HYPRE_Int, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
+      HYPRE_Complex *ie_a  = NULL;
+
+      if (hypre_HandleSpgemmUseVendor(hypre_handle()))
+      {
+         ie_a = hypre_TAlloc(HYPRE_Complex, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL(std::fill, ie_a, ie_a + num_rows + num_elemt, 1.0);
+#else
+         HYPRE_THRUST_CALL(fill, ie_a, ie_a + num_rows + num_elemt, 1.0);
+#endif
+      }
 
 #if defined(HYPRE_USING_SYCL)
       hypreSycl_sequence(ie_ii, ie_ii + num_rows, 0);
@@ -1089,8 +1086,9 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       HYPRE_Int *ie_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, num_rows + num_elemt, ie_ii);
       hypre_TFree(ie_ii, HYPRE_MEMORY_DEVICE);
 
-      hypre_CSRMatrixI(IE) = ie_i;
-      hypre_CSRMatrixJ(IE) = ie_j;
+      hypre_CSRMatrixI(IE)    = ie_i;
+      hypre_CSRMatrixJ(IE)    = ie_j;
+      hypre_CSRMatrixData(IE) = ie_a;
 
       // CC = [Cbar_local; Cext]
       hypre_CSRMatrix *CC = hypre_CSRMatrixStack2Device(Cbar_local, Cext);
@@ -1108,10 +1106,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       t1 = hypre_MPI_Wtime();
 #endif
       hypreDevice_CSRSpGemm(IE, CC, &Cz);
-      /* WM: debug */
-      hypre_CSRMatrixPrint(IE, "IE");
-      hypre_CSRMatrixPrint(CC, "CC");
-      hypre_CSRMatrixPrint(Cz, "Cz");
 
       hypre_CSRMatrixDestroy(IE);
       hypre_CSRMatrixDestroy(CC);
@@ -1157,10 +1151,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    HYPRE_Complex *C_diag_a = hypre_CSRMatrixData(C_diag);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: debug */
-   hypre_printf("WM: debug - zmp_a = ");
-   for (auto i = 0; i < 100; i++) hypre_printf("%f ", zmp_a[i]);
-   hypre_printf("\n");
    auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a),
                                      oneapi::dpl::make_zip_iterator(zmp_i, zmp_j, zmp_a) + local_nnz_C,
                                      zmp_j,
@@ -1174,10 +1164,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      zmp_j,
                                      thrust::make_zip_iterator(thrust::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
                                      pred );
-   /* WM: debug */
-   hypre_printf("WM: debug - C_diag_a = ");
-   for (auto i = 0; i < 100; i++) hypre_printf("%f ", C_diag_a[i]);
-   hypre_printf("\n");
    hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
 #endif
@@ -1255,3 +1241,4 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
