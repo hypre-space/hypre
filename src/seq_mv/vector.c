@@ -703,9 +703,10 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorInnerProd
  *--------------------------------------------------------------------------*/
-HYPRE_Real
+HYPRE_Int
 hypre_SeqVectorInnerProd( hypre_Vector *x,
-                          hypre_Vector *y )
+                          hypre_Vector *y,
+                          HYPRE_Real   *result )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
@@ -714,8 +715,8 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
-   HYPRE_Real     result = 0.0;
 
+   result[0] = 0.0;
    size *= hypre_VectorNumVectors(x);
 
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
@@ -730,9 +731,9 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_CUBLAS)
    HYPRE_CUBLAS_CALL( hypre_cublas_dot(hypre_HandleCublasHandle(hypre_handle()), size, x_data, 1,
                                        y_data, 1,
-                                       &result) );
+                                       &result[0]) );
 #else
-   result = HYPRE_THRUST_CALL( inner_product, x_data, x_data + size, y_data, 0.0 );
+   result[0] = HYPRE_THRUST_CALL(inner_product, x_data, x_data + size, y_data, 0.0);
 #endif // #if defined(HYPRE_USING_CUBLAS)
 
 #elif defined(HYPRE_USING_SYCL) // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -742,10 +743,10 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_ONEMKL_CALL( oneapi::mkl::blas::dot(*hypre_HandleComputeStream(hypre_handle()),
                                              size, x_data, 1,
                                              y_data, 1, result_dev).wait() );
-   hypre_TMemcpy(&result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(result, result_dev, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(result_dev, HYPRE_MEMORY_DEVICE);
 #else
-   result = HYPRE_ONEDPL_CALL( std::transform_reduce, x_data, x_data + size, y_data, 0.0 );
+   result[0] = HYPRE_ONEDPL_CALL(std::transform_reduce, x_data, x_data + size, y_data, 0.0);
 #endif // #if defined(HYPRE_USING_ONEMKLBLAS)
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -765,7 +766,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif
    for (i = 0; i < size; i++)
    {
-      result += hypre_conj(y_data[i]) * x_data[i];
+      result[0] += hypre_conj(y_data[i]) * x_data[i];
    }
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
@@ -778,7 +779,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
 
-   return result;
+   return hypre_error_flag;
 }
 
 //TODO

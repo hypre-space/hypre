@@ -302,12 +302,13 @@ hypre_AMGDDCompGridVectorInnerProd( hypre_AMGDDCompGridVector *x,
    hypre_Vector *y_owned    = hypre_AMGDDCompGridVectorOwned(y);
    hypre_Vector *y_nonowned = hypre_AMGDDCompGridVectorNonOwned(y);
 
-   HYPRE_Real    res;
+   HYPRE_Real    res_owned;
+   HYPRE_Real    res_nonowned;
 
-   res  = hypre_SeqVectorInnerProd(x_owned, y_owned);
-   res += hypre_SeqVectorInnerProd(x_nonowned, y_nonowned);
+   hypre_SeqVectorInnerProd(x_owned, y_owned, &res_owned);
+   hypre_SeqVectorInnerProd(x_nonowned, y_nonowned, &res_nonowned);
 
-   return res;
+   return res_owned + res_nonowned;
 }
 
 HYPRE_Real

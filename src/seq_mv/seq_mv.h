@@ -516,7 +516,7 @@ hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
 HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
 
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
-HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorInnerProd ( hypre_Vector *x, hypre_Vector *y, HYPRE_Real *result );
 HYPRE_Int hypre_SeqVectorMassInnerProd(hypre_Vector *x, hypre_Vector **y, HYPRE_Int k,
                                        HYPRE_Int unroll, HYPRE_Real *result);
 HYPRE_Int hypre_SeqVectorMassInnerProd4(hypre_Vector *x, hypre_Vector **y, HYPRE_Int k,
@@ -612,7 +612,6 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatDnMatY(matrix)      ( hypre_GpuMatDataDnMatY (hypre_CSRMatrixGetGPUMatData(matrix) )
 #define hypre_CSRMatrixGPUMatDnVecX(matrix)      ( hypre_GpuMatDataDnVecX (hypre_CSRMatrixGetGPUMatData(matrix) )
 #define hypre_CSRMatrixGPUMatDnVecY(matrix)      ( hypre_GpuMatDataDnVecY (hypre_CSRMatrixGetGPUMatData(matrix) )
-
 #endif
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);
 
@@ -621,3 +620,4 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);
 #endif
 
 #endif
+
