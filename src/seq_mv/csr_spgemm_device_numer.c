@@ -114,6 +114,10 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    hypre_create_ija(m, NULL, d_rc, d_ic, &d_jc, &d_c, &nnzC);
 
+#ifdef HYPRE_SPGEMM_PRINTF
+   HYPRE_SPGEMM_PRINT("%s[%d]: nnzC %d\n", __FILE__, __LINE__, nnzC);
+#endif
+
    HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
    //HYPRE_Int  num_bins = hypre_HandleSpgemmNumBin(hypre_handle());
