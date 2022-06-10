@@ -940,12 +940,16 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      &num_cols_offd_C, &col_map_offd_C, &map_offd_to_C);
 
 #if defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
-                         col_map_offd_C,
-                         col_map_offd_C + num_cols_offd_C,
-                         big_work,
-                         big_work + Cext_offd_nnz,
-                         oneapi::dpl::make_permutation_iterator(hypre_CSRMatrixJ(Cext), work) );
+      /* WM: onedpl lower_bound currently does not accept zero length input */
+      if (num_cols_offd_C > 0)
+      {
+         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                            col_map_offd_C,
+                            col_map_offd_C + num_cols_offd_C,
+                            big_work,
+                            big_work + Cext_offd_nnz,
+                            oneapi::dpl::make_permutation_iterator(hypre_CSRMatrixJ(Cext), work) );
+      }
 
       HYPRE_ONEDPL_CALL( std::transform,
                          oneapi::dpl::make_permutation_iterator(hypre_CSRMatrixJ(Cext), work),
@@ -978,7 +982,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                         oneapi::dpl::make_zip_iterator(work, big_work),
                                         pred1 );
 
-      HYPRE_Int Cext_diag_nnz = thrust::get<0>(dia_end.base()) - work;
+      HYPRE_Int Cext_diag_nnz = std::get<0>(dia_end.base()) - work;
 #else
       auto dia_end = HYPRE_THRUST_CALL( copy_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(thrust::make_counting_iterator(0), Cext_bigj)),
@@ -1062,13 +1066,26 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
       if (hypre_HandleSpgemmUseVendor(hypre_handle()))
       {
          ie_a = hypre_TAlloc(HYPRE_Complex, num_rows + num_elemt, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL(std::fill, ie_a, ie_a + num_rows + num_elemt, 1.0);
+#else
          HYPRE_THRUST_CALL(fill, ie_a, ie_a + num_rows + num_elemt, 1.0);
+#endif
       }
 
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_sequence(ie_ii, ie_ii + num_rows, 0);
+      HYPRE_ONEDPL_CALL( std::copy, send_map, send_map + num_elemt, ie_ii + num_rows);
+      hypreSycl_sequence(ie_j, ie_j + num_rows + num_elemt, 0);
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(ie_ii, ie_j);
+      HYPRE_ONEDPL_CALL( std::stable_sort, zipped_begin, zipped_begin + num_rows + num_elemt,
+      [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
+#else
       HYPRE_THRUST_CALL( sequence, ie_ii, ie_ii + num_rows);
       HYPRE_THRUST_CALL( copy, send_map, send_map + num_elemt, ie_ii + num_rows);
       HYPRE_THRUST_CALL( sequence, ie_j, ie_j + num_rows + num_elemt);
       HYPRE_THRUST_CALL( stable_sort_by_key, ie_ii, ie_ii + num_rows + num_elemt, ie_j );
+#endif
 
       HYPRE_Int *ie_i = hypreDevice_CsrRowIndicesToPtrs(num_rows, num_rows + num_elemt, ie_ii);
       hypre_TFree(ie_ii, HYPRE_MEMORY_DEVICE);
