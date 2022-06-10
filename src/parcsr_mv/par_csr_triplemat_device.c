@@ -1168,7 +1168,6 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      zmp_j,
                                      thrust::make_zip_iterator(thrust::make_tuple(C_diag_ii, C_diag_j, C_diag_a)),
                                      pred );
-   hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_diag_ii + nnz_C_diag );
 #endif
    hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_diag), nnz_C_diag, C_diag_ii,
@@ -1187,6 +1186,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                 zmp_j,
                                 oneapi::dpl::make_zip_iterator(C_offd_ii, C_offd_j, C_offd_a),
                                 std::not_fn(pred) );
+   hypre_assert( std::get<0>(new_end.base()) == C_offd_ii + nnz_C_offd );
 #else
    new_end = HYPRE_THRUST_CALL( copy_if,
                                 thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)),
