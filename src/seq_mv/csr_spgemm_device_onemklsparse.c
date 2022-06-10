@@ -31,7 +31,6 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                   HYPRE_Int                          **d_jc_out,
                                   HYPRE_Complex                      **d_c_out)
 {
-   hypre_printf("WM: debug - using oneMKL spgemm\n");
    std::int64_t *tmp_size1 = NULL, *tmp_size2, *nnzC = NULL;
    void *tmp_buffer1 = NULL;
    void *tmp_buffer2 = NULL;
