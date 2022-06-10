@@ -4009,9 +4009,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixRowvalues(C) = NULL;
    hypre_ParCSRMatrixGetrowactive(C) = 0;
 
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C)) = memory_location_C;
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(C)) = memory_location_C;
-
    if (C_diag)
    {
       hypre_CSRMatrixSetRownnz(C_diag);
@@ -4031,6 +4028,10 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    {
       hypre_ParCSRMatrixOffd(C) = C_tmp_offd;
    }
+
+
+   hypre_assert(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C)) == memory_location_C);
+   hypre_assert(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(C)) == memory_location_C);
 
    if (num_cols_offd_C)
    {
