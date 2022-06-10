@@ -27,22 +27,22 @@
                    cycle = 2.628293
 
 # Output file: coarsening.out.4
- Average Convergence Factor = 0.427608
+ Average Convergence Factor = 0.426864
 
-     Complexity:    grid = 1.100889
-                operator = 1.158136
-                   cycle = 2.315962
+     Complexity:    grid = 1.101333
+                operator = 1.158503
+                   cycle = 2.316522
 
 # Output file: coarsening.out.5
- Average Convergence Factor = 0.427608
+ Average Convergence Factor = 0.426864
 
-     Complexity:    grid = 1.100889
-                operator = 1.158136
-                   cycle = 2.315962
+     Complexity:    grid = 1.101333
+                operator = 1.158503
+                   cycle = 2.316522
 
 # Output file: coarsening.out.6
 Iterations = 12
-Final Relative Residual Norm = 3.566893e-09
+Final Relative Residual Norm = 3.729996e-09
 
 # Output file: coarsening.out.7
 Iterations = 13
@@ -50,15 +50,15 @@ Final Relative Residual Norm = 2.767220e-09
 
 # Output file: coarsening.out.8
 BoomerAMG Iterations = 21
-Final Relative Residual Norm = 6.778496e-09
+Final Relative Residual Norm = 6.569014e-09
 
 # Output file: coarsening.out.9
-BoomerAMG Iterations = 24
-Final Relative Residual Norm = 9.160866e-09
+BoomerAMG Iterations = 26
+Final Relative Residual Norm = 9.316749e-09
 
 # Output file: coarsening.out.11
-BoomerAMG Iterations = 21
-Final Relative Residual Norm = 5.008125e-09
+BoomerAMG Iterations = 20
+Final Relative Residual Norm = 9.665672e-09
 
 # Output file: coarsening.out.12
 BoomerAMG Iterations = 15
@@ -66,7 +66,7 @@ Final Relative Residual Norm = 3.865632e-09
 
 # Output file: coarsening.out.13
 BoomerAMG Iterations = 24
-Final Relative Residual Norm = 9.759773e-09
+Final Relative Residual Norm = 9.878259e-09
 
 # Output file: coarsening.out.14
 BoomerAMG Iterations = 10
