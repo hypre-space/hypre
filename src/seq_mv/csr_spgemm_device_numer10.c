@@ -27,4 +27,3 @@ hypre_spgemm_numerical_max_num_blocks
 ( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
-
