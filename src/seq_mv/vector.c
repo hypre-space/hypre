@@ -605,10 +605,26 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Complex *b_data = hypre_VectorData(b);
-   HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Int      size   = hypre_VectorSize(b);
+   HYPRE_Complex *x_data        = hypre_VectorData(x);
+   HYPRE_Complex *b_data        = hypre_VectorData(b);
+   HYPRE_Complex *y_data        = hypre_VectorData(y);
+   HYPRE_Int      num_vectors_x = hypre_VectorNumVectors(x);
+   HYPRE_Int      num_vectors_y = hypre_VectorNumVectors(y);
+   HYPRE_Int      num_vectors_b = hypre_VectorNumVectors(b);
+   HYPRE_Int      size          = hypre_VectorSize(x);
+
+   /* Sanity checks */
+   if (hypre_VectorSize(x) != hypre_VectorSize(y) ||
+       hypre_VectorSize(y) != hypre_VectorSize(b))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: size of x, y, and b do not match!\n");
+      return hypre_error_flag;
+   }
+
+   /* row-wise multivec support is not implemeted yet */
+   hypre_assert(hypre_VectorMultiVecStorageMethod(x) == 0);
+   hypre_assert(hypre_VectorMultiVecStorageMethod(b) == 0);
+   hypre_assert(hypre_VectorMultiVecStorageMethod(y) == 0);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
@@ -629,12 +645,34 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
 #endif
    {
       HYPRE_Int i;
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < size; i++)
+
+      if (num_vectors_x == 1 && num_vectors_y == 1 && num_vectors_b == 1)
       {
-         y_data[i] += x_data[i] / b_data[i];
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < size; i++)
+         {
+            y_data[i] += x_data[i] / b_data[i];
+         }
+      }
+      else if (num_vectors_x == 2 && num_vectors_y == 2 && num_vectors_b == 1)
+      {
+#ifdef HYPRE_USING_OPENMP
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < size; i++)
+         {
+            HYPRE_Complex  val = 1.0 / b_data[i];
+
+            y_data[i]        += x_data[i]        * val;
+            y_data[i + size] += x_data[i + size] * val;
+         }
+      }
+      else
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Unsupported combination of num_vectors\n");
+         return hypre_error_flag;
       }
    }
 
