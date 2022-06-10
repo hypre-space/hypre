@@ -4029,7 +4029,6 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixOffd(C) = C_tmp_offd;
    }
 
-
    hypre_assert(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C)) == memory_location_C);
    hypre_assert(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(C)) == memory_location_C);
 
