@@ -156,7 +156,9 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 HYPRE_Int
 hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
 {
+#if defined(HYPRE_USING_GPU)
    hypre_int max_size = 0, max_size_optin = 0;
+#endif
 
 #if defined(HYPRE_USING_CUDA)
    cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
@@ -167,8 +169,10 @@ hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
    hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
 #endif
 
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[1] = max_size_optin;
+#endif
 
    return hypre_error_flag;
 }
@@ -432,9 +436,11 @@ HYPRE_PrintDeviceInfo()
    hypre_printf("Max Compute Units: %d\n", max_compute_units);
 #endif
 
+#if defined(HYPRE_USING_GPU)
    hypre_printf("MaxSharedMemoryPerBlock %d, MaxSharedMemoryPerBlockOptin %d\n",
                 hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[0],
                 hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1]);
+#endif
 
    return hypre_error_flag;
 }
