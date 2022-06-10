@@ -671,7 +671,8 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       }
       else
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Unsupported combination of num_vectors\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported combination of num_vectors!\n");
+         hypre_assert(0);
          return hypre_error_flag;
       }
    }
