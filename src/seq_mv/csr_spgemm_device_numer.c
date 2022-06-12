@@ -31,9 +31,16 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
                                                      HYPRE_Complex **d_c_out,
                                                      HYPRE_Int      *nnzC_out )
 {
+#if defined(HYPRE_USING_CUDA)
    const HYPRE_Int SHMEM_HASH_SIZE = HYPRE_SPGEMM_NUMER_HASH_SIZE;
    const HYPRE_Int GROUP_SIZE = HYPRE_SPGEMM_BASE_GROUP_SIZE;
    const HYPRE_Int BIN = 5;
+#endif
+#if defined(HYPRE_USING_HIP)
+   const HYPRE_Int SHMEM_HASH_SIZE = 2 * HYPRE_SPGEMM_NUMER_HASH_SIZE;
+   const HYPRE_Int GROUP_SIZE = 2 * HYPRE_SPGEMM_BASE_GROUP_SIZE;
+   const HYPRE_Int BIN = 6;
+#endif
 
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0,      thrust::maximum<HYPRE_Int>());
@@ -122,7 +129,12 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
    //HYPRE_Int  num_bins = hypre_HandleSpgemmNumBin(hypre_handle());
    HYPRE_Int high_bin = hypre_HandleSpgemmHighestBin(hypre_handle())[1];
+#if defined(HYPRE_USING_CUDA)
    const char s = 8, t = 2, u = high_bin;
+#endif
+#if defined(HYPRE_USING_HIP)
+   const char s = 4, t = 2, u = high_bin;
+#endif
 
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 

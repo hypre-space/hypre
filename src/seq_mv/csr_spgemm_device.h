@@ -17,7 +17,12 @@
 static const char HYPRE_SPGEMM_HASH_TYPE = 'D';
 
 /* default settings associated with bin 5 */
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
+#endif
+#if defined(HYPRE_USING_HIP)
+#define HYPRE_SPGEMM_NUMER_HASH_SIZE 128
+#endif
 #define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
 #define HYPRE_SPGEMM_BASE_GROUP_SIZE 32
 /* unroll factor in the kernels */

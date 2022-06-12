@@ -454,7 +454,7 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int BDIMX                = hypre_min(4, GROUP_SIZE);
 #elif defined(HYPRE_USING_HIP)
-   const HYPRE_Int BDIMX                = hypre_min(2, GROUP_SIZE);
+   const HYPRE_Int BDIMX                = hypre_min(4, GROUP_SIZE);
 #endif
    const HYPRE_Int BDIMY                = GROUP_SIZE / BDIMX;
 

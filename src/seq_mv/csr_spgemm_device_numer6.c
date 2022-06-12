@@ -21,6 +21,17 @@ hypre_spgemm_numerical_with_rownnz
   HYPRE_Complex *d_b,
   HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
 
+#if defined(HYPRE_USING_HIP)
+template HYPRE_Int
+hypre_spgemm_numerical_with_rownnz
+< 6, HYPRE_SPGEMM_NUMER_HASH_SIZE * 2, HYPRE_SPGEMM_BASE_GROUP_SIZE * 2, false >
+( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
+  HYPRE_Int exact_rownnz,
+  HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
+  HYPRE_Complex *d_b,
+  HYPRE_Int *d_rc, HYPRE_Int *d_ic, HYPRE_Int *d_jc, HYPRE_Complex *d_c );
+#endif
+
 template HYPRE_Int
 hypre_spgemm_numerical_max_num_blocks
 < HYPRE_SPGEMM_NUMER_HASH_SIZE * 2, HYPRE_SPGEMM_BASE_GROUP_SIZE * 2 >
