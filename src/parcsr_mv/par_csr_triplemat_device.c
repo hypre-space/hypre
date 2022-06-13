@@ -1109,7 +1109,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 #if PARCSRGEMM_TIMING > 1
       t1 = hypre_MPI_Wtime();
 #endif
-      hypreDevice_CSRSpGemm(IE, CC, &Cz);
+      Cz = hypre_CSRMatrixMultiplyDevice(IE, CC);
 
       hypre_CSRMatrixDestroy(IE);
       hypre_CSRMatrixDestroy(CC);
