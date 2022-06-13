@@ -71,6 +71,8 @@ function usage
 # generate default command based on the first 4 characters of the platform name
 function MpirunString
 {
+   NumArgs1=$#
+
    case $HOST in
       *bgl*)
          BatchMode=1
@@ -100,40 +102,41 @@ function MpirunString
          shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
-            RunString="srun -p pdebug -c $NumThreads -n$*"
+            RunString="srun -p pdebug -c $NumThreads -n$1"
          else
-            RunString="srun -p pdebug -n$*"
+            RunString="srun -p pdebug -n$1"
          fi
          ;;
       surface*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
          ;;
       pascal*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
          ;;
       rzansel*)
          shift
-         RunString="lrun -T$*"
+         RunString="lrun -T$1"
          ;;
       ray*)
          shift
-         #RunString="mpirun -n $*"
-         RunString="lrun -n$*"
+         RunString="lrun -n$1"
          ;;
       lassen*)
          shift
-         #RunString="mpirun -n $*"
-         RunString="lrun -n$*"
+         RunString="lrun -n$1"
          ;;
-      redwood*)
+      tioga*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
+         if [ "$mpibind" = "mpibind" ] ; then
+            mpibind="--mpibind=on"
+         fi
          ;;
       node*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
          ;;
       *)
          shift
@@ -141,11 +144,15 @@ function MpirunString
             export OMP_NUM_THREADS=$NumThreads
          fi
          RunString="$RunPrefix $1"
-         shift
          ;;
    esac
 
-   RunString="$RunString $script $mpibind $Valgrind $*"
+   NumArgs2=$(($#+1))
+   if [ "$NumArgs1" -eq "$NumArgs2" ] ; then
+      shift
+      RunString="$RunString $script $mpibind $Valgrind $*"
+      #echo $RunString
+   fi
 }
 
 # determine the "number of nodes" desired by dividing the "number of processes"
