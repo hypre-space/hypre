@@ -11,7 +11,7 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the redwood cluster ****
+   **** Only run this script on the tioga cluster ****
 
    $0 [-h|-help] {src_dir}
 
