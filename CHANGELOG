@@ -7,6 +7,17 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.25.0 released 2022/06/15
+
+- New features in MGR: multilevel assignment of solver options, block jacobi for
+  smoothers and integrid transfer, CPR, non-Galerkin.
+- New factorized sparse approximate inverse (FSAI) solver/preconditioner.  Can
+  also be used as a smoother in BoomerAMG.
+- Added SStruct I/O routines.
+- Various bug fixes.
+
+#====================================
+
 Version 2.24.0 released 2022/02/11
 
 - Added SYCL support for the structured interface and solvers
@@ -19,6 +30,7 @@ Version 2.24.0 released 2022/02/11
 - Various bug fixes.
 
 #====================================
+
 Version 2.23.0 released 2021/10/01
 
 - Added GPU support for multipass interpolation.
