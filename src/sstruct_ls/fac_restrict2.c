@@ -531,7 +531,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 
    HYPRE_Int               fi, ci;
    HYPRE_Int               nvars, var;
-   HYPRE_Int               volume_crse_cell;
+   /* HYPRE_Int               volume_crse_cell; */
 
    HYPRE_Int               i, j, k;
    HYPRE_Int               imax, jmax, kmax;
@@ -561,11 +561,11 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
       rfactors[i] = 1;
    }
 
-   volume_crse_cell = 1;
-   for (i = 0; i < ndim; i++)
-   {
-      volume_crse_cell *= rfactors[i];
-   }
+   /* volume_crse_cell = 1; */
+   /* for (i = 0; i < ndim; i++) */
+   /* { */
+   /*    volume_crse_cell *= rfactors[i]; */
+   /* } */
 
    /*-----------------------------------------------------------------------
     * We are assuming the refinement and coarsening have same variable

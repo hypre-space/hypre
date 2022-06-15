@@ -6040,7 +6040,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
          HYPRE_Complex v = A_diag_a[j];
          if (type == 1)
          {
-            row_nrm += fabs(v);
+            row_nrm += hypre_cabs(v);
          }
          else if (type == 2)
          {
@@ -6048,7 +6048,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
          }
          else
          {
-            row_nrm = hypre_max(row_nrm, fabs(v));
+            row_nrm = hypre_max(row_nrm, hypre_cabs(v));
          }
       }
       if (num_procs > 1)
@@ -6058,7 +6058,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
             HYPRE_Complex v = A_offd_a[j];
             if (type == 1)
             {
-               row_nrm += fabs(v);
+               row_nrm += hypre_cabs(v);
             }
             else if (type == 2)
             {
@@ -6066,7 +6066,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
             }
             else
             {
-               row_nrm = hypre_max(row_nrm, fabs(v));
+               row_nrm = hypre_max(row_nrm, hypre_cabs(v));
             }
          }
       }
@@ -6081,7 +6081,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
       {
          HYPRE_Int     col = A_diag_j[j];
          HYPRE_Complex val = A_diag_a[j];
-         if (i == col || fabs(val) >= tol * row_nrm)
+         if (i == col || hypre_cabs(val) >= tol * row_nrm)
          {
             A_diag_j[nnz_diag] = col;
             A_diag_a[nnz_diag] = val;
@@ -6096,7 +6096,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
             HYPRE_Complex val = A_offd_a[j];
             /* in normal cases: diagonal entry should not
              * appear in A_offd (but this can still be possible) */
-            if (i + first_row == col_map_offd_A[col] || fabs(val) >= tol * row_nrm)
+            if (i + first_row == col_map_offd_A[col] || hypre_cabs(val) >= tol * row_nrm)
             {
                if (0 == marker_offd[col])
                {
