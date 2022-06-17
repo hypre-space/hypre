@@ -860,6 +860,10 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
          hypre_CSRMatrixData(A) = B_data;
       }
    }
+   else
+   {
+      hypre_CSRMatrixMemoryLocation(A) = memory_location;
+   }
 
    return hypre_error_flag;
 }
