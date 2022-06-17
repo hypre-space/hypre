@@ -12,6 +12,256 @@
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
 
+__global__ void
+hypreCUDAKernel_InterpTruncationPass0_v2( HYPRE_Int   nrows,
+                                          HYPRE_Real  trunc_factor,
+                                          HYPRE_Int  *P_diag_i,
+                                          HYPRE_Int  *P_diag_j,
+                                          HYPRE_Real *P_diag_a,
+                                          HYPRE_Int  *P_offd_i,
+                                          HYPRE_Int  *P_offd_j,
+                                          HYPRE_Real *P_offd_a,
+                                          HYPRE_Int  *P_diag_i_new,
+                                          HYPRE_Int  *P_offd_i_new )
+{
+   HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
+
+   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
+
+   p_diag = read_only_load(P_diag_i + row);
+   p_offd = read_only_load(P_offd_i + row);
+   q_diag = read_only_load(P_diag_i + row + 1);
+   q_offd = read_only_load(P_offd_i + row + 1);
+
+   /* 1. compute row rowsum, rowmax */
+   for (HYPRE_Int i = p_diag; i < q_diag; i ++)
+   {
+      HYPRE_Real v = P_diag_a[i];
+      row_sum += v;
+      row_max = hypre_max(row_max, fabs(v));
+   }
+
+   for (HYPRE_Int i = p_offd; i < q_offd; i ++)
+   {
+      HYPRE_Real v = P_offd_a[i];
+      row_sum += v;
+      row_max = hypre_max(row_max, fabs(v));
+   }
+
+   row_max *= trunc_factor;
+
+   HYPRE_Int cnt_diag = 0, cnt_offd = 0;
+
+   /* 2. move wanted entries to the front and row scal */
+   for (HYPRE_Int i = p_diag; i < q_diag; i ++)
+   {
+      HYPRE_Real v = 0.0;
+      HYPRE_Int j = -1;
+
+      v = P_diag_a[i];
+
+      if (fabs(v) >= row_max)
+      {
+         j = P_diag_j[i];
+         row_scal += v;
+
+         P_diag_a[p_diag + cnt_diag] = v;
+         P_diag_j[p_diag + cnt_diag] = j;
+         cnt_diag ++;
+      }
+   }
+
+   for (HYPRE_Int i = p_offd; i < q_offd; i ++)
+   {
+      HYPRE_Real v = 0.0;
+      HYPRE_Int j = -1;
+
+      v = P_offd_a[i];
+
+      if (fabs(v) >= row_max)
+      {
+         j = P_offd_j[i];
+         row_scal += v;
+
+         P_offd_a[p_offd + cnt_offd] = v;
+         P_offd_j[p_offd + cnt_offd] = j;
+         cnt_offd ++;
+      }
+
+   }
+
+   if (row_scal)
+   {
+      row_scal = row_sum / row_scal;
+   }
+   else
+   {
+      row_scal = 1.0;
+   }
+
+   /* 3. scale the row */
+   for (HYPRE_Int i = p_diag; i < p_diag + cnt_diag; i ++)
+   {
+      P_diag_a[i] *= row_scal;
+   }
+
+   for (HYPRE_Int i = p_offd; i < p_offd + cnt_offd; i ++)
+   {
+      P_offd_a[i] *= row_scal;
+   }
+
+   P_diag_i_new[row] = cnt_diag;
+   P_offd_i_new[row] = cnt_offd;
+}
+
+/* special case for max_elmts = 0, i.e. no max_elmts limit */
+__global__ void
+hypreCUDAKernel_InterpTruncationPass0_v1( HYPRE_Int   nrows,
+                                          HYPRE_Real  trunc_factor,
+                                          HYPRE_Int  *P_diag_i,
+                                          HYPRE_Int  *P_diag_j,
+                                          HYPRE_Real *P_diag_a,
+                                          HYPRE_Int  *P_offd_i,
+                                          HYPRE_Int  *P_offd_j,
+                                          HYPRE_Real *P_offd_a,
+                                          HYPRE_Int  *P_diag_i_new,
+                                          HYPRE_Int  *P_offd_i_new )
+{
+   HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
+
+   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
+
+   if (lane < 2)
+   {
+      p_diag = read_only_load(P_diag_i + row + lane);
+      p_offd = read_only_load(P_offd_i + row + lane);
+   }
+   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+
+   /* 1. compute row rowsum, rowmax */
+   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Real v = P_diag_a[i];
+      row_sum += v;
+      row_max = hypre_max(row_max, fabs(v));
+   }
+
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Real v = P_offd_a[i];
+      row_sum += v;
+      row_max = hypre_max(row_max, fabs(v));
+   }
+
+   row_max = warp_allreduce_max(row_max) * trunc_factor;
+   row_sum = warp_allreduce_sum(row_sum);
+
+   HYPRE_Int cnt_diag = 0, cnt_offd = 0;
+
+   /* 2. move wanted entries to the front and row scal */
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Real v = 0.0;
+      HYPRE_Int j = -1;
+
+      if (i < q_diag)
+      {
+         v = P_diag_a[i];
+
+         if (fabs(v) >= row_max)
+         {
+            j = P_diag_j[i];
+            row_scal += v;
+         }
+      }
+
+      HYPRE_Int sum, pos;
+      pos = warp_prefix_sum(lane, (HYPRE_Int) (j != -1), sum);
+
+      if (j != -1)
+      {
+         P_diag_a[p_diag + cnt_diag + pos] = v;
+         P_diag_j[p_diag + cnt_diag + pos] = j;
+      }
+
+      cnt_diag += sum;
+   }
+
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   {
+      HYPRE_Real v = 0.0;
+      HYPRE_Int j = -1;
+
+      if (i < q_offd)
+      {
+         v = P_offd_a[i];
+
+         if (fabs(v) >= row_max)
+         {
+            j = P_offd_j[i];
+            row_scal += v;
+         }
+      }
+
+      HYPRE_Int sum, pos;
+      pos = warp_prefix_sum(lane, (HYPRE_Int) (j != -1), sum);
+
+      if (j != -1)
+      {
+         P_offd_a[p_offd + cnt_offd + pos] = v;
+         P_offd_j[p_offd + cnt_offd + pos] = j;
+      }
+
+      cnt_offd += sum;
+   }
+
+   row_scal = warp_allreduce_sum(row_scal);
+
+   if (row_scal)
+   {
+      row_scal = row_sum / row_scal;
+   }
+   else
+   {
+      row_scal = 1.0;
+   }
+
+   /* 3. scale the row */
+   for (HYPRE_Int i = p_diag + lane; i < p_diag + cnt_diag; i += HYPRE_WARP_SIZE)
+   {
+      P_diag_a[i] *= row_scal;
+   }
+
+   for (HYPRE_Int i = p_offd + lane; i < p_offd + cnt_offd; i += HYPRE_WARP_SIZE)
+   {
+      P_offd_a[i] *= row_scal;
+   }
+
+   if (!lane)
+   {
+      P_diag_i_new[row] = cnt_diag;
+      P_offd_i_new[row] = cnt_offd;
+   }
+}
+
 static __device__ __forceinline__
 void hypre_smallest_abs_val( HYPRE_Int   n,
                              HYPRE_Real *v,
@@ -269,16 +519,31 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    HYPRE_Int *P_offd_i_new = hypre_TAlloc(HYPRE_Int, nrows + 1, memory_location);
 
    /* truncate P, wanted entries are marked negative in P_diag/offd_j */
-   dim3 bDim(256);
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
-   size_t shmem_bytes = bDim.x * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+   if (max_elmts == 0)
+   {
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+      //dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH2( hypreCUDAKernel_InterpTruncationPass1_v1,
-                      gDim, bDim, shmem_bytes,
-                      nrows, trunc_factor, max_elmts,
-                      P_diag_i, P_diag_j, P_diag_a,
-                      P_offd_i, P_offd_j, P_offd_a,
-                      P_diag_i_new, P_offd_i_new);
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_InterpTruncationPass0_v1,
+                        gDim, bDim,
+                        nrows, trunc_factor,
+                        P_diag_i, P_diag_j, P_diag_a,
+                        P_offd_i, P_offd_j, P_offd_a,
+                        P_diag_i_new, P_offd_i_new);
+   }
+   else
+   {
+      dim3 bDim(256);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
+      size_t shmem_bytes = bDim.x * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+      HYPRE_GPU_LAUNCH2( hypreCUDAKernel_InterpTruncationPass1_v1,
+                         gDim, bDim, shmem_bytes,
+                         nrows, trunc_factor, max_elmts,
+                         P_diag_i, P_diag_j, P_diag_a,
+                         P_offd_i, P_offd_j, P_offd_a,
+                         P_diag_i_new, P_offd_i_new);
+   }
 
    hypre_Memset(&P_diag_i_new[nrows], 0, sizeof(HYPRE_Int), memory_location);
    hypre_Memset(&P_offd_i_new[nrows], 0, sizeof(HYPRE_Int), memory_location);
@@ -301,10 +566,10 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    HYPRE_Int  *P_offd_j_new = hypre_TAlloc(HYPRE_Int,  nnz_offd, memory_location);
    HYPRE_Real *P_offd_a_new = hypre_TAlloc(HYPRE_Real, nnz_offd, memory_location);
 
-   dim3 bDim2 = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim2 = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_InterpTruncationPass2_v1,
-                     gDim2, bDim2,
+                     gDim, bDim,
                      nrows,
                      P_diag_i, P_diag_j, P_diag_a,
                      P_offd_i, P_offd_j, P_offd_a,
