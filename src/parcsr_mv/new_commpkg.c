@@ -547,6 +547,13 @@ hypre_ParCSRCommPkgCreateApart
                                     send_map_elmts,
                                     &comm_pkg);
 
+   MPIX_Dist_graph_create_adjacent( comm, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, MPI_INFO_NULL, 0, &(comm_pkg->neighbor_comm));
+   MPIX_Dist_graph_create_adjacent( comm, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, 0, 0, &(comm_pkg->neighborT_comm));
+
    return hypre_error_flag;
 }
 
