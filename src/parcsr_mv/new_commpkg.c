@@ -11,6 +11,7 @@
  *-----------------------------------------------------*/
 
 #include "_hypre_parcsr_mv.h"
+#include <mpi.h>
 
 /* some debugging tools*/
 #define mydebug 0
@@ -546,6 +547,27 @@ hypre_ParCSRCommPkgCreateApart
                                     num_sends, send_procs, send_map_starts,
                                     send_map_elmts,
                                     &comm_pkg);
+
+   MPIX_Dist_graph_create_adjacent( comm, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, MPI_INFO_NULL, 0, &(comm_pkg->neighbor_comm));
+   MPIX_Dist_graph_create_adjacent( comm, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    MPI_UNWEIGHTED, 0, 0, &(comm_pkg->neighborT_comm));
+
+   HYPRE_Int num_send_elmts = send_map_starts[num_sends];
+   comm_pkg->global_send_indices = hypre_CTAlloc(long, num_send_elmts, HYPRE_MEMORY_HOST);
+   for (HYPRE_Int i = 0; i < num_send_elmts; ++i)
+   {
+      comm_pkg->global_send_indices[i] = send_map_elmts[i] + first_col_diag;
+   }
+
+   HYPRE_Int num_recv_elmts = recv_vec_starts[num_recvs];
+   comm_pkg->global_recv_indices = hypre_CTAlloc(long, num_recv_elmts, HYPRE_MEMORY_HOST);
+   for (HYPRE_Int i = 0; i < num_recv_elmts; ++i)
+   {
+      comm_pkg->global_recv_indices[i] = col_map_off_d[i];
+   }
 
    return hypre_error_flag;
 }

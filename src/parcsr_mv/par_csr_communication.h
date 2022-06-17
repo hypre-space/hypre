@@ -13,6 +13,9 @@
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
+#include "mpi_advance.h"
+
+
 #ifdef HYPRE_USING_PERSISTENT_COMM
 typedef enum CommPkgJobType
 {
@@ -44,6 +47,7 @@ typedef struct
    void                 *recv_data_buffer;
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
+   MPIX_Request         *Xrequest;
 } hypre_ParCSRCommHandle;
 
 typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
@@ -51,6 +55,8 @@ typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 typedef struct _hypre_ParCSRCommPkg
 {
    MPI_Comm                          comm;
+   MPIX_Comm                        *neighbor_comm;
+   MPIX_Comm                        *neighborT_comm;
    HYPRE_Int                         num_components;
    HYPRE_Int                         num_sends;
    HYPRE_Int                        *send_procs;
@@ -60,6 +66,8 @@ typedef struct _hypre_ParCSRCommPkg
    HYPRE_Int                         num_recvs;
    HYPRE_Int                        *recv_procs;
    HYPRE_Int                        *recv_vec_starts;
+   long                             *global_send_indices;
+   long                             *global_recv_indices;
    /* remote communication information */
    hypre_MPI_Datatype               *send_mpi_types;
    hypre_MPI_Datatype               *recv_mpi_types;
