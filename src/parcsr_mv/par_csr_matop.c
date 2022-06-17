@@ -3562,7 +3562,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       C_int_offd = hypre_CSRMatrixMultiply(AT_offd, B_offd);
       hypre_ParCSRMatrixDiag(B) = C_int_diag;
       hypre_ParCSRMatrixOffd(B) = C_int_offd;
-      C_int = hypre_MergeDiagAndOffd(B);
+      hypre_MergeDiagAndOffd(B, &C_int);
       hypre_ParCSRMatrixDiag(B) = B_diag;
       hypre_ParCSRMatrixOffd(B) = B_offd;
       hypre_ExchangeExternalRowsInit(C_int, comm_pkg_A, &request);

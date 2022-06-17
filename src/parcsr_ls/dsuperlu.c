@@ -57,7 +57,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
 
    /* Merge diag and offd into one matrix (global ids) */
-   A_local = hypre_MergeDiagAndOffd(A);
+   hypre_MergeDiagAndOffd(A, &A_local);
 
    num_rows = hypre_CSRMatrixNumRows(A_local);
    /* Now convert hypre matrix to a SuperMatrix */

@@ -1610,32 +1610,42 @@ GenerateDiagAndOffd(hypre_CSRMatrix    *A,
    return hypre_error_flag;
 }
 
-hypre_CSRMatrix *
-hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
+/*--------------------------------------------------------------------------
+ * hypre_MergeDiagAndOffd
+ *
+ * Merges the diagonal and off-diagonal portions of a ParCSRMatrix into
+ * a single CSRMatrix.
+ *
+ * Note: Column indices of the resulting matrix are stored with HYPRE_BigInt
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MergeDiagAndOffd(hypre_ParCSRMatrix  *par_matrix,
+                       hypre_CSRMatrix    **csr_matrix_ptr)
 {
-   hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(par_matrix);
-   hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(par_matrix);
-   hypre_CSRMatrix  *matrix;
+   hypre_CSRMatrix     *matrix;
+   hypre_CSRMatrix     *diag = hypre_ParCSRMatrixDiag(par_matrix);
+   hypre_CSRMatrix     *offd = hypre_ParCSRMatrixOffd(par_matrix);
 
-   HYPRE_BigInt       num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
-   HYPRE_BigInt       first_col_diag = hypre_ParCSRMatrixFirstColDiag(par_matrix);
-   HYPRE_BigInt      *col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
-   HYPRE_Int          num_rows = hypre_CSRMatrixNumRows(diag);
+   HYPRE_BigInt         num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
+   HYPRE_BigInt         first_col_diag = hypre_ParCSRMatrixFirstColDiag(par_matrix);
+   HYPRE_BigInt        *col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
+   HYPRE_Int            num_rows = hypre_CSRMatrixNumRows(diag);
 
-   HYPRE_Int          *diag_i = hypre_CSRMatrixI(diag);
-   HYPRE_Int          *diag_j = hypre_CSRMatrixJ(diag);
-   HYPRE_Complex      *diag_data = hypre_CSRMatrixData(diag);
-   HYPRE_Int          *offd_i = hypre_CSRMatrixI(offd);
-   HYPRE_Int          *offd_j = hypre_CSRMatrixJ(offd);
-   HYPRE_Complex      *offd_data = hypre_CSRMatrixData(offd);
+   HYPRE_Int           *diag_i = hypre_CSRMatrixI(diag);
+   HYPRE_Int           *diag_j = hypre_CSRMatrixJ(diag);
+   HYPRE_Complex       *diag_data = hypre_CSRMatrixData(diag);
+   HYPRE_Int           *offd_i = hypre_CSRMatrixI(offd);
+   HYPRE_Int           *offd_j = hypre_CSRMatrixJ(offd);
+   HYPRE_Complex       *offd_data = hypre_CSRMatrixData(offd);
 
-   HYPRE_Int          *matrix_i;
-   HYPRE_BigInt       *matrix_j;
-   HYPRE_Complex      *matrix_data;
+   HYPRE_Int           *matrix_i;
+   HYPRE_BigInt        *matrix_j;
+   HYPRE_Complex       *matrix_data;
 
-   HYPRE_Int          num_nonzeros, i, j;
-   HYPRE_Int          count;
-   HYPRE_Int          size, rest, num_threads, ii;
+   HYPRE_Int            num_nonzeros, i, j;
+   HYPRE_Int            count;
+   HYPRE_Int            size, rest, num_threads, ii;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(par_matrix);
 
@@ -1687,7 +1697,9 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 
    matrix_i[num_rows] = num_nonzeros;
 
-   return matrix;
+   *csr_matrix_ptr = matrix;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1752,8 +1764,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    local_num_rows = (HYPRE_Int)(hypre_ParCSRMatrixLastRowIndex(par_matrix)  -
                                 hypre_ParCSRMatrixFirstRowIndex(par_matrix) + 1);
 
-
-   local_matrix = hypre_MergeDiagAndOffd(par_matrix); /* creates matrix */
+   hypre_MergeDiagAndOffd(par_matrix, &local_matrix); /* creates matrix */
    hypre_CSRMatrixBigJtoJ(local_matrix); /* copies big_j to j */
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);
@@ -1768,10 +1779,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    {
       num_contacts = 1;
       contact_proc_list[0] = 0;
-      contact_send_buf[0] =  (HYPRE_Int)hypre_ParCSRMatrixLastRowIndex(par_matrix);
+      contact_send_buf[0]  = (HYPRE_Int) hypre_ParCSRMatrixLastRowIndex(par_matrix);
       contact_send_buf_starts[0] = 0;
       contact_send_buf_starts[1] = 1;
-
    }
    else
    {
