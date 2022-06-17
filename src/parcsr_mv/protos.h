@@ -420,8 +420,9 @@ hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix ( MPI_Comm comm, hypre_CSRMatr
                                                     HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts );
 HYPRE_Int GenerateDiagAndOffd ( hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
                                 HYPRE_BigInt first_col_diag, HYPRE_BigInt last_col_diag );
-HYPRE_Int hypre_MergeDiagAndOffd ( hypre_ParCSRMatrix *par_matrix, hypre_CSRMatrix **csr_matrix_ptr );
-hypre_CSRMatrix *hypre_MergeDiagAndOffdDevice ( hypre_ParCSRMatrix *par_matrix );
+HYPRE_Int hypre_ParCSRMatrixMergeDiagAndOffd ( hypre_ParCSRMatrix *par_matrix, hypre_CSRMatrix **csr_matrix_ptr );
+HYPRE_Int hypre_MergeDiagAndOffdHost ( hypre_ParCSRMatrix *par_matrix, hypre_CSRMatrix **csr_matrix_ptr );
+HYPRE_Int hypre_MergeDiagAndOffdDevice ( hypre_ParCSRMatrix *A, hypre_CSRMatrix **B_ptr );
 hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll ( hypre_ParCSRMatrix *par_matrix );
 HYPRE_Int hypre_ParCSRMatrixCopy ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
                                    HYPRE_Int copy_data );

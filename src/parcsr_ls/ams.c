@@ -2955,8 +2955,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          HYPRE_Int B_num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(B));
          HYPRE_Int B_num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(B));
 
-         hypre_MergeDiagAndOffd(A, &A_local);
-         hypre_MergeDiagAndOffd(B, &B_local);*/
+         hypre_ParCSRMatrixMergeDiagAndOffd(A, &A_local);
+         hypre_ParCSRMatrixMergeDiagAndOffd(B, &B_local);*/
          /* scale (penalize) G0 G0^T before adding it to the matrix */
          /*{
             HYPRE_Int i, nnz = hypre_CSRMatrixNumNonzeros(A_local);
@@ -3473,8 +3473,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   HYPRE_Int B_num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(B));
                   HYPRE_Int B_num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(B));
 
-                  hypre_MergeDiagAndOffd(A, &A_local);
-                  hypre_MergeDiagAndOffd(B, &B_local);
+                  hypre_ParCSRMatrixMergeDiagAndOffd(A, &A_local);
+                  hypre_ParCSRMatrixMergeDiagAndOffd(B, &B_local);
                   C_local = hypre_CSRMatrixBigAdd(A_local, B_local);
                   hypre_CSRMatrixBigJtoJ(C_local);
 

@@ -1620,8 +1620,35 @@ GenerateDiagAndOffd(hypre_CSRMatrix    *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MergeDiagAndOffd(hypre_ParCSRMatrix  *par_matrix,
-                       hypre_CSRMatrix    **csr_matrix_ptr)
+hypre_ParCSRMatrixMergeDiagAndOffd(hypre_ParCSRMatrix  *par_matrix,
+                                   hypre_CSRMatrix    **csr_matrix_ptr)
+{
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(par_matrix));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_MergeDiagAndOffdDevice(par_matrix, csr_matrix_ptr);
+   }
+   else
+#endif
+   {
+      return hypre_MergeDiagAndOffdHost(par_matrix, csr_matrix_ptr);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MergeDiagAndOffdHost
+ *
+ * Host implementation of hypre_MergeDiagAndOffd (see it for more comments)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MergeDiagAndOffdHost(hypre_ParCSRMatrix  *par_matrix,
+                           hypre_CSRMatrix    **csr_matrix_ptr)
 {
    hypre_CSRMatrix     *matrix;
    hypre_CSRMatrix     *diag = hypre_ParCSRMatrixDiag(par_matrix);
@@ -1764,7 +1791,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    local_num_rows = (HYPRE_Int)(hypre_ParCSRMatrixLastRowIndex(par_matrix)  -
                                 hypre_ParCSRMatrixFirstRowIndex(par_matrix) + 1);
 
-   hypre_MergeDiagAndOffd(par_matrix, &local_matrix); /* creates matrix */
+   hypre_ParCSRMatrixMergeDiagAndOffd(par_matrix, &local_matrix); /* creates matrix */
    hypre_CSRMatrixBigJtoJ(local_matrix); /* copies big_j to j */
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);

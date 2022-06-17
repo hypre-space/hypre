@@ -945,9 +945,15 @@ hypre_ParcsrGetExternalRowsDeviceWait(void *vrequest)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+/*--------------------------------------------------------------------------
+ * hypre_MergeDiagAndOffdDevice
+ *
+ * Device implementation of hypre_MergeDiagAndOffd (see it for more comments)
+ *--------------------------------------------------------------------------*/
 
-hypre_CSRMatrix*
-hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
+HYPRE_Int
+hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix  *A,
+                             hypre_CSRMatrix    **B_ptr)
 {
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -969,7 +975,7 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    hypre_CSRMatrix *B;
    HYPRE_Int        B_nrows = local_num_rows;
    HYPRE_BigInt     B_ncols = glbal_num_cols;
-   HYPRE_Int       *B_i = hypre_TAlloc(HYPRE_Int, B_nrows + 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int       *B_i;
    HYPRE_BigInt    *B_j;
    HYPRE_Complex   *B_a;
    HYPRE_Int        B_nnz;
@@ -978,17 +984,13 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 
    hypre_MPI_Comm_size(comm, &num_procs);
 
-   hypre_Memset(B_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
-
+   /* Construct row pointer B_i */
+   B_i = hypre_CTAlloc(HYPRE_Int, B_nrows + 1, HYPRE_MEMORY_DEVICE);
    hypreDevice_GetRowNnz(B_nrows, NULL, A_diag_i, A_offd_i, B_i + 1);
-
    hypreDevice_IntegerInclusiveScan(B_nrows + 1, B_i);
 
    /* total number of nnz */
    hypre_TMemcpy(&B_nnz, B_i + B_nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-
-   B_j = hypre_TAlloc(HYPRE_BigInt,  B_nnz, HYPRE_MEMORY_DEVICE);
-   B_a = hypre_TAlloc(HYPRE_Complex, B_nnz, HYPRE_MEMORY_DEVICE);
 
    if (d_col_map_offd_A == NULL)
    {
@@ -998,20 +1000,24 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
       hypre_ParCSRMatrixDeviceColMapOffd(A) = d_col_map_offd_A;
    }
 
+   /* Construct column indices and coefficients */
+   B_j = hypre_TAlloc(HYPRE_BigInt,  B_nnz, HYPRE_MEMORY_DEVICE);
+   B_a = hypre_TAlloc(HYPRE_Complex, B_nnz, HYPRE_MEMORY_DEVICE);
    hypreDevice_CopyParCSRRows(B_nrows, NULL, 2, num_procs > 1, first_col, d_col_map_offd_A,
                               A_diag_i, A_diag_j, A_diag_a, A_offd_i, A_offd_j, A_offd_a,
                               B_i, B_j, B_a);
 
-   /* output */
+   /* Form output matrix */
    B = hypre_CSRMatrixCreate(B_nrows, B_ncols, B_nnz);
    hypre_CSRMatrixI   (B) = B_i;
    hypre_CSRMatrixBigJ(B) = B_j;
    hypre_CSRMatrixData(B) = B_a;
    hypre_CSRMatrixMemoryLocation(B) = HYPRE_MEMORY_DEVICE;
+   *B_ptr = B;
 
    hypre_SyncComputeStream(hypre_handle());
 
-   return B;
+   return hypre_error_flag;
 }
 
 HYPRE_Int

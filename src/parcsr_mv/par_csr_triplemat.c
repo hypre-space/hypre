@@ -330,7 +330,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixDiag(B) = C_int_diag;
       hypre_ParCSRMatrixOffd(B) = C_int_offd;
 
-      hypre_MergeDiagAndOffd(B, &C_int);
+      hypre_MergeDiagAndOffdHost(B, &C_int);
 
       hypre_ParCSRMatrixDiag(B) = B_diag;
       hypre_ParCSRMatrixOffd(B) = B_offd;
@@ -741,7 +741,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
          hypre_ParCSRMatrixDiag(Q) = C_int_diag;
          hypre_ParCSRMatrixOffd(Q) = C_int_offd;
-         hypre_MergeDiagAndOffd(Q, &C_int);
+         hypre_MergeDiagAndOffdHost(Q, &C_int);
 
          hypre_ParCSRMatrixDiag(Q) = Q_diag;
          hypre_ParCSRMatrixOffd(Q) = Q_offd;
