@@ -12,115 +12,6 @@
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
 
-__global__ void
-hypreCUDAKernel_InterpTruncationPass0_v2( HYPRE_Int   nrows,
-                                          HYPRE_Real  trunc_factor,
-                                          HYPRE_Int  *P_diag_i,
-                                          HYPRE_Int  *P_diag_j,
-                                          HYPRE_Real *P_diag_a,
-                                          HYPRE_Int  *P_offd_i,
-                                          HYPRE_Int  *P_offd_j,
-                                          HYPRE_Real *P_offd_a,
-                                          HYPRE_Int  *P_diag_i_new,
-                                          HYPRE_Int  *P_offd_i_new )
-{
-   HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
-
-   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
-
-   if (row >= nrows)
-   {
-      return;
-   }
-
-   HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
-
-   p_diag = read_only_load(P_diag_i + row);
-   p_offd = read_only_load(P_offd_i + row);
-   q_diag = read_only_load(P_diag_i + row + 1);
-   q_offd = read_only_load(P_offd_i + row + 1);
-
-   /* 1. compute row rowsum, rowmax */
-   for (HYPRE_Int i = p_diag; i < q_diag; i ++)
-   {
-      HYPRE_Real v = P_diag_a[i];
-      row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
-   }
-
-   for (HYPRE_Int i = p_offd; i < q_offd; i ++)
-   {
-      HYPRE_Real v = P_offd_a[i];
-      row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
-   }
-
-   row_max *= trunc_factor;
-
-   HYPRE_Int cnt_diag = 0, cnt_offd = 0;
-
-   /* 2. move wanted entries to the front and row scal */
-   for (HYPRE_Int i = p_diag; i < q_diag; i ++)
-   {
-      HYPRE_Real v = 0.0;
-      HYPRE_Int j = -1;
-
-      v = P_diag_a[i];
-
-      if (fabs(v) >= row_max)
-      {
-         j = P_diag_j[i];
-         row_scal += v;
-
-         P_diag_a[p_diag + cnt_diag] = v;
-         P_diag_j[p_diag + cnt_diag] = j;
-         cnt_diag ++;
-      }
-   }
-
-   for (HYPRE_Int i = p_offd; i < q_offd; i ++)
-   {
-      HYPRE_Real v = 0.0;
-      HYPRE_Int j = -1;
-
-      v = P_offd_a[i];
-
-      if (fabs(v) >= row_max)
-      {
-         j = P_offd_j[i];
-         row_scal += v;
-
-         P_offd_a[p_offd + cnt_offd] = v;
-         P_offd_j[p_offd + cnt_offd] = j;
-         cnt_offd ++;
-      }
-
-   }
-
-   if (row_scal)
-   {
-      row_scal = row_sum / row_scal;
-   }
-   else
-   {
-      row_scal = 1.0;
-   }
-
-   /* 3. scale the row */
-   for (HYPRE_Int i = p_diag; i < p_diag + cnt_diag; i ++)
-   {
-      P_diag_a[i] *= row_scal;
-   }
-
-   for (HYPRE_Int i = p_offd; i < p_offd + cnt_offd; i ++)
-   {
-      P_offd_a[i] *= row_scal;
-   }
-
-   P_diag_i_new[row] = cnt_diag;
-   P_offd_i_new[row] = cnt_offd;
-}
-
 /* special case for max_elmts = 0, i.e. no max_elmts limit */
 __global__ void
 hypreCUDAKernel_InterpTruncationPass0_v1( HYPRE_Int   nrows,
@@ -523,7 +414,6 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-      //dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
 
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_InterpTruncationPass0_v1,
                         gDim, bDim,
