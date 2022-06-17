@@ -68,7 +68,8 @@ hypreCUDAKernel_InterpTruncationPass0_v1( HYPRE_Int   nrows,
    HYPRE_Int cnt_diag = 0, cnt_offd = 0;
 
    /* 2. move wanted entries to the front and row scal */
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+        i += HYPRE_WARP_SIZE)
    {
       HYPRE_Real v = 0.0;
       HYPRE_Int j = -1;
@@ -96,7 +97,8 @@ hypreCUDAKernel_InterpTruncationPass0_v1( HYPRE_Int   nrows,
       cnt_diag += sum;
    }
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+        i += HYPRE_WARP_SIZE)
    {
       HYPRE_Real v = 0.0;
       HYPRE_Int j = -1;
