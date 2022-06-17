@@ -792,6 +792,79 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CSRMatrixMigrate
+ *
+ * Migrates matrix row pointer, column indices and data to memory_location
+ * if it is different to the current one.
+ *
+ * Note: Does not move rownnz array.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
+                        HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Int      num_rows     = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int     *A_i          = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j          = hypre_CSRMatrixJ(A);
+   HYPRE_BigInt  *A_big_j      = hypre_CSRMatrixBigJ(A);
+   HYPRE_Complex *A_data       = hypre_CSRMatrixData(A);
+
+   HYPRE_MemoryLocation old_memory_location = hypre_CSRMatrixMemoryLocation(A);
+
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(old_memory_location) )
+   {
+      if (A_i)
+      {
+         HYPRE_Int *B_i;
+
+         B_i = hypre_TAlloc(HYPRE_Int, num_rows + 1, memory_location);
+         hypre_TMemcpy(B_i, A_i, HYPRE_Int, num_rows + 1,
+                       memory_location, old_memory_location);
+         hypre_TFree(A_i, old_memory_location);
+         hypre_CSRMatrixI(A) = B_i;
+      }
+
+      if (A_j)
+      {
+         HYPRE_Int *B_j;
+
+         B_j = hypre_TAlloc(HYPRE_Int, num_nonzeros, memory_location);
+         hypre_TMemcpy(B_j, A_j, HYPRE_Int, num_nonzeros,
+                       memory_location, old_memory_location);
+         hypre_TFree(A_j, old_memory_location);
+         hypre_CSRMatrixJ(A) = B_j;
+      }
+
+      if (A_big_j)
+      {
+         HYPRE_Int *B_big_j;
+
+         B_big_j = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, memory_location);
+         hypre_TMemcpy(B_big_j, A_big_j, HYPRE_BigInt, num_nonzeros,
+                       memory_location, old_memory_location);
+         hypre_TFree(A_big_j, old_memory_location);
+         hypre_CSRMatrixBigJ(A) = B_big_j;
+      }
+
+      if (A_data)
+      {
+         HYPRE_Complex *B_data;
+
+         B_data = hypre_TAlloc(HYPRE_Complex, num_nonzeros, memory_location);
+         hypre_TMemcpy(B_data, A_data, HYPRE_Complex, num_nonzeros,
+                       memory_location, old_memory_location);
+         hypre_TFree(A_data, old_memory_location);
+         hypre_CSRMatrixData(A) = B_data;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CSRMatrixClone_v2
  *
  * This function does the same job as hypre_CSRMatrixClone; however, here

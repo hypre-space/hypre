@@ -383,6 +383,7 @@ HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input, char *file_nam
 HYPRE_Int hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix, HYPRE_Int basei, HYPRE_Int basej,
                                   HYPRE_Int trans, const char *file_name );
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data );
+HYPRE_Int hypre_CSRMatrixMigrate ( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
                                           HYPRE_MemoryLocation memory_location );
