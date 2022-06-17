@@ -1611,7 +1611,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix    *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MergeDiagAndOffd
+ * hypre_ParCSRMatrixMergeDiagAndOffd
  *
  * Merges the diagonal and off-diagonal portions of a ParCSRMatrix into
  * a single CSRMatrix.
@@ -1796,7 +1796,6 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);
    local_matrix_data = hypre_CSRMatrixData(local_matrix);
-
 
    /* determine procs that have vector data and store their ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact

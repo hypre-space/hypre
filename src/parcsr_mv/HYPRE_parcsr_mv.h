@@ -35,9 +35,12 @@ typedef struct hypre_ParVector_struct *HYPRE_ParVector;
  *--------------------------------------------------------------------------*/
 
 /* HYPRE_parcsr_matrix.c */
-HYPRE_Int HYPRE_ParCSRMatrixCreate( MPI_Comm comm, HYPRE_BigInt global_num_rows,
-                                    HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts,
-                                    HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd,
+HYPRE_Int HYPRE_ParCSRMatrixCreate( MPI_Comm comm,
+                                    HYPRE_BigInt global_num_rows,
+                                    HYPRE_BigInt global_num_cols,
+                                    HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts,
+                                    HYPRE_Int num_cols_offd,
+                                    HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd,
                                     HYPRE_ParCSRMatrix *matrix );
 HYPRE_Int HYPRE_ParCSRMatrixDestroy( HYPRE_ParCSRMatrix matrix );
 HYPRE_Int HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix );
@@ -56,6 +59,7 @@ HYPRE_Int HYPRE_ParCSRMatrixGetRow( HYPRE_ParCSRMatrix matrix, HYPRE_BigInt row,
                                     HYPRE_BigInt **col_ind, HYPRE_Complex **values );
 HYPRE_Int HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix matrix, HYPRE_BigInt row,
                                         HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values );
+HYPRE_Int HYPRE_ParCSRMatrixMergeDiagAndOffd( HYPRE_ParCSRMatrix par_matrix, HYPRE_CSRMatrix *csr_matrix );
 HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm, HYPRE_CSRMatrix A_CSR,
                                          HYPRE_BigInt *row_partitioning, HYPRE_BigInt *col_partitioning, HYPRE_ParCSRMatrix *matrix );
 HYPRE_Int HYPRE_ParCSRMatrixMatvec( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
@@ -85,4 +89,3 @@ HYPRE_Int HYPRE_ParVectorGetValues( HYPRE_ParVector vector, HYPRE_Int num_values
 #endif
 
 #endif
-

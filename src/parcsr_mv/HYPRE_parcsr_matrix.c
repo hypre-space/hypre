@@ -327,6 +327,28 @@ HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRMatrixMergeDiagAndOffd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRMatrixMergeDiagAndOffd( HYPRE_ParCSRMatrix  par_matrix,
+                                    HYPRE_CSRMatrix    *csr_matrix )
+{
+   hypre_CSRMatrix  **csr_matrix_ptr = NULL;
+
+   if (!par_matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParCSRMatrixMergeDiagAndOffd(par_matrix, csr_matrix_ptr);
+   csr_matrix = (HYPRE_CSRMatrix*) csr_matrix_ptr;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_CSRMatrixToParCSRMatrix
  * Output argument (fifth argument): a new ParCSRmatrix.
  * Input arguments: MPI communicator, CSR matrix, and optional partitionings.
@@ -348,6 +370,7 @@ HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm            comm,
       hypre_error_in_arg(5);
       return hypre_error_flag;
    }
+
    *matrix = (HYPRE_ParCSRMatrix)
              hypre_CSRMatrixToParCSRMatrix( comm, (hypre_CSRMatrix *) A_CSR,
                                             row_partitioning, col_partitioning) ;
