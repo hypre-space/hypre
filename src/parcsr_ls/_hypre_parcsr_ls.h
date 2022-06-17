@@ -1339,8 +1339,8 @@ HYPRE_Int BuildParLaplacian ( HYPRE_Int argc, char *argv [], HYPRE_Int arg_index
                               HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParDifConv ( HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                             HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParFromOneFile ( HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                                HYPRE_ParCSRMatrix *A_ptr );
+//HYPRE_Int BuildParFromOneFile ( HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+//                                HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildRhsParFromOneFile ( HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                    HYPRE_ParCSRMatrix A, HYPRE_ParVector *b_ptr );
 HYPRE_Int BuildParLaplacian9pt ( HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,

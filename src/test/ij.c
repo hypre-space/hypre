@@ -24,6 +24,7 @@
 #include "_hypre_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
+#include "_hypre_parcsr_ls.h"
 #include "HYPRE_krylov.h"
 
 #if defined(HYPRE_USING_CUDA)
@@ -4249,6 +4250,86 @@ main( hypre_int argc,
          }
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
+     }
+
+     {
+         hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_solver;
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Levels: %d\n", hypre_ParAMGDataNumLevels(amg_data));
+         for (int level = 0; level < 1; ++level) { //hypre_ParAMGDataNumLevels(amg_data); ++level) {
+            //hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Level: %d\n", level);
+            hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
+            hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   #if defined(HYPRE_USING_PERSISTENT_COMM)
+            hypre_ParPrintf(hypre_MPI_COMM_WORLD, "TEST COMM. BEGIN \n");
+            hypre_ParCSRPersistentCommHandle *comm_handle =
+               hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
+
+            HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+            HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+            //hypre_printf("Level: %d, Rank: %d, num_sends: %d, num_recvs: %d\n", level, myid, num_sends, num_recvs);
+            //HYPRE_Complex *x_buf_data = hypre_CTAlloc(HYPRE_Complex,
+            //                                          hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+            //                                          HYPRE_MEMORY_HOST);
+            //HYPRE_Complex *x_tmp_data = hypre_TAlloc(HYPRE_Complex, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs), HYPRE_MEMORY_HOST);
+
+            //hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, x_buf_data);
+            //hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle, HYPRE_MEMORY_HOST, x_tmp_data);
+            //hypre_ParPrintf(hypre_MPI_COMM_WORLD, "TEST COMM. DONE 1, BEGIN 2\n");
+
+            // Method 2: part nap
+            MPIX_Comm *neighbor_comm;
+            MPIX_Dist_graph_create_adjacent( comm, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                       MPI_UNWEIGHTED, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                       MPI_UNWEIGHTED, MPI_INFO_NULL, 0, &neighbor_comm);
+     
+            HYPRE_Complex *x_tmp_data2 = hypre_TAlloc(HYPRE_Complex, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs), HYPRE_MEMORY_HOST);
+            MPIX_Request *Xrequest;
+
+            HYPRE_Int *send_sizes = hypre_TAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
+            HYPRE_Int *recv_sizes = hypre_TAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
+            
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                             hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_part_locality_alltoallv_init( (HYPRE_Complex *)hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), send_sizes,
+                                          hypre_ParCSRCommPkgSendMapStarts(comm_pkg), HYPRE_MPI_COMPLEX,
+                                          (HYPRE_Complex *)x_tmp_data2, recv_sizes,
+                                          hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                          HYPRE_MPI_COMPLEX, neighbor_comm,
+                                          0, &Xrequest);
+            /*
+            hypre_ParPrintf(hypre_MPI_COMM_WORLD, "TEST COMM. STARTING \n");
+            HYPRE_Int ret = (HYPRE_Int) MPIX_Start(Xrequest);
+            hypre_ParPrintf(hypre_MPI_COMM_WORLD, "TEST COMM. WAITING \n");
+            ret = (HYPRE_Int) MPIX_Wait(Xrequest, MPI_STATUS_IGNORE);
+            hypre_ParPrintf(hypre_MPI_COMM_WORLD, "TEST COMM. DONE 2 \n");
+
+            // compare buffers
+            for (i = 0; i < hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs); i++) {
+               if (((HYPRE_Complex *)comm_handle->recv_data_buffer)[i] != x_tmp_data2[i]) {
+                  hypre_printf("Rank %d: Buffers not equal. Expected %f, have %f\n", myid, ((HYPRE_Complex *)comm_handle->recv_data_buffer)[i], x_tmp_data2[i]);
+                  break;
+               }
+               if (i == hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) - 1) {
+                  hypre_printf("Rank %d: Buffers equal\n", myid);
+               }
+            }
+            // freeing
+            hypre_TFree(x_tmp_data2, HYPRE_MEMORY_HOST);
+            hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
+            hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
+          
+            */
+            hypre_ParPrintf(hypre_MPI_COMM_WORLD, "TEST COMM. DONE ALL\n");
+         }
+#endif
       }
 
       if (solver_id == 0)
