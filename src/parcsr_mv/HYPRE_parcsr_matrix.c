@@ -349,6 +349,25 @@ HYPRE_ParCSRMatrixMergeDiagAndOffd( HYPRE_ParCSRMatrix  par_matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRMatrixToCSRMatrixAll
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRMatrixToCSRMatrixAll( HYPRE_ParCSRMatrix  par_matrix,
+                                  HYPRE_CSRMatrix    *csr_matrix )
+{
+   if (!par_matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   csr_matrix = (HYPRE_CSRMatrix*) hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_CSRMatrixToParCSRMatrix
  * Output argument (fifth argument): a new ParCSRmatrix.
  * Input arguments: MPI communicator, CSR matrix, and optional partitionings.
