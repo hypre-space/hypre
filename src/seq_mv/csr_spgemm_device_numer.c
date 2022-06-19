@@ -67,8 +67,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc,
-                                                                       &d_c);
+      hypreDevice_CSRSpGemmNumerPostCopy<T_GROUP_SIZE[5]>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
    }
 
    *d_ic_out = d_ic;
@@ -173,8 +172,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
 
    if (!exact_rownnz)
    {
-      hypreDevice_CSRSpGemmNumerPostCopy<HYPRE_SPGEMM_BASE_GROUP_SIZE>(m, d_rc, &nnzC, &d_ic, &d_jc,
-                                                                       &d_c);
+      hypreDevice_CSRSpGemmNumerPostCopy<T_GROUP_SIZE[5]>(m, d_rc, &nnzC, &d_ic, &d_jc, &d_c);
    }
 
    *d_ic_out = d_ic;
