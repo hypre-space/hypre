@@ -813,7 +813,8 @@ hypreGPUKernel_CSRMoveDiagFirst( hypre_Item    &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane + 1; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane + 1; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q);
+        j += HYPRE_WARP_SIZE)
    {
       hypre_int find_diag = j < q && ja[j] == row;
 

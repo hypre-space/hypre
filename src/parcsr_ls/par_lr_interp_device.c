@@ -62,7 +62,8 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
 
    HYPRE_Complex rl = 0.0;
 
-   for (HYPRE_Int i = ib + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = ib + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie);
+        i += HYPRE_WARP_SIZE)
    {
       if (i < ie)
       {
@@ -79,7 +80,8 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
       ie = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 1);
       ib = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, ib, 0);
 
-      for (HYPRE_Int i = ib + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie); i += HYPRE_WARP_SIZE)
+      for (HYPRE_Int i = ib + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < ie);
+           i += HYPRE_WARP_SIZE)
       {
          if (i < ie)
          {
@@ -584,7 +586,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
 
    /* D_\tau */
    /* do not assume the first element is the diagonal */
-   for (HYPRE_Int j = pd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qd); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = pd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qd);
+        j += HYPRE_WARP_SIZE)
    {
       if (j < qd)
       {
@@ -596,7 +599,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
       }
    }
 
-   for (HYPRE_Int j = po + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qo); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = po + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qo);
+        j += HYPRE_WARP_SIZE)
    {
       if (j < qo)
       {
@@ -620,7 +624,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
 
    /* AFF Diag part */
    // do not assume diag is the first element of row
-   for (HYPRE_Int j = pd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qd); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = pd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qd);
+        j += HYPRE_WARP_SIZE)
    {
       if (j < qd)
       {
@@ -636,7 +641,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
    }
 
    /* AFF offd part */
-   for (HYPRE_Int j = po + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qo); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = po + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < qo);
+        j += HYPRE_WARP_SIZE)
    {
       if (j < qo)
       {
@@ -647,7 +653,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
    theta = theta != 0.0 ? 1.0 / theta : 0.0;
 
    /* AFC Diag part */
-   for (HYPRE_Int j = xd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < yd); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = xd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < yd);
+        j += HYPRE_WARP_SIZE)
    {
       if (j < yd)
       {
@@ -656,7 +663,8 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
    }
 
    /* AFC offd part */
-   for (HYPRE_Int j = xo + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < yo); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = xo + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < yo);
+        j += HYPRE_WARP_SIZE)
    {
       if (j < yo)
       {

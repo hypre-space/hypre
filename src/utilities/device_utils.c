@@ -424,7 +424,8 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
 }
 
 __global__ void
-hypreGPUKernel_IVAXPY( hypre_Item &item, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+hypreGPUKernel_IVAXPY( hypre_Item &item, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
+                       HYPRE_Complex *y)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (i < n)
@@ -1179,7 +1180,8 @@ template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HY
 #endif
 
 __global__ void
-hypreGPUKernel_ScatterAddTrivial(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAddTrivial(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                                 HYPRE_Real *y)
 {
    for (HYPRE_Int i = 0; i < n; i++)
    {
@@ -1189,7 +1191,8 @@ hypreGPUKernel_ScatterAddTrivial(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, H
 
 /* x[map[i]] += y[i], same index cannot appear more than once in map */
 __global__ void
-hypreGPUKernel_ScatterAdd(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAdd(hypre_Item &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                          HYPRE_Real *y)
 {
    HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -1350,7 +1353,8 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
 }
 
 __global__ void
-hypreGPUKernel_DiagScaleVector2(hypre_Item &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+hypreGPUKernel_DiagScaleVector2(hypre_Item &item, HYPRE_Int n, HYPRE_Int *A_i,
+                                HYPRE_Complex *A_data,
                                 HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);

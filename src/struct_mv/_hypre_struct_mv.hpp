@@ -776,7 +776,7 @@ extern "C++"
 
    template <typename LOOP_BODY>
    __global__ void
-   forall_kernel( hypre_Item &item,
+   forall_kernel( hypre_Item & item,
                   LOOP_BODY loop_body,
                   HYPRE_Int length )
    {
@@ -821,7 +821,7 @@ extern "C++"
 
    template <typename LOOP_BODY, typename REDUCER>
    __global__ void
-   reductionforall_kernel( hypre_Item &item,
+   reductionforall_kernel( hypre_Item & item,
                            HYPRE_Int length,
                            REDUCER   reducer,
                            LOOP_BODY loop_body )
