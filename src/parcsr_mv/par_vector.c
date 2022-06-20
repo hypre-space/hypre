@@ -597,6 +597,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    HYPRE_BigInt                 first_index  = hypre_ParVectorFirstIndex(par_v);
    HYPRE_BigInt                 last_index   = hypre_ParVectorLastIndex(par_v);
    hypre_Vector                *local_vector = hypre_ParVectorLocalVector(par_v);
+   HYPRE_MemoryLocation         memory_location = hypre_ParVectorMemoryLocation(par_v);
 
    hypre_Vector                *vector;
    HYPRE_Complex               *vector_data;
@@ -812,13 +813,13 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
 
    hypre_MPI_Waitall(num_requests, requests, status);
 
-   if (num_requests)
-   {
-      hypre_TFree(requests, HYPRE_MEMORY_HOST);
-      hypre_TFree(status, HYPRE_MEMORY_HOST);
-      hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
-   }
+   /* Migrate to memory_location */
+   hypre_SeqVectorMigrate(vector, memory_location);
 
+   /* Free memory */
+   hypre_TFree(requests, HYPRE_MEMORY_HOST);
+   hypre_TFree(status, HYPRE_MEMORY_HOST);
+   hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
    hypre_TFree(new_vec_starts, HYPRE_MEMORY_HOST);
 
    return vector;
