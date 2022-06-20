@@ -1903,7 +1903,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
       for (i = 0; i < num_types; i++)
       {
          used_procs[i] = send_proc_obj.id[i];
-         new_vec_starts[i + 1] = send_proc_obj.elements[i] + 1;
+         new_vec_starts[i + 1] = (HYPRE_Int) send_proc_obj.elements[i] + 1;
       }
       hypre_qsort0(used_procs, 0, num_types - 1);
       hypre_qsort0(new_vec_starts, 0, num_types);
@@ -1913,7 +1913,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
       send_info[0] = num_types;
       for (i = 1; i <= num_types; i++)
       {
-         send_info[i] = (HYPRE_BigInt)used_procs[i - 1];
+         send_info[i] = used_procs[i - 1];
       }
       for (i = num_types + 1; i < count; i++)
       {
