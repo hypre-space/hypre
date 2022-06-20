@@ -35,7 +35,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #define hypre_device_assert(EX) assert(EX)
 #elif defined(HYPRE_USING_HIP)
 /* FIXME: Currently, asserts in device kernels in HIP do not behave well */
-#define hypre_device_assert(EX)
+#define hypre_device_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
 #endif
 #else /* #ifdef HYPRE_DEBUG */
 /* this is to silence compiler's unused variable warnings */

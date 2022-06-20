@@ -441,7 +441,7 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
 
 HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix,
-                                HYPRE_Int              owns_data )
+                                HYPRE_Int           owns_data )
 {
    if (!matrix)
    {
@@ -450,6 +450,29 @@ hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix,
    }
 
    hypre_ParCSRMatrixOwnsData(matrix) = owns_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixSetPatternOnly
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixSetPatternOnly( hypre_ParCSRMatrix *matrix,
+                                  HYPRE_Int           pattern_only)
+{
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
+   if (diag) { hypre_CSRMatrixSetPatternOnly(diag, pattern_only); }
+
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
+   if (offd) { hypre_CSRMatrixSetPatternOnly(offd, pattern_only); }
 
    return hypre_error_flag;
 }

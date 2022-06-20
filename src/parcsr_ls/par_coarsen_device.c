@@ -398,7 +398,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_Item &item,
    }
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int row, i, marker_row, row_start, row_end;
+   HYPRE_Int row = 0, i = 0, marker_row, row_start, row_end;
 
    if (lane < 2)
    {

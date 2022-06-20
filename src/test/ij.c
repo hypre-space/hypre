@@ -292,10 +292,10 @@ main( hypre_int argc,
    spgemm_use_vendor = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
+   HYPRE_Int  spgemm_binned = 0;
    HYPRE_Int  spgemm_rowest_mtd = 3;
-   HYPRE_Int  spgemm_rowest_nsamples = 32;
-   HYPRE_Real spgemm_rowest_mult = 1.5;
-   char       spgemm_hash_type = 'L';
+   HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
+   HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
 #endif
 
    /* for CGC BM Aug 25, 2006 */
@@ -1244,6 +1244,11 @@ main( hypre_int argc,
          arg_index++;
          spgemm_alg  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-spgemm_binned") == 0 )
+      {
+         arg_index++;
+         spgemm_binned  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-spgemm_rowest") == 0 )
       {
          arg_index++;
@@ -1258,11 +1263,6 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_rowest_nsamples  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-spgemm_hash") == 0 )
-      {
-         arg_index++;
-         spgemm_hash_type  = argv[arg_index++][0];
       }
       else if ( strcmp(argv[arg_index], "-use_curand") == 0 )
       {
@@ -2381,10 +2381,10 @@ main( hypre_int argc,
    /* use vendor implementation for SpGEMM */
    ierr = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmAlgorithm(spgemm_alg); hypre_assert(ierr == 0);
+   ierr = hypre_SetSpGemmBinned(spgemm_binned); hypre_assert(ierr == 0);
    ierr = hypre_SetSpGemmRownnzEstimateMethod(spgemm_rowest_mtd); hypre_assert(ierr == 0);
-   ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0);
-   ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0);
-   ierr = hypre_SetSpGemmHashType(spgemm_hash_type); hypre_assert(ierr == 0);
+   if (spgemm_rowest_nsamples > 0) { ierr = hypre_SetSpGemmRownnzEstimateNSamples(spgemm_rowest_nsamples); hypre_assert(ierr == 0); }
+   if (spgemm_rowest_mult > 0.0) { ierr = hypre_SetSpGemmRownnzEstimateMultFactor(spgemm_rowest_mult); hypre_assert(ierr == 0); }
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
 #endif

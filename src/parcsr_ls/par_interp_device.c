@@ -429,7 +429,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
       return;
    }
 
-   HYPRE_Int p, q, dof_func_i;
+   HYPRE_Int p = 0, q = 0, dof_func_i = 0;
    HYPRE_Int jPd = 0, jPo = 0;
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
 
@@ -574,7 +574,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
 
-   HYPRE_Int k, dof_func_i;
+   HYPRE_Int k = 0, dof_func_i = 0;
 
    if (lane == 0)
    {
@@ -612,7 +612,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
    HYPRE_Real diagonal = 0.0, sum_N_pos = 0.0, sum_N_neg = 0.0, sum_P_pos = 0.0, sum_P_neg = 0.0;
 
    /* diag part */
-   HYPRE_Int p_diag_A, q_diag_A, p_diag_P, q_diag_P;
+   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0, q_diag_P;
    if (lane < 2)
    {
       p_diag_A = read_only_load(A_diag_i + i + lane);
@@ -681,7 +681,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
    hypre_device_assert(k == q_diag_P);
 
    /* offd part */
-   HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
+   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0, q_offd_P;
    if (lane < 2)
    {
       p_offd_A = read_only_load(A_offd_i + i + lane);
@@ -847,7 +847,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
 
-   HYPRE_Int k, dof_func_i;
+   HYPRE_Int k = 0, dof_func_i = 0;
 
    if (lane == 0)
    {
@@ -885,7 +885,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
    HYPRE_Real diagonal = 0.0, sum_F = 0.0;
 
    /* diag part */
-   HYPRE_Int p_diag_A, q_diag_A, p_diag_P, q_diag_P;
+   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0, q_diag_P;
    if (lane < 2)
    {
       p_diag_A = read_only_load(A_diag_i + i + lane);
@@ -946,7 +946,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
    hypre_device_assert(k == q_diag_P);
 
    /* offd part */
-   HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
+   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0, q_offd_P;
    if (lane < 2)
    {
       p_offd_A = read_only_load(A_offd_i + i + lane);
@@ -1393,7 +1393,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
       return;
    }
 
-   HYPRE_Int p, q;
+   HYPRE_Int p = 0, q;
    HYPRE_Int max_j_diag = -1, max_j_offd = -1;
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Real max_diag = -1.0, max_offd = -1.0;

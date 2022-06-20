@@ -36,8 +36,8 @@ hypreCUDAKernel_IndepSetMain(hypre_Item &item,
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int row, row_start, row_end;
-   HYPRE_Int i, j;
-   HYPRE_Real t, measure_row;
+   HYPRE_Int i = 0, j;
+   HYPRE_Real t = 0.0, measure_row;
    HYPRE_Int marker_row = 1;
 
    if (lane < 2)

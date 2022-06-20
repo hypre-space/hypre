@@ -268,7 +268,7 @@ hypreCUDAKernel_GtEliminateBoundary( hypre_Item    &item,
    }
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1 = 0, q1, p2 = 0, q2 = 0;
    bool nonempty_offd = Gt_offd_j != NULL;
    bool bdr = false;
 

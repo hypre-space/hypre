@@ -390,7 +390,7 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_Item    &item,
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Real eps = 0.0; /* DBL_EPSILON * 1e+4; */
    HYPRE_Real l1_norm = 0.0;
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1 = 0, q1, p2 = 0, q2 = 0;
 
    if (lane < 2)
    {
@@ -1505,7 +1505,7 @@ hypreCUDAKernel_AMSComputePi_copy2(hypre_Item &item,
    }
 
    const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int j, istart, iend;
+   HYPRE_Int j = 0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
    Gdata[0] = Gx_data;
@@ -1784,7 +1784,7 @@ hypreCUDAKernel_AMSComputePixyz_copy(hypre_Item &item,
    }
 
    const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int j, istart, iend;
+   HYPRE_Int j = 0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3], *Odata[3];
 
    Gdata[0] = Gx_data;
@@ -2367,7 +2367,7 @@ hypreCUDAKernel_AMSComputeGPi_copy2(hypre_Item &item,
    }
 
    const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int j, istart, iend;
+   HYPRE_Int j = 0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
    Gdata[0] = Gx_data;
@@ -2667,7 +2667,7 @@ hypreCUDAKernel_FixInterNodes( hypre_Item    &item,
       return;
    }
 
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1 = 0, q1, p2 = 0, q2 = 0;
    bool nonempty_offd = G0t_offd_data != NULL;
 
    if (lane < 2)
@@ -2718,7 +2718,7 @@ hypreCUDAKernel_AMSSetupScaleGGt( hypre_Item &item,
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Real h2 = 0.0;
-   HYPRE_Int ne, p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int ne, p1 = 0, q1, p2 = 0, q2 = 0;
 
    if (lane < 2)
    {

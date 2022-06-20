@@ -1723,7 +1723,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item    &item,
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p_diag_A, q_diag_A, p_diag_P, q_diag_P;
+   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0, q_diag_P;
    HYPRE_Int k;
    HYPRE_Complex row_sum_C = 0.0, diagonal = 0.0;
 
@@ -1773,7 +1773,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item    &item,
    hypre_device_assert(k == q_diag_P);
 
    // S_offd
-   HYPRE_Int p_offd_A, q_offd_A, p_offd_P, q_offd_P;
+   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0, q_offd_P;
 
    if (lane < 2)
    {
@@ -1961,7 +1961,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item    &item,
 
    HYPRE_Int i1 = read_only_load(&pass_order[row_i]);
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p_diag_A, q_diag_A, p_diag_P;
+   HYPRE_Int p_diag_A = 0, q_diag_A, p_diag_P = 0;
 #ifdef HYPRE_DEBUG
    HYPRE_Int q_diag_P;
 #endif
@@ -2048,7 +2048,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item    &item,
 #endif
 
    // S_offd
-   HYPRE_Int p_offd_A, q_offd_A, p_offd_P;
+   HYPRE_Int p_offd_A = 0, q_offd_A, p_offd_P = 0;
 #ifdef HYPRE_DEBUG
    HYPRE_Int q_offd_P;
 #endif

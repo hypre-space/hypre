@@ -578,8 +578,8 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
    }
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int ib_diag, ie_diag;
-   HYPRE_Int rowF;
+   HYPRE_Int ib_diag = 0, ie_diag;
+   HYPRE_Int rowF = 0;
 
    if (lane == 0)
    {
@@ -627,7 +627,7 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_Item    &item,
       }
    }
 
-   HYPRE_Int ib_offd, ie_offd;
+   HYPRE_Int ib_offd = 0, ie_offd;
 
    if (lane < 2)
    {
@@ -711,8 +711,8 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
    }
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int ib_diag, ie_diag;
-   HYPRE_Int rowF;
+   HYPRE_Int ib_diag = 0, ie_diag;
+   HYPRE_Int rowF = 0;
 
    if (lane == 0)
    {
@@ -761,7 +761,7 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_Item    &item,
       }
    }
 
-   HYPRE_Int ib_offd, ie_offd;
+   HYPRE_Int ib_offd = 0, ie_offd;
 
    if (lane < 2)
    {
