@@ -343,29 +343,28 @@ hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_loc
    return y;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorMigrate
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_MemoryLocation memory_location)
+hypre_ParVectorMigrate(hypre_ParVector      *x,
+                       HYPRE_MemoryLocation  memory_location)
 {
    if (!x)
    {
       return hypre_error_flag;
    }
 
-   if ( hypre_GetActualMemLocation(memory_location) !=
-        hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) )
+   if (!hypre_ParVectorOwnsData(vector))
    {
-      hypre_Vector *x_local = hypre_SeqVectorCloneDeep_v2(hypre_ParVectorLocalVector(x), memory_location);
-      hypre_SeqVectorDestroy(hypre_ParVectorLocalVector(x));
-      hypre_ParVectorLocalVector(x) = x_local;
-   }
-   else
-   {
-      hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(x)) = memory_location;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Called hypre_ParVectorMigrate on a vector that doesn't own the data\n");
+      return hypre_error_flag;
    }
 
-   return hypre_error_flag;
+   return hypre_SeqVectorMigrate(hypre_ParVectorLocalVector(x), memory_location);
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorScale
