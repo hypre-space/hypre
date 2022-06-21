@@ -16,15 +16,21 @@
 
 static const char HYPRE_SPGEMM_HASH_TYPE = 'D';
 
-/* default settings associated with bin 5 */
+/* bin settings                             0   1   2    3    4    5     6     7     8     9     10 */
+constexpr HYPRE_Int SYMBL_HASH_SIZE[11] = { 0, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 };
 #if defined(HYPRE_USING_CUDA)
-#define HYPRE_SPGEMM_NUMER_HASH_SIZE 256
+constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0, 16, 32,  64, 128, 256,  512, 1024, 2048, 4096,  8192 };
+#elif defined(HYPRE_USING_HIP)
+constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0,  8, 16,  32,  64, 128,  256,  512, 1024, 2048,  4096 };
 #endif
-#if defined(HYPRE_USING_HIP)
-#define HYPRE_SPGEMM_NUMER_HASH_SIZE 128
+constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128,  256,  512,  1024 };
+
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_SPGEMM_DEFAULT_BIN 5
+#elif defined(HYPRE_USING_HIP)
+#define HYPRE_SPGEMM_DEFAULT_BIN 6
 #endif
-#define HYPRE_SPGEMM_SYMBL_HASH_SIZE 512
-#define HYPRE_SPGEMM_BASE_GROUP_SIZE 32
+
 /* unroll factor in the kernels */
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_NUMER_UNROLL 256
@@ -43,20 +49,6 @@ static const char HYPRE_SPGEMM_HASH_TYPE = 'D';
  * where we assume CUDA block is 3D and blockDim.x * blockDim.y = GROUP_SIZE
  *------------------------------------------------------------------------------------------------ */
 
-/* the number of threads in the block */
-static __device__ __forceinline__
-hypre_int get_block_size()
-{
-   return (blockDim.x * blockDim.y * blockDim.z);
-}
-
-/* the thread id in the block */
-static __device__ __forceinline__
-hypre_int get_thread_id()
-{
-   return (threadIdx.z * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x);
-}
-
 /* the number of groups in block */
 static __device__ __forceinline__
 hypre_int get_num_groups()
@@ -73,16 +65,9 @@ hypre_int get_group_id()
 
 /* the thread id (lane) in the group */
 static __device__ __forceinline__
-hypre_int get_lane_id()
+hypre_int get_group_lane_id()
 {
-   return threadIdx.y * blockDim.x + threadIdx.x;
-}
-
-/* the warp id in the block */
-static __device__ __forceinline__
-hypre_int get_warp_id()
-{
-   return get_thread_id() >> HYPRE_WARP_BITSHIFT;
+   return hypre_cuda_get_thread_id<2>();
 }
 
 /* the warp id in the group */
@@ -96,27 +81,23 @@ hypre_int get_warp_in_group_id()
    }
    else
    {
-      return get_lane_id() >> HYPRE_WARP_BITSHIFT;
+      return hypre_cuda_get_warp_id<2>();
    }
-}
-
-/* return the thread id (lane) in warp */
-static __device__ __forceinline__
-hypre_int get_warp_lane_id()
-{
-   return get_lane_id() & (HYPRE_WARP_SIZE - 1);
 }
 
 /* group reads 2 values from ptr to v1 and v2
  * GROUP_SIZE must be >= 2
- * lane = GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane : group_lane
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2, HYPRE_Int lane)
+void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
+      /* lane = warp_lane
+       * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
+      const HYPRE_Int lane = hypre_cuda_get_lane_id<2>();
+
       if (lane < 2)
       {
          v1 = read_only_load(ptr + lane);
@@ -126,6 +107,9 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &
    }
    else
    {
+      /* lane = group_lane */
+      const HYPRE_Int lane = get_group_lane_id();
+
       if (valid_ptr && lane < 2)
       {
          v1 = read_only_load(ptr + lane);
@@ -136,14 +120,18 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &
 }
 
 /* group reads a value from ptr to v1
- * lane = GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane : group_lane
+ * GROUP_SIZE must be >= 2
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int lane)
+void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
+      /* lane = warp_lane
+       * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
+      const HYPRE_Int lane = hypre_cuda_get_lane_id<2>();
+
       if (!lane)
       {
          v1 = read_only_load(ptr);
@@ -152,6 +140,9 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int l
    }
    else
    {
+      /* lane = group_lane */
+      const HYPRE_Int lane = get_group_lane_id();
+
       if (valid_ptr && !lane)
       {
          v1 = read_only_load(ptr);
@@ -188,8 +179,8 @@ T group_reduce_sum(T in, volatile T *s_WarpData)
 
    T out = warp_reduce_sum(in);
 
-   const HYPRE_Int warp_lane_id = get_warp_lane_id();
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_lane_id = hypre_cuda_get_lane_id<2>();
+   const HYPRE_Int warp_id = hypre_cuda_get_warp_id<3>();
 
    if (warp_lane_id == 0)
    {

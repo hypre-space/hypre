@@ -74,7 +74,7 @@ void csr_spmm_rownnz_naive(HYPRE_Int  M,
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
-   volatile const HYPRE_Int lane_id = get_lane_id();
+   volatile const HYPRE_Int lane_id = get_group_lane_id();
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
@@ -119,8 +119,8 @@ __global__
 void expdistfromuniform(HYPRE_Int n,
                         float    *x)
 {
-   const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
-   const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
+   const HYPRE_Int global_thread_id  = hypre_cuda_get_grid_thread_id<3, 1>();
+   const HYPRE_Int total_num_threads = hypre_cuda_get_grid_num_threads<3, 1>();
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
@@ -148,7 +148,7 @@ void cohen_rowest_kernel(HYPRE_Int  nrow,
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
-   volatile HYPRE_Int lane_id = get_lane_id();
+   volatile HYPRE_Int lane_id = get_group_lane_id();
 #if COHEN_USE_SHMEM
    __shared__ volatile HYPRE_Int s_col[NUM_WARPS_PER_BLOCK * SHMEM_SIZE_PER_WARP];
    volatile HYPRE_Int  *warp_s_col = s_col + warp_id * SHMEM_SIZE_PER_WARP;
