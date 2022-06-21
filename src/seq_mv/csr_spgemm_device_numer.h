@@ -6,7 +6,7 @@
  ******************************************************************************/
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
-           Perform SpMM with Row Nnz Upper Bound
+           Perform SpGEMM with Row Nnz Upper Bound
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"

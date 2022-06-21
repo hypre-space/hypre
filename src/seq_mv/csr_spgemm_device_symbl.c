@@ -103,7 +103,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *rownnz_exact_ptr)
 {
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
 
 #ifdef HYPRE_SPGEMM_NVTX
@@ -148,7 +148,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
 #endif
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] += hypre_MPI_Wtime();
 #endif
 
    return hypre_error_flag;
@@ -328,7 +328,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int *d_rc )
 {
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] -= hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
 
 #ifdef HYPRE_SPGEMM_NVTX
@@ -363,7 +363,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 #endif
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_SYMBOLIC] += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] += hypre_MPI_Wtime();
 #endif
 
    return hypre_error_flag;

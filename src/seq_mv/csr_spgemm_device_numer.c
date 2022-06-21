@@ -173,7 +173,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 
 {
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] -= hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] -= hypre_MPI_Wtime();
 #endif
 
 #ifdef HYPRE_SPGEMM_NVTX
@@ -208,7 +208,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
 #endif
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM_NUMERIC] += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] += hypre_MPI_Wtime();
 #endif
 
    return hypre_error_flag;
