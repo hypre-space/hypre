@@ -672,6 +672,26 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       return hypre_error_flag;
    }
 
+#if defined(HYPRE_USING_GPU)
+   diag_i =    hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumRows(diag) + 1, HYPRE_MEMORY_HOST);
+   diag_j =    hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumNonzeros(diag), HYPRE_MEMORY_HOST);
+   diag_data = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(diag), HYPRE_MEMORY_HOST);
+
+   hypre_TMemcpy(diag_i,    hypre_CSRMatrixI(diag),    HYPRE_Int,     hypre_CSRMatrixNumRows(diag) + 1, HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(diag));
+   hypre_TMemcpy(diag_j,    hypre_CSRMatrixJ(diag),    HYPRE_Int,     hypre_CSRMatrixNumNonzeros(diag), HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(diag));
+   hypre_TMemcpy(diag_data, hypre_CSRMatrixData(diag), HYPRE_Complex, hypre_CSRMatrixNumNonzeros(diag), HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(diag));
+
+   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(offd);
+   if (num_nonzeros_offd)
+   {
+	   offd_i =    hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumRows(offd) + 1, HYPRE_MEMORY_HOST);
+	   offd_j =    hypre_TAlloc(HYPRE_Int,     hypre_CSRMatrixNumNonzeros(offd), HYPRE_MEMORY_HOST);
+	   offd_data = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(offd), HYPRE_MEMORY_HOST);
+	   hypre_TMemcpy(offd_i,    hypre_CSRMatrixI(offd),    HYPRE_Int,     hypre_CSRMatrixNumRows(offd) + 1, HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(offd));
+	   hypre_TMemcpy(offd_j,    hypre_CSRMatrixJ(offd),    HYPRE_Int,     hypre_CSRMatrixNumNonzeros(offd), HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(offd));
+	   hypre_TMemcpy(offd_data, hypre_CSRMatrixData(offd), HYPRE_Complex, hypre_CSRMatrixNumNonzeros(offd), HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(offd));
+   }
+#else
    diag_data = hypre_CSRMatrixData(diag);
    diag_i    = hypre_CSRMatrixI(diag);
    diag_j    = hypre_CSRMatrixJ(diag);
@@ -683,6 +703,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       offd_i    = hypre_CSRMatrixI(offd);
       offd_j    = hypre_CSRMatrixJ(offd);
    }
+#endif
 
    ilower = row_starts[0] + (HYPRE_BigInt) base_i;
    iupper = row_starts[1] + (HYPRE_BigInt) base_i - 1;
@@ -739,6 +760,19 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 
    fclose(file);
 
+#if defined(HYPRE_USING_GPU)
+   hypre_TFree(diag_i,    HYPRE_MEMORY_HOST);
+   hypre_TFree(diag_j,    HYPRE_MEMORY_HOST);
+   hypre_TFree(diag_data, HYPRE_MEMORY_HOST);
+
+   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(offd);
+   if (num_nonzeros_offd)
+   {
+	   hypre_TFree(offd_i,    HYPRE_MEMORY_HOST);
+	   hypre_TFree(offd_j,    HYPRE_MEMORY_HOST);
+	   hypre_TFree(offd_data, HYPRE_MEMORY_HOST);
+   }
+#endif
    return hypre_error_flag;
 }
 
