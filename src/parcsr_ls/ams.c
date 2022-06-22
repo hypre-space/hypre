@@ -136,14 +136,15 @@ hypre_ParVector *hypre_ParVectorInDomainOf(hypre_ParCSRMatrix *A)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 template<HYPRE_Int dir>
 __global__ void
-hypreCUDAKernel_ParVectorBlockSplitGather(HYPRE_Int   size,
+hypreCUDAKernel_ParVectorBlockSplitGather(hypre_Item &item,
+                                          HYPRE_Int   size,
                                           HYPRE_Int   dim,
                                           HYPRE_Real *x0,
                                           HYPRE_Real *x1,
                                           HYPRE_Real *x2,
                                           HYPRE_Real *x)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i >= size * dim)
    {
@@ -370,7 +371,8 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsHost(hypre_ParCSRMatrix *A)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_ParCSRMatrixFixZeroRows( HYPRE_Int      nrows,
+hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_Item    &item,
+                                         HYPRE_Int      nrows,
                                          HYPRE_Int     *A_diag_i,
                                          HYPRE_Int     *A_diag_j,
                                          HYPRE_Complex *A_diag_data,
@@ -378,17 +380,17 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( HYPRE_Int      nrows,
                                          HYPRE_Complex *A_offd_data,
                                          HYPRE_Int      num_cols_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Real eps = 0.0; /* DBL_EPSILON * 1e+4; */
    HYPRE_Real l1_norm = 0.0;
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1 = 0, q1, p2 = 0, q2 = 0;
 
    if (lane < 2)
    {
@@ -399,12 +401,12 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( HYPRE_Int      nrows,
       }
    }
 
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    if (num_cols_offd)
    {
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
@@ -748,7 +750,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_ParCSRMatrixSetDiagRows(HYPRE_Int      nrows,
+hypreCUDAKernel_ParCSRMatrixSetDiagRows(hypre_Item    &item,
+                                        HYPRE_Int      nrows,
                                         HYPRE_Int     *A_diag_I,
                                         HYPRE_Int     *A_diag_J,
                                         HYPRE_Complex *A_diag_data,
@@ -756,7 +759,7 @@ hypreCUDAKernel_ParCSRMatrixSetDiagRows(HYPRE_Int      nrows,
                                         HYPRE_Int      num_cols_offd,
                                         HYPRE_Real     d)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (i >= nrows)
    {
       return;
@@ -1464,12 +1467,13 @@ HYPRE_Int hypre_AMSSetBetaAMGCoarseRelaxType(void *solver,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int  nnz,
+hypreCUDAKernel_AMSComputePi_copy1(hypre_Item &item,
+                                   HYPRE_Int  nnz,
                                    HYPRE_Int  dim,
                                    HYPRE_Int *j_in,
                                    HYPRE_Int *j_out)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < nnz)
    {
@@ -1483,7 +1487,8 @@ hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int  nnz,
 }
 
 __global__ void
-hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
+hypreCUDAKernel_AMSComputePi_copy2(hypre_Item &item,
+                                   HYPRE_Int   nrows,
                                    HYPRE_Int   dim,
                                    HYPRE_Int  *i_in,
                                    HYPRE_Real *data_in,
@@ -1492,15 +1497,15 @@ hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
                                    HYPRE_Real *Gz_data,
                                    HYPRE_Real *data_out)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int j, istart, iend;
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int j = 0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
    Gdata[0] = Gx_data;
@@ -1512,8 +1517,8 @@ hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
       j = read_only_load(i_in + i + lane_id);
    }
 
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    if (lane_id < dim)
    {
@@ -1522,7 +1527,7 @@ hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int   nrows,
 
    for (HYPRE_Int d = 0; d < dim; d++)
    {
-      G[d] = __shfl_sync(HYPRE_WARP_FULL_MASK, t, d);
+      G[d] = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, d);
    }
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
@@ -1759,7 +1764,8 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
+hypreCUDAKernel_AMSComputePixyz_copy(hypre_Item &item,
+                                     HYPRE_Int   nrows,
                                      HYPRE_Int   dim,
                                      HYPRE_Int  *i_in,
                                      HYPRE_Real *data_in,
@@ -1770,15 +1776,15 @@ hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
                                      HYPRE_Real *data_y_out,
                                      HYPRE_Real *data_z_out )
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int j, istart, iend;
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int j = 0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3], *Odata[3];
 
    Gdata[0] = Gx_data;
@@ -1794,8 +1800,8 @@ hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
       j = read_only_load(i_in + i + lane_id);
    }
 
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    if (lane_id < dim)
    {
@@ -1804,7 +1810,7 @@ hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int   nrows,
 
    for (HYPRE_Int d = 0; d < dim; d++)
    {
-      G[d] = __shfl_sync(HYPRE_WARP_FULL_MASK, t, d);
+      G[d] = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, d);
    }
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
@@ -2343,7 +2349,8 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_AMSComputeGPi_copy2(HYPRE_Int   nrows,
+hypreCUDAKernel_AMSComputeGPi_copy2(hypre_Item &item,
+                                    HYPRE_Int   nrows,
                                     HYPRE_Int   dim,
                                     HYPRE_Int  *i_in,
                                     HYPRE_Real *data_in,
@@ -2352,15 +2359,15 @@ hypreCUDAKernel_AMSComputeGPi_copy2(HYPRE_Int   nrows,
                                     HYPRE_Real *Gz_data,
                                     HYPRE_Real *data_out)
 {
-   const HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int j, istart, iend;
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int j = 0, istart, iend;
    HYPRE_Real t, G[3], *Gdata[3];
 
    Gdata[0] = Gx_data;
@@ -2372,8 +2379,8 @@ hypreCUDAKernel_AMSComputeGPi_copy2(HYPRE_Int   nrows,
       j = read_only_load(i_in + i + lane_id);
    }
 
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    if (lane_id < dim - 1)
    {
@@ -2382,7 +2389,7 @@ hypreCUDAKernel_AMSComputeGPi_copy2(HYPRE_Int   nrows,
 
    for (HYPRE_Int d = 0; d < dim - 1; d++)
    {
-      G[d] = __shfl_sync(HYPRE_WARP_FULL_MASK, t, d);
+      G[d] = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, d);
    }
 
    for (j = istart + lane_id; j < iend; j += HYPRE_WARP_SIZE)
@@ -2630,21 +2637,22 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
+hypreCUDAKernel_FixInterNodes( hypre_Item    &item,
+                               HYPRE_Int      nrows,
                                HYPRE_Int     *G0t_diag_i,
                                HYPRE_Complex *G0t_diag_data,
                                HYPRE_Int     *G0t_offd_i,
                                HYPRE_Complex *G0t_offd_data,
                                HYPRE_Real    *interior_nodes_data)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int not1 = 0;
 
    if (lane == 0)
@@ -2652,14 +2660,14 @@ hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
       not1 = read_only_load(&interior_nodes_data[row_i]) != 1.0;
    }
 
-   not1 = __shfl_sync(HYPRE_WARP_FULL_MASK, not1, 0);
+   not1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, not1, 0);
 
    if (!not1)
    {
       return;
    }
 
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int p1 = 0, q1, p2 = 0, q2 = 0;
    bool nonempty_offd = G0t_offd_data != NULL;
 
    if (lane < 2)
@@ -2671,12 +2679,12 @@ hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
       }
    }
 
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    if (nonempty_offd)
    {
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
@@ -2690,7 +2698,8 @@ hypreCUDAKernel_FixInterNodes( HYPRE_Int      nrows,
 }
 
 __global__ void
-hypreCUDAKernel_AMSSetupScaleGGt( HYPRE_Int   Gt_num_rows,
+hypreCUDAKernel_AMSSetupScaleGGt( hypre_Item &item,
+                                  HYPRE_Int   Gt_num_rows,
                                   HYPRE_Int  *Gt_diag_i,
                                   HYPRE_Int  *Gt_diag_j,
                                   HYPRE_Real *Gt_diag_data,
@@ -2700,23 +2709,23 @@ hypreCUDAKernel_AMSSetupScaleGGt( HYPRE_Int   Gt_num_rows,
                                   HYPRE_Real *Gy_data,
                                   HYPRE_Real *Gz_data )
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= Gt_num_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Real h2 = 0.0;
-   HYPRE_Int ne, p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int ne, p1 = 0, q1, p2 = 0, q2 = 0;
 
    if (lane < 2)
    {
       p1 = read_only_load(Gt_diag_i + row_i + lane);
    }
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    ne = q1 - p1;
 
    if (ne == 0)
@@ -2730,8 +2739,8 @@ hypreCUDAKernel_AMSSetupScaleGGt( HYPRE_Int   Gt_num_rows,
       {
          p2 = read_only_load(Gt_offd_i + row_i + lane);
       }
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
@@ -3444,8 +3453,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                {
                   GGt = hypre_ParCSRMatMat(ams_data -> G, Gt);
                }
-#endif
                else
+#endif
                {
                   GGt = hypre_ParMatmul(ams_data -> G, Gt);
                }

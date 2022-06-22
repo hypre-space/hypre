@@ -80,6 +80,7 @@ doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 
     --e;
     --d__;
+    anorm = 0.;
 
     /* Function Body */
     if (*n <= 0) {

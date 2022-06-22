@@ -249,6 +249,7 @@ extern "C" {
     wntvo = lsame_(jobvt, "O");
     wntvn = lsame_(jobvt, "N");
     minwrk = 1;
+    maxwrk = minwrk;
     lquery = *lwork == -1;
 
     if (! (wntua || wntus || wntuo || wntun)) {
