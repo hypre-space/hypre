@@ -493,7 +493,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       hypre_IntArraySize(&arr_offd) = num_rownnz_offd_A;
       hypre_IntArrayMemoryLocation(&arr_rownnz) = memory_location_A;
 
-      hypre_MergeOrderedArrays(&arr_diag, &arr_offd, &arr_rownnz);
+      hypre_IntArrayMergeOrdered(&arr_diag, &arr_offd, &arr_rownnz);
 
       num_rownnz_A = hypre_IntArraySize(&arr_rownnz);
       rownnz_A     = hypre_IntArrayData(&arr_rownnz);
@@ -5214,7 +5214,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
       hypre_IntArraySize(&arr_diagB) = num_rownnz_diag_B;
       hypre_IntArrayMemoryLocation(&arr_diagC) = memory_location_C;
 
-      hypre_MergeOrderedArrays(&arr_diagA, &arr_diagB, &arr_diagC);
+      hypre_IntArrayMergeOrdered(&arr_diagA, &arr_diagB, &arr_diagC);
 
       num_rownnz_diag_C = hypre_IntArraySize(&arr_diagC);
       rownnz_diag_C     = hypre_IntArrayData(&arr_diagC);
@@ -5235,7 +5235,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
       hypre_IntArraySize(&arr_offdB) = num_rownnz_offd_B;
       hypre_IntArrayMemoryLocation(&arr_offdC) = memory_location_C;
 
-      hypre_MergeOrderedArrays(&arr_offdA, &arr_offdB, &arr_offdC);
+      hypre_IntArrayMergeOrdered(&arr_offdA, &arr_offdB, &arr_offdC);
 
       num_rownnz_offd_C = hypre_IntArraySize(&arr_offdC);
       rownnz_offd_C     = hypre_IntArrayData(&arr_offdC);
