@@ -127,17 +127,27 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundBinned( HYPRE_Int       m,
    hypre_SpGemmCreateBins(m, s, t, u, d_rc, false, d_rind, h_bin_ptr);
 
 #if 0
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  1, NUMER_HASH_SIZE[ 1], T_GROUP_SIZE[ 1], exact_rownnz, false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  1, NUMER_HASH_SIZE[ 1], T_GROUP_SIZE[ 1], exact_rownnz,
+                                               false);
 #endif
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  2, NUMER_HASH_SIZE[ 2], T_GROUP_SIZE[ 2], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  3, NUMER_HASH_SIZE[ 3], T_GROUP_SIZE[ 3], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  4, NUMER_HASH_SIZE[ 4], T_GROUP_SIZE[ 4], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  5, NUMER_HASH_SIZE[ 5], T_GROUP_SIZE[ 5], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  6, NUMER_HASH_SIZE[ 6], T_GROUP_SIZE[ 6], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  7, NUMER_HASH_SIZE[ 7], T_GROUP_SIZE[ 7], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  8, NUMER_HASH_SIZE[ 8], T_GROUP_SIZE[ 8], exact_rownnz, false);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  9, NUMER_HASH_SIZE[ 9], T_GROUP_SIZE[ 9], exact_rownnz, hbin9);
-   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 10, NUMER_HASH_SIZE[10], T_GROUP_SIZE[10], exact_rownnz, true);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  2, NUMER_HASH_SIZE[ 2], T_GROUP_SIZE[ 2], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  3, NUMER_HASH_SIZE[ 3], T_GROUP_SIZE[ 3], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  4, NUMER_HASH_SIZE[ 4], T_GROUP_SIZE[ 4], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  5, NUMER_HASH_SIZE[ 5], T_GROUP_SIZE[ 5], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  6, NUMER_HASH_SIZE[ 6], T_GROUP_SIZE[ 6], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  7, NUMER_HASH_SIZE[ 7], T_GROUP_SIZE[ 7], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  8, NUMER_HASH_SIZE[ 8], T_GROUP_SIZE[ 8], exact_rownnz,
+                                               false);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED(  9, NUMER_HASH_SIZE[ 9], T_GROUP_SIZE[ 9], exact_rownnz,
+                                               hbin9);
+   HYPRE_SPGEMM_NUMERICAL_WITH_ROWNNZ_BINNED( 10, NUMER_HASH_SIZE[10], T_GROUP_SIZE[10], exact_rownnz,
+                                              true);
 
    if (!exact_rownnz)
    {

@@ -304,7 +304,8 @@ hypre_spgemm_numeric( const HYPRE_Int                   M,
 
       if (HAS_GHASH)
       {
-         group_read<GROUP_SIZE>(ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_g, iend_g);
+         group_read<GROUP_SIZE>(ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
+                                istart_g, iend_g);
 
          /* size of global hash table allocated for this row
             (must be power of 2 and >= the actual size of the row of C) */

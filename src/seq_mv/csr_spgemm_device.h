@@ -403,8 +403,9 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int multiProcessorCount,
 
 HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim();
 
-template <HYPRE_Int GROUP_SIZE> HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int m,
-                                                                              HYPRE_Int *d_rc, HYPRE_Int *nnzC, HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);
+template <HYPRE_Int GROUP_SIZE>
+HYPRE_Int hypreDevice_CSRSpGemmNumerPostCopy( HYPRE_Int m, HYPRE_Int *d_rc, HYPRE_Int *nnzC,
+                                              HYPRE_Int **d_ic, HYPRE_Int **d_jc, HYPRE_Complex **d_c);
 
 template <HYPRE_Int GROUP_SIZE>
 static constexpr HYPRE_Int
