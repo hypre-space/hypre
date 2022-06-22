@@ -19,13 +19,13 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 template <char type>
 static __device__ __forceinline__
-void rownnz_naive_rowi(HYPRE_Int  rowi,
-                       HYPRE_Int  lane_id,
-                       HYPRE_Int *ia,
-                       HYPRE_Int *ja,
-                       HYPRE_Int *ib,
-                       HYPRE_Int &row_nnz_sum,
-                       HYPRE_Int &row_nnz_max)
+void hypre_rownnz_naive_rowi( HYPRE_Int  rowi,
+                              HYPRE_Int  lane_id,
+                              HYPRE_Int *ia,
+                              HYPRE_Int *ja,
+                              HYPRE_Int *ib,
+                              HYPRE_Int &row_nnz_sum,
+                              HYPRE_Int &row_nnz_max )
 {
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
@@ -61,14 +61,14 @@ void rownnz_naive_rowi(HYPRE_Int  rowi,
 
 template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
-void csr_spgemm_rownnz_naive(HYPRE_Int  M,
-                             HYPRE_Int  N,
-                             HYPRE_Int *ia,
-                             HYPRE_Int *ja,
-                             HYPRE_Int *ib,
-                             HYPRE_Int *jb,
-                             HYPRE_Int *rcL,
-                             HYPRE_Int *rcU)
+void hypre_spgemm_rownnz_naive( HYPRE_Int  M,
+                                HYPRE_Int  N,
+                                HYPRE_Int *ia,
+                                HYPRE_Int *ja,
+                                HYPRE_Int *ib,
+                                HYPRE_Int *jb,
+                                HYPRE_Int *rcL,
+                                HYPRE_Int *rcU )
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
@@ -84,7 +84,7 @@ void csr_spgemm_rownnz_naive(HYPRE_Int  M,
    {
       HYPRE_Int jU, jL;
 
-      rownnz_naive_rowi<type>(i, lane_id, ia, ja, ib, jU, jL);
+      hypre_rownnz_naive_rowi<type>(i, lane_id, ia, ja, ib, jU, jL);
 
       if (type == 'U' || type == 'B')
       {
@@ -116,8 +116,8 @@ void csr_spgemm_rownnz_naive(HYPRE_Int  M,
                        COHEN
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 __global__
-void expdistfromuniform(HYPRE_Int n,
-                        float    *x)
+void hypre_expdistfromuniform( HYPRE_Int n,
+                               float    *x )
 {
    const HYPRE_Int global_thread_id  = hypre_cuda_get_grid_thread_id<3, 1>();
    const HYPRE_Int total_num_threads = hypre_cuda_get_grid_num_threads<3, 1>();
@@ -133,16 +133,16 @@ void expdistfromuniform(HYPRE_Int n,
 /* T = float: single precision should be enough */
 template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP, HYPRE_Int layer>
 __global__
-void cohen_rowest_kernel(HYPRE_Int  nrow,
-                         HYPRE_Int *rowptr,
-                         HYPRE_Int *colidx,
-                         T         *V_in,
-                         T         *V_out,
-                         HYPRE_Int *rc,
-                         HYPRE_Int  nsamples,
-                         HYPRE_Int *low,
-                         HYPRE_Int *upp,
-                         T          mult)
+void hypre_cohen_rowest_kernel( HYPRE_Int  nrow,
+                                HYPRE_Int *rowptr,
+                                HYPRE_Int *colidx,
+                                T         *V_in,
+                                T         *V_out,
+                                HYPRE_Int *rc,
+                                HYPRE_Int  nsamples,
+                                HYPRE_Int *low,
+                                HYPRE_Int *upp,
+                                T          mult )
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
@@ -287,19 +287,19 @@ void cohen_rowest_kernel(HYPRE_Int  nrow,
 }
 
 template <typename T, HYPRE_Int BDIMX, HYPRE_Int BDIMY, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP>
-void csr_spgemm_rownnz_cohen(HYPRE_Int  M,
-                             HYPRE_Int  K,
-                             HYPRE_Int  N,
-                             HYPRE_Int *d_ia,
-                             HYPRE_Int *d_ja,
-                             HYPRE_Int *d_ib,
-                             HYPRE_Int *d_jb,
-                             HYPRE_Int *d_low,
-                             HYPRE_Int *d_upp,
-                             HYPRE_Int *d_rc,
-                             HYPRE_Int  nsamples,
-                             T          mult_factor,
-                             T         *work)
+void hypre_spgemm_rownnz_cohen( HYPRE_Int  M,
+                                HYPRE_Int  K,
+                                HYPRE_Int  N,
+                                HYPRE_Int *d_ia,
+                                HYPRE_Int *d_ja,
+                                HYPRE_Int *d_ib,
+                                HYPRE_Int *d_jb,
+                                HYPRE_Int *d_low,
+                                HYPRE_Int *d_upp,
+                                HYPRE_Int *d_rc,
+                                HYPRE_Int  nsamples,
+                                T          mult_factor,
+                                T         *work )
 {
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
@@ -327,12 +327,12 @@ void csr_spgemm_rownnz_cohen(HYPRE_Int  M,
 
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
-   HYPRE_GPU_LAUNCH( expdistfromuniform, gDim, bDim, nsamples * N, d_V1 );
+   HYPRE_GPU_LAUNCH( hypre_expdistfromuniform, gDim, bDim, nsamples * N, d_V1 );
 
    /* step-1: layer 3-2 */
    gDim.x = (K + bDim.z - 1) / bDim.z;
-   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>), gDim,
-                     bDim,
+   HYPRE_GPU_LAUNCH( (hypre_cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 2>),
+                     gDim, bDim,
                      K, d_ib, d_jb, d_V1, d_V2, NULL, nsamples, NULL, NULL, -1.0);
 
    //hypre_TFree(d_V1, HYPRE_MEMORY_DEVICE);
@@ -341,8 +341,8 @@ void csr_spgemm_rownnz_cohen(HYPRE_Int  M,
    d_V3 = (T*) d_rc;
 
    gDim.x = (M + bDim.z - 1) / bDim.z;
-   HYPRE_GPU_LAUNCH( (cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>), gDim,
-                     bDim,
+   HYPRE_GPU_LAUNCH( (hypre_cohen_rowest_kernel<T, NUM_WARPS_PER_BLOCK, SHMEM_SIZE_PER_WARP, 1>),
+                     gDim, bDim,
                      M, d_ia, d_ja, d_V2, d_V3, d_rc, nsamples, d_low, d_upp, mult_factor);
 
    /* done */
@@ -392,13 +392,13 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    if (row_est_mtd == 1)
    {
       /* naive overestimate */
-      HYPRE_GPU_LAUNCH( (csr_spgemm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_rownnz_naive<'U', num_warps_per_block>), gDim, bDim,
                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, NULL, d_rc );
    }
    else if (row_est_mtd == 2)
    {
       /* naive underestimate */
-      HYPRE_GPU_LAUNCH( (csr_spgemm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_rownnz_naive<'L', num_warps_per_block>), gDim, bDim,
                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_rc, NULL );
    }
    else if (row_est_mtd == 3)
@@ -417,11 +417,11 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
       HYPRE_Int *d_low = d_low_upp;
       HYPRE_Int *d_upp = d_low_upp + m;
 
-      HYPRE_GPU_LAUNCH( (csr_spgemm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
+      HYPRE_GPU_LAUNCH( (hypre_spgemm_rownnz_naive<'B', num_warps_per_block>), gDim, bDim,
                         m, /*k,*/ n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp );
 
       /* Cohen's algorithm, stochastic approach */
-      csr_spgemm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>
+      hypre_spgemm_rownnz_cohen<float, BDIMX, BDIMY, num_warps_per_block, shmem_size_per_warp>
       (m, k, n, d_ia, d_ja, d_ib, d_jb, d_low, d_upp, d_rc, cohen_nsamples, cohen_mult,
        (float *)work_mem);
 
@@ -453,3 +453,4 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
 }
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+
