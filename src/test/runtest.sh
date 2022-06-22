@@ -24,6 +24,7 @@ script=""                  # string to add to MpirunString when using script
 SaveExt="saved"            # saved file extension
 RTOL=0
 ATOL=0
+RTOL_PERF=0.15
 
 function usage
 {
@@ -418,6 +419,14 @@ function ExecuteTest
       if [ -f $SaveName ]; then
          # diff -U3 -bI"time" ${TestName}.saved ${TestName}.out   # old way of diffing
          (../runcheck.sh $TestName.out $SaveName $RTOL $ATOL >> $TestName.err 2>&1)
+      fi
+      # check performance
+      PerfTestName=$TestName.perf.out
+      PerfSaveName=$TestName.perf.$SaveExt
+      if [ -f $PerfTestName ]; then
+         if [ -f $PerfSaveName ]; then
+            (../runcheck.sh $PerfTestName $PerfSaveName $RTOL_PERF >> $TestName.err 2>&1)
+         fi
       fi
    fi
    cd $SavePWD
