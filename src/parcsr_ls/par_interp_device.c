@@ -489,7 +489,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
          }
       }
    }
-   jPd = warp_reduce_sum(jPd);
+   jPd = warp_reduce_sum(item, jPd);
 
    /* offd part */
    if (lane < 2)
@@ -512,7 +512,7 @@ hypre_BoomerAMGBuildDirInterp_getnnz( hypre_Item &item,
          }
       }
    }
-   jPo = warp_reduce_sum(jPo);
+   jPo = warp_reduce_sum(item, jPo);
 
    if (lane == 0)
    {
@@ -749,11 +749,11 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_Item &item,
 
    hypre_device_assert(k == q_offd_P);
 
-   diagonal  = warp_allreduce_sum(diagonal);
-   sum_N_pos = warp_allreduce_sum(sum_N_pos);
-   sum_N_neg = warp_allreduce_sum(sum_N_neg);
-   sum_P_pos = warp_allreduce_sum(sum_P_pos);
-   sum_P_neg = warp_allreduce_sum(sum_P_neg);
+   diagonal  = warp_allreduce_sum(item, diagonal);
+   sum_N_pos = warp_allreduce_sum(item, sum_N_pos);
+   sum_N_neg = warp_allreduce_sum(item, sum_N_neg);
+   sum_P_pos = warp_allreduce_sum(item, sum_P_pos);
+   sum_P_neg = warp_allreduce_sum(item, sum_P_neg);
 
    HYPRE_Complex alfa = 1.0, beta = 1.0;
 
@@ -1006,8 +1006,8 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_Item &item,
 
    hypre_device_assert(k == q_offd_P);
 
-   diagonal  = warp_allreduce_sum(diagonal);
-   sum_F     = warp_allreduce_sum(sum_F);
+   diagonal  = warp_allreduce_sum(item, diagonal);
+   sum_F     = warp_allreduce_sum(item, sum_F);
 
    HYPRE_Complex beta = sum_F / (q_diag_P - p_diag_P + q_offd_P - p_offd_P);
 
@@ -1450,7 +1450,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
          }
       }
    }
-   warp_max_diag = warp_allreduce_max(max_diag);
+   warp_max_diag = warp_allreduce_max(item, max_diag);
 
    /* offd part */
    if (lane < 2)
@@ -1474,7 +1474,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
          }
       }
    }
-   warp_max_offd = warp_allreduce_max(max_offd);
+   warp_max_offd = warp_allreduce_max(item, max_offd);
 
    /*--------------------------------------------------------------------
     *  If no max found, then there is no strongly connected C-point,
@@ -1496,7 +1496,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
       {
          max_j_offd = -1;
       }
-      max_j_offd = warp_reduce_max(max_j_offd);
+      max_j_offd = warp_reduce_max(item, max_j_offd);
       if (lane == 0)
       {
          P_offd_i[i] = 1;
@@ -1510,7 +1510,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_Item    &item,
       {
          max_j_diag = -1;
       }
-      max_j_diag = warp_reduce_max(max_j_diag);
+      max_j_diag = warp_reduce_max(item, max_j_diag);
       if (lane == 0)
       {
          P_diag_i[i] = 1;

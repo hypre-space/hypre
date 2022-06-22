@@ -85,11 +85,7 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_Item    &item,
       }
    }
 
-#if defined(HYPRE_USING_SYCL)
-   rl = warp_reduce_sum(rl, SG);
-#else
-   rl = warp_reduce_sum(rl);
-#endif
+   rl = warp_reduce_sum(item, rl);
 
    if (lane == 0)
    {
@@ -488,7 +484,6 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       HYPRE_Int kmatch = -1;
       for (HYPRE_Int indk = kb + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, indk < ke);
            indk += HYPRE_WARP_SIZE)
-#endif
       {
          if (indk < ke && row == read_only_load(&AFF_diag_j[indk]))
          {
@@ -500,11 +495,7 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
             break;
          }
       }
-#if defined(HYPRE_USING_SYCL)
-      kmatch = warp_reduce_max(kmatch, SG);
-#else
-      kmatch = warp_reduce_max(kmatch);
-#endif
+      kmatch = warp_reduce_max(item, kmatch);
 
       if (lane == 0)
       {
@@ -554,7 +545,6 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
       HYPRE_Int kmatch = -1;
       for (HYPRE_Int indk = kb + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, indk < ke);
            indk += HYPRE_WARP_SIZE)
-#endif
       {
          if (indk < ke && row + first_index == read_only_load(&AFF_ext_j[indk]))
          {
@@ -566,11 +556,7 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_Item    &item,
             break;
          }
       }
-#if defined(HYPRE_USING_SYCL)
-      kmatch = warp_reduce_max(kmatch, SG);
-#else
-      kmatch = warp_reduce_max(kmatch);
-#endif
+      kmatch = warp_reduce_max(item, kmatch);
 
       if (lane == 0)
       {
@@ -680,11 +666,7 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_Item    &item,
       dtau_i += AFF_offd_data[j] * read_only_load(&dtmp_offd[index]);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   dtau_i = warp_reduce_sum(dtau_i, SG);
-#else
-   dtau_i = warp_reduce_sum(dtau_i);
-#endif
+   dtau_i = warp_reduce_sum(item, dtau_i);
 
    if (lane == 0)
    {
@@ -797,13 +779,8 @@ void hypreCUDAKernel_compute_dlam_dtmp( hypre_Item    &item,
       row_sum += read_only_load(&AFF_offd_data[j]);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   row_sum = warp_reduce_sum(row_sum, SG);
-   find_diag = warp_reduce_sum(find_diag, SG);
-#else
-   row_sum = warp_reduce_sum(row_sum);
-   find_diag = warp_reduce_sum(find_diag);
-#endif
+   row_sum = warp_reduce_sum(item, row_sum);
+   find_diag = warp_reduce_sum(item, find_diag);
 
    if (lane == 0)
    {

@@ -88,13 +88,13 @@ void csr_spmm_rownnz_naive(HYPRE_Int  M,
 
       if (type == 'U' || type == 'B')
       {
-         jU = warp_reduce_sum(jU);
+         jU = warp_reduce_sum(NULL, jU);
          jU = min(jU, N);
       }
 
       if (type == 'L' || type == 'B')
       {
-         jL = warp_reduce_max(jL);
+         jL = warp_reduce_max(NULL, jL);
       }
 
       if (lane_id == 0)
@@ -248,7 +248,7 @@ void cohen_rowest_kernel(hypre_Item &item,
             }
 
             /* partial sum along r */
-            vmin = warp_reduce_sum(vmin);
+            vmin = warp_reduce_sum(NULL, vmin);
 
             if (lane_id == 0)
             {

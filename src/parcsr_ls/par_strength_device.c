@@ -28,358 +28,6 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
                                                     HYPRE_Int num_functions, HYPRE_Int* dof_func, HYPRE_Int* dof_func_offd,
                                                     HYPRE_Int* jS_diag, HYPRE_Int* jS_offd );
 
-      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are < 0 should be removed
-                              strong connections: same as A_diag_j; weak: -1; diagonal: -2
-              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are < 0 should be removed
-                              strong connections: same as A_offd_j; weak: -1;
-              jS_diag       - row nnz vector for compressed S_diag
-              jS_offd       - row nnz vector for compressed S_offd
-    */
-   /*-----------------------------------------------------------------------*/
-
-   HYPRE_Real row_scale = 0.0, row_sum = 0.0, row_max = 0.0, row_min = 0.0, diag = 0.0;
-   HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
-
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
-#else
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
-
-   if (row >= nr_of_rows)
-   {
-      return;
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int lane = SG.get_local_linear_id();
-#else
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-#endif
-   HYPRE_Int p_diag, q_diag, p_offd, q_offd;
-
-   /* diag part */
-   if (lane < 2)
-   {
-      p_diag = read_only_load(A_diag_i + row + lane);
-   }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   q_diag = SG.shuffle(p_diag, 1);
-   p_diag = SG.shuffle(p_diag, 0);
-#else
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
-#endif
-
-   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int col = read_only_load(&A_diag_j[i]);
-
-      if ( num_functions == 1 || row == col ||
-           read_only_load(&dof_func[row]) == read_only_load(&dof_func[col]) )
-      {
-         const HYPRE_Real v = read_only_load(&A_diag_data[i]);
-         row_sum += v;
-         if (row == col)
-         {
-            diag = v;
-            diag_pos = i;
-         }
-         else
-         {
-            row_max = hypre_max(row_max, v);
-            row_min = hypre_min(row_min, v);
-         }
-      }
-   }
-
-   /* offd part */
-   if (lane < 2)
-   {
-      p_offd = read_only_load(A_offd_i + row + lane);
-   }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   q_offd = SG.shuffle(p_offd, 1);
-   p_offd = SG.shuffle(p_offd, 0);
-#else
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
-#endif
-
-   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
-   {
-      if ( num_functions == 1 ||
-           read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
-      {
-         const HYPRE_Real v = read_only_load(&A_offd_data[i]);
-         row_sum += v;
-         row_max = hypre_max(row_max, v);
-         row_min = hypre_min(row_min, v);
-      }
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   diag = warp_allreduce_sum(diag, SG);
-#else
-   diag = warp_allreduce_sum(diag);
-#endif
-
-   /* sign of diag */
-   const HYPRE_Int sdiag = diag > 0.0 ? 1 : -1;
-
-   /* compute scaling factor and row sum */
-#if defined(HYPRE_USING_SYCL)
-   row_sum = warp_allreduce_sum(row_sum, SG);
-
-   if (diag > 0.0)
-   {
-      row_scale = warp_allreduce_min(row_min, SG);
-   }
-   else
-   {
-      row_scale = warp_allreduce_max(row_max, SG);
-   }
-#else
-   row_sum = warp_allreduce_sum(row_sum);
-
-   if (diag > 0.0)
-   {
-      row_scale = warp_allreduce_min(row_min);
-   }
-   else
-   {
-      row_scale = warp_allreduce_max(row_max);
-   }
-#endif
-
-   /* compute row of S */
-   HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
-   const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
-
-   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
-                             ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                               read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
-                             sdiag * read_only_load(&A_diag_data[i]) < thresh;
-      S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
-      row_nnz_diag += cond;
-   }
-
-   /* !!! mark diagonal as -2 !!! */
-   if (diag_pos >= 0)
-   {
-      S_temp_diag_j[diag_pos] = -2;
-   }
-
-   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int cond = all_weak == 0 &&
-                             ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                               read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
-                             sdiag * read_only_load(&A_offd_data[i]) < thresh;
-      S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
-      row_nnz_offd += cond;
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag, SG);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd, SG);
-#else
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd);
-#endif
-
-   if (0 == lane)
-   {
-      jS_diag[row] = row_nnz_diag;
-      jS_offd[row] = row_nnz_offd;
-   }
-}
-
-/*-----------------------------------------------------------------------*/
-__global__ void hypre_BoomerAMGCreateSabs_rowcount(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int   nr_of_rows,
-   HYPRE_Real  max_row_sum,
-   HYPRE_Real  strength_threshold,
-   HYPRE_Real *A_diag_data,
-   HYPRE_Int  *A_diag_i,
-   HYPRE_Int  *A_diag_j,
-   HYPRE_Real *A_offd_data,
-   HYPRE_Int  *A_offd_i,
-   HYPRE_Int  *A_offd_j,
-   HYPRE_Int  *S_temp_diag_j,
-   HYPRE_Int  *S_temp_offd_j,
-   HYPRE_Int   num_functions,
-   HYPRE_Int  *dof_func,
-   HYPRE_Int  *dof_func_offd,
-   HYPRE_Int  *jS_diag,
-   HYPRE_Int  *jS_offd )
-{
-   /*-----------------------------------------------------------------------*/
-   /*
-      Input: nr_of_rows - Number of rows in matrix (local in processor)
-             A_diag_data, A_diag_i, A_diag_j - CSR representation of A_diag
-             A_offd_data, A_offd_i, A_offd_j - CSR representation of A_offd
-             num_function  - Number of degrees of freedom per grid point
-             dof_func      - vector over nonzero elements of A_diag, indicating the degree of freedom
-             dof_func_offd - vector over nonzero elements of A_offd, indicating the degree of freedom
-
-      Output: S_temp_diag_j - S_diag_j vector before compression, i.e.,elements that are < 0 should be removed
-                              strong connections: same as A_diag_j; weak: -1; diagonal: -2
-              S_temp_offd_j - S_offd_j vector before compression, i.e.,elements that are < 0 should be removed
-                              strong connections: same as A_offd_j; weak: -1;
-              jS_diag       - row nnz vector for compressed S_diag
-              jS_offd       - row nnz vector for compressed S_offd
-    */
-   /*-----------------------------------------------------------------------*/
-
-   HYPRE_Real row_scale = 0.0, row_sum = 0.0, diag = 0.0;
-   HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
-
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
-#else
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
-
-   if (row >= nr_of_rows)
-   {
-      return;
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int lane = SG.get_local_linear_id();
-#else
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-#endif
-   HYPRE_Int p_diag, q_diag, p_offd, q_offd;
-
-   /* diag part */
-   if (lane < 2)
-   {
-      p_diag = read_only_load(A_diag_i + row + lane);
-   }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   q_diag = SG.shuffle(p_diag, 1);
-   p_diag = SG.shuffle(p_diag, 0);
-#else
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
-#endif
-
-   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int col = read_only_load(&A_diag_j[i]);
-
-      if ( num_functions == 1 || row == col ||
-           read_only_load(&dof_func[row]) == read_only_load(&dof_func[col]) )
-      {
-         const HYPRE_Real v = hypre_cabs( read_only_load(&A_diag_data[i]) );
-         row_sum += v;
-         if (row == col)
-         {
-            diag = v;
-            diag_pos = i;
-         }
-         else
-         {
-            row_scale = hypre_max(row_scale, v);
-         }
-      }
-   }
-
-   /* offd part */
-   if (lane < 2)
-   {
-      p_offd = read_only_load(A_offd_i + row + lane);
-   }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   q_offd = SG.shuffle(p_offd, 1);
-   p_offd = SG.shuffle(p_offd, 0);
-#else
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
-#endif
-
-   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
-   {
-      if ( num_functions == 1 ||
-           read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
-      {
-         const HYPRE_Real v = hypre_cabs( read_only_load(&A_offd_data[i]) );
-         row_sum += v;
-         row_scale = hypre_max(row_scale, v);
-      }
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   diag = warp_allreduce_sum(diag, SG);
-
-   /* compute scaling factor and row sum */
-   row_sum = warp_allreduce_sum(row_sum, SG);
-   row_scale = warp_allreduce_max(row_scale, SG);
-#else
-   diag = warp_allreduce_sum(diag);
-
-   /* compute scaling factor and row sum */
-   row_sum = warp_allreduce_sum(row_sum);
-   row_scale = warp_allreduce_max(row_scale);
-#endif
-
-   /* compute row of S */
-   HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
-   const HYPRE_Real thresh = strength_threshold * row_scale;
-
-   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
-                             ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                               read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
-                             hypre_cabs( read_only_load(&A_diag_data[i]) ) > thresh;
-      S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
-      row_nnz_diag += cond;
-   }
-
-   /* !!! mark diagonal as -2 !!! */
-   if (diag_pos >= 0)
-   {
-      S_temp_diag_j[diag_pos] = -2;
-   }
-
-   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
-   {
-      const HYPRE_Int cond = all_weak == 0 &&
-                             ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                               read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
-                             hypre_cabs( read_only_load(&A_offd_data[i]) ) > thresh;
-      S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
-      row_nnz_offd += cond;
-   }
-
-#if defined(HYPRE_USING_SYCL)
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag, SG);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd, SG);
-#else
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd);
-#endif
-
-   if (0 == lane)
-   {
-      jS_diag[row] = row_nnz_diag;
-      jS_offd[row] = row_nnz_offd;
-   }
-}
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 HYPRE_Int
@@ -710,21 +358,21 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_Item &item,
       }
    }
 
-   diag = warp_allreduce_sum(diag);
+   diag = warp_allreduce_sum(item, diag);
 
    /* sign of diag */
    const HYPRE_Int sdiag = diag > 0.0 ? 1 : -1;
 
    /* compute scaling factor and row sum */
-   row_sum = warp_allreduce_sum(row_sum);
+   row_sum = warp_allreduce_sum(item, row_sum);
 
    if (diag > 0.0)
    {
-      row_scale = warp_allreduce_min(row_min);
+      row_scale = warp_allreduce_min(item, row_min);
    }
    else
    {
-      row_scale = warp_allreduce_max(row_max);
+      row_scale = warp_allreduce_max(item, row_max);
    }
 
    /* compute row of S */
@@ -765,8 +413,8 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_Item &item,
       }
    }
 
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd);
+   row_nnz_diag = warp_reduce_sum(item, row_nnz_diag);
+   row_nnz_offd = warp_reduce_sum(item, row_nnz_offd);
 
    if (0 == lane)
    {
@@ -803,7 +451,7 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 }
 
 /*-----------------------------------------------------------------------*/
-__global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item  &item,
                                                     HYPRE_Int   nr_of_rows,
                                                     HYPRE_Real  max_row_sum,
                                                     HYPRE_Real  strength_threshold,
@@ -850,7 +498,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
    }
 
    HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p_diag = 0, q_diag, p_offd = 0, q_offd;
+   HYPRE_Int p_diag, q_diag, p_offd, q_offd;
 
    /* diag part */
    if (lane < 2)
@@ -860,27 +508,23 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
    q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
    p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
    {
-      if (i < q_diag)
-      {
-         const HYPRE_Int col = read_only_load(&A_diag_j[i]);
+      const HYPRE_Int col = read_only_load(&A_diag_j[i]);
 
-         if ( num_functions == 1 || row == col ||
-              read_only_load(&dof_func[row]) == read_only_load(&dof_func[col]) )
+      if ( num_functions == 1 || row == col ||
+           read_only_load(&dof_func[row]) == read_only_load(&dof_func[col]) )
+      {
+         const HYPRE_Real v = hypre_cabs( read_only_load(&A_diag_data[i]) );
+         row_sum += v;
+         if (row == col)
          {
-            const HYPRE_Real v = hypre_cabs( read_only_load(&A_diag_data[i]) );
-            row_sum += v;
-            if (row == col)
-            {
-               diag = v;
-               diag_pos = i;
-            }
-            else
-            {
-               row_scale = hypre_max(row_scale, v);
-            }
+            diag = v;
+            diag_pos = i;
+         }
+         else
+         {
+            row_scale = hypre_max(row_scale, v);
          }
       }
    }
@@ -893,43 +537,35 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
    q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
    p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
-      if (i < q_offd)
+      if ( num_functions == 1 ||
+           read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
       {
-         if ( num_functions == 1 ||
-              read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
-         {
-            const HYPRE_Real v = hypre_cabs( read_only_load(&A_offd_data[i]) );
-            row_sum += v;
-            row_scale = hypre_max(row_scale, v);
-         }
+         const HYPRE_Real v = hypre_cabs( read_only_load(&A_offd_data[i]) );
+         row_sum += v;
+         row_scale = hypre_max(row_scale, v);
       }
    }
 
-   diag = warp_allreduce_sum(diag);
+   diag = warp_allreduce_sum(item, diag);
 
    /* compute scaling factor and row sum */
-   row_sum = warp_allreduce_sum(row_sum);
-   row_scale = warp_allreduce_max(row_scale);
+   row_sum = warp_allreduce_sum(item, row_sum);
+   row_scale = warp_allreduce_max(item, row_scale);
 
    /* compute row of S */
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
    const HYPRE_Real thresh = strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
    {
-      if (i < q_diag)
-      {
-         const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
-                                ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                                  read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
-                                hypre_cabs( read_only_load(&A_diag_data[i]) ) > thresh;
-         S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
-         row_nnz_diag += cond;
-      }
+      const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
+                             ( num_functions == 1 || read_only_load(&dof_func[row]) ==
+                               read_only_load(&dof_func[read_only_load(&A_diag_j[i])]) ) &&
+                             hypre_cabs( read_only_load(&A_diag_data[i]) ) > thresh;
+      S_temp_diag_j[i] = cond * (1 + read_only_load(&A_diag_j[i])) - 1;
+      row_nnz_diag += cond;
    }
 
    /* !!! mark diagonal as -2 !!! */
@@ -938,22 +574,18 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_Item &item,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
-      if (i < q_offd)
-      {
-         const HYPRE_Int cond = all_weak == 0 &&
-                                ( num_functions == 1 || read_only_load(&dof_func[row]) ==
-                                  read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
-                                hypre_cabs( read_only_load(&A_offd_data[i]) ) > thresh;
-         S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
-         row_nnz_offd += cond;
-      }
+      const HYPRE_Int cond = all_weak == 0 &&
+                             ( num_functions == 1 || read_only_load(&dof_func[row]) ==
+                               read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) ) &&
+                             hypre_cabs( read_only_load(&A_offd_data[i]) ) > thresh;
+      S_temp_offd_j[i] = cond * (1 + read_only_load(&A_offd_j[i])) - 1;
+      row_nnz_offd += cond;
    }
 
-   row_nnz_diag = warp_reduce_sum(row_nnz_diag);
-   row_nnz_offd = warp_reduce_sum(row_nnz_offd);
+   row_nnz_diag = warp_reduce_sum(item, row_nnz_diag);
+   row_nnz_offd = warp_reduce_sum(item, row_nnz_offd);
 
    if (0 == lane)
    {

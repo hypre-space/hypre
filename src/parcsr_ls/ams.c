@@ -419,7 +419,7 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_Item    &item,
       l1_norm += fabs(A_offd_data[j]);
    }
 
-   l1_norm = warp_allreduce_sum(l1_norm);
+   l1_norm = warp_allreduce_sum(item, l1_norm);
 
    if (l1_norm <= eps)
    {

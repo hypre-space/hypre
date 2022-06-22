@@ -92,9 +92,9 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_Item    &item,
    }
 
    // Get the row_sum and diagonal value on lane 0
-   row_sum_i = warp_reduce_sum(row_sum_i);
+   row_sum_i = warp_reduce_sum(item, row_sum_i);
 
-   diag_value = warp_reduce_sum(diag_value);
+   diag_value = warp_reduce_sum(item, diag_value);
 
    if (lane == 0)
    {

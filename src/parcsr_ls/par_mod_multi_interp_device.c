@@ -1466,7 +1466,7 @@ void hypreCUDAKernel_cfmarker_masked_rowsum( hypre_Item    &item,
       }
    }
 
-   row_sum_i = warp_reduce_sum(row_sum_i);
+   row_sum_i = warp_reduce_sum(item, row_sum_i);
 
    if (lane == 0)
    {
@@ -1535,7 +1535,7 @@ void hypreCUDAKernel_mutli_pi_rowsum( hypre_Item    &item,
       row_sum_C += read_only_load(&Pi_offd_data[j]);
    }
 
-   row_sum_C = warp_reduce_sum(row_sum_C);
+   row_sum_C = warp_reduce_sum(item, row_sum_C);
 
    if ( lane == 0 )
    {
@@ -1655,7 +1655,7 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_Item &item,
       diag_increment += marker == color;
    }
 
-   diag_increment = warp_reduce_sum(diag_increment);
+   diag_increment = warp_reduce_sum(item, diag_increment);
 
    // Increment P_diag_i, but then we need to also do a block reduction
    // on diag_increment to log the total nnz_diag for the block
@@ -1686,7 +1686,7 @@ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_Item &item,
       offd_increment += marker == color;
    }
 
-   offd_increment = warp_reduce_sum(offd_increment);
+   offd_increment = warp_reduce_sum(item, offd_increment);
 
    // Increment P_offd_i, but then we need to also do a block reduction
    // on offd_increment to log the total nnz_offd for the block
@@ -1822,8 +1822,8 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_Item    &item,
 
    hypre_device_assert(k == q_offd_P);
 
-   row_sum_C = warp_reduce_sum(row_sum_C);
-   diagonal = warp_reduce_sum(diagonal);
+   row_sum_C = warp_reduce_sum(item, row_sum_C);
+   diagonal = warp_reduce_sum(item, diagonal);
    HYPRE_Complex value = row_sum_C * diagonal;
    HYPRE_Complex row_sum_i = 0.0;
 
@@ -2129,7 +2129,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_Item    &item,
    hypre_device_assert(k == q_offd_P);
 #endif
 
-   w_row_sum_i = warp_reduce_sum(w_row_sum_i);
+   w_row_sum_i = warp_reduce_sum(item, w_row_sum_i);
 
    if (lane == 0)
    {

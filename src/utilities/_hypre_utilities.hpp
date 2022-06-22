@@ -952,7 +952,7 @@ T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_reduce_sum(T in)
+T warp_reduce_sum(hypre_Item &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -964,7 +964,7 @@ T warp_reduce_sum(T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_allreduce_sum(T in)
+T warp_allreduce_sum(hypre_Item &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -976,7 +976,7 @@ T warp_allreduce_sum(T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_reduce_max(T in)
+T warp_reduce_max(hypre_Item &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -988,7 +988,7 @@ T warp_reduce_max(T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_allreduce_max(T in)
+T warp_allreduce_max(hypre_Item &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -1000,7 +1000,7 @@ T warp_allreduce_max(T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_reduce_min(T in)
+T warp_reduce_min(hypre_Item &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -1012,7 +1012,7 @@ T warp_reduce_min(T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_allreduce_min(T in)
+T warp_allreduce_min(hypre_Item &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -1239,7 +1239,6 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_Item &item)
 {
-   sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
 }
 
@@ -1258,6 +1257,96 @@ T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
    item.get_sub_group().barrier();
    return item.get_sub_group().shuffle(val, src_line);
 }
+
+template <typename T>
+static __forceinline__
+T warp_reduce_sum(hypre_Item &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in += item.get_sub_group().shuffle_down(in, d);
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_sum(hypre_Item &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in += item.get_sub_group().shuffle_xor(in, d);
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_reduce_max(hypre_Item &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, item.get_sub_group().shuffle_down(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_max(hypre_Item &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, item.get_sub_group().shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_reduce_min(hypre_Item &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, item.get_sub_group().shuffle_down(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_min(hypre_Item &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, item.get_sub_group().shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template<typename T>
+struct is_negative
+{
+   is_negative() {}
+
+   constexpr bool operator()(const T &x) const { return (x < 0); }
+};
+
+template<typename T>
+struct is_positive
+{
+   is_positive() {}
+
+   constexpr bool operator()(const T &x) const { return (x > 0); }
+};
+
+template<typename T>
+struct is_nonnegative
+{
+   is_nonnegative() {}
+
+   constexpr bool operator()(const T &x) const { return (x >= 0); }
+};
 
 template<typename T>
 struct in_range

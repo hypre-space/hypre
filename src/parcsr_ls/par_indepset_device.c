@@ -98,7 +98,7 @@ hypreCUDAKernel_IndepSetMain(hypre_Item &item,
       }
    }
 
-   marker_row = warp_reduce_min(marker_row);
+   marker_row = warp_reduce_min(item, marker_row);
 
    if (lane == 0 && marker_row == 0)
    {

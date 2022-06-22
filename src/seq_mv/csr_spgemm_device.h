@@ -186,7 +186,7 @@ T group_reduce_sum(T in, volatile T *s_WarpData)
    hypre_device_assert(GROUP_SIZE > HYPRE_WARP_SIZE);
 #endif
 
-   T out = warp_reduce_sum(in);
+   T out = warp_reduce_sum(NULL, in);
 
    const HYPRE_Int warp_lane_id = get_warp_lane_id();
    const HYPRE_Int warp_id = get_warp_id();
@@ -201,7 +201,7 @@ T group_reduce_sum(T in, volatile T *s_WarpData)
    if (get_warp_in_group_id<GROUP_SIZE>() == 0)
    {
       const T a = warp_lane_id < GROUP_SIZE / HYPRE_WARP_SIZE ? s_WarpData[warp_id + warp_lane_id] : 0.0;
-      out = warp_reduce_sum(a);
+      out = warp_reduce_sum(NULL, a);
    }
 
    __syncthreads();

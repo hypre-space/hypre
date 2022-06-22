@@ -45,13 +45,8 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
       row_sum += v;
    }
 
-#if defined(HYPRE_USING_SYCL)
-   row_max = warp_allreduce_max(row_max, SG) * trunc_factor;
-   row_sum = warp_allreduce_sum(row_sum, SG);
-#else
-   row_max = warp_allreduce_max(row_max) * trunc_factor;
-   row_sum = warp_allreduce_sum(row_sum);
-#endif
+   row_max = warp_allreduce_max(item, row_max) * trunc_factor;
+   row_sum = warp_allreduce_sum(item, row_sum);
 
    /* 2. mark dropped entries by -1 in P_j, and compute row_scal */
    HYPRE_Int last_pos = -1;
@@ -59,11 +54,7 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
    {
       HYPRE_Int cond = 0, cond_prev;
 
-#if defined(HYPRE_USING_SYCL)
-      cond_prev = i == p + lane || warp_allreduce_min(cond, SG);
-#else
-      cond_prev = i == p + lane || warp_allreduce_min(cond);
-#endif
+      cond_prev = i == p + lane || warp_allreduce_min(item, cond);
 
       if (i < q)
       {
@@ -87,11 +78,7 @@ hypreCUDAKernel_InterpTruncation( hypre_Item &item,
       }
    }
 
-#if defined(HYPRE_USING_SYCL)
-   row_scal = warp_allreduce_sum(row_scal, SG);
-#else
-   row_scal = warp_allreduce_sum(row_scal);
-#endif
+   row_scal = warp_allreduce_sum(item, row_scal);
 
    if (row_scal)
    {
