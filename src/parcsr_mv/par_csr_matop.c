@@ -2189,6 +2189,37 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixLocalTranspose
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix  *A )
+{
+   if (!hypre_ParCSRMatrixDiagT(A))
+   {
+      hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+      if (A_diag)
+      {
+         hypre_CSRMatrix *AT_diag = NULL;
+         hypre_CSRMatrixTranspose(A_diag, &AT_diag, 1);
+         hypre_ParCSRMatrixDiagT(A) = AT_diag;
+      }
+   }
+
+   if (!hypre_ParCSRMatrixOffdT(A))
+   {
+      hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+      if (A_offd)
+      {
+         hypre_CSRMatrix *AT_offd = NULL;
+         hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
+         hypre_ParCSRMatrixOffdT(A) = AT_offd;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
 /* -----------------------------------------------------------------------------
  * generate a parallel spanning tree (for Maxwell Equation)
  * G_csr is the node to edge connectivity matrix
