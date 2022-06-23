@@ -1,1 +1,1 @@
-TEST_ij/!(fsai).sh
+TEST_ij/[^f]*.sh
