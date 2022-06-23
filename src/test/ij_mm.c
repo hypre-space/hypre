@@ -57,14 +57,7 @@ HYPRE_Int BuildParRotate7pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                              HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParVarDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                               HYPRE_ParCSRMatrix *A_ptr, HYPRE_ParVector *rhs_ptr );
-HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
-                                         HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                         HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, HYPRE_Int nx, HYPRE_Int ny,
-                                              HYPRE_Int nz,
-                                              HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r,
-                                              HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value);
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
                             HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
 
 HYPRE_Int BuildParCoordinates (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
@@ -531,7 +524,8 @@ void runjob4( HYPRE_ParCSRMatrix parcsr_A,
    HYPRE_Int    num_functions = 1;
    HYPRE_Real   strong_threshold = 0.25;
    HYPRE_Real   max_row_sum = 1.0;
-   HYPRE_Int    local_num_vars, coarse_pnts_global[2];
+   HYPRE_Int    local_num_vars;
+   HYPRE_BigInt coarse_pnts_global[2];
    HYPRE_Int    time_index, i;
    char         fname[1024];
 
@@ -743,8 +737,8 @@ main( hypre_int argc,
    HYPRE_Int           num_procs, myid;
    HYPRE_Int           time_index;
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int           first_local_row, last_local_row;//, local_num_rows;
-   HYPRE_Int           first_local_col, last_local_col;//, local_num_cols;
+   HYPRE_BigInt        first_local_row, last_local_row;
+   HYPRE_BigInt        first_local_col, last_local_col;
    HYPRE_Int           rap2 = 0;
    HYPRE_Int           mult_order = 0;
    HYPRE_Int           print_system = 0;
@@ -2598,8 +2592,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
 
 /**************************************************************************/
 
-
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
                             HYPRE_Real vcx,
                             HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
 {
@@ -2635,10 +2628,10 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE
 
 HYPRE_Int
 BuildParCoordinates( HYPRE_Int                  argc,
-                     char                *argv[],
+                     char                      *argv[],
                      HYPRE_Int                  arg_index,
                      HYPRE_Int                 *coorddim_ptr,
-                     float               **coord_ptr     )
+                     float                    **coord_ptr     )
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
