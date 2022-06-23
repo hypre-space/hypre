@@ -68,7 +68,7 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
    hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real       theta, delta;
    HYPRE_Real       den;
-   HYPRE_Real       upper_bound = 0.0, lower_bound = 0.0;
+   HYPRE_Real       upper_bound, lower_bound;
    HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Real      *coefs        = NULL;
    HYPRE_Int        cheby_order;
@@ -89,17 +89,17 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
    /* we are using the order of p(A) */
    cheby_order = order - 1;
 
-   if (min_eig >= 0.0)
+   if (max_eig <= 0.0)
+   {
+      upper_bound = min_eig * 1.1;
+      lower_bound = max_eig - (max_eig - upper_bound) * fraction;
+   }
+   else
    {
       /* make sure we are large enough - Adams et al. 2003 */
       upper_bound = max_eig * 1.1;
       /* lower_bound = max_eig/fraction; */
       lower_bound = (upper_bound - min_eig) * fraction + min_eig;
-   }
-   else if (max_eig <= 0.0)
-   {
-      upper_bound = min_eig * 1.1;
-      lower_bound = max_eig - (max_eig - upper_bound) * fraction;
    }
 
    /* theta and delta */
