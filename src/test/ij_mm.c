@@ -144,12 +144,8 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
 
    if (print_system)
    {
-      if (!parcsr_A_host)
-      {
-         parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
-      }
       sprintf(fname, "%s/%s", file_dir, "IJ.out.A");
-      hypre_ParCSRMatrixPrintIJ(parcsr_A_host, 0, 0, fname);
+      hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, fname);
 
       //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A_host), 1, 1, 0, "A.mtx");
    }
@@ -331,12 +327,8 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
 
    if (print_system)
    {
-      if (!parcsr_B_host2)
-      {
-         parcsr_B_host2 = hypre_ParCSRMatrixClone_v2(parcsr_B, 1, HYPRE_MEMORY_HOST);
-      }
       sprintf(fname, "%s/%s", file_dir, "IJ.out.B");
-      hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
+      hypre_ParCSRMatrixPrintIJ(parcsr_B, 0, 0, fname);
       sprintf(fname, "%s/%s", file_dir, "IJ.out.B.CPU");
       hypre_ParCSRMatrixPrintIJ(parcsr_B_host, 0, 0, fname);
    }
