@@ -292,6 +292,7 @@ HYPRE_Int hypre_ParCSRMatrixExtractBExtDeviceInit( hypre_ParCSRMatrix *B, hypre_
 hypre_CSRMatrix* hypre_ParCSRMatrixExtractBExtDeviceWait(void *request);
 hypre_CSRMatrix* hypre_ParCSRMatrixExtractBExtDevice( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A,
                                                       HYPRE_Int want_data );
+HYPRE_Int hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix  *A );
 HYPRE_Int hypre_ParCSRMatrixTranspose ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **AT_ptr,
                                         HYPRE_Int data );
 HYPRE_Int hypre_ParCSRMatrixTransposeHost ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **AT_ptr,
