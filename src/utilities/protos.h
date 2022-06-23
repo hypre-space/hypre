@@ -282,6 +282,7 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Comple
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
+HYPRE_Int hypreDevice_IVAMXPMY(HYPRE_Int m, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
