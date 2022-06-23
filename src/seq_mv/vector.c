@@ -639,7 +639,20 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       #pragma omp target teams distribute parallel for private(i) is_device_ptr(u_data,v_data,l1_norms)
       #endif
       */
-      hypreDevice_IVAXPY(size, b_data, x_data, y_data);
+
+      if (num_vectors_x == 1 && num_vectors_y == 1 && num_vectors_b == 1)
+      {
+         hypreDevice_IVAXPY(size, b_data, x_data, y_data);
+      }
+      else if (num_vectors_x == 2 && num_vectors_y == 2 && num_vectors_b == 1)
+      {
+         hypreDevice_IVAMXPMY(size, num_vectors_x, b_data, x_data, y_data);
+      }
+      else
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported combination of num_vectors!\n");
+         return hypre_error_flag;
+      }
    }
    else
 #endif
