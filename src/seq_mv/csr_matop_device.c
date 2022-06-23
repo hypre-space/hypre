@@ -1005,20 +1005,21 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
+   HYPRE_Int set = set_or_add[0] == 's';
    if (type == 0)
    {
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_CSRRowSum<0>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                        row_sum, scal, set_or_add[0] == 's' );
+                        row_sum, scal, set );
    }
    else if (type == 1)
    {
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_CSRRowSum<1>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                        row_sum, scal, set_or_add[0] == 's' );
+                        row_sum, scal, set );
    }
    else if (type == 2)
    {
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_CSRRowSum<2>, gDim, bDim, nrows, A_i, A_j, A_data, CF_i, CF_j,
-                        row_sum, scal, set_or_add[0] == 's' );
+                        row_sum, scal, set );
    }
 
    hypre_SyncComputeStream(hypre_handle());
