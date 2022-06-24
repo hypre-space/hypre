@@ -61,7 +61,8 @@ void hypre_rownnz_naive_rowi( HYPRE_Int  rowi,
 
 template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
-void hypre_spgemm_rownnz_naive( HYPRE_Int  M,
+void hypre_spgemm_rownnz_naive( hypre_Item &item,
+                                HYPRE_Int  M,
                                 HYPRE_Int  N,
                                 HYPRE_Int *ia,
                                 HYPRE_Int *ja,
@@ -116,10 +117,11 @@ void hypre_spgemm_rownnz_naive( HYPRE_Int  M,
                        COHEN
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 __global__
-void hypre_expdistfromuniform( HYPRE_Int n,
-                               float    *x )
+void hypre_expdistfromuniform( hypre_Item &item,
+                               HYPRE_Int   n,
+                               float      *x )
 {
-   const HYPRE_Int global_thread_id  = hypre_cuda_get_grid_thread_id<3, 1>();
+   const HYPRE_Int global_thread_id  = hypre_gpu_get_grid_thread_id<3, 1>(item);
    const HYPRE_Int total_num_threads = hypre_cuda_get_grid_num_threads<3, 1>();
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
@@ -133,7 +135,8 @@ void hypre_expdistfromuniform( HYPRE_Int n,
 /* T = float: single precision should be enough */
 template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP, HYPRE_Int layer>
 __global__
-void hypre_cohen_rowest_kernel( HYPRE_Int  nrow,
+void hypre_cohen_rowest_kernel( hypre_Item &item,
+                                HYPRE_Int  nrow,
                                 HYPRE_Int *rowptr,
                                 HYPRE_Int *colidx,
                                 T         *V_in,

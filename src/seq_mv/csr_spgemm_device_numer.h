@@ -244,7 +244,8 @@ hypre_spgemm_copy_from_hash_into_C_row( HYPRE_Int               lane_id,
 template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_RIND,
           bool FAILED_SYMBL, char HASHTYPE, bool HAS_GHASH>
 __global__ void
-hypre_spgemm_numeric( const HYPRE_Int                   M,
+hypre_spgemm_numeric( hypre_Item                       &item,
+                      const HYPRE_Int                   M,
                       const HYPRE_Int*     __restrict__ rind,
                       const HYPRE_Int*     __restrict__ ia,
                       const HYPRE_Int*     __restrict__ ja,
@@ -549,7 +550,8 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
 
 template <HYPRE_Int GROUP_SIZE>
 __global__ void
-hypre_spgemm_copy_from_Cext_into_C( HYPRE_Int      M,
+hypre_spgemm_copy_from_Cext_into_C( hypre_Item    &item,
+                                    HYPRE_Int      M,
                                     HYPRE_Int     *ix,
                                     HYPRE_Int     *jx,
                                     HYPRE_Complex *ax,

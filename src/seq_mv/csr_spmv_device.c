@@ -105,8 +105,8 @@ hypre_csr_v_k_shuffle(hypre_Item &item,
       {
          p = read_only_load(&d_ia[grid_row_id + group_lane]);
       }
-      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, K);
-      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, K);
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
+      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
 
       T sum = 0.0;
 #if VERSION == 1
