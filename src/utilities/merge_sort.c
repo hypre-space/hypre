@@ -16,13 +16,13 @@
 #define SWAP(T, a, b) do { T tmp = a; a = b; b = tmp; } while (0)
 
 /*--------------------------------------------------------------------------
- * hypre_MergeOrderedArrays: merge two ordered arrays
+ * hypre_IntArrayMergeOrdered: merge two ordered arrays
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MergeOrderedArrays( hypre_IntArray *array1,
-                          hypre_IntArray *array2,
-                          hypre_IntArray *array3 )
+hypre_IntArrayMergeOrdered( hypre_IntArray *array1,
+                            hypre_IntArray *array2,
+                            hypre_IntArray *array3 )
 {
    HYPRE_Int i = 0, j = 0, k = 0;
    const HYPRE_Int size1 = hypre_IntArraySize(array1);
