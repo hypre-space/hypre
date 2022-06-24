@@ -140,7 +140,7 @@ using hypre_Item = sycl::nd_item<1>;
 #define HYPRE_WARP_SIZE       64
 #define HYPRE_WARP_BITSHIFT   6
 #elif defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       8
+#define HYPRE_WARP_SIZE       16
 #define HYPRE_WARP_BITSHIFT   3
 #endif
 
