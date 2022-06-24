@@ -41,6 +41,7 @@ typedef struct
    hypre_int            *i_short;
    hypre_int            *j_short;
    HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   HYPRE_Int             pattern_only;    /* if 1, data array is ignored, and assumed to be all 1's */
    HYPRE_Complex        *data;
    HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
    HYPRE_Int             num_rownnz;
@@ -67,6 +68,7 @@ typedef struct
 #define hypre_CSRMatrixRownnz(matrix)               ((matrix) -> rownnz)
 #define hypre_CSRMatrixNumRownnz(matrix)            ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)             ((matrix) -> owns_data)
+#define hypre_CSRMatrixPatternOnly(matrix)          ((matrix) -> pattern_only)
 #define hypre_CSRMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)

@@ -182,7 +182,6 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    *d_ac_out = d_ac;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPADD] += hypre_MPI_Wtime();
 #endif
 

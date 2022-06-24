@@ -137,6 +137,22 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
    return HYPRE_ONEDPL_CALL( oneapi::dpl::copy, perm_begin, perm_begin + n, result);
 }
 
+// Equivalent of thrust::sequence (with step=1)
+template <class Iter, class T>
+void hypreSycl_sequence(Iter first, Iter last, T init = 0)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<Iter>::iterator_category,
+      std::random_access_iterator_tag>::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   using DiffType = typename std::iterator_traits<Iter>::difference_type;
+   HYPRE_ONEDPL_CALL( std::transform,
+                      oneapi::dpl::counting_iterator<DiffType>(init),
+                      oneapi::dpl::counting_iterator<DiffType>(std::distance(first, last)),
+                      first,
+                      [](auto i) { return i; });
+}
+
 #endif
 
 #endif
