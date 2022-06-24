@@ -233,7 +233,11 @@ hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate ( HYPRE_Int job, hypre_ParC
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job,
                                                           hypre_ParCSRCommPkg *comm_pkg, HYPRE_MemoryLocation send_memory_location, void *send_data_in,
                                                           HYPRE_MemoryLocation recv_memory_location, void *recv_data_in );
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v3 ( HYPRE_Int job,
+                                                          hypre_ParCSRCommPkg *comm_pkg, HYPRE_MemoryLocation send_memory_location, void *send_data_in, void *send_data_pinned,
+                                                          HYPRE_MemoryLocation recv_memory_location, void *recv_data_in, void *recv_data_pinned );
 HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
+HYPRE_Int hypre_ParCSRCommHandleDestroy_v3 ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_ParCSRCommPkgCreate_core ( MPI_Comm comm, HYPRE_BigInt *col_map_offd,
                                       HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts, HYPRE_Int num_cols_diag,
                                       HYPRE_Int num_cols_offd, HYPRE_Int *p_num_recvs, HYPRE_Int **p_recv_procs,

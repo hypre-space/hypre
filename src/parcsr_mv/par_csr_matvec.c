@@ -51,7 +51,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Int num_vectors   = hypre_VectorNumVectors(x_local);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int ierr = 0;
-   HYPRE_Int num_sends, jv;
+   HYPRE_Int num_sends, num_recvs, jv;
 
    HYPRE_Int vecstride = hypre_VectorVectorStride( x_local );
    HYPRE_Int idxstride = hypre_VectorIndexStride( x_local );
@@ -118,6 +118,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    hypre_assert( num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg,
                                                                   hypre_ParCSRCommPkgNumRecvs(comm_pkg)) );
    hypre_assert( hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0) == 0 );
@@ -176,6 +177,23 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
 #endif
 
+   /* allocate pinned memory buffers */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int Nsends = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_Int Nrecvs = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
+   HYPRE_Int N = Nsends>Nrecvs ? Nsends : Nrecvs;
+   if (!hypre_ParCSRMatrixSendPinned(A))
+   {
+      char * temp = _hypre_TAlloc(char, N*sizeof(HYPRE_Complex), hypre_MEMORY_HOST_PINNED);
+      hypre_ParCSRMatrixSendPinned(A) = temp;
+   }
+   if (!hypre_ParCSRMatrixRecvPinned(A))
+   {
+      char * temp = _hypre_TAlloc(char, N*sizeof(HYPRE_Complex), hypre_MEMORY_HOST_PINNED);
+      hypre_ParCSRMatrixRecvPinned(A) = temp;
+   }
+#endif
+   
    hypre_SeqVectorInitialize_v2(x_tmp, HYPRE_MEMORY_DEVICE);
    x_tmp_data = hypre_VectorData(x_tmp);
 
@@ -239,13 +257,31 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
       /* if on device, no need to Sync: send_data is on device memory */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      /* pack send data on device */
-      HYPRE_THRUST_CALL( gather,
-                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                         hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                         locl_data,
-                         send_data );
+
+      /* Write the data directly into the Pinned memory buffer */
+      if (N)
+      {
+         send_data = (HYPRE_Complex *)hypre_HostGetDevicePointer(hypre_ParCSRMatrixSendPinned(A));
+
+#if 0
+         /* This kernel seems a little bit faster than thrust */
+         cusparseHandle_t          handle     = hypre_HandleCusparseHandle(hypre_handle());
+         HYPRE_CUSPARSE_CALL( cusparseDgthr(handle,
+                                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                            locl_data,
+                                            send_data,
+                                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                                            CUSPARSE_INDEX_BASE_ZERO) );
+#else
+         HYPRE_THRUST_CALL( gather,
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                            locl_data,
+                            send_data );
+#endif
+      }
+
 #elif defined(HYPRE_USING_SYCL)
       auto permuted_source = oneapi::dpl::make_permutation_iterator(locl_data,
                                                                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg));
@@ -253,6 +289,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                          permuted_source,
                          permuted_source + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                          send_data );
+
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       /* pack send data on device */
       HYPRE_Int i;
@@ -308,8 +345,13 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
-         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2( 1, comm_pkg, HYPRE_MEMORY_DEVICE, x_buf_data[jv],
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v3( 1, comm_pkg, HYPRE_MEMORY_DEVICE, x_buf_data[jv], hypre_ParCSRMatrixSendPinned(A),
+                                                            HYPRE_MEMORY_DEVICE, &x_tmp_data[jv * num_cols_offd], hypre_ParCSRMatrixRecvPinned(A) );
+#else
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2( 1, comm_pkg, HYPRE_MEMORY_DEVICE, x_buf_data[jv], 
                                                             HYPRE_MEMORY_DEVICE, &x_tmp_data[jv * num_cols_offd] );
+#endif
       }
    }
 
@@ -337,7 +379,12 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         hypre_ParCSRCommHandleDestroy_v3(comm_handle[jv]);
+#else
          hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
+#endif
+
          comm_handle[jv] = NULL;
       }
       hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
@@ -439,7 +486,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    HYPRE_Int num_vectors   = hypre_VectorNumVectors(y_local);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int ierr = 0;
-   HYPRE_Int num_sends, jv;
+   HYPRE_Int num_sends, num_recvs, jv;
 
    HYPRE_Int vecstride     = hypre_VectorVectorStride(y_local);
    HYPRE_Int idxstride     = hypre_VectorIndexStride(y_local);
@@ -504,6 +551,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    hypre_assert( num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg,
                                                                   hypre_ParCSRCommPkgNumRecvs(comm_pkg)) );
    hypre_assert( hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0) == 0 );
@@ -559,6 +607,28 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                                    persistent_comm_handle);
       hypre_SeqVectorSetDataOwner(y_tmp, 0);
 #endif
+   }
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int Nsends = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_Int Nrecvs = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
+   HYPRE_Int N = Nsends>Nrecvs ? Nsends : Nrecvs;
+   if (!hypre_ParCSRMatrixSendPinned(A))
+   {
+      char * temp = _hypre_TAlloc(char, N*sizeof(HYPRE_Complex), hypre_MEMORY_HOST_PINNED);
+      hypre_ParCSRMatrixSendPinned(A) = temp;
+   }
+   if (!hypre_ParCSRMatrixRecvPinned(A))
+   {
+      char * temp = _hypre_TAlloc(char, N*sizeof(HYPRE_Complex), hypre_MEMORY_HOST_PINNED);
+      hypre_ParCSRMatrixRecvPinned(A) = temp;
+   }
+
+   /* Reassign the pointer of the first SpMV output so that kernel writes data directly into the Pinned memory buffer */
+   if (N)
+   {
+       hypre_VectorData(y_tmp) = (HYPRE_Complex *)hypre_HostGetDevicePointer(hypre_ParCSRMatrixSendPinned(A));
    }
 #endif
 
@@ -651,10 +721,15 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate_v3( 2, comm_pkg, HYPRE_MEMORY_DEVICE, &y_tmp_data[jv * num_cols_offd], hypre_ParCSRMatrixSendPinned(A),
+                                                            HYPRE_MEMORY_DEVICE, y_buf_data[jv], hypre_ParCSRMatrixRecvPinned(A) );
+#else
          /* this is where we assume multivectors are 'column' storage */
          comm_handle[jv] = hypre_ParCSRCommHandleCreate_v2( 2, comm_pkg, HYPRE_MEMORY_DEVICE,
                                                             &y_tmp_data[jv * num_cols_offd],
                                                             HYPRE_MEMORY_DEVICE, y_buf_data[jv] );
+#endif
       }
    }
 
@@ -690,7 +765,11 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       for ( jv = 0; jv < num_vectors; ++jv )
       {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         hypre_ParCSRCommHandleDestroy_v3(comm_handle[jv]);
+#else
          hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
+#endif
          comm_handle[jv] = NULL;
       }
       hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
