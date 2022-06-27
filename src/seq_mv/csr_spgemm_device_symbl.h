@@ -178,7 +178,7 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int           istart_a,
 template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_RIND,
           bool CAN_FAIL, char HASHTYPE, bool HAS_GHASH>
 __global__ void
-hypre_spgemm_symbolic( hypre_Item                   &item,
+hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
                        const HYPRE_Int               M,
                        const HYPRE_Int* __restrict__ rind,
                        const HYPRE_Int* __restrict__ ia,

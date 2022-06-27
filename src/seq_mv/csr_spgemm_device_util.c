@@ -134,7 +134,7 @@ hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
 }
 
 __global__ void
-hypre_SpGemmGhashSize( hypre_Item &item,
+hypre_SpGemmGhashSize( hypre_DeviceItem &item,
                        HYPRE_Int  num_rows,
                        HYPRE_Int *row_id,
                        HYPRE_Int  num_ghash,

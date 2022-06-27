@@ -97,7 +97,7 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &
    {
       /* lane = warp_lane
        * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
-      hypre_Item item;
+      hypre_DeviceItem item;
       const HYPRE_Int lane = hypre_gpu_get_lane_id<2>(item);
 
       if (lane < 2)
@@ -132,7 +132,7 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1)
    {
       /* lane = warp_lane
        * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
-      hypre_Item item;
+      hypre_DeviceItem item;
       const HYPRE_Int lane = hypre_gpu_get_lane_id<2>(item);
 
       if (!lane)
@@ -182,7 +182,7 @@ T group_reduce_sum(T in, volatile T *s_WarpData)
 
    T out = warp_reduce_sum(in);
 
-   hypre_Item item;
+   hypre_DeviceItem item;
    const HYPRE_Int warp_lane_id = hypre_gpu_get_lane_id<2>(item);
    const HYPRE_Int warp_id = hypre_cuda_get_warp_id<3>();
 

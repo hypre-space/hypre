@@ -72,7 +72,7 @@ struct hypre_device_allocator
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_CUDA)
-using hypre_Item = void*;
+using hypre_DeviceItem = void*;
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
@@ -111,7 +111,7 @@ using hypre_Item = void*;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_HIP)
-using hypre_Item = void*;
+using hypre_DeviceItem = void*;
 #include <hip/hip_runtime.h>
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -166,7 +166,7 @@ using namespace thrust::placeholders;
 /* The following definitions facilitate code reuse and limits
  * if/def-ing when unifying cuda/hip code with sycl code */
 using dim3 = sycl::range<1>;
-using hypre_Item = sycl::nd_item<1>;
+using hypre_DeviceItem = sycl::nd_item<1>;
 #define __global__
 #define __host__
 #define __device__
@@ -232,7 +232,7 @@ using hypre_Item = sycl::nd_item<1>;
    }                                                                                                                                \
    else                                                                                                                             \
    {                                                                                                                                \
-      hypre_Item item = NULL;                                                                                                       \
+      hypre_DeviceItem item = NULL;                                                                                                       \
       (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (item, __VA_ARGS__);     \
       GPU_LAUNCH_SYNC;                                                                                                              \
    }                                                                                                                                \
@@ -255,7 +255,7 @@ using hypre_Item = sycl::nd_item<1>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_Item item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]            \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]            \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -742,7 +742,7 @@ hypre_int hypre_cuda_get_warp_id()
 /* return the thread lane id in warp */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_lane_id(hypre_Item &item)
+hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
    return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE - 1);
 }
@@ -795,7 +795,7 @@ hypre_int hypre_cuda_get_grid_num_threads()
 /* return the flattened thread id in grid */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_grid_thread_id(hypre_Item &item)
+hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
    return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_threads<bdim>() +
           hypre_cuda_get_thread_id<bdim>();
@@ -812,7 +812,7 @@ hypre_int hypre_cuda_get_grid_num_warps()
 /* return the flattened warp id in grid */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_grid_warp_id(hypre_Item &item)
+hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
    return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
           hypre_cuda_get_warp_id<bdim>();
@@ -938,14 +938,14 @@ T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 }
 
 static __device__ __forceinline__
-hypre_int warp_any_sync(hypre_Item &item, unsigned mask, hypre_int predicate)
+hypre_int warp_any_sync(hypre_DeviceItem &item, unsigned mask, hypre_int predicate)
 {
    return __any_sync(mask, predicate);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
 {
    return __shfl_sync(mask, val, src_line);
 }
@@ -1219,7 +1219,7 @@ struct print_functor
 /* WM: todo - only supports bdim = gdim = 1 */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_grid_thread_id(hypre_Item &item)
+hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
    return static_cast<HYPRE_Int>(item.get_global_linear_id());
 }
@@ -1228,7 +1228,7 @@ hypre_int hypre_gpu_get_grid_thread_id(hypre_Item &item)
 /* WM: todo - only supports bdim = gdim = 1 */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_grid_warp_id(hypre_Item &item)
+hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
    return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
           item.get_sub_group().get_group_linear_id();
@@ -1237,21 +1237,21 @@ hypre_int hypre_gpu_get_grid_warp_id(hypre_Item &item)
 /* return the thread lane id in warp */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_lane_id(hypre_Item &item)
+hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
    sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
 }
 
 static __device__ __forceinline__
-hypre_int warp_any_sync(hypre_Item &item, unsigned mask, hypre_int predicate)
+hypre_int warp_any_sync(hypre_DeviceItem &item, unsigned mask, hypre_int predicate)
 {
    return sycl::any_of_group(item.get_sub_group(), predicate);
 }
 
 template <typename T>
 static __device__ __forceinline__
-T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
 {
    /* WM: NOTE - seems that barrier is required in order to produce correct results here, but I don't know why... */
    /* this may be a bug in the underlying sycl implementation that needs to be fixed */
@@ -1552,7 +1552,7 @@ T blockReduceSum(T val)
 
 template<typename T>
 __global__ void
-OneBlockReduceKernel(hypre_Item &item, T *arr, HYPRE_Int N)
+OneBlockReduceKernel(hypre_DeviceItem &item, T *arr, HYPRE_Int N)
 {
    T sum;
    sum = 0.0;
