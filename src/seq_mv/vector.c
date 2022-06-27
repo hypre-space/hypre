@@ -672,7 +672,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       }
       else if (num_vectors_x == 2 && num_vectors_y == 2 && num_vectors_b == 1)
       {
-         hypreDevice_IVAMXPMY(size, num_vectors_x, b_data, x_data, y_data);
+         hypreDevice_IVAMXPMY(num_vectors_x, size, b_data, x_data, y_data);
       }
       else
       {
