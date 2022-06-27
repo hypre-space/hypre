@@ -19,7 +19,7 @@
       const T val = d_a ? read_only_load(&d_a[p]) : 1.0;             \
       for (HYPRE_Int i = 0; i < NV; i++)                             \
       {                                                              \
-         sum[i] += val * read_only_load(&d_x[col + i * n]);          \
+         sum[i] += val * read_only_load(&d_x[col + i * ncols]);      \
       }                                                              \
    }                                                                 \
    else if (F == -1)                                                 \
@@ -29,7 +29,7 @@
          const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
          for (HYPRE_Int i = 0; i < NV; i++)                          \
          {                                                           \
-            sum[i] += val * read_only_load(&d_x[col + i * n]);       \
+            sum[i] += val * read_only_load(&d_x[col + i * ncols]);   \
          }                                                           \
       }                                                              \
    }                                                                 \
@@ -40,7 +40,7 @@
          const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
          for (HYPRE_Int i = 0; i < NV; i++)                          \
          {                                                           \
-            sum[i] += val * read_only_load(&d_x[col + i * n]);       \
+            sum[i] += val * read_only_load(&d_x[col + i * ncols]);   \
          }                                                           \
       }                                                              \
    }                                                                 \
@@ -51,7 +51,7 @@
          const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
          for (HYPRE_Int i = 0; i < NV; i++)                          \
          {                                                           \
-            sum[i] += val * read_only_load(&d_x[col + i * n]);       \
+            sum[i] += val * read_only_load(&d_x[col + i * ncols]);   \
          }                                                           \
       }                                                              \
    }                                                                 \
@@ -62,7 +62,7 @@
          const T val = d_a ? read_only_load(&d_a[p]) : 1.0;          \
          for (HYPRE_Int i = 0; i < NV; i++)                          \
          {                                                           \
-            sum[i] += val * read_only_load(&d_x[col + i * n]);       \
+            sum[i] += val * read_only_load(&d_x[col + i * ncols]);   \
          }                                                           \
       }                                                              \
    }                                                                 \
@@ -75,7 +75,7 @@
       const HYPRE_Int num_groups_per_block = HYPRE_SPMV_BLOCKDIM / group_size;                      \
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);                   \
       HYPRE_GPU_LAUNCH( (hypreGPUKernel_CSRMatvecShuffle<F, group_size, num_vectors, HYPRE_Real>),  \
-                        gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );        \
+                        gDim, bDim, nrows, ncols, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind ); \
    }                                                                                                \
    else if (avg_rownnz >= 32)                                                                       \
    {                                                                                                \
@@ -83,7 +83,7 @@
       const HYPRE_Int num_groups_per_block = HYPRE_SPMV_BLOCKDIM / group_size;                      \
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);                   \
       HYPRE_GPU_LAUNCH( (hypreGPUKernel_CSRMatvecShuffle<F, group_size, num_vectors, HYPRE_Real>),  \
-                        gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );        \
+                        gDim, bDim, nrows, ncols, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind ); \
    }                                                                                                \
    else if (avg_rownnz >= 16)                                                                       \
    {                                                                                                \
@@ -91,7 +91,7 @@
       const HYPRE_Int num_groups_per_block = HYPRE_SPMV_BLOCKDIM / group_size;                      \
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);                   \
       HYPRE_GPU_LAUNCH( (hypreGPUKernel_CSRMatvecShuffle<F, group_size, num_vectors, HYPRE_Real>),  \
-                        gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );        \
+                        gDim, bDim, nrows, ncols, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind ); \
    }                                                                                                \
    else if (avg_rownnz >= 8)                                                                        \
    {                                                                                                \
@@ -99,7 +99,7 @@
       const HYPRE_Int num_groups_per_block = HYPRE_SPMV_BLOCKDIM / group_size;                      \
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);                   \
       HYPRE_GPU_LAUNCH( (hypreGPUKernel_CSRMatvecShuffle<F, group_size, num_vectors, HYPRE_Real>),  \
-                        gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );        \
+                        gDim, bDim, nrows, ncols, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind ); \
    }                                                                                                \
    else                                                                                             \
    {                                                                                                \
@@ -107,7 +107,7 @@
       const HYPRE_Int num_groups_per_block = HYPRE_SPMV_BLOCKDIM / group_size;                      \
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);                   \
       HYPRE_GPU_LAUNCH( (hypreGPUKernel_CSRMatvecShuffle<F, group_size, num_vectors, HYPRE_Real>),  \
-                        gDim, bDim, nrows, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind );        \
+                        gDim, bDim, nrows, ncols, alpha, d_ia, d_ja, d_a, d_x, beta, d_y, d_yind ); \
    }
 
 #endif

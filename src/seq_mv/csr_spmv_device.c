@@ -33,7 +33,8 @@
 
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
-hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
+hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     nrows,
+                                HYPRE_Int     ncols,
                                 T             alpha,
                                 HYPRE_Int    *d_ia,
                                 HYPRE_Int    *d_ja,
@@ -50,11 +51,11 @@ hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
    const HYPRE_Int  warp_group_id = warp_lane / K;
    const HYPRE_Int  warp_ngroups  = HYPRE_WARP_SIZE / K;
 
-   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
+   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < nrows); grid_group_id += grid_ngroups)
    {
 #if 0
       HYPRE_Int p = 0, q = 0;
-      if (grid_group_id < n && group_lane < 2)
+      if (grid_group_id < nrows && group_lane < 2)
       {
          p = read_only_load(&d_ia[grid_group_id + group_lane]);
       }
@@ -63,7 +64,7 @@ hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
 #else
       const HYPRE_Int s = grid_group_id - warp_group_id + warp_lane;
       HYPRE_Int p = 0, q = 0;
-      if (s <= n && warp_lane <= warp_ngroups)
+      if (s <= nrows && warp_lane <= warp_ngroups)
       {
          p = read_only_load(&d_ia[s]);
       }
@@ -109,7 +110,7 @@ hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
          }
       }
 
-      if (grid_group_id < n && group_lane == 0)
+      if (grid_group_id < nrows && group_lane == 0)
       {
          HYPRE_Int row = d_yind ? read_only_load(&d_yind[grid_group_id]) : grid_group_id;
          if (beta)
@@ -117,7 +118,7 @@ hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
 #pragma unroll
             for (HYPRE_Int i = 0; i < NV; i++)
             {
-               d_y[row + i * n] = alpha * sum[i] + beta * d_y[row + i * n];
+               d_y[row + i * nrows] = alpha * sum[i] + beta * d_y[row + i * nrows];
             }
          }
          else
@@ -125,7 +126,7 @@ hypreGPUKernel_CSRMatvecShuffle(HYPRE_Int     n,
 #pragma unroll
             for (HYPRE_Int i = 0; i < NV; i++)
             {
-               d_y[row + i * n] = alpha * sum[i];
+               d_y[row + i * nrows] = alpha * sum[i];
             }
          }
       }
@@ -149,6 +150,7 @@ template <HYPRE_Int F>
 HYPRE_Int
 hypreDevice_CSRMatrixMatvec( HYPRE_Int      num_vectors,
                              HYPRE_Int      nrows,
+                             HYPRE_Int      ncols,
                              HYPRE_Int      num_nonzeros,
                              HYPRE_Complex  alpha,
                              HYPRE_Int     *d_ia,
@@ -220,6 +222,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
 {
    /* Input data variables */
    HYPRE_Int        nrows        = trans ? hypre_CSRMatrixNumCols(B) : hypre_CSRMatrixNumRows(B);
+   HYPRE_Int        ncols        = trans ? hypre_CSRMatrixNumRows(B) : hypre_CSRMatrixNumCols(B);
    HYPRE_Int        num_nonzeros = hypre_CSRMatrixNumNonzeros(B);
    HYPRE_Int        num_vectors  = hypre_VectorNumVectors(x);
    HYPRE_Complex   *d_x          = hypre_VectorData(x);
@@ -272,31 +275,31 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    {
       case -2:
          /* Strict lower matrix */
-         hypreDevice_CSRMatrixMatvec<-2>(num_vectors, nrows, num_nonzeros, alpha,
+         hypreDevice_CSRMatrixMatvec<-2>(num_vectors, nrows, ncols, num_nonzeros, alpha,
                                          d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
          break;
 
       case -1:
          /* Lower matrix */
-         hypreDevice_CSRMatrixMatvec<-1>(num_vectors, nrows, num_nonzeros, alpha,
+         hypreDevice_CSRMatrixMatvec<-1>(num_vectors, nrows, ncols, num_nonzeros, alpha,
                                          d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
          break;
 
       case 0:
          /* Whole matrix */
-         hypreDevice_CSRMatrixMatvec<0>(num_vectors, nrows, num_nonzeros, alpha,
+         hypreDevice_CSRMatrixMatvec<0>(num_vectors, nrows, ncols, num_nonzeros, alpha,
                                         d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
          break;
 
       case 1:
          /* Upper matrix */
-         hypreDevice_CSRMatrixMatvec<1>(num_vectors, nrows, num_nonzeros, alpha,
+         hypreDevice_CSRMatrixMatvec<1>(num_vectors, nrows, ncols, num_nonzeros, alpha,
                                         d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
          break;
 
       case 2:
          /* Strict upper matrix */
-         hypreDevice_CSRMatrixMatvec<2>(num_vectors, nrows, num_nonzeros, alpha,
+         hypreDevice_CSRMatrixMatvec<2>(num_vectors, nrows, ncols, num_nonzeros, alpha,
                                         d_ia, d_ja, d_a, d_x, beta, d_y, y_ind);
          break;
 
