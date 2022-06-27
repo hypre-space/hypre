@@ -19,7 +19,7 @@
 template HYPRE_Int
 hypre_spgemm_numerical_with_rownnz
 < HYPRE_SPGEMM_BIN, NUMER_HASH_SIZE[HYPRE_SPGEMM_BIN], T_GROUP_SIZE[HYPRE_SPGEMM_BIN], true >
-( hypre_Item &item, HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
+( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
   HYPRE_Int exact_rownnz,
   HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
   HYPRE_Complex *d_b,
@@ -29,7 +29,7 @@ hypre_spgemm_numerical_with_rownnz
 template HYPRE_Int
 hypre_spgemm_numerical_with_rownnz
 < HYPRE_SPGEMM_BIN, NUMER_HASH_SIZE[HYPRE_SPGEMM_BIN], T_GROUP_SIZE[HYPRE_SPGEMM_BIN], false >
-( hypre_Item &item, HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
+( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash,
   HYPRE_Int exact_rownnz,
   HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
   HYPRE_Complex *d_b,
@@ -39,7 +39,7 @@ hypre_spgemm_numerical_with_rownnz
 template HYPRE_Int
 hypre_spgemm_numerical_max_num_blocks
 < NUMER_HASH_SIZE[HYPRE_SPGEMM_BIN], T_GROUP_SIZE[HYPRE_SPGEMM_BIN] >
-( hypre_Item &item, HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
+( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
 
 #if HYPRE_SPGEMM_BIN == 5
 template HYPRE_Int
