@@ -76,7 +76,9 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorInitialize
+ * hypre_SeqVectorInitialize_v2
+ *
+ * Initialize a vector on a given memory_location
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -116,6 +118,10 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorInitialize
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SeqVectorInitialize( hypre_Vector *vector )
 {
@@ -131,6 +137,25 @@ hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
                              HYPRE_Int     owns_data   )
 {
    hypre_VectorOwnsData(vector) = owns_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorSetSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetSize( hypre_Vector *vector,
+                        HYPRE_Int     size   )
+{
+   HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
+
+   hypre_VectorSize(vector) = size;
+   if (multivec_storage_method == 0)
+   {
+      hypre_VectorVectorStride(vector) = size;
+   }
 
    return hypre_error_flag;
 }
@@ -323,7 +348,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorSetRandomValues
  *
- *     returns vector of values randomly distributed between -1.0 and +1.0
+ * returns vector of values randomly distributed between -1.0 and +1.0
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -438,7 +463,7 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
    hypre_VectorMemoryLocation(y) = hypre_VectorMemoryLocation(x);
 
    hypre_VectorData(y) = hypre_VectorData(x);
-   hypre_SeqVectorSetDataOwner( y, 0 );
+   hypre_SeqVectorSetDataOwner(y, 0);
    hypre_SeqVectorInitialize(y);
 
    return y;
@@ -447,6 +472,7 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorScale
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SeqVectorScale( HYPRE_Complex alpha,
                       hypre_Vector *y )

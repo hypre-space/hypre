@@ -112,7 +112,9 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorInitialize
+ * hypre_ParVectorInitialize_v2
+ *
+ * Initialize a hypre_ParVector on a given memory_location
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -129,6 +131,10 @@ hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memo
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorInitialize
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorInitialize( hypre_ParVector *vector )
@@ -150,6 +156,21 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
       return hypre_error_flag;
    }
    hypre_ParVectorOwnsData(vector) = owns_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorSetSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector,
+                             HYPRE_Int        local_size )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_SeqVectorSetSize(local_vector, local_size);
 
    return hypre_error_flag;
 }
