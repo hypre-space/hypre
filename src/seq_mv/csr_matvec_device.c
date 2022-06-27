@@ -81,9 +81,13 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_GpuProfilingPushRange("CSRMatrixMatvec");
 #endif
+   HYPRE_Int   num_vectors = hypre_VectorNumVectors(x);
 
    // TODO: RL: do we need offset > 0 at all?
    hypre_assert(offset == 0);
+
+   // VPM: offset > 0 does not work with multivectors. Remove offset? See comment above
+   hypre_assert(!(offset != 0 && num_vectors > 1));
 
    HYPRE_Int nx = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
    HYPRE_Int ny = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
@@ -107,7 +111,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_TMemcpy( hypre_VectorData(y) + offset,
                      hypre_VectorData(b) + offset,
                      HYPRE_Complex,
-                     ny - offset,
+                     (ny - offset) * num_vectors,
                      hypre_VectorMemoryLocation(y),
                      hypre_VectorMemoryLocation(b) );
 
