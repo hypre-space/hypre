@@ -372,7 +372,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
          if (i >= vec_start && i <= vec_stop)
          {
             k = (HYPRE_Int)( i - vec_start);
-            data[k] = values[vecoffset + j * idxstride];
+            data[vecoffset + k * idxstride] = values[j];
          }
       }
    }
@@ -392,7 +392,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
 #endif
       for (j = 0; j < num_values; j++)
       {
-         data[j] = values[vecoffset + j * idxstride];
+         data[vecoffset + j * idxstride] = values[j];
       }
    }
 
