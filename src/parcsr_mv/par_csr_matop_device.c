@@ -15,7 +15,7 @@
 /* return B = [Adiag, Aoffd] */
 #if 1
 __global__ void
-hypreGPUKernel_ConcatDiagAndOffd( hypre_Item &item,
+hypreGPUKernel_ConcatDiagAndOffd( hypre_DeviceItem &item,
                                   HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
                                   HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
                                   HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
@@ -1153,7 +1153,7 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
  */
 template<HYPRE_Int type>
 __global__ void
-hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_Item &item,
+hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_DeviceItem &item,
                                                       HYPRE_Int      nrows,
                                                       HYPRE_Real     tol,
                                                       HYPRE_Int     *A_diag_i,

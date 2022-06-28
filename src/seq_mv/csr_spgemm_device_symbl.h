@@ -178,7 +178,8 @@ hypre_spgemm_compute_row_symbl( HYPRE_Int           istart_a,
 template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_RIND,
           bool CAN_FAIL, char HASHTYPE, bool HAS_GHASH>
 __global__ void
-hypre_spgemm_symbolic( const HYPRE_Int               M,
+hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
+                       const HYPRE_Int               M,
                        const HYPRE_Int* __restrict__ rind,
                        const HYPRE_Int* __restrict__ ia,
                        const HYPRE_Int* __restrict__ ja,
@@ -196,9 +197,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M,
    /* group id in the grid */
    volatile const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups() + group_id;
    /* lane id inside the group */
-   volatile const HYPRE_Int lane_id = get_lane_id();
-   /* lane id inside the warp */
-   volatile const HYPRE_Int warp_lane_id = get_warp_lane_id();
+   volatile const HYPRE_Int lane_id = get_group_lane_id();
    /* shared memory hash table */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
@@ -220,9 +219,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M,
 
       if (HAS_RIND)
       {
-         group_read<GROUP_SIZE>(rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
-                                ii,
-                                GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane_id : lane_id);
+         group_read<GROUP_SIZE>(rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, ii);
       }
       else
       {
@@ -235,8 +232,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M,
       if (HAS_GHASH)
       {
          group_read<GROUP_SIZE>(ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
-                                istart_g, iend_g,
-                                GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane_id : lane_id);
+                                istart_g, iend_g);
 
          /* size of global hash table allocated for this row
            (must be power of 2 and >= the actual size of the row of C - shmem hash size) */
@@ -265,9 +261,7 @@ hypre_spgemm_symbolic( const HYPRE_Int               M,
       HYPRE_Int istart_a = 0, iend_a = 0;
 
       /* load the start and end position of row ii of A */
-      group_read<GROUP_SIZE>(ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
-                             istart_a, iend_a,
-                             GROUP_SIZE >= HYPRE_WARP_SIZE ? warp_lane_id : lane_id);
+      group_read<GROUP_SIZE>(ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_a, iend_a);
 
       /* work with two hash tables */
       HYPRE_Int jsum;

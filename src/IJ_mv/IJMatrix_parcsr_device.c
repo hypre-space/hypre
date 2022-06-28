@@ -17,7 +17,7 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
-hypreCUDAKernel_IJMatrixValues_dev1(hypre_Item &item, HYPRE_Int n, HYPRE_Int *rowind,
+hypreCUDAKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
                                     HYPRE_Int *row_ptr,
                                     HYPRE_Int *row_len, HYPRE_Int *mark)
 {

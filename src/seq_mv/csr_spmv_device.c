@@ -64,7 +64,7 @@
 /* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <HYPRE_Int F, HYPRE_Int K, typename T>
 __global__ void
-hypre_csr_v_k_shuffle(hypre_Item &item,
+hypre_csr_v_k_shuffle(hypre_DeviceItem &item,
                       HYPRE_Int  n,
                       HYPRE_Int *row_id,
                       T          alpha,
@@ -105,8 +105,8 @@ hypre_csr_v_k_shuffle(hypre_Item &item,
       {
          p = read_only_load(&d_ia[grid_row_id + group_lane]);
       }
-      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, K);
-      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, K);
+      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
+      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
 
       T sum = 0.0;
 #if VERSION == 1

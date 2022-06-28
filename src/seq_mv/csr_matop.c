@@ -406,7 +406,7 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
       hypre_IntArraySize(&arr_B) = nnzrows_B;
       hypre_IntArrayMemoryLocation(&arr_C) = memory_location_C;
 
-      hypre_MergeOrderedArrays(&arr_A, &arr_B, &arr_C);
+      hypre_IntArrayMergeOrdered(&arr_A, &arr_B, &arr_C);
 
       nnzrows_C = hypre_IntArraySize(&arr_C);
       rownnz_C  = hypre_IntArrayData(&arr_C);

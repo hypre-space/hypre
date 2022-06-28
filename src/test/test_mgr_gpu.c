@@ -691,7 +691,6 @@ main( hypre_int argc,
       else
       {
          hypre_MGRBuildPDevice(parcsr_A, hypre_IntArrayData(CF_marker), coarse_pnts_global, 2, &P);
-         hypre_ParCSRMatrixMigrate(P, HYPRE_MEMORY_HOST);
          hypre_ParCSRMatrixPrintIJ(P, 0, 0, "P_device");
       }
 #endif

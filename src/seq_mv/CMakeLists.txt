@@ -59,6 +59,27 @@ set(SRCS
   vector.c
 )
 
+# Autogenerate csr_spgemm_device_numer$ files
+file(READ "csr_spgemm_device_numer.in" CONTENTS)
+foreach(number RANGE 1 10)
+  # Check if file exists, then don't recreate
+  set(fn "csr_spgemm_device_numer${number}.c")
+  if (NOT EXISTS ${fn})
+    file(WRITE ${fn} "#define HYPRE_SPGEMM_BIN ${number}")
+    file(APPEND ${fn} "${CONTENTS}")
+  endif (NOT EXISTS ${fn})
+endforeach(number RANGE 1 10)
+
+# Autogenerate csr_spgemm_device_symbl$ files
+file(READ "csr_spgemm_device_symbl.in" CONTENTS)
+foreach(number RANGE 1 10)
+  set(fn "csr_spgemm_device_symbl${number}.c")
+  if (NOT EXISTS ${fn})
+    file(WRITE ${fn} "#define HYPRE_SPGEMM_BIN ${number}")
+    file(APPEND ${fn} "${CONTENTS}")
+  endif (NOT EXISTS ${fn})
+endforeach(number RANGE 1 10)
+
 target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
