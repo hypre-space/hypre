@@ -308,8 +308,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
    q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
    p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int col = read_only_load(&A_diag_j[i]);
 
@@ -339,8 +338,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
    q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
    p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
       if ( num_functions == 1 ||
            read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
@@ -373,8 +371,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
    const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
                              ( num_functions == 1 || read_only_load(&dof_func[row]) ==
@@ -390,8 +387,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int cond = all_weak == 0 &&
                              ( num_functions == 1 || read_only_load(&dof_func[row]) ==
@@ -496,8 +492,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
    q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
    p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int col = read_only_load(&A_diag_j[i]);
 
@@ -526,8 +521,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
    q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
    p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
       if ( num_functions == 1 ||
            read_only_load(&dof_func[row]) == read_only_load(&dof_func_offd[read_only_load(&A_offd_j[i])]) )
@@ -548,7 +542,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
    const HYPRE_Real thresh = strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
+   for (HYPRE_Int i = p_diag + lane; i < q_diag;
         i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int cond = all_weak == 0 && diag_pos != i &&
@@ -565,8 +559,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
-        i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
       const HYPRE_Int cond = all_weak == 0 &&
                              ( num_functions == 1 || read_only_load(&dof_func[row]) ==

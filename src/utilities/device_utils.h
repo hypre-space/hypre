@@ -175,7 +175,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    }                                                                                                                                \
    else                                                                                                                             \
    {                                                                                                                                \
-      hypre_DeviceItem item = NULL;                                                                                                       \
+      hypre_DeviceItem item = NULL;                                                                                                 \
       (kernel_name) <<< (gridsize), (blocksize), shmem_size, hypre_HandleComputeStream(hypre_handle()) >>> (item, __VA_ARGS__);     \
       GPU_LAUNCH_SYNC;                                                                                                              \
    }                                                                                                                                \
@@ -198,7 +198,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]            \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -215,7 +215,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    else                                                                                      \
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
-         auto debug_stream = sycl::stream(4096, 1024, cgh);                                   \
+         auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
          cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
             [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
@@ -895,14 +895,7 @@ T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_
 
 template <typename T>
 static __device__ __forceinline__
-T warp_shuffle_sync(hypre_Item &item, unsigned mask, T val, hypre_int src_line)
-{
-   return __shfl_sync(mask, val, src_line);
-}
-
-template <typename T>
-static __device__ __forceinline__
-T warp_reduce_sum(hypre_Item &item, T in)
+T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -914,7 +907,7 @@ T warp_reduce_sum(hypre_Item &item, T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_allreduce_sum(hypre_Item &item, T in)
+T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -926,7 +919,7 @@ T warp_allreduce_sum(hypre_Item &item, T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_reduce_max(hypre_Item &item, T in)
+T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -938,7 +931,7 @@ T warp_reduce_max(hypre_Item &item, T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_allreduce_max(hypre_Item &item, T in)
+T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -950,7 +943,7 @@ T warp_allreduce_max(hypre_Item &item, T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_reduce_min(hypre_Item &item, T in)
+T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -962,7 +955,7 @@ T warp_reduce_min(hypre_Item &item, T in)
 
 template <typename T>
 static __device__ __forceinline__
-T warp_allreduce_min(hypre_Item &item, T in)
+T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
@@ -1208,6 +1201,96 @@ T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_
    item.get_sub_group().barrier();
    return item.get_sub_group().shuffle(val, src_line);
 }
+
+template <typename T>
+static __forceinline__
+T warp_reduce_sum(hypre_DeviceItem &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in += item.get_sub_group().shuffle_down(in, d);
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_sum(hypre_DeviceItem &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in += item.get_sub_group().shuffle_xor(in, d);
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_reduce_max(hypre_DeviceItem &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, item.get_sub_group().shuffle_down(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_max(hypre_DeviceItem &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::max(in, item.get_sub_group().shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_reduce_min(hypre_DeviceItem &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, item.get_sub_group().shuffle_down(in, d));
+   }
+   return in;
+}
+
+template <typename T>
+static __forceinline__
+T warp_allreduce_min(hypre_DeviceItem &item, T in)
+{
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      in = std::min(in, item.get_sub_group().shuffle_xor(in, d));
+   }
+   return in;
+}
+
+template<typename T>
+struct is_negative
+{
+   is_negative() {}
+
+   constexpr bool operator()(const T &x) const { return (x < 0); }
+};
+
+template<typename T>
+struct is_positive
+{
+   is_positive() {}
+
+   constexpr bool operator()(const T &x) const { return (x > 0); }
+};
+
+template<typename T>
+struct is_nonnegative
+{
+   is_nonnegative() {}
+
+   constexpr bool operator()(const T &x) const { return (x >= 0); }
+};
 
 template<typename T>
 struct in_range
