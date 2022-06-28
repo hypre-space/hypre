@@ -396,9 +396,20 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
    nnzrows_C = nrows_A;
    if ((nnzrows_A < nrows_A) && (nnzrows_B < nrows_B))
    {
-      hypre_MergeOrderedArrays(nnzrows_A, rownnz_A,
-                               nnzrows_B, rownnz_B,
-                               &nnzrows_C, &rownnz_C);
+      hypre_IntArray arr_A;
+      hypre_IntArray arr_B;
+      hypre_IntArray arr_C;
+
+      hypre_IntArrayData(&arr_A) = rownnz_A;
+      hypre_IntArrayData(&arr_B) = rownnz_B;
+      hypre_IntArraySize(&arr_A) = nnzrows_A;
+      hypre_IntArraySize(&arr_B) = nnzrows_B;
+      hypre_IntArrayMemoryLocation(&arr_C) = memory_location_C;
+
+      hypre_MergeOrderedArrays(&arr_A, &arr_B, &arr_C);
+
+      nnzrows_C = hypre_IntArraySize(&arr_C);
+      rownnz_C  = hypre_IntArrayData(&arr_C);
    }
    else
    {
@@ -1282,6 +1293,8 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
       ierr = hypre_CSRMatrixTransposeHost(A, AT, data);
    }
 
+   hypre_CSRMatrixSetPatternOnly(*AT, hypre_CSRMatrixPatternOnly(A));
+
    return ierr;
 }
 
@@ -1851,7 +1864,7 @@ hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
          }
          else if (type == 1)
          {
-            row_sum_i += scal * fabs(A_data[j]);
+            row_sum_i += scal * hypre_cabs(A_data[j]);
          }
          else if (type == 2)
          {
@@ -1926,7 +1939,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 1)
             {
-               d_i = fabs(A_data[j]);
+               d_i = hypre_cabs(A_data[j]);
             }
             else if (type == 2)
             {
@@ -1938,7 +1951,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 4)
             {
-               d_i = 1.0 / (sqrt(fabs(A_data[j])));
+               d_i = 1.0 / (sqrt(hypre_cabs(A_data[j])));
             }
             break;
          }
@@ -2079,4 +2092,3 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    return hypre_error_flag;
 }
-

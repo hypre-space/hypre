@@ -14,42 +14,30 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 __global__ void
-hypreCUDAKernel_IndepSetMain(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int   graph_diag_size,
-   HYPRE_Int  *graph_diag,
-   HYPRE_Real *measure_diag,
-   HYPRE_Real *measure_offd,
-   HYPRE_Int  *S_diag_i,
-   HYPRE_Int  *S_diag_j,
-   HYPRE_Int  *S_offd_i,
-   HYPRE_Int  *S_offd_j,
-   HYPRE_Int  *IS_marker_diag,
-   HYPRE_Int  *IS_marker_offd,
-   HYPRE_Int   IS_offd_temp_mark)
+hypreCUDAKernel_IndepSetMain(hypre_Item &item,
+                             HYPRE_Int   graph_diag_size,
+                             HYPRE_Int  *graph_diag,
+                             HYPRE_Real *measure_diag,
+                             HYPRE_Real *measure_offd,
+                             HYPRE_Int  *S_diag_i,
+                             HYPRE_Int  *S_diag_j,
+                             HYPRE_Int  *S_offd_i,
+                             HYPRE_Int  *S_offd_j,
+                             HYPRE_Int  *IS_marker_diag,
+                             HYPRE_Int  *IS_marker_offd,
+                             HYPRE_Int   IS_offd_temp_mark)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int warp_id = hypre_sycl_get_grid_warp_id(item);
-#else
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
+   HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (warp_id >= graph_diag_size)
    {
       return;
    }
 
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   HYPRE_Int lane = SG.get_local_linear_id();
-#else
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-#endif
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int row, row_start, row_end;
-   HYPRE_Int i, j;
-   HYPRE_Real t, measure_row;
+   HYPRE_Int i = 0, j;
+   HYPRE_Real t = 0.0, measure_row;
    HYPRE_Int marker_row = 1;
 
    if (lane < 2)
@@ -58,26 +46,15 @@ hypreCUDAKernel_IndepSetMain(
       i   = read_only_load(S_diag_i + row + lane);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   row_start = SG.shuffle(i, 0);
-   row_end   = SG.shuffle(i, 1);
-#else
-   row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
-#endif
+   row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+   row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
    if (lane == 0)
    {
       t = read_only_load(measure_diag + row);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   measure_row = SG.shuffle(t, 0);
-#else
-   measure_row = __shfl_sync(HYPRE_WARP_FULL_MASK, t, 0);
-#endif
+   measure_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, 0);
 
    for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
    {
@@ -100,14 +77,9 @@ hypreCUDAKernel_IndepSetMain(
    {
       i = read_only_load(S_offd_i + row + lane);
    }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   row_start = SG.shuffle(i, 0);
-   row_end   = SG.shuffle(i, 1);
-#else
-   row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
-#endif
+
+   row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+   row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
    for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
    {
@@ -126,11 +98,7 @@ hypreCUDAKernel_IndepSetMain(
       }
    }
 
-#if defined(HYPRE_USING_SYCL)
-   marker_row = warp_reduce_min(marker_row, SG);
-#else
-   marker_row = warp_reduce_min(marker_row);
-#endif
+   marker_row = warp_reduce_min(item, marker_row);
 
    if (lane == 0 && marker_row == 0)
    {
@@ -139,21 +107,14 @@ hypreCUDAKernel_IndepSetMain(
 }
 
 __global__ void
-hypreCUDAKernel_IndepSetFixMarker(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int  *IS_marker_diag,
-   HYPRE_Int   num_elmts_send,
-   HYPRE_Int  *send_map_elmts,
-   HYPRE_Int  *int_send_buf,
-   HYPRE_Int   IS_offd_temp_mark)
+hypreCUDAKernel_IndepSetFixMarker(hypre_Item &item,
+                                  HYPRE_Int  *IS_marker_diag,
+                                  HYPRE_Int   num_elmts_send,
+                                  HYPRE_Int  *send_map_elmts,
+                                  HYPRE_Int  *int_send_buf,
+                                  HYPRE_Int   IS_offd_temp_mark)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   HYPRE_Int thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (thread_id >= num_elmts_send)
    {
@@ -249,7 +210,6 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
                                    HYPRE_Real         *measure_array,
                                    HYPRE_Int           aug_rand)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGIndepSetInitDevice()\n");
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
    hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
    HYPRE_Int        num_rows_diag = hypre_CSRMatrixNumRows(S_diag);
@@ -289,7 +249,6 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGIndepSetInitDevice()\n");
    return hypre_error_flag;
 }
 

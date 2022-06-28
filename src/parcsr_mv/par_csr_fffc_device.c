@@ -230,12 +230,12 @@ struct FF_pred : public thrust::unary_function<Tuple, bool>
       if (option == 1)
       {
          /* A_{F,F} */
-         return row_CF_marker[i] <   0 && (j == -2 || j >= 0 && col_CF_marker[j] < 0);
+         return row_CF_marker[i] <   0 && (j == -2 || (j >= 0 && col_CF_marker[j] < 0));
       }
       else
       {
          /* A_{F2, F} */
-         return row_CF_marker[i] == -2 && (j == -2 || j >= 0 && col_CF_marker[j] < 0);
+         return row_CF_marker[i] == -2 && (j == -2 || (j >= 0 && col_CF_marker[j] < 0));
       }
    }
 };
@@ -305,7 +305,7 @@ struct CC_pred : public thrust::unary_function<Tuple, bool>
       const HYPRE_Int i = thrust::get<0>(t);
       const HYPRE_Int j = thrust::get<1>(t);
 
-      return row_CF_marker[i] >= 0 && (j == -2 || j >= 0 && col_CF_marker[j] >= 0);
+      return row_CF_marker[i] >= 0 && (j == -2 || (j >= 0 && col_CF_marker[j] >= 0));
    }
 };
 

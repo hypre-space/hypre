@@ -12,50 +12,31 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 __global__ void
-hypreCUDAKernel_InterpTruncation(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int   nrows,
-   HYPRE_Real  trunc_factor,
-   HYPRE_Int   max_elmts,
-   HYPRE_Int  *P_i,
-   HYPRE_Int  *P_j,
-   HYPRE_Real *P_a)
+hypreCUDAKernel_InterpTruncation( hypre_Item &item,
+                                  HYPRE_Int   nrows,
+                                  HYPRE_Real  trunc_factor,
+                                  HYPRE_Int   max_elmts,
+                                  HYPRE_Int  *P_i,
+                                  HYPRE_Int  *P_j,
+                                  HYPRE_Real *P_a)
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
-#else
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int lane = SG.get_local_linear_id();
-#else
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-#endif
-   HYPRE_Int p, q;
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item), p = 0, q;
 
    /* 1. compute row max, rowsum */
    if (lane < 2)
    {
       p = read_only_load(P_i + row + lane);
    }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   q = SG.shuffle(p, 1);
-   p = SG.shuffle(p, 0);
-#else
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-#endif
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    for (HYPRE_Int i = p + lane; i < q; i += HYPRE_WARP_SIZE)
    {
@@ -64,29 +45,16 @@ hypreCUDAKernel_InterpTruncation(
       row_sum += v;
    }
 
-#if defined(HYPRE_USING_SYCL)
-   row_max = warp_allreduce_max(row_max, SG) * trunc_factor;
-   row_sum = warp_allreduce_sum(row_sum, SG);
-#else
-   row_max = warp_allreduce_max(row_max) * trunc_factor;
-   row_sum = warp_allreduce_sum(row_sum);
-#endif
+   row_max = warp_allreduce_max(item, row_max) * trunc_factor;
+   row_sum = warp_allreduce_sum(item, row_sum);
 
    /* 2. mark dropped entries by -1 in P_j, and compute row_scal */
    HYPRE_Int last_pos = -1;
-#if defined(HYPRE_USING_SYCL)
-   for (HYPRE_Int i = p + lane; sycl::any_of_group(SG, i < q); i += HYPRE_WARP_SIZE)
-#else
-   for (HYPRE_Int i = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
-#endif
+   for (HYPRE_Int i = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
    {
       HYPRE_Int cond = 0, cond_prev;
 
-#if defined(HYPRE_USING_SYCL)
-      cond_prev = i == p + lane || warp_allreduce_min(cond, SG);
-#else
-      cond_prev = i == p + lane || warp_allreduce_min(cond);
-#endif
+      cond_prev = i == p + lane || warp_allreduce_min(item, cond);
 
       if (i < q)
       {
@@ -110,11 +78,7 @@ hypreCUDAKernel_InterpTruncation(
       }
    }
 
-#if defined(HYPRE_USING_SYCL)
-   row_scal = warp_allreduce_sum(row_scal, SG);
-#else
-   row_scal = warp_allreduce_sum(row_scal);
-#endif
+   row_scal = warp_allreduce_sum(item, row_scal);
 
    if (row_scal)
    {

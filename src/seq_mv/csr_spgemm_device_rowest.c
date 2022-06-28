@@ -19,9 +19,13 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 template <char type>
 static __device__ __forceinline__
-void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_Int *ja,
+void rownnz_naive_rowi(HYPRE_Int  rowi,
+                       HYPRE_Int  lane_id,
+                       HYPRE_Int *ia,
+                       HYPRE_Int *ja,
                        HYPRE_Int *ib,
-                       HYPRE_Int &row_nnz_sum, HYPRE_Int &row_nnz_max)
+                       HYPRE_Int &row_nnz_sum,
+                       HYPRE_Int &row_nnz_max)
 {
    /* load the start and end position of row i of A */
    HYPRE_Int j = -1;
@@ -57,12 +61,18 @@ void rownnz_naive_rowi(HYPRE_Int rowi, HYPRE_Int lane_id, HYPRE_Int *ia, HYPRE_I
 
 template <char type, HYPRE_Int NUM_WARPS_PER_BLOCK>
 __global__
-void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int *ia, HYPRE_Int *ja,
-                           HYPRE_Int *ib, HYPRE_Int *jb, HYPRE_Int *rcL, HYPRE_Int *rcU)
+void csr_spmm_rownnz_naive(HYPRE_Int  M,
+                           HYPRE_Int  N,
+                           HYPRE_Int *ia,
+                           HYPRE_Int *ja,
+                           HYPRE_Int *ib,
+                           HYPRE_Int *jb,
+                           HYPRE_Int *rcL,
+                           HYPRE_Int *rcU)
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
    volatile const HYPRE_Int lane_id = get_lane_id();
 
@@ -78,13 +88,13 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
 
       if (type == 'U' || type == 'B')
       {
-         jU = warp_reduce_sum(jU);
+         jU = warp_reduce_sum(NULL, jU);
          jU = min(jU, N);
       }
 
       if (type == 'L' || type == 'B')
       {
-         jL = warp_reduce_max(jL);
+         jL = warp_reduce_max(NULL, jL);
       }
 
       if (lane_id == 0)
@@ -106,7 +116,9 @@ void csr_spmm_rownnz_naive(HYPRE_Int M, /*HYPRE_Int K,*/ HYPRE_Int N, HYPRE_Int 
                        COHEN
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 __global__
-void expdistfromuniform(HYPRE_Int n, float *x)
+void expdistfromuniform(hypre_Item &item,
+                        HYPRE_Int   n,
+                        float      *x)
 {
    const HYPRE_Int global_thread_id  = blockIdx.x * get_block_size() + get_thread_id();
    const HYPRE_Int total_num_threads = gridDim.x  * get_block_size();
@@ -122,12 +134,21 @@ void expdistfromuniform(HYPRE_Int n, float *x)
 /* T = float: single precision should be enough */
 template <typename T, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP, HYPRE_Int layer>
 __global__
-void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T *V_in, T *V_out,
-                         HYPRE_Int *rc, HYPRE_Int nsamples, HYPRE_Int *low, HYPRE_Int *upp, T mult)
+void cohen_rowest_kernel(hypre_Item &item,
+                         HYPRE_Int  nrow,
+                         HYPRE_Int *rowptr,
+                         HYPRE_Int *colidx,
+                         T         *V_in,
+                         T         *V_out,
+                         HYPRE_Int *rc,
+                         HYPRE_Int  nsamples,
+                         HYPRE_Int *low,
+                         HYPRE_Int *upp,
+                         T          mult)
 {
    const HYPRE_Int num_warps = NUM_WARPS_PER_BLOCK * gridDim.x;
    /* warp id inside the block */
-   const HYPRE_Int warp_id = get_warp_id();
+   const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
    volatile HYPRE_Int lane_id = get_lane_id();
 #if COHEN_USE_SHMEM
@@ -149,8 +170,8 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
       {
          tmp = read_only_load(rowptr + i + lane_id);
       }
-      const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0);
-      const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1);
+      const HYPRE_Int istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 0);
+      const HYPRE_Int iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 1);
 
       /* works on WARP_SIZE samples at a time */
       for (HYPRE_Int r = 0; r < nsamples; r += HYPRE_WARP_SIZE)
@@ -197,7 +218,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 
             for (HYPRE_Int k = 0; k < HYPRE_WARP_SIZE; k++)
             {
-               HYPRE_Int colk = __shfl_sync(HYPRE_WARP_FULL_MASK, col, k);
+               HYPRE_Int colk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, col, k);
                if (colk == -1)
                {
                   hypre_device_assert(j + HYPRE_WARP_SIZE >= iend);
@@ -227,7 +248,7 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
             }
 
             /* partial sum along r */
-            vmin = warp_reduce_sum(vmin);
+            vmin = warp_reduce_sum(NULL, vmin);
 
             if (lane_id == 0)
             {
@@ -268,9 +289,19 @@ void cohen_rowest_kernel(HYPRE_Int nrow, HYPRE_Int *rowptr, HYPRE_Int *colidx, T
 }
 
 template <typename T, HYPRE_Int BDIMX, HYPRE_Int BDIMY, HYPRE_Int NUM_WARPS_PER_BLOCK, HYPRE_Int SHMEM_SIZE_PER_WARP>
-void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_ia, HYPRE_Int *d_ja,
-                           HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_low, HYPRE_Int *d_upp, HYPRE_Int *d_rc,
-                           HYPRE_Int nsamples, T mult_factor, T *work)
+void csr_spmm_rownnz_cohen(HYPRE_Int  M,
+                           HYPRE_Int  K,
+                           HYPRE_Int  N,
+                           HYPRE_Int *d_ia,
+                           HYPRE_Int *d_ja,
+                           HYPRE_Int *d_ib,
+                           HYPRE_Int *d_jb,
+                           HYPRE_Int *d_low,
+                           HYPRE_Int *d_upp,
+                           HYPRE_Int *d_rc,
+                           HYPRE_Int  nsamples,
+                           T          mult_factor,
+                           T         *work)
 {
    dim3 bDim(BDIMX, BDIMY, NUM_WARPS_PER_BLOCK);
    hypre_assert(bDim.x * bDim.y == HYPRE_WARP_SIZE);
@@ -282,8 +313,19 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
    //d_V1 = hypre_TAlloc(T, nsamples*N, HYPRE_MEMORY_DEVICE);
    //d_V2 = hypre_TAlloc(T, nsamples*K, HYPRE_MEMORY_DEVICE);
 
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1, t2;
+   t1 = hypre_MPI_Wtime();
+#endif
+
    /* random V1: uniform --> exp */
    hypre_CurandUniformSingle(nsamples * N, d_V1, 0, 0, 0, 0);
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream(hypre_handle());
+   t2 = hypre_MPI_Wtime() - t1;
+   HYPRE_SPGEMM_PRINT("Curand time %f\n", t2);
+#endif
 
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE) );
 
@@ -311,11 +353,26 @@ void csr_spmm_rownnz_cohen(HYPRE_Int M, HYPRE_Int K, HYPRE_Int N, HYPRE_Int *d_i
 
 
 HYPRE_Int
-hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
-                                    HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc)
+hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
+                                     HYPRE_Int  k,
+                                     HYPRE_Int  n,
+                                     HYPRE_Int *d_ia,
+                                     HYPRE_Int *d_ja,
+                                     HYPRE_Int *d_ib,
+                                     HYPRE_Int *d_jb,
+                                     HYPRE_Int *d_rc,
+                                     HYPRE_Int  row_est_mtd )
 {
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPushRange("CSRSpGemmRowEstimate");
+#endif
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] -= hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
    const HYPRE_Int num_warps_per_block =  16;
@@ -329,9 +386,10 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
    // for cases where one WARP works on a row
    dim3 gDim( (m + bDim.z - 1) / bDim.z );
 
-   HYPRE_Int   row_est_mtd    = hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle());
-   HYPRE_Int   cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
-   float cohen_mult           = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
+   size_t cohen_nsamples = hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle());
+   float  cohen_mult     = hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle());
+
+   //hypre_printf("Cohen Nsamples %d, mult %f\n", cohen_nsamples, cohen_mult);
 
    if (row_est_mtd == 1)
    {
@@ -350,7 +408,7 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       /* [optional] first run naive estimate for naive lower and upper bounds,
                     which will be given to Cohen's alg as corrections */
       char *work_mem = hypre_TAlloc(char,
-                                    cohen_nsamples * (n + k) * sizeof(float) +2 * m * sizeof(HYPRE_Int),
+                                    cohen_nsamples * (n + k) * sizeof(float) + 2 * m * sizeof(HYPRE_Int),
                                     HYPRE_MEMORY_DEVICE);
       char *work_mem_saved = work_mem;
 
@@ -379,9 +437,18 @@ hypreDevice_CSRSpGemmRownnzEstimate(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
    }
 
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream(hypre_handle());
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
+   HYPRE_SPGEMM_PRINT("RownnzEst time %f\n", t2);
+#endif
+
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPMM_ROWNNZ] += hypre_MPI_Wtime();
+#endif
+
+#ifdef HYPRE_SPGEMM_NVTX
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;

@@ -66,7 +66,7 @@ doublereal dlamch_(const char *cmach)
     doublereal emin, prec, emax;
     integer imin, imax;
     logical lrnd;
-    doublereal rmin, rmax, t, rmach;
+    doublereal rmin, rmax, t, rmach = 0.;
     extern logical lsame_(const char *,const char *);
     doublereal small, sfmin;
     extern /* Subroutine */ integer dlamc2_(integer *, integer *, logical *,
@@ -190,14 +190,14 @@ nding
     /* System generated locals */
     doublereal d__1, d__2;
     /* Local variables */
-    logical lrnd;
+    logical lrnd = FALSE_;
     doublereal a, b, c, f;
-    integer lbeta;
+    integer lbeta = 0;
     doublereal savec;
     extern doublereal dlamc3_(doublereal *, doublereal *);
-    logical lieee1;
+    logical lieee1 = FALSE_;
     doublereal t1, t2;
-    integer lt;
+    integer lt = 0;
     doublereal one, qtr;
 
 
@@ -425,14 +425,14 @@ L30:
     /* Local variables */
     logical ieee;
     doublereal half;
-    logical lrnd;
-    doublereal leps, zero, a, b, c;
-    integer i, lbeta;
+    logical lrnd= FALSE_;
+    doublereal leps = 0., zero, a, b, c;
+    integer i, lbeta = 0;
     doublereal rbase;
-    integer lemin, lemax, gnmin;
+    integer lemin = 0, lemax = 0, gnmin;
     doublereal small;
     integer gpmin;
-    doublereal third, lrmin, lrmax, sixth;
+    doublereal third, lrmin = 0., lrmax = 0., sixth;
     extern /* Subroutine */ integer dlamc1_(integer *, integer *, logical *,
 	    logical *);
     extern doublereal dlamc3_(doublereal *, doublereal *);
@@ -440,7 +440,7 @@ L30:
     extern /* Subroutine */ integer dlamc4_(integer *, doublereal *, integer *),
 	    dlamc5_(integer *, integer *, integer *, logical *, integer *,
 	    doublereal *);
-    integer lt, ngnmin, ngpmin;
+    integer lt = 0, ngnmin, ngpmin;
     doublereal one, two;
 
 
