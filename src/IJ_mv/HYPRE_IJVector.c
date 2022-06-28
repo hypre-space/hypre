@@ -79,8 +79,80 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorPrintLevel(vec)      = 0;
    hypre_IJVectorPartitioning(vec)[0] = jlower;
    hypre_IJVectorPartitioning(vec)[1] = jupper + 1;
+   hypre_IJVectorComponent(vec)       = 0;
 
    *vector = (HYPRE_IJVector) vec;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetNumVectors
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetNumVectors( HYPRE_IJVector vector,
+                             HYPRE_Int      num_vectors )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(vec) == HYPRE_PARCSR)
+   {
+      hypre_IJVectorSetNumVectorsPar(vec, num_vectors);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetComponent
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetComponent( HYPRE_IJVector vector,
+                            HYPRE_Int      component )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+   HYPRE_Int       num_vectors;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(vec) == HYPRE_PARCSR)
+   {
+      hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vec);
+
+      num_vectors = hypre_ParVectorNumVectors(par_vector);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (component < 0 || component > num_vectors)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   else
+   {
+      hypre_IJVectorComponent(vec) = component;
+   }
 
    return hypre_error_flag;
 }

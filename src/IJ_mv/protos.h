@@ -136,6 +136,7 @@ HYPRE_Int hypre_IJVectorZeroValues ( HYPRE_IJVector vector );
 
 /* IJVector_parcsr.c */
 HYPRE_Int hypre_IJVectorCreatePar ( hypre_IJVector *vector, HYPRE_BigInt *IJpartitioning );
+HYPRE_Int hypre_IJVectorSetNumVectorsPar ( hypre_IJVector *vector, HYPRE_Int num_vectors );
 HYPRE_Int hypre_IJVectorDestroyPar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializePar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializePar_v2(hypre_IJVector *vector,
@@ -197,6 +198,7 @@ HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha, HYPRE_IJMatrix matrix_A, HYPR
 /* HYPRE_IJVector.c */
 HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm, HYPRE_BigInt jlower, HYPRE_BigInt jupper,
                                  HYPRE_IJVector *vector );
+HYPRE_Int HYPRE_IJVectorSetNumVectors ( HYPRE_IJVector vector, HYPRE_Int num_vectors );
 HYPRE_Int HYPRE_IJVectorDestroy ( HYPRE_IJVector vector );
 HYPRE_Int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
 HYPRE_Int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector, HYPRE_Int print_level );

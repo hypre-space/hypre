@@ -46,6 +46,21 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorSetNumVectorsPar
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorSetNumVectorsPar(hypre_IJVector *vector,
+                               HYPRE_Int       num_vectors)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   hypre_ParVectorNumVectors(par_vector) = num_vectors;
+
+   return hypre_error_flag;
+}
+
 /******************************************************************************
  *
  * hypre_IJVectorDestroyPar
@@ -287,7 +302,11 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
+   HYPRE_Int component = hypre_IJVectorComponent(vector);
    hypre_Vector *local_vector;
+   HYPRE_Int vecoffset;
+   HYPRE_Int vecstride;
+   HYPRE_Int idxstride;
 
    /* If no components are to be set, perform no checking and return */
    if (num_values < 1) { return 0; }
@@ -342,7 +361,9 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
       vec_start.  NOTE: If indices == NULL off proc values are ignored!!! */
 
    data = hypre_VectorData(local_vector);
-
+   vecstride = hypre_VectorVectorStride(local_vector);
+   idxstride = hypre_VectorIndexStride(local_vector);
+   vecoffset = component * vecstride;
    if (indices)
    {
       for (j = 0; j < num_values; j++)
@@ -351,7 +372,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
          if (i >= vec_start && i <= vec_stop)
          {
             k = (HYPRE_Int)( i - vec_start);
-            data[k] = values[j];
+            data[k] = values[vecoffset + j * idxstride];
          }
       }
    }
@@ -371,7 +392,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
 #endif
       for (j = 0; j < num_values; j++)
       {
-         data[j] = values[j];
+         data[j] = values[vecoffset + j * idxstride];
       }
    }
 
@@ -653,6 +674,10 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
+   /* VPM: hypre_IJVectorComponent is not visible to the following function.
+      Should "component" be a member of hypre_ParVector or be passed as an
+      input argument to hypre_ParVectorGetValues2? */
 
    hypre_ParVectorGetValues2(par_vector, num_values, (HYPRE_BigInt *) indices, jmin, values);
 

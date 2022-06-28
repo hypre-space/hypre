@@ -21,23 +21,18 @@
 typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
-
    HYPRE_BigInt  partitioning[2];   /* Indicates partitioning over tasks */
-
+   HYPRE_Int     component;         /* Index of a single vector on a multivector
+                                       (used for set/get routines )*/
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
-
    void         *object;            /* Structure for storing local portion */
-
    void         *translator;        /* Structure for storing off processor
                                        information */
-
    void         *assumed_part;      /* IJ Vector assumed partition */
-
    HYPRE_BigInt  global_first_row;  /* these for data items are necessary */
    HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global */
    /* global partition */
    HYPRE_Int     print_level;
-
 } hypre_IJVector;
 
 /*--------------------------------------------------------------------------
@@ -46,6 +41,7 @@ typedef struct hypre_IJVector_struct
 
 #define hypre_IJVectorComm(vector)            ((vector) -> comm)
 #define hypre_IJVectorPartitioning(vector)    ((vector) -> partitioning)
+#define hypre_IJVectorComponent(vector)       ((vector) -> component)
 #define hypre_IJVectorObjectType(vector)      ((vector) -> object_type)
 #define hypre_IJVectorObject(vector)          ((vector) -> object)
 #define hypre_IJVectorTranslator(vector)      ((vector) -> translator)
