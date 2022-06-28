@@ -1032,16 +1032,28 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex       *locl_data,
    hypre_CSRMatrixJ(&csr)           = hypre_ParCSRCommPkgSendMapJ(comm_pkg);
    hypre_CSRMatrixData(&csr)        = NULL; /* all ones */
 
-   hypre_Vector vec_x, vec_y;
-   hypre_VectorData(&vec_x) = recv_data;
-   hypre_VectorSize(&vec_x) = num_elemt;
-   hypre_VectorData(&vec_y) = locl_data;
+   hypre_Vector vec_x;
+   hypre_VectorData(&vec_x)                  = recv_data;
+   hypre_VectorOwnsData(&vec_x)              = 0;
+   hypre_VectorSize(&vec_x)                  = num_elemt;
+   hypre_VectorVectorStride(&vec_x)          = num_elemt;
+   hypre_VectorIndexStride(&vec_x)           = 1;
+   hypre_VectorNumVectors(&vec_x)            = 1;
+   hypre_VectorMultiVecStorageMethod(&vec_x) = 0;
+
+   hypre_Vector vec_y;
+   hypre_VectorData(&vec_y)                  = locl_data;
+   hypre_VectorOwnsData(&vec_y)              = 0;
+   hypre_VectorSize(&vec_y)                  = hypre_ParCSRCommPkgSendMapN(comm_pkg);
+   hypre_VectorVectorStride(&vec_y)          = hypre_ParCSRCommPkgSendMapN(comm_pkg);
+   hypre_VectorIndexStride(&vec_y)           = 1;
+   hypre_VectorNumVectors(&vec_y)            = 1;
+   hypre_VectorMultiVecStorageMethod(&vec_y) = 0;
 
    hypre_CSRMatrixSpMVDevice(0, 1.0, &csr, &vec_x, 1.0, &vec_y,
                              hypre_ParCSRCommPkgSendMapRowInd(comm_pkg), 0);
 #endif
 
-                      return hypre_error_flag;
+   return hypre_error_flag;
 }
 #endif
-
