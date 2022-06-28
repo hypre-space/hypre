@@ -64,7 +64,8 @@
 /* K is the number of threads working on a single row. K = 2, 4, 8, 16, 32 */
 template <HYPRE_Int F, HYPRE_Int K, typename T>
 __global__ void
-hypre_csr_v_k_shuffle(HYPRE_Int  n,
+hypre_csr_v_k_shuffle(hypre_DeviceItem &item,
+                      HYPRE_Int  n,
                       HYPRE_Int *row_id,
                       T          alpha,
                       HYPRE_Int *d_ia,
@@ -83,7 +84,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int  n,
    HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
    const HYPRE_Int group_lane = threadIdx.x & (K - 1);
 
-   for (; __any_sync(HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
+   for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
    {
       HYPRE_Int grid_row_id = -1, p = 0, q = 0;
 
@@ -110,7 +111,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int  n,
       T sum = 0.0;
 #if VERSION == 1
 #pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
+      for (p += group_lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, p < q); p += K * 2)
       {
          if (p < q)
          {
@@ -123,7 +124,7 @@ hypre_csr_v_k_shuffle(HYPRE_Int  n,
       }
 #elif VERSION == 2
 #pragma unroll 1
-      for (p += group_lane; __any_sync(HYPRE_WARP_FULL_MASK, p < q); p += K)
+      for (p += group_lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, p < q); p += K)
       {
          if (p < q)
          {

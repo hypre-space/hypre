@@ -17,10 +17,11 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
-hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr,
+hypreCUDAKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
+                                    HYPRE_Int *row_ptr,
                                     HYPRE_Int *row_len, HYPRE_Int *mark)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {

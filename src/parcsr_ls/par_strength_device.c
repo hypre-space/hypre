@@ -10,14 +10,16 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
+                                                 HYPRE_Int nr_of_rows,
                                                  HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
                                                  HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
                                                  HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
                                                  HYPRE_Int* S_temp_diag_j, HYPRE_Int* S_temp_offd_j,
                                                  HYPRE_Int num_functions, HYPRE_Int* dof_func, HYPRE_Int* dof_func_offd,
                                                  HYPRE_Int* jS_diag, HYPRE_Int* jS_offd );
-__global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
+                                                    HYPRE_Int nr_of_rows,
                                                     HYPRE_Real max_row_sum, HYPRE_Real strength_threshold,
                                                     HYPRE_Real* A_diag_data, HYPRE_Int* A_diag_i, HYPRE_Int* A_diag_j,
                                                     HYPRE_Real* A_offd_data, HYPRE_Int* A_offd_i, HYPRE_Int* A_offd_j,
@@ -230,7 +232,8 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 }
 
 /*-----------------------------------------------------------------------*/
-__global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
+__global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
+                                                 HYPRE_Int   nr_of_rows,
                                                  HYPRE_Real  max_row_sum,
                                                  HYPRE_Real  strength_threshold,
                                                  HYPRE_Real *A_diag_data,
@@ -268,14 +271,14 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, row_max = 0.0, row_min = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p_diag = 0, q_diag, p_offd = 0, q_offd;
 
    /* diag part */
@@ -283,10 +286,10 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
    {
       p_diag = read_only_load(A_diag_i + row + lane);
    }
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
@@ -317,10 +320,10 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
    {
       p_offd = read_only_load(A_offd_i + row + lane);
    }
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
@@ -357,7 +360,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
    const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
@@ -377,7 +380,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( HYPRE_Int   nr_of_rows,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
@@ -429,7 +432,8 @@ hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A,
 }
 
 /*-----------------------------------------------------------------------*/
-__global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
+__global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
+                                                    HYPRE_Int   nr_of_rows,
                                                     HYPRE_Real  max_row_sum,
                                                     HYPRE_Real  strength_threshold,
                                                     HYPRE_Real *A_diag_data,
@@ -467,14 +471,14 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
    HYPRE_Real row_scale = 0.0, row_sum = 0.0, diag = 0.0;
    HYPRE_Int row_nnz_diag = 0, row_nnz_offd = 0, diag_pos = -1;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p_diag = 0, q_diag, p_offd = 0, q_offd;
 
    /* diag part */
@@ -482,10 +486,10 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
    {
       p_diag = read_only_load(A_diag_i + row + lane);
    }
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
@@ -515,10 +519,10 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
    {
       p_offd = read_only_load(A_offd_i + row + lane);
    }
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)
@@ -543,7 +547,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
    HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
    const HYPRE_Real thresh = strength_threshold * row_scale;
 
-   for (HYPRE_Int i = p_diag + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_diag);
+   for (HYPRE_Int i = p_diag + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_diag);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_diag)
@@ -563,7 +567,7 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( HYPRE_Int   nr_of_rows,
       S_temp_diag_j[diag_pos] = -2;
    }
 
-   for (HYPRE_Int i = p_offd + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q_offd);
+   for (HYPRE_Int i = p_offd + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q_offd);
         i += HYPRE_WARP_SIZE)
    {
       if (i < q_offd)

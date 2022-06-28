@@ -14,7 +14,8 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
+hypreCUDAKernel_IndepSetMain(hypre_DeviceItem &item,
+                             HYPRE_Int   graph_diag_size,
                              HYPRE_Int  *graph_diag,
                              HYPRE_Real *measure_diag,
                              HYPRE_Real *measure_offd,
@@ -26,14 +27,14 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
                              HYPRE_Int  *IS_marker_offd,
                              HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (warp_id >= graph_diag_size)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int row, row_start, row_end;
    HYPRE_Int i = 0, j;
    HYPRE_Real t = 0.0, measure_row;
@@ -45,15 +46,15 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
       i   = read_only_load(S_diag_i + row + lane);
    }
 
-   row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+   row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+   row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
    if (lane == 0)
    {
       t = read_only_load(measure_diag + row);
    }
 
-   measure_row = __shfl_sync(HYPRE_WARP_FULL_MASK, t, 0);
+   measure_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, 0);
 
    for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
    {
@@ -77,8 +78,8 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
       i = read_only_load(S_offd_i + row + lane);
    }
 
-   row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+   row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+   row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
    for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
    {
@@ -106,13 +107,14 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
 }
 
 __global__ void
-hypreCUDAKernel_IndepSetFixMarker(HYPRE_Int  *IS_marker_diag,
+hypreCUDAKernel_IndepSetFixMarker(hypre_DeviceItem &item,
+                                  HYPRE_Int  *IS_marker_diag,
                                   HYPRE_Int   num_elmts_send,
                                   HYPRE_Int  *send_map_elmts,
                                   HYPRE_Int  *int_send_buf,
                                   HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (thread_id >= num_elmts_send)
    {
