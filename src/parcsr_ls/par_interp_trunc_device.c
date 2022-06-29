@@ -365,9 +365,9 @@ hypreCUDAKernel_InterpTruncationPass2_v1( hypre_DeviceItem &item,
       p = read_only_load(P_diag_i + i + lane);
       pnew = read_only_load(P_diag_i_new + i + lane);
    }
-   p = warp_shfl_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-   qnew = warp_shfl_sync(item, HYPRE_WARP_FULL_MASK, pnew, 1);
-   pnew = warp_shfl_sync(item, HYPRE_WARP_FULL_MASK, pnew, 0);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+   qnew = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pnew, 1);
+   pnew = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pnew, 0);
 
    shift = p - pnew;
    for (HYPRE_Int k = pnew + lane; k < qnew; k += HYPRE_WARP_SIZE)
@@ -381,9 +381,9 @@ hypreCUDAKernel_InterpTruncationPass2_v1( hypre_DeviceItem &item,
       p = read_only_load(P_offd_i + i + lane);
       pnew = read_only_load(P_offd_i_new + i + lane);
    }
-   p = warp_shfl_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-   qnew = warp_shfl_sync(item, HYPRE_WARP_FULL_MASK, pnew, 1);
-   pnew = warp_shfl_sync(item, HYPRE_WARP_FULL_MASK, pnew, 0);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+   qnew = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pnew, 1);
+   pnew = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pnew, 0);
 
    shift = p - pnew;
    for (HYPRE_Int k = pnew + lane; k < qnew; k += HYPRE_WARP_SIZE)
