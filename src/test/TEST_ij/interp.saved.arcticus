@@ -2,8 +2,8 @@
  Average Convergence Factor = 0.480928
 
      Complexity:    grid = 1.401778
-                operator = 3.549728
-                   cycle = 7.099456
+                operator = 3.549796
+                   cycle = 7.099524
 
 # Output file: interp.out.1
  Average Convergence Factor = 0.481973
@@ -48,11 +48,11 @@
                    cycle = 7.186463
 
 # Output file: interp.out.7
- Average Convergence Factor = 0.521690
+ Average Convergence Factor = 0.514379
 
-     Complexity:    grid = 1.410222
-                operator = 3.511224
-                   cycle = 7.021361
+     Complexity:    grid = 1.414222
+                operator = 3.716463
+                   cycle = 7.431224
 
 # Output file: interp.out.8
  Average Convergence Factor = 0.491756

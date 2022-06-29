@@ -1000,8 +1000,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildExtPIInterpDevice()\n");
-   hypre_ParCSRMatrixPrint(S, "S");
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1022,11 +1020,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int          *Soc_diag_j   = hypre_ParCSRMatrixSocDiagJ(S);
    HYPRE_Int          *Soc_offd_j   = hypre_ParCSRMatrixSocOffdJ(S);
-   /* WM: debug */
-   hypre_printf("WM: debug - CF marker = ");
-   for (auto i = 0; i < hypre_CSRMatrixNumRows(A_diag); i++)
-      hypre_printf("%d ", CF_marker[i]);
-   hypre_printf("\n");
 
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
 
@@ -1262,10 +1255,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    /* 9. Free memory */
    hypre_ParCSRMatrixDestroy(W);
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGBuildExtPIInterpDevice()\n");
-   hypre_ParCSRMatrixPrint(P, "P");
-   hypre_MPI_Finalize();
-   exit(0);
    return hypre_error_flag;
 }
 
