@@ -14,7 +14,8 @@
 
 /* special case for max_elmts = 0, i.e. no max_elmts limit */
 __global__ void
-hypreCUDAKernel_InterpTruncationPass0_v1( HYPRE_Int   nrows,
+hypreCUDAKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
+                                          HYPRE_Int   nrows,
                                           HYPRE_Real  trunc_factor,
                                           HYPRE_Int  *P_diag_i,
                                           HYPRE_Int  *P_diag_j,
@@ -27,14 +28,14 @@ hypreCUDAKernel_InterpTruncationPass0_v1( HYPRE_Int   nrows,
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
 
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p_diag = 0, q_diag = 0, p_offd = 0, q_offd = 0;
 
    if (lane < 2)
@@ -177,7 +178,8 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
 
 /* TODO: using 1 thread per row, which can be suboptimal */
 __global__ void
-hypreCUDAKernel_InterpTruncationPass1_v1( HYPRE_Int   nrows,
+hypreCUDAKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
+                                          HYPRE_Int   nrows,
                                           HYPRE_Real  trunc_factor,
                                           HYPRE_Int   max_elmts,
                                           HYPRE_Int  *P_diag_i,
@@ -189,7 +191,7 @@ hypreCUDAKernel_InterpTruncationPass1_v1( HYPRE_Int   nrows,
                                           HYPRE_Int  *P_diag_i_new,
                                           HYPRE_Int  *P_offd_i_new )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int row = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (row >= nrows)
    {
@@ -333,7 +335,8 @@ hypreCUDAKernel_InterpTruncationPass1_v1( HYPRE_Int   nrows,
 
 /* using 1 warp per row */
 __global__ void
-hypreCUDAKernel_InterpTruncationPass2_v1( HYPRE_Int   nrows,
+hypreCUDAKernel_InterpTruncationPass2_v1( hypre_DeviceItem &item,
+                                          HYPRE_Int   nrows,
                                           HYPRE_Int  *P_diag_i,
                                           HYPRE_Int  *P_diag_j,
                                           HYPRE_Real *P_diag_a,
@@ -347,14 +350,14 @@ hypreCUDAKernel_InterpTruncationPass2_v1( HYPRE_Int   nrows,
                                           HYPRE_Int  *P_offd_j_new,
                                           HYPRE_Real *P_offd_a_new )
 {
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, pnew = 0, qnew = 0, shift;
 
    if (lane < 2)
