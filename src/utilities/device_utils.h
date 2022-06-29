@@ -141,7 +141,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #define HYPRE_WARP_BITSHIFT   6
 #elif defined(HYPRE_USING_SYCL)
 #define HYPRE_WARP_SIZE       16
-#define HYPRE_WARP_BITSHIFT   3
+#define HYPRE_WARP_BITSHIFT   4
 #endif
 
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF

@@ -198,7 +198,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #define HYPRE_WARP_BITSHIFT   6
 #elif defined(HYPRE_USING_SYCL)
 #define HYPRE_WARP_SIZE       16
-#define HYPRE_WARP_BITSHIFT   3
+#define HYPRE_WARP_BITSHIFT   4
 #endif
 
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
@@ -941,13 +941,6 @@ static __device__ __forceinline__
 hypre_int warp_any_sync(hypre_DeviceItem &item, unsigned mask, hypre_int predicate)
 {
    return __any_sync(mask, predicate);
-}
-
-template <typename T>
-static __device__ __forceinline__
-T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
-{
-   return __shfl_sync(mask, val, src_line);
 }
 
 template <typename T>
