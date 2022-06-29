@@ -487,7 +487,8 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
 
 
 __global__ void
-hypreCUDAKernel_InterpTruncation_v2( HYPRE_Int   nrows,
+hypreCUDAKernel_InterpTruncation_v2( hypre_DeviceItem &item,
+                                     HYPRE_Int   nrows,
                                      HYPRE_Real  trunc_factor,
                                      HYPRE_Int   max_elmts,
                                      HYPRE_Int  *P_i,
@@ -495,24 +496,24 @@ hypreCUDAKernel_InterpTruncation_v2( HYPRE_Int   nrows,
                                      HYPRE_Real *P_a)
 {
    HYPRE_Real row_max = 0.0, row_sum = 0.0, row_scal = 0.0;
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>(), p = 0, q;
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item), p = 0, q;
 
    /* 1. compute row max, rowsum */
    if (lane < 2)
    {
       p = read_only_load(P_i + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int i = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
    {
       if (i < q)
       {
@@ -527,7 +528,7 @@ hypreCUDAKernel_InterpTruncation_v2( HYPRE_Int   nrows,
 
    /* 2. mark dropped entries by -1 in P_j, and compute row_scal */
    HYPRE_Int last_pos = -1;
-   for (HYPRE_Int i = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
    {
       HYPRE_Int cond = 0, cond_prev;
 

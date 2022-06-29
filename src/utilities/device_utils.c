@@ -415,7 +415,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
    }
 
 #if defined(HYPRE_USING_SYCL)
-   sycl::range<1> gDim(num_blocks);
+   dim3 gDim(num_blocks);
 #else
    dim3 gDim(num_blocks, 1, 1);
 #endif
@@ -424,17 +424,10 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
 }
 
 __global__ void
-hypreGPUKernel_IVAXPY(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
+hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
+                       HYPRE_Complex *y)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (i < n)
    {
       y[i] += x[i] / a[i];
@@ -460,18 +453,11 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
 }
 
 __global__ void
-hypreGPUKernel_IVAXPYMarked(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
-   HYPRE_Int *marker, HYPRE_Int marker_val)
+hypreGPUKernel_IVAXPYMarked( hypre_DeviceItem &item,
+                             HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y,
+                             HYPRE_Int *marker, HYPRE_Int marker_val)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (i < n)
    {
       if (marker[i] == marker_val)
@@ -518,7 +504,7 @@ hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row
 
 #if defined(HYPRE_USING_SYCL)
 void
-hypreSYCLKernel_ScatterRowPtr(sycl::nd_item<1>& item,
+hypreSYCLKernel_ScatterRowPtr(hypre_DeviceItem &item,
                               HYPRE_Int nrows, HYPRE_Int *d_row_ptr, HYPRE_Int *d_row_ind)
 {
    HYPRE_Int i = (HYPRE_Int) item.get_global_linear_id();
@@ -627,19 +613,12 @@ hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_
  * d_rownnz can be the same as d_row_indices
  */
 __global__ void
-hypreGPUKernel_GetRowNnz(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1> item,
-#endif
-   HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
-   HYPRE_Int *d_offd_ia,
-   HYPRE_Int *d_rownnz)
+hypreGPUKernel_GetRowNnz( hypre_DeviceItem &item,
+                          HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+                          HYPRE_Int *d_offd_ia,
+                          HYPRE_Int *d_rownnz)
 {
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int global_thread_id = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   const HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < nrows)
    {
@@ -693,33 +672,23 @@ hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i)
 }
 
 __global__ void
-hypreGPUKernel_CopyParCSRRows(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int      nrows,
-   HYPRE_Int     *d_row_indices,
-   HYPRE_Int      has_offd,
-   HYPRE_BigInt   first_col,
-   HYPRE_BigInt  *d_col_map_offd_A,
-   HYPRE_Int     *d_diag_i,
-   HYPRE_Int     *d_diag_j,
-   HYPRE_Complex *d_diag_a,
-   HYPRE_Int     *d_offd_i,
-   HYPRE_Int     *d_offd_j,
-   HYPRE_Complex *d_offd_a,
-   HYPRE_Int     *d_ib,
-   HYPRE_BigInt  *d_jb,
-   HYPRE_Complex *d_ab)
+hypreGPUKernel_CopyParCSRRows( hypre_DeviceItem    &item,
+                               HYPRE_Int      nrows,
+                               HYPRE_Int     *d_row_indices,
+                               HYPRE_Int      has_offd,
+                               HYPRE_BigInt   first_col,
+                               HYPRE_BigInt  *d_col_map_offd_A,
+                               HYPRE_Int     *d_diag_i,
+                               HYPRE_Int     *d_diag_j,
+                               HYPRE_Complex *d_diag_a,
+                               HYPRE_Int     *d_offd_i,
+                               HYPRE_Int     *d_offd_j,
+                               HYPRE_Complex *d_offd_a,
+                               HYPRE_Int     *d_ib,
+                               HYPRE_BigInt  *d_jb,
+                               HYPRE_Complex *d_ab)
 {
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int warp_size = SG.get_local_range().get(0);
-   const HYPRE_Int global_warp_id = hypre_sycl_get_grid_warp_id(item);
-#else
-   const HYPRE_Int global_warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
-   const HYPRE_Int warp_size = HYPRE_WARP_SIZE;
-#endif
+   const HYPRE_Int global_warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (global_warp_id >= nrows)
    {
@@ -727,11 +696,7 @@ hypreGPUKernel_CopyParCSRRows(
    }
 
    /* lane id inside the warp */
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int lane_id = SG.get_local_linear_id();
-#else
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-#endif
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int i, j = 0, k = 0, p, row, istart, iend, bstart;
 
    /* diag part */
@@ -751,19 +716,12 @@ hypreGPUKernel_CopyParCSRRows(
       /* start position of b */
       k = d_ib ? read_only_load(d_ib + global_warp_id) : 0;
    }
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-   bstart = SG.shuffle(k, 0);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-   bstart = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
+   bstart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    p = bstart - istart;
-   for (i = istart + lane_id; i < iend; i += warp_size)
+   for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
       d_jb[p + i] = read_only_load(d_diag_j + i) + first_col;
       if (d_ab)
@@ -783,17 +741,11 @@ hypreGPUKernel_CopyParCSRRows(
       j = read_only_load(d_offd_i + row + lane_id);
    }
    bstart += iend - istart;
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    p = bstart - istart;
-   for (i = istart + lane_id; i < iend; i += warp_size)
+   for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
    {
       if (d_col_map_offd_A)
       {
@@ -985,7 +937,7 @@ template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in
  * Note that compute_XX refers to a PTX version and sm_XX refers to a cubin version.
 */
 __global__ void
-hypreGPUKernel_CompileFlagSafetyCheck(hypre_int *cuda_arch_compile)
+hypreGPUKernel_CompileFlagSafetyCheck(hypre_DeviceItem &item, hypre_int *cuda_arch_compile)
 {
 #if defined(__CUDA_ARCH__)
    cuda_arch_compile[0] = __CUDA_ARCH__;
@@ -1050,9 +1002,9 @@ hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 
 template<typename T>
 __global__ void
-hypreGPUKernel_axpyn(T *x, size_t n, T *y, T *z, T a)
+hypreGPUKernel_axpyn(hypre_DeviceItem &item, T *x, size_t n, T *y, T *z, T a)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1096,9 +1048,9 @@ hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z, H
 
 template<typename T>
 __global__ void
-hypreGPUKernel_scalen(T *x, size_t n, T *y, T v)
+hypreGPUKernel_scalen(hypre_DeviceItem &item, T *x, size_t n, T *y, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1141,9 +1093,9 @@ hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPR
 
 template<typename T>
 __global__ void
-hypreGPUKernel_filln(T *x, size_t n, T v)
+hypreGPUKernel_filln(hypre_DeviceItem &item, T *x, size_t n, T v)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1228,7 +1180,8 @@ template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HY
 #endif
 
 __global__ void
-hypreGPUKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                                 HYPRE_Real *y)
 {
    for (HYPRE_Int i = 0; i < n; i++)
    {
@@ -1238,9 +1191,10 @@ hypreGPUKernel_ScatterAddTrivial(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYP
 
 /* x[map[i]] += y[i], same index cannot appear more than once in map */
 __global__ void
-hypreGPUKernel_ScatterAdd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                          HYPRE_Real *y)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -1323,9 +1277,9 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 /* x[map[i]] = v */
 template <typename T>
 __global__ void
-hypreGPUKernel_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
+hypreGPUKernel_ScatterConstant(hypre_DeviceItem &item, T *x, HYPRE_Int n, HYPRE_Int *map, T v)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -1360,10 +1314,10 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HY
                                                HYPRE_Complex v);
 
 __global__ void
-hypreGPUKernel_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+hypreGPUKernel_DiagScaleVector(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1399,10 +1353,11 @@ hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data, 
 }
 
 __global__ void
-hypreGPUKernel_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+hypreGPUKernel_DiagScaleVector2(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *A_i,
+                                HYPRE_Complex *A_data,
                                 HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
@@ -1434,11 +1389,12 @@ hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
 }
 
 __global__ void
-hypreGPUKernel_BigToSmallCopy( HYPRE_Int*          __restrict__ tgt,
+hypreGPUKernel_BigToSmallCopy( hypre_DeviceItem                      &item,
+                               HYPRE_Int*          __restrict__ tgt,
                                const HYPRE_BigInt* __restrict__ src,
                                HYPRE_Int                        size )
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < size)
    {

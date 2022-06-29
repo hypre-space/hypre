@@ -789,32 +789,19 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 __global__ void
-hypreGPUKernel_CSRMoveDiagFirst(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int      nrows,
-   HYPRE_Int     *ia,
-   HYPRE_Int     *ja,
-   HYPRE_Complex *aa )
+hypreGPUKernel_CSRMoveDiagFirst( hypre_DeviceItem    &item,
+                                 HYPRE_Int      nrows,
+                                 HYPRE_Int     *ia,
+                                 HYPRE_Int     *ja,
+                                 HYPRE_Complex *aa )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
-#else
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
+   HYPRE_Int row  = hypre_gpu_get_grid_warp_id<1, 1>(item);
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
 
    if (row >= nrows)
    {
       return;
    }
-
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   HYPRE_Int lane = SG.get_local_linear_id();
-#else
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-#endif
 
    HYPRE_Int p = 0, q = 0;
 
@@ -822,17 +809,12 @@ hypreGPUKernel_CSRMoveDiagFirst(
    {
       p = read_only_load(ia + row + lane);
    }
-#if defined(HYPRE_USING_SYCL)
-   q = SG.shuffle(p, 1);
-   p = SG.shuffle(p, 0);
 
-   for (HYPRE_Int j = p + lane + 1; sycl::any_of_group(SG, j < q); j += SG.get_local_range().get(0))
-#else
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane + 1; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-#endif
+   for (HYPRE_Int j = p + lane + 1; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q);
+        j += HYPRE_WARP_SIZE)
    {
       hypre_int find_diag = j < q && ja[j] == row;
 
@@ -845,11 +827,7 @@ hypreGPUKernel_CSRMoveDiagFirst(
          aa[j] = tmp;
       }
 
-#if defined(HYPRE_USING_SYCL)
-      if ( sycl::any_of_group(SG, find_diag) )
-#else
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
-#endif
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
       {
          break;
       }
@@ -945,12 +923,13 @@ hypre_CSRMatrixStack2Device(hypre_CSRMatrix *A, hypre_CSRMatrix *B)
  * RL: only check if it's a non-empty row
  */
 __global__ void
-hypreCUDAKernel_CSRCheckDiagFirst( HYPRE_Int  nrows,
+hypreCUDAKernel_CSRCheckDiagFirst( hypre_DeviceItem &item,
+                                   HYPRE_Int  nrows,
                                    HYPRE_Int *ia,
                                    HYPRE_Int *ja,
                                    HYPRE_Int *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int row = hypre_gpu_get_grid_thread_id<1, 1>(item);
    if (row < nrows)
    {
       result[row] = (ia[row + 1] > ia[row]) && (ja[ia[row]] != row);
@@ -985,7 +964,8 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 }
 
 __global__ void
-hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
+hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( hypre_DeviceItem    &item,
+                                            HYPRE_Complex  v,
                                             HYPRE_Int      nrows,
                                             HYPRE_Int     *ia,
                                             HYPRE_Int     *ja,
@@ -993,14 +973,14 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
                                             HYPRE_Real     tol,
                                             HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
@@ -1008,10 +988,10 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
 
@@ -1023,7 +1003,7 @@ hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( HYPRE_Complex  v,
          }
       }
 
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
       {
          has_diag = true;
          break;
@@ -1082,7 +1062,8 @@ hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
 }
 
 __global__ void
-hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
+hypreCUDAKernel_CSRMatrixReplaceDiagDevice( hypre_DeviceItem    &item,
+                                            HYPRE_Complex *new_diag,
                                             HYPRE_Complex  v,
                                             HYPRE_Int      nrows,
                                             HYPRE_Int     *ia,
@@ -1091,14 +1072,14 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
                                             HYPRE_Real     tol,
                                             HYPRE_Int     *result )
 {
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
    bool has_diag = false;
 
@@ -1106,10 +1087,10 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
 
@@ -1123,7 +1104,7 @@ hypreCUDAKernel_CSRMatrixReplaceDiagDevice( HYPRE_Complex *new_diag,
          data[j] = d;
       }
 
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
       {
          has_diag = true;
          break;
@@ -1266,7 +1247,8 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
  */
 template<HYPRE_Int type>
 __global__ void
-hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
+hypreCUDAKernel_CSRRowSum( hypre_DeviceItem    &item,
+                           HYPRE_Int      nrows,
                            HYPRE_Int     *ia,
                            HYPRE_Int     *ja,
                            HYPRE_Complex *aa,
@@ -1276,26 +1258,26 @@ hypreCUDAKernel_CSRRowSum( HYPRE_Int      nrows,
                            HYPRE_Complex  scal,
                            HYPRE_Int      set)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
       p = read_only_load(ia + row_i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    HYPRE_Complex row_sum_i = 0.0;
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       if ( j >= q || (CF_i && CF_j && read_only_load(&CF_i[row_i]) != read_only_load(&CF_j[ja[j]])) )
       {
@@ -1377,33 +1359,34 @@ hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A,
  *      4: abs diag inverse sqrt
  */
 __global__ void
-hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
+hypreCUDAKernel_CSRExtractDiag( hypre_DeviceItem    &item,
+                                HYPRE_Int      nrows,
                                 HYPRE_Int     *ia,
                                 HYPRE_Int     *ja,
                                 HYPRE_Complex *aa,
                                 HYPRE_Complex *d,
                                 HYPRE_Int      type)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    HYPRE_Int has_diag = 0;
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
    {
       hypre_int find_diag = j < q && ja[j] == row;
 
@@ -1431,7 +1414,7 @@ hypreCUDAKernel_CSRExtractDiag( HYPRE_Int      nrows,
          }
       }
 
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, find_diag) )
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
       {
          has_diag = 1;
          break;
@@ -1633,7 +1616,8 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
  * diag_option: 1: special treatment for diag entries, mark as -2
  */
 __global__ void
-hypreCUDAKernel_CSRMatrixIntersectPattern(HYPRE_Int  n,
+hypreCUDAKernel_CSRMatrixIntersectPattern(hypre_DeviceItem &item,
+                                          HYPRE_Int  n,
                                           HYPRE_Int  nA,
                                           HYPRE_Int *rowid,
                                           HYPRE_Int *colid,
@@ -1641,7 +1625,7 @@ hypreCUDAKernel_CSRMatrixIntersectPattern(HYPRE_Int  n,
                                           HYPRE_Int *mark,
                                           HYPRE_Int  diag_option)
 {
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i >= n)
    {
@@ -1740,29 +1724,30 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
 }
 
 __global__ void
-hypreCUDAKernel_CSRDiagScale( HYPRE_Int      nrows,
+hypreCUDAKernel_CSRDiagScale( hypre_DeviceItem    &item,
+                              HYPRE_Int      nrows,
                               HYPRE_Int     *ia,
                               HYPRE_Int     *ja,
                               HYPRE_Complex *aa,
                               HYPRE_Complex *ld,
                               HYPRE_Complex *rd)
 {
-   HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p = 0, q = 0;
 
    if (lane < 2)
    {
       p = read_only_load(ia + row + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
    HYPRE_Complex sl = 1.0;
 
@@ -1772,7 +1757,7 @@ hypreCUDAKernel_CSRDiagScale( HYPRE_Int      nrows,
       {
          sl = read_only_load(ld + row);
       }
-      sl = __shfl_sync(HYPRE_WARP_FULL_MASK, sl, 0);
+      sl = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, sl, 0);
    }
 
    if (rd)

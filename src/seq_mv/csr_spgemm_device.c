@@ -45,7 +45,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM] -= hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM] -= hypre_MPI_Wtime();
 #endif
 
 #ifdef HYPRE_SPGEMM_TIMING
@@ -130,7 +130,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    hypre_CSRMatrixData(C)        = d_c;
 
 #ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_SPMM] += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_SPGEMM] += hypre_MPI_Wtime();
 #endif
 
    return hypre_error_flag;

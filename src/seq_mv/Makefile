@@ -85,7 +85,11 @@ SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 # Targets
 ##################################################################
 
-all: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
+all:
+	make autogen
+	make lib
+
+lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/seq_mv.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
@@ -95,11 +99,33 @@ install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/seq_mv.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean:
+clean: deleteautogen
 	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
+
+autogen:
+	@for number in 1 2 3 4 5 6 7 8 9 10; do \
+	   fn=csr_spgemm_device_numer$$number.c; \
+	   if [ ! -f $$fn ]; then \
+	      echo "#define HYPRE_SPGEMM_BIN $$number" > $$fn; \
+	      cat csr_spgemm_device_numer.in >> $$fn; \
+	   fi \
+	   done
+	@for number in 1 2 3 4 5 6 7 8 9 10; do \
+	   fn=csr_spgemm_device_symbl$$number.c; \
+	   if [ ! -f $$fn ]; then \
+	      echo "#define HYPRE_SPGEMM_BIN $$number" > $$fn; \
+	      cat csr_spgemm_device_symbl.in >> $$fn; \
+	   fi \
+	   done
+
+deleteautogen:
+	rm -f csr_spgemm_device_numer[1-9].c
+	rm -f csr_spgemm_device_numer10.c
+	rm -f csr_spgemm_device_symbl[1-9].c
+	rm -f csr_spgemm_device_symbl10.c
 
 ##################################################################
 # Rules

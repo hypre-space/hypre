@@ -1058,20 +1058,9 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
    void *object;
    HYPRE_IJMatrixGetObject(matrix, &object);
-   HYPRE_ParCSRMatrix par_csr = (HYPRE_ParCSRMatrix) object;
+   hypre_ParCSRMatrix *par_csr = (hypre_ParCSRMatrix*) object;
 
-   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(matrix);
-
-   if ( hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST )
-   {
-      hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
-   }
-   else
-   {
-      HYPRE_ParCSRMatrix par_csr2 = hypre_ParCSRMatrixClone_v2(par_csr, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixPrintIJ(par_csr2, 0, 0, filename);
-      hypre_ParCSRMatrixDestroy(par_csr2);
-   }
+   hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
 
    return hypre_error_flag;
 }

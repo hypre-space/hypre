@@ -15,21 +15,14 @@
 /* return B = [Adiag, Aoffd] */
 #if 1
 __global__ void
-hypreGPUKernel_ConcatDiagAndOffd(
-#if defined(HYPRE_USING_SYCL)
-   sycl::nd_item<1>& item,
-#endif
-   HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
-   HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
-   HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
-   HYPRE_Int *cols_offd_map,
-   HYPRE_Int *d_ib,     HYPRE_Int *d_jb,     HYPRE_Complex *d_ab)
+hypreGPUKernel_ConcatDiagAndOffd( hypre_DeviceItem &item,
+                                  HYPRE_Int  nrows,    HYPRE_Int  diag_ncol,
+                                  HYPRE_Int *d_diag_i, HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
+                                  HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j, HYPRE_Complex *d_offd_a,
+                                  HYPRE_Int *cols_offd_map,
+                                  HYPRE_Int *d_ib,     HYPRE_Int *d_jb,     HYPRE_Complex *d_ab)
 {
-#if defined(HYPRE_USING_SYCL)
-   const HYPRE_Int row = hypre_sycl_get_grid_warp_id(item);
-#else
-   const HYPRE_Int row = hypre_cuda_get_grid_warp_id<1, 1>();
-#endif
+   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row >= nrows)
    {
@@ -37,12 +30,7 @@ hypreGPUKernel_ConcatDiagAndOffd(
    }
 
    /* lane id inside the warp */
-#if defined(HYPRE_USING_SYCL)
-   sycl::sub_group SG = item.get_sub_group();
-   const HYPRE_Int lane_id = SG.get_local_linear_id();
-#else
-   const HYPRE_Int lane_id = hypre_cuda_get_lane_id<1>();
-#endif
+   const HYPRE_Int lane_id = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int i, j = 0, k = 0, p, istart, iend, bstart;
 
    /* diag part */
@@ -54,17 +42,9 @@ hypreGPUKernel_ConcatDiagAndOffd(
    {
       k = read_only_load(d_ib + row);
    }
-#if defined(HYPRE_USING_SYCL)
-   /* WM: NOTE - barriers seem to be required before shuffle to guarantee correct results */
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-   bstart = SG.shuffle(k, 0);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-   bstart = __shfl_sync(HYPRE_WARP_FULL_MASK, k, 0);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
+   bstart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, k, 0);
 
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
@@ -79,14 +59,8 @@ hypreGPUKernel_ConcatDiagAndOffd(
       j = read_only_load(d_offd_i + row + lane_id);
    }
    bstart += iend - istart;
-#if defined(HYPRE_USING_SYCL)
-   SG.barrier();
-   istart = SG.shuffle(j, 0);
-   iend   = SG.shuffle(j, 1);
-#else
-   istart = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 0);
-   iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, j, 1);
-#endif
+   istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 0);
+   iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, j, 1);
 
    p = bstart - istart;
    for (i = istart + lane_id; i < iend; i += HYPRE_WARP_SIZE)
@@ -1179,7 +1153,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
  */
 template<HYPRE_Int type>
 __global__ void
-hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
+hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_DeviceItem &item,
+                                                      HYPRE_Int      nrows,
                                                       HYPRE_Real     tol,
                                                       HYPRE_Int     *A_diag_i,
                                                       HYPRE_Int     *A_diag_j,
@@ -1189,14 +1164,14 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
                                                       HYPRE_Real     *elmt_tols_diag,
                                                       HYPRE_Real     *elmt_tols_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int p_diag = 0, p_offd = 0, q_diag, q_offd;
 
    /* sum row norm over diag part */
@@ -1204,8 +1179,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    {
       p_diag = read_only_load(A_diag_i + row_i + lane);
    }
-   q_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 1);
-   p_diag = __shfl_sync(HYPRE_WARP_FULL_MASK, p_diag, 0);
+   q_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 1);
+   p_diag = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_diag, 0);
 
    HYPRE_Real row_norm_i = 0.0;
 
@@ -1232,8 +1207,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( HYPRE_Int      nrows,
    {
       p_offd = read_only_load(A_offd_i + row_i + lane);
    }
-   q_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 1);
-   p_offd = __shfl_sync(HYPRE_WARP_FULL_MASK, p_offd, 0);
+   q_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 1);
+   p_offd = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p_offd, 0);
 
    for (HYPRE_Int j = p_offd + lane; j < q_offd; j += HYPRE_WARP_SIZE)
    {

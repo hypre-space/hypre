@@ -37,85 +37,65 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    }
 
    /* symbolic */
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE / 16, HYPRE_SPGEMM_BASE_GROUP_SIZE / 16 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[1], T_GROUP_SIZE[1] >
    (multiProcessorCount, &max_nblocks[0][1], &max_nblocks[2][1]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE /  8, HYPRE_SPGEMM_BASE_GROUP_SIZE /  8 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[2], T_GROUP_SIZE[2] >
    (multiProcessorCount, &max_nblocks[0][2], &max_nblocks[2][2]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE /  4, HYPRE_SPGEMM_BASE_GROUP_SIZE /  4 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[3], T_GROUP_SIZE[3] >
    (multiProcessorCount, &max_nblocks[0][3], &max_nblocks[2][3]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE /  2, HYPRE_SPGEMM_BASE_GROUP_SIZE /  2 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[4], T_GROUP_SIZE[4] >
    (multiProcessorCount, &max_nblocks[0][4], &max_nblocks[2][4]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE,      HYPRE_SPGEMM_BASE_GROUP_SIZE >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[5], T_GROUP_SIZE[5] >
    (multiProcessorCount, &max_nblocks[0][5], &max_nblocks[2][5]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE *  2, HYPRE_SPGEMM_BASE_GROUP_SIZE *  2 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[6], T_GROUP_SIZE[6] >
    (multiProcessorCount, &max_nblocks[0][6], &max_nblocks[2][6]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE *  4, HYPRE_SPGEMM_BASE_GROUP_SIZE *  4 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[7], T_GROUP_SIZE[7] >
    (multiProcessorCount, &max_nblocks[0][7], &max_nblocks[2][7]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE *  8, HYPRE_SPGEMM_BASE_GROUP_SIZE *  8 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[8], T_GROUP_SIZE[8] >
    (multiProcessorCount, &max_nblocks[0][8], &max_nblocks[2][8]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE * 16, HYPRE_SPGEMM_BASE_GROUP_SIZE * 16 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[9], T_GROUP_SIZE[9] >
    (multiProcessorCount, &max_nblocks[0][9], &max_nblocks[2][9]);
 
-   hypre_spgemm_symbolic_max_num_blocks
-   < HYPRE_SPGEMM_SYMBL_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32 >
+   hypre_spgemm_symbolic_max_num_blocks< SYMBL_HASH_SIZE[10], T_GROUP_SIZE[10] >
    (multiProcessorCount, &max_nblocks[0][10], &max_nblocks[2][10]);
 
    /* numeric */
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE / 16, HYPRE_SPGEMM_BASE_GROUP_SIZE / 16 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[1], T_GROUP_SIZE[1] >
    (multiProcessorCount, &max_nblocks[1][1], &max_nblocks[3][1]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE /  8, HYPRE_SPGEMM_BASE_GROUP_SIZE /  8 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[2], T_GROUP_SIZE[2] >
    (multiProcessorCount, &max_nblocks[1][2], &max_nblocks[3][2]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE /  4, HYPRE_SPGEMM_BASE_GROUP_SIZE /  4 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[3], T_GROUP_SIZE[3] >
    (multiProcessorCount, &max_nblocks[1][3], &max_nblocks[3][3]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE /  2, HYPRE_SPGEMM_BASE_GROUP_SIZE /  2 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[4], T_GROUP_SIZE[4] >
    (multiProcessorCount, &max_nblocks[1][4], &max_nblocks[3][4]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE,      HYPRE_SPGEMM_BASE_GROUP_SIZE>
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[5], T_GROUP_SIZE[5] >
    (multiProcessorCount, &max_nblocks[1][5], &max_nblocks[3][5]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE *  2, HYPRE_SPGEMM_BASE_GROUP_SIZE *  2 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[6], T_GROUP_SIZE[6] >
    (multiProcessorCount, &max_nblocks[1][6], &max_nblocks[3][6]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE *  4, HYPRE_SPGEMM_BASE_GROUP_SIZE *  4 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[7], T_GROUP_SIZE[7] >
    (multiProcessorCount, &max_nblocks[1][7], &max_nblocks[3][7]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE *  8, HYPRE_SPGEMM_BASE_GROUP_SIZE *  8 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[8], T_GROUP_SIZE[8] >
    (multiProcessorCount, &max_nblocks[1][8], &max_nblocks[3][8]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE * 16, HYPRE_SPGEMM_BASE_GROUP_SIZE * 16 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[9], T_GROUP_SIZE[9] >
    (multiProcessorCount, &max_nblocks[1][9], &max_nblocks[3][9]);
 
-   hypre_spgemm_numerical_max_num_blocks
-   < HYPRE_SPGEMM_NUMER_HASH_SIZE * 32, HYPRE_SPGEMM_BASE_GROUP_SIZE * 32 >
+   hypre_spgemm_numerical_max_num_blocks< NUMER_HASH_SIZE[10], T_GROUP_SIZE[10] >
    (multiProcessorCount, &max_nblocks[1][10], &max_nblocks[3][10]);
 
    /* highest bin with nonzero num blocks */
