@@ -120,10 +120,6 @@ function MpirunString
          shift
          RunString="lrun -T$1"
          ;;
-      ray*)
-         shift
-         RunString="lrun -n$1"
-         ;;
       lassen*)
          shift
          RunString="lrun -n$1"
