@@ -122,7 +122,7 @@ void hypre_expdistfromuniform( hypre_DeviceItem &item,
                                float      *x )
 {
    const HYPRE_Int global_thread_id  = hypre_gpu_get_grid_thread_id<3, 1>(item);
-   const HYPRE_Int total_num_threads = hypre_cuda_get_grid_num_threads<3, 1>();
+   const HYPRE_Int total_num_threads = hypre_gpu_get_grid_num_threads<3, 1>(item);
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
@@ -376,10 +376,6 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
-#ifdef HYPRE_SPGEMM_TIMING
-   HYPRE_Real t1 = hypre_MPI_Wtime();
-#endif
-
    const HYPRE_Int num_warps_per_block =  16;
    const HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int BDIMX               =   2;
@@ -450,10 +446,6 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_ROWNNZ] += hypre_MPI_Wtime();
-#endif
-
-#ifdef HYPRE_SPGEMM_NVTX
-   hypre_GpuProfilingPopRange();
 #endif
 
 #ifdef HYPRE_SPGEMM_NVTX

@@ -68,7 +68,8 @@ hypre_int get_group_id()
 static __device__ __forceinline__
 hypre_int get_group_lane_id()
 {
-   return hypre_cuda_get_thread_id<2>();
+   hypre_DeviceItem item;
+   return hypre_gpu_get_thread_id<2>(item);
 }
 
 /* the warp id in the group */
@@ -82,7 +83,7 @@ hypre_int get_warp_in_group_id()
    }
    else
    {
-      return hypre_cuda_get_warp_id<2>();
+      return hypre_gpu_get_warp_id<2>(item);
    }
 }
 
@@ -184,7 +185,7 @@ T group_reduce_sum(T in, volatile T *s_WarpData)
 
    hypre_DeviceItem item;
    const HYPRE_Int warp_lane_id = hypre_gpu_get_lane_id<2>(item);
-   const HYPRE_Int warp_id = hypre_cuda_get_warp_id<3>();
+   const HYPRE_Int warp_id = hypre_gpu_get_warp_id<3>(item);
 
    if (warp_lane_id == 0)
    {

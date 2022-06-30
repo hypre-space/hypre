@@ -186,7 +186,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 
 /* sycl version */
 #if defined(HYPRE_USING_SYCL)
-#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
 {                                                                                            \
    if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
    {                                                                                         \
@@ -223,6 +223,8 @@ using hypre_DeviceItem = sycl::nd_item<1>;
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
+
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
 #endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -632,7 +634,7 @@ T read_only_load( const T *ptr )
 /* return the number of threads in block */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_num_threads()
+hypre_int hypre_gpu_get_num_threads(hypre_DeviceItem &item)
 {
    switch (dim)
    {
@@ -650,7 +652,7 @@ hypre_int hypre_cuda_get_num_threads()
 /* return the flattened thread id in block */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_thread_id()
+hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
 {
    switch (dim)
    {
@@ -669,17 +671,17 @@ hypre_int hypre_cuda_get_thread_id()
 /* return the number of warps in block */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_num_warps()
+hypre_int hypre_gpu_get_num_warps(item)
 {
-   return hypre_cuda_get_num_threads<dim>() >> HYPRE_WARP_BITSHIFT;
+   return hypre_gpu_get_num_threads<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the warp id in block */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_warp_id()
+hypre_int hypre_gpu_get_warp_id(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_thread_id<dim>() >> HYPRE_WARP_BITSHIFT;
+   return hypre_gpu_get_thread_id<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the thread lane id in warp */
@@ -687,7 +689,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_thread_id<dim>() & (HYPRE_WARP_SIZE - 1);
+   return hypre_gpu_get_thread_id<dim>(item) & (HYPRE_WARP_SIZE - 1);
 }
 
 /* return the num of blocks in grid */
@@ -730,9 +732,9 @@ hypre_int hypre_cuda_get_block_id()
 /* return the number of threads in grid */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_grid_num_threads()
+hypre_int hypre_gpu_get_grid_num_threads(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_threads<bdim>();
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>(item);
 }
 
 /* return the flattened thread id in grid */
@@ -740,16 +742,16 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_threads<bdim>() +
-          hypre_cuda_get_thread_id<bdim>();
+   return hypre_cuda_get_block_id<gdim>() * hypre_gpu_get_num_threads<bdim>(item) +
+          hypre_gpu_get_thread_id<bdim>(item);
 }
 
 /* return the number of warps in grid */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_grid_num_warps()
+hypre_int hypre_gpu_get_grid_num_warps(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_num_blocks<gdim>() * hypre_cuda_get_num_warps<bdim>();
+   return hypre_cuda_get_num_blocks<gdim>() * hypre_gpu_get_num_warps<bdim>(item);
 }
 
 /* return the flattened warp id in grid */
@@ -757,8 +759,8 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_block_id<gdim>() * hypre_cuda_get_num_warps<bdim>() +
-          hypre_cuda_get_warp_id<bdim>();
+   return hypre_cuda_get_block_id<gdim>() * hypre_gpu_get_num_warps<bdim>(item) +
+          hypre_gpu_get_warp_id<bdim>(item);
 }
 
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 600
@@ -1158,6 +1160,23 @@ struct print_functor
 
 #if defined(HYPRE_USING_SYCL)
 
+/* return the number of threads in block */
+/* WM: todo - only supports bdim = gdim = 1 DOUBLE CHECK THIS */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_num_threads(hypre_DeviceItem &item)
+{
+   return static_cast<HYPRE_Int>(item.get_group().get_group_range().get(0));
+}
+
+/* return the flattened thread id in block */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
+{
+   return static_cast<HYPRE_Int>(item.get_local_linear_id());
+}
+
 /* return the flattened thread id in grid */
 /* WM: todo - only supports bdim = gdim = 1 */
 template <hypre_int bdim, hypre_int gdim>
@@ -1184,6 +1203,48 @@ hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
    sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
+}
+
+/* exclusive prefix scan */
+template <typename T>
+static __device__ __forceinline__
+T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
+{
+#pragma unroll
+   for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)
+   {
+      T t = item.get_sub_group().shuffle_up(in, d >> 1);
+      if ( (lane_id & (d - 1)) == (d - 1) )
+      {
+         in += t;
+      }
+   }
+
+   all_sum = item.get_sub_group().shuffle(in, HYPRE_WARP_SIZE - 1);
+
+   if (lane_id == HYPRE_WARP_SIZE - 1)
+   {
+      in = 0;
+   }
+
+#pragma unroll
+   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   {
+      T t = item.get_sub_group().shuffle_xor(in, d);
+
+      if ( (lane_id & (d - 1)) == (d - 1))
+      {
+         if ( (lane_id & ((d << 1) - 1)) == ((d << 1) - 1) )
+         {
+            in += t;
+         }
+         else
+         {
+            in = t;
+         }
+      }
+   }
+   return in;
 }
 
 static __device__ __forceinline__

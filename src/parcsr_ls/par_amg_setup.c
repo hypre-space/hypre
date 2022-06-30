@@ -3115,7 +3115,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
 #if defined(HYPRE_USING_NVTX)
-      hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", j);
+      hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
       hypre_GpuProfilingPushRange(nvtx_name);
 #endif
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
@@ -3177,7 +3177,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
 #if defined(HYPRE_USING_NVTX)
-         hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", j);
+         hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
          hypre_GpuProfilingPushRange(nvtx_name);
 #endif
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
@@ -3202,7 +3202,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
 #if defined(HYPRE_USING_NVTX)
-      hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", j);
+      hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
       hypre_GpuProfilingPushRange(nvtx_name);
 #endif
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
@@ -3259,7 +3259,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
 #if defined(HYPRE_USING_NVTX)
-      hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", j);
+      hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
       hypre_GpuProfilingPushRange(nvtx_name);
 #endif
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");

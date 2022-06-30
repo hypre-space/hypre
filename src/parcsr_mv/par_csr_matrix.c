@@ -670,7 +670,8 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int            num_nonzeros_offd;
    HYPRE_BigInt         ilower, iupper, jlower, jupper;
 
-   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation((hypre_ParCSRMatrix*) matrix);
+   HYPRE_MemoryLocation memory_location =
+      hypre_ParCSRMatrixMemoryLocation((hypre_ParCSRMatrix*) matrix);
 
    if (!matrix)
    {

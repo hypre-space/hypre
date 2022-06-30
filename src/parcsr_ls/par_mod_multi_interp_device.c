@@ -75,13 +75,15 @@ __global__ void hypreCUDAKernel_cfmarker_masked_rowsum( hypre_DeviceItem &item, 
                                                         HYPRE_Complex *A_offd_data, HYPRE_Int *CF_marker, HYPRE_Int *dof_func, HYPRE_Int *dof_func_offd,
                                                         HYPRE_Complex *row_sums );
 
-__global__ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_DeviceItem &item, HYPRE_Int num_points,
+__global__ void hypreCUDAKernel_generate_Pdiag_i_Poffd_i( hypre_DeviceItem &item,
+                                                          HYPRE_Int num_points,
                                                           HYPRE_Int color,
                                                           HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd, HYPRE_Int *S_diag_i,
                                                           HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *P_diag_i,
                                                           HYPRE_Int *P_offd_i );
 
-__global__ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem &item, HYPRE_Int num_points,
+__global__ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem &item,
+                                                          HYPRE_Int num_points,
                                                           HYPRE_Int color,
                                                           HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
                                                           HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
@@ -97,7 +99,8 @@ __global__ void hypreCUDAKernel_insert_remaining_weights( hypre_DeviceItem &item
                                                           HYPRE_Int *Pi_offd_j, HYPRE_Real *Pi_offd_data, HYPRE_Int *P_offd_i, HYPRE_Int *P_offd_j,
                                                           HYPRE_Real *P_offd_data );
 
-__global__ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_DeviceItem &item, HYPRE_Int num_points,
+__global__ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_DeviceItem &item,
+                                                          HYPRE_Int num_points,
                                                           HYPRE_Int color,
                                                           HYPRE_Int *pass_order, HYPRE_Int *pass_marker, HYPRE_Int *pass_marker_offd,
                                                           HYPRE_Int *fine_to_coarse, HYPRE_Int *fine_to_coarse_offd, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
@@ -1716,7 +1719,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem    &item,
          equal = j1 > -1 && read_only_load(&pass_marker[j1]) == color;
       }
 
-      HYPRE_Int pos = warp_prefix_sum(lane, equal, sum);
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
 
       if (equal)
       {
@@ -1763,7 +1766,7 @@ void hypreCUDAKernel_generate_Pdiag_j_Poffd_j( hypre_DeviceItem    &item,
          equal = j1 > -1 && read_only_load(&pass_marker_offd[j1]) == color;
       }
 
-      HYPRE_Int pos = warp_prefix_sum(lane, equal, sum);
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
 
       if (equal)
       {
@@ -1963,7 +1966,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_DeviceItem    &item,
          equal = j1 > -1 && read_only_load(&pass_marker[j1]) == color;
       }
 
-      HYPRE_Int pos = warp_prefix_sum(lane, equal, sum);
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
 
       if (equal)
       {
@@ -2037,7 +2040,7 @@ void hypreCUDAKernel_generate_Qdiag_j_Qoffd_j( hypre_DeviceItem    &item,
          equal = j1 > -1 && read_only_load(&pass_marker_offd[j1]) == color;
       }
 
-      HYPRE_Int pos = warp_prefix_sum(lane, equal, sum);
+      HYPRE_Int pos = warp_prefix_sum(item, lane, equal, sum);
 
       if (equal)
       {

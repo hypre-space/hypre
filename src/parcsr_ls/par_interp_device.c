@@ -24,7 +24,8 @@ __global__ void hypre_BoomerAMGBuildDirInterp_getcoef( hypre_DeviceItem &item, H
                                                        HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Real *P_diag_data, HYPRE_Int *P_offd_i,
                                                        HYPRE_Int *P_offd_j, HYPRE_Real *P_offd_data, HYPRE_Int *fine_to_coarse );
 
-__global__ void hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_DeviceItem &item,
+                                                          HYPRE_Int nr_of_rows,
                                                           HYPRE_Int *A_diag_i,
                                                           HYPRE_Int *A_diag_j, HYPRE_Real *A_diag_data, HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
                                                           HYPRE_Real *A_offd_data, HYPRE_Int *Soc_diag_j, HYPRE_Int *Soc_offd_j, HYPRE_Int *CF_marker,
@@ -672,7 +673,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_DeviceItem &item,
          }
       }
 
-      pos = warp_prefix_sum(lane, is_SC, sum);
+      pos = warp_prefix_sum(item, lane, is_SC, sum);
 
       if (is_SC)
       {
@@ -737,7 +738,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef( hypre_DeviceItem &item,
          }
       }
 
-      pos = warp_prefix_sum(lane, is_SC, sum);
+      pos = warp_prefix_sum(item, lane, is_SC, sum);
 
       if (is_SC)
       {
@@ -937,7 +938,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_DeviceItem &item,
          }
       }
 
-      pos = warp_prefix_sum(lane, is_SC, sum);
+      pos = warp_prefix_sum(item, lane, is_SC, sum);
 
       if (is_SC)
       {
@@ -994,7 +995,7 @@ hypre_BoomerAMGBuildDirInterp_getcoef_v2( hypre_DeviceItem &item,
          }
       }
 
-      pos = warp_prefix_sum(lane, is_SC, sum);
+      pos = warp_prefix_sum(item, lane, is_SC, sum);
 
       if (is_SC)
       {

@@ -28,15 +28,15 @@ Final Relative Residual Norm = 7.092339e-10
 
 # Output file: elast.out.7
 Iterations = 17
-Final Relative Residual Norm = 5.873774e-09
+Final Relative Residual Norm = 3.595815e-09
 
 # Output file: elast.out.8
 Iterations = 21
-Final Relative Residual Norm = 4.320611e-09
+Final Relative Residual Norm = 4.320022e-09
 
 # Output file: elast.out.9
-Iterations = 17
-Final Relative Residual Norm = 9.246032e-09
+Iterations = 18
+Final Relative Residual Norm = 3.131906e-09
 
 # Output file: elast.out.10
 Iterations = 30
@@ -56,29 +56,29 @@ Final Relative Residual Norm = 5.280302e-09
 
 # Output file: elast.out.14
 Iterations = 21
-Final Relative Residual Norm = 3.750124e-09
+Final Relative Residual Norm = 3.749018e-09
 
 # Output file: elast.out.15
 Iterations = 21
-Final Relative Residual Norm = 2.631553e-09
+Final Relative Residual Norm = 2.497467e-09
 
 # Output file: elast.out.16
 Iterations = 21
-Final Relative Residual Norm = 3.706737e-09
+Final Relative Residual Norm = 3.707944e-09
 
 # Output file: elast.out.17
 Iterations = 15
-Final Relative Residual Norm = 6.403256e-09
+Final Relative Residual Norm = 6.340959e-09
 
 # Output file: elast.out.18
 Iterations = 15
-Final Relative Residual Norm = 2.465441e-09
+Final Relative Residual Norm = 2.390385e-09
 
 # Output file: elast.out.19
 Iterations = 21
-Final Relative Residual Norm = 3.750124e-09
+Final Relative Residual Norm = 3.749018e-09
 
 # Output file: elast.out.20
 Iterations = 29
-Final Relative Residual Norm = 8.276017e-09
+Final Relative Residual Norm = 7.098349e-09
 
