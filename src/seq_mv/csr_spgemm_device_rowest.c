@@ -249,7 +249,7 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
             }
 
             /* partial sum along r */
-            vmin = warp_reduce_sum(NULL, vmin);
+            vmin = warp_reduce_sum(item, vmin);
 
             if (lane_id == 0)
             {
