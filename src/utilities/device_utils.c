@@ -1314,7 +1314,8 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HY
                                                HYPRE_Complex v);
 
 __global__ void
-hypreGPUKernel_DiagScaleVector(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
+hypreGPUKernel_DiagScaleVector(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *A_i,
+                               HYPRE_Complex *A_data,
                                HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
