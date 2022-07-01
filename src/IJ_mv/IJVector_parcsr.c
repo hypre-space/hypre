@@ -302,7 +302,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_Int component = hypre_IJVectorComponent(vector);
+   HYPRE_Int component;
    hypre_Vector *local_vector;
    HYPRE_Int vecoffset;
    HYPRE_Int vecstride;
@@ -361,6 +361,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
       vec_start.  NOTE: If indices == NULL off proc values are ignored!!! */
 
    data = hypre_VectorData(local_vector);
+   component = hypre_VectorComponent(local_vector);
    vecstride = hypre_VectorVectorStride(local_vector);
    idxstride = hypre_VectorIndexStride(local_vector);
    vecoffset = component * vecstride;
@@ -674,10 +675,6 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-
-   /* VPM: hypre_IJVectorComponent is not visible to the following function.
-      Should "component" be a member of hypre_ParVector or be passed as an
-      input argument to hypre_ParVectorGetValues2? */
 
    hypre_ParVectorGetValues2(par_vector, num_values, (HYPRE_BigInt *) indices, jmin, values);
 

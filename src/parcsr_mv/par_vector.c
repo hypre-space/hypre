@@ -112,7 +112,9 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorInitialize
+ * hypre_ParVectorInitialize_v2
+ *
+ * Initialize a hypre_ParVector at a given memory location
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -130,10 +132,32 @@ hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memo
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorInitialize
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParVectorInitialize( hypre_ParVector *vector )
 {
    return hypre_ParVectorInitialize_v2(vector, hypre_ParVectorMemoryLocation(vector));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorSetComponent
+ *
+ * Set the identifier of the active component of a hypre_ParVector for the
+ * purpose of Set/AddTo/Get values functions.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetComponent( hypre_ParVector *vector,
+                             HYPRE_Int        component )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_VectorComponent(local_vector) = component;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

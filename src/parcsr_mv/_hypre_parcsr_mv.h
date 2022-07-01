@@ -1124,6 +1124,7 @@ HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector, HYPRE_Int owns_data );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector, HYPRE_Int num_vectors );
+HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int component );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
 HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector, const char *file_name );
 HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v, HYPRE_Complex value );
