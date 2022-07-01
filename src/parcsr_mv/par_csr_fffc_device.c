@@ -38,8 +38,8 @@ struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
    __host__ __device__
    HYPRE_BigInt operator()(const Tuple& t) const
    {
-      const HYPRE_Int local_idx = std::get<0>(t);
-      const HYPRE_Int cf_marker = std::get<1>(t);
+      const HYPRE_Int local_idx = thrust::get<0>(t);
+      const HYPRE_Int cf_marker = thrust::get<1>(t);
       const HYPRE_Int s = cf_marker < 0;
       const HYPRE_Int m = 1 - 2 * s;
       return m * (local_idx + CF_first[s] + s);

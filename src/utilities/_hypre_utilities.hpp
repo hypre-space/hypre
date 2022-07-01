@@ -728,7 +728,7 @@ hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
 /* return the number of warps in block */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_num_warps(item)
+hypre_int hypre_gpu_get_num_warps(hypre_DeviceItem &item)
 {
    return hypre_gpu_get_num_threads<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
@@ -900,7 +900,7 @@ hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
 /* exclusive prefix scan */
 template <typename T>
 static __device__ __forceinline__
-T warp_prefix_sum(hypre_int lane_id, T in, T &all_sum)
+T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 {
 #pragma unroll
    for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)

@@ -75,7 +75,7 @@ void hypre_spgemm_rownnz_naive( hypre_DeviceItem &item,
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
-   volatile const HYPRE_Int lane_id = get_group_lane_id();
+   volatile const HYPRE_Int lane_id = get_group_lane_id(item);
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
@@ -89,13 +89,13 @@ void hypre_spgemm_rownnz_naive( hypre_DeviceItem &item,
 
       if (type == 'U' || type == 'B')
       {
-         jU = warp_reduce_sum(NULL, jU);
+         jU = warp_reduce_sum(item, jU);
          jU = min(jU, N);
       }
 
       if (type == 'L' || type == 'B')
       {
-         jL = warp_reduce_max(NULL, jL);
+         jL = warp_reduce_max(item, jL);
       }
 
       if (lane_id == 0)
@@ -151,7 +151,7 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
-   volatile HYPRE_Int lane_id = get_group_lane_id();
+   volatile HYPRE_Int lane_id = get_group_lane_id(item);
 #if COHEN_USE_SHMEM
    __shared__ volatile HYPRE_Int s_col[NUM_WARPS_PER_BLOCK * SHMEM_SIZE_PER_WARP];
    volatile HYPRE_Int  *warp_s_col = s_col + warp_id * SHMEM_SIZE_PER_WARP;

@@ -66,16 +66,15 @@ hypre_int get_group_id()
 
 /* the thread id (lane) in the group */
 static __device__ __forceinline__
-hypre_int get_group_lane_id()
+hypre_int get_group_lane_id(hypre_DeviceItem &item)
 {
-   hypre_DeviceItem item;
    return hypre_gpu_get_thread_id<2>(item);
 }
 
 /* the warp id in the group */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-hypre_int get_warp_in_group_id()
+hypre_int get_warp_in_group_id(hypre_DeviceItem &item)
 {
    if (GROUP_SIZE <= HYPRE_WARP_SIZE)
    {
@@ -92,13 +91,12 @@ hypre_int get_warp_in_group_id()
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2)
+void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
       /* lane = warp_lane
        * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
-      hypre_DeviceItem item;
       const HYPRE_Int lane = hypre_gpu_get_lane_id<2>(item);
 
       if (lane < 2)
@@ -111,7 +109,7 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &
    else
    {
       /* lane = group_lane */
-      const HYPRE_Int lane = get_group_lane_id();
+      const HYPRE_Int lane = get_group_lane_id(item);
 
       if (valid_ptr && lane < 2)
       {
@@ -127,13 +125,12 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1)
+void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
       /* lane = warp_lane
        * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
-      hypre_DeviceItem item;
       const HYPRE_Int lane = hypre_gpu_get_lane_id<2>(item);
 
       if (!lane)
@@ -145,7 +142,7 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1)
    else
    {
       /* lane = group_lane */
-      const HYPRE_Int lane = get_group_lane_id();
+      const HYPRE_Int lane = get_group_lane_id(item);
 
       if (valid_ptr && !lane)
       {
@@ -157,7 +154,7 @@ void group_read(const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1)
 
 template <typename T, HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-T group_reduce_sum(T in)
+T group_reduce_sum(hypre_DeviceItem &item, T in)
 {
 #if defined(HYPRE_DEBUG)
    hypre_device_assert(GROUP_SIZE <= HYPRE_WARP_SIZE);
@@ -175,15 +172,14 @@ T group_reduce_sum(T in)
 /* s_WarpData[NUM_GROUPS_PER_BLOCK * GROUP_SIZE / HYPRE_WARP_SIZE] */
 template <typename T, HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-T group_reduce_sum(T in, volatile T *s_WarpData)
+T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
 {
 #if defined(HYPRE_DEBUG)
    hypre_device_assert(GROUP_SIZE > HYPRE_WARP_SIZE);
 #endif
 
-   T out = warp_reduce_sum(in);
+   T out = warp_reduce_sum(item, in);
 
-   hypre_DeviceItem item;
    const HYPRE_Int warp_lane_id = hypre_gpu_get_lane_id<2>(item);
    const HYPRE_Int warp_id = hypre_gpu_get_warp_id<3>(item);
 
@@ -194,10 +190,10 @@ T group_reduce_sum(T in, volatile T *s_WarpData)
 
    __syncthreads();
 
-   if (get_warp_in_group_id<GROUP_SIZE>() == 0)
+   if (get_warp_in_group_id<GROUP_SIZE>(item) == 0)
    {
       const T a = warp_lane_id < GROUP_SIZE / HYPRE_WARP_SIZE ? s_WarpData[warp_id + warp_lane_id] : 0.0;
-      out = warp_reduce_sum(a);
+      out = warp_reduce_sum(item, a);
    }
 
    __syncthreads();
