@@ -267,7 +267,8 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
 }
 
 __global__ void
-hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
+hypreCUDAKernel_PMISCoarseningInit(hypre_DeviceItem &item,
+                                   HYPRE_Int   nrows,
                                    HYPRE_Int   CF_init,
                                    HYPRE_Int  *S_diag_i,
                                    HYPRE_Int  *S_offd_i,
@@ -275,7 +276,7 @@ hypreCUDAKernel_PMISCoarseningInit(HYPRE_Int   nrows,
                                    HYPRE_Int  *CF_marker_diag)
 {
    /* global_thread_id */
-   const HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
+   const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i >= nrows)
    {
@@ -378,7 +379,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 }
 
 __global__ void
-hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
+hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_DeviceItem &item,
+                                       HYPRE_Int   graph_diag_size,
                                        HYPRE_Int  *graph_diag,
                                        HYPRE_Int  *S_diag_i,
                                        HYPRE_Int  *S_diag_j,
@@ -388,15 +390,15 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
                                        HYPRE_Int  *CF_marker_diag,
                                        HYPRE_Int  *CF_marker_offd)
 {
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (warp_id >= graph_diag_size)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int row, i, marker_row, row_start, row_end;
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int row = 0, i = 0, marker_row, row_start, row_end;
 
    if (lane < 2)
    {
@@ -404,7 +406,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
       i = read_only_load(CF_marker_diag + row);
    }
 
-   marker_row = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
+   marker_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
 
    if (marker_row > 0)
    {
@@ -434,8 +436,8 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
          i = read_only_load(S_diag_i + row + lane);
       }
 
-      row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-      row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+      row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+      row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
       for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
       {
@@ -459,8 +461,8 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(HYPRE_Int   graph_diag_size,
             i = read_only_load(S_offd_i + row + lane);
          }
 
-         row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-         row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+         row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+         row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
          for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
          {

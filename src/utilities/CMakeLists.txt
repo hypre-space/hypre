@@ -31,6 +31,7 @@ set(SRCS
   hopscotch_hash.c
   memory.c
   merge_sort.c
+  mmio.c
   mpi_comm_f2c.c
   nvtx.c
   omp_device.c

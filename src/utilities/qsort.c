@@ -922,7 +922,7 @@ static void hypre_dense_search_row(HYPRE_Int            row,
          {
             val = L[row * n + col];
          }
-         if (fabs(val) > 1e-14)
+         if (hypre_cabs(val) > 1e-14)
          {
             hypre_dense_search_row(col, L, visited, ordering, order_ind, n, is_col_major);
          }

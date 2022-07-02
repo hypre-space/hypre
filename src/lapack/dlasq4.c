@@ -90,6 +90,7 @@ extern "C" {
 
        Parameter adjustments */
     --z__;
+    s = 0.;
 
     /* Function Body
 

@@ -101,7 +101,7 @@
 * Utility Macros
 **********************************************************************/
 /* MPI and Cray native timers. Note MPI uses doubles while Cray uses longs */
-#if MACHINE_IS_CRAY
+#if defined(MACHINE_IS_CRAY) && MACHINE_IS_CRAY
 # define cleartimer(tmr) (tmr = 0)
 # define starttimer(tmr) (tmr -= rtclock())
 # define stoptimer(tmr)  (tmr += rtclock())

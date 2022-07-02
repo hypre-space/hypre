@@ -43,13 +43,33 @@ CUFILES =\
  csr_matvec_oomp.c\
  csr_spadd_device.c\
  csr_spgemm_device.c\
- csr_spgemm_device_attempt.c\
- csr_spgemm_device_confident.c\
  csr_spgemm_device_cusparse.c\
- csr_spgemm_device_rocsparse.c \
+ csr_spgemm_device_numblocks.c\
+ csr_spgemm_device_numer.c\
+ csr_spgemm_device_numer1.c\
+ csr_spgemm_device_numer2.c\
+ csr_spgemm_device_numer3.c\
+ csr_spgemm_device_numer4.c\
+ csr_spgemm_device_numer5.c\
+ csr_spgemm_device_numer6.c\
+ csr_spgemm_device_numer7.c\
+ csr_spgemm_device_numer8.c\
+ csr_spgemm_device_numer9.c\
+ csr_spgemm_device_numer10.c\
  csr_spgemm_device_onemklsparse.c\
- csr_spgemm_device_rowbound.c\
+ csr_spgemm_device_rocsparse.c \
  csr_spgemm_device_rowest.c\
+ csr_spgemm_device_symbl.c\
+ csr_spgemm_device_symbl1.c\
+ csr_spgemm_device_symbl2.c\
+ csr_spgemm_device_symbl3.c\
+ csr_spgemm_device_symbl4.c\
+ csr_spgemm_device_symbl5.c\
+ csr_spgemm_device_symbl6.c\
+ csr_spgemm_device_symbl7.c\
+ csr_spgemm_device_symbl8.c\
+ csr_spgemm_device_symbl9.c\
+ csr_spgemm_device_symbl10.c\
  csr_spgemm_device_util.c\
  csr_spmv_device.c\
  csr_sptrans_device.c\
@@ -65,7 +85,11 @@ SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 # Targets
 ##################################################################
 
-all: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
+all:
+	make autogen
+	make lib
+
+lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/seq_mv.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
@@ -75,11 +99,33 @@ install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/seq_mv.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean:
+clean: deleteautogen
 	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
+
+autogen:
+	@for number in 1 2 3 4 5 6 7 8 9 10; do \
+	   fn=csr_spgemm_device_numer$$number.c; \
+	   if [ ! -f $$fn ]; then \
+	      echo "#define HYPRE_SPGEMM_BIN $$number" > $$fn; \
+	      cat csr_spgemm_device_numer.in >> $$fn; \
+	   fi \
+	   done
+	@for number in 1 2 3 4 5 6 7 8 9 10; do \
+	   fn=csr_spgemm_device_symbl$$number.c; \
+	   if [ ! -f $$fn ]; then \
+	      echo "#define HYPRE_SPGEMM_BIN $$number" > $$fn; \
+	      cat csr_spgemm_device_symbl.in >> $$fn; \
+	   fi \
+	   done
+
+deleteautogen:
+	rm -f csr_spgemm_device_numer[1-9].c
+	rm -f csr_spgemm_device_numer10.c
+	rm -f csr_spgemm_device_symbl[1-9].c
+	rm -f csr_spgemm_device_symbl10.c
 
 ##################################################################
 # Rules

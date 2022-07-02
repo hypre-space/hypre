@@ -65,25 +65,6 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
-# Check performance
-HOST=`hostname`
-case $HOST in
-   lassen*)
-      SavePerfExt="saved.lassen"
-      rtol=0.15
-      ;;
-   ray*)
-      SavePerfExt="saved.ray"
-      rtol=0.15
-      ;;
-   *) SavePerfExt=""
-      ;;
-esac
-
-if [ -n "$SavePerfExt" ]; then
-   ../runcheck.sh $TNAME.perf.out $TNAME.perf.$SavePerfExt $rtol >&2
-fi
-
 #=============================================================================
 # remove temporary files
 #=============================================================================

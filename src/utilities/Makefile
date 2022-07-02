@@ -49,6 +49,7 @@ FILES =\
  error.c\
  hopscotch_hash.c\
  merge_sort.c\
+ mmio.c\
  mpi_comm_f2c.c\
  prefix_sum.c\
  printf.c\
