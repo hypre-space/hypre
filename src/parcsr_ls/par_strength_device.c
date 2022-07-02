@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -53,7 +53,7 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    HYPRE_Int               *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_BigInt            *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int                num_variables   = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int                global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt             global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int                num_nonzeros_diag;
    HYPRE_Int                num_nonzeros_offd;
    HYPRE_Int                num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
@@ -127,6 +127,11 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
                          dof_func,
                          int_buf_data );
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+      /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
+      hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
       comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, HYPRE_MEMORY_DEVICE, int_buf_data,
                                                     HYPRE_MEMORY_DEVICE, dof_func_offd_dev);
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -140,24 +145,27 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
 
    if (abs_soc)
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateSabs_rowcount, gDim, bDim,
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
    else
    {
-      HYPRE_CUDA_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
-                         num_variables, max_row_sum, strength_threshold,
-                         A_diag_data, A_diag_i, A_diag_j,
-                         A_offd_data, A_offd_i, A_offd_j,
-                         S_temp_diag_j, S_temp_offd_j,
-                         num_functions, dof_func, dof_func_offd_dev,
-                         S_diag_i, S_offd_i );
+      HYPRE_GPU_LAUNCH( hypre_BoomerAMGCreateS_rowcount, gDim, bDim,
+                        num_variables, max_row_sum, strength_threshold,
+                        A_diag_data, A_diag_i, A_diag_j,
+                        A_offd_data, A_offd_i, A_offd_j,
+                        S_temp_diag_j, S_temp_offd_j,
+                        num_functions, dof_func, dof_func_offd_dev,
+                        S_diag_i, S_offd_i );
    }
+
+   hypre_Memset(S_diag_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
+   hypre_Memset(S_offd_i + num_variables, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_diag_i);
    hypreDevice_IntegerExclusiveScan(num_variables + 1, S_offd_i);

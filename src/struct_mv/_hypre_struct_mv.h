@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -869,7 +869,7 @@ typedef struct hypre_BoxBTQueue_struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -929,7 +929,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1121,7 +1121,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1218,7 +1218,7 @@ typedef struct hypre_StructGrid_struct
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1263,7 +1263,7 @@ hypre_StructStencilShape(stencil)[i]
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1537,7 +1537,7 @@ typedef struct hypre_CommHandle_struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1767,7 +1767,7 @@ hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1930,7 +1930,7 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -2105,7 +2105,7 @@ typedef struct hypre_StructMatmultData_struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -2178,6 +2178,8 @@ HYPRE_Int hypre_AddIndexes ( hypre_Index index1, hypre_Index index2, HYPRE_Int n
 HYPRE_Int hypre_SubtractIndexes ( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim,
                                   hypre_Index result );
 HYPRE_Int hypre_IndexesEqual ( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim );
+HYPRE_Int hypre_IndexPrint ( FILE *file, HYPRE_Int ndim, hypre_Index index );
+HYPRE_Int hypre_IndexRead ( FILE *file, HYPRE_Int ndim, hypre_Index index );
 hypre_Box *hypre_BoxCreate ( HYPRE_Int ndim );
 HYPRE_Int hypre_BoxDestroy ( hypre_Box *box );
 HYPRE_Int hypre_BoxInit ( hypre_Box *box, HYPRE_Int  ndim );
@@ -2203,6 +2205,8 @@ HYPRE_Int hypre_BoxGrowByIndex ( hypre_Box *box, hypre_Index  index );
 HYPRE_Int hypre_BoxGrowByValue ( hypre_Box *box, HYPRE_Int val );
 HYPRE_Int hypre_BoxGrowByBox ( hypre_Box *box, hypre_Box *gbox );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box, HYPRE_Int *array );
+HYPRE_Int hypre_BoxPrint ( FILE *file, hypre_Box *box );
+HYPRE_Int hypre_BoxRead ( FILE *file, HYPRE_Int ndim, hypre_Box **box_ptr );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayCreateFromIndices ( HYPRE_Int ndim, HYPRE_Int num_indices_in,
                                             HYPRE_Int **indices_in, HYPRE_Real threshold, hypre_BoxArray **box_array_ptr );
@@ -2436,8 +2440,8 @@ HYPRE_Int hypre_StructGridPrintVTK ( const char *filename, hypre_StructGrid *gri
 HYPRE_Int hypre_StructGridPrint ( FILE *file, hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm, FILE *file, hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid, HYPRE_Int *num_ghost );
-#if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
+HYPRE_Int hypre_StructGridGetMaxBoxSize ( hypre_StructGrid *grid );
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid,
                                            HYPRE_MemoryLocation data_location );
 #endif
@@ -2612,12 +2616,14 @@ HYPRE_Int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix, HYPRE_Int 
 HYPRE_Int hypre_StructMatrixSetGhost ( hypre_StructMatrix *matrix, HYPRE_Int ghost,
                                        HYPRE_Int *resize );
 HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
+HYPRE_Int hypre_StructMatrixPrintData ( FILE *file, hypre_StructMatrix *matrix, HYPRE_Int all );
+HYPRE_Int hypre_StructMatrixReadData ( FILE *file, hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename, hypre_StructMatrix *matrix,
                                     HYPRE_Int all );
-HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix,
-                                      hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead ( MPI_Comm comm, const char *filename,
                                              HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix,
+                                      hypre_StructMatrix *to_matrix );
 HYPRE_Int hypre_StructMatrixClearBoundary ( hypre_StructMatrix *matrix);
 HYPRE_Int hypre_StructMatrixGetDiagonal ( hypre_StructMatrix *matrix, hypre_StructVector *diag );
 
@@ -2704,6 +2710,8 @@ hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg ( hypre_StructVector *from_ve
                                                      hypre_StructVector *to_vector );
 HYPRE_Int hypre_StructVectorMigrate ( hypre_CommPkg *comm_pkg, hypre_StructVector *from_vector,
                                       hypre_StructVector *to_vector );
+HYPRE_Int hypre_StructVectorPrintData ( FILE *file, hypre_StructVector *vector, HYPRE_Int all );
+HYPRE_Int hypre_StructVectorReadData ( FILE *file, hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorPrint ( const char *filename, hypre_StructVector *vector,
                                     HYPRE_Int all );
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm, const char *filename,
@@ -2712,7 +2720,7 @@ HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector, HYPRE_Real *m
                                        HYPRE_Int *max_index, hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -3290,7 +3298,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #endif /* #ifndef HYPRE_BOXLOOP_DEVICEOMP_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -76,9 +76,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    {
       row_ptr = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(row_ptr, ncols, HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      /* RL: have to init the last entry; cuda-memcheck --tool initcheck complains otherwise
-       * but why? exclusive scan does not need it */
-      /* hypre_Memset(row_ptr + nrows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE); */
+      /* RL: have to init the last entry !!! */
+      hypre_Memset(row_ptr + nrows, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
       hypreDevice_IntegerExclusiveScan(nrows + 1, row_ptr);
       hypre_TMemcpy(&nelms, row_ptr + nrows, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
@@ -132,7 +131,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix) = stack_elmts_max_new;
    }
 
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, nelms, SorA);
+   hypreDevice_CharFilln(stack_sora + stack_elmts_current, nelms, SorA);
 
    if (ncols)
    {
@@ -164,8 +163,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       /* mark unwanted elements as -1 */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(len1, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
-                         (HYPRE_Int *) row_indexes, ncols, indicator );
+      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
+                        (HYPRE_Int *) row_indexes, ncols, indicator );
 
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
@@ -233,7 +232,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(N0, "thread", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
    */
 
    /* output X: 0: keep, 1: zero-out */
@@ -659,7 +658,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
             hypre_TMemcpy(diag_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Complex,
                           diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-            HYPRE_THRUST_CALL(fill_n, diag_sora_new, diag_nnz_existed, 0);
+            hypreDevice_CharFilln(diag_sora_new, diag_nnz_existed, 0);
 
             hypre_IJMatrixAssembleSortAndReduce2(diag_nnz_existed + diag_nnz_new, diag_i_new, diag_j_new,
                                                  diag_sora_new, diag_a_new,
@@ -712,7 +711,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
             hypre_TMemcpy(offd_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix)), HYPRE_Complex,
                           offd_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-            HYPRE_THRUST_CALL(fill_n, offd_sora_new, offd_nnz_existed, 0);
+            hypreDevice_CharFilln(offd_sora_new, offd_nnz_existed, 0);
 
             hypre_IJMatrixAssembleSortAndReduce2(offd_nnz_existed + offd_nnz_new, offd_i_new, offd_j_new,
                                                  offd_sora_new, offd_a_new,
@@ -782,8 +781,8 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
    HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
    HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-   HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
-   HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+   hypreDevice_ComplexFilln( diag_data, nnz_diag, value );
+   hypreDevice_ComplexFilln( offd_data, nnz_offd, value );
 
    return hypre_error_flag;
 }

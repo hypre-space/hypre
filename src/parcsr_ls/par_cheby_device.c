@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -170,13 +170,13 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       {
          hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, v);
          mult = coefs[i];
-         /* u = mult * r + v */
 
-         HYPRE_THRUST_CALL( transform, r_data, r_data + num_rows, v_data, u_data, mult * _1 + _2 );
+         /* u = mult * r + v */
+         hypreDevice_ComplexAxpyn( r_data, num_rows, v_data, u_data, mult );
       }
 
       /* u = o + u */
-      HYPRE_THRUST_CALL(transform, orig_u, orig_u + num_rows, u_data, u_data, _1 + _2);
+      hypreDevice_ComplexAxpyn( orig_u, num_rows, u_data, u_data, 1.0);
    }
    else /* scaling! */
    {

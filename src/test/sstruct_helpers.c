@@ -5,11 +5,19 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/*--------------------------------------------------------------------------
- * Compute new box based on variable type
- *--------------------------------------------------------------------------*/
-
 #include "sstruct_helpers.h"
+
+/*--------------------------------------------------------------------------
+ * BoxVolume
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+BoxVolume( Index     ilower,
+           Index     iupper )
+{
+   return (iupper[0] - ilower[0] + 1) *
+          (iupper[1] - ilower[1] + 1) *
+          (iupper[2] - ilower[2] + 1);
+}
 
 /*--------------------------------------------------------------------------
  * GetVariableBox
@@ -191,7 +199,8 @@ SScanProblemIndex( char          *sdata_ptr,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-ReadData( char         *filename,
+ReadData( MPI_Comm      comm,
+          char         *filename,
           ProblemData  *data_ptr )
 {
    ProblemData        data;
@@ -216,14 +225,14 @@ ReadData( char         *filename,
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
 
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_rank(comm, &myid);
 
    if (myid == 0)
    {
       if ((file = fopen(filename, "r")) == NULL)
       {
          hypre_printf("Error: can't open input file %s\n", filename);
-         exit(1);
+         hypre_MPI_Abort(comm, 1);
       }
 
       /* allocate initial space, and read first input line */
@@ -251,11 +260,11 @@ ReadData( char         *filename,
    }
 
    /* broadcast the data size */
-   hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
+   hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, comm);
 
    /* broadcast the data */
    sdata = hypre_TReAlloc(sdata, char, sdata_size, HYPRE_MEMORY_HOST);
-   hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, hypre_MPI_COMM_WORLD);
+   hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, comm);
 
    /*-----------------------------------------------------------
     * Parse the data and fill ProblemData structure
@@ -307,7 +316,6 @@ ReadData( char         *filename,
          else if ( strcmp(key, "GridSetNumGhost:") == 0 )
          {
             // # GridSetNumGhost: numghost[2*ndim]
-            // GridSetNumGhost: [3 3 3 3]
             data.numghost = hypre_CTAlloc(HYPRE_Int,  2 * data.ndim, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, 2 * data.ndim, data.numghost);
          }
@@ -340,7 +348,16 @@ ReadData( char         *filename,
             if ( (il != 0) || (iu != 1) )
             {
                hypre_printf("Error: Invalid use of `+-' in GridSetExtents\n");
-               exit(1);
+               if (il != 0)
+               {
+                  hypre_printf("\tCannot have all lower indices pointing to the right (+)\n");
+               }
+
+               if (iu != 1)
+               {
+                  hypre_printf("\tCannot have an upper index pointing to the left (-)\n");
+               }
+               hypre_MPI_Abort(comm, 1);
             }
             pdata.boxsizes[pdata.nboxes] = 1;
             for (i = 0; i < 3; i++)
@@ -367,7 +384,7 @@ ReadData( char         *filename,
          {
             /* TODO */
             hypre_printf("GridAddVariables not yet implemented!\n");
-            exit(1);
+            hypre_MPI_Abort(comm, 1);
          }
          else if ( strcmp(key, "GridSetNeighborPart:") == 0 ||
                    strcmp(key, "GridSetSharedPart:") == 0 )
@@ -469,7 +486,7 @@ ReadData( char         *filename,
             if (data.fem_nvars > 0)
             {
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
-               exit(1);
+               hypre_MPI_Abort(comm, 1);
             }
             data.nstencils = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int, data.nstencils, HYPRE_MEMORY_HOST);
@@ -514,7 +531,7 @@ ReadData( char         *filename,
             if (data.nstencils > 0)
             {
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
-               exit(1);
+               hypre_MPI_Abort(comm, 1);
             }
             data.fem_nvars = strtol(sdata_ptr, &sdata_ptr, 10);
             data.fem_offsets = hypre_CTAlloc(Index, data.fem_nvars, HYPRE_MEMORY_HOST);
@@ -545,7 +562,6 @@ ReadData( char         *filename,
             {
                data.fem_rhs_true = 1;
                data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_HOST);
-               data.d_fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_DEVICE);
             }
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_rhs_values);
@@ -1013,13 +1029,12 @@ IntersectBoxes( ProblemIndex ilower1,
 }
 
 HYPRE_Int
-DistributeData( ProblemData   global_data,
+DistributeData( MPI_Comm      comm,
+                ProblemData   global_data,
                 HYPRE_Int     pooldist,
                 Index        *refine,
                 Index        *distribute,
                 Index        *block,
-                HYPRE_Int     num_procs,
-                HYPRE_Int     myid,
                 ProblemData  *data_ptr )
 {
    ProblemData      data = global_data;
@@ -1032,6 +1047,10 @@ DistributeData( ProblemData   global_data,
    HYPRE_Real      *dptr;
    Index            m, mmap, n;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
+   HYPRE_Int        myid, num_procs;
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    /* set default pool distribution */
    data.npools = data.dist_npools[pooldist];
@@ -1057,7 +1076,7 @@ DistributeData( ProblemData   global_data,
    {
       hypre_printf("%d,  %d \n", pool_procs[data.npools], num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
-      exit(1);
+      hypre_MPI_Abort(comm, 1);
    }
 
    /* modify part data */
@@ -1638,52 +1657,27 @@ DistributeData( ProblemData   global_data,
          }
          for (box = 0; box < pdata.matset_nboxes; box++)
          {
-            size = 1;
-            for (i = 0; i < 3; i++)
-            {
-               size *= (pdata.matset_iuppers[box][i] -
-                        pdata.matset_ilowers[box][i] + 1);
-            }
+            size = BoxVolume(pdata.matset_ilowers[box], pdata.matset_iuppers[box]);
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
          for (box = 0; box < pdata.matadd_nboxes; box++)
          {
-            size = 1;
-            for (i = 0; i < 3; i++)
-            {
-               size *= (pdata.matadd_iuppers[box][i] -
-                        pdata.matadd_ilowers[box][i] + 1);
-            }
+            size = BoxVolume(pdata.matadd_ilowers[box], pdata.matadd_iuppers[box]);
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
          for (box = 0; box < pdata.fem_matadd_nboxes; box++)
          {
-            size = 1;
-            for (i = 0; i < 3; i++)
-            {
-               size *= (pdata.fem_matadd_iuppers[box][i] -
-                        pdata.fem_matadd_ilowers[box][i] + 1);
-            }
+            size = BoxVolume(pdata.fem_matadd_ilowers[box], pdata.fem_matadd_iuppers[box]);
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
          for (box = 0; box < pdata.rhsadd_nboxes; box++)
          {
-            size = 1;
-            for (i = 0; i < 3; i++)
-            {
-               size *= (pdata.rhsadd_iuppers[box][i] -
-                        pdata.rhsadd_ilowers[box][i] + 1);
-            }
+            size = BoxVolume(pdata.rhsadd_ilowers[box], pdata.rhsadd_iuppers[box]);
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
          for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
          {
-            size = 1;
-            for (i = 0; i < 3; i++)
-            {
-               size *= (pdata.fem_rhsadd_iuppers[box][i] -
-                        pdata.fem_rhsadd_ilowers[box][i] + 1);
-            }
+            size = BoxVolume(pdata.fem_rhsadd_ilowers[box], pdata.fem_rhsadd_iuppers[box]);
             pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
 
@@ -1964,7 +1958,6 @@ DestroyData( ProblemData   data )
    if (data.fem_rhs_true > 0)
    {
       hypre_TFree(data.fem_rhs_values, HYPRE_MEMORY_HOST);
-      hypre_TFree(data.d_fem_rhs_values, HYPRE_MEMORY_DEVICE);
    }
 
    if (data.symmetric_num > 0)
@@ -2230,6 +2223,8 @@ BuildMatrix( MPI_Comm               comm,
    ProblemPartData        pdata;
 
    HYPRE_Real            *values;
+   HYPRE_Real            *d_values;
+   HYPRE_Int              values_size;
    Index                  ilower, iupper;
    Index                  origin, stride;
    Index                  index;
@@ -2244,8 +2239,19 @@ BuildMatrix( MPI_Comm               comm,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),
-                         HYPRE_MEMORY_HOST);
+   /* Set and allocate values buffer */
+   values_size = 1;
+   values_size = hypre_max(values_size, data.fem_nvars * data.fem_nvars);
+   values_size = hypre_max(values_size, data.max_boxsize);
+   values_size = hypre_max(values_size, data.fem_nsparse);
+   for (part = 0; part < data.nparts; part++)
+   {
+      pdata = data.pdata[part];
+      values_size = hypre_max(values_size, pdata.graph_nboxes);
+   }
+
+   values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
+   d_values = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixCreate(comm, graph, &A);
    HYPRE_SStructMatrixSetObjectType(A, object_type);
@@ -2296,10 +2302,15 @@ BuildMatrix( MPI_Comm               comm,
                      stride[d] = pdata.matrix_rstride[d];
                   }
                }
+
                for (j = 0; j < pdata.max_boxsize; j++)
                {
                   values[j] = data.stencil_values[s][i];
                }
+
+               hypre_TMemcpy(d_values, values, HYPRE_Real, pdata.max_boxsize,
+                             HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
                for (box = 0; box < pdata.nboxes; box++)
                {
                   HYPRE_SStructGridGetVariableBox(grid, part, var,
@@ -2308,7 +2319,7 @@ BuildMatrix( MPI_Comm               comm,
                                                   ilower, iupper);
                   HYPRE_SStructGridProjectBox(grid, ilower, iupper, origin, stride);
                   HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                                  var, 1, &i, values);
+                                                  var, 1, &i, d_values);
                }
             }
          }
@@ -2316,6 +2327,10 @@ BuildMatrix( MPI_Comm               comm,
    }
    else if (data.fem_nvars > 0)
    {
+      hypre_TMemcpy(d_values, data.fem_values, HYPRE_Real,
+                    data.fem_nvars * data.fem_nvars,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
       /* FEMStencilSetRow: add to stencil values */
       for (part = 0; part < data.nparts; part++)
       {
@@ -2331,8 +2346,7 @@ BuildMatrix( MPI_Comm               comm,
                   for (index[0] = pdata.ilowers[box][0];
                        index[0] <= pdata.iuppers[box][0]; index[0]++)
                   {
-                     HYPRE_SStructMatrixAddFEMValues(A, part, index,
-                                                     data.fem_values);
+                     HYPRE_SStructMatrixAddFEMValues(A, part, index, d_values);
                   }
                }
             }
@@ -2344,6 +2358,11 @@ BuildMatrix( MPI_Comm               comm,
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
+
+      hypre_TMemcpy(d_values, pdata.graph_values,
+                    HYPRE_Real, pdata.graph_nboxes,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
       for (box = 0; box < pdata.graph_nboxes; box++)
       {
          /*
@@ -2364,12 +2383,17 @@ BuildMatrix( MPI_Comm               comm,
          {
             values[j] = pdata.graph_values[box];
          }
+
+         hypre_TMemcpy(d_values, values,
+                       HYPRE_Real, pdata.graph_boxsizes[box],
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.graph_ilowers[box],
                                          pdata.graph_iuppers[box],
                                          pdata.graph_vars[box],
                                          1, &pdata.graph_entries[box],
-                                         values);
+                                         d_values);
 #else
          for (index[2] = pdata.graph_ilowers[box][2];
               index[2] <= pdata.graph_iuppers[box][2];
@@ -2386,7 +2410,7 @@ BuildMatrix( MPI_Comm               comm,
                   HYPRE_SStructMatrixSetValues(A, part, index,
                                                pdata.graph_vars[box],
                                                1, &pdata.graph_entries[box],
-                                               &pdata.graph_values[box]);
+                                               &d_values[box]);
                }
             }
          }
@@ -2400,22 +2424,21 @@ BuildMatrix( MPI_Comm               comm,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.matset_nboxes; box++)
       {
-         size = 1;
-         for (j = 0; j < 3; j++)
-         {
-            size *= (pdata.matset_iuppers[box][j] -
-                     pdata.matset_ilowers[box][j] + 1);
-         }
+         size = BoxVolume(pdata.matset_ilowers[box], pdata.matset_iuppers[box]);
          for (j = 0; j < size; j++)
          {
             values[j] = pdata.matset_values[box];
          }
+
+         hypre_TMemcpy(d_values, values, HYPRE_Real, size,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.matset_ilowers[box],
                                          pdata.matset_iuppers[box],
                                          pdata.matset_vars[box],
                                          1, &pdata.matset_entries[box],
-                                         values);
+                                         d_values);
       }
    }
 
@@ -2425,12 +2448,7 @@ BuildMatrix( MPI_Comm               comm,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.matadd_nboxes; box++)
       {
-         size = 1;
-         for (j = 0; j < 3; j++)
-         {
-            size *= (pdata.matadd_iuppers[box][j] -
-                     pdata.matadd_ilowers[box][j] + 1);
-         }
+         size = BoxVolume(pdata.matadd_ilowers[box], pdata.matadd_iuppers[box]);
 
          for (e = 0; e < pdata.matadd_nentries[box]; e++)
          {
@@ -2439,12 +2457,15 @@ BuildMatrix( MPI_Comm               comm,
                values[j] = pdata.matadd_values[box][e];
             }
 
+            hypre_TMemcpy(d_values, values, HYPRE_Real, size,
+                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
             HYPRE_SStructMatrixAddToBoxValues(A, part,
                                               pdata.matadd_ilowers[box],
                                               pdata.matadd_iuppers[box],
                                               pdata.matadd_vars[box],
                                               1, &pdata.matadd_entries[box][e],
-                                              values);
+                                              d_values);
          }
       }
    }
@@ -2471,6 +2492,10 @@ BuildMatrix( MPI_Comm               comm,
                s++;
             }
          }
+
+         hypre_TMemcpy(d_values, values, HYPRE_Real, data.fem_nsparse,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          for (index[2] = pdata.fem_matadd_ilowers[box][2];
               index[2] <= pdata.fem_matadd_iuppers[box][2]; index[2]++)
          {
@@ -2480,7 +2505,7 @@ BuildMatrix( MPI_Comm               comm,
                for (index[0] = pdata.fem_matadd_ilowers[box][0];
                     index[0] <= pdata.fem_matadd_iuppers[box][0]; index[0]++)
                {
-                  HYPRE_SStructMatrixAddFEMValues(A, part, index, values);
+                  HYPRE_SStructMatrixAddFEMValues(A, part, index, d_values);
                }
             }
          }
@@ -2493,6 +2518,7 @@ BuildMatrix( MPI_Comm               comm,
     * Free memory
     *-----------------------------------------------------------*/
    hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
 
    *A_ptr = A;
 
@@ -2517,12 +2543,17 @@ BuildVector( MPI_Comm             comm,
    Index                index;
 
    HYPRE_Real          *values;
+   HYPRE_Real          *d_values;
+   HYPRE_Int            values_size;
    HYPRE_Int            j, part, var, box;
    HYPRE_Int            size;
 
    /* Allocate work data */
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),
-                         HYPRE_MEMORY_HOST);
+   values_size = 1;
+   values_size = hypre_max(values_size, data.max_boxsize);
+   values_size = hypre_max(values_size, data.fem_nvars);
+   values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
+   d_values = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructVectorCreate(comm, grid, &vec);
    HYPRE_SStructVectorSetObjectType(vec, object_type);
@@ -2551,6 +2582,9 @@ BuildVector( MPI_Comm             comm,
       }
    }
 
+   hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
@@ -2571,7 +2605,7 @@ BuildVector( MPI_Comm             comm,
    /* Add values for FEMRhsSet */
    if (data.fem_rhs_true)
    {
-      hypre_TMemcpy(data.d_fem_rhs_values, data.fem_rhs_values, HYPRE_Real, data.fem_nvars,
+      hypre_TMemcpy(d_values, data.fem_rhs_values, HYPRE_Real, data.fem_nvars,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
       for (part = 0; part < data.nparts; part++)
@@ -2588,8 +2622,7 @@ BuildVector( MPI_Comm             comm,
                   for (index[0] = pdata.ilowers[box][0];
                        index[0] <= pdata.iuppers[box][0]; index[0]++)
                   {
-                     HYPRE_SStructVectorAddFEMValues(vec, part, index,
-                                                     data.d_fem_rhs_values);
+                     HYPRE_SStructVectorAddFEMValues(vec, part, index, d_values);
                   }
                }
             }
@@ -2603,22 +2636,19 @@ BuildVector( MPI_Comm             comm,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.rhsadd_nboxes; box++)
       {
-         size = 1;
-         for (j = 0; j < 3; j++)
-         {
-            size *= (pdata.rhsadd_iuppers[box][j] -
-                     pdata.rhsadd_ilowers[box][j] + 1);
-         }
-
+         size = BoxVolume(pdata.rhsadd_ilowers[box], pdata.rhsadd_iuppers[box]);
          for (j = 0; j < size; j++)
          {
             values[j] = pdata.rhsadd_values[box];
          }
 
+         hypre_TMemcpy(d_values, values, HYPRE_Real, size,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          HYPRE_SStructVectorAddToBoxValues(vec, part,
                                            pdata.rhsadd_ilowers[box],
                                            pdata.rhsadd_iuppers[box],
-                                           pdata.rhsadd_vars[box], values);
+                                           pdata.rhsadd_vars[box], d_values);
       }
    }
 
@@ -2628,6 +2658,9 @@ BuildVector( MPI_Comm             comm,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
       {
+         hypre_TMemcpy(d_values, pdata.fem_rhsadd_values[box], HYPRE_Real,
+                       data.fem_nvars, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
          for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
               index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
          {
@@ -2637,8 +2670,7 @@ BuildVector( MPI_Comm             comm,
                for (index[0] = pdata.fem_rhsadd_ilowers[box][0];
                     index[0] <= pdata.fem_rhsadd_iuppers[box][0]; index[0]++)
                {
-                  HYPRE_SStructVectorAddFEMValues(vec, part, index,
-                                                  pdata.fem_rhsadd_values[box]);
+                  HYPRE_SStructVectorAddFEMValues(vec, part, index, d_values);
                }
             }
          }
@@ -2651,6 +2683,7 @@ BuildVector( MPI_Comm             comm,
     * Free memory
     *-----------------------------------------------------------*/
    hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
 
    *vec_ptr = vec;
 

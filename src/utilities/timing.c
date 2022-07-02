@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -278,6 +278,10 @@ hypre_EndTiming( HYPRE_Int time_index )
    hypre_TimingState(time_index) --;
    if (hypre_TimingState(time_index) == 0)
    {
+#if defined(HYPRE_USING_GPU)
+      /* hypre_ForceSyncComputeStream(hypre_handle()); */
+      hypre_SyncCudaDevice(hypre_handle());
+#endif
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) += hypre_TimingWallCount;
       hypre_TimingCPUTime(time_index)  += hypre_TimingCPUCount;

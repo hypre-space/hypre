@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1058,6 +1058,13 @@ HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
                              void                **object);
 
 /**
+ * Returns the grid object of a HYPRE_SStructMatrix.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixGetGrid( HYPRE_SStructMatrix   matrix,
+                            HYPRE_SStructGrid    *grid );
+
+/**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
 HYPRE_Int
@@ -1075,6 +1082,14 @@ HYPRE_Int
 HYPRE_SStructMatrixToIJMatrix(HYPRE_SStructMatrix  matrix,
                               HYPRE_Int            fill_diagonal,
                               HYPRE_IJMatrix      *ijmatrix);
+
+/**
+ * Read the matrix from file. This is mainly for debugging purposes.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixRead( MPI_Comm              comm,
+                         const char           *filename,
+                         HYPRE_SStructMatrix  *matrix_ptr );
 
 /**@}*/
 
@@ -1347,6 +1362,14 @@ HYPRE_Int
 HYPRE_SStructVectorPrint(const char          *filename,
                          HYPRE_SStructVector  vector,
                          HYPRE_Int            all);
+
+/**
+ * Read the vector from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorRead( MPI_Comm             comm,
+                         const char          *filename,
+                         HYPRE_SStructVector *vector_ptr );
 
 /**
  * Copy a vector (y <-- x).

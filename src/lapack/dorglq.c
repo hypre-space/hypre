@@ -9,100 +9,100 @@ extern "C" {
 #include "hypre_lapack.h"
 
 /* Subroutine */ integer dorglq_(integer *m, integer *n, integer *k, doublereal *
-	a, integer *lda, doublereal *tau, doublereal *work, integer *lwork, 
+	a, integer *lda, doublereal *tau, doublereal *work, integer *lwork,
 	integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DORGLQ generates an M-by-N real matrix Q with orthonormal rows,   
-    which is defined as the first M rows of a product of K elementary   
-    reflectors of order N   
+    DORGLQ generates an M-by-N real matrix Q with orthonormal rows,
+    which is defined as the first M rows of a product of K elementary
+    reflectors of order N
 
-          Q  =  H(k) . . . H(2) H(1)   
+          Q  =  H(k) . . . H(2) H(1)
 
-    as returned by DGELQF.   
+    as returned by DGELQF.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    M       (input) INTEGER   
-            The number of rows of the matrix Q. M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix Q. M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix Q. N >= M.   
+    N       (input) INTEGER
+            The number of columns of the matrix Q. N >= M.
 
-    K       (input) INTEGER   
-            The number of elementary reflectors whose product defines the   
-            matrix Q. M >= K >= 0.   
+    K       (input) INTEGER
+            The number of elementary reflectors whose product defines the
+            matrix Q. M >= K >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the i-th row must contain the vector which defines   
-            the elementary reflector H(i), for i = 1,2,...,k, as returned   
-            by DGELQF in the first k rows of its array argument A.   
-            On exit, the M-by-N matrix Q.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the i-th row must contain the vector which defines
+            the elementary reflector H(i), for i = 1,2,...,k, as returned
+            by DGELQF in the first k rows of its array argument A.
+            On exit, the M-by-N matrix Q.
 
-    LDA     (input) INTEGER   
-            The first dimension of the array A. LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The first dimension of the array A. LDA >= max(1,M).
 
-    TAU     (input) DOUBLE PRECISION array, dimension (K)   
-            TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by DGELQF.   
+    TAU     (input) DOUBLE PRECISION array, dimension (K)
+            TAU(i) must contain the scalar factor of the elementary
+            reflector H(i), as returned by DGELQF.
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK. LWORK >= max(1,M).   
-            For optimum performance LWORK >= M*NB, where NB is   
-            the optimal blocksize.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK. LWORK >= max(1,M).
+            For optimum performance LWORK >= M*NB, where NB is
+            the optimal blocksize.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument has an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument has an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__3 = 3;
-    static integer c__2 = 2;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__3 = 3;
+    integer c__2 = 2;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
-    static integer i__, j, l, nbmin, iinfo;
-    extern /* Subroutine */ integer dorgl2_(integer *, integer *, integer *, 
+    integer i__, j, l, nbmin, iinfo;
+    extern /* Subroutine */ integer dorgl2_(integer *, integer *, integer *,
 	    doublereal *, integer *, doublereal *, doublereal *, integer *);
-    static integer ib, nb, ki, kk;
-    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *, 
-	    integer *, integer *, integer *, doublereal *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    integer ib, nb, ki, kk;
+    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *,
+	    integer *, integer *, integer *, doublereal *, integer *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    integer *);
-    static integer nx;
-    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *, 
+    integer nx;
+    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *,
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    static integer ldwork, lwkopt;
-    static logical lquery;
-    static integer iws;
+    integer ldwork, lwkopt;
+    logical lquery;
+    integer iws;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -149,7 +149,7 @@ extern "C" {
     iws = *m;
     if (nb > 1 && nb < *k) {
 
-/*        Determine when to cross over from blocked to unblocked code.   
+/*        Determine when to cross over from blocked to unblocked code.
 
    Computing MAX */
 	i__1 = 0, i__2 = ilaenv_(&c__3, "DORGLQ", " ", m, n, k, &c_n1, (
@@ -163,7 +163,7 @@ extern "C" {
 	    iws = ldwork * nb;
 	    if (*lwork < iws) {
 
-/*              Not enough workspace to use optimal NB:  reduce NB and   
+/*              Not enough workspace to use optimal NB:  reduce NB and
                 determine the minimum value of NB. */
 
 		nb = *lwork / ldwork;
@@ -177,7 +177,7 @@ extern "C" {
 
     if (nb >= nbmin && nb < *k && nx < *k) {
 
-/*        Use blocked code after the last block.   
+/*        Use blocked code after the last block.
           The first kk rows are handled by the block method. */
 
 	ki = (*k - nx - 1) / nb * nb;
@@ -221,11 +221,11 @@ extern "C" {
 	    ib = min(i__2,i__3);
 	    if (i__ + ib <= *m) {
 
-/*              Form the triangular factor of the block reflector   
+/*              Form the triangular factor of the block reflector
                 H = H(i) H(i+1) . . . H(i+ib-1) */
 
 		i__2 = *n - i__ + 1;
-		dlarft_("Forward", "Rowwise", &i__2, &ib, &a_ref(i__, i__), 
+		dlarft_("Forward", "Rowwise", &i__2, &ib, &a_ref(i__, i__),
 			lda, &tau[i__], &work[1], &ldwork);
 
 /*              Apply H' to A(i+ib:m,i:n) from the right */

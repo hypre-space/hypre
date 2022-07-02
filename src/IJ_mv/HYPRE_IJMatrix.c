@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -311,7 +311,7 @@ hypre_PrefixSumInt(HYPRE_Int   nvals,
       {
          HYPRE_Int  i, n = hypre_min((j + bsize), nvals);
 
-         sums[0] = 0;
+         sums[j] = 0;
          for (i = j + 1; i < n; i++)
          {
             sums[i] = sums[i - 1] + vals[i - 1];

@@ -14,7 +14,7 @@ extern "C" {
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -65,31 +65,31 @@ typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 
 typedef struct _hypre_ParCSRCommPkg
 {
-   MPI_Comm                     comm;
-
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int                   *send_map_starts;
-   HYPRE_Int                   *send_map_elmts;
-   HYPRE_Int                   *device_send_map_elmts;
-
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
-
+   MPI_Comm                          comm;
+   HYPRE_Int                         num_sends;
+   HYPRE_Int                        *send_procs;
+   HYPRE_Int                        *send_map_starts;
+   HYPRE_Int                        *send_map_elmts;
+   HYPRE_Int                        *device_send_map_elmts;
+   HYPRE_Int                         num_recvs;
+   HYPRE_Int                        *recv_procs;
+   HYPRE_Int                        *recv_vec_starts;
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
-
+   hypre_MPI_Datatype               *send_mpi_types;
+   hypre_MPI_Datatype               *recv_mpi_types;
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
-
-   /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
 #if defined(HYPRE_USING_GPU)
-   HYPRE_Complex *tmp_data;
-   HYPRE_Complex *buf_data;
-   char          *work_space;
+   /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
+   HYPRE_Complex                    *tmp_data;
+   HYPRE_Complex                    *buf_data;
+   /* for matvecT*/
+   HYPRE_Int                         send_map_n;
+   HYPRE_Int                        *send_map_j;
+   HYPRE_Int                        *send_map_i;
+   HYPRE_Int                        *send_map_rowind;
+   char                             *work_space;
 #endif
 } hypre_ParCSRCommPkg;
 
@@ -121,6 +121,10 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
 #define hypre_ParCSRCommPkgWorkSpace(comm_pkg)           ((comm_pkg) -> work_space)
+#define hypre_ParCSRCommPkgSendMapN(comm_pkg)            ((comm_pkg) -> send_map_n)
+#define hypre_ParCSRCommPkgSendMapJ(comm_pkg)            ((comm_pkg) -> send_map_j)
+#define hypre_ParCSRCommPkgSendMapI(comm_pkg)            ((comm_pkg) -> send_map_i)
+#define hypre_ParCSRCommPkgSendMapRowInd(comm_pkg)       ((comm_pkg) -> send_map_rowind)
 #endif
 
 static inline void
@@ -160,7 +164,7 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 
 #endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -183,7 +187,7 @@ typedef struct
 #endif /* hypre_PARCSR_ASSUMED_PART */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -206,7 +210,7 @@ typedef struct
 #endif /* hypre_NEW_COMMPKG */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -274,7 +278,7 @@ hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -473,7 +477,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -519,7 +523,7 @@ typedef struct hypre_NumbersNode
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -610,7 +614,7 @@ typedef struct
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -629,7 +633,7 @@ typedef struct
 #endif /* hypre_PAR_MAKE_SYSTEM */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -735,11 +739,11 @@ HYPRE_Int hypre_ParCSRMatrixGenerateFFFCD3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3Device(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                                 HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr,
                                                 hypre_ParCSRMatrix **A_FF_ptr ) ;
-HYPRE_Int hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
+HYPRE_Int hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                               HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **ACF_ptr) ;
-HYPRE_Int hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
+HYPRE_Int hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                               HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **ACC_ptr) ;
-HYPRE_Int hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
+HYPRE_Int hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                                 HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **ACX_ptr,
                                                 hypre_ParCSRMatrix **AXC_ptr ) ;
 
@@ -946,10 +950,10 @@ hypre_CSRMatrix* hypre_ExchangeExternalRowsWait(void *vequest);
 HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext,
                                                 hypre_ParCSRCommPkg *comm_pkg_A, HYPRE_Int want_data, void **request_ptr);
 hypre_CSRMatrix* hypre_ExchangeExternalRowsDeviceWait(void *vrequest);
-HYPRE_Int hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                                 HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr,
                                                 hypre_ParCSRMatrix **A_FF_ptr );
-HYPRE_Int hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
+HYPRE_Int hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                                 HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_CF_ptr,
                                                 hypre_ParCSRMatrix **A_FF_ptr );
 hypre_CSRMatrix* hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A);
@@ -1076,6 +1080,8 @@ HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                      HYPRE_Complex beta, hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Complex *locl_data, HYPRE_Complex *recv_data,
+                                            hypre_ParCSRCommPkg *comm_pkg );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                         hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y, HYPRE_Int *CF_marker, HYPRE_Int fpt );
 

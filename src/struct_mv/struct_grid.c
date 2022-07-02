@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1215,29 +1215,28 @@ hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_StructGridGetMaxBoxSize
+ *--------------------------------------------------------------------------*/
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
-hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
+hypre_StructGridGetMaxBoxSize( hypre_StructGrid *grid )
 {
-   hypre_Box  *box;
-   hypre_BoxArray  *boxes;
-   HYPRE_Int box_size;
-   HYPRE_Int i;
-   HYPRE_Int        max_box_size = 0;
+   hypre_BoxArray   *boxes;
+   hypre_Box        *box;
+   HYPRE_Int         i, max_box_size = 0;
+
    boxes = hypre_StructGridBoxes(grid);
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i);
-      box_size = hypre_BoxVolume(box);
-      if (box_size > max_box_size)
-      {
-         max_box_size = box_size;
-      }
+      max_box_size = hypre_max(max_box_size, hypre_BoxVolume(box));
    }
+
    return max_box_size;
 }
 
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
 {

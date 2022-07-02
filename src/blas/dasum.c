@@ -20,19 +20,19 @@ doublereal dasum_(integer *n, doublereal *dx, integer *incx)
     doublereal ret_val, d__1, d__2, d__3, d__4, d__5, d__6;
 
     /* Local variables */
-    static integer i, m;
-    static doublereal dtemp;
-    static integer nincx, mp1;
+    integer i, m;
+    doublereal dtemp;
+    integer nincx, mp1;
 
 
-/*     takes the sum of the absolute values.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 3/93 to return if incx .le. 0.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     takes the sum of the absolute values.
+       jack dongarra, linpack, 3/11/78.
+       modified 3/93 to return if incx .le. 0.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #define DX(I) dx[(I)-1]
 
@@ -56,7 +56,7 @@ doublereal dasum_(integer *n, doublereal *dx, integer *incx)
     ret_val = dtemp;
     return ret_val;
 
-/*        code for increment equal to 1   
+/*        code for increment equal to 1
 
 
           clean-up loop */
@@ -77,7 +77,7 @@ L40:
     mp1 = m + 1;
     for (i = mp1; i <= *n; i += 6) {
 	dtemp = dtemp + (d__1 = DX(i), abs(d__1)) + (d__2 = DX(i + 1), abs(
-		d__2)) + (d__3 = DX(i + 2), abs(d__3)) + (d__4 = DX(i + 3), 
+		d__2)) + (d__3 = DX(i + 2), abs(d__3)) + (d__4 = DX(i + 3),
 		abs(d__4)) + (d__5 = DX(i + 4), abs(d__5)) + (d__6 = DX(i + 5)
 		, abs(d__6));
 /* L50: */

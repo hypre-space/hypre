@@ -8,99 +8,99 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dgetri_(integer *n, doublereal *a, integer *lda, integer 
+/* Subroutine */ integer dgetri_(integer *n, doublereal *a, integer *lda, integer
 	*ipiv, doublereal *work, integer *lwork, integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DGETRI computes the inverse of a matrix using the LU factorization   
-    computed by DGETRF.   
+    DGETRI computes the inverse of a matrix using the LU factorization
+    computed by DGETRF.
 
-    This method inverts U and then computes inv(A) by solving the system   
-    inv(A)*L = inv(U) for inv(A).   
+    This method inverts U and then computes inv(A) by solving the system
+    inv(A)*L = inv(U) for inv(A).
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    N       (input) INTEGER   
-            The order of the matrix A.  N >= 0.   
+    N       (input) INTEGER
+            The order of the matrix A.  N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            On entry, the factors L and U from the factorization   
-            A = P*L*U as computed by DGETRF.   
-            On exit, if INFO = 0, the inverse of the original matrix A.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            On entry, the factors L and U from the factorization
+            A = P*L*U as computed by DGETRF.
+            On exit, if INFO = 0, the inverse of the original matrix A.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
 
-    IPIV    (input) INTEGER array, dimension (N)   
-            The pivot indices from DGETRF; for 1<=i<=N, row i of the   
-            matrix was interchanged with row IPIV(i).   
+    IPIV    (input) INTEGER array, dimension (N)
+            The pivot indices from DGETRF; for 1<=i<=N, row i of the
+            matrix was interchanged with row IPIV(i).
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO=0, then WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO=0, then WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.  LWORK >= max(1,N).   
-            For optimal performance LWORK >= N*NB, where NB is   
-            the optimal blocksize returned by ILAENV.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK.  LWORK >= max(1,N).
+            For optimal performance LWORK >= N*NB, where NB is
+            the optimal blocksize returned by ILAENV.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
-            > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is   
-                  singular and its inverse could not be computed.   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
+            > 0:  if INFO = i, U(i,i) is exactly zero; the matrix is
+                  singular and its inverse could not be computed.
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input parameters.   
+       Test the input parameters.
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__2 = 2;
-    static doublereal c_b20 = -1.;
-    static doublereal c_b22 = 1.;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__2 = 2;
+    doublereal c_b20 = -1.;
+    doublereal c_b22 = 1.;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
-    static integer i__, j;
-    extern /* Subroutine */ integer dgemm_(const char *, const char *, integer *, integer *, 
-	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
+    integer i__, j;
+    extern /* Subroutine */ integer dgemm_(const char *, const char *, integer *, integer *,
+	    integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *),
-	     dgemv_(const char *, integer *, integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
+	     dgemv_(const char *, integer *, integer *, doublereal *, doublereal *,
+	    integer *, doublereal *, integer *, doublereal *, doublereal *,
 	    integer *);
-    static integer nbmin;
-    extern /* Subroutine */ integer dswap_(integer *, doublereal *, integer *, 
-	    doublereal *, integer *), dtrsm_(const char *, const char *, const char *, const char *, 
-	    integer *, integer *, doublereal *, doublereal *, integer *, 
+    integer nbmin;
+    extern /* Subroutine */ integer dswap_(integer *, doublereal *, integer *,
+	    doublereal *, integer *), dtrsm_(const char *, const char *, const char *, const char *,
+	    integer *, integer *, doublereal *, doublereal *, integer *,
 	    doublereal *, integer *);
-    static integer jb, nb, jj, jp, nn;
+    integer jb, nb, jj, jp, nn;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    static integer ldwork;
-    extern /* Subroutine */ integer dtrtri_(const char *, const char *, integer *, doublereal 
+    integer ldwork;
+    extern /* Subroutine */ integer dtrtri_(const char *, const char *, integer *, doublereal
 	    *, integer *, integer *);
-    static integer lwkopt;
-    static logical lquery;
-    static integer iws;
+    integer lwkopt;
+    logical lquery;
+    integer iws;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -138,7 +138,7 @@ extern "C" {
 	return 0;
     }
 
-/*     Form inv(U).  If INFO > 0 from DTRTRI, then U is singular,   
+/*     Form inv(U).  If INFO > 0 from DTRTRI, then U is singular,
        and the inverse is not computed. */
 
     dtrtri_("Upper", "Non-unit", n, &a[a_offset], lda, info);
@@ -184,7 +184,7 @@ extern "C" {
 
 	    if (j < *n) {
 		i__1 = *n - j;
-		dgemv_("No transpose", n, &i__1, &c_b20, &a_ref(1, j + 1), 
+		dgemv_("No transpose", n, &i__1, &c_b20, &a_ref(1, j + 1),
 			lda, &work[j + 1], &c__1, &c_b22, &a_ref(1, j), &c__1);
 	    }
 /* L20: */
@@ -200,7 +200,7 @@ extern "C" {
 	    i__2 = nb, i__3 = *n - j + 1;
 	    jb = min(i__2,i__3);
 
-/*           Copy current block column of L to WORK and replace with   
+/*           Copy current block column of L to WORK and replace with
              zeros. */
 
 	    i__2 = j + jb - 1;
@@ -218,7 +218,7 @@ extern "C" {
 
 	    if (j + jb <= *n) {
 		i__2 = *n - j - jb + 1;
-		dgemm_("No transpose", "No transpose", n, &jb, &i__2, &c_b20, 
+		dgemm_("No transpose", "No transpose", n, &jb, &i__2, &c_b20,
 			&a_ref(1, j + jb), lda, &work[j + jb], &ldwork, &
 			c_b22, &a_ref(1, j), lda);
 	    }
@@ -250,4 +250,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-

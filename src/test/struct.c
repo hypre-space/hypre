@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1009,17 +1009,17 @@ main( hypre_int argc,
             v_num_ghost[2 * i + 1] = 1;
          }
 
-         A = (HYPRE_StructMatrix)
-             hypre_StructMatrixRead(hypre_MPI_COMM_WORLD,
-                                    argv[read_fromfile_index], A_num_ghost);
+         HYPRE_StructMatrixRead(hypre_MPI_COMM_WORLD,
+                                argv[read_fromfile_index],
+                                A_num_ghost, &A);
 
-         b = (HYPRE_StructVector)
-             hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                    argv[read_rhsfromfile_index], v_num_ghost);
+         HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                argv[read_rhsfromfile_index],
+                                v_num_ghost, &b);
 
-         x = (HYPRE_StructVector)
-             hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                    argv[read_x0fromfile_index], v_num_ghost);
+         HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                argv[read_x0fromfile_index],
+                                v_num_ghost, &x);
       }
 
       /* beginning of sum == 0  */
@@ -1233,10 +1233,9 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               b = (HYPRE_StructVector)
-                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                          argv[read_rhsfromfile_index],
-                                          v_num_ghost);
+               HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                      argv[read_rhsfromfile_index],
+                                      v_num_ghost, &b);
 
                readgrid = hypre_StructVectorGrid(b) ;
                readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1274,9 +1273,9 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               x = (HYPRE_StructVector)
-                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                          argv[read_x0fromfile_index], v_num_ghost);
+               HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                      argv[read_x0fromfile_index],
+                                      v_num_ghost, &x);
 
                readgrid = hypre_StructVectorGrid(x) ;
                readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1315,15 +1314,13 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0  from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               b = (HYPRE_StructVector)
-                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                          argv[read_rhsfromfile_index],
-                                          v_num_ghost);
+               HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                      argv[read_rhsfromfile_index],
+                                      v_num_ghost, &b);
 
-               x = (HYPRE_StructVector)
-                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                          argv[read_x0fromfile_index],
-                                          v_num_ghost);
+               HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                      argv[read_x0fromfile_index],
+                                      v_num_ghost, &x);
 
                readgrid = hypre_StructVectorGrid(b);
                readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1356,9 +1353,9 @@ main( hypre_int argc,
             hypre_printf("\nreading matrix from file:%s\n",
                          argv[read_fromfile_index]);
 
-            A = (HYPRE_StructMatrix)
-                hypre_StructMatrixRead(hypre_MPI_COMM_WORLD,
-                                       argv[read_fromfile_index], A_num_ghost);
+            HYPRE_StructMatrixRead(hypre_MPI_COMM_WORLD,
+                                   argv[read_fromfile_index],
+                                   A_num_ghost, &A);
 
             readgrid = hypre_StructMatrixGrid(A);
             readperiodic  =  hypre_StructGridPeriodic(readgrid);
@@ -1369,10 +1366,9 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               b = (HYPRE_StructVector)
-                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                          argv[read_rhsfromfile_index],
-                                          v_num_ghost);
+               HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                      argv[read_rhsfromfile_index],
+                                      v_num_ghost, &b);
 
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &x);
                HYPRE_StructVectorInitialize(x);
@@ -1386,10 +1382,9 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               x = (HYPRE_StructVector)
-                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
-                                          argv[read_x0fromfile_index],
-                                          v_num_ghost);
+               HYPRE_StructVectorRead(hypre_MPI_COMM_WORLD,
+                                      argv[read_x0fromfile_index],
+                                      v_num_ghost, &x);
 
                HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, readgrid, &b);
                HYPRE_StructVectorInitialize(b);
@@ -1415,7 +1410,7 @@ main( hypre_int argc,
       /* linear system complete */
 
       hypre_EndTiming(time_index);
-      if (reps == 1)
+      if (reps == 1 || (solver_id != 0 && solver_id != 1 && solver_id != 3 && solver_id != 4))
       {
          hypre_PrintTiming("Struct Interface", hypre_MPI_COMM_WORLD);
          hypre_FinalizeTiming(time_index);
@@ -2765,7 +2760,6 @@ main( hypre_int argc,
          {
             HYPRE_StructPFMGDestroy(precond);
          }
-
       }
 
       /* Compute residual */

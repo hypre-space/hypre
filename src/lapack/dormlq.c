@@ -8,142 +8,142 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dormlq_(const char *side,const char *trans, integer *m, integer *n, 
+/* Subroutine */ integer dormlq_(const char *side,const char *trans, integer *m, integer *n,
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *lwork, integer *info)
 {
-/*  -- LAPACK routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DORMLQ overwrites the general real M-by-N matrix C with   
+    DORMLQ overwrites the general real M-by-N matrix C with
 
-                    SIDE = 'L'     SIDE = 'R'   
-    TRANS = 'N':      Q * C          C * Q   
-    TRANS = 'T':      Q**T * C       C * Q**T   
+                    SIDE = 'L'     SIDE = 'R'
+    TRANS = 'N':      Q * C          C * Q
+    TRANS = 'T':      Q**T * C       C * Q**T
 
-    where Q is a real orthogonal matrix defined as the product of k   
-    elementary reflectors   
+    where Q is a real orthogonal matrix defined as the product of k
+    elementary reflectors
 
-          Q = H(k) . . . H(2) H(1)   
+          Q = H(k) . . . H(2) H(1)
 
-    as returned by DGELQF. Q is of order M if SIDE = 'L' and of order N   
-    if SIDE = 'R'.   
+    as returned by DGELQF. Q is of order M if SIDE = 'L' and of order N
+    if SIDE = 'R'.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    SIDE    (input) CHARACTER*1   
-            = 'L': apply Q or Q**T from the Left;   
-            = 'R': apply Q or Q**T from the Right.   
+    SIDE    (input) CHARACTER*1
+            = 'L': apply Q or Q**T from the Left;
+            = 'R': apply Q or Q**T from the Right.
 
-    TRANS   (input) CHARACTER*1   
-            = 'N':  No transpose, apply Q;   
-            = 'T':  Transpose, apply Q**T.   
+    TRANS   (input) CHARACTER*1
+            = 'N':  No transpose, apply Q;
+            = 'T':  Transpose, apply Q**T.
 
-    M       (input) INTEGER   
-            The number of rows of the matrix C. M >= 0.   
+    M       (input) INTEGER
+            The number of rows of the matrix C. M >= 0.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix C. N >= 0.   
+    N       (input) INTEGER
+            The number of columns of the matrix C. N >= 0.
 
-    K       (input) INTEGER   
-            The number of elementary reflectors whose product defines   
-            the matrix Q.   
-            If SIDE = 'L', M >= K >= 0;   
-            if SIDE = 'R', N >= K >= 0.   
+    K       (input) INTEGER
+            The number of elementary reflectors whose product defines
+            the matrix Q.
+            If SIDE = 'L', M >= K >= 0;
+            if SIDE = 'R', N >= K >= 0.
 
-    A       (input) DOUBLE PRECISION array, dimension   
-                                 (LDA,M) if SIDE = 'L',   
-                                 (LDA,N) if SIDE = 'R'   
-            The i-th row must contain the vector which defines the   
-            elementary reflector H(i), for i = 1,2,...,k, as returned by   
-            DGELQF in the first k rows of its array argument A.   
-            A is modified by the routine but restored on exit.   
+    A       (input) DOUBLE PRECISION array, dimension
+                                 (LDA,M) if SIDE = 'L',
+                                 (LDA,N) if SIDE = 'R'
+            The i-th row must contain the vector which defines the
+            elementary reflector H(i), for i = 1,2,...,k, as returned by
+            DGELQF in the first k rows of its array argument A.
+            A is modified by the routine but restored on exit.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A. LDA >= max(1,K).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A. LDA >= max(1,K).
 
-    TAU     (input) DOUBLE PRECISION array, dimension (K)   
-            TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by DGELQF.   
+    TAU     (input) DOUBLE PRECISION array, dimension (K)
+            TAU(i) must contain the scalar factor of the elementary
+            reflector H(i), as returned by DGELQF.
 
-    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)   
-            On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q.   
+    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)
+            On entry, the M-by-N matrix C.
+            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q.
 
-    LDC     (input) INTEGER   
-            The leading dimension of the array C. LDC >= max(1,M).   
+    LDC     (input) INTEGER
+            The leading dimension of the array C. LDC >= max(1,M).
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The dimension of the array WORK.   
-            If SIDE = 'L', LWORK >= max(1,N);   
-            if SIDE = 'R', LWORK >= max(1,M).   
-            For optimum performance LWORK >= N*NB if SIDE = 'L', and   
-            LWORK >= M*NB if SIDE = 'R', where NB is the optimal   
-            blocksize.   
+    LWORK   (input) INTEGER
+            The dimension of the array WORK.
+            If SIDE = 'L', LWORK >= max(1,N);
+            if SIDE = 'R', LWORK >= max(1,M).
+            For optimum performance LWORK >= N*NB if SIDE = 'L', and
+            LWORK >= M*NB if SIDE = 'R', where NB is the optimal
+            blocksize.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input arguments   
+       Test the input arguments
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__2 = 2;
-    static integer c__65 = 65;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__2 = 2;
+    integer c__65 = 65;
+
     /* System generated locals */
     address a__1[2];
-    integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2, i__3[2], i__4, 
+    integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2, i__3[2], i__4,
 	    i__5;
     char ch__1[2];
-    /* Builtin functions   
+    /* Builtin functions
        Subroutine */ integer s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
-    static logical left;
-    static integer i__;
-    static doublereal t[4160]	/* was [65][64] */;
+    logical left;
+    integer i__;
+    doublereal t[4160]	/* was [65][64] */;
     extern logical lsame_(const char *,const char *);
-    static integer nbmin, iinfo, i1, i2, i3;
-    extern /* Subroutine */ integer dorml2_(const char *,const char *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
+    integer nbmin, iinfo, i1, i2, i3;
+    extern /* Subroutine */ integer dorml2_(const char *,const char *, integer *, integer *,
+	    integer *, doublereal *, integer *, doublereal *, doublereal *,
 	    integer *, doublereal *, integer *);
-    static integer ib, ic, jc, nb, mi, ni;
-    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *, 
-	    integer *, integer *, integer *, doublereal *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
+    integer ib, ic, jc, nb, mi, ni;
+    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *,
+	    integer *, integer *, integer *, doublereal *, integer *,
+	    doublereal *, integer *, doublereal *, integer *, doublereal *,
 	    integer *);
-    static integer nq, nw;
-    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *, 
+    integer nq, nw;
+    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *,
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
-    static logical notran;
-    static integer ldwork;
-    static char transt[1];
-    static integer lwkopt;
-    static logical lquery;
-    static integer iws;
+    logical notran;
+    integer ldwork;
+    char transt[1];
+    integer lwkopt;
+    logical lquery;
+    integer iws;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
 
@@ -192,10 +192,10 @@ extern "C" {
 
     if (*info == 0) {
 
-/*        Determine the block size.  NB may be at most NBMAX, where NBMAX   
-          is used to define the local array T.   
+/*        Determine the block size.  NB may be at most NBMAX, where NBMAX
+          is used to define the local array T.
 
-   Computing MIN   
+   Computing MIN
    Writing concatenation */
 		i__3[0] = 1, a__1[0] = (char*)side;
 		i__3[1] = 1, a__1[1] = (char*)trans;
@@ -228,7 +228,7 @@ extern "C" {
 	iws = nw * nb;
 	if (*lwork < iws) {
 	    nb = *lwork / ldwork;
-/* Computing MAX   
+/* Computing MAX
    Writing concatenation */
 	    i__3[0] = 1, a__1[0] =(char*) side;
 	    i__3[1] = 1, a__1[1] =(char*) trans;
@@ -282,7 +282,7 @@ extern "C" {
 	    i__4 = nb, i__5 = *k - i__ + 1;
 	    ib = min(i__4,i__5);
 
-/*           Form the triangular factor of the block reflector   
+/*           Form the triangular factor of the block reflector
              H = H(i) H(i+1) . . . H(i+ib-1) */
 
 	    i__4 = nq - i__ + 1;

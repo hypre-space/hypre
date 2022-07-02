@@ -8,54 +8,54 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
+/* Subroutine */ integer dlartg_(doublereal *f, doublereal *g, doublereal *cs,
 	doublereal *sn, doublereal *r__)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       September 30, 1994   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       September 30, 1994
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLARTG generate a plane rotation so that   
+    DLARTG generate a plane rotation so that
 
-       [  CS  SN  ]  .  [ F ]  =  [ R ]   where CS**2 + SN**2 = 1.   
-       [ -SN  CS  ]     [ G ]     [ 0 ]   
+       [  CS  SN  ]  .  [ F ]  =  [ R ]   where CS**2 + SN**2 = 1.
+       [ -SN  CS  ]     [ G ]     [ 0 ]
 
-    This is a slower, more accurate version of the BLAS1 routine DROTG,   
-    with the following other differences:   
-       F and G are unchanged on return.   
-       If G=0, then CS=1 and SN=0.   
-       If F=0 and (G .ne. 0), then CS=0 and SN=1 without doing any   
-          floating point operations (saves work in DBDSQR when   
-          there are zeros on the diagonal).   
+    This is a slower, more accurate version of the BLAS1 routine DROTG,
+    with the following other differences:
+       F and G are unchanged on return.
+       If G=0, then CS=1 and SN=0.
+       If F=0 and (G .ne. 0), then CS=0 and SN=1 without doing any
+          floating point operations (saves work in DBDSQR when
+          there are zeros on the diagonal).
 
-    If F exceeds G in magnitude, CS will be positive.   
+    If F exceeds G in magnitude, CS will be positive.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    F       (input) DOUBLE PRECISION   
-            The first component of vector to be rotated.   
+    F       (input) DOUBLE PRECISION
+            The first component of vector to be rotated.
 
-    G       (input) DOUBLE PRECISION   
-            The second component of vector to be rotated.   
+    G       (input) DOUBLE PRECISION
+            The second component of vector to be rotated.
 
-    CS      (output) DOUBLE PRECISION   
-            The cosine of the rotation.   
+    CS      (output) DOUBLE PRECISION
+            The cosine of the rotation.
 
-    SN      (output) DOUBLE PRECISION   
-            The sine of the rotation.   
+    SN      (output) DOUBLE PRECISION
+            The sine of the rotation.
 
-    R       (output) DOUBLE PRECISION   
-            The nonzero component of the rotated vector.   
+    R       (output) DOUBLE PRECISION
+            The nonzero component of the rotated vector.
 
     ===================================================================== */
     /* Initialized data */
-    static logical first = TRUE_;
+    logical first = TRUE_;
     /* System generated locals */
     integer i__1;
     doublereal d__1, d__2;
@@ -63,12 +63,12 @@ extern "C" {
 //    doublereal log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
     doublereal pow_di(doublereal *, integer *);
     /* Local variables */
-    static integer i__;
-    static doublereal scale;
-    static integer count;
-    static doublereal f1, g1, safmn2, safmx2;
+    integer i__;
+    doublereal scale;
+    integer count;
+    doublereal f1, g1, safmn2, safmx2;
     extern doublereal dlamch_(const char *);
-//    static doublereal safmin, eps;
+//     doublereal safmin, eps;
 
 
 
@@ -77,7 +77,7 @@ extern "C" {
 //	safmin = dlamch_("S");
 //	eps = dlamch_("E");
 	d__1 = dlamch_("B");
-//	i__1 = (integer) (log(safmin / eps) / log(dlamch_("B")) / 
+//	i__1 = (integer) (log(safmin / eps) / log(dlamch_("B")) /
 //		2.);
         i__1 = HYPRE_REAL_MIN_EXP>>1;
 	safmn2 = pow_di(&d__1, &i__1);

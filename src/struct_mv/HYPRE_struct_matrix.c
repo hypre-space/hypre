@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -415,6 +415,26 @@ HYPRE_StructMatrixPrint( const char         *filename,
                          HYPRE_Int           all )
 {
    return ( hypre_StructMatrixPrint(filename, matrix, all) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixRead( MPI_Comm             comm,
+                        const char          *filename,
+                        HYPRE_Int           *num_ghost,
+                        HYPRE_StructMatrix  *matrix )
+{
+   if (!matrix)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   *matrix = (HYPRE_StructMatrix) hypre_StructMatrixRead(comm, filename, num_ghost);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

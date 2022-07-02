@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -15,6 +15,8 @@
 
 /*--------------------------------------------------------------------------
  * hypre_PrintBoxArrayData
+ *
+ * Note: data array is expected to live on the host memory.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -38,33 +40,9 @@ hypre_PrintBoxArrayData( FILE            *file,
 
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
-   HYPRE_Complex   *data_host;
-   HYPRE_Complex   *data_host_saved = NULL;
 
-   /*----------------------------------------
-    * Print data
-    *----------------------------------------*/
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
-   {
-      HYPRE_Int tot_size = 0;
-      hypre_ForBoxI(i, data_space)
-      {
-         data_box = hypre_BoxArrayBox(data_space, i);
-         data_box_volume = hypre_BoxVolume(data_box);
-         tot_size += num_values * data_box_volume;
-      }
-      data_host = hypre_CTAlloc(HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      data_host_saved = data_host;
-   }
-   else
-   {
-      data_host = data;
-   }
-
+   /* Print data from the host */
    hypre_SetIndex(stride, 1);
-
    hypre_ForBoxI(i, box_array)
    {
       box      = hypre_BoxArrayBox(box_array, i);
@@ -87,7 +65,7 @@ hypre_PrintBoxArrayData( FILE            *file,
             {
                hypre_fprintf(file, ", %d", hypre_IndexD(start, d) + hypre_IndexD(index, d));
             }
-            value = data_host[datai + j * data_box_volume];
+            value = data[datai + j * data_box_volume];
 
             /* Make zero values "positive" */
             if (value == 0.0)
@@ -104,10 +82,8 @@ hypre_PrintBoxArrayData( FILE            *file,
       }
       hypre_SerialBoxLoop1End(datai);
 
-      data_host += num_values * data_box_volume;
+      data += num_values * data_box_volume;
    }
-
-   hypre_TFree(data_host_saved, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -137,12 +113,8 @@ hypre_ReadBoxArrayData( FILE            *file,
 
    HYPRE_Int        i, j, d, idummy;
 
-   /*----------------------------------------
-    * Read data
-    *----------------------------------------*/
-
+   /* Read data on the host */
    hypre_SetIndex(stride, 1);
-
    hypre_ForBoxI(i, box_array)
    {
       box      = hypre_BoxArrayBox(box_array, i);
@@ -207,8 +179,8 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
     * Read data
     *----------------------------------------*/
 
-   if ( constant_coefficient == 1 ) { constant_stencil_size = stencil_size; }
-   if ( constant_coefficient == 2 ) { constant_stencil_size = stencil_size - 1; }
+   if (constant_coefficient == 1) { constant_stencil_size = stencil_size; }
+   if (constant_coefficient == 2) { constant_stencil_size = stencil_size - 1; }
 
    hypre_SetIndex(stride, 1);
 
@@ -233,7 +205,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
       /* Next entries, if any, will be for a variable diagonal: */
       data += real_stencil_size;
 
-      if ( constant_coefficient == 2 )
+      if (constant_coefficient == 2)
       {
          hypre_SerialBoxLoop1Begin(ndim, loop_size,
                                    data_box, start, stride, datai);
@@ -249,7 +221,6 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
          hypre_SerialBoxLoop1End(datai);
          data += data_box_volume;
       }
-
    }
 
    return hypre_error_flag;

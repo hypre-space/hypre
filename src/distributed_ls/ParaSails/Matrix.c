@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -181,10 +181,16 @@ void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYP
    mat->vals[row] = (HYPRE_Real *) MemAlloc(mat->mem, len*sizeof(HYPRE_Real));
 
    if (ind != NULL)
-      hypre_TMemcpy(mat->inds[row],  ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   {
+      //hypre_TMemcpy(mat->inds[row], ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      memcpy(mat->inds[row], ind, sizeof(HYPRE_Int) * len);
+   }
 
    if (val != NULL)
-      hypre_TMemcpy(mat->vals[row],  val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   {
+      //hypre_TMemcpy(mat->vals[row], val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      memcpy(mat->vals[row], val, sizeof(HYPRE_Real) * len);
+   }
 }
 
 /*--------------------------------------------------------------------------

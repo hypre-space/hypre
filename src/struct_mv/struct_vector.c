@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1458,6 +1458,96 @@ hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructVectorPrintData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPrintData( FILE               *file,
+                             hypre_StructVector *vector,
+                             HYPRE_Int           all )
+{
+   HYPRE_Int         ndim       = hypre_StructVectorNDim(vector);
+   hypre_StructGrid *grid       = hypre_StructVectorGrid(vector);
+   hypre_BoxArray   *grid_boxes = hypre_StructGridBoxes(grid);
+   hypre_BoxArray   *data_space = hypre_StructVectorDataSpace(vector);
+   HYPRE_Int         data_size  = hypre_StructVectorDataSize(vector);
+   HYPRE_Complex    *data       = hypre_StructVectorData(vector);
+
+   HYPRE_Int         num_values = 1;
+   HYPRE_Int         value_ids[1] = {0};
+
+   hypre_BoxArray   *boxes;
+   HYPRE_Complex    *h_data;
+
+   /* Allocate/Point to data on the host memory */
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      h_data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(h_data, data, HYPRE_Complex, data_size,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      h_data = data;
+   }
+
+   /* Print ghost data (all) also or only real data? */
+   boxes = (all) ? data_space : grid_boxes;
+
+   /* Print data to file */
+   hypre_PrintBoxArrayData(file, boxes, data_space, num_values, value_ids, ndim, h_data);
+
+   /* Free memory */
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructVectorReadData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorReadData( FILE               *file,
+                            hypre_StructVector *vector )
+{
+   HYPRE_Int         ndim       = hypre_StructVectorNDim(vector);
+   hypre_StructGrid *grid       = hypre_StructVectorGrid(vector);
+   hypre_BoxArray   *grid_boxes = hypre_StructGridBoxes(grid);
+   hypre_BoxArray   *data_space = hypre_StructVectorDataSpace(vector);
+   HYPRE_Int         data_size  = hypre_StructVectorDataSize(vector);
+   HYPRE_Complex    *data       = hypre_StructVectorData(vector);
+
+   HYPRE_Complex    *h_data;
+
+   /* Allocate/Point to data on the host memory */
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      h_data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      h_data = data;
+   }
+
+   /* Read data from file */
+   hypre_ReadBoxArrayData(file, grid_boxes, data_space, 1, ndim, h_data);
+
+   /* Move data to the device memory if necessary and free host data */
+   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   {
+      hypre_TMemcpy(data, h_data, HYPRE_Complex, data_size,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructVectorPrint
  *--------------------------------------------------------------------------*/
 
@@ -1470,23 +1560,21 @@ hypre_StructVectorPrint( const char         *filename,
    char               new_filename[255];
 
    hypre_StructGrid  *grid;
-   hypre_BoxArray    *boxes;
-   hypre_BoxArray    *data_space;
-   HYPRE_Int          value_id;
    HYPRE_Int          myid;
 
    /*----------------------------------------
     * Open file
     *----------------------------------------*/
 
-   hypre_MPI_Comm_rank(hypre_StructVectorComm(vector), &myid );
-
+   hypre_MPI_Comm_rank(hypre_StructVectorComm(vector), &myid);
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "w")) == NULL)
    {
       hypre_printf("Error: can't open output file %s\n", new_filename);
-      exit(1);
+      hypre_error_in_arg(1);
+
+      return hypre_error_flag;
    }
 
    /*----------------------------------------
@@ -1504,22 +1592,8 @@ hypre_StructVectorPrint( const char         *filename,
     * Print data
     *----------------------------------------*/
 
-   data_space = hypre_StructVectorDataSpace(vector);
-
-   if (all)
-   {
-      boxes = data_space;
-   }
-   else
-   {
-      boxes = hypre_StructGridBoxes(grid);
-   }
-
    hypre_fprintf(file, "\nData:\n");
-   value_id = 0;
-   hypre_PrintBoxArrayData(file, boxes, data_space, 1, &value_id,
-                           hypre_StructGridNDim(grid),
-                           hypre_StructVectorData(vector));
+   hypre_StructVectorPrintData(file, vector, all);
 
    /*----------------------------------------
     * Close file
@@ -1532,6 +1606,7 @@ hypre_StructVectorPrint( const char         *filename,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructVectorRead
  *--------------------------------------------------------------------------*/
 
 hypre_StructVector *
@@ -1543,11 +1618,7 @@ hypre_StructVectorRead( MPI_Comm    comm,
    char                  new_filename[255];
 
    hypre_StructVector   *vector;
-
    hypre_StructGrid     *grid;
-   hypre_BoxArray       *boxes;
-
-   hypre_BoxArray       *data_space;
 
    HYPRE_Int             myid;
 
@@ -1555,13 +1626,13 @@ hypre_StructVectorRead( MPI_Comm    comm,
     * Open file
     *----------------------------------------*/
 
-   hypre_MPI_Comm_rank(comm, &myid );
-
+   hypre_MPI_Comm_rank(comm, &myid);
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
 
    if ((file = fopen(new_filename, "r")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
+      hypre_printf("Error: can't open input file %s\n", new_filename);
+      hypre_error_in_arg(2);
       exit(1);
    }
 
@@ -1587,13 +1658,8 @@ hypre_StructVectorRead( MPI_Comm    comm,
     * Read data
     *----------------------------------------*/
 
-   boxes      = hypre_StructGridBoxes(grid);
-   data_space = hypre_StructVectorDataSpace(vector);
-
    hypre_fscanf(file, "\nData:\n");
-   hypre_ReadBoxArrayData(file, boxes, data_space, 1,
-                          hypre_StructGridNDim(grid),
-                          hypre_StructVectorData(vector));
+   hypre_StructVectorReadData(file, vector);
 
    /*----------------------------------------
     * Assemble the vector
@@ -1684,6 +1750,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
  * hypre_StructVectorClone
  * Returns a complete copy of x - a deep copy, with its own copy of the data.
  *--------------------------------------------------------------------------*/
+
 hypre_StructVector *
 hypre_StructVectorClone( hypre_StructVector *x )
 {

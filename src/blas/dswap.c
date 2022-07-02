@@ -8,19 +8,19 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ integer dswap_(integer *n, doublereal *dx, integer *incx, 
+/* Subroutine */ integer dswap_(integer *n, doublereal *dx, integer *incx,
 	doublereal *dy, integer *incy)
 {
     /* System generated locals */
     integer i__1;
     /* Local variables */
-    static integer i__, m;
-    static doublereal dtemp;
-    static integer ix, iy, mp1;
-/*     interchanges two vectors.   
-       uses unrolled loops for increments equal one.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+    integer i__, m;
+    doublereal dtemp;
+    integer ix, iy, mp1;
+/*     interchanges two vectors.
+       uses unrolled loops for increments equal one.
+       jack dongarra, linpack, 3/11/78.
+       modified 12/3/93, array(1) declarations changed to array(*)
        Parameter adjustments */
     --dy;
     --dx;
@@ -31,7 +31,7 @@ extern "C" {
     if (*incx == 1 && *incy == 1) {
 	goto L20;
     }
-/*       code for unequal increments or equal increments not equal   
+/*       code for unequal increments or equal increments not equal
            to 1 */
     ix = 1;
     iy = 1;
@@ -51,7 +51,7 @@ extern "C" {
 /* L10: */
     }
     return 0;
-/*       code for both increments equal to 1   
+/*       code for both increments equal to 1
          clean-up loop */
 L20:
     m = *n % 3;

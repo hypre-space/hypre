@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -64,13 +64,13 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
    hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 #else
-   HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
-                                         m, n, nnzA,
-                                         d_aa, d_ia, d_ja,
-                                         csc_a, csc_j, csc_i,
-                                         action,
-                                         CUSPARSE_INDEX_BASE_ZERO) );
-#endif
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csr2csc(handle,
+                                               m, n, nnzA,
+                                               d_aa, d_ia, d_ja,
+                                               csc_a, csc_j, csc_i,
+                                               action,
+                                               CUSPARSE_INDEX_BASE_ZERO) );
+#endif /* #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION */
 
    *d_ic_out = csc_i;
    *d_jc_out = csc_j;
@@ -124,13 +124,14 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
    void * buffer;
    buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_ROCSPARSE_CALL( rocsparse_dcsr2csc(handle,
-                                            m, n, nnzA,
-                                            d_aa, d_ia, d_ja,
-                                            csc_a, csc_j, csc_i,
-                                            action,
-                                            rocsparse_index_base_zero,
-                                            buffer) );
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csr2csc(handle,
+                                                 m, n, nnzA,
+                                                 d_aa, d_ia, d_ja,
+                                                 csc_a, csc_j, csc_i,
+                                                 action,
+                                                 rocsparse_index_base_zero,
+                                                 buffer) );
+
    hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 
    *d_ic_out = csc_i;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -214,6 +214,51 @@ hypre_IndexesEqual( hypre_Index  index1,
    }
 
    return equal;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IndexPrint( FILE        *file,
+                  HYPRE_Int    ndim,
+                  hypre_Index  index )
+{
+   HYPRE_Int d;
+
+   hypre_fprintf(file, "[%d", hypre_IndexD(index, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_fprintf(file, " %d", hypre_IndexD(index, d));
+   }
+   hypre_fprintf(file, "]");
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IndexRead( FILE        *file,
+                 HYPRE_Int    ndim,
+                 hypre_Index  index )
+{
+   HYPRE_Int d;
+
+   hypre_fscanf(file, "[%d", &hypre_IndexD(index, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_fscanf(file, " %d", &hypre_IndexD(index, d));
+   }
+   hypre_fscanf(file, "]");
+
+   for (d = ndim; d < HYPRE_MAXDIM; d++)
+   {
+      hypre_IndexD(index, d) = 0;
+   }
+
+   return hypre_error_flag;
 }
 
 /*==========================================================================
@@ -706,6 +751,72 @@ hypre_BoxGrowByArray( hypre_Box  *box,
       imin[d] -= array[2 * d];
       imax[d] += array[2 * d + 1];
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Print a box to file
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxPrint( FILE      *file,
+                hypre_Box *box )
+{
+   HYPRE_Int   ndim = hypre_BoxNDim(box);
+   HYPRE_Int   d;
+
+   hypre_fprintf(file, "(%d", hypre_BoxIMinD(box, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_fprintf(file, ", %d", hypre_BoxIMinD(box, d));
+   }
+   hypre_fprintf(file, ") x (%d", hypre_BoxIMaxD(box, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_fprintf(file, ", %d", hypre_BoxIMaxD(box, d));
+   }
+   hypre_fprintf(file, ")");
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Read a box from file
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxRead( FILE       *file,
+               HYPRE_Int   ndim,
+               hypre_Box **box_ptr )
+{
+   hypre_Box  *box;
+   HYPRE_Int   d;
+
+   /* Don't create a new box if the output box already exists */
+   if (*box_ptr)
+   {
+      box = *box_ptr;
+      hypre_BoxInit(box, ndim);
+   }
+   else
+   {
+      box = hypre_BoxCreate(ndim);
+   }
+
+   hypre_fscanf(file, "(%d", &hypre_BoxIMinD(box, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_fscanf(file, ", %d", &hypre_BoxIMinD(box, d));
+   }
+   hypre_fscanf(file, ") x (%d", &hypre_BoxIMaxD(box, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_fscanf(file, ", %d", &hypre_BoxIMaxD(box, d));
+   }
+   hypre_fscanf(file, ")");
+
+   *box_ptr = box;
 
    return hypre_error_flag;
 }

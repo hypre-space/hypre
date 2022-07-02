@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -20,6 +20,7 @@ HOST=`hostname`
 NumThreads=0               # number of OpenMP threads to use if > 0
 Valgrind=""                # string to add to MpirunString when using valgrind
 mpibind=""                 # string to add to MpirunString when using mpibind
+script=""                  # string to add to MpirunString when using script
 SaveExt="saved"            # saved file extension
 RTOL=0
 ATOL=0
@@ -41,6 +42,7 @@ function usage
    printf "    -save <ext>    use '<test>.saved.<ext> for the saved-file extension\n"
    printf "    -valgrind      use valgrind memory checker\n"
    printf "    -mpibind       use mpibind\n"
+   printf "    -script <sh>   use a script before the command\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -140,9 +142,10 @@ function MpirunString
          fi
          RunString="$RunPrefix $1"
          shift
-         RunString="$RunString $mpibind $Valgrind $*"
          ;;
    esac
+
+   RunString="$RunString $script $mpibind $Valgrind $*"
 }
 
 # determine the "number of nodes" desired by dividing the "number of processes"
@@ -513,6 +516,11 @@ do
       -mpibind)
          shift
          mpibind="mpibind"
+         ;;
+      -script)
+         shift
+         script=$1
+         shift
          ;;
       -n|-norun)
          NoRun=1

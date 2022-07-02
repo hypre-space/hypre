@@ -150,7 +150,7 @@ main( hypre_int  argc,
    global_data = hypre_TAlloc(ProblemData, nmatrices, HYPRE_MEMORY_HOST);
    for (i = 0; i < nmatrices; i++)
    {
-      ReadData(infile[i], &global_data[i]);
+      ReadData(comm, infile[i], &global_data[i]);
    }
    nparts = global_data[0].nparts;
 
@@ -273,8 +273,8 @@ main( hypre_int  argc,
     *-----------------------------------------------------------*/
    for (i = 0; i < nmatrices; i++)
    {
-      DistributeData(global_data[i], pooldist, refine, distribute, block,
-                     nprocs, myid, &data[i]);
+      DistributeData(comm, global_data[i], pooldist, refine,
+                     distribute, block, &data[i]);
    }
 
    /*-----------------------------------------------------------

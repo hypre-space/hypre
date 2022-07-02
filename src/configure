@@ -10,7 +10,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 ## -------------------- ##
 ## M4sh Initialization. ##
@@ -785,6 +785,7 @@ enable_unified_memory
 enable_cuda_streams
 enable_cusparse
 enable_device_memory_pool
+enable_device_malloc_async
 enable_cublas
 enable_curand
 enable_rocsparse
@@ -1518,7 +1519,9 @@ Optional Features:
   --enable-cusparse       Use cuSPARSE (default is YES).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
-  --enable-cublas         Use cuBLAS (default is NO).
+  --enable-device-malloc-async
+                          Use device async malloc (default is NO).
+  --enable-cublas         Use cuBLAS (default is YES).
   --enable-curand         Use cuRAND (default is YES).
   --enable-rocsparse      Use rocSPARSE (default is YES).
   --enable-rocblas        Use rocBLAS (default is NO).
@@ -1822,7 +1825,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 _ACEOF
   exit
@@ -2700,24 +2703,7 @@ _ACEOF
 
 
 
-as_ac_File=`$as_echo "ac_cv_file_$HYPRE_SRCDIR/../.git" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $HYPRE_SRCDIR/../.git" >&5
-$as_echo_n "checking for $HYPRE_SRCDIR/../.git... " >&6; }
-if eval \${$as_ac_File+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  test "$cross_compiling" = yes &&
-  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
-if test -r "$HYPRE_SRCDIR/../.git"; then
-  eval "$as_ac_File=yes"
-else
-  eval "$as_ac_File=no"
-fi
-fi
-eval ac_res=\$$as_ac_File
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+if test -d "$HYPRE_SRCDIR/../.git"; then :
 
   develop_string=$(git -C $HYPRE_SRCDIR describe --match 'v*' --long --abbrev=9)
   develop_lastag=$(git -C $HYPRE_SRCDIR describe --match 'v*' --abbrev=0)
@@ -2759,7 +2745,6 @@ $as_echo "$as_me: NOTE: Could not find .git directory" >&6;}
 
 fi
 
-
 PACKAGE_DATE=
 PACKAGE_TIME=
 PACKAGE_DATETIME=
@@ -2800,9 +2785,10 @@ hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
-hypre_using_cublas=no
+hypre_using_cublas=yes
 hypre_using_curand=yes
 hypre_using_device_pool=no
+hypre_using_device_malloc_async=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -3169,15 +3155,28 @@ else
 fi
 
 
+# Check whether --enable-device-malloc-async was given.
+if test "${enable_device_malloc_async+set}" = set; then :
+  enableval=$enable_device_malloc_async; case "${enableval}" in
+    yes) hypre_using_device_malloc_async=yes ;;
+    no)  hypre_using_device_malloc_async=no ;;
+    *)   hypre_using_device_malloc_async=no ;;
+ esac
+else
+  hypre_using_device_malloc_async=no
+
+fi
+
+
 # Check whether --enable-cublas was given.
 if test "${enable_cublas+set}" = set; then :
   enableval=$enable_cublas; case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=yes ;;
  esac
 else
-  hypre_using_cublas=no
+  hypre_using_cublas=yes
 
 fi
 
@@ -9203,6 +9202,13 @@ $as_echo "#define HYPRE_USING_DEVICE_POOL 1" >>confdefs.h
 
    fi
 
+   if test "$hypre_using_device_malloc_async" = "yes"
+   then
+
+$as_echo "#define HYPRE_USING_DEVICE_MALLOC_ASYNC 1" >>confdefs.h
+
+   fi
+
    if test "x$hypre_using_cuda_streams" = "xyes"
    then
 
@@ -9236,7 +9242,7 @@ $as_echo "#define HYPRE_USING_HIP 1" >>confdefs.h
                                         HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"; then :
-  HIPCXXFLAGS="-O0 -Wall -g -ggdb ${HIPCXXFLAGS}"
+  HIPCXXFLAGS="-O1 -Wall -g -ggdb ${HIPCXXFLAGS}"
 elif HIPCXXFLAGS="-O2 ${HIPCXXFLAGS}"; then :
 
 fi

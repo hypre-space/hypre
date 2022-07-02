@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -66,7 +66,7 @@ typedef double                 hypre_double;
 #endif /* hypre_GENERAL_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -86,6 +86,7 @@ HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
+HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 // #else
 // #define hypre_printf  printf
 // #define hypre_fprintf fprintf
@@ -97,7 +98,7 @@ HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -148,7 +149,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif /* hypre_ERROR_HEADER */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -501,7 +502,7 @@ HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm, HYPRE_Int num_recvs, H
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -514,7 +515,7 @@ HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm, HYPRE_Int num_recvs, H
 #define HYPRE_SMP_SCHEDULE schedule(static)
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -591,7 +592,14 @@ HYPRE_Int hypre_MPI_CheckCommMatrix( hypre_MPI_Comm comm, HYPRE_Int num_recvs, H
 #endif
 
 #if defined(HYPRE_USING_UMPIRE)
+#include "umpire/config.hpp"
+#if UMPIRE_VERSION_MAJOR >= 2022
+#include "umpire/interface/c_fortran/umpire.h"
+#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_quick_pool
+#else
 #include "umpire/interface/umpire.h"
+#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_pool
+#endif
 #define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
 #endif
 
@@ -650,8 +658,10 @@ typedef struct
 {
    char                  _action[16];
    void                 *_ptr;
+   void                 *_ptr2;
    size_t                _nbytes;
    hypre_MemoryLocation  _memory_location;
+   hypre_MemoryLocation  _memory_location2;
    char                  _filename[256];
    char                  _function[256];
    HYPRE_Int             _line;
@@ -671,25 +681,27 @@ typedef struct
 (                                                                                                                                     \
 {                                                                                                                                     \
    void *ptr = hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                              \
-   hypre_MemoryTrackerInsert("malloc", ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
+   hypre_MemoryTrackerInsert("malloc", ptr, NULL, sizeof(type)*(count), hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED, \
+                              __FILE__, __func__, __LINE__);                                                                          \
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
 )
 
-#define _hypre_TAlloc(type, count, location)                                                                                          \
-(                                                                                                                                     \
-{                                                                                                                                     \
-   void *ptr = _hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                             \
-   hypre_MemoryTrackerInsert("malloc", ptr, sizeof(type)*(count), location, __FILE__, __func__, __LINE__);                            \
-   (type *) ptr;                                                                                                                      \
-}                                                                                                                                     \
+#define _hypre_TAlloc(type, count, location)                                                                                             \
+(                                                                                                                                        \
+{                                                                                                                                        \
+   void *ptr = _hypre_MAlloc((size_t)(sizeof(type) * (count)), location);                                                                \
+   hypre_MemoryTrackerInsert("malloc", ptr, NULL, sizeof(type)*(count), location, hypre_MEMORY_UNDEFINED, __FILE__, __func__, __LINE__); \
+   (type *) ptr;                                                                                                                         \
+}                                                                                                                                        \
 )
 
 #define hypre_CTAlloc(type, count, location)                                                                                          \
 (                                                                                                                                     \
 {                                                                                                                                     \
    void *ptr = hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location);                                                         \
-   hypre_MemoryTrackerInsert("calloc", ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
+   hypre_MemoryTrackerInsert("calloc", ptr, NULL, sizeof(type)*(count), hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED, \
+                             __FILE__, __func__, __LINE__);                                                                           \
    (type *) ptr;                                                                                                                      \
 }                                                                                                                                     \
 )
@@ -697,9 +709,11 @@ typedef struct
 #define hypre_TReAlloc(ptr, type, count, location)                                                                                         \
 (                                                                                                                                          \
 {                                                                                                                                          \
-   hypre_MemoryTrackerInsert("rfree", ptr, (size_t) -1, hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);               \
+   hypre_MemoryTrackerInsert("rfree", ptr, NULL, (size_t) -1, hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED,                \
+                             __FILE__, __func__, __LINE__);                                                                                \
    void *new_ptr = hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location);                                                 \
-   hypre_MemoryTrackerInsert("rmalloc", new_ptr, sizeof(type)*(count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
+   hypre_MemoryTrackerInsert("rmalloc", new_ptr, NULL, sizeof(type)*(count), hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED, \
+                             __FILE__, __func__, __LINE__);                                                                                \
    (type *) new_ptr;                                                                                                                       \
 }                                                                                                                                          \
 )
@@ -707,24 +721,29 @@ typedef struct
 #define hypre_TReAlloc_v2(ptr, old_type, old_count, new_type, new_count, location)                                                                 \
 (                                                                                                                                                  \
 {                                                                                                                                                  \
-   hypre_MemoryTrackerInsert("rfree", ptr, sizeof(old_type)*(old_count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);      \
+   hypre_MemoryTrackerInsert("rfree", ptr, NULL, sizeof(old_type)*(old_count), hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED,       \
+                             __FILE__, __func__, __LINE__);                                                                                        \
    void *new_ptr = hypre_ReAlloc_v2((char *)ptr, (size_t)(sizeof(old_type)*(old_count)), (size_t)(sizeof(new_type)*(new_count)), location);        \
-   hypre_MemoryTrackerInsert("rmalloc", new_ptr, sizeof(new_type)*(new_count), hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__);\
+   hypre_MemoryTrackerInsert("rmalloc", new_ptr, NULL, sizeof(new_type)*(new_count), hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED, \
+                             __FILE__, __func__, __LINE__);                                                                                        \
    (new_type *) new_ptr;                                                                                                                           \
 }                                                                                                                                                  \
 )
 
-#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc)                                     \
-(                                                                                                \
-{                                                                                                \
-   hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc); \
-}                                                                                                \
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc)                                                                                   \
+(                                                                                                                                              \
+{                                                                                                                                              \
+   hypre_MemoryTrackerInsert("memcpy", (void *) (dst), (void *) (src), sizeof(type)*(count), hypre_GetActualMemLocation(locdst),               \
+                              hypre_GetActualMemLocation(locsrc), __FILE__, __func__, __LINE__);                                               \
+   hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc);                                               \
+}                                                                                                                                              \
 )
 
 #define hypre_TFree(ptr, location)                                                                                          \
 (                                                                                                                           \
 {                                                                                                                           \
-   hypre_MemoryTrackerInsert("free", ptr, (size_t) -1, hypre_GetActualMemLocation(location), __FILE__, __func__, __LINE__); \
+   hypre_MemoryTrackerInsert("free", ptr, NULL, (size_t) -1, hypre_GetActualMemLocation(location), hypre_MEMORY_UNDEFINED,  \
+                             __FILE__, __func__, __LINE__);                                                                 \
    hypre_Free((void *)ptr, location);                                                                                       \
    ptr = NULL;                                                                                                              \
 }                                                                                                                           \
@@ -733,7 +752,8 @@ typedef struct
 #define _hypre_TFree(ptr, location)                                                                             \
 (                                                                                                               \
 {                                                                                                               \
-   hypre_MemoryTrackerInsert("free", ptr, (size_t) -1, location, __FILE__, __func__, __LINE__);                 \
+   hypre_MemoryTrackerInsert("free", ptr, NULL, (size_t) -1, location, hypre_MEMORY_UNDEFINED,                  \
+                             __FILE__, __func__, __LINE__);                                                     \
    _hypre_Free((void *)ptr, location);                                                                          \
    ptr = NULL;                                                                                                  \
 }                                                                                                               \
@@ -807,8 +827,9 @@ HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
 #ifdef HYPRE_USING_MEMORY_TRACKER
 hypre_MemoryTracker * hypre_MemoryTrackerCreate();
 void hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker);
-void hypre_MemoryTrackerInsert(const char *action, void *ptr, size_t nbytes,
-                               hypre_MemoryLocation memory_location, const char *filename, const char *function, HYPRE_Int line);
+void hypre_MemoryTrackerInsert(const char *action, void *ptr, void *ptr2, size_t nbytes,
+                               hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2, const char *filename,
+                               const char *function, HYPRE_Int line);
 HYPRE_Int hypre_PrintMemoryTracker();
 #endif
 
@@ -831,7 +852,7 @@ typedef void (*GPUMfreeFunc)(void *);
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -945,7 +966,7 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #endif /* HYPRE_OMP_DEVICE_H */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -975,7 +996,7 @@ void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1093,7 +1114,7 @@ HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1135,7 +1156,7 @@ typedef hypre_ListElement *hypre_LinkList;
 #endif
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1187,7 +1208,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
 #endif /* end of header */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1325,7 +1346,7 @@ static char hypre__caliper_markname[1024];
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1350,7 +1371,7 @@ typedef struct
    HYPRE_ExecutionPolicy  default_exec_policy;
    HYPRE_ExecutionPolicy  struct_exec_policy;
 #if defined(HYPRE_USING_GPU)
-   hypre_DeviceData        *device_data;
+   hypre_DeviceData      *device_data;
    /* device G-S options */
    HYPRE_Int              device_gs_method;
 #endif
@@ -1400,7 +1421,9 @@ typedef struct
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_DeviceDataStructCommSendBuffer(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_DeviceDataStructCommRecvBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_DeviceDataStructCommSendBufferSize(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleSpgemmUseCusparse(hypre_handle)              hypre_DeviceDataSpgemmUseCusparse(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpMVUseVendor(hypre_handle)                  hypre_DeviceDataSpMVUseVendor(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpTransUseVendor(hypre_handle)               hypre_DeviceDataSpTransUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_DeviceDataSpgemmRownnzEstimateMethod(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))
@@ -1429,7 +1452,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1498,7 +1521,7 @@ typedef struct
 #endif /* #ifndef HYPRE_GSELIM_H */
 
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1537,7 +1560,7 @@ typedef struct
 
 #endif
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1568,11 +1591,13 @@ HYPRE_Complex hypre_conj( HYPRE_Complex value );
 HYPRE_Real    hypre_cabs( HYPRE_Complex value );
 HYPRE_Real    hypre_creal( HYPRE_Complex value );
 HYPRE_Real    hypre_cimag( HYPRE_Complex value );
+HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
 #define hypre_cabs(value)  fabs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
+#define hypre_csqrt(value) sqrt(value)
 #endif
 
 /* general.c */
@@ -1810,6 +1835,7 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
 void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out,
                                            hypre_UnorderedBigIntMap *inverse_map);
 
+/* device_utils.c */
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
@@ -1821,15 +1847,36 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Comple
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
+HYPRE_Int hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
-HYPRE_Int hypreDevice_Filln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
-HYPRE_Int hypreDevice_Scalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
+HYPRE_Int hypreDevice_CharFilln(char *d_x, size_t n, char v);
+HYPRE_Int hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
+HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
+                                    HYPRE_Complex v);
+HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
+                                   HYPRE_Complex *d_z, HYPRE_Complex a);
+HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
+                               HYPRE_Int a);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);
 HYPRE_Int* hypreDevice_CsrRowIndicesToPtrs(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind);
 HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ind,
                                              HYPRE_Int *d_row_ptr);
+HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
+                                HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
+
+HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
+                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
+                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
+                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+
+HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
+
+HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 #endif
 
@@ -1837,6 +1884,8 @@ HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_see
                                hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
 HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_seed,
                                      hypre_ulonglongint seed, HYPRE_Int set_offset, hypre_ulonglongint offset);
+
+HYPRE_Int hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed, hypre_ulonglongint offset );
 
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
@@ -1854,9 +1903,12 @@ HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
-HYPRE_Int hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse );
+HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
+HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
+HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
@@ -1879,7 +1931,7 @@ hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x,
 hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)

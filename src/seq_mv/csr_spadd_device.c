@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -105,7 +105,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
-      HYPRE_THRUST_CALL( transform, d_aa, d_aa + nnzA, d_at, alpha * _1 );
+      hypreDevice_ComplexScalen( d_aa, nnzA, d_at, alpha );
    }
 
    if (beta == 1.0)
@@ -114,7 +114,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
-      HYPRE_THRUST_CALL( transform, d_ab, d_ab + nnzB, d_at + nnzA, beta * _1 );
+      hypreDevice_ComplexScalen( d_ab, nnzB, d_at + nnzA, beta );
    }
 
    /* expansion: i */
