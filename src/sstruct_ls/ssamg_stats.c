@@ -44,12 +44,11 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Complex          *diag_a;
    HYPRE_Complex          *offd_a;
 
+   hypre_IntArray          arr_diag_r;
+   hypre_IntArray          arr_offd_r;
+   hypre_IntArray          arr_rownnz;
    HYPRE_Int              *rownnz;
-   HYPRE_Int              *diag_rownnz;
-   HYPRE_Int              *offd_rownnz;
    HYPRE_Int               num_rownnz;
-   HYPRE_Int               diag_num_rownnz;
-   HYPRE_Int               offd_num_rownnz;
 
    HYPRE_Int              *global_num_rows;
    HYPRE_Int              *global_num_rownnz;
@@ -138,13 +137,19 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       offd_i = hypre_CSRMatrixI(offd);
       diag_a = hypre_CSRMatrixData(diag);
       offd_a = hypre_CSRMatrixData(offd);
-      diag_rownnz = hypre_CSRMatrixRownnz(diag);
-      offd_rownnz = hypre_CSRMatrixRownnz(offd);
-      diag_num_rownnz = hypre_CSRMatrixNumRownnz(diag);
-      offd_num_rownnz = hypre_CSRMatrixNumRownnz(offd);
-      hypre_MergeOrderedArrays(diag_num_rownnz, diag_rownnz,
-                               offd_num_rownnz, offd_rownnz,
-                               &num_rownnz, &rownnz);
+
+      hypre_IntArrayData(&arr_diag_r) = hypre_CSRMatrixRownnz(diag);
+      hypre_IntArrayData(&arr_offd_r) = hypre_CSRMatrixRownnz(offd);
+      hypre_IntArraySize(&arr_diag_r) = hypre_CSRMatrixNumRownnz(diag);
+      hypre_IntArraySize(&arr_offd_r) = hypre_CSRMatrixNumRownnz(offd);
+      hypre_IntArrayMemoryLocation(&arr_diag_r) = HYPRE_MEMORY_HOST;
+      hypre_IntArrayMemoryLocation(&arr_offd_r) = HYPRE_MEMORY_HOST;
+      hypre_IntArrayMemoryLocation(&arr_rownnz) = HYPRE_MEMORY_HOST;
+
+      hypre_IntArrayMergeOrdered(&arr_diag_r, &arr_diag_r, &arr_rownnz);
+
+      num_rownnz = hypre_IntArraySize(&arr_rownnz);
+      rownnz     = hypre_IntArrayData(&arr_rownnz);
 
       if (myid == 0)
       {
