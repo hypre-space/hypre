@@ -480,8 +480,16 @@ hypre_SeqVectorMigrate(hypre_Vector         *x,
          new_data = hypre_TAlloc(HYPRE_Complex, total_size, memory_location);
          hypre_TMemcpy(new_data, data, HYPRE_Complex, total_size,
                        memory_location, old_memory_location);
-         hypre_TFree(data, old_memory_location);
          hypre_VectorData(x) = new_data;
+
+         if (owns_data)
+         {
+            hypre_TFree(data, old_memory_location);
+         }
+         else
+         {
+            hypre_VectorOwnsData(x) = 1;
+         }
       }
    }
 

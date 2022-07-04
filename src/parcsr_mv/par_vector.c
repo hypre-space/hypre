@@ -356,13 +356,6 @@ hypre_ParVectorMigrate(hypre_ParVector      *x,
       return hypre_error_flag;
    }
 
-   if (!hypre_ParVectorOwnsData(vector))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Called hypre_ParVectorMigrate on a vector that doesn't own the data\n");
-      return hypre_error_flag;
-   }
-
    return hypre_SeqVectorMigrate(hypre_ParVectorLocalVector(x), memory_location);
 }
 
