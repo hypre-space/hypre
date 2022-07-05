@@ -417,6 +417,21 @@ HYPRE_Int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector vector,
                                            HYPRE_Int      max_off_proc_elmts);
 
 /**
+ * Sets the number of components (vectors) of a multivector. A vector is assumed
+ * to have a single component when this function is not called. This function must
+ * be called prior to HYPRE_IJVectorInitialize.
+ **/
+HYPRE_Int HYPRE_IJVectorSetNumComponents(HYPRE_IJVector  vector,
+                                         HYPRE_Int       num_components);
+
+/**
+ * Set the component identifier of a vector with multiple components (multivector).
+ * This can be used for Set/AddTo/Get purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorSetComponent(HYPRE_IJVector  vector,
+                                     HYPRE_Int       component);
+
+/**
  * Sets values in vector.  The arrays \e values and \e indices
  * are of dimension \e nvalues and contain the vector values to be
  * set and the corresponding global vector indices, respectively.

@@ -41,22 +41,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector,
       partitioning[j] = IJpartitioning[j] - jmin;
    }
 
-   hypre_IJVectorObject(vector) = hypre_ParVectorCreate(comm, global_n, partitioning);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_IJVectorSetNumVectorsPar
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_IJVectorSetNumVectorsPar(hypre_IJVector *vector,
-                               HYPRE_Int       num_vectors)
-{
-   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-
-   hypre_ParVectorNumVectors(par_vector) = num_vectors;
+   hypre_IJVectorObject(vector) = (void*) hypre_ParVectorCreate(comm, global_n, partitioning);
 
    return hypre_error_flag;
 }
@@ -91,18 +76,21 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
 HYPRE_Int
 hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memory_location)
 {
-   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
-   HYPRE_BigInt *partitioning = hypre_ParVectorPartitioning(par_vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
-   HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
+   MPI_Comm            comm         = hypre_IJVectorComm(vector);
+   hypre_ParVector    *par_vector   = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_AuxParVector *aux_vector   = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+   HYPRE_Int           print_level  = hypre_IJVectorPrintLevel(vector);
+   HYPRE_Int           num_vectors  = hypre_IJVectorNumComponents(vector);
 
-   HYPRE_Int my_id;
-   MPI_Comm  comm = hypre_IJVectorComm(vector);
-   hypre_MPI_Comm_rank(comm, &my_id);
+   HYPRE_BigInt       *partitioning = hypre_ParVectorPartitioning(par_vector);
+   hypre_Vector       *local_vector = hypre_ParVectorLocalVector(par_vector);
+
+   HYPRE_Int           my_id;
 
    HYPRE_MemoryLocation memory_location_aux =
       hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    if (!partitioning)
    {
@@ -115,6 +103,7 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memo
       return hypre_error_flag;
    }
 
+   hypre_VectorNumVectors(local_vector) = num_vectors;
    hypre_VectorSize(local_vector) = (HYPRE_Int)(partitioning[1] - partitioning[0]);
 
    hypre_ParVectorInitialize_v2(par_vector, memory_location);
@@ -281,6 +270,42 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 
 /******************************************************************************
  *
+ * hypre_IJVectorSetComponentPar
+ *
+ * Set the component identifier of a vector with multiple components
+ * (multivector)
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJVectorSetComponentPar(hypre_IJVector *vector,
+                              HYPRE_Int       component)
+{
+   HYPRE_Int        print_level = hypre_IJVectorPrintLevel(vector);
+   hypre_ParVector *par_vector  = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   HYPRE_Int        num_vectors = hypre_ParVectorNumVectors(par_vector);
+
+   if (component < 0 || component > num_vectors)
+   {
+      if (print_level)
+      {
+         hypre_printf("component < 0 || component > num_vectors -- ");
+         hypre_printf("hypre_IJVectorSetComponentPar\n");
+         hypre_printf("**** This vector partitioning should not occur ****\n");
+      }
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   else
+   {
+      hypre_ParVectorSetComponent(par_vector, component);
+   }
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
  * hypre_IJVectorSetValuesPar
  *
  * sets a potentially noncontiguous set of components of an IJVectorPar
@@ -370,9 +395,9 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
       for (j = 0; j < num_values; j++)
       {
          i = indices[j];
-         if (i >= vec_start && i <= vec_stop)
+         if (vec_start <= i && i <= vec_stop)
          {
-            k = (HYPRE_Int)( i - vec_start);
+            k = (HYPRE_Int)(i - vec_start);
             data[vecoffset + k * idxstride] = values[j];
          }
       }

@@ -323,14 +323,14 @@ typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
    HYPRE_BigInt  partitioning[2];   /* Indicates partitioning over tasks */
+   HYPRE_Int     num_components;    /* Number of components of a multivector */
    HYPRE_Int     object_type;       /* Indicates the type of "local storage" */
    void         *object;            /* Structure for storing local portion */
    void         *translator;        /* Structure for storing off processor
                                        information */
    void         *assumed_part;      /* IJ Vector assumed partition */
    HYPRE_BigInt  global_first_row;  /* these for data items are necessary */
-   HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global */
-   /* global partition */
+   HYPRE_BigInt  global_num_rows;   /* to be able to avoid using the global partition */
    HYPRE_Int     print_level;
 } hypre_IJVector;
 
@@ -340,6 +340,7 @@ typedef struct hypre_IJVector_struct
 
 #define hypre_IJVectorComm(vector)            ((vector) -> comm)
 #define hypre_IJVectorPartitioning(vector)    ((vector) -> partitioning)
+#define hypre_IJVectorNumComponents(vector)   ((vector) -> num_components)
 #define hypre_IJVectorObjectType(vector)      ((vector) -> object_type)
 #define hypre_IJVectorObject(vector)          ((vector) -> object)
 #define hypre_IJVectorTranslator(vector)      ((vector) -> translator)
@@ -503,7 +504,6 @@ HYPRE_Int hypre_IJVectorZeroValues ( HYPRE_IJVector vector );
 
 /* IJVector_parcsr.c */
 HYPRE_Int hypre_IJVectorCreatePar ( hypre_IJVector *vector, HYPRE_BigInt *IJpartitioning );
-HYPRE_Int hypre_IJVectorSetNumVectorsPar ( hypre_IJVector *vector, HYPRE_Int num_vectors );
 HYPRE_Int hypre_IJVectorDestroyPar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializePar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializePar_v2(hypre_IJVector *vector,
@@ -512,6 +512,7 @@ HYPRE_Int hypre_IJVectorSetMaxOffProcElmtsPar ( hypre_IJVector *vector,
                                                 HYPRE_Int max_off_proc_elmts );
 HYPRE_Int hypre_IJVectorDistributePar ( hypre_IJVector *vector, const HYPRE_Int *vec_starts );
 HYPRE_Int hypre_IJVectorZeroValuesPar ( hypre_IJVector *vector );
+HYPRE_Int hypre_IJVectorSetComponentPar ( hypre_IJVector *vector, HYPRE_Int component);
 HYPRE_Int hypre_IJVectorSetValuesPar ( hypre_IJVector *vector, HYPRE_Int num_values,
                                        const HYPRE_BigInt *indices, const HYPRE_Complex *values );
 HYPRE_Int hypre_IJVectorAddToValuesPar ( hypre_IJVector *vector, HYPRE_Int num_values,
@@ -565,7 +566,8 @@ HYPRE_Int HYPRE_IJMatrixAdd ( HYPRE_Complex alpha, HYPRE_IJMatrix matrix_A, HYPR
 /* HYPRE_IJVector.c */
 HYPRE_Int HYPRE_IJVectorCreate ( MPI_Comm comm, HYPRE_BigInt jlower, HYPRE_BigInt jupper,
                                  HYPRE_IJVector *vector );
-HYPRE_Int HYPRE_IJVectorSetNumVectors ( HYPRE_IJVector vector, HYPRE_Int num_vectors );
+HYPRE_Int HYPRE_IJVectorSetNumComponents ( HYPRE_IJVector vector, HYPRE_Int num_components );
+HYPRE_Int HYPRE_IJVectorSetComponent ( HYPRE_IJVector vector, HYPRE_Int component );
 HYPRE_Int HYPRE_IJVectorDestroy ( HYPRE_IJVector vector );
 HYPRE_Int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
 HYPRE_Int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector, HYPRE_Int print_level );

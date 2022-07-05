@@ -72,6 +72,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
 
    hypre_IJVectorComm(vec)            = comm;
+   hypre_IJVectorNumComponents(vec)   = 1;
    hypre_IJVectorObjectType(vec)      = HYPRE_UNITIALIZED;
    hypre_IJVectorObject(vec)          = NULL;
    hypre_IJVectorTranslator(vec)      = NULL;
@@ -86,12 +87,12 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorSetNumVectors
+ * HYPRE_IJVectorSetNumComponents
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorSetNumVectors( HYPRE_IJVector vector,
-                             HYPRE_Int      num_vectors )
+HYPRE_IJVectorSetNumComponents( HYPRE_IJVector vector,
+                                HYPRE_Int      num_components )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -101,15 +102,13 @@ HYPRE_IJVectorSetNumVectors( HYPRE_IJVector vector,
       return hypre_error_flag;
    }
 
-   if (hypre_IJVectorObjectType(vec) == HYPRE_PARCSR)
+   if (num_components < 0)
    {
-      hypre_IJVectorSetNumVectorsPar(vec, num_vectors);
-   }
-   else
-   {
-      hypre_error_in_arg(1);
+      hypre_error_in_arg(2);
       return hypre_error_flag;
    }
+
+   hypre_IJVectorNumComponents(vector) = num_components;
 
    return hypre_error_flag;
 }
@@ -132,18 +131,7 @@ HYPRE_IJVectorSetComponent( HYPRE_IJVector vector,
 
    if (hypre_IJVectorObjectType(vec) == HYPRE_PARCSR)
    {
-      hypre_ParVector *par_vector  = (hypre_ParVector*) hypre_IJVectorObject(vec);
-      HYPRE_Int        num_vectors = hypre_ParVectorNumVectors(par_vector);
-
-      if (component < 0 || component > num_vectors)
-      {
-         hypre_error_in_arg(2);
-         return hypre_error_flag;
-      }
-      else
-      {
-         hypre_ParVectorSetComponent(par_vector, component);
-      }
+      hypre_IJVectorSetComponentPar(vector, component);
    }
    else
    {
