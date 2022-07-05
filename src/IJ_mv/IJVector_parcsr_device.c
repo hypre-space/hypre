@@ -35,7 +35,8 @@ HYPRE_Int hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int N0, HYPRE_BigInt *I0, c
 HYPRE_Int hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int N0, HYPRE_BigInt *I0, char *X0,
                                                HYPRE_Complex *A0, HYPRE_Int *N1, HYPRE_BigInt **I1, char **X1, HYPRE_Complex **A1 );
 
-__global__ void hypreCUDAKernel_IJVectorAssemblePar(hypre_Item &item, HYPRE_Int n, HYPRE_Complex *x,
+__global__ void hypreCUDAKernel_IJVectorAssemblePar(hypre_DeviceItem &item, HYPRE_Int n,
+                                                    HYPRE_Complex *x,
                                                     HYPRE_BigInt *map, HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y);
 
 /*
@@ -380,7 +381,7 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
 /* y[map[i]-offset] = x[i] or y[map[i]] += x[i] depending on SorA,
  * same index cannot appear more than once in map */
 __global__ void
-hypreCUDAKernel_IJVectorAssemblePar(hypre_Item &item, HYPRE_Int n, HYPRE_Complex *x,
+hypreCUDAKernel_IJVectorAssemblePar(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *x,
                                     HYPRE_BigInt *map,
                                     HYPRE_BigInt offset, char *SorA, HYPRE_Complex *y)
 {

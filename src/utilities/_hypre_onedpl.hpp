@@ -66,7 +66,7 @@ Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
 }
 
 // Functor evaluates second element of tied sequence with predicate.
-// Used by: copy_if, remove_if
+// Used by: copy_if
 template <typename Predicate> struct predicate_key_fun
 {
    typedef bool result_of;
@@ -97,48 +97,6 @@ Iter3 hypreSycl_copy_if(Iter1 first, Iter1 last, Iter2 mask,
       std::random_access_iterator_tag>::value,
       "Iterators passed to algorithms must be random-access iterators.");
    auto ret_val = HYPRE_ONEDPL_CALL( std::copy_if,
-                                     oneapi::dpl::make_zip_iterator(first, mask),
-                                     oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
-                                     oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),
-                                     predicate_key_fun<Pred>(pred));
-   return std::get<0>(ret_val.base());
-}
-
-// Similar to above, need mask version of remove_if
-// NOTE: We copy the mask below because this implementation also
-// remove elements from the mask in addition to the input.
-template <typename Iter1, typename Iter2, typename Pred>
-Iter1 hypreSycl_remove_if(Iter1 first, Iter1 last, Iter2 mask, Pred pred)
-{
-   static_assert(
-      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
-      std::random_access_iterator_tag>::value &&
-      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
-      std::random_access_iterator_tag>::value,
-      "Iterators passed to algorithms must be random-access iterators.");
-   using ValueType = typename std::iterator_traits<Iter1>::value_type;
-   Iter2 mask_cpy = hypre_CTAlloc(ValueType, std::distance(first, last), HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(mask_cpy, mask, ValueType, std::distance(first, last), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   auto ret_val = HYPRE_ONEDPL_CALL( std::remove_if,
-                                     oneapi::dpl::make_zip_iterator(first, mask_cpy),
-                                     oneapi::dpl::make_zip_iterator(last, mask_cpy + std::distance(first, last)),
-                                     predicate_key_fun<Pred>(pred));
-   hypre_TFree(mask_cpy, HYPRE_MEMORY_DEVICE);
-   return std::get<0>(ret_val.base());
-}
-
-// Similar to above, need mask version of remove_copy_if
-// WM: todo - double check that the mask isn't "removed" here as above (shouldn't be due to the copy)
-template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
-Iter3 hypreSycl_remove_copy_if(Iter1 first, Iter1 last, Iter2 mask, Iter3 result, Pred pred)
-{
-   static_assert(
-      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
-      std::random_access_iterator_tag>::value &&
-      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
-      std::random_access_iterator_tag>::value,
-      "Iterators passed to algorithms must be random-access iterators.");
-   auto ret_val = HYPRE_ONEDPL_CALL( std::remove_copy_if,
                                      oneapi::dpl::make_zip_iterator(first, mask),
                                      oneapi::dpl::make_zip_iterator(last, mask + std::distance(first, last)),
                                      oneapi::dpl::make_zip_iterator(result, oneapi::dpl::discard_iterator()),

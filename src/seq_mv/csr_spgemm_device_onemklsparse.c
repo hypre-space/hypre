@@ -31,7 +31,9 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                   HYPRE_Int                          **d_jc_out,
                                   HYPRE_Complex                      **d_c_out)
 {
-   std::int64_t *tmp_size1 = NULL, *tmp_size2, *nnzC = NULL;
+   std::int64_t *tmp_size1_h = NULL, *tmp_size1_d = NULL;
+   std::int64_t *tmp_size2_h = NULL, *tmp_size2_d = NULL;
+   std::int64_t *nnzC_h = NULL, *nnzC_d;
    void *tmp_buffer1 = NULL;
    void *tmp_buffer2 = NULL;
    HYPRE_Int *d_ic, *d_jc = NULL;
@@ -53,19 +55,21 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* get tmp_buffer1 size for work estimation */
    req = oneapi::mkl::sparse::matmat_request::get_work_estimation_buf_size;
-   tmp_size1 = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
+   tmp_size1_d = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
                                                   handle_A,
                                                   handle_B,
                                                   handle_C,
                                                   req,
                                                   descr,
-                                                  tmp_size1,
+                                                  tmp_size1_d,
                                                   NULL,
                                                   {}).wait() );
 
    /* allocate tmp_buffer1 for work estimation */
-   tmp_buffer1 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size1, HYPRE_MEMORY_DEVICE);
+   tmp_size1_h = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(tmp_size1_h, tmp_size1_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);                                                                                   \
+   tmp_buffer1 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size1_h, HYPRE_MEMORY_DEVICE);
 
    /* do work_estimation */
    req = oneapi::mkl::sparse::matmat_request::work_estimation;
@@ -75,25 +79,27 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                                   handle_C,
                                                   req,
                                                   descr,
-                                                  tmp_size1,
+                                                  tmp_size1_d,
                                                   tmp_buffer1,
                                                   {}).wait() );
 
    /* get tmp_buffer2 size for computation */
    req = oneapi::mkl::sparse::matmat_request::get_compute_buf_size;
-   tmp_size2 = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
+   tmp_size2_d = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
                                                   handle_A,
                                                   handle_B,
                                                   handle_C,
                                                   req,
                                                   descr,
-                                                  tmp_size2,
+                                                  tmp_size2_d,
                                                   NULL,
                                                   {}).wait() );
 
    /* allocate tmp_buffer2 for computation */
-   tmp_buffer2 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size2, HYPRE_MEMORY_DEVICE);
+   tmp_size2_h = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(tmp_size2_h, tmp_size2_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);                                                                                   \
+   tmp_buffer2 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size2_h, HYPRE_MEMORY_DEVICE);
 
    /* do the computation */
    req = oneapi::mkl::sparse::matmat_request::compute;
@@ -103,26 +109,28 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
                                                   handle_C,
                                                   req,
                                                   descr,
-                                                  tmp_size2,
+                                                  tmp_size2_d,
                                                   tmp_buffer2,
                                                   {}).wait() );
 
    /* get nnzC */
    req = oneapi::mkl::sparse::matmat_request::get_nnz;
-   nnzC = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
+   nnzC_d = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::matmat(*hypre_HandleComputeStream(hypre_handle()),
                                                   handle_A,
                                                   handle_B,
                                                   handle_C,
                                                   req,
                                                   descr,
-                                                  nnzC,
+                                                  nnzC_d,
                                                   NULL,
                                                   {}).wait() );
 
    /* allocate col index and data arrays */
-   d_jc = hypre_CTAlloc(HYPRE_Int, *nnzC, HYPRE_MEMORY_DEVICE);
-   d_c = hypre_CTAlloc(HYPRE_Complex, *nnzC, HYPRE_MEMORY_DEVICE);
+   nnzC_h = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(nnzC_h, nnzC_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);                                                                                   \
+   d_jc = hypre_CTAlloc(HYPRE_Int, *nnzC_h, HYPRE_MEMORY_DEVICE);
+   d_c = hypre_CTAlloc(HYPRE_Complex, *nnzC_h, HYPRE_MEMORY_DEVICE);
    oneapi::mkl::sparse::set_csr_data(handle_C, m, n, oneapi::mkl::index_base::zero, d_ic, d_jc, d_c);
 
    /* finalize C */
@@ -141,10 +149,20 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    oneapi::mkl::sparse::release_matmat_descr(&descr);
 
    /* assign the output */
-   *nnzC_out = (HYPRE_Int) * nnzC;
+   *nnzC_out = (HYPRE_Int) * nnzC_h;
    *d_ic_out = d_ic;
    *d_jc_out = d_jc;
    *d_c_out = d_c;
+
+   /* free temporary arrays */
+   hypre_TFree(tmp_size1_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(tmp_size1_d, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tmp_size2_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(tmp_size2_d, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(nnzC_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(nnzC_d, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tmp_buffer1, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tmp_buffer2, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

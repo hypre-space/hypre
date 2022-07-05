@@ -539,7 +539,6 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    {
       offd = hypre_CSRMatrixCreate(local_num_rows, 0, 0);
       hypre_CSRMatrixInitialize_v2(offd, 0, HYPRE_MEMORY_HOST);
-
    }
 
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
@@ -647,6 +646,8 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
                            const HYPRE_Int           base_j,
                            const char               *filename )
 {
+   hypre_ParCSRMatrix  *h_matrix;
+
    MPI_Comm             comm;
    HYPRE_BigInt         first_row_index;
    HYPRE_BigInt         first_col_diag;
@@ -669,21 +670,34 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int            num_nonzeros_offd;
    HYPRE_BigInt         ilower, iupper, jlower, jupper;
 
+   HYPRE_MemoryLocation memory_location =
+      hypre_ParCSRMatrixMemoryLocation((hypre_ParCSRMatrix*) matrix);
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
-   comm            = hypre_ParCSRMatrixComm(matrix);
-   first_row_index = hypre_ParCSRMatrixFirstRowIndex(matrix);
-   first_col_diag  = hypre_ParCSRMatrixFirstColDiag(matrix);
-   diag            = hypre_ParCSRMatrixDiag(matrix);
-   offd            = hypre_ParCSRMatrixOffd(matrix);
-   col_map_offd    = hypre_ParCSRMatrixColMapOffd(matrix);
-   num_rows        = hypre_ParCSRMatrixNumRows(matrix);
-   row_starts      = hypre_ParCSRMatrixRowStarts(matrix);
-   col_starts      = hypre_ParCSRMatrixColStarts(matrix);
+   /* Create temporary matrix on host memory if needed */
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
+   {
+      h_matrix = (hypre_ParCSRMatrix *) matrix;
+   }
+   else
+   {
+      h_matrix = hypre_ParCSRMatrixClone_v2((hypre_ParCSRMatrix *) matrix, 1, HYPRE_MEMORY_HOST);
+   }
+
+   comm            = hypre_ParCSRMatrixComm(h_matrix);
+   first_row_index = hypre_ParCSRMatrixFirstRowIndex(h_matrix);
+   first_col_diag  = hypre_ParCSRMatrixFirstColDiag(h_matrix);
+   diag            = hypre_ParCSRMatrixDiag(h_matrix);
+   offd            = hypre_ParCSRMatrixOffd(h_matrix);
+   col_map_offd    = hypre_ParCSRMatrixColMapOffd(h_matrix);
+   num_rows        = hypre_ParCSRMatrixNumRows(h_matrix);
+   row_starts      = hypre_ParCSRMatrixRowStarts(h_matrix);
+   col_starts      = hypre_ParCSRMatrixColStarts(h_matrix);
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
 
@@ -761,6 +775,12 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    }
 
    fclose(file);
+
+   /* Free temporary matrix */
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   {
+      hypre_ParCSRMatrixDestroy(h_matrix);
+   }
 
    return hypre_error_flag;
 }

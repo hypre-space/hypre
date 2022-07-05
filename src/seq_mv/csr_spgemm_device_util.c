@@ -134,13 +134,13 @@ hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
 }
 
 __global__ void
-hypre_SpGemmGhashSize1( hypre_Item &item,
-                        HYPRE_Int  num_rows,
-                        HYPRE_Int *row_id,
-                        HYPRE_Int  num_ghash,
-                        HYPRE_Int *row_sizes,
-                        HYPRE_Int *ghash_sizes,
-                        HYPRE_Int  SHMEM_HASH_SIZE )
+hypre_SpGemmGhashSize( hypre_DeviceItem &item,
+                       HYPRE_Int  num_rows,
+                       HYPRE_Int *row_id,
+                       HYPRE_Int  num_ghash,
+                       HYPRE_Int *row_sizes,
+                       HYPRE_Int *ghash_sizes,
+                       HYPRE_Int  SHMEM_HASH_SIZE )
 {
    const HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 

@@ -22,7 +22,7 @@
  * to be used for the MaxEigEstimate
  */
 __global__ void
-hypreCUDAKernel_CSRMaxEigEstimate(hypre_Item    &item,
+hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
                                   HYPRE_Int      nrows,
                                   HYPRE_Int     *diag_ia,
                                   HYPRE_Int     *diag_ja,
@@ -55,13 +55,8 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_Item    &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j >= q)
-      {
-         continue;
-      }
-
       HYPRE_Complex aij = read_only_load(&diag_aa[j]);
       if ( read_only_load(&diag_ja[j]) == row_i )
       {
@@ -80,13 +75,8 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_Item    &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j >= q)
-      {
-         continue;
-      }
-
       HYPRE_Complex aij = read_only_load(&offd_aa[j]);
       row_sum_i += fabs(aij);
    }
