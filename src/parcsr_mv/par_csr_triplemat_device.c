@@ -941,7 +941,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
 
 #if defined(HYPRE_USING_SYCL)
       /* WM: onedpl lower_bound currently does not accept zero length input */
-      if (num_cols_offd_C > 0)
+      if (num_cols_offd_C > 0 && Cext_offd_nnz > 0)
       {
          HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                             col_map_offd_C,

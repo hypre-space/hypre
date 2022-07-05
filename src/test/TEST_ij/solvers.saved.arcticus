@@ -1,0 +1,359 @@
+# Output file: solvers.out.0
+Iterations = 11
+Final Relative Residual Norm = 5.872340e-09
+
+# Output file: solvers.out.1
+Iterations = 41
+Final Relative Residual Norm = 6.698760e-09
+
+# Output file: solvers.out.2
+GMRES Iterations = 12
+Final GMRES Relative Residual Norm = 1.799604e-09
+
+# Output file: solvers.out.3
+GMRES Iterations = 93
+Final GMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.4
+Iterations = 9
+Final Relative Residual Norm = 5.921302e-09
+
+# Output file: solvers.out.5
+Iterations = 196
+Final Relative Residual Norm = 9.097622e-09
+
+# Output file: solvers.out.8
+Iterations = 41
+PCG_Iterations = 0
+DSCG_Iterations = 41
+Final Relative Residual Norm = 6.698760e-09
+
+# Output file: solvers.out.9
+Iterations = 11
+PCG_Iterations = 7
+DSCG_Iterations = 4
+Final Relative Residual Norm = 2.590526e-09
+
+# Output file: solvers.out.10
+Iterations = 10
+PCG_Iterations = 8
+DSCG_Iterations = 2
+Final Relative Residual Norm = 9.324879e-10
+
+# Output file: solvers.out.11
+Iterations = 7
+PCG_Iterations = 4
+DSCG_Iterations = 3
+Final Relative Residual Norm = 1.541035e-09
+
+# Output file: solvers.out.12
+
+
+COGMRES Iterations = 12
+Final COGMRES Relative Residual Norm = 1.799604e-09
+
+# Output file: solvers.out.13
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.14
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225662e-09
+
+# Output file: solvers.out.15
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225662e-09
+
+# Output file: solvers.out.16
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.17
+index 19 value -4.501768e-11
+
+GMRES Iterations = 12
+Final GMRES Relative Residual Norm = 1.799604e-09
+
+# Output file: solvers.out.18
+index 19 value -7.497268e-11
+
+GMRES Iterations = 93
+Final GMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.sysh
+ Average Convergence Factor = 0.914034
+
+     Complexity:    grid = 1.342000
+                operator = 1.059338
+                   cycle = 2.115933
+
+# Output file: solvers.out.sysn
+ Average Convergence Factor = 0.537936
+
+     Complexity:    grid = 1.391500
+                operator = 2.082687
+                   cycle = 10.165075
+
+# Output file: solvers.out.sysu
+ Average Convergence Factor = 0.775145
+
+     Complexity:    grid = 1.389500
+                operator = 2.727668
+                   cycle = 5.455168
+
+# Output file: solvers.out.101
+LGMRES Iterations = 83
+Final LGMRES Relative Residual Norm = 8.591967e-09
+
+# Output file: solvers.out.102
+LGMRES Iterations = 12
+Final LGMRES Relative Residual Norm = 9.395624e-09
+
+# Output file: solvers.out.103
+FlexGMRES Iterations = 93
+Final FlexGMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.104
+FlexGMRES Iterations = 12
+Final FlexGMRES Relative Residual Norm = 1.799604e-09
+
+# Output file: solvers.out.105
+Iterations = 19
+Final Relative Residual Norm = 3.997230e-09
+
+# Output file: solvers.out.106
+Iterations = 19
+Final Relative Residual Norm = 3.997230e-09
+
+# Output file: solvers.out.107
+Iterations = 29
+Final Relative Residual Norm = 8.277702e-09
+
+# Output file: solvers.out.108
+Iterations = 29
+Final Relative Residual Norm = 8.171478e-09
+
+# Output file: solvers.out.109
+Iterations = 20
+Final Relative Residual Norm = 5.659682e-09
+
+# Output file: solvers.out.110
+Iterations = 20
+Final Relative Residual Norm = 5.659682e-09
+
+# Output file: solvers.out.111
+Iterations = 32
+Final Relative Residual Norm = 9.530052e-09
+
+# Output file: solvers.out.112
+GMRES Iterations = 40
+Final GMRES Relative Residual Norm = 6.956702e-09
+
+# Output file: solvers.out.113
+GMRES Iterations = 26
+Final GMRES Relative Residual Norm = 8.279492e-09
+
+# Output file: solvers.out.114
+BoomerAMG Iterations = 34
+Final Relative Residual Norm = 7.489469e-09
+
+# Output file: solvers.out.115
+BoomerAMG Iterations = 34
+Final Relative Residual Norm = 7.819380e-09
+
+# Output file: solvers.out.116
+GMRES Iterations = 15
+Final GMRES Relative Residual Norm = 2.586639e-09
+
+# Output file: solvers.out.117
+GMRES Iterations = 15
+Final GMRES Relative Residual Norm = 2.586639e-09
+
+# Output file: solvers.out.118
+GMRES Iterations = 27
+Final GMRES Relative Residual Norm = 5.318109e-09
+
+# Output file: solvers.out.119
+GMRES Iterations = 19
+Final GMRES Relative Residual Norm = 7.311280e-09
+
+# Output file: solvers.out.121
+GMRES Iterations = 25
+Final GMRES Relative Residual Norm = 6.837710e-09
+
+# Output file: solvers.out.122
+GMRES Iterations = 19
+Final GMRES Relative Residual Norm = 7.311280e-09
+
+# Output file: solvers.out.120
+GMRES Iterations = 19
+Final GMRES Relative Residual Norm = 7.311368e-09
+
+# Output file: solvers.out.200
+MGR Iterations = 9
+Final Relative Residual Norm = 1.010122e-09
+
+# Output file: solvers.out.201
+MGR Iterations = 9
+Final Relative Residual Norm = 3.061758e-09
+
+# Output file: solvers.out.202
+MGR Iterations = 9
+Final Relative Residual Norm = 1.010122e-09
+
+# Output file: solvers.out.203
+MGR Iterations = 9
+Final Relative Residual Norm = 3.061758e-09
+
+# Output file: solvers.out.204
+MGR Iterations = 74
+Final Relative Residual Norm = 9.547704e-09
+
+# Output file: solvers.out.205
+MGR Iterations = 71
+Final Relative Residual Norm = 8.988058e-09
+
+# Output file: solvers.out.206
+MGR Iterations = 52
+Final Relative Residual Norm = 8.499132e-09
+
+# Output file: solvers.out.207
+MGR Iterations = 51
+Final Relative Residual Norm = 7.557098e-09
+
+# Output file: solvers.out.208
+MGR Iterations = 16
+Final Relative Residual Norm = 4.388026e-09
+
+# Output file: solvers.out.209
+MGR Iterations = 15
+Final Relative Residual Norm = 4.621475e-09
+
+# Output file: solvers.out.210
+MGR Iterations = 22
+Final Relative Residual Norm = 9.565388e-09
+
+# Output file: solvers.out.211
+MGR Iterations = 29
+Final Relative Residual Norm = 7.681560e-09
+
+# Output file: solvers.out.212
+Iterations = 11
+Final Relative Residual Norm = 4.786327e-09
+
+# Output file: solvers.out.213
+Iterations = 28
+Final Relative Residual Norm = 8.863248e-09
+
+# Output file: solvers.out.300
+hypre_ILU Iterations = 85
+Final Relative Residual Norm = 9.266244e-09
+
+# Output file: solvers.out.301
+hypre_ILU Iterations = 40
+Final Relative Residual Norm = 9.772377e-09
+
+# Output file: solvers.out.302
+hypre_ILU Iterations = 23
+Final Relative Residual Norm = 5.512717e-09
+
+# Output file: solvers.out.303
+hypre_ILU Iterations = 64
+Final Relative Residual Norm = 8.558467e-09
+
+# Output file: solvers.out.304
+hypre_ILU Iterations = 52
+Final Relative Residual Norm = 9.189234e-09
+
+# Output file: solvers.out.305
+hypre_ILU Iterations = 38
+Final Relative Residual Norm = 7.024121e-09
+
+# Output file: solvers.out.306
+hypre_ILU Iterations = 26
+Final Relative Residual Norm = 7.556742e-09
+
+# Output file: solvers.out.307
+  cpu MFLOPS      = 0.000000
+
+Solver:  hypre_ILU
+# Output file: solvers.out.308
+  cpu MFLOPS      = 0.000000
+
+Solver:  hypre_ILU
+# Output file: solvers.out.309
+hypre_ILU Iterations = 49
+Final Relative Residual Norm = 7.072947e-09
+
+# Output file: solvers.out.310
+hypre_ILU Iterations = 42
+Final Relative Residual Norm = 6.699477e-09
+
+# Output file: solvers.out.311
+hypre_ILU Iterations = 36
+Final Relative Residual Norm = 6.392185e-09
+
+# Output file: solvers.out.312
+hypre_ILU Iterations = 24
+Final Relative Residual Norm = 5.953652e-09
+
+# Output file: solvers.out.313
+GMRES Iterations = 25
+Final GMRES Relative Residual Norm = 3.968804e-09
+
+# Output file: solvers.out.314
+GMRES Iterations = 19
+Final GMRES Relative Residual Norm = 7.026445e-09
+
+# Output file: solvers.out.315
+GMRES Iterations = 20
+Final GMRES Relative Residual Norm = 7.908624e-09
+
+# Output file: solvers.out.316
+GMRES Iterations = 13
+Final GMRES Relative Residual Norm = 7.969372e-09
+
+# Output file: solvers.out.317
+FlexGMRES Iterations = 17
+Final FlexGMRES Relative Residual Norm = 9.152443e-09
+
+# Output file: solvers.out.318
+FlexGMRES Iterations = 9
+Final FlexGMRES Relative Residual Norm = 5.768784e-09
+
+# Output file: solvers.out.319
+
+Solver:  ILU-FlexGMRES
+HYPRE_FlexGMRESGetPrecond got good precond
+# Output file: solvers.out.320
+
+Solver:  ILU-FlexGMRES
+HYPRE_FlexGMRESGetPrecond got good precond
+# Output file: solvers.out.321
+FlexGMRES Iterations = 17
+Final FlexGMRES Relative Residual Norm = 4.489256e-09
+
+# Output file: solvers.out.322
+FlexGMRES Iterations = 8
+Final FlexGMRES Relative Residual Norm = 3.082447e-09
+
+# Output file: solvers.out.323
+FlexGMRES Iterations = 18
+Final FlexGMRES Relative Residual Norm = 4.133851e-09
+
+# Output file: solvers.out.324
+BoomerAMG Iterations = 10
+Final Relative Residual Norm = 4.638918e-09
+
+# Output file: solvers.out.325
+BoomerAMG Iterations = 9
+Final Relative Residual Norm = 1.250395e-09
+

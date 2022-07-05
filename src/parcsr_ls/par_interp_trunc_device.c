@@ -5,12 +5,16 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
+
+/* WM: todo - how to do shared memory in sycl? */
+#if !defined(HYPRE_USING_SYCL)
 
 /* special case for max_elmts = 0, i.e. no max_elmts limit */
 __global__ void
@@ -63,8 +67,8 @@ hypreCUDAKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       row_max = hypre_max(row_max, fabs(v));
    }
 
-   row_max = warp_allreduce_max(row_max) * trunc_factor;
-   row_sum = warp_allreduce_sum(row_sum);
+   row_max = warp_allreduce_max(item, row_max) * trunc_factor;
+   row_sum = warp_allreduce_sum(item, row_sum);
 
    HYPRE_Int cnt_diag = 0, cnt_offd = 0;
 
@@ -87,7 +91,7 @@ hypreCUDAKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       }
 
       HYPRE_Int sum, pos;
-      pos = warp_prefix_sum(lane, (HYPRE_Int) (j != -1), sum);
+      pos = warp_prefix_sum(item, lane, (HYPRE_Int) (j != -1), sum);
 
       if (j != -1)
       {
@@ -116,7 +120,7 @@ hypreCUDAKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       }
 
       HYPRE_Int sum, pos;
-      pos = warp_prefix_sum(lane, (HYPRE_Int) (j != -1), sum);
+      pos = warp_prefix_sum(item, lane, (HYPRE_Int) (j != -1), sum);
 
       if (j != -1)
       {
@@ -127,7 +131,7 @@ hypreCUDAKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       cnt_offd += sum;
    }
 
-   row_scal = warp_allreduce_sum(row_scal);
+   row_scal = warp_allreduce_sum(item, row_scal);
 
    if (row_scal)
    {
@@ -223,8 +227,8 @@ hypreCUDAKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    row_max *= trunc_factor;
 
    /* 2. save the largest max_elmts entries in sh_val/pos */
-   const HYPRE_Int nt = hypre_cuda_get_num_threads<1>();
-   const HYPRE_Int tid = hypre_cuda_get_thread_id<1>();
+   const HYPRE_Int nt = hypre_gpu_get_num_threads<1>(item);
+   const HYPRE_Int tid = hypre_gpu_get_thread_id<1>(item);
    extern __shared__ HYPRE_Int shared_mem[];
    HYPRE_Int *sh_pos = &shared_mem[tid * max_elmts];
    HYPRE_Real *sh_val = &((HYPRE_Real *) &shared_mem[nt * max_elmts])[tid * max_elmts];
@@ -488,6 +492,7 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    return hypre_error_flag;
 }
 
+#endif
 
 __global__ void
 hypreCUDAKernel_InterpTruncation_v2( hypre_DeviceItem &item,
@@ -516,18 +521,15 @@ hypreCUDAKernel_InterpTruncation_v2( hypre_DeviceItem &item,
    q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
    p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int i = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < q); i += HYPRE_WARP_SIZE)
+   for (HYPRE_Int i = p + lane; i < q; i += HYPRE_WARP_SIZE)
    {
-      if (i < q)
-      {
-         HYPRE_Real v = read_only_load(&P_a[i]);
-         row_max = hypre_max(row_max, fabs(v));
-         row_sum += v;
-      }
+      HYPRE_Real v = read_only_load(&P_a[i]);
+      row_max = hypre_max(row_max, fabs(v));
+      row_sum += v;
    }
 
-   row_max = warp_allreduce_max(row_max) * trunc_factor;
-   row_sum = warp_allreduce_sum(row_sum);
+   row_max = warp_allreduce_max(item, row_max) * trunc_factor;
+   row_sum = warp_allreduce_sum(item, row_sum);
 
    /* 2. mark dropped entries by -1 in P_j, and compute row_scal */
    HYPRE_Int last_pos = -1;
@@ -535,7 +537,7 @@ hypreCUDAKernel_InterpTruncation_v2( hypre_DeviceItem &item,
    {
       HYPRE_Int cond = 0, cond_prev;
 
-      cond_prev = i == p + lane || warp_allreduce_min(cond);
+      cond_prev = i == p + lane || warp_allreduce_min(item, cond);
 
       if (i < q)
       {
@@ -559,7 +561,7 @@ hypreCUDAKernel_InterpTruncation_v2( hypre_DeviceItem &item,
       }
    }
 
-   row_scal = warp_allreduce_sum(row_scal);
+   row_scal = warp_allreduce_sum(item, row_scal);
 
    if (row_scal)
    {
@@ -616,7 +618,12 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
 
    hypre_TMemcpy(P_j, P_diag_j, HYPRE_Int, nnz_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    /* offd col id := -2 - offd col id */
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag,
+   [] (const auto & x) {return -x - 2;} );
+#else
    HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + nnz_offd, P_j + nnz_diag, -_1 - 2);
+#endif
 
    hypre_TMemcpy(P_a,            P_diag_a, HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE,
                  HYPRE_MEMORY_DEVICE);
@@ -638,6 +645,14 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
    /* build new P_diag and P_offd */
    if (nnz_diag)
    {
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
+                                        oneapi::dpl::make_zip_iterator(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P),
+                                        P_j,
+                                        oneapi::dpl::make_zip_iterator(tmp_rowid, P_diag_j,  P_diag_a),
+                                        is_nonnegative<HYPRE_Int>() );
+      new_nnz_diag = std::get<0>(new_end.base()) - tmp_rowid;
+#else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
                         thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
@@ -645,8 +660,8 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
                         P_j,
                         thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_diag_j,  P_diag_a)),
                         is_nonnegative<HYPRE_Int>() );
-
       new_nnz_diag = thrust::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;
+#endif
 
       hypre_assert(new_nnz_diag <= nnz_diag);
 
@@ -656,6 +671,14 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
    if (nnz_offd)
    {
       less_than<HYPRE_Int> pred(-1);
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(P_i,       P_j,       P_a),
+                                        oneapi::dpl::make_zip_iterator(P_i + nnz_P, P_j + nnz_P, P_a + nnz_P),
+                                        P_j,
+                                        oneapi::dpl::make_zip_iterator(tmp_rowid, P_offd_j,  P_offd_a),
+                                        pred );
+      new_nnz_offd = std::get<0>(new_end.base()) - tmp_rowid;
+#else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
                         thrust::make_zip_iterator(thrust::make_tuple(P_i,       P_j,       P_a)),
@@ -663,12 +686,17 @@ hypre_BoomerAMGInterpTruncationDevice_v2( hypre_ParCSRMatrix *P,
                         P_j,
                         thrust::make_zip_iterator(thrust::make_tuple(tmp_rowid, P_offd_j,  P_offd_a)),
                         pred );
-
       new_nnz_offd = thrust::get<0>(new_end.get_iterator_tuple()) - tmp_rowid;
+#endif
 
       hypre_assert(new_nnz_offd <= nnz_offd);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL(std::transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j,
+      [] (const auto & x) {return -x - 2;} );
+#else
       HYPRE_THRUST_CALL(transform, P_offd_j, P_offd_j + new_nnz_offd, P_offd_j, -_1 - 2);
+#endif
 
       hypreDevice_CsrRowIndicesToPtrs_v2(nrows, new_nnz_offd, tmp_rowid, P_offd_i);
    }
@@ -703,11 +731,14 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
 #endif
    hypre_GpuProfilingPushRange("Interp-Truncation");
 
+/* WM: todo - sycl */
+#if !defined(HYPRE_USING_SYCL)
    if (max_elmts <= HYPRE_INTERPTRUNC_ALGORITHM_SWITCH)
    {
       hypre_BoomerAMGInterpTruncationDevice_v1(P, trunc_factor, max_elmts);
    }
    else
+#endif
    {
       hypre_BoomerAMGInterpTruncationDevice_v2(P, trunc_factor, max_elmts);
    }
@@ -721,5 +752,4 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
    return hypre_error_flag;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
-
+#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */

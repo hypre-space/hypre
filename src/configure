@@ -9328,6 +9328,8 @@ $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
            SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
 
+        LDFLAGS+="-fsycl-targets=spir64_gen -Xsycl-target-backend '-device 12.1.0,12.4.0'"
+
                 if test "$hypre_user_chose_cuflags" = "no"
         then
            CUFLAGS="${SYCLFLAGS}"

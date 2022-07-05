@@ -921,6 +921,46 @@ hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in,  T2 *keys2_in,  T3 *vals
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, HYPRE_Int *keys1_in,
                                                 HYPRE_Int *keys2_in, HYPRE_Complex *vals_in, HYPRE_Int *keys1_out, HYPRE_Int *keys2_out,
                                                 HYPRE_Complex *vals_out);
+
+/* x[map[i]] = v */
+template <typename T>
+__global__ void
+hypreGPUKernel_ScatterConstant( hypre_DeviceItem &item, T *x, HYPRE_Int n, HYPRE_Int *map, T v)
+{
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (global_thread_id < n)
+   {
+      x[map[global_thread_id]] = v;
+   }
+}
+
+/* x[map[i]] = v
+ * n is length of map
+ * TODO: thrust? */
+template <typename T>
+HYPRE_Int
+hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterConstant, gDim, bDim, x, n, map, v );
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int     *x, HYPRE_Int n, HYPRE_Int *map,
+                                               HYPRE_Int     v);
+template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HYPRE_Int *map,
+                                               HYPRE_Complex v);
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1273,45 +1313,6 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
 
    return hypre_error_flag;
 }
-
-/* x[map[i]] = v */
-template <typename T>
-__global__ void
-hypreGPUKernel_ScatterConstant(hypre_DeviceItem &item, T *x, HYPRE_Int n, HYPRE_Int *map, T v)
-{
-   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (global_thread_id < n)
-   {
-      x[map[global_thread_id]] = v;
-   }
-}
-
-/* x[map[i]] = v
- * n is length of map
- * TODO: thrust? */
-template <typename T>
-HYPRE_Int
-hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
-{
-   /* trivial case */
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterConstant, gDim, bDim, x, n, map, v );
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int     *x, HYPRE_Int n, HYPRE_Int *map,
-                                               HYPRE_Int     v);
-template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HYPRE_Int *map,
-                                               HYPRE_Complex v);
 
 __global__ void
 hypreGPUKernel_DiagScaleVector(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *A_i,

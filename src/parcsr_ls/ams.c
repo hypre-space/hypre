@@ -419,7 +419,7 @@ hypreCUDAKernel_ParCSRMatrixFixZeroRows( hypre_DeviceItem    &item,
       l1_norm += fabs(A_offd_data[j]);
    }
 
-   l1_norm = warp_allreduce_sum(l1_norm);
+   l1_norm = warp_allreduce_sum(item, l1_norm);
 
    if (l1_norm <= eps)
    {
@@ -2753,7 +2753,7 @@ hypreCUDAKernel_AMSSetupScaleGGt( hypre_DeviceItem &item,
       h2 += Gx * Gx + Gy * Gy + Gz * Gz;
    }
 
-   h2 = warp_allreduce_sum(h2) / ne;
+   h2 = warp_allreduce_sum(item, h2) / ne;
 
    for (HYPRE_Int j = p1 + lane; j < q1; j += HYPRE_WARP_SIZE)
    {

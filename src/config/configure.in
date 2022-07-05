@@ -2399,7 +2399,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
 
-        dnl (Ab)Using CUCC when compiling HIP
+        dnl (Ab)Using CUCC when compiling SYCL
         LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
@@ -2410,6 +2410,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         else
            SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
+
+        LDFLAGS+="-fsycl-targets=spir64_gen -Xsycl-target-backend '-device 12.1.0,12.4.0'"
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
         if test "$hypre_user_chose_cuflags" = "no"
