@@ -636,10 +636,10 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
  *****************************************************************************/
 
 HYPRE_Int
-hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
-                           HYPRE_Int       num_values,
-                           const HYPRE_BigInt   *indices,
-                           HYPRE_Complex  *values)
+hypre_IJVectorGetValuesPar(hypre_IJVector      *vector,
+                           HYPRE_Int            num_values,
+                           const HYPRE_BigInt  *indices,
+                           HYPRE_Complex       *values)
 {
    HYPRE_Int        my_id;
    MPI_Comm         comm           = hypre_IJVectorComm(vector);

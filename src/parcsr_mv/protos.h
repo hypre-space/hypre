@@ -536,8 +536,10 @@ HYPRE_Int hypre_ParVectorGetValues2( hypre_ParVector *vector, HYPRE_Int num_valu
 HYPRE_Int hypre_ParVectorGetValuesHost(hypre_ParVector *vector, HYPRE_Int num_values,
                                        HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
 HYPRE_Int hypre_ParVectorElmdivpy( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
+                                         hypre_ParVector *y, HYPRE_Int *marker,
+                                         HYPRE_Int marker_val );
 /* par_vector_device.c */
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
-                                         HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
+                                         HYPRE_BigInt *indices, HYPRE_BigInt base,
+                                         HYPRE_Complex *values);

@@ -1057,19 +1057,18 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
                              HYPRE_BigInt     base,
                              HYPRE_Complex   *values)
 {
-   HYPRE_Int     i, ierr = 0;
-   HYPRE_BigInt  first_index = hypre_ParVectorFirstIndex(vector);
-   HYPRE_BigInt  last_index = hypre_ParVectorLastIndex(vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
-   HYPRE_Complex *data = hypre_VectorData(local_vector);
+   HYPRE_BigInt    first_index  = hypre_ParVectorFirstIndex(vector);
+   HYPRE_BigInt    last_index   = hypre_ParVectorLastIndex(vector);
+   hypre_Vector   *local_vector = hypre_ParVectorLocalVector(vector);
 
-   /*
-   if (hypre_VectorOwnsData(local_vector) == 0)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Vector does not own data! -- hypre_ParVectorGetValues.");
-      return hypre_error_flag;
-   }
-   */
+   HYPRE_Int       num_vectors  = hypre_VectorNumVectors(local_vector);
+   HYPRE_Int       component    = hypre_VectorComponent(local_vector);
+   HYPRE_Int       vecstride    = hypre_VectorVectorStride(local_vector);
+   HYPRE_Int       idxstride    = hypre_VectorIndexStride(local_vector);
+   HYPRE_Complex  *data         = hypre_VectorData(local_vector);
+   HYPRE_Int       vecoffset    = component * vecstride;
+
+   HYPRE_Int       i, ierr = 0;
 
    if (indices)
    {
@@ -1081,12 +1080,12 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
          HYPRE_BigInt index = indices[i] - base;
          if (index < first_index || index > last_index)
          {
-            ierr ++;
+            ierr++;
          }
          else
          {
             HYPRE_Int local_index = (HYPRE_Int) (index - first_index);
-            values[i] = data[local_index];
+            values[i] = data[vecoffset + local_index * idxstride];
          }
       }
 
@@ -1110,7 +1109,7 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
 #endif
       for (i = 0; i < num_values; i++)
       {
-         values[i] = data[i];
+         values[i] = data[vecoffset + i * idxstride];
       }
    }
 
