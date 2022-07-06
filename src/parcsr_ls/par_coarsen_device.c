@@ -399,7 +399,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                                        count + num_rows_diag,
                                        CF_marker_diag,
                                        graph_diag,
-                                       [] (const auto & x) {return x;} );
+   [] (const auto & x) {return x;} );
 #else
    new_end = HYPRE_THRUST_CALL( remove_copy_if,
                                 thrust::make_counting_iterator(0),

@@ -962,7 +962,8 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HY
                                                HYPRE_Complex v);
 
 __global__ void
-hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                                 HYPRE_Real *y)
 {
    for (HYPRE_Int i = 0; i < n; i++)
    {
@@ -972,7 +973,8 @@ hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real
 
 /* x[map[i]] += y[i], same index cannot appear more than once in map */
 __global__ void
-hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map, HYPRE_Real *y)
+hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                          HYPRE_Real *y)
 {
    HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 

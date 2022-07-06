@@ -804,12 +804,13 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
       /* WM: this works? Mysterious... */
       std::pair<HYPRE_Int*, HYPRE_Int*> new_end = oneapi::dpl::reduce_by_segment(
-                                         oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream( hypre_handle())),
-                                         A_j_sorted,
-                                         A_j_sorted + nnz_A,
-                                         ones,
-                                         reduced_col_indices,
-                                         reduced_col_nnz);
+                                                     oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
+                                                              hypre_handle())),
+                                                     A_j_sorted,
+                                                     A_j_sorted + nnz_A,
+                                                     ones,
+                                                     reduced_col_indices,
+                                                     reduced_col_nnz);
 
 
 

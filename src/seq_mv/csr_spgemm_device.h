@@ -91,7 +91,8 @@ hypre_int get_warp_in_group_id(hypre_DeviceItem &item)
  */
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1, HYPRE_Int &v2)
+void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HYPRE_Int &v1,
+                HYPRE_Int &v2)
 {
    if (GROUP_SIZE >= HYPRE_WARP_SIZE)
    {
