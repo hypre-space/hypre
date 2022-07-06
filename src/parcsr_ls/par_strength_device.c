@@ -247,10 +247,6 @@ hypre_BoomerAMGCreateSDevice(hypre_ParCSRMatrix    *A,
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
 #endif
 
-   /* WM: debug */
-   hypre_ParCSRMatrixPrint(S, "S");
-   hypre_MPI_Finalize();
-   exit(0);
    return (ierr);
 }
 

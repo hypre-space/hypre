@@ -214,8 +214,6 @@ struct XC_pred : public thrust::unary_function<Tuple, bool>
    }
 };
 
-#endif // #if defined(HYPRE_USING_SYCL)
-
 /* Option = 1:
  *    F is marked as -1, C is +1
  *    | AFF AFC |

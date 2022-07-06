@@ -33,8 +33,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                   HYPRE_Int              debug_flag,
                                   hypre_IntArray       **CF_marker_ptr )
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenPMISDevice(), CF_init = %d\n", CF_init);
-   hypre_ParCSRMatrixPrint(S, "S");
    MPI_Comm                  comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
@@ -82,14 +80,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    }
    CF_marker_diag = hypre_IntArrayData(*CF_marker_ptr);
    CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_DEVICE);
-   /* WM: debug */
-   if (my_id == 0)
-   {
-      hypre_printf("WM: debug - Initial CF marker = ");
-      for (auto i = 0; i < num_cols_diag; i++)
-         hypre_printf("%d ", CF_marker_diag[i]);
-      hypre_printf("\n");
-   }
 
    /* arrays for global measure diag and offd parts */
    measure_diag = hypre_TAlloc(HYPRE_Real, num_cols_diag, HYPRE_MEMORY_DEVICE);
@@ -133,14 +123,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 
    hypre_GetGlobalMeasureDevice(S, comm_pkg, CF_init, aug_rand, measure_diag, measure_offd,
                                 (HYPRE_Real *) send_buf);
-   /* WM: debug */
-   if (my_id == 0)
-   {
-      hypre_printf("WM: debug - 1 CF marker = ");
-      for (auto i = 0; i < num_cols_diag; i++)
-         hypre_printf("%d ", CF_marker_diag[i]);
-      hypre_printf("\n");
-   }
 
    /* initialize CF marker, graph arrays and measure_diag, measure_offd is sync'ed
     * Note: CF_marker_offd is not sync'ed */
@@ -156,20 +138,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 
       /* stop the coarsening if nothing left to be coarsened */
       hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-      /* WM: debug */
-      if (my_id == 0)
-      {
-         hypre_printf("WM: debug - ITER %d, global_graph_size = %d\n", iter, global_graph_size);
-         hypre_printf("WM: debug - CF marker = ");
-         for (auto i = 0; i < num_cols_diag; i++)
-            hypre_printf("%d ", CF_marker_diag[i]);
-         hypre_printf("\n");
-         /* WM: debug */
-         hypre_printf("WM: debug - 0 measure = ");
-         for (auto i = 0; i < num_cols_diag; i++)
-            hypre_printf("%f ", measure_diag[i]);
-         hypre_printf("\n");
-      }
 
       /* if (my_id == 0) { hypre_printf("graph size %b\n", global_graph_size); } */
 
@@ -264,18 +232,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
 #endif
-   /* WM: debug */
-   if (my_id == 0)
-   {
-      hypre_printf("WM: debug - CF marker = ");
-      for (auto i = 0; i < num_cols_diag; i++)
-         hypre_printf("%d ", CF_marker_diag[i]);
-      hypre_printf("\n");
-   }
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGCoarsenPMISDevice()\n");
-   hypre_MPI_Finalize();
-   exit(0);
    return hypre_error_flag;
 }
 
@@ -405,7 +362,6 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int *new_end;
 
    /* init CF_marker_diag and measure_diag: remove some special nodes */
-   hypre_printf("WM: debug - CF_init = %d\n", CF_init);
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
