@@ -82,6 +82,9 @@
 /* Use cuSPARSE */
 #cmakedefine HYPRE_USING_CUSPARSE 1
 
+/* Use cuSOLVER */
+#cmakedefine HYPRE_USING_CUSOLVER 1
+
 /* Use device memory pool */
 #cmakedefine HYPRE_USING_DEVICE_POOL 1
 
