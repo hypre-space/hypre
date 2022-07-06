@@ -1785,6 +1785,8 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Comple
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
+HYPRE_Int hypreDevice_ComplexAccumulate(HYPRE_Int n, HYPRE_Complex v, HYPRE_Complex *d_x,
+                                        HYPRE_Complex *d_y );
 HYPRE_Int hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
@@ -1806,9 +1808,12 @@ HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE
                                 HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
 
 HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
-                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
-                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
-                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+                                     HYPRE_Int has_offd, HYPRE_BigInt first_col,
+                                     HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
+                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
+                                     HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
+                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib,
+                                     HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
 
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 

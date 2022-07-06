@@ -1313,6 +1313,56 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
 }
 
 /*--------------------------------------------------------------------
+ * hypreGPUKernel_Accumulate
+ *--------------------------------------------------------------------*/
+
+template<typename T>
+__global__ void
+hypreGPUKernel_Accumulate( hypre_DeviceItem &item, HYPRE_Int n, T v, T *x, T *y )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      y[i] = x[i] + v;
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_Accumulate
+ *--------------------------------------------------------------------*/
+
+template<typename T>
+HYPRE_Int
+hypreDevice_Accumulate( HYPRE_Int n, T v, T *d_x, T *d_y)
+{
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_Accumulate, gDim, bDim, n, v, d_x, d_y );
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexAccumulate
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexAccumulate( HYPRE_Int      n,
+                               HYPRE_Complex  v,
+                               HYPRE_Complex *d_x,
+                               HYPRE_Complex *d_y )
+{
+   return hypreDevice_Accumulate(n, v, d_x, d_y);
+}
+
+/*--------------------------------------------------------------------
  * hypreGPUKernel_filln
  *--------------------------------------------------------------------*/
 
