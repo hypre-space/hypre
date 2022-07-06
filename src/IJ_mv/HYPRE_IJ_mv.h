@@ -459,7 +459,8 @@ HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 HYPRE_Int HYPRE_IJVectorUpdateValues(HYPRE_IJVector       vector,
                                      HYPRE_Int            nvalues,
                                      const HYPRE_BigInt  *indices,
-                                     const HYPRE_Complex *values);
+                                     const HYPRE_Complex *values,
+                                     HYPRE_Int            action);
 
 /**
  * Gets values in vector.  Usage details are analogous to

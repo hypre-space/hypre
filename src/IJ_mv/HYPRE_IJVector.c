@@ -362,7 +362,8 @@ HYPRE_Int
 HYPRE_IJVectorUpdateValues( HYPRE_IJVector        vector,
                             HYPRE_Int             nvalues,
                             const HYPRE_BigInt   *indices,
-                            const HYPRE_Complex  *values   )
+                            const HYPRE_Complex  *values,
+                            HYPRE_Int             action )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -393,12 +394,19 @@ HYPRE_IJVectorUpdateValues( HYPRE_IJVector        vector,
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         return ( hypre_IJVectorUpdateValuesParDevice(vec, nvalues, indices, values, "set") );
+         return ( hypre_IJVectorUpdateValuesDevice(vec, nvalues, indices, values, action) );
       }
       else
 #endif
       {
-         return ( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+         if (action == 1)
+         {
+            return ( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+         }
+         else
+         {
+            return ( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
+         }
       }
    }
    else
