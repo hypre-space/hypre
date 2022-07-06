@@ -134,7 +134,7 @@ hypre_IJVectorSetMaxOffProcElmtsPar(hypre_IJVector *vector,
    }
    hypre_AuxParVectorMaxOffProcElmts(aux_vector) = max_off_proc_elmts;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_AuxParVectorUsrOffProcElmts(aux_vector) = max_off_proc_elmts;
 #endif
 
@@ -1119,7 +1119,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
       hypre_TMemcpy(off_proc_data_recv_d, off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_cur,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypre_IJVectorSetAddValuesParDevice(vector, off_proc_nelm_recv_cur, off_proc_i_recv_d,
                                           off_proc_data_recv_d, "add");
 #endif
