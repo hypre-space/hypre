@@ -1041,14 +1041,21 @@ hypre_FillResponseParToVectorAll( void       *p_recv_contact_buf,
    return hypre_error_flag;
 }
 
-/* -----------------------------------------------------------------------------
- * return the sum of all local elements of the vector
- * ----------------------------------------------------------------------------- */
+/*--------------------------------------------------------------------
+ * hypre_ParVectorLocalSumElts
+ *
+ * Return the sum of all local elements of the vector
+ *--------------------------------------------------------------------*/
 
-HYPRE_Complex hypre_ParVectorLocalSumElts( hypre_ParVector * vector )
+HYPRE_Complex
+hypre_ParVectorLocalSumElts( hypre_ParVector *vector )
 {
    return hypre_SeqVectorSumElts( hypre_ParVectorLocalVector(vector) );
 }
+
+/*--------------------------------------------------------------------
+ * hypre_ParVectorGetValuesHost
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
@@ -1061,7 +1068,6 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
    HYPRE_BigInt    last_index   = hypre_ParVectorLastIndex(vector);
    hypre_Vector   *local_vector = hypre_ParVectorLocalVector(vector);
 
-   HYPRE_Int       num_vectors  = hypre_VectorNumVectors(local_vector);
    HYPRE_Int       component    = hypre_VectorComponent(local_vector);
    HYPRE_Int       vecstride    = hypre_VectorVectorStride(local_vector);
    HYPRE_Int       idxstride    = hypre_VectorIndexStride(local_vector);
@@ -1116,6 +1122,10 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------
+ * hypre_ParVectorGetValues2
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParVectorGetValues2(hypre_ParVector *vector,
                           HYPRE_Int        num_values,
@@ -1136,6 +1146,10 @@ hypre_ParVectorGetValues2(hypre_ParVector *vector,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_ParVectorGetValues
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorGetValues(hypre_ParVector *vector,

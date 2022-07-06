@@ -439,19 +439,25 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
                              const HYPRE_BigInt   *indices,
                              const HYPRE_Complex  *values)
 {
-   HYPRE_Int my_id;
-   HYPRE_Int i, j, vec_start, vec_stop;
-   HYPRE_Complex *data;
-   HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
-
-   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   MPI_Comm            comm = hypre_IJVectorComm(vector);
+   hypre_ParVector    *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
-   MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector;
+   HYPRE_BigInt       *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_Int           print_level = hypre_IJVectorPrintLevel(vector);
+
+   hypre_Vector       *local_vector;
+   HYPRE_Int           idxstride, vecstride;
+   HYPRE_Int           component, vecoffset;
+   HYPRE_Int           num_vectors;
+   HYPRE_Int           my_id;
+   HYPRE_Int           i, j, vec_start, vec_stop;
+   HYPRE_Complex      *data;
 
    /* If no components are to be retrieved, perform no checking and return */
-   if (num_values < 1) { return 0; }
+   if (num_values < 1)
+   {
+      return hypre_error_flag;
+   }
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -469,6 +475,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
    local_vector = hypre_ParVectorLocalVector(par_vector);
    if (!local_vector)
    {
@@ -498,6 +505,11 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
    }
 
    data = hypre_VectorData(local_vector);
+   num_vectors = hypre_VectorNumVectors(local_vector);
+   component   = hypre_VectorComponent(local_vector);
+   vecstride   = hypre_VectorVectorStride(local_vector);
+   idxstride   = hypre_VectorIndexStride(local_vector);
+   vecoffset   = component * vecstride;
 
    if (indices)
    {
@@ -546,8 +558,15 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
          else /* local values are added to the vector */
          {
             k = (HYPRE_Int)(i - vec_start);
-            data[k] += values[j];
+            data[vecoffset + k * idxstride] += values[j];
          }
+      }
+
+      if (current_num_elmts > 0 && num_vectors > 1)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Off processor AddToValues not implemented for multivectors!\n");
+         return hypre_error_flag;
       }
    }
    else
@@ -561,12 +580,13 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
          }
          num_values = (HYPRE_Int)(vec_stop - vec_start) + 1;
       }
+
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif
       for (j = 0; j < num_values; j++)
       {
-         data[j] += values[j];
+         data[vecoffset + j * idxstride] += values[j];
       }
    }
 
