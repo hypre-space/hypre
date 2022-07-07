@@ -128,7 +128,6 @@ Iter1 hypreSycl_remove_if(Iter1 first, Iter1 last, Iter2 mask, Pred pred)
 }
 
 // Similar to above, need mask version of remove_copy_if
-// WM: todo - double check that the mask isn't "removed" here as above (shouldn't be due to the copy)
 template <typename Iter1, typename Iter2, typename Iter3, typename Pred>
 Iter3 hypreSycl_remove_copy_if(Iter1 first, Iter1 last, Iter2 mask, Iter3 result, Pred pred)
 {

@@ -772,47 +772,17 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
 
    /* WM: onedpl reduce_by_segment currently does not accept zero length input */
-   /* WM: todo - is this really the right way to guard against this? */
    if (nnz_A > 0)
    {
       /* WM: better way to get around lack of constant iterator in DPL? */
       HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
-      /* WM: there's something weird going on with dpl reduce_by_segment where if I have it */
-      /*     in the library multiple times, I get a CL_INVALID_ARG_VALUE on one of the calls... */
-      /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
-      /*                                   A_j_sorted, */
-      /*                                   A_j_sorted + nnz_A, */
-      /*                                   ones, */
-      /*                                   reduced_col_indices, */
-      /*                                   reduced_col_nnz); */
-
-      /* WM: this also doesn't work for me */
-      /* std::equal_to<HYPRE_Int> pred; */
-      /* std::plus<HYPRE_Int> func; */
-
-      /* auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment, */
-      /*                                      A_j_sorted, */
-      /*                                      A_j_sorted + nnz_A, */
-      /*                                      ones, */
-      /*                                      reduced_col_indices, */
-      /*                                      reduced_col_nnz, */
-      /*                                      pred, */
-      /*                                      func); */
-
-
-
-      /* WM: this works? Mysterious... */
-      std::pair<HYPRE_Int*, HYPRE_Int*> new_end = oneapi::dpl::reduce_by_segment(
-                                                     oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                              hypre_handle())),
-                                                     A_j_sorted,
-                                                     A_j_sorted + nnz_A,
-                                                     ones,
-                                                     reduced_col_indices,
-                                                     reduced_col_nnz);
-
-
+      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                        A_j_sorted,
+                                        A_j_sorted + nnz_A,
+                                        ones,
+                                        reduced_col_indices,
+                                        reduced_col_nnz);
 
       hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
       hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
