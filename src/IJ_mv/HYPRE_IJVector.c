@@ -703,3 +703,49 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInnerProd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorInnerProd( HYPRE_IJVector  x,
+                         HYPRE_IJVector  y,
+                         HYPRE_Complex  *prod )
+{
+   hypre_IJVector *xvec = (hypre_IJVector *) x;
+   hypre_IJVector *yvec = (hypre_IJVector *) y;
+
+   if (!xvec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!yvec)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(xvec) != hypre_IJVectorObjectType(yvec))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Input vectors don't have the same object type!");
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(xvec) == HYPRE_PARCSR)
+   {
+      hypre_ParVector *par_x = (hypre_ParVector*) hypre_IJVectorObject(xvec);
+      hypre_ParVector *par_y = (hypre_ParVector*) hypre_IJVectorObject(yvec);
+
+      HYPRE_ParVectorInnerProd(par_x, par_y, prod);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}

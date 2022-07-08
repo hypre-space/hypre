@@ -533,6 +533,13 @@ HYPRE_Int HYPRE_IJVectorRead(const char     *filename,
 HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                               const char     *filename);
 
+/**
+ * Computes the inner product between two vectors
+ **/
+HYPRE_Int HYPRE_IJVectorInnerProd(HYPRE_IJVector  x,
+                                  HYPRE_IJVector  y,
+                                  HYPRE_Complex  *prod);
+
 /**@}*/
 /**@}*/
 
