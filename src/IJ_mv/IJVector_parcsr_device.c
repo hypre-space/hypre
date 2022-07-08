@@ -149,7 +149,6 @@ hypre_IJVectorSetAddValuesParDevice(hypre_IJVector       *vector,
 HYPRE_Int
 hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 {
-   hypre_printf("WM: debug - inside hypre_IJVectorAssembleParDevice()\n");
    MPI_Comm comm = hypre_IJVectorComm(vector);
    HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
    HYPRE_BigInt  vec_start, vec_stop;
@@ -157,8 +156,6 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    vec_stop  = IJpartitioning[1] - 1;
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
-   /* WM: debug */
-   hypre_ParVectorPrint(par_vector, "par_vector");
 
    if (!aux_vector)
    {
@@ -174,6 +171,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    HYPRE_BigInt  *stack_i    = hypre_AuxParVectorStackI(aux_vector);
    HYPRE_Complex *stack_data = hypre_AuxParVectorStackData(aux_vector);
    char          *stack_sora = hypre_AuxParVectorStackSorA(aux_vector);
+   HYPRE_Complex *par_vector_data = hypre_VectorData(hypre_ParVectorLocalVector(par_vector));
 
    in_range<HYPRE_BigInt> pred(vec_start, vec_stop);
 #if defined(HYPRE_USING_SYCL)
@@ -181,7 +179,6 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 #else
    HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
 #endif
-   hypre_printf("WM: debug - inside hypre_IJVectorAssembleParDevice() 1\n");
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
    hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
@@ -284,7 +281,6 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    hypre_assert(nelms == tmp);
 #endif
 
-   hypre_printf("WM: debug - inside hypre_IJVectorAssembleParDevice() 2\n");
    if (nelms)
    {
       HYPRE_Int      new_nnz;
@@ -295,26 +291,13 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* sort and reduce */
       hypre_IJVectorAssembleSortAndReduce1(nelms, stack_i, stack_sora, stack_data, &new_nnz, &new_i,
                                            &new_sora, &new_data);
-      hypre_printf("WM: debug - inside hypre_IJVectorAssembleParDevice() 3\n");
-      hypre_printf("WM: debug - new_i = ");
-      for (auto i = 0; i < nelms; i++)
-         hypre_printf("%d ", new_i[i]);
-      hypre_printf("\n");
-      hypre_printf("WM: debug - new_sora = ");
-      for (auto i = 0; i < nelms; i++)
-         hypre_printf("%d ", (int) new_sora[i]);
-      hypre_printf("\n");
-      hypre_printf("WM: debug - new_data = ");
-      for (auto i = 0; i < nelms; i++)
-         hypre_printf("%f ", new_data[i]);
-      hypre_printf("\n");
 
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim, new_nnz, new_data, new_i,
                         vec_start, new_sora,
-                        hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+                        par_vector_data );
 
       hypre_TFree(new_i,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(new_data, HYPRE_MEMORY_DEVICE);
@@ -324,7 +307,6 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    hypre_AuxParVectorDestroy(aux_vector);
    hypre_IJVectorTranslator(vector) = NULL;
 
-   hypre_printf("WM: debug - finished hypre_IJVectorSetAddValuesParDevice()\n");
    return hypre_error_flag;
 }
 
@@ -364,23 +346,50 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
+
+   /* WM: TODO - this is a temporary host implementation since oneDPL's exclusive_scan_by_segment() is broken */
+   HYPRE_BigInt *I0_h = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_HOST);
+   char *X0_h = hypre_TAlloc(char, N0, HYPRE_MEMORY_HOST);
+   char *X_h = hypre_TAlloc(char, N0, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(I0_h, I0, HYPRE_BigInt, N0, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(X0_h, X0, char, N0, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   char m = char(0);
+   X_h[N0 - 1] = m;
+   for (auto i = N0 - 2; i >= 0; i--)
+   {
+      if (I0_h[i] == I0_h[i+1])
+      {
+         m = std::max(m, X_h[i+1]);
+      }
+      else
+      {
+         m = char(0);
+      }
+      X_h[i] = m;
+   }
+   hypre_TMemcpy(X, X_h, char, N0, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TFree(I0_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(X0_h, HYPRE_MEMORY_HOST);
+   hypre_TFree(X_h, HYPRE_MEMORY_HOST);
+
+   /* WM: TODO - exclusive_scan_by_segment() is broken in oneDPL... need a workaround for now */
    /* WM: double check this... also, is there a better workaround here for lack of reverse iterator in dpl? */
-   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
-                      reverse_perm,
-                      [N0] (auto i) { return N0 - i - 1; });
-   HYPRE_ONEDPL_CALL(
-      oneapi::dpl::exclusive_scan_by_segment,
-      oneapi::dpl::make_permutation_iterator(I0, reverse_perm),      /* key begin */
-      oneapi::dpl::make_permutation_iterator(I0, reverse_perm) + N0, /* key end */
-      oneapi::dpl::make_permutation_iterator(X0, reverse_perm),      /* input value begin */
-      oneapi::dpl::make_permutation_iterator(X, reverse_perm),       /* output value begin */
-      char(0),                                                       /* init */
-      std::equal_to<HYPRE_BigInt>(),
-      oneapi::dpl::maximum<char>() );
-   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+   /* HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE); */
+   /* HYPRE_ONEDPL_CALL( std::transform, */
+   /*                    oneapi::dpl::counting_iterator(0), */
+   /*                    oneapi::dpl::counting_iterator(N0), */
+   /*                    reverse_perm, */
+   /*                    [N0] (auto i) { return N0 - i - 1; }); */
+   /* HYPRE_ONEDPL_CALL( */
+   /*    oneapi::dpl::exclusive_scan_by_segment, */
+   /*    oneapi::dpl::make_permutation_iterator(I0, reverse_perm),      /1* key begin *1/ */
+   /*    oneapi::dpl::make_permutation_iterator(I0, reverse_perm) + N0, /1* key end *1/ */
+   /*    oneapi::dpl::make_permutation_iterator(X0, reverse_perm),      /1* input value begin *1/ */
+   /*    oneapi::dpl::make_permutation_iterator(X, reverse_perm),       /1* output value begin *1/ */
+   /*    char(0),                                                       /1* init *1/ */
+   /*    std::equal_to<HYPRE_BigInt>(), */
+   /*    oneapi::dpl::maximum<char>() ); */
+   /* hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE); */
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -394,7 +403,7 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int       N0,
                                  I0 + N0,                                                    /* keys_last */
                                  oneapi::dpl::make_zip_iterator(X0, A0),                     /* values_first */
                                  I,                                                          /* keys_output */
-                                 oneapi::dpl::make_zip_iterator(X, A0),                      /* values_output */
+                                 oneapi::dpl::make_zip_iterator(X, A),                       /* values_output */
                                  std::equal_to<HYPRE_BigInt>(),                              /* binary_pred */
                                  hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()        /* binary_op */);
 #else
@@ -452,6 +461,7 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
    /* WM: double check this... also, is there a better workaround here for lack of reverse iterator in dpl? */
+   /* WM: TODO - does inclusive_scan_by_segment() have issues similar to exclusive_scan_by_segment()? */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator(0),
@@ -549,7 +559,7 @@ hypreCUDAKernel_IJVectorAssemblePar(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_C
       return;
    }
 
-   if (SorA[i])
+   if ((bool)SorA[i])
    {
       y[map[i] - offset] = x[i];
    }
