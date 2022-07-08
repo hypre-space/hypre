@@ -299,11 +299,13 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
       {
          if (GROUP_SIZE <= HYPRE_WARP_SIZE)
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item, (hypre_int) failed);
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (hypre_int) failed);
          }
          else
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item, (hypre_int) failed,
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (hypre_int) failed,
                                                                                           s_HashKeys);
          }
       }

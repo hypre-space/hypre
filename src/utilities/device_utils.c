@@ -57,7 +57,7 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
 
    /* pmis */
-#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND)
    hypre_DeviceDataUseGpuRand(data) = 1;
 #else
    hypre_DeviceDataUseGpuRand(data) = 0;
@@ -961,6 +961,350 @@ template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int     *x, HYPRE_Int n, HY
 template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HYPRE_Int *map,
                                                HYPRE_Complex v);
 
+__global__ void
+hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                                 HYPRE_Real *y)
+{
+   for (HYPRE_Int i = 0; i < n; i++)
+   {
+      x[map[i]] += y[i];
+   }
+}
+
+/* x[map[i]] += y[i], same index cannot appear more than once in map */
+__global__ void
+hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
+                          HYPRE_Real *y)
+{
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (global_thread_id < n)
+   {
+      x[map[global_thread_id]] += y[global_thread_id];
+   }
+}
+
+/* Generalized Scatter-and-Add
+ * for i = 0 : ny-1, x[map[i]] += y[i];
+ * Note: An index is allowed to appear more than once in map
+ *       Content in y will be destroyed
+ *       When work != NULL, work is at least of size [2*sizeof(HYPRE_Int)+sizeof(HYPRE_Complex)]*ny
+ */
+HYPRE_Int
+hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work)
+{
+   if (ny <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (ny <= 2)
+   {
+      /* trivial cases, n = 1, 2 */
+      dim3 bDim = 1;
+      dim3 gDim = 1;
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
+   }
+   else
+   {
+      /* general cases */
+      HYPRE_Int *map2, *reduced_map, reduced_n;
+      HYPRE_Real *reduced_y;
+
+      if (work)
+      {
+         map2 = (HYPRE_Int *) work;
+         reduced_map = map2 + ny;
+         reduced_y = (HYPRE_Real *) (reduced_map + ny);
+      }
+      else
+      {
+         map2        = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
+         reduced_map = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
+         reduced_y   = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
+      }
+
+      hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_SYCL)
+      auto zipped_begin = oneapi::dpl::make_zip_iterator(map2, y);
+      HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
+      [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
+
+      // WM: todo - ABB: The below code has issues because of name mangling issues,
+      //       similar to https://github.com/oneapi-src/oneDPL/pull/166
+      //       https://github.com/oneapi-src/oneDPL/issues/507
+      //       should be fixed by now?
+      /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
+      /*                                   map2, */
+      /*                                   map2 + ny, */
+      /*                                   y, */
+      /*                                   reduced_map, */
+      /*                                   reduced_y ); */
+      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
+                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
+                                                               hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
+#else
+      HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
+
+      thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_THRUST_CALL( reduce_by_key,
+                                                                         map2,
+                                                                         map2 + ny,
+                                                                         y,
+                                                                         reduced_map,
+                                                                         reduced_y );
+#endif
+
+      reduced_n = new_end.first - reduced_map;
+
+      hypre_assert(reduced_n == new_end.second - reduced_y);
+
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
+
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAdd, gDim, bDim,
+                        reduced_n, x, reduced_map, reduced_y );
+
+      if (!work)
+      {
+         hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+template<typename T>
+__global__ void
+hypreGPUKernel_axpyn(hypre_DeviceItem &item, T *x, size_t n, T *y, T *z, T a)
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      z[i] = a * x[i] + y[i];
+   }
+}
+
+template<typename T>
+HYPRE_Int
+hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
+{
+#if 0
+   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_y, d_z, a * _1 + _2 );
+#else
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_axpyn, gDim, bDim, d_x, n, d_y, d_z, a );
+#endif
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex *d_z,
+                         HYPRE_Complex a)
+{
+   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+}
+
+HYPRE_Int
+hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z, HYPRE_Int a)
+{
+   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+}
+
+#if defined(HYPRE_USING_CURAND)
+curandGenerator_t
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
+{
+   if (data->curand_generator)
+   {
+      return data->curand_generator;
+   }
+
+   curandGenerator_t gen;
+   HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
+   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
+   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, 0) );
+   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_DeviceDataComputeStream(data)) );
+
+   data->curand_generator = gen;
+
+   return gen;
+}
+
+/* T = float or hypre_double */
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+
+   if (set_seed)
+   {
+      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
+   }
+
+   if (set_offset)
+   {
+      HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
+   }
+
+   if (sizeof(T) == sizeof(hypre_double))
+   {
+      HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, n) );
+   }
+   else if (sizeof(T) == sizeof(float))
+   {
+      HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
+   }
+
+   return hypre_error_flag;
+}
+#endif /* #if defined(HYPRE_USING_CURAND) */
+
+#if defined(HYPRE_USING_ROCRAND)
+rocrand_generator
+hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
+{
+   if (data->curand_generator)
+   {
+      return data->curand_generator;
+   }
+
+   rocrand_generator gen;
+   HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
+   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
+   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, 0) );
+   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_DeviceDataComputeStream(data)) );
+
+   data->curand_generator = gen;
+
+   return gen;
+}
+
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   hypre_GpuProfilingPushRange("hypre_CurandUniform_core");
+
+   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
+
+   if (set_seed)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
+   }
+
+   if (set_offset)
+   {
+      HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
+   }
+
+   if (sizeof(T) == sizeof(hypre_double))
+   {
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform_double(gen, (hypre_double *) urand, n) );
+   }
+   else if (sizeof(T) == sizeof(float))
+   {
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform(gen, (float *) urand, n) );
+   }
+
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
+}
+#endif /* #if defined(HYPRE_USING_ROCRAND) */
+
+#if defined(HYPRE_USING_ONEMKLRAND)
+/* T = float or hypre_double */
+template <typename T>
+HYPRE_Int
+hypre_CurandUniform_core( HYPRE_Int          n,
+                          T                 *urand,
+                          HYPRE_Int          set_seed,
+                          hypre_ulonglongint seed,
+                          HYPRE_Int          set_offset,
+                          hypre_ulonglongint offset)
+{
+   /* WM: if n is zero, onemkl rand throws an error */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   static_assert(std::is_same_v<T, float> || std::is_same_v<T, hypre_double>,
+                 "oneMKL: rng/uniform: T is not supported");
+
+   oneapi::mkl::rng::default_engine engine(*hypre_HandleComputeStream(hypre_handle()), seed);
+   oneapi::mkl::rng::uniform<T> distribution(0.0 + offset, 1.0 + offset);
+   oneapi::mkl::rng::generate(distribution, engine, n, urand).wait_and_throw();
+
+   return hypre_error_flag;
+}
+#endif /* #if defined(HYPRE_USING_ONEMKLRAND) */
+
+#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND)
+
+HYPRE_Int
+hypre_CurandUniform( HYPRE_Int          n,
+                     HYPRE_Real        *urand,
+                     HYPRE_Int          set_seed,
+                     hypre_ulonglongint seed,
+                     HYPRE_Int          set_offset,
+                     hypre_ulonglongint offset)
+{
+   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+HYPRE_Int
+hypre_CurandUniformSingle( HYPRE_Int          n,
+                           float             *urand,
+                           HYPRE_Int          set_seed,
+                           hypre_ulonglongint seed,
+                           HYPRE_Int          set_offset,
+                           hypre_ulonglongint offset)
+{
+   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
+}
+
+HYPRE_Int
+hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
+                                hypre_ulonglongint offset )
+{
+#if defined(HYPRE_USING_CURAND)
+   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
+   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
+   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
+#elif defined(HYPRE_USING_ROCRAND)
+   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
+   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
+   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
+#endif
+   return hypre_error_flag;
+}
+
+#endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND) */
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1038,52 +1382,6 @@ HYPRE_Int
 hypreDevice_IntegerReduceSum(HYPRE_Int n, HYPRE_Int *d_i)
 {
    return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
-}
-
-template<typename T>
-__global__ void
-hypreGPUKernel_axpyn(hypre_DeviceItem &item, T *x, size_t n, T *y, T *z, T a)
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < n)
-   {
-      z[i] = a * x[i] + y[i];
-   }
-}
-
-template<typename T>
-HYPRE_Int
-hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
-{
-#if 0
-   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_y, d_z, a * _1 + _2 );
-#else
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_axpyn, gDim, bDim, d_x, n, d_y, d_z, a );
-#endif
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y, HYPRE_Complex *d_z,
-                         HYPRE_Complex a)
-{
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
-}
-
-HYPRE_Int
-hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z, HYPRE_Int a)
-{
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
 }
 
 template<typename T>
@@ -1218,101 +1516,6 @@ template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HY
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                              HYPRE_Int *d_row_ptr, HYPRE_BigInt *d_row_num, HYPRE_BigInt *d_row_ind);
 #endif
-
-__global__ void
-hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
-                                 HYPRE_Real *y)
-{
-   for (HYPRE_Int i = 0; i < n; i++)
-   {
-      x[map[i]] += y[i];
-   }
-}
-
-/* x[map[i]] += y[i], same index cannot appear more than once in map */
-__global__ void
-hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Real *x, HYPRE_Int *map,
-                          HYPRE_Real *y)
-{
-   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (global_thread_id < n)
-   {
-      x[map[global_thread_id]] += y[global_thread_id];
-   }
-}
-
-/* Generalized Scatter-and-Add
- * for i = 0 : ny-1, x[map[i]] += y[i];
- * Note: An index is allowed to appear more than once in map
- *       Content in y will be destroyed
- *       When work != NULL, work is at least of size [2*sizeof(HYPRE_Int)+sizeof(HYPRE_Complex)]*ny
- */
-HYPRE_Int
-hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y, char *work)
-{
-   if (ny <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   if (ny <= 2)
-   {
-      /* trivial cases, n = 1, 2 */
-      dim3 bDim = 1;
-      dim3 gDim = 1;
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
-   }
-   else
-   {
-      /* general cases */
-      HYPRE_Int *map2, *reduced_map, reduced_n;
-      HYPRE_Real *reduced_y;
-
-      if (work)
-      {
-         map2 = (HYPRE_Int *) work;
-         reduced_map = map2 + ny;
-         reduced_y = (HYPRE_Real *) (reduced_map + ny);
-      }
-      else
-      {
-         map2        = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
-         reduced_map = hypre_TAlloc(HYPRE_Int,  ny, HYPRE_MEMORY_DEVICE);
-         reduced_y   = hypre_TAlloc(HYPRE_Real, ny, HYPRE_MEMORY_DEVICE);
-      }
-
-      hypre_TMemcpy(map2, map, HYPRE_Int, ny, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-      HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
-
-      thrust::pair<HYPRE_Int*, HYPRE_Real*> new_end = HYPRE_THRUST_CALL( reduce_by_key,
-                                                                         map2,
-                                                                         map2 + ny,
-                                                                         y,
-                                                                         reduced_map,
-                                                                         reduced_y );
-
-      reduced_n = new_end.first - reduced_map;
-
-      hypre_assert(reduced_n == new_end.second - reduced_y);
-
-      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(reduced_n, "thread", bDim);
-
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAdd, gDim, bDim,
-                        reduced_n, x, reduced_map, reduced_y );
-
-      if (!work)
-      {
-         hypre_TFree(map2, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(reduced_map, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(reduced_y, HYPRE_MEMORY_DEVICE);
-      }
-   }
-
-   return hypre_error_flag;
-}
 
 __global__ void
 hypreGPUKernel_DiagScaleVector(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *A_i,
@@ -1507,161 +1710,6 @@ hypre_HYPREIntToCusparseIndexType()
 #endif
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE)
-
-#if defined(HYPRE_USING_CURAND)
-curandGenerator_t
-hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
-{
-   if (data->curand_generator)
-   {
-      return data->curand_generator;
-   }
-
-   curandGenerator_t gen;
-   HYPRE_CURAND_CALL( curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT) );
-   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 1234ULL) );
-   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, 0) );
-   HYPRE_CURAND_CALL( curandSetStream(gen, hypre_DeviceDataComputeStream(data)) );
-
-   data->curand_generator = gen;
-
-   return gen;
-}
-
-/* T = float or hypre_double */
-template <typename T>
-HYPRE_Int
-hypre_CurandUniform_core( HYPRE_Int          n,
-                          T                 *urand,
-                          HYPRE_Int          set_seed,
-                          hypre_ulonglongint seed,
-                          HYPRE_Int          set_offset,
-                          hypre_ulonglongint offset)
-{
-   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
-
-   if (set_seed)
-   {
-      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
-   }
-
-   if (set_offset)
-   {
-      HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
-   }
-
-   if (sizeof(T) == sizeof(hypre_double))
-   {
-      HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, n) );
-   }
-   else if (sizeof(T) == sizeof(float))
-   {
-      HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
-   }
-
-   return hypre_error_flag;
-}
-#endif /* #if defined(HYPRE_USING_CURAND) */
-
-#if defined(HYPRE_USING_ROCRAND)
-rocrand_generator
-hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
-{
-   if (data->curand_generator)
-   {
-      return data->curand_generator;
-   }
-
-   rocrand_generator gen;
-   HYPRE_ROCRAND_CALL( rocrand_create_generator(&gen, ROCRAND_RNG_PSEUDO_DEFAULT) );
-   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, 1234ULL) );
-   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, 0) );
-   HYPRE_ROCRAND_CALL( rocrand_set_stream(gen, hypre_DeviceDataComputeStream(data)) );
-
-   data->curand_generator = gen;
-
-   return gen;
-}
-
-template <typename T>
-HYPRE_Int
-hypre_CurandUniform_core( HYPRE_Int          n,
-                          T                 *urand,
-                          HYPRE_Int          set_seed,
-                          hypre_ulonglongint seed,
-                          HYPRE_Int          set_offset,
-                          hypre_ulonglongint offset)
-{
-   hypre_GpuProfilingPushRange("hypre_CurandUniform_core");
-
-   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
-
-   if (set_seed)
-   {
-      HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
-   }
-
-   if (set_offset)
-   {
-      HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
-   }
-
-   if (sizeof(T) == sizeof(hypre_double))
-   {
-      HYPRE_ROCRAND_CALL( rocrand_generate_uniform_double(gen, (hypre_double *) urand, n) );
-   }
-   else if (sizeof(T) == sizeof(float))
-   {
-      HYPRE_ROCRAND_CALL( rocrand_generate_uniform(gen, (float *) urand, n) );
-   }
-
-   hypre_GpuProfilingPopRange();
-
-   return hypre_error_flag;
-}
-#endif /* #if defined(HYPRE_USING_ROCRAND) */
-
-#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-
-HYPRE_Int
-hypre_CurandUniform( HYPRE_Int          n,
-                     HYPRE_Real        *urand,
-                     HYPRE_Int          set_seed,
-                     hypre_ulonglongint seed,
-                     HYPRE_Int          set_offset,
-                     hypre_ulonglongint offset)
-{
-   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
-}
-
-HYPRE_Int
-hypre_CurandUniformSingle( HYPRE_Int          n,
-                           float             *urand,
-                           HYPRE_Int          set_seed,
-                           hypre_ulonglongint seed,
-                           HYPRE_Int          set_offset,
-                           hypre_ulonglongint offset)
-{
-   return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
-}
-
-HYPRE_Int
-hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
-                                hypre_ulonglongint offset )
-{
-#if defined(HYPRE_USING_CURAND)
-   curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
-   HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
-   HYPRE_CURAND_CALL( curandSetGeneratorOffset(gen, offset) );
-#elif defined(HYPRE_USING_ROCRAND)
-   rocrand_generator gen = hypre_HandleCurandGenerator(hypre_handle());
-   HYPRE_ROCRAND_CALL( rocrand_set_seed(gen, seed) );
-   HYPRE_ROCRAND_CALL( rocrand_set_offset(gen, offset) );
-#endif
-   return hypre_error_flag;
-}
-
-#endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) */
 
 #if defined(HYPRE_USING_CUBLAS)
 cublasHandle_t
