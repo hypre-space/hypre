@@ -75,7 +75,7 @@ void hypre_spgemm_rownnz_naive( hypre_DeviceItem &item,
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
-   volatile const HYPRE_Int lane_id = get_group_lane_id();
+   volatile const HYPRE_Int lane_id = get_group_lane_id(item);
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
@@ -89,13 +89,13 @@ void hypre_spgemm_rownnz_naive( hypre_DeviceItem &item,
 
       if (type == 'U' || type == 'B')
       {
-         jU = warp_reduce_sum(jU);
+         jU = warp_reduce_sum(item, jU);
          jU = min(jU, N);
       }
 
       if (type == 'L' || type == 'B')
       {
-         jL = warp_reduce_max(jL);
+         jL = warp_reduce_max(item, jL);
       }
 
       if (lane_id == 0)
@@ -122,7 +122,7 @@ void hypre_expdistfromuniform( hypre_DeviceItem &item,
                                float      *x )
 {
    const HYPRE_Int global_thread_id  = hypre_gpu_get_grid_thread_id<3, 1>(item);
-   const HYPRE_Int total_num_threads = hypre_cuda_get_grid_num_threads<3, 1>();
+   const HYPRE_Int total_num_threads = hypre_gpu_get_grid_num_threads<3, 1>(item);
 
    hypre_device_assert(blockDim.x * blockDim.y == HYPRE_WARP_SIZE);
 
@@ -151,7 +151,7 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
    /* warp id inside the block */
    const HYPRE_Int warp_id = get_group_id();
    /* lane id inside the warp */
-   volatile HYPRE_Int lane_id = get_group_lane_id();
+   volatile HYPRE_Int lane_id = get_group_lane_id(item);
 #if COHEN_USE_SHMEM
    __shared__ volatile HYPRE_Int s_col[NUM_WARPS_PER_BLOCK * SHMEM_SIZE_PER_WARP];
    volatile HYPRE_Int  *warp_s_col = s_col + warp_id * SHMEM_SIZE_PER_WARP;
@@ -171,8 +171,8 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
       {
          tmp = read_only_load(rowptr + i + lane_id);
       }
-      const HYPRE_Int istart = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 0);
-      const HYPRE_Int iend   = __shfl_sync(HYPRE_WARP_FULL_MASK, tmp, 1);
+      const HYPRE_Int istart = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 0);
+      const HYPRE_Int iend   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 1);
 
       /* works on WARP_SIZE samples at a time */
       for (HYPRE_Int r = 0; r < nsamples; r += HYPRE_WARP_SIZE)
@@ -219,7 +219,7 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
 
             for (HYPRE_Int k = 0; k < HYPRE_WARP_SIZE; k++)
             {
-               HYPRE_Int colk = __shfl_sync(HYPRE_WARP_FULL_MASK, col, k);
+               HYPRE_Int colk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, col, k);
                if (colk == -1)
                {
                   hypre_device_assert(j + HYPRE_WARP_SIZE >= iend);
@@ -249,7 +249,7 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
             }
 
             /* partial sum along r */
-            vmin = warp_reduce_sum(vmin);
+            vmin = warp_reduce_sum(item, vmin);
 
             if (lane_id == 0)
             {

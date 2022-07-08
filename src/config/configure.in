@@ -175,6 +175,7 @@ hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
 hypre_using_cublas=yes
 hypre_using_curand=yes
+hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
 hypre_using_umpire=no
@@ -430,6 +431,17 @@ AS_HELP_STRING([--enable-cusparse],
     *)   hypre_using_cusparse=yes ;;
  esac],
 [hypre_using_cusparse=yes]
+)
+
+AC_ARG_ENABLE(cusolver,
+AS_HELP_STRING([--enable-cusolver],
+               [Use cusolver (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cusolver=yes ;;
+    no)  hypre_using_cusolver=no ;;
+    *)   hypre_using_cusolver=yes ;;
+ esac],
+[hypre_using_cusolver=no]
 )
 
 AC_ARG_ENABLE(device-memory-pool,
@@ -2270,6 +2282,12 @@ then
       HYPRE_CUDA_LIBS+=" -lcurand"
    fi
 
+   if test "$hypre_using_cusolver" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSolver])
+      HYPRE_CUDA_LIBS+=" -lcusolver"
+   fi
+
    if test "$hypre_using_device_pool" = "yes"
    then
       AC_DEFINE(HYPRE_USING_DEVICE_POOL, 1, [Define to 1 if using device pooling allocator])
@@ -2399,7 +2417,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
 
-        dnl (Ab)Using CUCC when compiling HIP
+        dnl (Ab)Using CUCC when compiling SYCL
         LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
@@ -2410,6 +2428,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         else
            SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
+
+        LDFLAGS+="-fsycl-targets=spir64_gen -Xsycl-target-backend '-device 12.1.0,12.4.0'"
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
         if test "$hypre_user_chose_cuflags" = "no"

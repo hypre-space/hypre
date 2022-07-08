@@ -1231,11 +1231,11 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_DeviceItem &item,
    /* allreduce to get the row norm on all threads */
    if (type == -1)
    {
-      row_norm_i = warp_allreduce_max(row_norm_i);
+      row_norm_i = warp_allreduce_max(item, row_norm_i);
    }
    else
    {
-      row_norm_i = warp_allreduce_sum(row_norm_i);
+      row_norm_i = warp_allreduce_sum(item, row_norm_i);
    }
    if (type == 2)
    {
