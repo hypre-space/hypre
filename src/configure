@@ -3145,19 +3145,6 @@ else
 fi
 
 
-# Check whether --enable-device-memory-pool was given.
-if test "${enable_device_memory_pool+set}" = set; then :
-  enableval=$enable_device_memory_pool; case "${enableval}" in
-    yes) hypre_using_device_pool=yes ;;
-    no)  hypre_using_device_pool=no ;;
-    *)   hypre_using_device_pool=no ;;
- esac
-else
-  hypre_using_device_pool=no
-
-fi
-
-
 # Check whether --enable-cusolver was given.
 if test "${enable_cusolver+set}" = set; then :
   enableval=$enable_cusolver; case "${enableval}" in
@@ -3167,6 +3154,19 @@ if test "${enable_cusolver+set}" = set; then :
  esac
 else
   hypre_using_cusolver=no
+
+fi
+
+
+# Check whether --enable-device-memory-pool was given.
+if test "${enable_device_memory_pool+set}" = set; then :
+  enableval=$enable_device_memory_pool; case "${enableval}" in
+    yes) hypre_using_device_pool=yes ;;
+    no)  hypre_using_device_pool=no ;;
+    *)   hypre_using_device_pool=no ;;
+ esac
+else
+  hypre_using_device_pool=no
 
 fi
 
@@ -9216,7 +9216,7 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
 
 $as_echo "#define HYPRE_USING_CUSOLVER 1" >>confdefs.h
 
-       HYPRE_CUDA_LIBS+=" -lcusolver"
+      HYPRE_CUDA_LIBS+=" -lcusolver"
    fi
 
    if test "$hypre_using_device_pool" = "yes"
