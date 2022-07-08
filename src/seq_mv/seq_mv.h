@@ -239,7 +239,6 @@ typedef struct
 {
    HYPRE_Complex        *data;
    HYPRE_Int             size;      /* Number of elements of a single vector component */
-   HYPRE_Int             full_size; /* Number of elements of the whole multivector */
    HYPRE_Int             component; /* Index of a multivector component
                                     (used for set/get routines )*/
    HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
@@ -262,7 +261,6 @@ typedef struct
 
 #define hypre_VectorData(vector)                  ((vector) -> data)
 #define hypre_VectorSize(vector)                  ((vector) -> size)
-#define hypre_VectorFullSize(vector)              ((vector) -> full_size)
 #define hypre_VectorComponent(vector)             ((vector) -> component)
 #define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
 #define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
