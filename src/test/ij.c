@@ -148,6 +148,7 @@ main( hypre_int argc,
    HYPRE_Int           keep_same_sign = 0;
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
+   HYPRE_Real          b_dot_b;
    HYPRE_Real          final_res_norm;
    void               *object;
 
@@ -201,6 +202,7 @@ main( hypre_int argc,
 
    HYPRE_Int           use_nonsymm_schwarz = 0;
    HYPRE_Int           test_ij = 0;
+   HYPRE_Int           test_multivec = 0;
    HYPRE_Int           build_rbm = 0;
    HYPRE_Int           build_rbm_index = 0;
    HYPRE_Int           num_interp_vecs = 0;
@@ -580,6 +582,11 @@ main( hypre_int argc,
       {
          arg_index++;
          test_ij = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-test_multivec") == 0 )
+      {
+         arg_index++;
+         test_multivec = 1;
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -3238,7 +3245,8 @@ main( hypre_int argc,
       {
          values_h[i] = 1.;
       }
-      hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_rows,
+                    memory_location, HYPRE_MEMORY_HOST);
 
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_d);
       HYPRE_IJVectorAssemble(ij_b);
@@ -3460,6 +3468,24 @@ main( hypre_int argc,
       x = (HYPRE_ParVector) object;
    }
 
+   /* Compute RHS squared norm */
+   if (ij_b)
+   {
+      HYPRE_IJVectorInnerProd(ij_b, ij_b, &b_dot_b);
+   }
+   else if (b)
+   {
+      HYPRE_ParVectorInnerProd(b, b, &b_dot_b);
+   }
+   else
+   {
+      if (!myid)
+      {
+         hypre_printf(" Error: Vector b not set!\n");
+      }
+      hypre_MPI_Abort(comm, 1);
+   }
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("IJ Vector Setup", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -3470,12 +3496,18 @@ main( hypre_int argc,
       dof_func = NULL;
       if (build_funcs_type == 1)
       {
-         hypre_printf("calling BuildFuncsFromOneFile\n");
+         if (myid == 0)
+         {
+            hypre_printf(" Calling BuildFuncsFromOneFile\n");
+         }
          BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else if (build_funcs_type == 2)
       {
-         hypre_printf("calling BuildFuncsFromOneFiles\n");
+         if (myid == 0)
+         {
+            hypre_printf(" Calling BuildFuncsFromFiles\n");
+         }
          BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else
@@ -3537,13 +3569,6 @@ main( hypre_int argc,
       {
          HYPRE_ParVectorPrint(b, "ParVec.out.b");
       }
-      else
-      {
-         if (!myid)
-         {
-            hypre_printf(" Vector b not found!\n");
-         }
-      }
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
    }
 
@@ -3572,7 +3597,50 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
-    * Solve the system using the hybrid solver
+    * Test multivector support
+    *-----------------------------------------------------------*/
+
+   if (test_multivec && ij_b && num_components > 1)
+   {
+      HYPRE_IJVector   ij_bf;
+      HYPRE_Complex   *d_data_full;
+      HYPRE_Real       bf_dot_bf, e_dot_e;
+      HYPRE_Int        num_rows_full = local_num_rows * num_components;
+      HYPRE_BigInt     ilower = first_local_row * num_components;
+      HYPRE_BigInt     iupper = ilower + (HYPRE_BigInt) num_rows_full;
+
+      /* Allocate memory */
+      d_data_full = hypre_CTAlloc(HYPRE_Complex, num_rows_full, memory_location);
+
+      /* Get values */
+      for (c = 0; c < num_components; c++)
+      {
+         HYPRE_IJVectorSetComponent(ij_b, c);
+         HYPRE_IJVectorGetValues(ij_b, local_num_rows, NULL,
+                                 &d_data_full[c * local_num_rows]);
+      }
+
+      /* Create single vector containing all values of b */
+      HYPRE_IJVectorCreate(comm, ilower, iupper, &ij_bf);
+      HYPRE_IJVectorSetObjectType(ij_bf, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_bf);
+      HYPRE_IJVectorSetValues(ij_bf, num_rows_full, NULL, d_data_full);
+      HYPRE_IJVectorAssemble(ij_bf);
+      HYPRE_IJVectorInnerProd(ij_bf, ij_bf, &bf_dot_bf);
+
+      e_dot_e = bf_dot_bf - b_dot_b;
+      if (myid == 0)
+      {
+         hypre_printf("Vector/Multivector error = %e\n", e_dot_e);
+      }
+
+      /* Free memory */
+      hypre_TFree(d_data_full, memory_location);
+      HYPRE_IJVectorDestroy(ij_bf);
+   }
+
+   /*-----------------------------------------------------------
+    * Perform sparse matrix/vector multiplication
     *-----------------------------------------------------------*/
 
    if (solver_id == -1)
@@ -3611,6 +3679,10 @@ main( hypre_int argc,
 
       goto final;
    }
+
+   /*-----------------------------------------------------------
+    * Solve the system using the hybrid solver
+    *-----------------------------------------------------------*/
 
    if (solver_id == 20)
    {
