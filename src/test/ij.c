@@ -3486,6 +3486,54 @@ main( hypre_int argc,
       hypre_MPI_Abort(comm, 1);
    }
 
+   /*-----------------------------------------------------------
+    * Test multivector support
+    *-----------------------------------------------------------*/
+
+   if (test_multivec && ij_b && num_components > 1)
+   {
+      HYPRE_IJVector   ij_bf;
+      HYPRE_Complex   *d_data_full;
+      HYPRE_Real       bf_dot_bf, e_dot_e;
+      HYPRE_Int        num_rows_full = local_num_rows * num_components;
+      HYPRE_BigInt     ilower = first_local_row * num_components;
+      HYPRE_BigInt     iupper = ilower + (HYPRE_BigInt) num_rows_full;
+
+      /* Allocate memory */
+      d_data_full = hypre_CTAlloc(HYPRE_Complex, num_rows_full, memory_location);
+
+      /* Get values */
+      for (c = 0; c < num_components; c++)
+      {
+         HYPRE_IJVectorSetComponent(ij_b, c);
+         HYPRE_IJVectorGetValues(ij_b, local_num_rows, NULL,
+                                 &d_data_full[c * local_num_rows]);
+      }
+
+      /* Create single vector containing all values of b */
+      HYPRE_IJVectorCreate(comm, ilower, iupper, &ij_bf);
+      HYPRE_IJVectorSetObjectType(ij_bf, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_bf);
+      HYPRE_IJVectorSetValues(ij_bf, num_rows_full, NULL, d_data_full);
+      HYPRE_IJVectorAssemble(ij_bf);
+      HYPRE_IJVectorInnerProd(ij_bf, ij_bf, &bf_dot_bf);
+
+      e_dot_e = bf_dot_bf - b_dot_b;
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("  Vector/Multivector error = %e\n\n", e_dot_e);
+      }
+
+      /* Free memory */
+      hypre_TFree(d_data_full, memory_location);
+      HYPRE_IJVectorDestroy(ij_bf);
+   }
+
+   /*-----------------------------------------------------------
+    * Finalize IJVector Setup timings
+    *-----------------------------------------------------------*/
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("IJ Vector Setup", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -3594,49 +3642,6 @@ main( hypre_int argc,
    if (second_time)
    {
       x0_save = hypre_ParVectorCloneDeep_v2(x, hypre_ParVectorMemoryLocation(x));
-   }
-
-   /*-----------------------------------------------------------
-    * Test multivector support
-    *-----------------------------------------------------------*/
-
-   if (test_multivec && ij_b && num_components > 1)
-   {
-      HYPRE_IJVector   ij_bf;
-      HYPRE_Complex   *d_data_full;
-      HYPRE_Real       bf_dot_bf, e_dot_e;
-      HYPRE_Int        num_rows_full = local_num_rows * num_components;
-      HYPRE_BigInt     ilower = first_local_row * num_components;
-      HYPRE_BigInt     iupper = ilower + (HYPRE_BigInt) num_rows_full;
-
-      /* Allocate memory */
-      d_data_full = hypre_CTAlloc(HYPRE_Complex, num_rows_full, memory_location);
-
-      /* Get values */
-      for (c = 0; c < num_components; c++)
-      {
-         HYPRE_IJVectorSetComponent(ij_b, c);
-         HYPRE_IJVectorGetValues(ij_b, local_num_rows, NULL,
-                                 &d_data_full[c * local_num_rows]);
-      }
-
-      /* Create single vector containing all values of b */
-      HYPRE_IJVectorCreate(comm, ilower, iupper, &ij_bf);
-      HYPRE_IJVectorSetObjectType(ij_bf, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize(ij_bf);
-      HYPRE_IJVectorSetValues(ij_bf, num_rows_full, NULL, d_data_full);
-      HYPRE_IJVectorAssemble(ij_bf);
-      HYPRE_IJVectorInnerProd(ij_bf, ij_bf, &bf_dot_bf);
-
-      e_dot_e = bf_dot_bf - b_dot_b;
-      if (myid == 0)
-      {
-         hypre_printf("Vector/Multivector error = %e\n", e_dot_e);
-      }
-
-      /* Free memory */
-      hypre_TFree(d_data_full, memory_location);
-      HYPRE_IJVectorDestroy(ij_bf);
    }
 
    /*-----------------------------------------------------------
