@@ -1518,7 +1518,7 @@ Optional Features:
                           (default is NO).
   --enable-cuda-streams   Use CUDA streams (default is YES).
   --enable-cusparse       Use cuSPARSE (default is YES).
-  --enable-cusolver       Use cusolver (default is NO).
+  --enable-cusolver       Use cuSOLVER (default is NO).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
   --enable-device-malloc-async
