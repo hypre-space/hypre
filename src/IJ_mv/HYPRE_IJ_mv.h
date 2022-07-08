@@ -538,7 +538,7 @@ HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
  **/
 HYPRE_Int HYPRE_IJVectorInnerProd(HYPRE_IJVector  x,
                                   HYPRE_IJVector  y,
-                                  HYPRE_Complex  *prod);
+                                  HYPRE_Real     *prod);
 
 /**@}*/
 /**@}*/

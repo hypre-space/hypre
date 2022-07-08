@@ -711,7 +711,7 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
 HYPRE_Int
 HYPRE_IJVectorInnerProd( HYPRE_IJVector  x,
                          HYPRE_IJVector  y,
-                         HYPRE_Complex  *prod )
+                         HYPRE_Real     *prod )
 {
    hypre_IJVector *xvec = (hypre_IJVector *) x;
    hypre_IJVector *yvec = (hypre_IJVector *) y;
