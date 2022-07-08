@@ -532,7 +532,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
             ret = hypre_BoomerAMGRelax(A, Zero, NULL /*CFmarker*/,
                                        rlx_type, 0 /*rel pts*/, 1.0 /*weight*/,
                                        1.0 /*omega*/, NULL, U, Temp,
-                                       Qtemp);
+                                       Qtemp, 0);
             hypre_assert(ret == 0);
          }
       }

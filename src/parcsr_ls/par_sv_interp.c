@@ -51,7 +51,7 @@ HYPRE_Int hypre_BoomerAMGSmoothInterpVectors(hypre_ParCSRMatrix *A,
 
          for (j = 0; j < smooth_steps; j++)
          {
-            hypre_BoomerAMGRelax(A, f, NULL, 3, 0, 1.0, 1.0, NULL, new_vector, v, z);
+            hypre_BoomerAMGRelax(A, f, NULL, 3, 0, 1.0, 1.0, NULL, new_vector, v, z, 0);
          }
       }
 

@@ -30,7 +30,8 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                       HYPRE_Real         *l1_norms,
                       hypre_ParVector    *u,
                       hypre_ParVector    *Vtemp,
-                      hypre_ParVector    *Ztemp )
+                      hypre_ParVector    *Ztemp,
+                      HYPRE_Int           zero_u )
 {
    HYPRE_Int relax_error = 0;
 
@@ -108,7 +109,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          break;
 
       case 7: /* Jacobi (uses ParMatvec) */
-         hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
+         hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp, zero_u);
          break;
 
       case 8: /* hybrid L1 Symm. Gauss-Seidel */
@@ -144,7 +145,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       case 18: /* weighted L1 Jacobi */
          hypre_BoomerAMGRelax18WeightedL1Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u,
-                                                Vtemp);
+                                                Vtemp, zero_u);
          break;
 
       case 19: /* Direct solve: use gaussian elimination */
@@ -313,7 +314,8 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
                                         HYPRE_Real          relax_weight,
                                         HYPRE_Real         *l1_norms,
                                         hypre_ParVector    *u,
-                                        hypre_ParVector    *Vtemp )
+                                        hypre_ParVector    *Vtemp,
+                                        HYPRE_Int           zero_u)
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
@@ -322,7 +324,7 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       // XXX GPU calls Relax7 XXX
-      return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
+      return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp, zero_u);
    }
    else
 #endif
@@ -330,7 +332,7 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
       /* in the case of non-CF, use relax-7 which is faster */
       if (relax_points == 0)
       {
-         return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
+         return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp, zero_u);
       }
       else
       {
@@ -1099,7 +1101,8 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              HYPRE_Real          relax_weight,
                              HYPRE_Real         *l1_norms,
                              hypre_ParVector    *u,
-                             hypre_ParVector    *Vtemp )
+                             hypre_ParVector    *Vtemp,
+                             HYPRE_Int           zero_u )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Relax7Jacobi");
@@ -1133,7 +1136,14 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     * Perform Matvec Vtemp = w * (f - Au)
     *-----------------------------------------------------------------*/
-   hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
+   if (zero_u)
+   {
+      hypre_ParVectorScale(relax_weight, Vtemp);
+   }
+   else
+   {
+      hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
+   }
 
    /*-----------------------------------------------------------------
     * u += D^{-1} * Vtemp, where D_ii = ||A(i,:)||_1

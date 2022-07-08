@@ -216,7 +216,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                    NULL,
                                    xn_l[level],
                                    nVtemp2_l[level],
-                                   ze);
+                                   ze,
+                                   0);
          }  /*for (j = 0; j < npre_relax; j++) */
 
          /* compute residuals */
@@ -246,7 +247,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                              NULL,
                              xn_l[level],
                              nVtemp2_l[level],
-                             ze);
+                             ze,
+                             0);
 
       /*---------------------------------------------------------------------
        *  Cycle up the levels.
@@ -271,7 +273,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                    NULL,
                                    xn_l[level],
                                    nVtemp2_l[level],
-                                   ze);
+                                   ze,
+                                   0);
          }
       }   /* for (level = (en_numlevs - 2); level>= 1; level--) */
 
@@ -292,7 +295,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                 NULL,
                                 xn_l[0],
                                 nVtemp2_l[0],
-                                ze);
+                                ze,
+                                0);
       }  /* for (j = 0; j < npost_relax; j++) */
       hypre_ParVectorCopy(bn_l[0], resn_l[0]);
       hypre_ParCSRMatrixMatvec(-1.0, Ann_l[0], xn_l[0], 1.0, resn_l[0]);
@@ -322,7 +326,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                    NULL,
                                    xe_l[level],
                                    eVtemp2_l[level],
-                                   ze);
+                                   ze,
+                                   0);
          }  /*for (j = 0; j < npre_relax; j++) */
 
          /* compute residuals */
@@ -357,7 +362,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                 NULL,
                                 xe_l[level],
                                 eVtemp2_l[level],
-                                ze);
+                                ze,
+                                0);
       }
 
       /*---------------------------------------------------------------------
@@ -386,7 +392,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                    NULL,
                                    xe_l[level],
                                    eVtemp2_l[level],
-                                   ze);
+                                   ze,
+                                   0);
          }
       }  /* for (level = (edge_numlevs - 2); level>= 1; level--) */
 
@@ -411,7 +418,8 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
                                 NULL,
                                 xe_l[0],
                                 eVtemp2_l[0],
-                                ze);
+                                ze,
+                                0);
       }  /* for (j = 0; j < npost_relax; j++) */
 
       e_dot_e = hypre_ParVectorInnerProd(ee_l[0], ee_l[0]);
@@ -429,3 +437,4 @@ hypre_MaxwellSolve2( void                *maxwell_vdata,
 
    return hypre_error_flag;
 }
+

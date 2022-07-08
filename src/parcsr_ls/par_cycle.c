@@ -400,8 +400,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #if defined(HYPRE_USING_NVTX)
          hypre_GpuProfilingPushRange("Relaxation");
 #endif
+
+         HYPRE_Int sweep_count = 0;
+
          for (jj = 0; jj < cg_num_sweep; jj++)
          {
+            HYPRE_Int zero_u = level > 0 && sweep_count == 0 && cycle_param == 1;
+
             if (smooth_num_levels > level && smooth_type > 9)
             {
                hypre_ParVectorSetConstantValues(Aux_U, 0);
@@ -522,7 +527,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                           l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                                           Aux_U,
                                                           Vtemp,
-                                                          Ztemp);
+                                                          Ztemp,
+                                                          zero_u);
                }
                else if (relax_type == 15)
                {
@@ -554,7 +560,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                         and we just do one sweep regular jacobi */
                      hypre_assert(cycle_param == 3);
                      hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker, 0, 0, relax_weight[level],
-                                          0.0, NULL, Aux_U, Vtemp, NULL);
+                                          0.0, NULL, Aux_U, Vtemp, NULL, 0);
                   }
                   else
                   {
@@ -574,7 +580,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                         l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                                         Aux_U,
                                                         Vtemp,
-                                                        Ztemp);
+                                                        Ztemp,
+                                                        0);
                }
                else
                {
@@ -605,7 +612,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                              l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
                                                              Aux_U,
                                                              Vtemp,
-                                                             Ztemp);
+                                                             Ztemp,
+                                                             zero_u);
                   }
                }
 
@@ -621,7 +629,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #endif
                   return (Solve_err_flag);
                }
-            }
+
+               sweep_count ++;
+
+            } /* for (j = 0; j < num_sweep; j++) */
+
             if  (smooth_num_levels > level && smooth_type > 9)
             {
                gammaold = gamma;
@@ -644,7 +656,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                hypre_ParVectorAxpy(alfa, Ptemp, U_array[level]);
                hypre_ParVectorAxpy(-alfa, Vtemp, Rtemp);
             }
-         }
+         } /* for (jj = 0; jj < cg_num_sweep; jj++) */
+
          HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
 #if defined(HYPRE_USING_NVTX)
          hypre_GpuProfilingPopRange();

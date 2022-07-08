@@ -265,7 +265,7 @@ HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
    hypre_ParVector    *y = (hypre_ParVector *) Hy;
    hypre_ParVector    *x = (hypre_ParVector *) Hx;
    HYPRE_Int ierr = 0;
-   ierr = hypre_BoomerAMGRelax(A, y, NULL, 10, 0, 1, 1, NULL, x, NULL, NULL);
+   ierr = hypre_BoomerAMGRelax(A, y, NULL, 10, 0, 1, 1, NULL, x, NULL, NULL, 0);
    return ierr;
 }
 

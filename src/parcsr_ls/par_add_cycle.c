@@ -164,7 +164,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                       CF_marker, rlx_down, rlx_order, 1,
                                       relax_weight[fine_grid], omega[fine_grid],
                                       l1_norms[level] ? hypre_VectorData(l1_norms[level]) : NULL,
-                                      U_array[fine_grid], Vtemp, Ztemp);
+                                      U_array[fine_grid], Vtemp, Ztemp, 0);
                hypre_ParVectorCopy(F_array[fine_grid], Vtemp);
             }
          }
@@ -262,7 +262,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                    NULL, rlx_coarse, 0, 0,
                                    relax_weight[fine_grid], omega[fine_grid],
                                    l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
-                                   U_array[fine_grid], Vtemp, Ztemp);
+                                   U_array[fine_grid], Vtemp, Ztemp, 0);
    }
    HYPRE_ANNOTATE_MGLEVEL_END(num_levels - 1);
 
@@ -292,7 +292,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                       rlx_up, rlx_order, 2,
                                       relax_weight[fine_grid], omega[fine_grid],
                                       l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
-                                      U_array[fine_grid], Vtemp, Ztemp);
+                                      U_array[fine_grid], Vtemp, Ztemp, 0);
             }
          }
          else if (rlx_order)
