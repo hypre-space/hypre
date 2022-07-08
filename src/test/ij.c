@@ -2933,7 +2933,7 @@ main( hypre_int argc,
       hypre_printf("  Number of vector components: %d\n", num_components);
    }
 
-   if (num_components > 1 && build_rhs_type != 2)
+   if (num_components > 1 && !(build_rhs_type > 1 && build_rhs_type < 6))
    {
       hypre_printf("num_components > 1 not implemented for this RHS choice!\n");
       hypre_MPI_Abort(comm, 1);
@@ -3036,7 +3036,7 @@ main( hypre_int argc,
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
    }
-   else if ( build_rhs_type == 3 )
+   else if (build_rhs_type == 3)
    {
       if (myid == 0)
       {
@@ -3047,6 +3047,7 @@ main( hypre_int argc,
       /* RHS */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
+      HYPRE_IJVectorSetNumComponents(ij_b, num_components);
       HYPRE_IJVectorInitialize(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -3063,6 +3064,7 @@ main( hypre_int argc,
 
       /* Initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetNumComponents(ij_x, num_components);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
       HYPRE_IJVectorAssemble(ij_x);
@@ -3070,7 +3072,7 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
-   else if ( build_rhs_type == 4 )
+   else if (build_rhs_type == 4)
    {
       if (myid == 0)
       {
@@ -3078,30 +3080,36 @@ main( hypre_int argc,
          hypre_printf("  Initial guess is 0\n");
       }
 
-      /* Temporary use of solution vector */
-      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
-      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize(ij_x);
-
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
       HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_cols, memory_location);
       for (i = 0; i < local_num_cols; i++)
       {
          values_h[i] = 1.;
       }
-      hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols,
+                    memory_location, HYPRE_MEMORY_HOST);
 
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
+      /* Temporary use of solution vector */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorSetNumComponents(ij_x, num_components);
+      HYPRE_IJVectorInitialize(ij_x);
+      for (c = 0; c < num_components; c++)
+      {
+         HYPRE_IJVectorSetComponent(ij_x, c);
+         HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
+      }
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
-      hypre_TFree(values_d, memory_location);
-
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+
+      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(values_d, memory_location);
 
       /* RHS */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
+      HYPRE_IJVectorSetNumComponents(ij_b, num_components);
       HYPRE_IJVectorInitialize(ij_b);
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
@@ -3111,7 +3119,7 @@ main( hypre_int argc,
       /* Zero initial guess */
       hypre_IJVectorZeroValues(ij_x);
    }
-   else if ( build_rhs_type == 5 )
+   else if (build_rhs_type == 5)
    {
       if (myid == 0)
       {
@@ -3119,9 +3127,19 @@ main( hypre_int argc,
          hypre_printf("  Initial guess has unit coefficients\n");
       }
 
+      HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
+      HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_cols, memory_location);
+      for (i = 0; i < local_num_cols; i++)
+      {
+         values_h[i] = 1.;
+      }
+      hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols,
+                    memory_location, HYPRE_MEMORY_HOST);
+
       /* RHS */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
+      HYPRE_IJVectorSetNumComponents(ij_b, num_components);
       HYPRE_IJVectorInitialize(ij_b);
       HYPRE_IJVectorAssemble(ij_b);
 
@@ -3130,26 +3148,22 @@ main( hypre_int argc,
 
       /* Initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetNumComponents(ij_x, num_components);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
-
-      HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
-      HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_cols, memory_location);
-      for (i = 0; i < local_num_cols; i++)
+      for (c = 0; c < num_components; c++)
       {
-         values_h[i] = 1.;
+         HYPRE_IJVectorSetComponent(ij_x, c);
+         HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
       }
-      hypre_TMemcpy(values_d, values_h, HYPRE_Real, local_num_cols, memory_location, HYPRE_MEMORY_HOST);
-
-      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
       HYPRE_IJVectorAssemble(ij_x);
-      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
-      hypre_TFree(values_d, memory_location);
-
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+
+      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
+      hypre_TFree(values_d, memory_location);
    }
-   else if ( build_rhs_type == 6)
+   else if (build_rhs_type == 6)
    {
       ij_b = NULL;
    }
@@ -3510,7 +3524,7 @@ main( hypre_int argc,
                                  &d_data_full[c * local_num_rows]);
       }
 
-      /* Create single vector containing all values of b */
+      /* Create a single component vector containing all values of b */
       HYPRE_IJVectorCreate(comm, ilower, iupper, &ij_bf);
       HYPRE_IJVectorSetObjectType(ij_bf, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_bf);
@@ -3521,8 +3535,7 @@ main( hypre_int argc,
       e_dot_e = bf_dot_bf - b_dot_b;
       if (myid == 0)
       {
-         hypre_printf("\n");
-         hypre_printf("  Vector/Multivector error = %e\n\n", e_dot_e);
+         hypre_printf("\nVector/Multivector error = %e\n\n", e_dot_e);
       }
 
       /* Free memory */
