@@ -31,6 +31,8 @@
 /* Use complex values */
 #cmakedefine HYPRE_COMPLEX 1
 
+#cmakedefine HYPRE_USING_DEVICE_MALLOC_ASYNC 1
+
 /* Debug mode */
 #cmakedefine HYPRE_DEBUG 1
 
