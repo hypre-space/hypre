@@ -169,11 +169,11 @@
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
+/* Define to 1 if using cuSolver */
+#undef HYPRE_USING_CUSOLVER
+
 /* Define to 1 if using cuSPARSE */
 #undef HYPRE_USING_CUSPARSE
-
-/* Define to 1 if using cuSOLVER */
-#undef HYPRE_USING_CUSOLVER
 
 /* Define to 1 if using device async malloc */
 #undef HYPRE_USING_DEVICE_MALLOC_ASYNC
