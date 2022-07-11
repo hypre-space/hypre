@@ -750,6 +750,7 @@ HYPRE_Int
 hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
                                  HYPRE_Real       *colnnz)
 {
+   hypre_printf("WM: debug - inside hypre_CSRMatrixColNNzRealDevice()\n");
    HYPRE_Int *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int  ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int  nnz_A    = hypre_CSRMatrixNumNonzeros(A);
@@ -761,7 +762,9 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    A_j_sorted = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(A_j_sorted, A_j, HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
+   hypre_printf("WM: debug - about to sort\n");
    HYPRE_ONEDPL_CALL(std::sort, A_j_sorted, A_j_sorted + nnz_A);
+   hypre_printf("WM: debug - done with sort\n");
 #else
    HYPRE_THRUST_CALL(sort, A_j_sorted, A_j_sorted + nnz_A);
 #endif
@@ -778,31 +781,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
       /* WM: better way to get around lack of constant iterator in DPL? */
       HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
-      /* WM: there's something weird going on with dpl reduce_by_segment where if I have it */
-      /*     in the library multiple times, I get a CL_INVALID_ARG_VALUE on one of the calls... */
-      /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
-      /*                                   A_j_sorted, */
-      /*                                   A_j_sorted + nnz_A, */
-      /*                                   ones, */
-      /*                                   reduced_col_indices, */
-      /*                                   reduced_col_nnz); */
-
-      /* WM: this also doesn't work for me */
-      /* std::equal_to<HYPRE_Int> pred; */
-      /* std::plus<HYPRE_Int> func; */
-
-      /* auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment, */
-      /*                                      A_j_sorted, */
-      /*                                      A_j_sorted + nnz_A, */
-      /*                                      ones, */
-      /*                                      reduced_col_indices, */
-      /*                                      reduced_col_nnz, */
-      /*                                      pred, */
-      /*                                      func); */
-
-
-
-      /* WM: this works? Mysterious... */
+      hypre_printf("WM: debug - about to reduce_by_segment\n");
       std::pair<HYPRE_Int*, HYPRE_Int*> new_end = oneapi::dpl::reduce_by_segment(
                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
                                                               hypre_handle())),
@@ -811,6 +790,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
                                                      ones,
                                                      reduced_col_indices,
                                                      reduced_col_nnz);
+      hypre_printf("WM: debug - done with reduce_by_segment\n");
 
 
 
@@ -848,6 +828,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
    hypre_SyncComputeStream(hypre_handle());
 
+   hypre_printf("WM: debug - finished hypre_CSRMatrixColNNzRealDevice()\n");
    return hypre_error_flag;
 }
 
