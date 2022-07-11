@@ -105,6 +105,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       hypre_assert( num_vectors > 1 );
       x_tmp = hypre_SeqMultiVectorCreate( num_cols_offd, num_vectors );
+      hypre_VectorMultiVecStorageMethod(x_tmp) = 1;
    }
 
    /*---------------------------------------------------------------------
@@ -116,7 +117,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
-      /* TODO: move this to a better place - hypre_MatvecCommPkgCreate (?)*/
+      /* TODO: move this to a better place - hypre_MatvecCommPkgCreate (?) */
+      /* Issue: hypre_ParCSRMatrixMatvec might be called for vector with
+         different number of components, which would break this */
       if (num_vectors > 1)
       {
          HYPRE_Int   num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -125,33 +128,21 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
          HYPRE_Int  *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
          HYPRE_Int  *send_map_elmts  = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
          HYPRE_Int  *send_map_elmts_new;
-         HYPRE_Int   k, cnt = 0;
 
          /* Update send_maps_elmts */
          send_map_elmts_new = hypre_CTAlloc(HYPRE_Int,
                                             send_map_starts[num_sends] * num_vectors,
                                             HYPRE_MEMORY_HOST);
-         for (i = 0; i < num_sends; i++)
-         {
-            for (j = 0; j < num_vectors; j++)
-            {
-               for (k = send_map_starts[i]; k < send_map_starts[i + 1]; k++)
-               {
-                  send_map_elmts_new[cnt++] = send_map_elmts[k] * idxstride + j * vecstride;
-               }
-            }
-         }
 
-#if 0
          for (i = 0; i < send_map_starts[num_sends]; i++)
          {
             for (j = 0; j < num_vectors; j++)
             {
                send_map_elmts_new[i * num_vectors + j] = send_map_elmts[i] * idxstride +
-                                                       j * vecstride;
+                                                         j * vecstride;
             }
          }
-#endif
+
          hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
          hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts_new;
 
