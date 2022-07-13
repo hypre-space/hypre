@@ -9375,8 +9375,8 @@ fi
 
 done
 
-               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a /soft/restricted/CNDA/sdk/2022.01.30.001/oneapi/vtune/latest/lib64/libittnotify.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include -I/soft/restricted/CNDA/sdk/2022.01.30.001/oneapi/vtune/latest/include"
+               HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
 
 fi
 
