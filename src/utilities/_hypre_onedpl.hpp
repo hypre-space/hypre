@@ -58,7 +58,7 @@ Iter3 hypreSycl_transform_if(Iter1 first, Iter1 last, Iter2 mask,
       "Iterators passed to algorithms must be random-access iterators.");
    using T = typename std::iterator_traits<Iter1>::value_type;
    const auto n = std::distance(first, last);
-   auto begin_for_each = make_zip_iterator(first, mask, result);
+   auto begin_for_each = oneapi::dpl::make_zip_iterator(first, mask, result);
    HYPRE_ONEDPL_CALL( std::for_each,
                       begin_for_each, begin_for_each + n,
                       transform_if_unary_zip_mask_fun<T, Pred, UnaryOperation>(pred, unary_op) );
