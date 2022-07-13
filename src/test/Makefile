@@ -75,7 +75,6 @@ HYPRE_DRIVERS =\
  ij_assembly.c\
  sstruct.c\
  struct.c\
- simple.c\
  ams_driver.c\
  maxwell_unscaled.c\
  struct_migrate.c\
@@ -152,10 +151,6 @@ ij_assembly: ij_assembly.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 sstruct: sstruct.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-simple: simple.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
