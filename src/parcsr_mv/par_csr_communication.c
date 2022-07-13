@@ -734,29 +734,30 @@ hypre_ParCSRCommPkgCreate_core(
     * received from Proc. i
     * ---------------------------------------------------------------------*/
 
-   for (i = 0; i < num_procs; i++)
+   proc_num = 0;
+   if (num_cols_offd)
    {
-      proc_add[i] = 0;
+      offd_col = col_map_offd[0];
    }
 
-   proc_num = 0;
-   if (num_cols_offd) { offd_col = col_map_offd[0]; }
    num_recvs = 0;
-   j = 0;
    for (i = 0; i < num_cols_offd; i++)
    {
       if (num_cols_diag)
       {
          proc_num = hypre_min(num_procs - 1, (HYPRE_Int)(offd_col / (HYPRE_BigInt)num_cols_diag));
       }
+
       while (col_starts[proc_num] > offd_col )
       {
          proc_num = proc_num - 1;
       }
+
       while (col_starts[proc_num + 1] - 1 < offd_col )
       {
          proc_num = proc_num + 1;
       }
+
       proc_mark[num_recvs] = proc_num;
       j = i;
       while (col_starts[proc_num + 1] > offd_col)
@@ -774,8 +775,15 @@ hypre_ParCSRCommPkgCreate_core(
          }
       }
       num_recvs++;
-      if (j < num_cols_offd) { i = j - 1; }
-      else { i = j; }
+
+      if (j < num_cols_offd)
+      {
+         i = j - 1;
+      }
+      else
+      {
+         i = j;
+      }
    }
 
    local_info = 2 * num_recvs;
@@ -789,7 +797,6 @@ hypre_ParCSRCommPkgCreate_core(
     * ---------------------------------------------------------------------*/
 
    displs = hypre_CTAlloc(HYPRE_Int,  num_procs + 1, HYPRE_MEMORY_HOST);
-   displs[0] = 0;
    for (i = 1; i < num_procs + 1; i++)
    {
       displs[i] = displs[i - 1] + info[i - 1];
@@ -806,7 +813,6 @@ hypre_ParCSRCommPkgCreate_core(
    recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs + 1, HYPRE_MEMORY_HOST);
 
    j = 0;
-   if (num_recvs) { recv_vec_starts[0] = 0; }
    for (i = 0; i < num_recvs; i++)
    {
       num_elmts = proc_add[i];
@@ -865,7 +871,6 @@ hypre_ParCSRCommPkgCreate_core(
       status = hypre_CTAlloc(hypre_MPI_Status,  num_requests, HYPRE_MEMORY_HOST);
    }
 
-   if (num_sends) { send_map_starts[0] = 0; }
    for (i = 0; i < num_sends; i++)
    {
       send_map_starts[i + 1] = proc_add[i + 1];
