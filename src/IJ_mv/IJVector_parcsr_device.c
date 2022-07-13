@@ -328,7 +328,6 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int       N0,
                                      HYPRE_Complex **A1 )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: double check this */
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
@@ -346,50 +345,38 @@ hypre_IJVectorAssembleSortAndReduce1(HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
+   /* WM: TODO - exclusive_scan_by_segment() currently does not work with a permutation iterator */
+   /*            and oneDPL currently does not have a reverse iterator */
+   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL( std::transform,
+                      oneapi::dpl::counting_iterator(0),
+                      oneapi::dpl::counting_iterator(N0),
+                      reverse_perm,
+                      [N0] (auto i) { return N0 - i - 1; });
 
-   /* WM: TODO - this is a temporary host implementation since oneDPL's exclusive_scan_by_segment() is broken */
-   HYPRE_BigInt *I0_h = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_HOST);
-   char *X0_h = hypre_TAlloc(char, N0, HYPRE_MEMORY_HOST);
-   char *X_h = hypre_TAlloc(char, N0, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(I0_h, I0, HYPRE_BigInt, N0, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(X0_h, X0, char, N0, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   char m = char(0);
-   X_h[N0 - 1] = m;
-   for (auto i = N0 - 2; i >= 0; i--)
-   {
-      if (I0_h[i] == I0_h[i+1])
-      {
-         m = std::max(m, X_h[i+1]);
-      }
-      else
-      {
-         m = char(0);
-      }
-      X_h[i] = m;
-   }
-   hypre_TMemcpy(X, X_h, char, N0, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TFree(I0_h, HYPRE_MEMORY_HOST);
-   hypre_TFree(X0_h, HYPRE_MEMORY_HOST);
-   hypre_TFree(X_h, HYPRE_MEMORY_HOST);
+   HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
+   hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
 
-   /* WM: TODO - exclusive_scan_by_segment() is broken in oneDPL... need a workaround for now */
-   /* WM: double check this... also, is there a better workaround here for lack of reverse iterator in dpl? */
-   /* HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE); */
-   /* HYPRE_ONEDPL_CALL( std::transform, */
-   /*                    oneapi::dpl::counting_iterator(0), */
-   /*                    oneapi::dpl::counting_iterator(N0), */
-   /*                    reverse_perm, */
-   /*                    [N0] (auto i) { return N0 - i - 1; }); */
-   /* HYPRE_ONEDPL_CALL( */
-   /*    oneapi::dpl::exclusive_scan_by_segment, */
-   /*    oneapi::dpl::make_permutation_iterator(I0, reverse_perm),      /1* key begin *1/ */
-   /*    oneapi::dpl::make_permutation_iterator(I0, reverse_perm) + N0, /1* key end *1/ */
-   /*    oneapi::dpl::make_permutation_iterator(X0, reverse_perm),      /1* input value begin *1/ */
-   /*    oneapi::dpl::make_permutation_iterator(X, reverse_perm),       /1* output value begin *1/ */
-   /*    char(0),                                                       /1* init *1/ */
-   /*    std::equal_to<HYPRE_BigInt>(), */
-   /*    oneapi::dpl::maximum<char>() ); */
-   /* hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE); */
+   char *X0_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
+   hypreSycl_scatter(X0, X0 + N0, reverse_perm, X0_reversed);
+
+   char *X_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_ONEDPL_CALL(
+      oneapi::dpl::exclusive_scan_by_segment,
+      I0_reversed,      /* key begin */
+      I0_reversed + N0, /* key end */
+      X0_reversed,      /* input value begin */
+      X_reversed,       /* output value begin */
+      char(0),          /* init */
+      std::equal_to<HYPRE_BigInt>(),
+      oneapi::dpl::maximum<char>() );
+
+   hypreSycl_scatter(X_reversed, X_reversed + N0, reverse_perm, X);
+   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(I0_reversed, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(X0_reversed, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(X_reversed, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -443,7 +430,6 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
                                      HYPRE_Int *N1)
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: double check this */
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
@@ -460,23 +446,34 @@ hypre_IJVectorAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, char *X0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: double check this... also, is there a better workaround here for lack of reverse iterator in dpl? */
-   /* WM: TODO - does inclusive_scan_by_segment() have issues similar to exclusive_scan_by_segment()? */
+   /* WM: TODO - inclusive_scan_by_segment() currently does not work with a permutation iterator */
+   /*            and oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator(0),
                       oneapi::dpl::counting_iterator(N0),
                       reverse_perm,
                       [N0] (auto i) { return N0 - i - 1; });
+
+   HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
+   hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
+
+   char *X0_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
+   hypreSycl_scatter(X0, X0 + N0, reverse_perm, X0_reversed);
+
    HYPRE_ONEDPL_CALL(
       oneapi::dpl::inclusive_scan_by_segment,
-      oneapi::dpl::make_permutation_iterator(I0, reverse_perm), /* key begin */
-      oneapi::dpl::make_permutation_iterator(I0, reverse_perm) + N0, /* key end */
-      oneapi::dpl::make_permutation_iterator(X0, reverse_perm), /* input value begin */
-      oneapi::dpl::make_permutation_iterator(X0, reverse_perm), /* output value begin */
+      I0_reversed,      /* key begin */
+      I0_reversed + N0, /* key end */
+      X0_reversed,      /* input value begin */
+      X0_reversed,      /* output value begin */
       std::equal_to<HYPRE_BigInt>(),
       oneapi::dpl::maximum<char>() );
+
+   hypreSycl_scatter(X0_reversed, X0_reversed + N0, reverse_perm, X0);
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(I0_reversed, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(X0_reversed, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,

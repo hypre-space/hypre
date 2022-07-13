@@ -342,11 +342,10 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
    // P_diag_j and P_diag_data
    if (W_diag_j && W_diag_data)
    {
-      HYPRE_ONEDPL_CALL( std::copy,
-                         oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
+      hypreSycl_scatter( oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data),
                          oneapi::dpl::make_zip_iterator(W_diag_j, W_diag_data) + W_diag_nnz,
-                         oneapi::dpl::make_permutation_iterator(oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data),
-                                                                shift) );
+                         shift,
+                         oneapi::dpl::make_zip_iterator(P_diag_j, P_diag_data) );
    }
 #else
    HYPRE_THRUST_CALL( transform,

@@ -169,6 +169,27 @@ void hypreSycl_scatter_if(InputIter1 first, InputIter1 last,
    [ = ](auto &&v) { return v; }, [ = ](auto &&m) { return pred(m); });
 }
 
+// Equivalent of thrust::scatter
+template <typename InputIter1, typename InputIter2,
+          typename OutputIter>
+void hypreSycl_scatter(InputIter1 first, InputIter1 last,
+                             InputIter2 map, OutputIter result)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter2>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<OutputIter>::iterator_category,
+      std::random_access_iterator_tag >::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   auto perm_result =
+      oneapi::dpl::make_permutation_iterator(result, map);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::copy, first, last, perm_result);
+}
+
 // Equivalent of thrust::gather
 template <typename InputIter1, typename InputIter2,
           typename OutputIter>

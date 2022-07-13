@@ -33,7 +33,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                   HYPRE_Int              debug_flag,
                                   hypre_IntArray       **CF_marker_ptr )
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenPMISDevice()\n");
    MPI_Comm                  comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
@@ -130,7 +129,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    hypre_PMISCoarseningInitDevice(S, comm_pkg, CF_init, measure_diag, measure_offd,
                                   (HYPRE_Real *) send_buf,
                                   &graph_diag_size, graph_diag, CF_marker_diag);
-   hypre_printf("WM: debug - inside hypre_BoomerAMGCoarsenPMISDevice() 1\n");
 
    while (1)
    {
@@ -235,7 +233,6 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
 #endif
 
-   hypre_printf("WM: debug - finished hypre_BoomerAMGCoarsenPMISDevice()\n");
    return hypre_error_flag;
 }
 
@@ -248,7 +245,6 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
                               HYPRE_Real          *measure_offd,
                               HYPRE_Real          *real_send_buf )
 {
-   hypre_printf("WM: debug - inside hypre_GetGlobalMeasureDevice()\n");
    hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_Int                 num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
    hypre_CSRMatrix          *S_diag          = hypre_ParCSRMatrixDiag(S);
@@ -257,7 +253,6 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    /* Compute global column nnz */
    /* compute local column nnz of the offd part */
    hypre_CSRMatrixColNNzRealDevice(S_offd, measure_offd);
-   hypre_printf("WM: debug - inside hypre_GetGlobalMeasureDevice() 1\n");
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI)
    /* RL: make sure measure_offd is ready before issuing GPU-GPU MPI */
@@ -271,7 +266,6 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
 
    /* compute local column nnz of the diag part */
    hypre_CSRMatrixColNNzRealDevice(S_diag, measure_diag);
-   hypre_printf("WM: debug - inside hypre_GetGlobalMeasureDevice() 2\n");
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
@@ -281,7 +275,6 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    hypreDevice_GenScatterAdd(measure_diag, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                              hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), real_send_buf, NULL);
 
-   hypre_printf("WM: debug - inside hypre_GetGlobalMeasureDevice() 3\n");
    /* Augments the measures with a random number between 0 and 1 (only for the local part) */
    if (aug_rand)
    {
@@ -291,7 +284,6 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    /* Note that measure_offd is not sync'ed (communicated) here
     * and is not set to zero as in the cpu pmis */
 
-   hypre_printf("WM: debug - finished hypre_GetGlobalMeasureDevice()\n");
    return hypre_error_flag;
 }
 

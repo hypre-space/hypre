@@ -750,7 +750,6 @@ HYPRE_Int
 hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
                                  HYPRE_Real       *colnnz)
 {
-   hypre_printf("WM: debug - inside hypre_CSRMatrixColNNzRealDevice()\n");
    HYPRE_Int *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int  ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int  nnz_A    = hypre_CSRMatrixNumNonzeros(A);
@@ -819,7 +818,6 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
    hypre_SyncComputeStream(hypre_handle());
 
-   hypre_printf("WM: debug - finished hypre_CSRMatrixColNNzRealDevice()\n");
    return hypre_error_flag;
 }
 
