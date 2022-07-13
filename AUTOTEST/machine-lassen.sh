@@ -50,39 +50,46 @@ save="lassen"
 ##########
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
 
 #CUDA with UM and mixed-int
-co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
 # CUDA with UM with shared library [no run]
-co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 #CUDA with UM and single precision
-co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
 ./renametest.sh basic $output_dir/basic-cuda-um-single
 
 # CUDA with UM without MPI [no run]
-#co="--with-cuda --enable-unified-memory --without-MPI --with-gpu-arch=\\'60 70\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+#co="--with-cuda --enable-unified-memory --without-MPI --with-gpu-arch=70 --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo
 #./renametest.sh basic $output_dir/basic-cuda-um-without-MPI
 
-# CUDA without UM with device memory pool [benchmark, struct]
-co="--with-cuda --enable-device-memory-pool --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-ro="-bench -struct -rt -mpibind -save ${save}"
+# CUDA without UM with device memory pool [struct]
+co="--with-cuda --enable-device-memory-pool --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-nonum
+
+# CUDA without UM with umpire [benchmark]
+UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/2022.03.1-nvcc10.1.243-sm_70-xl2021.09.22
+co="--with-cuda --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=umpire --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-bench -rt -mpibind -save ${save}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-bench
 
 ############
 ## OMP4.5 ##
@@ -94,7 +101,7 @@ ro="-bench -struct -rt -mpibind -save ${save}"
 #./renametest.sh basic $output_dir/basic-deviceomp-um-shared
 
 # OMP 4.5 without UM in debug mode [struct]
-co="--with-device-openmp --enable-debug --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-device-openmp --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-struct -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
@@ -127,7 +134,7 @@ module -q load cuda/11
 module list cuda/11 |& grep "None found"
 
 # CUDA with UM with async malloc [no run]
-co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=\\'60 70\\' --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda11
 

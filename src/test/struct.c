@@ -4,6 +4,7 @@
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
+#include <ittnotify.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -1708,8 +1709,10 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("PCG Solve");
          hypre_BeginTiming(time_index);
 
+         __itt_resume();
          HYPRE_PCGSolve( (HYPRE_Solver) solver,
                          (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+         __itt_pause();
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);

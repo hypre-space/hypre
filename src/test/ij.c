@@ -2988,6 +2988,36 @@ main( hypre_int argc,
          hypre_printf("  RHS vector has unit components\n");
          hypre_printf("  Initial guess is 0\n");
       }
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
+      for (i = 0; i < local_num_rows; i++)
+      {
+         values_h[i] = 1.0;
+      }
+
+      /* RHS */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
+      HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize_v2(ij_b, HYPRE_MEMORY_HOST);
+      HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values_h);
+      HYPRE_IJVectorAssemble(ij_b);
+      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
+      b = (HYPRE_ParVector) object;
+      hypre_ParVectorMigrate(b, HYPRE_MEMORY_DEVICE);
+
+      hypre_Memset(values_h, 0, local_num_rows * sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+      /* Initial guess */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize_v2(ij_x, HYPRE_MEMORY_HOST);
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_h);
+      HYPRE_IJVectorAssemble(ij_x);
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+      hypre_ParVectorMigrate(x, HYPRE_MEMORY_DEVICE);
+
+      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
+#else
 
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
       HYPRE_Real *values_d = hypre_CTAlloc(HYPRE_Real, local_num_rows, memory_location);
@@ -3018,6 +3048,7 @@ main( hypre_int argc,
 
       hypre_TFree(values_h, HYPRE_MEMORY_HOST);
       hypre_TFree(values_d, memory_location);
+#endif
    }
    else if ( build_rhs_type == 3 )
    {

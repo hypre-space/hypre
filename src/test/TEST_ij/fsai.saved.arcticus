@@ -76,77 +76,77 @@ Final Relative Residual Norm = 9.415353e-09
 
 # Output file: fsai.out.100
 Iterations = 1
-Final Relative Residual Norm = 7.491826e-16
+Final Relative Residual Norm = 7.329490e-16
 
 # Output file: fsai.out.101
 Iterations = 21
-Final Relative Residual Norm = 3.522746e-09
+Final Relative Residual Norm = 3.616524e-09
 
 # Output file: fsai.out.102
 Iterations = 21
-Final Relative Residual Norm = 3.522746e-09
+Final Relative Residual Norm = 3.616524e-09
 
 # Output file: fsai.out.103
 Iterations = 21
-Final Relative Residual Norm = 3.522746e-09
+Final Relative Residual Norm = 3.616524e-09
 
 # Output file: fsai.out.104
 Iterations = 6
-Final Relative Residual Norm = 5.160229e-09
+Final Relative Residual Norm = 8.250667e-09
 
 # Output file: fsai.out.105
 Iterations = 5
-Final Relative Residual Norm = 1.395414e-09
+Final Relative Residual Norm = 2.309768e-09
 
 # Output file: fsai.out.106
 Iterations = 5
-Final Relative Residual Norm = 1.452445e-09
+Final Relative Residual Norm = 2.384893e-09
 
 # Output file: fsai.out.107
 Iterations = 7
-Final Relative Residual Norm = 2.922525e-09
+Final Relative Residual Norm = 4.376727e-09
 
 # Output file: fsai.out.108
 Iterations = 5
-Final Relative Residual Norm = 4.153347e-10
+Final Relative Residual Norm = 5.083096e-10
 
 # Output file: fsai.out.109
 Iterations = 6
-Final Relative Residual Norm = 3.122823e-09
+Final Relative Residual Norm = 6.265079e-09
 
 # Output file: fsai.out.110
-Iterations = 6
-Final Relative Residual Norm = 6.923575e-09
+Iterations = 7
+Final Relative Residual Norm = 3.765048e-10
 
 # Output file: fsai.out.111
-Iterations = 10
-Final Relative Residual Norm = 1.600370e-09
+Iterations = 9
+Final Relative Residual Norm = 3.484263e-09
 
 # Output file: fsai.out.112
 Iterations = 10
-Final Relative Residual Norm = 2.516022e-09
+Final Relative Residual Norm = 1.949666e-09
 
 # Output file: fsai.out.113
 Iterations = 10
-Final Relative Residual Norm = 3.353466e-09
+Final Relative Residual Norm = 4.004254e-09
 
 # Output file: fsai.out.114
 Iterations = 25
-Final Relative Residual Norm = 1.808700e-09
+Final Relative Residual Norm = 1.839593e-09
 
 # Output file: fsai.out.115
 Iterations = 27
-Final Relative Residual Norm = 3.763805e-09
+Final Relative Residual Norm = 3.872757e-09
 
 # Output file: fsai.out.116
-Iterations = 36
-Final Relative Residual Norm = 7.556651e-09
+Iterations = 37
+Final Relative Residual Norm = 4.555652e-09
 
 # Output file: fsai.out.117
 Iterations = 33
-Final Relative Residual Norm = 3.063081e-09
+Final Relative Residual Norm = 2.717305e-09
 
 # Output file: fsai.out.118
-Iterations = 38
-Final Relative Residual Norm = 6.468289e-09
+Iterations = 39
+Final Relative Residual Norm = 2.603839e-09
 
