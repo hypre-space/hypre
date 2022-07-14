@@ -683,29 +683,47 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    else
 #endif
    {
-      HYPRE_Int i;
+      HYPRE_Int i, j;
 
-      if (num_vectors_x == 1 && num_vectors_y == 1 && num_vectors_b == 1)
+      if (num_vectors_b == 1)
       {
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < size; i++)
+         if (num_vectors_x == 1 && num_vectors_y == 1)
          {
-            y_data[i] += x_data[i] / b_data[i];
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < size; i++)
+            {
+               y_data[i] += x_data[i] / b_data[i];
+            }
          }
-      }
-      else if (num_vectors_x == 2 && num_vectors_y == 2 && num_vectors_b == 1)
-      {
-#ifdef HYPRE_USING_OPENMP
-         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < size; i++)
+         else if (num_vectors_x == 2 && num_vectors_y == 2)
          {
-            HYPRE_Complex  val = 1.0 / b_data[i];
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < size; i++)
+            {
+               HYPRE_Complex  val = 1.0 / b_data[i];
 
-            y_data[i]        += x_data[i]        * val;
-            y_data[i + size] += x_data[i + size] * val;
+               y_data[i]        += x_data[i]        * val;
+               y_data[i + size] += x_data[i + size] * val;
+            }
+         }
+         else if (num_vectors_x == num_vectors_y)
+         {
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
+#endif
+            for (i = 0; i < size; i++)
+            {
+               HYPRE_Complex  val = 1.0 / b_data[i];
+
+               for (j = 0; j < num_vectors_x; j++)
+               {
+                  y_data[i + size * j] += x_data[i + size * j] * val;
+               }
+            }
          }
       }
       else
