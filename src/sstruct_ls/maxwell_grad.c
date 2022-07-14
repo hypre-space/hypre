@@ -94,7 +94,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_BigInt           start_rank1, start_rank2, rank;
 
    HYPRE_Int              myproc;
-   HYPRE_Int              ierr = 0;
 
    hypre_BoxInit(&layer, ndim);
    hypre_BoxInit(&interior_box, ndim);
@@ -312,7 +311,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          i = hypre_BoxVolume(box);
 
          tmp_box_array1 = hypre_BoxArrayCreate(0, ndim);
-         ierr         += hypre_BoxBoundaryG(box, var_grid, tmp_box_array1);
+         hypre_BoxBoundaryG(box, var_grid, tmp_box_array1);
 
          for (m = 0; m < hypre_BoxArraySize(tmp_box_array1); m++)
          {
@@ -412,8 +411,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             {
                tmp_box_array1 = hypre_BoxArrayCreate(0, ndim);
                tmp_box_array2 = hypre_BoxArrayCreate(0, ndim);
-               ierr += hypre_BoxBoundaryDG(box, var_grid, tmp_box_array1,
-                                           tmp_box_array2, direction[d]);
+               hypre_BoxBoundaryDG(box, var_grid, tmp_box_array1,
+                                   tmp_box_array2, direction[d]);
 
                for (k = 0; k < hypre_BoxArraySize(tmp_box_array1); k++)
                {

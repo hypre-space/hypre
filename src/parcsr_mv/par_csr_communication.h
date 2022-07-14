@@ -69,12 +69,8 @@ typedef struct _hypre_ParCSRCommPkg
    /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
    HYPRE_Complex                    *tmp_data;
    HYPRE_Complex                    *buf_data;
-   /* for matvecT*/
-   HYPRE_Int                         send_map_n;
-   HYPRE_Int                        *send_map_j;
-   HYPRE_Int                        *send_map_i;
-   HYPRE_Int                        *send_map_rowind;
-   char                             *work_space;
+   /* for matmultT/matvecT */
+   hypre_CSRMatrix                  *matrix_E;
 #endif
 } hypre_ParCSRCommPkg;
 
@@ -105,11 +101,7 @@ typedef struct _hypre_ParCSRCommPkg
 #if defined(HYPRE_USING_GPU)
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
-#define hypre_ParCSRCommPkgWorkSpace(comm_pkg)           ((comm_pkg) -> work_space)
-#define hypre_ParCSRCommPkgSendMapN(comm_pkg)            ((comm_pkg) -> send_map_n)
-#define hypre_ParCSRCommPkgSendMapJ(comm_pkg)            ((comm_pkg) -> send_map_j)
-#define hypre_ParCSRCommPkgSendMapI(comm_pkg)            ((comm_pkg) -> send_map_i)
-#define hypre_ParCSRCommPkgSendMapRowInd(comm_pkg)       ((comm_pkg) -> send_map_rowind)
+#define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
 #endif
 
 static inline void

@@ -1020,57 +1020,18 @@ HYPRE_IJMatrixRead( const char     *filename,
                     HYPRE_Int       type,
                     HYPRE_IJMatrix *matrix_ptr )
 {
-   HYPRE_IJMatrix  matrix;
-   HYPRE_BigInt    ilower, iupper, jlower, jupper;
-   HYPRE_BigInt    I, J;
-   HYPRE_Int       ncols;
-   HYPRE_Complex   value;
-   HYPRE_Int       myid, ret;
-   char            new_filename[255];
-   FILE           *file;
+   hypre_IJMatrixRead(filename, comm, type, matrix_ptr, 0);
 
-   hypre_MPI_Comm_rank(comm, &myid);
+   return hypre_error_flag;
+}
 
-   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
-
-   if ((file = fopen(new_filename, "r")) == NULL)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   hypre_fscanf(file, "%b %b %b %b", &ilower, &iupper, &jlower, &jupper);
-   HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
-
-   HYPRE_IJMatrixSetObjectType(matrix, type);
-
-   HYPRE_IJMatrixInitialize_v2(matrix, HYPRE_MEMORY_HOST);
-
-   /* It is important to ensure that whitespace follows the index value to help
-    * catch mistakes in the input file.  See comments in IJVectorRead(). */
-   ncols = 1;
-   while ( (ret = hypre_fscanf(file, "%b %b%*[ \t]%le", &I, &J, &value)) != EOF )
-   {
-      if (ret != 3)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in IJ matrix input file.");
-         return hypre_error_flag;
-      }
-      if (I < ilower || I > iupper)
-      {
-         HYPRE_IJMatrixAddToValues(matrix, 1, &ncols, &I, &J, &value);
-      }
-      else
-      {
-         HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
-      }
-   }
-
-   HYPRE_IJMatrixAssemble(matrix);
-
-   fclose(file);
-
-   *matrix_ptr = matrix;
+HYPRE_Int
+HYPRE_IJMatrixReadMM( const char     *filename,
+                      MPI_Comm        comm,
+                      HYPRE_Int       type,
+                      HYPRE_IJMatrix *matrix_ptr )
+{
+   hypre_IJMatrixRead(filename, comm, type, matrix_ptr, 1);
 
    return hypre_error_flag;
 }
@@ -1097,20 +1058,9 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
    void *object;
    HYPRE_IJMatrixGetObject(matrix, &object);
-   HYPRE_ParCSRMatrix par_csr = (HYPRE_ParCSRMatrix) object;
+   hypre_ParCSRMatrix *par_csr = (hypre_ParCSRMatrix*) object;
 
-   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(matrix);
-
-   if ( hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST )
-   {
-      hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
-   }
-   else
-   {
-      HYPRE_ParCSRMatrix par_csr2 = hypre_ParCSRMatrixClone_v2(par_csr, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixPrintIJ(par_csr2, 0, 0, filename);
-      hypre_ParCSRMatrixDestroy(par_csr2);
-   }
+   hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
 
    return hypre_error_flag;
 }

@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.24.0)
-set(HYPRE_NUMBER  22400)
-set(HYPRE_DATE    2022/02/11)
+set(HYPRE_VERSION 2.25.0)
+set(HYPRE_NUMBER  22500)
+set(HYPRE_DATE    2022/06/15)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -108,6 +108,7 @@ option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memo
 # CUDA options
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
+option(HYPRE_ENABLE_CUSOLVER         "Use cuSOLVER" OFF)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)

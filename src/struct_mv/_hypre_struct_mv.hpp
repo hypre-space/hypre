@@ -776,11 +776,12 @@ extern "C++"
 
    template <typename LOOP_BODY>
    __global__ void
-   forall_kernel( LOOP_BODY loop_body,
+   forall_kernel( hypre_DeviceItem & item,
+                  LOOP_BODY loop_body,
                   HYPRE_Int length )
    {
-      const HYPRE_Int idx = hypre_cuda_get_grid_thread_id<1, 1>();
-      /* const HYPRE_Int number_threads = hypre_cuda_get_grid_num_threads<1,1>(); */
+      const HYPRE_Int idx = hypre_gpu_get_grid_thread_id<1, 1>(item);
+      /* const HYPRE_Int number_threads = hypre_gpu_get_grid_num_threads<1,1>(item); */
 
       if (idx < length)
       {
@@ -820,12 +821,13 @@ extern "C++"
 
    template <typename LOOP_BODY, typename REDUCER>
    __global__ void
-   reductionforall_kernel( HYPRE_Int length,
+   reductionforall_kernel( hypre_DeviceItem & item,
+                           HYPRE_Int length,
                            REDUCER   reducer,
                            LOOP_BODY loop_body )
    {
-      const HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
-      const HYPRE_Int n_threads = hypre_cuda_get_grid_num_threads<1, 1>();
+      const HYPRE_Int thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
+      const HYPRE_Int n_threads = hypre_gpu_get_grid_num_threads<1, 1>(item);
 
       for (HYPRE_Int idx = thread_id; idx < length; idx += n_threads)
       {

@@ -52,7 +52,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* destroy solver if already setup */
-//   if (solver != NULL) { hypre_SLUDistDestroy(solver); }
+   //   if (solver != NULL) { hypre_SLUDistDestroy(solver); }
    /* allocate memory for new solver */
    dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
 

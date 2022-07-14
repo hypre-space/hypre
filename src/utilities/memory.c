@@ -47,6 +47,7 @@ hypre_WrongMemoryLocation()
 void
 hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
 {
+#if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    if (!ptr)
    {
@@ -58,6 +59,7 @@ hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
    assert(location == location_ptr);
+#endif
 #endif
 }
 
@@ -145,9 +147,7 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
       return;
    }
 
-#if defined(HYPRE_DEBUG)
    hypre_CheckMemoryLocation(ptr, hypre_MEMORY_UNIFIED);
-#endif
 
 #if defined(HYPRE_USING_CUDA)
    if (location == hypre_MEMORY_DEVICE)
@@ -519,9 +519,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
-#if defined(HYPRE_DEBUG)
    hypre_CheckMemoryLocation(ptr, location);
-#endif
 
    switch (location)
    {
@@ -576,13 +574,11 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
       return;
    }
 
-#if defined(HYPRE_DEBUG)
    if (size > 0)
    {
       hypre_CheckMemoryLocation(dst, loc_dst);
       hypre_CheckMemoryLocation(src, loc_src);
    }
-#endif
 
    /* Totally 4 x 4 = 16 cases */
 
@@ -863,9 +859,7 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation locati
       return ptr;
    }
 
-#if defined(HYPRE_DEBUG)
    hypre_CheckMemoryLocation(ptr, hypre_GetActualMemLocation(location));
-#endif
 
    switch (hypre_GetActualMemLocation(location))
    {
@@ -1383,7 +1377,8 @@ hypre_PrintMemoryTracker()
           tracker->data[i]._memory_location == hypre_MEMORY_HOST &&
           tracker->data[i]._memory_location2 == hypre_MEMORY_DEVICE )
       {
-         fprintf(file, " %6zu %12s        %16p  %16p  %10s %16s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
+         fprintf(file,
+                 " %6zu %12s        %16p  %16p  %10s %16s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
                  i,
                  tracker->data[i]._action,
                  tracker->data[i]._ptr,
@@ -1398,7 +1393,7 @@ hypre_PrintMemoryTracker()
                  curr_bytes[hypre_MEMORY_HOST_PINNED],
                  curr_bytes[hypre_MEMORY_DEVICE],
                  curr_bytes[hypre_MEMORY_UNIFIED]
-               );
+                );
       }
       else
 #endif
@@ -1416,7 +1411,7 @@ hypre_PrintMemoryTracker()
                  curr_bytes[hypre_MEMORY_HOST_PINNED],
                  curr_bytes[hypre_MEMORY_DEVICE],
                  curr_bytes[hypre_MEMORY_UNIFIED]
-               );
+                );
       }
    }
 
