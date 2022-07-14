@@ -49,10 +49,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    HYPRE_Int                num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int                num_recvs, num_sends;
-   HYPRE_Int                i, j;
    HYPRE_Int                ierr = 0;
 
-   HYPRE_Int                vecstride    = hypre_VectorVectorStride(x_local);
    HYPRE_Int                idxstride    = hypre_VectorIndexStride(x_local);
    HYPRE_Int                num_vectors  = hypre_VectorNumVectors(x_local);
    HYPRE_Complex           *x_local_data = hypre_VectorData(x_local);
@@ -97,14 +95,14 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_assert( hypre_VectorNumVectors(b_local) == num_vectors );
    hypre_assert( hypre_VectorNumVectors(y_local) == num_vectors );
 
-   if ( num_vectors == 1 )
+   if (num_vectors == 1)
    {
-      x_tmp = hypre_SeqVectorCreate( num_cols_offd );
+      x_tmp = hypre_SeqVectorCreate(num_cols_offd);
    }
    else
    {
-      hypre_assert( num_vectors > 1 );
-      x_tmp = hypre_SeqMultiVectorCreate( num_cols_offd, num_vectors );
+      hypre_assert(num_vectors > 1);
+      x_tmp = hypre_SeqMultiVectorCreate(num_cols_offd, num_vectors);
       hypre_VectorMultiVecStorageMethod(x_tmp) = 1;
    }
 
@@ -116,55 +114,21 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
-      /* TODO: move this to a better place - hypre_MatvecCommPkgCreate (?) */
-      /* Issue: hypre_ParCSRMatrixMatvec might be called for vector with
-         different number of components, which would break this */
-      if (num_vectors > 1)
-      {
-         HYPRE_Int   num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         HYPRE_Int   num_recvs       = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-         HYPRE_Int  *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
-         HYPRE_Int  *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-         HYPRE_Int  *send_map_elmts  = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
-         HYPRE_Int  *send_map_elmts_new;
-
-         /* Update send_maps_elmts */
-         send_map_elmts_new = hypre_CTAlloc(HYPRE_Int,
-                                            send_map_starts[num_sends] * num_vectors,
-                                            HYPRE_MEMORY_HOST);
-
-         for (i = 0; i < send_map_starts[num_sends]; i++)
-         {
-            for (j = 0; j < num_vectors; j++)
-            {
-               send_map_elmts_new[i * num_vectors + j] = send_map_elmts[i] * idxstride +
-                                                         j * vecstride;
-            }
-         }
-
-         hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
-         hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts_new;
-
-         /* Update send_map_starts */
-         for (i = 0; i < num_sends + 1; i++)
-         {
-            send_map_starts[i] *= num_vectors;
-         }
-
-         /* Update recv_vec_starts */
-         for (i = 0; i < num_recvs + 1; i++)
-         {
-            recv_vec_starts[i] *= num_vectors;
-         }
-      }
    }
+
+   /* Update send_map_starts, send_map_elmts, and recv_vec_starts when doing
+      sparse matrix/multivector product  */
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, x);
+
+   /* send_map_elmts on device */
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    hypre_assert( num_cols_offd * num_vectors ==
                  hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) );
+   hypre_assert( hypre_ParCSRCommPkgRecvVecStart(comm_pkg, 0) == 0 );
    hypre_assert( hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0) == 0 );
 
 #ifdef HYPRE_PROFILE
@@ -230,9 +194,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_assert(idxstride == 1);
 
    //hypre_SeqVectorPrefetch(x_local, HYPRE_MEMORY_DEVICE);
-
-   /* send_map_elmts on device */
-   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
    /*---------------------------------------------------------------------
     * Pack send data

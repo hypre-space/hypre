@@ -531,8 +531,9 @@ hypre_ParCSRCommPkgCreateApart
    hypre_ParCSRCommPkg *comm_pkg
 )
 {
-   HYPRE_Int num_sends, *send_procs, *send_map_starts,
-             num_recvs, *recv_procs, *recv_vec_starts, *send_map_elmts;
+   HYPRE_Int  num_sends, *send_procs, *send_map_starts;
+   HYPRE_Int  num_recvs, *recv_procs, *recv_vec_starts;
+   HYPRE_Int *send_map_elmts;
 
    /*-----------------------------------------------------------
     * get commpkg info information
@@ -544,8 +545,8 @@ hypre_ParCSRCommPkgCreateApart
                                         &num_sends, &send_procs, &send_map_starts,
                                         &send_map_elmts, apart);
 
-
    hypre_ParCSRCommPkgComm         (comm_pkg) = comm;
+   hypre_ParCSRCommPkgNumComponents(comm_pkg) = 1;
    hypre_ParCSRCommPkgNumRecvs     (comm_pkg) = num_recvs;
    hypre_ParCSRCommPkgRecvProcs    (comm_pkg) = recv_procs;
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;

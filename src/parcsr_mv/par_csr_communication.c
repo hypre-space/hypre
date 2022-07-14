@@ -971,12 +971,119 @@ hypre_ParCSRCommPkgCreate
    return hypre_error_flag;
 }
 
-/* ----------------------------------------------------------------------
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommPkgUpdateVecStarts
+ *------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
+                                    hypre_ParVector     *x )
+{
+   hypre_Vector *x_local         = hypre_ParVectorLocalVector(x);
+   HYPRE_Int     num_vectors     = hypre_VectorNumVectors(x_local);
+   HYPRE_Int     vecstride       = hypre_VectorVectorStride(x_local);
+   HYPRE_Int     idxstride       = hypre_VectorIndexStride(x_local);
+
+   HYPRE_Int     num_components  = hypre_ParCSRCommPkgNumComponents(comm_pkg);
+   HYPRE_Int     num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int     num_recvs       = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   HYPRE_Int    *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   HYPRE_Int    *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   HYPRE_Int    *send_map_elmts  = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+   HYPRE_Int    *send_map_elmts_new;
+
+   HYPRE_Int     i, j;
+
+   hypre_assert(num_components > 0);
+
+   if (num_vectors != num_components)
+   {
+      /* Update number of components in the communication package */
+      hypre_ParCSRCommPkgNumComponents(comm_pkg) = num_vectors;
+
+      /* Allocate send_maps_elmts */
+      send_map_elmts_new = hypre_CTAlloc(HYPRE_Int,
+                                         send_map_starts[num_sends] * num_vectors,
+                                         HYPRE_MEMORY_HOST);
+
+      /* Update send_maps_elmts */
+      if (num_vectors > num_components)
+      {
+         if (num_components == 1)
+         {
+            for (i = 0; i < send_map_starts[num_sends]; i++)
+            {
+               for (j = 0; j < num_vectors; j++)
+               {
+                  send_map_elmts_new[i * num_vectors + j] = send_map_elmts[i] * idxstride +
+                                                            j * vecstride;
+               }
+            }
+         }
+         else
+         {
+            for (i = 0; i < send_map_starts[num_sends]; i++)
+            {
+               for (j = 0; j < num_vectors; j++)
+               {
+                  send_map_elmts_new[i * num_vectors + j] =
+                     send_map_elmts[i * num_components] * idxstride + j * vecstride;
+               }
+            }
+         }
+      }
+      else
+      {
+         /* num_vectors < num_components */
+         if (num_vectors == 1)
+         {
+            for (i = 0; i < send_map_starts[num_sends]; i++)
+            {
+               send_map_elmts_new[i] = send_map_elmts[i * num_components];
+            }
+         }
+         else
+         {
+            for (i = 0; i < send_map_starts[num_sends]; i++)
+            {
+               for (j = 0; j < num_vectors; j++)
+               {
+                  send_map_elmts_new[i * num_vectors + j] =
+                      send_map_elmts[i * num_components + j];
+               }
+            }
+         }
+      }
+      hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts_new;
+
+      /* Free memory */
+      hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), HYPRE_MEMORY_DEVICE);
+
+      /* Update send_map_starts */
+      for (i = 0; i < num_sends + 1; i++)
+      {
+         send_map_starts[i] *= num_vectors / num_components;
+      }
+
+      /* Update recv_vec_starts */
+      for (i = 0; i < num_recvs + 1; i++)
+      {
+         recv_vec_starts[i] *= num_vectors / num_components;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*------------------------------------------------------------------
  * hypre_MatvecCommPkgCreate
- * generates the comm_pkg for A
- * if no row and/or column partitioning is given, the routine determines
+ *
+ * Generates the comm_pkg for A
+ * If no row and/or column partitioning is given, the routine determines
  * them with MPE_Decomp1d
- * ---------------------------------------------------------------------*/
+ *------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
@@ -1014,6 +1121,10 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
 
    return hypre_error_flag;
 }
+
+/*------------------------------------------------------------------
+ * hypre_MatvecCommPkgDestroy
+ *------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )

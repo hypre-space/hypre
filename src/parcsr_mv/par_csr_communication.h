@@ -51,6 +51,7 @@ typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 typedef struct _hypre_ParCSRCommPkg
 {
    MPI_Comm                          comm;
+   HYPRE_Int                         num_components;
    HYPRE_Int                         num_sends;
    HYPRE_Int                        *send_procs;
    HYPRE_Int                        *send_map_starts;
@@ -83,6 +84,7 @@ typedef struct _hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
 
 #define hypre_ParCSRCommPkgComm(comm_pkg)                (comm_pkg -> comm)
+#define hypre_ParCSRCommPkgNumComponents(comm_pkg)       (comm_pkg -> num_components)
 #define hypre_ParCSRCommPkgNumSends(comm_pkg)            (comm_pkg -> num_sends)
 #define hypre_ParCSRCommPkgSendProcs(comm_pkg)           (comm_pkg -> send_procs)
 #define hypre_ParCSRCommPkgSendProc(comm_pkg, i)         (comm_pkg -> send_procs[i])
@@ -116,17 +118,19 @@ static inline void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
 #if defined(HYPRE_USING_GPU)
+   HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
    if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)
    {
       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) =
          hypre_TAlloc(HYPRE_Int,
-                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)),
+                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                       HYPRE_MEMORY_DEVICE);
 
       hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                     hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
                     HYPRE_Int,
-                    hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)),
+                    hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                     HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_HOST);
    }
