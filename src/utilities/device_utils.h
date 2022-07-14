@@ -1386,7 +1386,7 @@ struct modulo
    T val;
    modulo(T val_) { val = val_; }
 
-   constexpr bool operator()(const T &x) const { return (x % val); }
+   constexpr T operator()(const T &x) const { return (x % val); }
 };
 
 template<typename T>
