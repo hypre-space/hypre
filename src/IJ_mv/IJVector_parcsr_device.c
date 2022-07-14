@@ -273,7 +273,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 
 #ifdef HYPRE_DEBUG
    /* the stack should only have on-proc elements now */
-#if define(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    HYPRE_Int tmp = HYPRE_ONEDPL_CALL(std::count_if, stack_i, stack_i + nelms, pred);
 #else
    HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
