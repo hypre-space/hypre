@@ -176,7 +176,7 @@ T blockReduceSum(T val)
 
 template<typename T>
 __global__ void
-OneBlockReduceKernel(T *arr, HYPRE_Int N)
+OneBlockReduceKernel(hypre_DeviceItem &item, T *arr, HYPRE_Int N)
 {
    T sum;
    sum = 0.0;

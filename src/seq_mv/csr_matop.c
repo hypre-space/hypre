@@ -396,9 +396,20 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
    nnzrows_C = nrows_A;
    if ((nnzrows_A < nrows_A) && (nnzrows_B < nrows_B))
    {
-      hypre_MergeOrderedArrays(nnzrows_A, rownnz_A,
-                               nnzrows_B, rownnz_B,
-                               &nnzrows_C, &rownnz_C);
+      hypre_IntArray arr_A;
+      hypre_IntArray arr_B;
+      hypre_IntArray arr_C;
+
+      hypre_IntArrayData(&arr_A) = rownnz_A;
+      hypre_IntArrayData(&arr_B) = rownnz_B;
+      hypre_IntArraySize(&arr_A) = nnzrows_A;
+      hypre_IntArraySize(&arr_B) = nnzrows_B;
+      hypre_IntArrayMemoryLocation(&arr_C) = memory_location_C;
+
+      hypre_IntArrayMergeOrdered(&arr_A, &arr_B, &arr_C);
+
+      nnzrows_C = hypre_IntArraySize(&arr_C);
+      rownnz_C  = hypre_IntArrayData(&arr_C);
    }
    else
    {
@@ -1281,6 +1292,8 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
    {
       ierr = hypre_CSRMatrixTransposeHost(A, AT, data);
    }
+
+   hypre_CSRMatrixSetPatternOnly(*AT, hypre_CSRMatrixPatternOnly(A));
 
    return ierr;
 }

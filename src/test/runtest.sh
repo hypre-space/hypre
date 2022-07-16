@@ -19,11 +19,13 @@ TestDirNames=""            # string of names of TEST_* directories used
 HOST=`hostname`
 NumThreads=0               # number of OpenMP threads to use if > 0
 Valgrind=""                # string to add to MpirunString when using valgrind
+cudamemcheck=""            # string to add to MpirunString when using cudamemcheck
 mpibind=""                 # string to add to MpirunString when using mpibind
 script=""                  # string to add to MpirunString when using script
 SaveExt="saved"            # saved file extension
 RTOL=0
 ATOL=0
+RTOL_PERF=0.15
 
 function usage
 {
@@ -41,6 +43,7 @@ function usage
    printf "    -atol <tol>    use absolute tolerance 'tol' to compare numeric test values\n"
    printf "    -save <ext>    use '<test>.saved.<ext> for the saved-file extension\n"
    printf "    -valgrind      use valgrind memory checker\n"
+   printf "    -cudamemcheck  use CUDA memory checker\n"
    printf "    -mpibind       use mpibind\n"
    printf "    -script <sh>   use a script before the command\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
@@ -71,6 +74,8 @@ function usage
 # generate default command based on the first 4 characters of the platform name
 function MpirunString
 {
+   NumArgs1=$#
+
    case $HOST in
       *bgl*)
          BatchMode=1
@@ -100,40 +105,37 @@ function MpirunString
          shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
-            RunString="srun -p pdebug -c $NumThreads -n$*"
+            RunString="srun -p pdebug -c $NumThreads -n$1"
          else
-            RunString="srun -p pdebug -n$*"
+            RunString="srun -p pdebug -n$1"
          fi
          ;;
       surface*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
          ;;
       pascal*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
          ;;
       rzansel*)
          shift
-         RunString="lrun -T$*"
-         ;;
-      ray*)
-         shift
-         #RunString="mpirun -n $*"
-         RunString="lrun -n$*"
+         RunString="lrun -T$1"
          ;;
       lassen*)
          shift
-         #RunString="mpirun -n $*"
-         RunString="lrun -n$*"
+         RunString="lrun -n$1"
          ;;
-      redwood*)
+      tioga*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
+         if [ "$mpibind" = "mpibind" ] ; then
+            mpibind="--mpibind=on"
+         fi
          ;;
       node*)
          shift
-         RunString="srun -n$*"
+         RunString="srun -n$1"
          ;;
       *)
          shift
@@ -141,11 +143,15 @@ function MpirunString
             export OMP_NUM_THREADS=$NumThreads
          fi
          RunString="$RunPrefix $1"
-         shift
          ;;
    esac
 
-   RunString="$RunString $script $mpibind $Valgrind $*"
+   NumArgs2=$(($#+1))
+   if [ "$NumArgs1" -eq "$NumArgs2" ] ; then
+      shift
+      RunString="$RunString $script $mpibind $cudamemcheck $Valgrind $*"
+      #echo $RunString
+   fi
 }
 
 # determine the "number of nodes" desired by dividing the "number of processes"
@@ -412,6 +418,14 @@ function ExecuteTest
          # diff -U3 -bI"time" ${TestName}.saved ${TestName}.out   # old way of diffing
          (../runcheck.sh $TestName.out $SaveName $RTOL $ATOL >> $TestName.err 2>&1)
       fi
+      # check performance
+      PerfTestName=$TestName.perf.out
+      PerfSaveName=$TestName.perf.$SaveExt
+      if [ -f $PerfTestName ]; then
+         if [ -f $PerfSaveName ]; then
+            (../runcheck.sh $PerfTestName $PerfSaveName $RTOL_PERF >> $TestName.err 2>&1)
+         fi
+      fi
    fi
    cd $SavePWD
 }
@@ -513,6 +527,10 @@ do
          shift
          Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=yes --track-origins=yes"
          ;;
+      -cudamemcheck)
+         shift
+         cudamemcheck="cuda-memcheck --leak-check full"
+         ;;
       -mpibind)
          shift
          mpibind="mpibind"
@@ -592,6 +610,7 @@ CleanUp $TestDirNames $ExecFileNames
 # Filter misleading error messages
 cat > runtest.filters <<EOF
 lrun warning: default mapping forced to idle
+srun: Warning: can't run 1 processes on 2 nodes, setting nnodes to 1
 hypre_MPI_Init
 job [0-9]* queued and waiting for resources
 job [0-9]* has been allocated resources

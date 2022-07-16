@@ -49,14 +49,20 @@ save="arcticus"
 ## SYCL ##
 ##########
 
+# SYCL with UM in debug mode [ij, struct]
+co="--with-sycl --enable-unified-memory --enable-debug CC=mpiicx CXX=mpiicpx FC=mpif90 --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-sycl-um
+
 
 ############
 ## OMP4.5 ##
 ############
 
 # OMP 4.5 without UM in debug mode [struct]
-co="--with-device-openmp --enable-debug --enable-fortran=no --with-extra-CXXFLAGS=\\'-Wno-missing-prototype-for-cc\\' --with-extra-CFLAGS=\\'-Wno-missing-prototype-for-cc\\' CC= CXX="
-ro="-struct -rt -save ${host}"
+co="--with-device-openmp --enable-debug --enable-fortran=no --with-extra-CXXFLAGS=\\'-Wno-missing-prototype-for-cc\\' --with-extra-CFLAGS=\\'-Wno-missing-prototype-for-cc\\' CC= CXX= --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+ro="-struct -rt -save ${save} -script gpu_tile_compact.sh"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-deviceomp-nonum-debug-struct
 
@@ -65,8 +71,8 @@ ro="-struct -rt -save ${host}"
 ############
 
 # Kokkos without UM in debug mode [struct]
-co="--with-device-openmp --with-kokkos --enable-debug --with-kokkos-include=$KOKKOS_HOME/include --with-kokkos-lib=$KOKKOS_HOME/lib64/libkokkoscore.a --with-cxxstandard=17 --with-extra-CXXFLAGS=\\'-fno-exceptions -D__STRICT_ANSI__\\' --enable-fortran=no CC= CXX="
-ro="-struct -rt -save ${host}"
+co="--with-device-openmp --with-kokkos --enable-debug --with-kokkos-include=$KOKKOS_HOME/include --with-kokkos-lib=$KOKKOS_HOME/lib64/libkokkoscore.a --with-cxxstandard=17 --with-extra-CXXFLAGS=\\'-fno-exceptions -D__STRICT_ANSI__\\' --enable-fortran=no CC= CXX= --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+ro="-struct -rt -save ${save} -script gpu_tile_compact.sh"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-kokkos-nonum-debug-struct
 

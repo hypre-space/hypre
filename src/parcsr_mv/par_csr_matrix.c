@@ -125,7 +125,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    matrix->bdiaginv_comm_pkg = NULL;
    matrix->bdiag_size = -1;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_ParCSRMatrixSocDiagJ(matrix) = NULL;
    hypre_ParCSRMatrixSocOffdJ(matrix) = NULL;
 #endif
@@ -201,7 +201,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
          hypre_MatvecCommPkgDestroy(matrix->bdiaginv_comm_pkg);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypre_TFree(hypre_ParCSRMatrixSocDiagJ(matrix), HYPRE_MEMORY_DEVICE);
       hypre_TFree(hypre_ParCSRMatrixSocOffdJ(matrix), HYPRE_MEMORY_DEVICE);
 #endif
@@ -441,7 +441,7 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
 
 HYPRE_Int
 hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix,
-                                HYPRE_Int              owns_data )
+                                HYPRE_Int           owns_data )
 {
    if (!matrix)
    {
@@ -450,6 +450,29 @@ hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix,
    }
 
    hypre_ParCSRMatrixOwnsData(matrix) = owns_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixSetPatternOnly
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixSetPatternOnly( hypre_ParCSRMatrix *matrix,
+                                  HYPRE_Int           pattern_only)
+{
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
+   if (diag) { hypre_CSRMatrixSetPatternOnly(diag, pattern_only); }
+
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
+   if (offd) { hypre_CSRMatrixSetPatternOnly(offd, pattern_only); }
 
    return hypre_error_flag;
 }
@@ -647,7 +670,8 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int            num_nonzeros_offd;
    HYPRE_BigInt         ilower, iupper, jlower, jupper;
 
-   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation((hypre_ParCSRMatrix*) matrix);
+   HYPRE_MemoryLocation memory_location =
+      hypre_ParCSRMatrixMemoryLocation((hypre_ParCSRMatrix*) matrix);
 
    if (!matrix)
    {

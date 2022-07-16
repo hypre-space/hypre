@@ -483,9 +483,20 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    if (num_rownnz_diag_A != num_rows_diag_A &&
        num_rownnz_offd_A != num_rows_offd_A )
    {
-      hypre_MergeOrderedArrays(num_rownnz_diag_A, A_diag_ir,
-                               num_rownnz_offd_A, A_offd_ir,
-                               &num_rownnz_A, &rownnz_A);
+      hypre_IntArray arr_diag;
+      hypre_IntArray arr_offd;
+      hypre_IntArray arr_rownnz;
+
+      hypre_IntArrayData(&arr_diag) = A_diag_ir;
+      hypre_IntArrayData(&arr_offd) = A_offd_ir;
+      hypre_IntArraySize(&arr_diag) = num_rownnz_diag_A;
+      hypre_IntArraySize(&arr_offd) = num_rownnz_offd_A;
+      hypre_IntArrayMemoryLocation(&arr_rownnz) = memory_location_A;
+
+      hypre_IntArrayMergeOrdered(&arr_diag, &arr_offd, &arr_rownnz);
+
+      num_rownnz_A = hypre_IntArraySize(&arr_rownnz);
+      rownnz_A     = hypre_IntArrayData(&arr_rownnz);
    }
    else
    {
@@ -1164,6 +1175,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixData(C_diag) = C_diag_data;
    hypre_CSRMatrixI(C_diag)    = C_diag_i;
    hypre_CSRMatrixJ(C_diag)    = C_diag_j;
+   hypre_CSRMatrixMemoryLocation(C_diag) = memory_location_C;
    hypre_CSRMatrixSetRownnz(C_diag);
 
    C_offd = hypre_ParCSRMatrixOffd(C);
@@ -1175,10 +1187,9 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixJ(C_offd)        = C_offd_j;
       hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
    }
+   hypre_CSRMatrixMemoryLocation(C_offd) = memory_location_C;
    hypre_CSRMatrixSetRownnz(C_offd);
 
-   hypre_CSRMatrixMemoryLocation(C_diag) = memory_location_C;
-   hypre_CSRMatrixMemoryLocation(C_offd) = memory_location_C;
 
    /*-----------------------------------------------------------------------
     *  Free various arrays
@@ -1199,7 +1210,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    {
       hypre_TFree(map_B_to_C, HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(rownnz_A, HYPRE_MEMORY_HOST);
+   hypre_TFree(rownnz_A, memory_location_A);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
@@ -4049,8 +4060,8 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixOffd(C) = C_tmp_offd;
    }
 
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C)) = memory_location_C;
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(C)) = memory_location_C;
+   hypre_assert(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(C)) == memory_location_C);
+   hypre_assert(hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(C)) == memory_location_C);
 
    if (num_cols_offd_C)
    {
@@ -5224,9 +5235,20 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    if ((num_rownnz_diag_A < num_rows_diag_A) &&
        (num_rownnz_diag_B < num_rows_diag_B))
    {
-      hypre_MergeOrderedArrays( num_rownnz_diag_A,  rownnz_diag_A,
-                                num_rownnz_diag_B,  rownnz_diag_B,
-                                &num_rownnz_diag_C, &rownnz_diag_C);
+      hypre_IntArray arr_diagA;
+      hypre_IntArray arr_diagB;
+      hypre_IntArray arr_diagC;
+
+      hypre_IntArrayData(&arr_diagA) = rownnz_diag_A;
+      hypre_IntArrayData(&arr_diagB) = rownnz_diag_B;
+      hypre_IntArraySize(&arr_diagA) = num_rownnz_diag_A;
+      hypre_IntArraySize(&arr_diagB) = num_rownnz_diag_B;
+      hypre_IntArrayMemoryLocation(&arr_diagC) = memory_location_C;
+
+      hypre_IntArrayMergeOrdered(&arr_diagA, &arr_diagB, &arr_diagC);
+
+      num_rownnz_diag_C = hypre_IntArraySize(&arr_diagC);
+      rownnz_diag_C     = hypre_IntArrayData(&arr_diagC);
    }
 
    /* Set nonzero rows data of offd_C */
@@ -5234,9 +5256,20 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    if ((num_rownnz_offd_A < num_rows_offd_A) &&
        (num_rownnz_offd_B < num_rows_offd_B))
    {
-      hypre_MergeOrderedArrays( num_rownnz_offd_A,  rownnz_offd_A,
-                                num_rownnz_offd_B,  rownnz_offd_B,
-                                &num_rownnz_offd_C, &rownnz_offd_C);
+      hypre_IntArray arr_offdA;
+      hypre_IntArray arr_offdB;
+      hypre_IntArray arr_offdC;
+
+      hypre_IntArrayData(&arr_offdA) = rownnz_offd_A;
+      hypre_IntArrayData(&arr_offdB) = rownnz_offd_B;
+      hypre_IntArraySize(&arr_offdA) = num_rownnz_offd_A;
+      hypre_IntArraySize(&arr_offdB) = num_rownnz_offd_B;
+      hypre_IntArrayMemoryLocation(&arr_offdC) = memory_location_C;
+
+      hypre_IntArrayMergeOrdered(&arr_offdA, &arr_offdB, &arr_offdC);
+
+      num_rownnz_offd_C = hypre_IntArraySize(&arr_offdC);
+      rownnz_offd_C     = hypre_IntArrayData(&arr_offdC);
    }
 
    /* Set diag_C */
