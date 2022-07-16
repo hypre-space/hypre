@@ -338,8 +338,8 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  nrows,
-                              HYPRE_Int  nnz,
+hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  num_rows,
+                              HYPRE_Int  num_nonzeros,
                               HYPRE_Int  alpha,
                               HYPRE_Int *d_ia,
                               HYPRE_Int *d_ja,
@@ -348,8 +348,16 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  nrows,
                               HYPRE_Int  beta,
                               HYPRE_Int *d_y )
 {
-   hypreDevice_CSRMatrixMatvec<0, HYPRE_Int>(1, nrows, NULL, nnz,
-                                             1, 1, 1, 1,
+   /* Additional input variables */
+   HYPRE_Int        num_vectors = 1;
+   HYPRE_Int        idxstride_x = 1;
+   HYPRE_Int        vecstride_x = 1;
+   HYPRE_Int        idxstride_y = 1;
+   HYPRE_Int        vecstride_y = 1;
+   HYPRE_Int       *d_rownnz    = NULL;
+
+   hypreDevice_CSRMatrixMatvec<0, HYPRE_Int>(num_vectors, num_rows, d_rownnz, num_nonzeros,
+                                             idxstride_x, idxstride_y, vecstride_x, vecstride_y,
                                              alpha, d_ia, d_ja, d_a,
                                              d_x, beta, d_y);
 
