@@ -224,6 +224,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Int *d_send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
    HYPRE_Int  start            = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
    HYPRE_Int  end              = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_Int  i;
 
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_buf_data, x_local_data, d_send_map_elmts)
    for (i = start; i < end; i++)
@@ -231,8 +232,11 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       x_buf_data[i] = x_local_data[d_send_map_elmts[i]];
    }
 #endif
+
 #else
    /* pack send data on Host */
+   HYPRE_Int  i;
+
 #if defined(HYPRE_USING_OPENMP)
       #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
@@ -872,31 +876,50 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
-hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            ncols,
+hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            num_cols,
                                   HYPRE_Complex       *locl_data,
                                   HYPRE_Complex       *recv_data,
                                   hypre_ParCSRCommPkg *comm_pkg )
 {
-   HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   HYPRE_Int num_elemt = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   hypre_CSRMatrix  *matrix_E  = hypre_ParCSRCommPkgMatrixE(comm_pkg);
+   HYPRE_Int         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int         num_elemt = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+
+   hypre_Vector      vec_x;
+   hypre_Vector      vec_y;
 
    if (num_elemt == 0)
    {
       return hypre_error_flag;
    }
 
-   if (!hypre_ParCSRCommPkgMatrixE(comm_pkg))
+   /* Create matrix E if it not exists */
+   if (!matrix_E)
    {
-      hypre_ParCSRCommPkgCreateMatrixE(comm_pkg, ncols);
+      hypre_ParCSRCommPkgCreateMatrixE(comm_pkg, num_cols);
+      matrix_E = hypre_ParCSRCommPkgMatrixE(comm_pkg);
    }
 
-   hypre_CSRMatrix *E = hypre_ParCSRCommPkgMatrixE(comm_pkg);
-   hypre_Vector vec_x, vec_y;
-   hypre_VectorData(&vec_x) = recv_data;
-   hypre_VectorSize(&vec_x) = num_elemt;
-   hypre_VectorData(&vec_y) = locl_data;
+   /* Set vector x */
+   hypre_VectorData(&vec_x)                  = recv_data;
+   hypre_VectorOwnsData(&vec_x)              = 0;
+   hypre_VectorSize(&vec_x)                  = num_elemt;
+   hypre_VectorVectorStride(&vec_x)          = num_elemt;
+   hypre_VectorIndexStride(&vec_x)           = 1;
+   hypre_VectorNumVectors(&vec_x)            = 1;
+   hypre_VectorMultiVecStorageMethod(&vec_x) = 0;
 
-   hypre_CSRMatrixSpMVDevice(0, 1.0, E, &vec_x, 1.0, &vec_y, 0);
+   /* Set vector y */
+   hypre_VectorData(&vec_y)                  = locl_data;
+   hypre_VectorOwnsData(&vec_y)              = 0;
+   hypre_VectorSize(&vec_y)                  = num_cols;
+   hypre_VectorVectorStride(&vec_y)          = num_cols;
+   hypre_VectorIndexStride(&vec_y)           = 1;
+   hypre_VectorNumVectors(&vec_y)            = 1;
+   hypre_VectorMultiVecStorageMethod(&vec_y) = 0;
+
+   /* Compute y += E*x */
+   hypre_CSRMatrixSpMVDevice(0, 1.0, matrix_E, &vec_x, 1.0, &vec_y, 0);
 
    return hypre_error_flag;
 }

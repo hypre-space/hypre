@@ -33,7 +33,7 @@
 
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
-hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item
+hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
                                 HYPRE_Int         nrows,
                                 HYPRE_Int        *row_id,
                                 HYPRE_Int         idxstride_x,
@@ -51,9 +51,6 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item
    const HYPRE_Int  grid_ngroups  = gridDim.x * (HYPRE_SPMV_BLOCKDIM / K);
    HYPRE_Int        grid_group_id = (blockIdx.x * HYPRE_SPMV_BLOCKDIM + threadIdx.x) / K;
    const HYPRE_Int  group_lane    = threadIdx.x & (K - 1);
-   const HYPRE_Int  warp_lane     = threadIdx.x & (HYPRE_WARP_SIZE - 1);
-   const HYPRE_Int  warp_group_id = warp_lane / K;
-   const HYPRE_Int  warp_ngroups  = HYPRE_WARP_SIZE / K;
 
    for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < nrows);
           grid_group_id += grid_ngroups)
@@ -62,7 +59,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item
 
       if (row_id)
       {
-         if (grid_group_id < n && group_lane == 0)
+         if (grid_group_id < nrows && group_lane == 0)
          {
             grid_row_id = read_only_load(&row_id[grid_group_id]);
          }
@@ -73,14 +70,14 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item
          grid_row_id = grid_group_id;
       }
 
-      if (grid_group_id < n && group_lane < 2)
+      if (grid_group_id < nrows && group_lane < 2)
       {
          p = read_only_load(&d_ia[grid_row_id + group_lane]);
       }
       q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
       p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
 
-      T sum[NV] = {0.0};
+      T sum[NV] = {T(0)};
 #if HYPRE_SPMV_VERSION == 1
 #pragma unroll 1
       for (p += group_lane; p < q; p += K * 2)
@@ -211,10 +208,10 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
  * hypre's internal implementation of sparse matrix/vector multiplication
  * (SpMV) on GPUs.
  *
+ * Computes:  y = alpha*op(B)*x + beta*y
+ *
  * Supported cases:
- *   1) ind != NULL, y(ind) = alpha*op(B)*x + beta*y(ind)
- *      ind == NULL, y      = alpha*op(B)*x + beta*y
- *      y_ind has size equal to the number of rows of op(B)
+ *   1) rownnz_B != NULL: y(rownnz_B) = alpha*op(B)*x + beta*y(rownnz_B)
  *
  *   2) op(B) = B (trans = 0) or B^T (trans = 1)
  *      op(B) = B^T: not recommended since it computes B^T at every call
@@ -332,6 +329,14 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixIntSpMVDevice
+ *
+ * Sparse matrix/vector multiplication with integer data on GPUs
+ *
+ * Note: This function does not support multivectors
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  nrows,
                               HYPRE_Int  nnz,
@@ -344,6 +349,7 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  nrows,
                               HYPRE_Int *d_y )
 {
    hypreDevice_CSRMatrixMatvec<0, HYPRE_Int>(1, nrows, NULL, nnz,
+                                             1, 1, 1, 1,
                                              alpha, d_ia, d_ja, d_a,
                                              d_x, beta, d_y);
 

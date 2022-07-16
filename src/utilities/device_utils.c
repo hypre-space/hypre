@@ -495,21 +495,14 @@ hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_
 
 template <HYPRE_Int MM>
 __global__ void
-hypreGPUKernel_IVAMXPMY(
-#if defined(HYPRE_USING_SYCL)
-                        sycl::nd_item<1>& item,
-#endif
-                        HYPRE_Int       m,
-                        HYPRE_Int       n,
-                        HYPRE_Complex  *a,
-                        HYPRE_Complex  *x,
-                        HYPRE_Complex  *y)
+hypreGPUKernel_IVAMXPMY( hypre_DeviceItem &item,
+                         HYPRE_Int         m,
+                         HYPRE_Int         n,
+                         HYPRE_Complex    *a,
+                         HYPRE_Complex    *x,
+                         HYPRE_Complex    *y)
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int i = static_cast<HYPRE_Int>(item.get_global_linear_id());
-#else
-   HYPRE_Int i = hypre_cuda_get_grid_thread_id<1, 1>();
-#endif
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
