@@ -35,7 +35,7 @@ struct hypre_IJVectorAssembleFunctor : public
 {
    typedef thrust::tuple<T1, T2> Tuple;
 
-   __device__ Tuple operator()(const Tuple& x, const Tuple& y )
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
    {
       return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
                                  thrust::get<1>(x) + thrust::get<1>(y) );
