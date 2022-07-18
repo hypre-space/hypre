@@ -647,7 +647,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       return hypre_error_flag;
    }
 
-   /* row-wise multivec support is not implemeted yet */
+   /* row-wise multivec is not supportted */
    hypre_assert(hypre_VectorMultiVecStorageMethod(x) == 0);
    hypre_assert(hypre_VectorMultiVecStorageMethod(b) == 0);
    hypre_assert(hypre_VectorMultiVecStorageMethod(y) == 0);
@@ -666,13 +666,21 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
       #endif
       */
 
-      if (num_vectors_x == 1 && num_vectors_y == 1 && num_vectors_b == 1)
+      if (num_vectors_b == 1)
       {
-         hypreDevice_IVAXPY(size, b_data, x_data, y_data);
-      }
-      else if (num_vectors_x == 2 && num_vectors_y == 2 && num_vectors_b == 1)
-      {
-         hypreDevice_IVAMXPMY(num_vectors_x, size, b_data, x_data, y_data);
+         if (num_vectors_x == 1)
+         {
+            hypreDevice_IVAXPY(size, b_data, x_data, y_data);
+         }
+         else if (num_vectors_x == num_vectors_y)
+         {
+            hypreDevice_IVAMXPMY(num_vectors_x, size, b_data, x_data, y_data);
+         }
+         else
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported combination of num_vectors!\n");
+            return hypre_error_flag;
+         }
       }
       else
       {
@@ -725,11 +733,15 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
                }
             }
          }
+         else
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported combination of num_vectors!\n");
+            return hypre_error_flag;
+         }
       }
       else
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported combination of num_vectors!\n");
-         hypre_assert(0);
          return hypre_error_flag;
       }
    }
