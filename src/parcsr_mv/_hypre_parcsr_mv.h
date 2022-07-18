@@ -85,8 +85,7 @@ typedef struct _hypre_ParCSRCommPkg
    /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
    HYPRE_Complex                    *tmp_data;
    HYPRE_Complex                    *buf_data;
-   /* for matmultT/matvecT */
-   hypre_CSRMatrix                  *matrix_E;
+   hypre_CSRMatrix                  *matrix_E; /* for matvecT */
 #endif
 } hypre_ParCSRCommPkg;
 
@@ -1087,9 +1086,8 @@ HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                      HYPRE_Complex beta, hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y );
-HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int ncols, HYPRE_Complex *locl_data,
-                                            HYPRE_Complex *recv_data,
-                                            hypre_ParCSRCommPkg *comm_pkg );
+HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_cols,
+                                            HYPRE_Complex *recv_data, HYPRE_Complex *local_data );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                         hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y, HYPRE_Int *CF_marker, HYPRE_Int fpt );
 

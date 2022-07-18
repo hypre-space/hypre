@@ -1060,6 +1060,8 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       /* Free memory */
       hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixDestroy(hypre_ParCSRCommPkgMatrixE(comm_pkg));
+      hypre_ParCSRCommPkgMatrixE(comm_pkg) = NULL;
 
       /* Update send_map_starts */
       for (i = 0; i < num_sends + 1; i++)
