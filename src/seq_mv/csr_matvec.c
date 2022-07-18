@@ -32,7 +32,6 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A) - offset;
    HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-   /*HYPRE_Int         num_nnz  = hypre_CSRMatrixNumNonzeros(A);*/
 
    HYPRE_Int        *A_rownnz = hypre_CSRMatrixRownnz(A);
    HYPRE_Int         num_rownnz = hypre_CSRMatrixNumRownnz(A);
@@ -46,8 +45,8 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
    HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
    HYPRE_Int         idxstride_y = hypre_VectorIndexStride(y);
    HYPRE_Int         vecstride_y = hypre_VectorVectorStride(y);
-   /*HYPRE_Int         idxstride_b = hypre_VectorIndexStride(b);
-   HYPRE_Int         vecstride_b = hypre_VectorVectorStride(b);*/
+   HYPRE_Int         idxstride_b = hypre_VectorIndexStride(b);
+   HYPRE_Int         vecstride_b = hypre_VectorVectorStride(b);
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
    HYPRE_Complex     temp, tempx;
@@ -68,6 +67,8 @@ hypre_CSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex    alpha,
 
    hypre_assert(num_vectors == hypre_VectorNumVectors(y));
    hypre_assert(num_vectors == hypre_VectorNumVectors(b));
+   hypre_assert(idxstride_b == idxstride_y);
+   hypre_assert(vecstride_b == vecstride_y);
 
    if (num_cols != x_size)
    {
