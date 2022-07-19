@@ -1,0 +1,15 @@
+#!/bin/bash
+#COBALT -t 10 
+#COBALT -n 1
+#COBALT -q arcticus
+#COBALT -e output_vtune
+#COBALT -o output_vtune
+#COBALT --debuglog output_vtune
+
+source /home/ac.mitchell82/loadModules
+
+
+
+export ZE_AFFINITY_MASK=0.0
+vtune -collect gpu-hotspots -start-paused -knob gpu-sampling-interval=10 ./struct -solver 11 -n 10 10 10
+# vtune --collect gpu-hotspots --resume-after=20 --duration=30 --finalization-mode=none -- ./struct -solver 11 -n 320 320 320
