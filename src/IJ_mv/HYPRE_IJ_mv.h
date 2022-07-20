@@ -450,6 +450,12 @@ HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector       vector,
                                   const HYPRE_Complex *values);
 
 /**
+ * Sets all values in vector to \e value
+ **/
+HYPRE_Int HYPRE_IJVectorSetConstantValues(HYPRE_IJVector vector,
+                                          HYPRE_Complex  value);
+
+/**
  * Adds to values in vector.  Usage details are analogous to
  * \ref HYPRE_IJVectorSetValues.
  * Adds to any previous values at the specified locations, or, if
