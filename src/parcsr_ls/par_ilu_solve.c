@@ -49,6 +49,10 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParCSRMatrix      *Aperm            = hypre_ParILUDataAperm(ilu_data);
    //hypre_ParCSRMatrix      *R                = hypre_ParILUDataR(ilu_data);
    //hypre_ParCSRMatrix      *P                = hypre_ParILUDataP(ilu_data);
+#else
+   hypre_ParCSRMatrix   *matmL         = hypre_ParILUDataMatLModified(ilu_data);
+   HYPRE_Real           *matmD         = hypre_ParILUDataMatDModified(ilu_data);
+   hypre_ParCSRMatrix   *matmU         = hypre_ParILUDataMatUModified(ilu_data);
 #endif
 
    /* get matrices */
@@ -59,9 +63,6 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matL          = hypre_ParILUDataMatL(ilu_data);
    HYPRE_Real           *matD          = hypre_ParILUDataMatD(ilu_data);
    hypre_ParCSRMatrix   *matU          = hypre_ParILUDataMatU(ilu_data);
-   hypre_ParCSRMatrix   *matmL         = hypre_ParILUDataMatLModified(ilu_data);
-   HYPRE_Real           *matmD         = hypre_ParILUDataMatDModified(ilu_data);
-   hypre_ParCSRMatrix   *matmU         = hypre_ParILUDataMatUModified(ilu_data);
    hypre_ParCSRMatrix   *matS          = hypre_ParILUDataMatS(ilu_data);
 
    HYPRE_Int            iter, num_procs,  my_id;
