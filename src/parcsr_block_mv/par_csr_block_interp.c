@@ -1672,7 +1672,8 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    HYPRE_Int             *coarse_counter;
    HYPRE_Int              coarse_shift;
    HYPRE_BigInt           total_global_cpts;
-   HYPRE_Int              num_cols_P_offd, my_first_cpt;
+   HYPRE_Int              num_cols_P_offd;
+   HYPRE_BigInt           my_first_cpt;
 
    HYPRE_Int              bd;
 
@@ -2956,11 +2957,11 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   coarse_counter = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
-   jj_count = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
-   jj_count_offd = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   coarse_counter = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   jj_count = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
 
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < n_fine; i++) { fine_to_coarse[i] = -1; }
 
@@ -3101,7 +3102,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
 
    if (debug_flag == 4) { wall_time = time_getWallclockSeconds(); }
 
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_A_offd, HYPRE_MEMORY_HOST);
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_HOST);
    big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                                num_sends), HYPRE_MEMORY_HOST);
 
