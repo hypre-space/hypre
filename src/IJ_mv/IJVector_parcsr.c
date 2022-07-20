@@ -393,7 +393,8 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
                              const HYPRE_Complex  *values)
 {
    HYPRE_Int my_id;
-   HYPRE_Int i, j, vec_start, vec_stop;
+   HYPRE_Int j;
+   HYPRE_BigInt vec_start, vec_stop;
    HYPRE_Complex *data;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
@@ -464,7 +465,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
 
       for (j = 0; j < num_values; j++)
       {
-         i = indices[j];
+         HYPRE_BigInt i = indices[j];
          if (i < vec_start || i > vec_stop)
          {
             /* if elements outside processor boundaries, store in off processor
@@ -701,7 +702,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    HYPRE_Int *num_rows_per_proc = NULL;
    HYPRE_Int  tmp_int;
    HYPRE_Int  obj_size_bytes, big_int_size, complex_size;
-   HYPRE_Int  first_index;
+   HYPRE_BigInt  first_index;
 
    void *void_contact_buf = NULL;
    void *index_ptr;

@@ -484,7 +484,7 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
    if (newoff > 0)
    {
       hypre_BigQsort0(tmp_found, 0, newoff - 1);
-      ifound = tmp_found[0];
+      HYPRE_BigInt ifound = tmp_found[0];
       min = 1;
       for (i = 1; i < newoff; i++)
       {

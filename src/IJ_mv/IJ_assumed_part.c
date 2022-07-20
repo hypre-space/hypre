@@ -87,7 +87,7 @@ hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
 {
    HYPRE_BigInt global_num, global_first_row;
    HYPRE_Int myid;
-   HYPRE_Int  start = 0, end = 0;
+   HYPRE_BigInt start = 0, end = 0;
    HYPRE_BigInt *partitioning = hypre_IJVectorPartitioning(vector);
 
    MPI_Comm   comm;
@@ -99,7 +99,7 @@ hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
    comm = hypre_ParVectorComm(vector);
 
    /* find out my actualy range of rows */
-   start =  partitioning[0];
+   start = partitioning[0];
    end = partitioning[1] - 1;
 
    hypre_MPI_Comm_rank(comm, &myid );

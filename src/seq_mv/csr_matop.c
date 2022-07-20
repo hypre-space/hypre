@@ -1324,6 +1324,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
    HYPRE_Complex   *B_ext_diag_data = NULL;
    HYPRE_Int       *B_ext_offd_i = NULL;
    HYPRE_Int       *B_ext_offd_j = NULL;
+   HYPRE_BigInt    *B_ext_offd_bigj = NULL;
    HYPRE_Complex   *B_ext_offd_data = NULL;
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
@@ -1416,6 +1417,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
          if (B_ext_offd_size)
          {
             B_ext_offd_j    = hypre_CTAlloc(HYPRE_Int,     B_ext_offd_size, HYPRE_MEMORY_HOST);
+            B_ext_offd_bigj = hypre_CTAlloc(HYPRE_BigInt,  B_ext_offd_size, HYPRE_MEMORY_HOST);
             B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size, HYPRE_MEMORY_HOST);
          }
          if (B_ext_offd_size || num_cols_offd_B)
@@ -1437,12 +1439,12 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
             if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
             {
                temp[cnt_offd] = Bs_ext_j[j];
-               B_ext_offd_j[cnt_offd] = Bs_ext_j[j];
+               B_ext_offd_bigj[cnt_offd] = Bs_ext_j[j];
                B_ext_offd_data[cnt_offd++] = Bs_ext_data[j];
             }
             else
             {
-               B_ext_diag_j[cnt_diag] = Bs_ext_j[j] - first_col_diag_B;
+               B_ext_diag_j[cnt_diag] = (HYPRE_Int) (Bs_ext_j[j] - first_col_diag_B);
                B_ext_diag_data[cnt_diag++] = Bs_ext_data[j];
             }
          }
@@ -1500,15 +1502,16 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
       {
          for (j = B_ext_offd_i[i]; j < B_ext_offd_i[i + 1]; j++)
          {
-            B_ext_offd_j[j] = hypre_BigBinarySearch(col_map_offd_C, B_ext_offd_j[j], num_cols_offd_C);
+            B_ext_offd_j[j] = hypre_BigBinarySearch(col_map_offd_C, B_ext_offd_bigj[j], num_cols_offd_C);
          }
       }
    } /* end parallel region */
 
    hypre_TFree(my_diag_array, HYPRE_MEMORY_HOST);
    hypre_TFree(my_offd_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_ext_offd_bigj, HYPRE_MEMORY_HOST);
 
-   Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, last_col_diag_B - first_col_diag_B + 1,
+   Bext_diag = hypre_CSRMatrixCreate(num_rows_Bext, (HYPRE_Int) (last_col_diag_B - first_col_diag_B + 1),
                                      B_ext_diag_size);
    hypre_CSRMatrixMemoryLocation(Bext_diag) = HYPRE_MEMORY_HOST;
    Bext_offd = hypre_CSRMatrixCreate(num_rows_Bext, num_cols_offd_C, B_ext_offd_size);
