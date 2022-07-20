@@ -119,7 +119,7 @@ using hypre_DeviceItem = void*;
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
-#include <rocrand.h>
+#include <rocrand/rocrand.h>
 #endif
 #endif // defined(HYPRE_USING_HIP)
 

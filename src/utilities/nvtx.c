@@ -9,7 +9,7 @@
 
 #if defined(HYPRE_USING_ROCTX)
 #include "hip/hip_runtime_api.h"
-#include "roctx.h"
+#include "roctracer/roctx.h"
 #endif
 
 #if defined(HYPRE_USING_NVTX)
