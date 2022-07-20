@@ -76,9 +76,9 @@ GenerateLaplacian( MPI_Comm       comm,
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = (HYPRE_Int) hypre_min(nx, P);
+   Q_busy = (HYPRE_Int) hypre_min(ny, Q);
+   R_busy = (HYPRE_Int) hypre_min(nz, R);
 
    num_cols_offd = 0;
    if (ip) { num_cols_offd += ny_local * nz_local; }
@@ -406,7 +406,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    HYPRE_Real *offd_data;
 
    HYPRE_BigInt global_part[2];
-   HYPRE_Int ix, iy, iz;
+   HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows;
    HYPRE_BigInt *col_map_offd;
@@ -453,9 +453,9 @@ GenerateSysLaplacian( MPI_Comm comm,
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = (HYPRE_Int) hypre_min(nx, P);
+   Q_busy = (HYPRE_Int) hypre_min(ny, Q);
+   R_busy = (HYPRE_Int) hypre_min(nz, R);
 
    num_cols_offd = 0;
    if (p) { num_cols_offd += ny_local * nz_local; }
@@ -948,9 +948,9 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows + 1, HYPRE_MEMORY_HOST);
 
-   P_busy = hypre_min(nx, P);
-   Q_busy = hypre_min(ny, Q);
-   R_busy = hypre_min(nz, R);
+   P_busy = (HYPRE_Int) hypre_min(nx, P);
+   Q_busy = (HYPRE_Int) hypre_min(ny, Q);
+   R_busy = (HYPRE_Int) hypre_min(nz, R);
 
    num_cols_offd = 0;
    if (p) { num_cols_offd += ny_local * nz_local; }

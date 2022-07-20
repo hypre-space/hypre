@@ -638,7 +638,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    {
       num_contacts = 1;
       contact_proc_list[0] = 0;
-      contact_send_buf[0] =  hypre_ParVectorLastIndex(par_v);
+      contact_send_buf[0]  = hypre_ParVectorLastIndex(par_v);
       contact_send_buf_starts[0] = 0;
       contact_send_buf_starts[1] = 1;
    }
@@ -837,7 +837,8 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    HYPRE_BigInt      global_size, j;
    HYPRE_BigInt     *partitioning;
    HYPRE_Complex    *local_data;
-   HYPRE_Int         myid, num_procs, i, part0;
+   HYPRE_Int         myid, num_procs, i;
+   HYPRE_BigInt      part0;
    char              new_filename[255];
    FILE             *file;
    if (!vector)

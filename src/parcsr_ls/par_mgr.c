@@ -2754,9 +2754,9 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix    *A_CF,
    HYPRE_Int *A_CF_diag_j = hypre_CSRMatrixJ(A_CF_diag);
    HYPRE_Complex *A_CF_diag_data = hypre_CSRMatrixData(A_CF_diag);
 
-   HYPRE_Int global_nrows = hypre_ParCSRMatrixGlobalNumRows(A_CF);
-   HYPRE_Int global_ncols = hypre_ParCSRMatrixGlobalNumCols(A_CF);
-   HYPRE_Int n_fpoints = global_ncols / global_nrows;
+   HYPRE_BigInt global_nrows = hypre_ParCSRMatrixGlobalNumRows(A_CF);
+   HYPRE_BigInt global_ncols = hypre_ParCSRMatrixGlobalNumCols(A_CF);
+   HYPRE_Int n_fpoints = (HYPRE_Int) (global_ncols / global_nrows);
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_CF));
    HYPRE_Int nnz_diag_new = 0;
 
@@ -4037,7 +4037,7 @@ HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
    HYPRE_Int        num_procs, my_id;
    HYPRE_Real      *res;
 
-   const HYPRE_Int  nb2 = blk_size * blk_size;
+   const HYPRE_Int  nb2 = (HYPRE_Int) (blk_size * blk_size);
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -4104,7 +4104,7 @@ HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
    *-----------------------------------------------------------------*/
    for (i = 0; i < n_block; i++)
    {
-      bidxm1 = i * blk_size;
+      bidxm1 = (HYPRE_Int) (i * blk_size);
       for (j = 0; j < blk_size; j++)
       {
          bidx = bidxm1 + j;
@@ -4143,7 +4143,7 @@ HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
          bidx1 = bidxm1 + j;
          for (k = 0; k < blk_size; k++)
          {
-            bidx  = i * nb2 + j * blk_size + k;
+            bidx  = (HYPRE_Int) (i * nb2 + j * blk_size + k);
             u_data[bidx1] += res[k] * diaginv[bidx];
             //printf("u[%d] = %e, diaginv[%d] = %e\n",bidx1,u_data[bidx1],bidx,diaginv[bidx]);
          }
