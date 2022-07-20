@@ -29,7 +29,7 @@ FILES="\
 for i in $FILES
 do
   echo "# Output file: $i"
-  tail -11 $i | head -1
+  tail -1 $i
 done > ${TNAME}.out
 
 # Make sure that the output file is reasonable
