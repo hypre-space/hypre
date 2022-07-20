@@ -864,7 +864,6 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
    }
 
    /* Set vector x */
-#if 1
    hypre_VectorData(&vec_x)                  = recv_data;
    hypre_VectorOwnsData(&vec_x)              = 0;
    hypre_VectorSize(&vec_x)                  = num_elements / num_components;
@@ -872,15 +871,6 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
    hypre_VectorIndexStride(&vec_x)           = num_components;
    hypre_VectorNumVectors(&vec_x)            = num_components;
    hypre_VectorMultiVecStorageMethod(&vec_x) = 1;
-#else
-   hypre_VectorData(&vec_x)                  = recv_data;
-   hypre_VectorOwnsData(&vec_x)              = 0;
-   hypre_VectorSize(&vec_x)                  = num_elements;
-   hypre_VectorVectorStride(&vec_x)          = num_elements;
-   hypre_VectorIndexStride(&vec_x)           = 1;
-   hypre_VectorNumVectors(&vec_x)            = 1;
-   hypre_VectorMultiVecStorageMethod(&vec_x) = 0;
-#endif
 
    /* Set vector y */
    hypre_VectorData(&vec_y)                  = local_data;
