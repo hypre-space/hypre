@@ -658,7 +658,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructStencil   *stencil;
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, rowstart, nnzs ;
+   HYPRE_Int               nrows, nnzs;
+   HYPRE_BigInt            rowstart;
    HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_row_size;
@@ -758,7 +759,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    for (entry = 0; entry < nUventries; entry++)
    {
       mi = iUventries[entry];
-      m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
+      m = (HYPRE_Int) (hypre_SStructUVEntryRank(Uventries[mi]) - rowstart);
       if ((m > -1) && (m < nrows))
       {
          row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[mi]);

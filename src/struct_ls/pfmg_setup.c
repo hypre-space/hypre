@@ -772,7 +772,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_BoxArray        *compute_boxes;
    HYPRE_Real             cxyz[3], sqcxyz[3], tcxyz[3];
    HYPRE_Real             cxyz_max;
-   HYPRE_Int              tot_size;
+   HYPRE_BigInt           tot_size;
    hypre_StructStencil   *stencil;
    //hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
@@ -860,8 +860,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
       for (d = 0; d < 3; d++)
       {
-         mean[d] = cxyz[d] / tot_size;
-         deviation[d] = sqcxyz[d] / tot_size;
+         mean[d] = cxyz[d] / (HYPRE_Real) tot_size;
+         deviation[d] = sqcxyz[d] / (HYPRE_Real) tot_size;
       }
    }
 
