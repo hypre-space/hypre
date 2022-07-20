@@ -291,7 +291,6 @@ hypre_IJVectorSetComponentPar(hypre_IJVector *vector,
       {
          hypre_printf("component < 0 || component > num_vectors -- ");
          hypre_printf("hypre_IJVectorSetComponentPar\n");
-         hypre_printf("**** This vector partitioning should not occur ****\n");
       }
       hypre_error_in_arg(2);
       return hypre_error_flag;
