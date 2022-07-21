@@ -368,6 +368,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       map2FC ); /* FC combined */
 #endif
 
+   hypre_TFree(itmp, HYPRE_MEMORY_DEVICE);
+
    if (option == 2)
    {
       map2F2 = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);

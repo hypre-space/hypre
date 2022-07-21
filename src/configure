@@ -9282,8 +9282,7 @@ fi
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
-                        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
-        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+                                HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/include"
 
                 HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
 
@@ -9292,7 +9291,6 @@ fi
 $as_echo "#define HYPRE_USING_ROCSPARSE 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
 
 fi
 
@@ -9300,7 +9298,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ROCBLAS 1" >>confdefs.h
 
-              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
 
 fi
 
@@ -9309,7 +9306,6 @@ fi
 $as_echo "#define HYPRE_USING_ROCRAND 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
 
 fi
 
@@ -9317,7 +9313,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ROCTX 1" >>confdefs.h
 
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
 
 fi

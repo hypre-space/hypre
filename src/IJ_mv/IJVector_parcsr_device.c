@@ -25,6 +25,10 @@ namespace thrust = std;
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
+/*--------------------------------------------------------------------
+ * hypre_IJVectorAssembleFunctor
+ *--------------------------------------------------------------------*/
+
 template<typename T1, typename T2>
 #if defined(HYPRE_USING_SYCL)
 struct hypre_IJVectorAssembleFunctor
@@ -526,7 +530,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                                                          stack_sora        )),  /* first */
                             thrust::make_zip_iterator(thrust::make_tuple(stack_i + nelms, stack_data + nelms,
                                                                          stack_sora + nelms)),  /* last */
-                            is_on_proc,                                                                                              /* stencil */
+                            is_on_proc,                                                         /* stencil */
                             thrust::make_zip_iterator(thrust::make_tuple(off_proc_i,      off_proc_data,
                                                                          off_proc_sora)),       /* result */
                             thrust::not1(thrust::identity<char>()) );
@@ -540,7 +544,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                                                          stack_sora        )),  /* first */
                             thrust::make_zip_iterator(thrust::make_tuple(stack_i + nelms, stack_data + nelms,
                                                                          stack_sora + nelms)),  /* last */
-                            is_on_proc,                                                                                              /* stencil */
+                            is_on_proc,                                                         /* stencil */
                             thrust::not1(thrust::identity<char>()) );
 
          hypre_assert(thrust::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);

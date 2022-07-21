@@ -1,0 +1,40 @@
+# Output file: gpu.out.1
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+
+# Output file: gpu.out.2
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+
+# Output file: gpu.out.3
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+
+# Output file: gpu.out.4
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= LEAK SUMMARY: 0 bytes leaked in 0 allocations
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+========= ERROR SUMMARY: 0 errors
+
