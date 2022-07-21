@@ -44,12 +44,14 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    }
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
-   if ( hypre_HandleSpMVUseVendor(hypre_handle()) )
+   if (hypre_HandleSpMVUseVendor(hypre_handle()))
    {
 #if defined(HYPRE_USING_CUSPARSE)
       hypre_CSRMatrixMatvecCusparse(trans, alpha, A, x, beta, y, offset);
+
 #elif defined(HYPRE_USING_ROCSPARSE)
       hypre_CSRMatrixMatvecRocsparse(trans, alpha, A, x, beta, y, offset);
+
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
       hypre_CSRMatrixMatvecOnemklsparse(trans, alpha, A, x, beta, y, offset);
 #endif
@@ -59,6 +61,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
+
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
       hypre_CSRMatrixMatvecOMPOffload(trans, alpha, A, x, beta, y, offset);
 #endif
@@ -138,6 +141,14 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 #if defined(HYPRE_USING_CUSPARSE)
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixMatvecCusparseNewAPI
+ *
+ * Sparse Matrix/(Multi)Vector interface to cusparse's API 11
+ *
+ * Note: The descriptor variables are not saved to allow for generic input
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      HYPRE_Complex    alpha,
@@ -147,73 +158,48 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                      hypre_Vector    *y,
                                      HYPRE_Int        offset )
 {
-   HYPRE_Int                 num_rows        = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int                 num_cols        = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int                 num_vectors     = hypre_VectorNumVectors(x);
-   HYPRE_Int                 x_size_override = trans ? num_rows : num_cols;
-   HYPRE_Int                 y_size_override = trans ? num_cols : num_rows;
-   hypre_CSRMatrix          *AT;
+   /* Input variables */
+   HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int         num_cols    = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         num_rows    = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
+   hypre_CSRMatrix  *AT;
+   hypre_CSRMatrix  *B;
 
    /* SpMV data */
    size_t                    bufferSize = 0;
    char                     *dBuffer    = hypre_CSRMatrixGPUMatSpMVBuffer(A);
+   cusparseHandle_t          handle     = hypre_HandleCusparseHandle(hypre_handle());
    const cudaDataType        data_type  = hypre_HYPREComplexToCudaDataType();
    const cusparseIndexType_t index_type = hypre_HYPREIntToCusparseIndexType();
-   cusparseHandle_t          handle     = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseSpMatDescr_t      matA       = hypre_CSRMatrixGPUMatSpMatA(A);
-   cusparseDnVecDescr_t      vecX       = hypre_CSRMatrixGPUMatDnVecX(A);
-   cusparseDnVecDescr_t      vecY       = hypre_CSRMatrixGPUMatDnVecY(A);
-   cusparseDnMatDescr_t      matX       = hypre_CSRMatrixGPUMatDnMatX(A);
-   cusparseDnMatDescr_t      matY       = hypre_CSRMatrixGPUMatDnMatY(A);
 
+   /* Local cusparse descriptor variables */
+   cusparseSpMatDescr_t      matA;
+   cusparseDnVecDescr_t      vecX, vecY;
+   cusparseDnMatDescr_t      matX, matY;
+
+   /* We handle the transpose explicitly to ensure the same output each run
+    * and for potential performance improvement memory for AT */
    if (trans)
    {
-      /* We handle the transpose explicitly to ensure the same output each run
-       * and for potential performance improvement memory for AT */
       hypre_CSRMatrixTransposeDevice(A, &AT, 1);
-      if (!matA)
-      {
-         matA = hypre_CSRMatrixToCusparseSpMat(AT, offset);
-         hypre_CSRMatrixGPUMatSpMatA(A) = matA;
-      }
+      B = AT;
    }
    else
    {
-      if (!matA)
-      {
-         matA = hypre_CSRMatrixToCusparseSpMat(A, offset);
-         hypre_CSRMatrixGPUMatSpMatA(A) = matA;
-      }
+      B = A;
    }
 
    /* Create cuSPARSE vector data structures */
+   matA = hypre_CSRMatrixToCusparseSpMat(B, offset);
    if (num_vectors == 1)
    {
-      if (!vecX)
-      {
-         vecX = hypre_VectorToCusparseDnVec(x, 0, x_size_override);
-         hypre_CSRMatrixGPUMatDnVecX(A) = vecX;
-      }
-
-      if (!vecY)
-      {
-         vecY = hypre_VectorToCusparseDnVec(y, offset, y_size_override - offset);
-         hypre_CSRMatrixGPUMatDnVecX(A) = vecY;
-      }
+      vecX = hypre_VectorToCusparseDnVec(x, 0, num_cols);
+      vecY = hypre_VectorToCusparseDnVec(y, offset, num_rows - offset);
    }
    else
    {
-      if (!matX)
-      {
-         matX = hypre_VectorToCusparseDnMat(x);
-         hypre_CSRMatrixGPUMatDnMatX(A) = matX;
-      }
-
-      if (!vecY)
-      {
-         matY = hypre_VectorToCusparseDnMat(y);
-         hypre_CSRMatrixGPUMatDnMatY(A) = matY;
-      }
+      matX = hypre_VectorToCusparseDnMat(x);
+      matY = hypre_VectorToCusparseDnMat(y);
    }
 
    if (!dBuffer)
@@ -295,6 +281,18 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
 
    hypre_SyncComputeStream(hypre_handle());
 
+   /* Free memory */
+   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
+   if (num_vectors == 1)
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
+   }
+   else
+   {
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matX) );
+      HYPRE_CUSPARSE_CALL( cusparseDestroyDnMat(matY) );
+   }
    if (trans)
    {
       hypre_CSRMatrixDestroy(AT);
@@ -371,6 +369,7 @@ hypre_CSRMatrixMatvecCusparse( HYPRE_Int        trans,
     * they are not present in SpMV interface.
     */
    hypre_CSRMatrixMatvecCusparseNewAPI(trans, alpha, A, x, beta, y, offset);
+
 #else
    hypre_CSRMatrixMatvecCusparseOldAPI(trans, alpha, A, x, beta, y, offset);
 #endif
