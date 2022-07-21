@@ -11,7 +11,6 @@
 #ifndef hypre_SENDINFODATA_HEADER
 #define hypre_SENDINFODATA_HEADER
 
-
 typedef struct
 {
    HYPRE_Int             size;

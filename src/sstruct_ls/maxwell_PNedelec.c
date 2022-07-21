@@ -64,8 +64,8 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              nvars, Edge_nvars, part, var;
    HYPRE_Int              tot_vars = 8;
 
-   HYPRE_Int              t, i, j, k, m, n, size;
-   HYPRE_BigInt           l, p;
+   HYPRE_Int              t, i, j, k, m, n, size, p;
+   HYPRE_BigInt           l, bigp;
 
    HYPRE_BigInt           ilower, iupper;
    HYPRE_BigInt           jlower, jupper;
@@ -361,7 +361,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             p = m % rfactor[k];
             if (p > 0 && m > 0)
             {
-               upper_shifts[part][i][k] = p - 1;
+               upper_shifts[part][i][k] = (HYPRE_Int)(p - 1);
                lower_shifts[part][i][k] = p - rfactor[k];
             }
             else
@@ -546,12 +546,12 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                hypre_AddIndexes(findex, start, 3, findex);
 
                hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, t, &entry);
-               hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &p, matrix_type);
+               hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &bigp, matrix_type);
 
                /* still row p may be outside the processor- check to make sure in */
-               if ( (p <= upper_ranks[part][t]) && (p >= lower_ranks[part][t]) )
+               if ( (bigp <= upper_ranks[part][t]) && (bigp >= lower_ranks[part][t]) )
                {
-                  iedgeEdge[j] = p;
+                  iedgeEdge[j] = bigp;
                   ncols_edgeEdge[j] = 1;
                   j++;
                }
@@ -1645,10 +1645,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                /* make sure that we do have the fine row corresponding to findex */
                hypre_AddIndexes(findex, start, 3, findex);
                hypre_SStructGridFindBoxManEntry(fgrid_edge, part, findex, t, &entry);
-               hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &p, matrix_type);
+               hypre_SStructBoxManEntryGetGlobalRank(entry, findex, &bigp, matrix_type);
 
                /* still row p may be outside the processor- check to make sure in */
-               if ( (p <= upper_ranks[part][t]) && (p >= lower_ranks[part][t]) )
+               if ( (bigp <= upper_ranks[part][t]) && (bigp >= lower_ranks[part][t]) )
                {
                   hypre_SubtractIndexes(findex, start, 3, findex);
 
@@ -1669,7 +1669,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   vals_edgeEdge[k] = fCedge_ratio;
 
                   k++;
-               }  /* if ((p <= upper_ranks[part][t]) && (p >= lower_ranks[part][t])) */
+               }  /* if ((bigp <= upper_ranks[part][t]) && (bigp >= lower_ranks[part][t])) */
             }
             hypre_SerialBoxLoop1End(m);
          }   /* hypre_ForBoxI */

@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef hypre_PARCSR_ELIMINATE_ROWSCOLS
-#define hypre_PARCSR_ELIMINATE_ROWSCOLS
+#ifndef hypre_ELIMINATE_ROWSCOLS_HEADER
+#define hypre_ELIMINATE_ROWSCOLS_HEADER
 
 #ifdef __cplusplus
 extern "C" {

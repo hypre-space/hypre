@@ -11,7 +11,6 @@
 #ifndef hypre_RECVINFODATA_HEADER
 #define hypre_RECVINFODATA_HEADER
 
-
 typedef struct
 {
    HYPRE_Int             size;

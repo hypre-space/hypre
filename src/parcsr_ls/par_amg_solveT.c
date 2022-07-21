@@ -34,7 +34,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    HYPRE_Int      amg_print_level;
    HYPRE_Int      amg_logging;
    HYPRE_Real  *num_coeffs;
-   HYPRE_Int     *num_variables;
+   HYPRE_BigInt     *num_variables;
    HYPRE_Real   cycle_op_count;
    HYPRE_Int      num_levels;
    /* HYPRE_Int      num_unknowns; */
@@ -52,8 +52,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_count;
-   HYPRE_Real   total_coeffs;
-   HYPRE_Int      total_variables;
+   HYPRE_Real     total_coeffs;
+   HYPRE_BigInt   total_variables;
    HYPRE_Int      num_procs, my_id;
 
    HYPRE_Real   alpha = 1.0;
@@ -91,7 +91,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    max_iter      = hypre_ParAMGDataMaxIter(amg_data);
 
    num_coeffs = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
-   num_variables = hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
+   num_variables = hypre_CTAlloc(HYPRE_BigInt,  num_levels, HYPRE_MEMORY_HOST);
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
 

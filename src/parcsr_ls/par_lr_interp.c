@@ -2290,7 +2290,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix  *A,
                      }
                      else
                      {
-                        loc_col = (HYPRE_BigInt)(-big_k1 - 1);
+                        loc_col = (HYPRE_Int)(-big_k1 - 1);
                         if (CF_marker_offd[loc_col] == 2)
                         {
                            /*if (hypre_BinarySearch(clist_offd,loc_col,ccounter_offd) >=
@@ -2625,7 +2625,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix  *A,
                         }
                         else
                         {
-                           loc_col = (-big_k1 - 1);
+                           loc_col = (HYPRE_Int) (-big_k1 - 1);
                            if (P_marker_offd[loc_col] < jj_begin_row_offd)
                            {
                               P_marker_offd[loc_col] = jj_counter_offd;

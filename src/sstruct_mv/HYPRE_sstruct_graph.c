@@ -621,6 +621,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
       if (Uverank > -1)
       {
+         // RL: I am not sure how to fix this? Need to ask.
          iUventries[nUventries] = Uverank;
 
          if (Uventries[Uverank] == NULL)

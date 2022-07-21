@@ -194,7 +194,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_BigInt *big_buf_data = NULL;
    HYPRE_Real *dbl_buf_data = NULL;
 
-   HYPRE_Int g_nc;
+   HYPRE_BigInt g_nc;
 
 
 #if SV_DEBUG
@@ -2013,7 +2013,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                      if (level == interp_vec_first_level )
                         /* get the old col number back to index into vector */
                      {
-                        c_col = (HYPRE_Int) big_new_col - floor((HYPRE_Real) big_new_col / (HYPRE_Real) num_f);
+                        c_col = (HYPRE_Int) ((HYPRE_Real) big_new_col - floor((HYPRE_Real) big_new_col / (HYPRE_Real) num_f));
                      }
                      else
                      {
@@ -2415,7 +2415,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                         if (is_diag[j])
                         {
                            P_diag_data_new[new_diag_pos] = value;
-                           P_diag_j_new[new_diag_pos] = aux_j[j_counter];
+                           P_diag_j_new[new_diag_pos] = (HYPRE_Int) aux_j[j_counter];
                            new_diag_pos++;
 
                            is_q[new_j_counter] = is_q[j_counter];
@@ -2500,7 +2500,11 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       new_col_starts[0] = (col_starts[0] / (HYPRE_BigInt)num_functions) * (HYPRE_BigInt)new_nf ;
       new_col_starts[1] = (col_starts[1] / (HYPRE_BigInt)num_functions) * (HYPRE_BigInt)new_nf;
 
-      if (myid == (num_procs - 1)) { g_nc = new_col_starts[1]; }
+      if (myid == (num_procs - 1))
+      {
+         g_nc = new_col_starts[1];
+      }
+
       hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else /* not first level */

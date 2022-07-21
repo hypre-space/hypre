@@ -5,6 +5,9 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_PTOPOLOGY_HEADER
+#define hypre_PTOPOLOGY_HEADER
+
 typedef struct
 {
    hypre_IJMatrix    *Face_iedge;
@@ -16,3 +19,4 @@ typedef struct
 
 } hypre_PTopology;
 
+#endif

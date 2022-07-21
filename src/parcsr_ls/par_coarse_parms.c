@@ -55,7 +55,7 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm         comm,
 #endif
 
    HYPRE_Int     i;
-   HYPRE_BigInt  local_coarse_size = 0;
+   HYPRE_Int     local_coarse_size = 0;
    HYPRE_Int    *coarse_dof_func;
 
    /*--------------------------------------------------------------
@@ -87,7 +87,8 @@ hypre_BoomerAMGCoarseParmsHost(MPI_Comm         comm,
 
    {
       HYPRE_BigInt scan_recv;
-      hypre_MPI_Scan(&local_coarse_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      HYPRE_BigInt big_local_coarse_size = local_coarse_size;
+      hypre_MPI_Scan(&big_local_coarse_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
       /* first point in my range */
       coarse_pnts_global[0] = scan_recv - local_coarse_size;

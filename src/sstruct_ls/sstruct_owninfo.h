@@ -14,7 +14,6 @@
 #ifndef hypre_OWNINFODATA_HEADER
 #define hypre_OWNINFODATA_HEADER
 
-
 typedef struct
 {
    HYPRE_Int             size;

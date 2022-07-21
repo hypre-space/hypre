@@ -1877,7 +1877,6 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
    /*HYPRE_Int            cnt, cnt_offd, cnt_diag;*/
    HYPRE_Int              num_procs, my_id;
    HYPRE_Int              index;
-   /*HYPRE_Int            value;*/
    HYPRE_Int              num_coarse;
    HYPRE_Int              num_nonzeros;
    HYPRE_BigInt           global_num_coarse;
@@ -2215,7 +2214,8 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
       hypre_TFree(S_big_offd_j, HYPRE_MEMORY_HOST);
       if (num_cols_offd_C) { hypre_UnorderedBigIntMapDestroy(&col_map_offd_C_inverse); }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
-      HYPRE_Int cnt_offd, cnt_diag, cnt, value;
+      HYPRE_Int cnt_offd, cnt_diag, cnt;
+      HYPRE_BigInt value;
       S_ext_diag_size = 0;
       S_ext_offd_size = 0;
 
@@ -2333,13 +2333,14 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
             HYPRE_Int i_begin, i_end;
             hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_S);
 
-            HYPRE_BigInt cnt = 0;
+            HYPRE_Int cnt = 0;
             for (i = i_begin; i < i_end; i++)
             {
                if (CF_marker_offd[i] > 0)
                {
-                  cnt = hypre_BigLowerBound(col_map_offd_C + cnt, col_map_offd_C + num_cols_offd_C,
-                                            fine_to_coarse_offd[i]) - col_map_offd_C;
+                  cnt = (HYPRE_Int) (hypre_BigLowerBound(col_map_offd_C + cnt,
+                                                         col_map_offd_C + num_cols_offd_C,
+                                                         fine_to_coarse_offd[i]) - col_map_offd_C);
                   map_S_to_C[i] = cnt++;
                }
                else { map_S_to_C[i] = -1; }

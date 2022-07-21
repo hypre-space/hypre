@@ -147,7 +147,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    HYPRE_SStructVariable  *vartypes;
 
    /* GEC0902 addition of variables for ilower and iupper   */
-   HYPRE_Int               ilower, iupper;
+   HYPRE_BigInt            ilower, iupper;
    hypre_ParVector        *par_vector;
    hypre_Vector           *parlocal_vector;
 

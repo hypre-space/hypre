@@ -117,9 +117,10 @@ HYPRE_Int hypre_BlockTridiagDestroy(void *data)
 HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
                                   hypre_ParVector *b, hypre_ParVector *x)
 {
-   HYPRE_Int                i, j, *index_set1, print_level, nsweeps, relax_type;
-   HYPRE_Int                nrows, nrows1, nrows2, start1, start2, *index_set2;
-   HYPRE_Int                count, ierr;
+   HYPRE_Int          i, j, *index_set1, print_level, nsweeps, relax_type;
+   HYPRE_Int          nrows, nrows1, nrows2, *index_set2;
+   HYPRE_BigInt       start1, start2;
+   HYPRE_Int          count, ierr;
    HYPRE_Real         threshold;
    hypre_ParCSRMatrix **submatrices;
    HYPRE_Solver       precon1;
