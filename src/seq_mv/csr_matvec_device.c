@@ -37,14 +37,38 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
                               hypre_Vector    *y,
                               HYPRE_Int        offset )
 {
+   /* Sanity check */
    if (hypre_VectorData(x) == hypre_VectorData(y))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice2");
    }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
-   if (hypre_HandleSpMVUseVendor(hypre_handle()))
+#if defined(HYPRE_USING_CUSPARSE)  || \
+    defined(HYPRE_USING_ROCSPARSE) || \
+    defined(HYPRE_USING_ONEMKLSPARSE)
+
+   /* Input variables */
+   HYPRE_Int  num_vectors_x      = hypre_VectorNumVectors(x);
+   HYPRE_Int  num_vectors_y      = hypre_VectorNumVectors(y);
+   HYPRE_Int  multivec_storage_x = hypre_VectorMultiVecStorageMethod(x);
+   HYPRE_Int  multivec_storage_y = hypre_VectorMultiVecStorageMethod(y);
+
+   /* Local variables */
+   HYPRE_Int  use_vendor;
+
+   /* Force use of hypre's SpMV for row-wise multivectors */
+   if ((num_vectors_x > 1 && multivec_storage_x == 1) ||
+       (num_vectors_y > 1 && multivec_storage_y == 1))
+   {
+      use_vendor = 0;
+   }
+   else
+   {
+      use_vendor = hypre_HandleSpMVUseVendor(hypre_handle());
+   }
+
+   if (use_vendor)
    {
 #if defined(HYPRE_USING_CUSPARSE)
       hypre_CSRMatrixMatvecCusparse(trans, alpha, A, x, beta, y, offset);
