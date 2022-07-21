@@ -1060,8 +1060,10 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       /* Free memory */
       hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_GPU)
       hypre_CSRMatrixDestroy(hypre_ParCSRCommPkgMatrixE(comm_pkg));
       hypre_ParCSRCommPkgMatrixE(comm_pkg) = NULL;
+#endif
 
       /* Update send_map_starts */
       for (i = 0; i < num_sends + 1; i++)
@@ -1112,7 +1114,7 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
    hypre_ParCSRCommPkgCreateApart( comm, col_map_offd, first_col_diag,
                                    num_cols_offd, global_num_cols,
@@ -1191,7 +1193,7 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
-   hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRCommPkg *new_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    *extend_comm_pkg = new_comm_pkg;
 
    hypre_assert(apart != NULL);

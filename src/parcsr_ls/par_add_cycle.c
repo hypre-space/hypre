@@ -976,8 +976,9 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       L_recv_ptr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
    }
 
-   L_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   L_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
 
+   hypre_ParCSRCommPkgNumComponents(L_comm_pkg) = 1;
    hypre_ParCSRCommPkgNumRecvs(L_comm_pkg) = num_recvs_L;
    hypre_ParCSRCommPkgNumSends(L_comm_pkg) = num_sends_L;
    hypre_ParCSRCommPkgRecvProcs(L_comm_pkg) = L_recv_procs;

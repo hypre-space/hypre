@@ -20,27 +20,22 @@
 HYPRE_Int
 hypre_PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
 {
-   HYPRE_Int num_sends, num_recvs;
+   HYPRE_Int  num_components, num_sends, num_recvs;
 
    HYPRE_Int *recv_vec_starts, *recv_procs;
    HYPRE_Int *send_map_starts, *send_map_elements, *send_procs;
 
-   HYPRE_Int i;
-   HYPRE_Int my_id;
-
-   MPI_Comm comm;
-
+   HYPRE_Int  i;
+   HYPRE_Int  my_id;
+   MPI_Comm   comm;
    hypre_ParCSRCommPkg *comm_pkg;
-
 
    char   new_file[80];
    FILE *fp;
 
-   comm_pkg =  hypre_ParCSRMatrixCommPkg(A);
-
-
-   comm =  hypre_ParCSRCommPkgComm(comm_pkg);
-
+   comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   comm = hypre_ParCSRCommPkgComm(comm_pkg);
+   num_components = hypre_ParCSRCommPkgNumComponents(comm_pkg);
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
    recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
@@ -49,12 +44,12 @@ hypre_PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
    send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
    send_map_elements = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
-
    hypre_MPI_Comm_rank(comm, &my_id);
 
    hypre_sprintf(new_file, "%s.%d", file_name, my_id);
 
    fp = fopen(new_file, "w");
+   hypre_fprintf(fp, "num_components = %d\n", num_components);
    hypre_fprintf(fp, "num_recvs = %d\n", num_recvs);
    for (i = 0; i < num_recvs; i++)
    {
@@ -635,7 +630,7 @@ hypre_RangeFillResponseIJDetermineRecvProcs( void      *p_recv_contact_buf,
     * with format [proc_id end_row  proc_id #end_row  proc_id #end_row etc...].
     *----------------------------------------------------------------------*/
 
-   hypre_MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid);
 
    /* populate send_response_buf */
 
@@ -644,20 +639,20 @@ hypre_RangeFillResponseIJDetermineRecvProcs( void      *p_recv_contact_buf,
    j = 0; /*marks which partition of the assumed partition we are in */
    row_val = recv_contact_buf[0]; /*beginning of range*/
    row_end = part->row_end_list[part->sort_index[j]];
-   tmp_id = part->proc_list[part->sort_index[j]];
+   tmp_id  = part->proc_list[part->sort_index[j]];
 
    /*check storage in send_buf for adding the ranges */
    size = 2 * (part->length);
 
-   if ( response_obj->send_response_storage  < size  )
+   if (response_obj->send_response_storage < size)
    {
 
       response_obj->send_response_storage =  hypre_max(size, 20);
-      send_response_buf = hypre_TReAlloc( send_response_buf,  HYPRE_BigInt,
-                                          response_obj->send_response_storage + overhead, HYPRE_MEMORY_HOST);
+      send_response_buf = hypre_TReAlloc(send_response_buf, HYPRE_BigInt,
+                                         response_obj->send_response_storage + overhead,
+                                         HYPRE_MEMORY_HOST);
       *p_send_response_buf = send_response_buf;    /* needed when using ReAlloc */
    }
-
 
    while (row_val > row_end) /*which partition to start in */
    {
@@ -674,12 +669,12 @@ hypre_RangeFillResponseIJDetermineRecvProcs( void      *p_recv_contact_buf,
 
    /*any more?  - now compare with end of range value*/
    row_val = recv_contact_buf[1]; /*end of range*/
-   while ( j < part->length && row_val > row_end  )
+   while (j < part->length && row_val > row_end )
    {
       row_end = part->row_end_list[part->sort_index[j]];
       tmp_id = part->proc_list[part->sort_index[j]];
 
-      send_response_buf[index++] = (HYPRE_BigInt)tmp_id;
+      send_response_buf[index++] = (HYPRE_BigInt) tmp_id;
       send_response_buf[index++] = row_end;
 
       j++;
