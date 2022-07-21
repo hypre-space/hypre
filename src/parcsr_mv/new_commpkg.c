@@ -549,6 +549,7 @@ hypre_ParCSRCommPkgCreateApart
    hypre_ParCSRCommPkgSendProcs    (comm_pkg) = send_procs;
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
+   hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) = NULL;
 
    return hypre_error_flag;
 }
