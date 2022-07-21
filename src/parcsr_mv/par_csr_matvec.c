@@ -383,7 +383,6 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_Vector            *y_local       = hypre_ParVectorLocalVector(y);
    hypre_Vector            *y_tmp;
 
-   HYPRE_Int                num_cols_diag = hypre_CSRMatrixNumCols(diag);
    HYPRE_Int                num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_BigInt             num_rows      = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt             num_cols      = hypre_ParCSRMatrixGlobalNumCols(A);
@@ -618,6 +617,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_assert(idxstride == 1);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int  num_cols_diag = hypre_CSRMatrixNumCols(diag);
+
    /* unpack recv data on device */
    hypre_ParCSRMatrixMatvecT_unpack(comm_pkg, num_cols_diag, y_buf_data, y_local_data);
 
