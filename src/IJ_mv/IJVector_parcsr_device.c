@@ -506,7 +506,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */
                                             zip_out, /* result */
-      [] (const auto & x) {return x;} );
+         [] (const auto & x) {return x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 

@@ -223,7 +223,7 @@ void hypreSycl_sequence(Iter first, Iter last, T init = 0)
    using DiffType = typename std::iterator_traits<Iter>::difference_type;
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator<DiffType>(init),
-                      oneapi::dpl::counting_iterator<DiffType>(std::distance(first, last)),
+                      oneapi::dpl::counting_iterator<DiffType>(init + std::distance(first, last)),
                       first,
                       [](auto i) { return i; });
 }
