@@ -2114,19 +2114,11 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigI
  * hypre_HYPREComplexToCudaDataType
  *
  * Determines the associated CudaDataType for HYPRE_Complex
-<<<<<<< HEAD
  *
  * TODO: Should be known at compile time.
  *       Support more sizes.
  *       Support complex.
  *
-=======
- *
- * TODO: Should be known at compile time.
- *       Support more sizes.
- *       Support complex.
- *
->>>>>>> master
  * Note: Only works for Single and Double precision.
  *--------------------------------------------------------------------*/
 
