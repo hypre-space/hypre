@@ -65,15 +65,15 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
 #endif
 
    HYPRE_Int      ierr = 0;
-   HYPRE_BigInt   local_coarse_size = 0;
+   HYPRE_Int      local_coarse_size = 0;
 
    /*--------------------------------------------------------------
     *----------------------------------------------------------------*/
 
-   local_coarse_size = HYPRE_THRUST_CALL( count_if,
-                                          hypre_IntArrayData(CF_marker),
-                                          hypre_IntArrayData(CF_marker) + local_num_variables,
-                                          equal<HYPRE_Int>(1) );
+   local_coarse_size = (HYPRE_Int) HYPRE_THRUST_CALL( count_if,
+                                                      hypre_IntArrayData(CF_marker),
+                                                      hypre_IntArrayData(CF_marker) + local_num_variables,
+                                                      equal<HYPRE_Int>(1) );
 
    if (num_functions > 1)
    {
@@ -90,7 +90,8 @@ hypre_BoomerAMGCoarseParmsDevice(MPI_Comm          comm,
 
    {
       HYPRE_BigInt scan_recv;
-      hypre_MPI_Scan(&local_coarse_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      HYPRE_BigInt big_local_coarse_size = local_coarse_size;
+      hypre_MPI_Scan(&big_local_coarse_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
       /* first point in my range */
       coarse_pnts_global[0] = scan_recv - local_coarse_size;
