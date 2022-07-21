@@ -3685,15 +3685,7 @@ hypre_BoomerAMGTruncandBuild( hypre_ParCSRMatrix   *P,
    new_num_cols_offd = 0;
    if (P_offd_size)
    {
-      P_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
-
-      /*#define HYPRE_SMP_PRIVATE i
-      #include "../utilities/hypre_smp_forloop.h"*/
-      for (i = 0; i < num_cols_offd; i++)
-      {
-         P_marker[i] = 0;
-      }
-
+      P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
       for (i = 0; i < P_offd_size; i++)
       {
          index = P_offd_j[i];
@@ -3710,28 +3702,37 @@ hypre_BoomerAMGTruncandBuild( hypre_ParCSRMatrix   *P,
       index = 0;
       for (i = 0; i < new_num_cols_offd; i++)
       {
-         while (P_marker[index] == 0) { index++; }
+         while (P_marker[index] == 0)
+         {
+            index++;
+         }
          tmp_map_offd[i] = index++;
       }
 
-      /*#define HYPRE_SMP_PRIVATE i
-      #include "../utilities/hypre_smp_forloop.h"*/
       for (i = 0; i < P_offd_size; i++)
+      {
          P_offd_j[i] = hypre_BinarySearch(tmp_map_offd,
                                           P_offd_j[i],
                                           new_num_cols_offd);
+      }
    }
 
    index = 0;
    for (i = 0; i < new_num_cols_offd; i++)
    {
-      while (P_marker[index] == 0) { index++; }
+      while (P_marker[index] == 0)
+      {
+         index++;
+      }
 
       new_col_map_offd[i] = col_map_offd[index];
       index++;
    }
 
-   if (P_offd_size) { hypre_TFree(P_marker, HYPRE_MEMORY_HOST); }
+   if (P_offd_size)
+   {
+      hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
+   }
 
    if (new_num_cols_offd)
    {
@@ -3741,11 +3742,13 @@ hypre_BoomerAMGTruncandBuild( hypre_ParCSRMatrix   *P,
       hypre_CSRMatrixNumCols(P_offd) = new_num_cols_offd;
    }
 
-   if (commpkg_P != NULL) { hypre_MatvecCommPkgDestroy(commpkg_P); }
+   if (commpkg_P != NULL)
+   {
+      hypre_MatvecCommPkgDestroy(commpkg_P);
+   }
    hypre_MatvecCommPkgCreate(P);
 
    return hypre_error_flag;
-
 }
 
 hypre_ParCSRMatrix *hypre_CreateC( hypre_ParCSRMatrix  *A,
