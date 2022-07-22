@@ -707,7 +707,7 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
 
    /* HYPRE_Int       *row_starts      = hypre_ParCSRMatrixRowStarts(A); */
    /* HYPRE_Int        first_row       = hypre_ParCSRMatrixFirstRowIndex(A); */
-   HYPRE_Int        first_col        = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt     first_col        = hypre_ParCSRMatrixFirstColDiag(A);
    HYPRE_BigInt    *col_map_offd_A   = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int        num_cols_A_offd  = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_BigInt    *d_col_map_offd_A = hypre_ParCSRMatrixDeviceColMapOffd(A);

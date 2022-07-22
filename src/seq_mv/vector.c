@@ -78,7 +78,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorInitialize_v2
  *
- * Initialize a vector on a given memory_location
+ * Initialize a vector at a given memory location
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

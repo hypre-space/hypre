@@ -534,8 +534,8 @@ getParCSRMatrixData(HYPRE_ParCSRMatrix  A,
    HYPRE_Int          *A_offd_j = hypre_CSRMatrixJ(A_offd);
    HYPRE_BigInt       *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
 
-   HYPRE_Int          ilower = hypre_ParCSRMatrixFirstRowIndex(A);
-   HYPRE_Int          jlower = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt       ilower = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_BigInt       jlower = hypre_ParCSRMatrixFirstColDiag(A);
 
    HYPRE_Int          nrows;
    HYPRE_BigInt       num_nonzeros;

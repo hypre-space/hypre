@@ -2365,10 +2365,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
-        dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
+        dnl PB: ROCm 5.2 parked all the headers in /opt/rocm-X.Y/include so we just point there.
+        dnl     This is backwards compatible to previous ROCm versions.
         dnl These are header-only so no linking needed.
-        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
-        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/include"
 
         dnl HIP library
         HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
@@ -2377,7 +2377,6 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
                ])
 
         dnl Note rocSPARSE requires rocBLAS, so this is only controlling
@@ -2385,20 +2384,17 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl So we don't need to add any extra libs or anything.
         AS_IF([test x"$hypre_using_rocblas" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCBLAS, 1, [rocBLAS being used])
-              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
               ])
 
         dnl rocRAND: random number generation on AMD GPUs
         AS_IF([test x"$hypre_using_rocrand" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
                ])
 
         dnl rocTX tracing API
         AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
                ])
 
