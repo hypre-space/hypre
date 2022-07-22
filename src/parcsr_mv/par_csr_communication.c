@@ -38,10 +38,13 @@ static CommPkgJobType getJobTypeOf(HYPRE_Int job)
    return job_type;
 }
 
-/**
- * When send_data and recv_data are NULL, buffers are internally allocated
- * and CommHandle owns the buffer
- */
+/*------------------------------------------------------------------
+ * hypre_ParCSRPersistentCommHandleCreate
+ *
+ * When send_data and recv_data are NULL, buffers are internally
+ * allocated and CommHandle owns the buffer
+ *------------------------------------------------------------------*/
+
 hypre_ParCSRPersistentCommHandle*
 hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg )
 {
@@ -234,6 +237,9 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
    return ( comm_handle );
 }
 
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommPkgGetPersistentCommHandle
+ *------------------------------------------------------------------*/
 
 hypre_ParCSRPersistentCommHandle*
 hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg )
@@ -242,24 +248,38 @@ hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int job, hypre_ParCSRCommPkg *
    if (!comm_pkg->persistent_comm_handles[type])
    {
       /* data is owned by persistent comm handle */
-      comm_pkg->persistent_comm_handles[type] = hypre_ParCSRPersistentCommHandleCreate(job, comm_pkg);
+      comm_pkg->persistent_comm_handles[type] =
+         hypre_ParCSRPersistentCommHandleCreate(job, comm_pkg);
    }
 
    return comm_pkg->persistent_comm_handles[type];
 }
 
+/*------------------------------------------------------------------
+ * hypre_ParCSRPersistentCommHandleDestroy
+ *------------------------------------------------------------------*/
+
 void
 hypre_ParCSRPersistentCommHandleDestroy( hypre_ParCSRPersistentCommHandle *comm_handle )
 {
-   hypre_TFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
-   hypre_TFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
-   hypre_TFree(comm_handle->requests, HYPRE_MEMORY_HOST);
-   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+   if (comm_handle)
+   {
+      hypre_TFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
+      hypre_TFree(comm_handle->requests, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+   }
 }
 
-void hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *comm_handle,
-                                            HYPRE_MemoryLocation              send_memory_location,
-                                            void                             *send_data )
+/*------------------------------------------------------------------
+ * hypre_ParCSRPersistentCommHandleStart
+ *------------------------------------------------------------------*/
+
+void
+hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *comm_handle,
+                                       HYPRE_MemoryLocation              send_memory_location,
+                                       void                             *send_data )
 {
    hypre_ParCSRCommHandleSendData(comm_handle) = send_data;
    hypre_ParCSRCommHandleSendMemoryLocation(comm_handle) = send_memory_location;
@@ -283,9 +303,14 @@ void hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *co
    }
 }
 
-void hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *comm_handle,
-                                           HYPRE_MemoryLocation              recv_memory_location,
-                                           void                             *recv_data )
+/*------------------------------------------------------------------
+ * hypre_ParCSRPersistentCommHandleWait
+ *------------------------------------------------------------------*/
+
+void
+hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *comm_handle,
+                                      HYPRE_MemoryLocation              recv_memory_location,
+                                      void                             *recv_data )
 {
    hypre_ParCSRCommHandleRecvData(comm_handle) = recv_data;
    hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle) = recv_memory_location;
@@ -311,6 +336,10 @@ void hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *com
 }
 #endif // HYPRE_USING_PERSISTENT_COMM
 
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommHandleCreate
+ *------------------------------------------------------------------*/
+
 hypre_ParCSRCommHandle*
 hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
                                hypre_ParCSRCommPkg *comm_pkg,
@@ -320,6 +349,10 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
    return hypre_ParCSRCommHandleCreate_v2(job, comm_pkg, HYPRE_MEMORY_HOST, send_data,
                                           HYPRE_MEMORY_HOST, recv_data);
 }
+
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommHandleCreate_v2
+ *------------------------------------------------------------------*/
 
 hypre_ParCSRCommHandle*
 hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
@@ -611,6 +644,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    return ( comm_handle );
 }
 
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommHandleDestroy
+ *------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
@@ -681,12 +718,16 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    return hypre_error_flag;
 }
 
-
-/* hypre_MatCommPkgCreate_core does all the communications and computations for
-   hypre_MatCommPkgCreate ( hypre_ParCSRMatrix *A) and
-   hypre_BoolMatCommPkgCreate ( hypre_ParCSRBooleanMatrix *A) To support both
-   data types, it has hardly any data structures other than HYPRE_Int*.
-*/
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommPkgCreate_core
+ *
+ * This function does all the communications and computations for
+ * hypre_ParCSRCommPkgCreate(hypre_ParCSRMatrix *A) and
+ * hypre_BooleanMatvecCommPkgCreate(hypre_ParCSRBooleanMatrix *A)
+ *
+ * To support both data types, it has hardly any data structures
+ * other than HYPRE_Int*.
+ *------------------------------------------------------------------*/
 
 void
 hypre_ParCSRCommPkgCreate_core(
@@ -928,20 +969,24 @@ hypre_ParCSRCommPkgCreate_core(
    *p_send_map_elmts = send_map_elmts;
 }
 
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommPkgCreate
+ *
+ * Creates the communication package with MPI collectives calls.
+ *
+ * Notes:
+ *    1) This version does not use the assumed partition.
+ *    2) comm_pkg must be allocated outside of this function
+ *------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRCommPkgCreate
-(
-   /* inputs */
-   MPI_Comm   comm,
-   HYPRE_BigInt *col_map_offd,
-   HYPRE_BigInt  first_col_diag,
-   HYPRE_BigInt *col_starts,
-   HYPRE_Int  num_cols_diag,
-   HYPRE_Int  num_cols_offd,
-   /* output */
-   hypre_ParCSRCommPkg *comm_pkg
-)
+hypre_ParCSRCommPkgCreate( MPI_Comm             comm,
+                           HYPRE_BigInt        *col_map_offd,
+                           HYPRE_BigInt         first_col_diag,
+                           HYPRE_BigInt        *col_starts,
+                           HYPRE_Int            num_cols_diag,
+                           HYPRE_Int            num_cols_offd,
+                           hypre_ParCSRCommPkg *comm_pkg )
 {
    HYPRE_Int  num_sends;
    HYPRE_Int *send_procs;
@@ -952,21 +997,78 @@ hypre_ParCSRCommPkgCreate
    HYPRE_Int *recv_procs;
    HYPRE_Int *recv_vec_starts;
 
-   hypre_ParCSRCommPkgCreate_core
-   ( comm, col_map_offd, first_col_diag, col_starts,
-     num_cols_diag, num_cols_offd,
-     &num_recvs, &recv_procs, &recv_vec_starts,
-     &num_sends, &send_procs, &send_map_starts,
-     &send_map_elmts );
+   hypre_ParCSRCommPkgCreate_core(comm, col_map_offd, first_col_diag,
+                                  col_starts, num_cols_diag, num_cols_offd,
+                                  &num_recvs, &recv_procs, &recv_vec_starts,
+                                  &num_sends, &send_procs, &send_map_starts,
+                                  &send_map_elmts);
 
-   hypre_ParCSRCommPkgComm         (comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumRecvs     (comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs    (comm_pkg) = recv_procs;
+   /* Fill the communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs, recv_procs, recv_vec_starts,
+                                    num_sends, send_procs, send_map_starts,
+                                    send_map_elmts,
+                                    &comm_pkg);
+
+   return hypre_error_flag;
+}
+
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommPkgCreateAndFill
+ *------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRCommPkgCreateAndFill( MPI_Comm              comm,
+                                  HYPRE_Int             num_recvs,
+                                  HYPRE_Int            *recv_procs,
+                                  HYPRE_Int            *recv_vec_starts,
+                                  HYPRE_Int             num_sends,
+                                  HYPRE_Int            *send_procs,
+                                  HYPRE_Int            *send_map_starts,
+                                  HYPRE_Int            *send_map_elmts,
+                                  hypre_ParCSRCommPkg **comm_pkg_ptr )
+{
+   hypre_ParCSRCommPkg  *comm_pkg;
+
+   /* Allocate memory for comm_pkg if needed */
+   if (*comm_pkg_ptr == NULL)
+   {
+      comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      comm_pkg = *comm_pkg_ptr;
+   }
+
+   /* Set default info */
+   hypre_ParCSRCommPkgNumComponents(comm_pkg)      = 1;
+   hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) = NULL;
+#if defined(HYPRE_USING_GPU)
+   hypre_ParCSRCommPkgTmpData(comm_pkg)            = NULL;
+   hypre_ParCSRCommPkgBufData(comm_pkg)            = NULL;
+   hypre_ParCSRCommPkgMatrixE(comm_pkg)            = NULL;
+#endif
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+   HYPRE_Int i;
+
+   for (i = 0; i < NUM_OF_COMM_PKG_JOB_TYPE; i++)
+   {
+      comm_pkg->persistent_comm_handles[i] = NULL;
+   }
+#endif
+
+   /* Set input info */
+   hypre_ParCSRCommPkgComm(comm_pkg)          = comm;
+   hypre_ParCSRCommPkgNumRecvs(comm_pkg)      = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs(comm_pkg)     = recv_procs;
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   hypre_ParCSRCommPkgNumSends     (comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs    (comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgNumSends(comm_pkg)      = num_sends;
+   hypre_ParCSRCommPkgSendProcs(comm_pkg)     = send_procs;
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
    hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
+
+   /* Set output pointer */
+   *comm_pkg_ptr = comm_pkg;
 
    return hypre_error_flag;
 }
@@ -1084,9 +1186,7 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
 /*------------------------------------------------------------------
  * hypre_MatvecCommPkgCreate
  *
- * Generates the comm_pkg for A
- * If no row and/or column partitioning is given, the routine determines
- * them with MPE_Decomp1d
+ * Generates the communication package for A using assumed partition
  *------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1114,6 +1214,7 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
+
    comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
    hypre_ParCSRCommPkgCreateApart( comm, col_map_offd, first_col_diag,
@@ -1162,10 +1263,8 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
 #if defined(HYPRE_USING_GPU)
-   hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
-   //_hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
-   //_hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixDestroy(hypre_ParCSRCommPkgMatrixE(comm_pkg));
 #endif
 
@@ -1174,11 +1273,16 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    return hypre_error_flag;
 }
 
-/* AHB 11/06 : alternate to the extend function below - creates a
+/*------------------------------------------------------------------
+ * hypre_ParCSRFindExtendCommPkg
+ *
+ * AHB 11/06 : alternate to the extend function below - creates a
  * second comm pkg based on indices - this makes it easier to use the
  * global partition
+ *
  * RL: renamed and moved it here
- */
+ *------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt          global_num,
@@ -1190,19 +1294,20 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt         *indices,
                               hypre_ParCSRCommPkg **extend_comm_pkg)
 {
-   /*-----------------------------------------------------------
-    * setup commpkg
-    *----------------------------------------------------------*/
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   *extend_comm_pkg = new_comm_pkg;
 
    hypre_assert(apart != NULL);
-   hypre_ParCSRCommPkgCreateApart ( comm, indices, my_first, indices_len, global_num, apart,
-                                    new_comm_pkg );
+   hypre_ParCSRCommPkgCreateApart(comm, indices, my_first, indices_len,
+                                  global_num, apart, new_comm_pkg);
+
+   *extend_comm_pkg = new_comm_pkg;
 
    return hypre_error_flag;
 }
 
+/*------------------------------------------------------------------
+ * hypre_BuildCSRMatrixMPIDataType
+ *------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BuildCSRMatrixMPIDataType( HYPRE_Int num_nonzeros,
@@ -1232,6 +1337,10 @@ hypre_BuildCSRMatrixMPIDataType( HYPRE_Int num_nonzeros,
 
    return hypre_error_flag;
 }
+
+/*------------------------------------------------------------------
+ * hypre_BuildCSRMatrixMPIDataType
+ *------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,

@@ -23,7 +23,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    HYPRE_Int *send_procs_A = hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
    HYPRE_Int *send_map_starts_A = hypre_ParCSRCommPkgSendMapStarts(comm_pkg_A);
 
-   hypre_ParCSRCommPkg *comm_pkg;
+   hypre_ParCSRCommPkg *comm_pkg = NULL;
    HYPRE_Int num_recvs_RT;
    HYPRE_Int *recv_procs_RT;
    HYPRE_Int *recv_vec_starts_RT;
@@ -245,16 +245,12 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
       send_map_elmts_RT[i] = (HYPRE_Int)(send_big_elmts[i] - first_col_diag);
    }
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends_RT;
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs_RT;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs_RT;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs_RT;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts_RT;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts_RT;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts_RT;
+   /* Create and fill communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs_RT, recv_procs_RT, recv_vec_starts_RT,
+                                    num_sends_RT, send_procs_RT, send_map_starts_RT,
+                                    send_map_elmts_RT,
+                                    &comm_pkg);
 
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
@@ -278,7 +274,7 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int nu
    hypre_MPI_Request *requests;
    hypre_MPI_Status *status;
    HYPRE_Int vec_len, vec_start;
-   hypre_ParCSRCommPkg *comm_pkg;
+   hypre_ParCSRCommPkg *comm_pkg = NULL;
    HYPRE_BigInt *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_BigInt first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
    HYPRE_BigInt *send_big_elmts = NULL;
@@ -286,13 +282,16 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int nu
    /*--------------------------------------------------------------------------
     * generate send_map_starts and send_map_elmts
     *--------------------------------------------------------------------------*/
+
    requests = hypre_CTAlloc(hypre_MPI_Request, num_requests, HYPRE_MEMORY_HOST);
    status = hypre_CTAlloc(hypre_MPI_Status, num_requests, HYPRE_MEMORY_HOST);
    send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends + 1, HYPRE_MEMORY_HOST);
    j = 0;
    for (i = 0; i < num_sends; i++)
+   {
       hypre_MPI_Irecv(&send_map_starts[i + 1], 1, HYPRE_MPI_INT, send_procs[i], 0, comm,
                       &requests[j++]);
+   }
 
    for (i = 0; i < num_recvs; i++)
    {
@@ -335,21 +334,18 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int nu
       send_map_elmts[i] = (HYPRE_Int)(send_big_elmts[i] - first_col_diag);
    }
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
+   /* Create and fill communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs, recv_procs, recv_vec_starts,
+                                    num_sends, send_procs, send_map_starts,
+                                    send_map_elmts,
+                                    &comm_pkg);
 
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(send_big_elmts, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
-   return 0;
+
+   return hypre_error_flag;
 }

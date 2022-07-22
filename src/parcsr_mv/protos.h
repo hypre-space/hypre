@@ -246,6 +246,11 @@ HYPRE_Int hypre_ParCSRCommPkgCreate(MPI_Comm comm, HYPRE_BigInt *col_map_offd,
                                     HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts,
                                     HYPRE_Int num_cols_diag, HYPRE_Int num_cols_offd,
                                     hypre_ParCSRCommPkg *comm_pkg);
+HYPRE_Int hypre_ParCSRCommPkgCreateAndFill ( MPI_Comm comm, HYPRE_Int num_recvs,
+                                             HYPRE_Int *recv_procs, HYPRE_Int *recv_vec_starts,
+                                             HYPRE_Int num_sends, HYPRE_Int *send_procs,
+                                             HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
+                                             hypre_ParCSRCommPkg **comm_pkg_ptr );
 HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg, hypre_ParVector *x );
 HYPRE_Int hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );

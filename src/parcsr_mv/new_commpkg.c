@@ -540,16 +540,12 @@ hypre_ParCSRCommPkgCreateApart
                                         &num_sends, &send_procs, &send_map_starts,
                                         &send_map_elmts, apart);
 
-   hypre_ParCSRCommPkgComm         (comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumComponents(comm_pkg) = 1;
-   hypre_ParCSRCommPkgNumRecvs     (comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs    (comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   hypre_ParCSRCommPkgNumSends     (comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs    (comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
-   hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) = NULL;
+   /* Fill the communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs, recv_procs, recv_vec_starts,
+                                    num_sends, send_procs, send_map_starts,
+                                    send_map_elmts,
+                                    &comm_pkg);
 
    return hypre_error_flag;
 }
