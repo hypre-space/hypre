@@ -179,7 +179,7 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorSetSize
+ * hypre_ParVectorSetLocalSize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
