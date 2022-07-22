@@ -303,13 +303,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data);
 
-   /* Verify that the number of vectors held by f and u match */
-   if (hypre_ParVectorNumVectors(f) != hypre_ParVectorNumVectors(u))
+   /* Get the number of vector components when LHS/RHS are passed in */
+   if ((f != NULL) && (u != NULL))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for f and u do not match!\n");
-      return hypre_error_flag;
+      /* Verify that the number of vectors held by f and u match */
+      if (hypre_ParVectorNumVectors(f) != hypre_ParVectorNumVectors(u))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for RHS and LHS do not match!\n");
+         return hypre_error_flag;
+      }
+      num_vectors = hypre_ParVectorNumVectors(f);
    }
-   num_vectors = hypre_ParVectorNumVectors(f);
+   else
+   {
+      num_vectors = 1;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
