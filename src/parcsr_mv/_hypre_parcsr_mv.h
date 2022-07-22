@@ -1070,10 +1070,14 @@ void hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A);
 // y = alpha*A*x + beta*b
 HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                                hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *b, hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlaceDevice ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
+                                               hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *b, hypre_ParVector *y );
 // y = alpha*A*x + beta*y
 HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x,
                                      HYPRE_Complex beta, hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
+                                      hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvecTDevice ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int ncols, HYPRE_Complex *locl_data,
                                             HYPRE_Complex *recv_data,

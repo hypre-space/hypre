@@ -316,9 +316,8 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Vtemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
       // XXX GPU calls Relax7 XXX

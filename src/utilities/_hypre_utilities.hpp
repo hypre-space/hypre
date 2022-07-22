@@ -181,7 +181,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #include <oneapi/mkl/blas.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
-#include "oneapi/mkl/rng.hpp"
+#include <oneapi/mkl/rng.hpp>
 #endif
 #endif // defined(HYPRE_USING_SYCL)
 
@@ -1532,8 +1532,6 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int n
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
-
-void hypre_CudaCompileFlagCheck();
 
 #if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);

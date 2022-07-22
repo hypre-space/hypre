@@ -1476,8 +1476,6 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int n
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
-void hypre_CudaCompileFlagCheck();
-
 #if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);
 
