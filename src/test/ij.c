@@ -1219,6 +1219,16 @@ main( hypre_int argc,
       }
       /* end FSAI options */
 #if defined(HYPRE_USING_GPU)
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -2334,10 +2344,21 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------------
+    * Check if compile GPU arch matches the device
+    *-----------------------------------------------------------------*/
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_CudaCompileFlagCheck();
+   }
+
+   /*-----------------------------------------------------------------
     * GPU Device binding
     * Must be done before HYPRE_Init() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   }
 
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
@@ -3006,7 +3027,7 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
-      hypre_Memset(values_d, 0, local_num_rows * sizeof(HYPRE_Real), HYPRE_MEMORY_DEVICE);
+      hypre_Memset(values_d, 0, local_num_rows * sizeof(HYPRE_Real), memory_location);
       /* Initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
@@ -6390,19 +6411,19 @@ main( hypre_int argc,
          }
          indices_h = hypre_TAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_HOST);
          values_h = hypre_TAlloc(HYPRE_Complex, num_values, HYPRE_MEMORY_HOST);
-         indices_d = hypre_TAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_DEVICE);
-         values_d = hypre_TAlloc(HYPRE_Complex, num_values, HYPRE_MEMORY_DEVICE);
+         indices_d = hypre_TAlloc(HYPRE_BigInt, num_values, memory_location);
+         values_d = hypre_TAlloc(HYPRE_Complex, num_values, memory_location);
          for (i = 0; i < num_values; i++)
          {
             indices_h[i] = first_local_row + i;
          }
-         hypre_TMemcpy(indices_d, indices_h, HYPRE_BigInt, num_values, HYPRE_MEMORY_DEVICE,
+         hypre_TMemcpy(indices_d, indices_h, HYPRE_BigInt, num_values, memory_location,
                        HYPRE_MEMORY_HOST);
 
          HYPRE_ParVectorGetValues((HYPRE_ParVector) residual, num_values, indices_d, values_d);
 
          hypre_TMemcpy(values_h, values_d, HYPRE_Complex, num_values, HYPRE_MEMORY_HOST,
-                       HYPRE_MEMORY_DEVICE);
+                       memory_location);
 
          for (i = 0; i < num_values; i++)
          {
@@ -6413,8 +6434,8 @@ main( hypre_int argc,
          }
          hypre_TFree(indices_h, HYPRE_MEMORY_HOST);
          hypre_TFree(values_h, HYPRE_MEMORY_HOST);
-         hypre_TFree(indices_d, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(values_d, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(indices_d, memory_location);
+         hypre_TFree(values_d, memory_location);
       }
 
       if (second_time)
@@ -8386,7 +8407,10 @@ final:
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   hypre_ResetCudaDevice(NULL);
+   if (default_exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ResetCudaDevice(NULL);
+   }
 #endif
 
    return (0);

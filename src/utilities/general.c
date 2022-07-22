@@ -339,7 +339,7 @@ HYPRE_Init()
 #endif
 
    /* Check if cuda arch flags in compiling match the device */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
    hypre_CudaCompileFlagCheck();
 #endif
 
