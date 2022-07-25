@@ -76,6 +76,12 @@ the user and reference manuals (adjust the path as needed):
     file:///home/falgout2/hypre/src/docs/usr-manual-html/index.html
     file:///home/falgout2/hypre/src/docs/ref-manual-html/index.html
 
+Alternatively, run a (local) webserver:
+
+    python3 -m http.server --directory usr-manual-html
+
+and open http://localhost:8000 in a browser.
+
 ## Some useful links
 
 Sphinx:
