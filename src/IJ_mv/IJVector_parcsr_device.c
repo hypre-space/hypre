@@ -25,10 +25,6 @@ namespace thrust = std;
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------
- * hypre_IJVectorAssembleFunctor
- *--------------------------------------------------------------------*/
-
 template<typename T1, typename T2>
 #if defined(HYPRE_USING_SYCL)
 struct hypre_IJVectorAssembleFunctor
