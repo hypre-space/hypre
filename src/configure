@@ -784,6 +784,7 @@ enable_fortran
 enable_unified_memory
 enable_cuda_streams
 enable_cusparse
+enable_cusolver
 enable_device_memory_pool
 enable_device_malloc_async
 enable_cublas
@@ -1517,6 +1518,7 @@ Optional Features:
                           (default is NO).
   --enable-cuda-streams   Use CUDA streams (default is YES).
   --enable-cusparse       Use cuSPARSE (default is YES).
+  --enable-cusolver       Use cuSOLVER (default is NO).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
   --enable-device-malloc-async
@@ -2787,6 +2789,7 @@ hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
 hypre_using_cublas=yes
 hypre_using_curand=yes
+hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
 hypre_using_umpire=no
@@ -3138,6 +3141,19 @@ if test "${enable_cusparse+set}" = set; then :
  esac
 else
   hypre_using_cusparse=yes
+
+fi
+
+
+# Check whether --enable-cusolver was given.
+if test "${enable_cusolver+set}" = set; then :
+  enableval=$enable_cusolver; case "${enableval}" in
+    yes) hypre_using_cusolver=yes ;;
+    no)  hypre_using_cusolver=no ;;
+    *)   hypre_using_cusolver=yes ;;
+ esac
+else
+  hypre_using_cusolver=no
 
 fi
 
@@ -9195,6 +9211,14 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
       HYPRE_CUDA_LIBS+=" -lcurand"
    fi
 
+   if test "$hypre_using_cusolver" = "yes"
+   then
+
+$as_echo "#define HYPRE_USING_CUSOLVER 1" >>confdefs.h
+
+      HYPRE_CUDA_LIBS+=" -lcusolver"
+   fi
+
    if test "$hypre_using_device_pool" = "yes"
    then
 
@@ -9258,8 +9282,7 @@ fi
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
-                        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
-        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+                                HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/include"
 
                 HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
 
@@ -9268,7 +9291,6 @@ fi
 $as_echo "#define HYPRE_USING_ROCSPARSE 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
 
 fi
 
@@ -9276,7 +9298,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ROCBLAS 1" >>confdefs.h
 
-              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
 
 fi
 
@@ -9285,7 +9306,6 @@ fi
 $as_echo "#define HYPRE_USING_ROCRAND 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
 
 fi
 
@@ -9293,7 +9313,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ROCTX 1" >>confdefs.h
 
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
 
 fi
@@ -9352,7 +9371,7 @@ fi
 done
 
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
 
 fi
 
