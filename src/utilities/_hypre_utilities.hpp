@@ -181,7 +181,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #include <oneapi/mkl/blas.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
-#include "oneapi/mkl/rng.hpp"
+#include <oneapi/mkl/rng.hpp>
 #endif
 #endif // defined(HYPRE_USING_SYCL)
 
@@ -1443,7 +1443,7 @@ struct modulo
    T val;
    modulo(T val_) { val = val_; }
 
-   constexpr bool operator()(const T &x) const { return (x % val); }
+   constexpr T operator()(const T &x) const { return (x % val); }
 };
 
 template<typename T>
