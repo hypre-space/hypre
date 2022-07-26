@@ -108,8 +108,8 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 /* The following definitions facilitate code reuse and limits
  * if/def-ing when unifying cuda/hip code with sycl code */
-using dim3 = sycl::range<1>;
-using hypre_DeviceItem = sycl::nd_item<1>;
+using dim3 = sycl::range<3>;
+using hypre_DeviceItem = sycl::nd_item<3>;
 #define __global__
 #define __host__
 #define __device__
@@ -197,7 +197,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    else                                                                                      \
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
-         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
@@ -216,8 +216,8 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
-         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (sycl::nd_item<3> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
@@ -1161,12 +1161,11 @@ struct print_functor
 #if defined(HYPRE_USING_SYCL)
 
 /* return the number of threads in block */
-/* WM: todo - only supports bdim = gdim = 1 DOUBLE CHECK THIS */
 template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_num_threads(hypre_DeviceItem &item)
 {
-   return static_cast<HYPRE_Int>(item.get_group().get_group_range().get(0));
+   return static_cast<HYPRE_Int>(item.get_group().get_group_range().size());
 }
 
 /* return the flattened thread id in block */
@@ -1178,7 +1177,6 @@ hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
 }
 
 /* return the flattened thread id in grid */
-/* WM: todo - only supports bdim = gdim = 1 */
 template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)

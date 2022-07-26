@@ -1215,12 +1215,12 @@ extern "C++"
       {
          return;
       }
-      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
       {
-         cgh.parallel_for(sycl::nd_range<1>(gDim * bDim, bDim), loop_body);
+         cgh.parallel_for(sycl::nd_range<3>(gDim * bDim, bDim), loop_body);
       }).wait_and_throw();
    }
 
@@ -1234,12 +1234,12 @@ extern "C++"
       {
          return;
       }
-      const sycl::range<1> bDim = hypre_GetDefaultDeviceBlockDimension();
-      const sycl::range<1> gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
 
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler & cgh)
       {
-         cgh.parallel_for(sycl::nd_range<1>(gDim * bDim, bDim), sycl::reduction(shared_sum_var,
+         cgh.parallel_for(sycl::nd_range<3>(gDim * bDim, bDim), sycl::reduction(shared_sum_var,
                                                                                 std::plus<>()), loop_body);
       }).wait_and_throw();
    }
@@ -1368,7 +1368,7 @@ else                                                            \
 #define hypre_newBoxLoop0Begin(ndim, loop_size)                                                       \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1384,7 +1384,7 @@ else                                                            \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1404,7 +1404,7 @@ else                                                            \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                             \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1427,7 +1427,7 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(1, ndim,loop_size, dbox1, start1, stride1);                              \
    hypre_BoxLoopDataDeclareK(2, ndim,loop_size, dbox2, start2, stride2);                              \
    hypre_BoxLoopDataDeclareK(3, ndim,loop_size, dbox3, start3, stride3);                              \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1453,7 +1453,7 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                             \
    hypre_BoxLoopDataDeclareK(3, ndim, loop_size, dbox3, start3, stride3);                             \
    hypre_BoxLoopDataDeclareK(4, ndim, loop_size, dbox4, start4, stride4);                             \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1476,7 +1476,7 @@ else                                                            \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BasicBoxLoopDataDeclareK(1, ndim, loop_size, stride1);                                       \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1490,7 +1490,7 @@ else                                                            \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BasicBoxLoopDataDeclareK(1, ndim, loop_size, stride1);                                       \
    hypre_BasicBoxLoopDataDeclareK(2, ndim, loop_size, stride2);                                       \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1507,7 +1507,7 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
    HYPRE_Real *shared_sum_var = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
    hypre_TMemcpy(shared_sum_var, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
-   ReductionBoxLoopforall( [=,hypre_unused_var=sum_var] (sycl::nd_item<1> item, auto &sum_var)        \
+   ReductionBoxLoopforall( [=,hypre_unused_var=sum_var] (sycl::nd_item<3> item, auto &sum_var)        \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1530,7 +1530,7 @@ else                                                            \
    hypre_BoxLoopDataDeclareK(2, ndim, loop_size, dbox2, start2, stride2);                             \
    HYPRE_Real *shared_sum_var = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);                    \
    hypre_TMemcpy(shared_sum_var, &sum_var, HYPRE_Real, 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);    \
-   ReductionBoxLoopforall( [=,hypre_unused_var=sum_var] (sycl::nd_item<1> item, auto &sum_var)        \
+   ReductionBoxLoopforall( [=,hypre_unused_var=sum_var] (sycl::nd_item<3> item, auto &sum_var)        \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \
@@ -1549,7 +1549,7 @@ else                                                            \
 #define hypre_LoopBegin(size, idx)                                                                    \
 {                                                                                                     \
    HYPRE_Int hypre__tot = size;                                                                       \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)                                              \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)                                              \
    {                                                                                                  \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();                                        \
       if (idx < hypre__tot)                                                                           \

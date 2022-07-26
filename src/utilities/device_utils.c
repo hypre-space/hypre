@@ -376,7 +376,7 @@ dim3
 hypre_GetDefaultDeviceBlockDimension()
 {
 #if defined(HYPRE_USING_SYCL)
-   dim3 bDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   dim3 bDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()), 1, 1);
 #else
    dim3 bDim(HYPRE_1D_BLOCK_SIZE, 1, 1);
 #endif
@@ -391,7 +391,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
 {
    HYPRE_Int num_blocks = 0;
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int num_threads_per_block = bDim[0];
+   HYPRE_Int num_threads_per_block = bDim.get(0) * bDim.get(1) * bDim.get(2);
 #else
    HYPRE_Int num_threads_per_block = bDim.x * bDim.y * bDim.z;
 #endif
@@ -415,7 +415,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int n,
    }
 
 #if defined(HYPRE_USING_SYCL)
-   dim3 gDim(num_blocks);
+   dim3 gDim(num_blocks, 1, 1);
 #else
    dim3 gDim(num_blocks, 1, 1);
 #endif
@@ -1259,8 +1259,8 @@ hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Rea
    if (ny <= 2)
    {
       /* trivial cases, n = 1, 2 */
-      dim3 bDim = 1;
-      dim3 gDim = 1;
+      dim3 bDim(1, 1, 1);
+      dim3 gDim(1, 1, 1);
       HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else
