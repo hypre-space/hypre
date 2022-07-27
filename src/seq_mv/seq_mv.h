@@ -579,8 +579,10 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre
                                      hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
 
-HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int alpha,
-                                        HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta, HYPRE_Int *d_y );
+HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int num_rows, HYPRE_Int num_nonzeros,
+                                        HYPRE_Int alpha, HYPRE_Int *d_ia, HYPRE_Int *d_ja,
+                                        HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta,
+                                        HYPRE_Int *d_y );
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
