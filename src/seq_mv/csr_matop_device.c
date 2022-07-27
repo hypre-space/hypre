@@ -406,16 +406,12 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
    if (num_cols_offd_B)
    {
 #if defined(HYPRE_USING_SYCL)
-      /* WM: NOTE - onedpl lower bound currently does not accept zero length input */
-      if (num_cols_offd_C > 0)
-      {
-         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
-                            col_map_offd_C,
-                            col_map_offd_C + num_cols_offd_C,
-                            col_map_offd_B,
-                            col_map_offd_B + num_cols_offd_B,
-                            map_B_to_C );
-      }
+      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                         col_map_offd_C,
+                         col_map_offd_C + num_cols_offd_C,
+                         col_map_offd_B,
+                         col_map_offd_B + num_cols_offd_B,
+                         map_B_to_C );
 #else
       HYPRE_THRUST_CALL( lower_bound,
                          col_map_offd_C,
@@ -771,27 +767,19 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
 
-   /* WM: onedpl reduce_by_segment currently does not accept zero length input */
-   if (nnz_A > 0)
-   {
-      /* WM: better way to get around lack of constant iterator in DPL? */
-      HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
-      HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
-      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                                        A_j_sorted,
-                                        A_j_sorted + nnz_A,
-                                        ones,
-                                        reduced_col_indices,
-                                        reduced_col_nnz);
+   /* WM: better way to get around lack of constant iterator in DPL? */
+   HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     A_j_sorted,
+                                     A_j_sorted + nnz_A,
+                                     ones,
+                                     reduced_col_indices,
+                                     reduced_col_nnz);
 
-      hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
-      hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
-      num_reduced_col_indices = new_end.first - reduced_col_indices;
-   }
-   else
-   {
-      num_reduced_col_indices = 0;
-   }
+   hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
+   hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
+   num_reduced_col_indices = new_end.first - reduced_col_indices;
 #else
    thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
       HYPRE_THRUST_CALL(reduce_by_key, A_j_sorted, A_j_sorted + nnz_A,

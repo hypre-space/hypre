@@ -965,12 +965,7 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
-   HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   /* HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0); */
-   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, tmp, 0);
-   hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -1068,11 +1063,6 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
                               T1 *keys1_out, T2 *keys2_out, T3 *vals_out )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: onedpl reduce_by_segment currently does not accept zero length input */
-   if (N <= 0)
-   {
-      return hypre_error_flag;
-   }
    auto begin_keys_in  = oneapi::dpl::make_zip_iterator(keys1_in,  keys2_in );
    auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out, keys2_out);
    std::equal_to< std::tuple<T1, T2> > pred;
