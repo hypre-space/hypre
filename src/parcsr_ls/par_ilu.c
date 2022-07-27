@@ -81,6 +81,9 @@ hypre_ILUCreate()
    hypre_ParILUDataNumIterations(ilu_data) = 0;
 
    hypre_ParILUDataMaxIter(ilu_data) = 20;
+   hypre_ParILUDataTriSolve(ilu_data) = 0;
+   hypre_ParILUDataLowerJacobiIters(ilu_data) = 5;
+   hypre_ParILUDataUpperJacobiIters(ilu_data) = 5;
    hypre_ParILUDataTol(ilu_data) = 1.0e-7;
 
    hypre_ParILUDataLogging(ilu_data) = 0;
@@ -120,6 +123,9 @@ hypre_ILUCreate()
       NULL;/* this is not the default option, set it only when switched to */
    hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = 0;
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = 1;
+   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = 0;
+   hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = 5;
+   hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = 5;
    hypre_ParILUDataSchurPrecondTol(ilu_data) = 0.0;
 
    /* -> SCHUR-NSH */
@@ -557,6 +563,30 @@ hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter )
    hypre_ParILUDataMaxIter(ilu_data) = max_iter;
    return hypre_error_flag;
 }
+/* Set ILU triangular solver type */
+HYPRE_Int
+hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataTriSolve(ilu_data) = tri_solve;
+   return hypre_error_flag;
+}
+/* Set Lower Jacobi iterations for iterative triangular solver */
+HYPRE_Int
+hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataLowerJacobiIters(ilu_data) = lower_jacobi_iters;
+   return hypre_error_flag;
+}
+/* Set Upper Jacobi iterations for iterative triangular solver */
+HYPRE_Int
+hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataUpperJacobiIters(ilu_data) = upper_jacobi_iters;
+   return hypre_error_flag;
+}
 /* Set convergence tolerance for ILU solver */
 HYPRE_Int
 hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol )
@@ -719,6 +749,30 @@ hypre_ILUSetSchurPrecondMaxIter( void *ilu_vdata, HYPRE_Int sp_max_iter )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = sp_max_iter;
+   return hypre_error_flag;
+}
+/* Set triangular solver type for Precond of Schur System */
+HYPRE_Int
+hypre_ILUSetSchurPrecondTriSolve( void *ilu_vdata, HYPRE_Int sp_tri_solve )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = sp_tri_solve;
+   return hypre_error_flag;
+}
+/* Set Lower Jacobi iterations for Precond of Schur System */
+HYPRE_Int
+hypre_ILUSetSchurPrecondLowerJacobiIters( void *ilu_vdata, HYPRE_Int sp_lower_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = sp_lower_jacobi_iters;
+   return hypre_error_flag;
+}
+/* Set Upper Jacobi iterations for Precond of Schur System */
+HYPRE_Int
+hypre_ILUSetSchurPrecondUpperJacobiIters( void *ilu_vdata, HYPRE_Int sp_upper_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = sp_upper_jacobi_iters;
    return hypre_error_flag;
 }
 /* Set onvergence tolerance for Precond of Schur System */
@@ -938,6 +992,9 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
 
    hypre_printf("\n ILU Solver Parameters: \n");
    hypre_printf("Max number of iterations: %d\n", hypre_ParILUDataMaxIter(ilu_data));
+   hypre_printf("Triangular solver type: %d\n", hypre_ParILUDataTriSolve(ilu_data));
+   hypre_printf("Lower Jacobi Iterations: %d\n", hypre_ParILUDataLowerJacobiIters(ilu_data));
+   hypre_printf("Upper Jacobi Iterations: %d\n", hypre_ParILUDataUpperJacobiIters(ilu_data));
    hypre_printf("Stopping tolerance: %e\n", hypre_ParILUDataTol(ilu_data));
 
    return hypre_error_flag;
