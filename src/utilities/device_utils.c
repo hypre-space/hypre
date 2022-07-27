@@ -1231,8 +1231,8 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
    if (ny <= 2)
    {
       /* trivial cases, n = 1, 2 */
-      dim3 bDim = 1;
-      dim3 gDim = 1;
+      dim3 bDim(1, 1, 1);
+      dim3 gDim(1, 1, 1);
       HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else
