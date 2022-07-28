@@ -885,14 +885,15 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
 /* WM: todo - port hypre_CSRMatrixSpMVDevice() to sycl */
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Complex *data = hypre_TAlloc(HYPRE_Complex,
-                                      hypre_CSRMatrixNumNonzeros(E),
+                                      hypre_CSRMatrixNumNonzeros(matrix_E),
                                       HYPRE_MEMORY_DEVICE);
-   hypreDevice_ComplexFilln(data, hypre_CSRMatrixNumNonzeros(E), 1.0);
-   hypre_CSRMatrixData(E) = data;
-   hypre_CSRMatrixMatvecDevice(trans, alpha, E, &vec_x, beta, &vec_y, &vec_y, 0);
+   hypreDevice_ComplexFilln(data, hypre_CSRMatrixNumNonzeros(matrix_E), 1.0);
+   hypre_CSRMatrixData(matrix_E) = data;
+
+   hypre_CSRMatrixMatvecDevice(trans, alpha, matrix_E, &vec_x, beta, &vec_y, &vec_y, 0);
 #else
    /* Compute y += E*x */
-   hypre_CSRMatrixSpMVDevice(trans, alpha, E, &vec_x, beta, &vec_y, fill);
+   hypre_CSRMatrixSpMVDevice(trans, alpha, matrix_E, &vec_x, beta, &vec_y, fill);
 #endif
 
    return hypre_error_flag;
