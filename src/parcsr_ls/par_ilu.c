@@ -81,7 +81,7 @@ hypre_ILUCreate()
    hypre_ParILUDataNumIterations(ilu_data) = 0;
 
    hypre_ParILUDataMaxIter(ilu_data) = 20;
-   hypre_ParILUDataTriSolve(ilu_data) = 0;
+   hypre_ParILUDataTriSolve(ilu_data) = 1;
    hypre_ParILUDataLowerJacobiIters(ilu_data) = 5;
    hypre_ParILUDataUpperJacobiIters(ilu_data) = 5;
    hypre_ParILUDataTol(ilu_data) = 1.0e-7;
@@ -123,7 +123,7 @@ hypre_ILUCreate()
       NULL;/* this is not the default option, set it only when switched to */
    hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = 0;
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = 1;
-   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = 0;
+   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = 1;
    hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = 5;
    hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = 5;
    hypre_ParILUDataSchurPrecondTol(ilu_data) = 0.0;

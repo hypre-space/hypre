@@ -1119,21 +1119,21 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
                                              HYPRE_Real   kap_tolerance);
 
 /**
- * Defines triangular solver for ILUT smoother, 0-direct, 1-iterative
+ * (Optional) Defines triangular solver for ILU(k,T) smoother: 0-iterative, 1-direct (default)
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
 										 HYPRE_Int     ilu_tri_solve);
 
 /**
- * Defines Jacobi iterations for ILUT smoother, iterative tri-solve
+ * (Optional) Defines number of lower Jacobi iterations for ILU(k,T) smoother triangular solve.
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
 												 HYPRE_Int     ilu_lower_jacobi_iters);
 
 /**
- * Defines Jacobi iterations for ILUT smoother, iterative tri-solve
+ * (Optional) Defines number of upper Jacobi iterations for ILU(k,T) smoother triangular solve.
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
@@ -4313,15 +4313,15 @@ HYPRE_Int
 HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve );
 
 /**
- * (Optional) Set number of Jacobi iterations for the triangular L and U solves
- * Set this to integer > 0 when TriSolve is (0) . The default is 5 iterations.
+ * (Optional) Set number of lower Jacobi iterations for the triangular L solves
+ * Set this to integer > 0 when using iterative tri_solve (0). The default is 5 iterations.
  **/
 HYPRE_Int
 HYPRE_ILUSetLowerJacobiIters( HYPRE_Solver solver, HYPRE_Int lower_jacobi_iterations );
 
 /**
- * (Optional) Set number of Jacobi iterations for the triangular L and U solves
- * Set this to integer > 0 when TriSolve is (0) . The default is 5 iterations.
+ * (Optional) Set number of upper Jacobi iterations for the triangular U solves
+ * Set this to integer > 0 when using iterative tri_solve (0). The default is 5 iterations.
  **/
 HYPRE_Int
 HYPRE_ILUSetUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int upper_jacobi_iterations );
