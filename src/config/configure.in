@@ -1235,7 +1235,6 @@ AS_HELP_STRING([--with-cuda],
 [hypre_using_cuda=no]
 )
 
-
 dnl ***** HIP
 AC_ARG_WITH(hip,
 AS_HELP_STRING([--with-hip],
@@ -1260,6 +1259,7 @@ esac],
 [hypre_using_sycl=no]
 )
 
+dnl ***** CUDA options
 
 AC_ARG_WITH(cuda-home,
 AS_HELP_STRING([--with-cuda-home=DIR],
@@ -1280,6 +1280,39 @@ AS_HELP_STRING([--with-gpu-arch=ARG],
     if test "x${HYPRE_CUDA_SM}" = "x"
     then
        HYPRE_CUDA_SM="${withval}"
+    fi
+ fi
+]
+)
+
+dnl ***** SYCL options
+
+AC_ARG_WITH(sycl-target,
+AS_HELP_STRING([--with-sycl-target=ARG],
+               [User specifies sycl targets for AOT compilation in ARG, where ARG is a comma-separated
+                list (enclosed in quotes), e.g. "spir64_gen".]),
+[
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_SYCL_TARGET}" = "x"
+    then
+       HYPRE_SYCL_TARGET="${withval}"
+    fi
+ fi
+]
+)
+
+AC_ARG_WITH(sycl-target-backend,
+AS_HELP_STRING([--with-sycl-target-backend=ARG],
+               [User specifies additional options for the sycl target backend for AOT compilation in ARG,
+                where ARG contains the desired options (enclosed in double+single quotes),
+                e.g. --with-sycl-target-backend="'-device 12.1.0,12.4.0'".]),
+[
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_SYCL_TARGET_BACKEND}" = "x"
+    then
+       HYPRE_SYCL_TARGET_BACKEND="${withval}"
     fi
  fi
 ]
@@ -2425,7 +2458,15 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
 
-        LDFLAGS+="-fsycl-targets=spir64_gen -Xsycl-target-backend '-device 12.1.0,12.4.0'"
+        dnl AOT compilation for specific devices
+        if test "x${HYPRE_SYCL_TARGET}" != "x"
+        then
+           LDFLAGS+=" -fsycl-targets=${HYPRE_SYCL_TARGET}"
+        fi
+        if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
+        then
+           LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+        fi
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
         if test "$hypre_user_chose_cuflags" = "no"
