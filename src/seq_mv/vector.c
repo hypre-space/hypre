@@ -142,11 +142,28 @@ HYPRE_Int
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
                              HYPRE_Int     owns_data   )
 {
-   HYPRE_Int    ierr = 0;
-
    hypre_VectorOwnsData(vector) = owns_data;
 
-   return ierr;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorSetSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetSize( hypre_Vector *vector,
+                        HYPRE_Int     size   )
+{
+   HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
+
+   hypre_VectorSize(vector) = size;
+   if (multivec_storage_method == 0)
+   {
+      hypre_VectorVectorStride(vector) = size;
+   }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
