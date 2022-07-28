@@ -39,6 +39,8 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpTransUseVendor(data) = 1;
 #else
    hypre_DeviceDataSpgemmUseVendor(data)  = 0;
+   hypre_DeviceDataSpMVUseVendor(data)    = 0;
+   hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
    /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
 #if defined(HYPRE_USING_CUDA)
