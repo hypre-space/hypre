@@ -179,6 +179,21 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorSetLocalSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector,
+                             HYPRE_Int        local_size )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_SeqVectorSetSize(local_vector, local_size);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorSetNumVectors
  * call before calling hypre_ParVectorInitialize
  * probably this will do more harm than good, use hypre_ParMultiVectorCreate

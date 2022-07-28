@@ -507,6 +507,7 @@ HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector, HYPRE_Int owns_data );
+HYPRE_Int hypre_ParVectorSetLocalSize ( hypre_ParVector *vector, HYPRE_Int local_size );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector, HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int component );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
