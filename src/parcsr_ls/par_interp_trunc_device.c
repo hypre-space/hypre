@@ -13,9 +13,6 @@
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
 
-/* WM: todo - how to do shared memory in sycl? */
-#if !defined(HYPRE_USING_SYCL)
-
 /* special case for max_elmts = 0, i.e. no max_elmts limit */
 __global__ void
 hypreCUDAKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
@@ -183,6 +180,9 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
 /* TODO: using 1 thread per row, which can be suboptimal */
 __global__ void
 hypreCUDAKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
+#if defined(HYPRE_USING_SYCL)
+                                          char *shmem_ptr,
+#endif
                                           HYPRE_Int   nrows,
                                           HYPRE_Real  trunc_factor,
                                           HYPRE_Int   max_elmts,
@@ -229,7 +229,11 @@ hypreCUDAKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    /* 2. save the largest max_elmts entries in sh_val/pos */
    const HYPRE_Int nt = hypre_gpu_get_num_threads<1>(item);
    const HYPRE_Int tid = hypre_gpu_get_thread_id<1>(item);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int *shared_mem = (HYPRE_Int*) shmem_ptr;
+#else
    extern __shared__ HYPRE_Int shared_mem[];
+#endif
    HYPRE_Int *sh_pos = &shared_mem[tid * max_elmts];
    HYPRE_Real *sh_val = &((HYPRE_Real *) &shared_mem[nt * max_elmts])[tid * max_elmts];
    HYPRE_Int cnt = 0;
@@ -433,9 +437,15 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    }
    else
    {
+#if defined(HYPRE_USING_SYCL)
+      dim3 bDim(256, 1, 1);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
+      size_t shmem_bytes = bDim.get(0) * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+#else
       dim3 bDim(256);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
       size_t shmem_bytes = bDim.x * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+#endif
       HYPRE_GPU_LAUNCH2( hypreCUDAKernel_InterpTruncationPass1_v1,
                          gDim, bDim, shmem_bytes,
                          nrows, trunc_factor, max_elmts,
@@ -491,8 +501,6 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
 
    return hypre_error_flag;
 }
-
-#endif
 
 __global__ void
 hypreCUDAKernel_InterpTruncation_v2( hypre_DeviceItem &item,
@@ -731,14 +739,11 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
 #endif
    hypre_GpuProfilingPushRange("Interp-Truncation");
 
-   /* WM: todo - sycl */
-#if !defined(HYPRE_USING_SYCL)
    if (max_elmts <= HYPRE_INTERPTRUNC_ALGORITHM_SWITCH)
    {
       hypre_BoomerAMGInterpTruncationDevice_v1(P, trunc_factor, max_elmts);
    }
    else
-#endif
    {
       hypre_BoomerAMGInterpTruncationDevice_v2(P, trunc_factor, max_elmts);
    }
