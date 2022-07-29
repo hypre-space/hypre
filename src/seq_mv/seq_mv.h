@@ -508,6 +508,7 @@ HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector, HYPRE_Int owns_data );
+HYPRE_Int hypre_SeqVectorSetSize ( hypre_Vector *vector, HYPRE_Int size );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
 HYPRE_Int hypre_SeqVectorPrint ( hypre_Vector *vector, char *file_name );
 HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex value );
