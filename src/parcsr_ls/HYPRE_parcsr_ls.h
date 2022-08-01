@@ -886,6 +886,11 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyScale (HYPRE_Solver solver,
 /**
  * (Optional) Defines which polynomial variant should be used.
  *  The default is 0 (i.e., scaled).
+ *  If variant=1, the polynomial is defined as:
+ *     T(t)* f(t) where f(t) = (1-b/t)
+ *  If variant=2, use standard Chebyshev polynomial with $D^{-1}A$, not $D^{-1/2}AD^{-1/2}$.
+ *  If variant=3, use 4th-kind Chebyshev polynomial from https://arxiv.org/abs/2202.08830.
+ *  If variant=4, use optimized 4th-kind Chebyshev polynomial from https://arxiv.org/abs/2202.08830.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
                                           HYPRE_Int   variant);
