@@ -23,7 +23,7 @@ hypre_ILUCreate()
 
    ilu_data                               = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    hypre_ParILUDataMatLMatrixDescription(ilu_data) = NULL;
    hypre_ParILUDataMatUMatrixDescription(ilu_data) = NULL;
    hypre_ParILUDataMatBLILUSolveInfo(ilu_data) = NULL;
@@ -148,7 +148,7 @@ hypre_ILUDestroy( void *data )
 {
    hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    if (hypre_ParILUDataILUSolveBuffer(ilu_data))
    {
       hypre_TFree(hypre_ParILUDataILUSolveBuffer(ilu_data), HYPRE_MEMORY_DEVICE);
@@ -373,12 +373,12 @@ hypre_ILUDestroy( void *data )
       switch (hypre_ParILUDataIluType(ilu_data))
       {
          case 10: case 11: case 40: case 41:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (hypre_ParILUDataIluType(ilu_data) != 10 && hypre_ParILUDataIluType(ilu_data) != 11)
             {
 #endif
                HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             }
 #endif
             break;
@@ -497,12 +497,12 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
       switch (hypre_ParILUDataIluType(ilu_data))
       {
          case 10: case 11: case 40: case 41:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (hypre_ParILUDataIluType(ilu_data) != 10 && hypre_ParILUDataIluType(ilu_data) != 11)
             {
 #endif
                HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             }
 #endif
             break;
@@ -2764,7 +2764,7 @@ hypre_ILULocalRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end)
    return hypre_error_flag;
 }
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUCusparseSchurGMRESDummySetup
@@ -3662,7 +3662,7 @@ hypre_ParILURAPSchurGMRESMatvecDestroyH( void *matvec_data )
    return 0;
 }
 
-#endif
+#endif /* if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE) */
 
 /* NSH create and solve and help functions */
 
