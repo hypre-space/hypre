@@ -73,6 +73,10 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int            print_level;
    HYPRE_Int            max_iter;
 
+   HYPRE_Int            tri_solve;
+   HYPRE_Int            lower_jacobi_iters;
+   HYPRE_Int            upper_jacobi_iters;
+
    HYPRE_Int            ilu_type;
    HYPRE_Int            nLU;
    HYPRE_Int            nI;
@@ -130,6 +134,9 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           *sp_ilu_droptol;/* droptol array for ILUT */
    HYPRE_Int            sp_print_level;
    HYPRE_Int            sp_max_iter;/* max precond iter or max MR iteration */
+   HYPRE_Int            sp_tri_solve;
+   HYPRE_Int            sp_lower_jacobi_iters;
+   HYPRE_Int            sp_upper_jacobi_iters;
    HYPRE_Real           sp_tol;
 
    HYPRE_Int            test_opt;
@@ -193,6 +200,9 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataLogging(ilu_data)                      ((ilu_data) -> logging)
 #define hypre_ParILUDataPrintLevel(ilu_data)                   ((ilu_data) -> print_level)
 #define hypre_ParILUDataMaxIter(ilu_data)                      ((ilu_data) -> max_iter)
+#define hypre_ParILUDataTriSolve(ilu_data)                     ((ilu_data) -> tri_solve)
+#define hypre_ParILUDataLowerJacobiIters(ilu_data)             ((ilu_data) -> lower_jacobi_iters)
+#define hypre_ParILUDataUpperJacobiIters(ilu_data)             ((ilu_data) -> upper_jacobi_iters)
 #define hypre_ParILUDataIluType(ilu_data)                      ((ilu_data) -> ilu_type)
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
 #define hypre_ParILUDataNI(ilu_data)                           ((ilu_data) -> nI)
@@ -220,6 +230,9 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)       ((ilu_data) -> sp_ilu_droptol)
 #define hypre_ParILUDataSchurPrecondPrintLevel(ilu_data)       ((ilu_data) -> sp_print_level)
 #define hypre_ParILUDataSchurPrecondMaxIter(ilu_data)          ((ilu_data) -> sp_max_iter)
+#define hypre_ParILUDataSchurPrecondTriSolve(ilu_data)         ((ilu_data) -> sp_tri_solve)
+#define hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) ((ilu_data) -> sp_lower_jacobi_iters)
+#define hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) ((ilu_data) -> sp_upper_jacobi_iters)
 #define hypre_ParILUDataSchurPrecondTol(ilu_data)              ((ilu_data) -> sp_tol)
 
 #define hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           ((ilu_data) -> ss_nsh_setup_max_iter)
