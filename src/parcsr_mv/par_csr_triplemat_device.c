@@ -840,11 +840,57 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    if (num_cols_offd_C)
    {
-      hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
+      /* squeeze out zero columns of C_offd */
+      HYPRE_Int *tmp_j, *tmp_end, num_cols_offd_C_new;
+      tmp_j = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(C_offd), HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(tmp_j, hypre_CSRMatrixJ(C_offd), HYPRE_Int, hypre_CSRMatrixNumNonzeros(C_offd),
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      HYPRE_THRUST_CALL( sort,
+                         tmp_j,
+                         tmp_j + hypre_CSRMatrixNumNonzeros(C_offd) );
+      tmp_end = HYPRE_THRUST_CALL( unique,
+                                   tmp_j,
+                                   tmp_j + hypre_CSRMatrixNumNonzeros(C_offd) );
+      num_cols_offd_C_new = tmp_end - tmp_j;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_assert(num_cols_offd_C_new <= num_cols_offd_C);
+
+      if (num_cols_offd_C_new < num_cols_offd_C)
+      {
+         hypre_CSRMatrixNumCols(C_offd) = num_cols_offd_C_new;
+
+         HYPRE_Int *offd_mark = hypre_CTAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+         HYPRE_BigInt *col_map_offd_C_new = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C_new, HYPRE_MEMORY_DEVICE);
+
+         HYPRE_THRUST_CALL( scatter,
+                            thrust::counting_iterator<HYPRE_Int>(0),
+                            thrust::counting_iterator<HYPRE_Int>(num_cols_offd_C_new),
+                            tmp_j,
+                            offd_mark );
+         HYPRE_THRUST_CALL( gather,
+                            hypre_CSRMatrixJ(C_offd),
+                            hypre_CSRMatrixJ(C_offd) + hypre_CSRMatrixNumNonzeros(C_offd),
+                            offd_mark,
+                            hypre_CSRMatrixJ(C_offd) );
+         HYPRE_THRUST_CALL( gather,
+                            tmp_j,
+                            tmp_j + num_cols_offd_C_new,
+                            col_map_offd_C,
+                            col_map_offd_C_new );
+
+         hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
+
+         hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C_new;
+         hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C_new, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C_new, HYPRE_BigInt, num_cols_offd_C_new,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      } else {
+         hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
+         hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      }
    }
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
