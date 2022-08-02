@@ -412,6 +412,8 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
       hypre_PrintTiming("Host Parcsr Matrix-by-Matrix, RAP", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_AH_host);
    }
 
    /*-----------------------------------------------------------
@@ -492,9 +494,10 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
       fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_AH_host);
       rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
 
-      hypre_ParPrintf(comm, "AH: %d x %d, nnz %d, CPU-GPU err %e\n",
+      hypre_ParPrintf(comm, "AH: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n",
                       hypre_ParCSRMatrixGlobalNumRows(parcsr_AH_host_2),
                       hypre_ParCSRMatrixGlobalNumCols(parcsr_AH_host_2),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host),
                       hypre_ParCSRMatrixNumNonzeros(parcsr_AH_host_2),
                       rfnorm);
    }

@@ -114,7 +114,7 @@ hypre_BoomerAMGCoarseParms(MPI_Comm         comm,
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(CF_marker));
    if (num_functions > 1)
    {

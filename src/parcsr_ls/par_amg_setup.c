@@ -162,6 +162,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_lfil;
    HYPRE_Int     ilu_max_row_nnz;
    HYPRE_Int     ilu_max_iter;
+   HYPRE_Int     ilu_tri_solve;
+   HYPRE_Int     ilu_lower_jacobi_iters;
+   HYPRE_Int     ilu_upper_jacobi_iters;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
    HYPRE_Int     fsai_max_steps;
@@ -255,6 +258,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_lfil = hypre_ParAMGDataILULevel(amg_data);
    ilu_max_row_nnz = hypre_ParAMGDataILUMaxRowNnz(amg_data);
    ilu_droptol = hypre_ParAMGDataILUDroptol(amg_data);
+   ilu_tri_solve = hypre_ParAMGDataILUTriSolve(amg_data);
+   ilu_lower_jacobi_iters = hypre_ParAMGDataILULowerJacobiIters(amg_data);
+   ilu_upper_jacobi_iters = hypre_ParAMGDataILUUpperJacobiIters(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
    fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
@@ -674,14 +680,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
 #else
       for (i = 0; i < local_size; i++)
       {
          hypre_IntArrayData(dof_func)[i] = (i + offset) % num_functions;
       }
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
    }
 
    A_array[0] = A;
@@ -3437,6 +3443,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ILUSetType( smoother[j], ilu_type);
          HYPRE_ILUSetLocalReordering( smoother[j], ilu_reordering_type);
          HYPRE_ILUSetMaxIter(smoother[j], ilu_max_iter);
+         HYPRE_ILUSetTriSolve(smoother[j], ilu_tri_solve);
+         HYPRE_ILUSetLowerJacobiIters(smoother[j], ilu_lower_jacobi_iters);
+         HYPRE_ILUSetUpperJacobiIters(smoother[j], ilu_upper_jacobi_iters);
          HYPRE_ILUSetTol(smoother[j], 0.);
          HYPRE_ILUSetDropThreshold(smoother[j], ilu_droptol);
          HYPRE_ILUSetLogging(smoother[j], 0);

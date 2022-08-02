@@ -348,7 +348,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *bdiaginv;
    hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
    HYPRE_Int            *soc_diag_j;
    HYPRE_Int            *soc_offd_j;
@@ -387,7 +387,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixAssumedPartition(matrix)       ((matrix) -> assumed_partition)
 #define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
 #define hypre_ParCSRMatrixProcOrdering(matrix)           ((matrix) -> proc_ordering)
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 #define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
 #define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
 #endif
@@ -1125,6 +1125,7 @@ HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector, HYPRE_Int owns_data );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector, HYPRE_Int num_vectors );
+HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int component );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
 HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector, const char *file_name );
 HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v, HYPRE_Complex value );
@@ -1161,11 +1162,13 @@ HYPRE_Int hypre_ParVectorGetValues2( hypre_ParVector *vector, HYPRE_Int num_valu
 HYPRE_Int hypre_ParVectorGetValuesHost(hypre_ParVector *vector, HYPRE_Int num_values,
                                        HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
 HYPRE_Int hypre_ParVectorElmdivpy( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
+                                         hypre_ParVector *y, HYPRE_Int *marker,
+                                         HYPRE_Int marker_val );
 /* par_vector_device.c */
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
-                                         HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
+                                         HYPRE_BigInt *indices, HYPRE_BigInt base,
+                                         HYPRE_Complex *values);
 
 #ifdef __cplusplus
 }

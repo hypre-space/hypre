@@ -661,7 +661,7 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
       }
    }
 
-   rl = warp_reduce_sum(rl);
+   rl = warp_reduce_sum(item, rl);
 
    if (lane == 0)
    {
@@ -796,7 +796,7 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
       }
    }
 
-   rl = warp_reduce_sum(rl);
+   rl = warp_reduce_sum(item, rl);
 
    if (lane == 0)
    {

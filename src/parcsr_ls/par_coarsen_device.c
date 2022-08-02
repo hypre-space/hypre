@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
@@ -14,7 +15,7 @@
 #define COMMON_C_PT  2
 #define Z_PT -2
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 HYPRE_Int hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix *S, hypre_ParCSRCommPkg *comm_pkg,
                                           HYPRE_Int CF_init, HYPRE_Real *measure_diag, HYPRE_Real *measure_offd, HYPRE_Real *real_send_buf,
@@ -153,12 +154,20 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                        CF_marker_diag, CF_marker_offd, comm_pkg, (HYPRE_Int *) send_buf);
 
          /* sync CF_marker_offd: so it has correct 1/0 now */
+#if defined(HYPRE_USING_SYCL)
+         hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                           hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                           CF_marker_diag,
+                           (HYPRE_Int *) send_buf );
+#else
          HYPRE_THRUST_CALL( gather,
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                             hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                             CF_marker_diag,
                             (HYPRE_Int *) send_buf );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
          /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
@@ -182,6 +191,17 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                          (HYPRE_Int *)send_buf);
 
       /* Update graph_diag. Remove the nodes with CF_marker_diag != 0 */
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather( graph_diag,
+                        graph_diag + graph_diag_size,
+                        CF_marker_diag,
+                        diag_iwork );
+
+      HYPRE_Int *new_end = hypreSycl_remove_if( graph_diag,
+                                                graph_diag + graph_diag_size,
+                                                diag_iwork,
+      [] (const auto & x) {return x;} );
+#else
       HYPRE_THRUST_CALL( gather,
                          graph_diag,
                          graph_diag + graph_diag_size,
@@ -193,6 +213,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                               graph_diag + graph_diag_size,
                                               diag_iwork,
                                               thrust::identity<HYPRE_Int>() );
+#endif
 
       graph_diag_size = new_end - graph_diag;
    }
@@ -334,9 +355,8 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int        num_rows_diag = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int        num_sends     = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   dim3 bDim, gDim;
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(num_rows_diag, "thread", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows_diag, "thread", bDim);
 
    hypre_ParCSRCommHandle *comm_handle;
    HYPRE_Int *new_end;
@@ -346,12 +366,20 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     measure_diag,
+                     real_send_buf );
+#else
    HYPRE_THRUST_CALL(gather,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      measure_diag,
                      real_send_buf);
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
@@ -365,13 +393,21 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* graph_diag consists points with CF_marker_diag == 0 */
-   new_end =
-      HYPRE_THRUST_CALL(remove_copy_if,
-                        thrust::make_counting_iterator(0),
-                        thrust::make_counting_iterator(num_rows_diag),
-                        CF_marker_diag,
-                        graph_diag,
-                        thrust::identity<HYPRE_Int>());
+#if defined(HYPRE_USING_SYCL)
+   oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+   new_end = hypreSycl_remove_copy_if( count,
+                                       count + num_rows_diag,
+                                       CF_marker_diag,
+                                       graph_diag,
+   [] (const auto & x) {return x;} );
+#else
+   new_end = HYPRE_THRUST_CALL( remove_copy_if,
+                                thrust::make_counting_iterator(0),
+                                thrust::make_counting_iterator(num_rows_diag),
+                                CF_marker_diag,
+                                graph_diag,
+                                thrust::identity<HYPRE_Int>());
+#endif
 
    *graph_diag_size = new_end - graph_diag;
 
@@ -452,7 +488,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_DeviceItem &item,
          }
       }
 
-      marker_row = warp_allreduce_min(marker_row);
+      marker_row = warp_allreduce_min(item, marker_row);
 
       if (marker_row == 0)
       {
@@ -476,7 +512,7 @@ hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_DeviceItem &item,
             }
          }
 
-         marker_row = warp_reduce_min(marker_row);
+         marker_row = warp_reduce_min(item, marker_row);
       }
 
       if (lane == 0 && marker_row == -1)
@@ -507,9 +543,8 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    HYPRE_Int       *S_offd_j  = hypre_CSRMatrixJ(S_offd);
    HYPRE_Int        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   dim3 bDim, gDim;
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
                      gDim, bDim,
@@ -526,12 +561,20 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    hypre_ParCSRCommHandle *comm_handle;
 
    /* communicate for measure_offd */
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                     measure_diag,
+                     real_send_buf );
+#else
    HYPRE_THRUST_CALL(gather,
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                      measure_diag,
                      real_send_buf);
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
@@ -569,5 +612,5 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 

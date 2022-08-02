@@ -720,7 +720,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       HYPRE_Complex *recv_data = (HYPRE_Complex *) y_buf_data[jv];
       HYPRE_Complex *locl_data = y_local_data + jv * vecstride;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       /* unpack recv data on device */
       hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRMatrixNumCols(A), locl_data, recv_data, comm_pkg );
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
@@ -920,7 +920,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
    return ierr;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 HYPRE_Int
 hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            ncols,
                                   HYPRE_Complex       *locl_data,
@@ -946,7 +946,16 @@ hypre_ParCSRMatrixMatvecT_unpack( HYPRE_Int            ncols,
    hypre_VectorSize(&vec_x) = num_elemt;
    hypre_VectorData(&vec_y) = locl_data;
 
+/* WM: todo - port hypre_CSRMatrixSpMVDevice() to sycl */
+#if defined(HYPRE_USING_SYCL)
+   hypre_VectorSize(&vec_y) = hypre_CSRMatrixNumRows(E);
+   HYPRE_Complex *data = hypre_TAlloc(HYPRE_Complex, hypre_CSRMatrixNumNonzeros(E), HYPRE_MEMORY_DEVICE);
+   hypreDevice_ComplexFilln(data, hypre_CSRMatrixNumNonzeros(E), 1.0);
+   hypre_CSRMatrixData(E) = data;
+   hypre_CSRMatrixMatvecDevice(0, 1.0, E, &vec_x, 1.0, &vec_y, &vec_y, 0);
+#else
    hypre_CSRMatrixSpMVDevice(0, 1.0, E, &vec_x, 1.0, &vec_y, 0);
+#endif
 
    return hypre_error_flag;
 }

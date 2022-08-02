@@ -287,7 +287,7 @@ Error Flags
 
 Every hypre function returns an integer, which is used to indicate errors
 during execution.  Note that the error flag returned by a given function
-reflects the errors from {\em all} previous calls to hypre functions.  In
+reflects the errors from *all* previous calls to hypre functions.  In
 particular, a value of zero means that all hypre functions up to (and
 including) the current one have completed successfully.  This new error flag
 system is being implemented throughout the library, but currently there are
