@@ -621,7 +621,16 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    return hypre_error_flag;
 }
 
-/* y = y + x ./ b */
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorElmdivpy
+ *
+ * Computes: y = y + x ./ b
+ *
+ * Notes:
+ *    1) y and b must have the same sizes
+ *    2) x_size can be larger than y_size
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SeqVectorElmdivpy( hypre_Vector *x,
                          hypre_Vector *b,
@@ -637,17 +646,22 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    HYPRE_Int      num_vectors_x = hypre_VectorNumVectors(x);
    HYPRE_Int      num_vectors_y = hypre_VectorNumVectors(y);
    HYPRE_Int      num_vectors_b = hypre_VectorNumVectors(b);
-   HYPRE_Int      size          = hypre_VectorSize(x);
+   HYPRE_Int      size          = hypre_VectorSize(y);
 
    /* Sanity checks */
-   if (hypre_VectorSize(x) != hypre_VectorSize(y) ||
-       hypre_VectorSize(y) != hypre_VectorSize(b))
+   if (hypre_VectorSize(y) != hypre_VectorSize(b))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: size of x, y, and b do not match!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: sizes of y and b do not match!\n");
       return hypre_error_flag;
    }
 
-   /* row-wise multivec is not supportted */
+   if (hypre_VectorSize(x) < hypre_VectorSize(y))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: x_size is smaller than y_size!\n");
+      return hypre_error_flag;
+   }
+
+   /* row-wise multivec is not supported */
    hypre_assert(hypre_VectorMultiVecStorageMethod(x) == 0);
    hypre_assert(hypre_VectorMultiVecStorageMethod(b) == 0);
    hypre_assert(hypre_VectorMultiVecStorageMethod(y) == 0);
