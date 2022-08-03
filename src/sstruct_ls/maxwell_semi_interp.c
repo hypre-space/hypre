@@ -104,7 +104,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    HYPRE_BigInt           start_rank1;
 
    HYPRE_Int              nFaces, nEdges, nElements, nedges;
-   HYPRE_Int              nxFaces, nyFaces, nzFaces, nxEdges, nyEdges, nzEdges;
+   HYPRE_Int              nxFaces, nyFaces, nzFaces;
+   /* HYPRE_Int              nxEdges, nyEdges, nzEdges; */
    HYPRE_Int              n_xFace_iedges, n_yFace_iedges, n_zFace_iedges;
    HYPRE_Int              n_Cell_iedges;
 
@@ -270,9 +271,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    nxFaces  = 0;
    nyFaces  = 0;
    nzFaces  = 0;
-   nxEdges  = 0;
-   nyEdges  = 0;
-   nzEdges  = 0;
+   /* nxEdges  = 0; */
+   /* nyEdges  = 0; */
+   /* nzEdges  = 0; */
 
    for (part = 0; part < nparts; part++)
    {
@@ -315,9 +316,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       if (ndim < 3)
       {
          nEdges = nFaces;
-         nxEdges = nxFaces;
-         nyEdges = nyFaces;
-         nzEdges = 0;
+         /* nxEdges = nxFaces; */
+         /* nyEdges = nyFaces; */
+         /* nzEdges = 0; */
       }
 
       else
@@ -332,18 +333,18 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             t = vartypes[var];
             nEdges += hypre_StructGridLocalSize(var_cgrid);
 
-            switch (t)
-            {
-               case 5:
-                  nxEdges += hypre_StructGridLocalSize(var_cgrid);
-                  break;
-               case 6:
-                  nyEdges += hypre_StructGridLocalSize(var_cgrid);
-                  break;
-               case 7:
-                  nzEdges += hypre_StructGridLocalSize(var_cgrid);
-                  break;
-            }
+            /* switch (t) */
+            /* { */
+            /*    case 5: */
+            /*       nxEdges += hypre_StructGridLocalSize(var_cgrid); */
+            /*       break; */
+            /*    case 6: */
+            /*       nyEdges += hypre_StructGridLocalSize(var_cgrid); */
+            /*       break; */
+            /*    case 7: */
+            /*       nzEdges += hypre_StructGridLocalSize(var_cgrid); */
+            /*       break; */
+            /* } */
 
             hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
                                            ndim, varoffsets[t]);

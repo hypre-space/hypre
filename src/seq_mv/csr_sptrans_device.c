@@ -64,23 +64,12 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
 
    hypre_TFree(dBuffer, HYPRE_MEMORY_DEVICE);
 #else
-#if !defined(HYPRE_COMPLEX)
-#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
-   HYPRE_CUSPARSE_CALL( cusparseDcsr2csc(handle,
-                                         m, n, nnzA,
-                                         d_aa, d_ia, d_ja,
-                                         csc_a, csc_j, csc_i,
-                                         action,
-                                         CUSPARSE_INDEX_BASE_ZERO) );
-#elif defined(HYPRE_SINGLE)
-   HYPRE_CUSPARSE_CALL( cusparseScsr2csc(handle,
-                                         m, n, nnzA,
-                                         d_aa, d_ia, d_ja,
-                                         csc_a, csc_j, csc_i,
-                                         action,
-                                         CUSPARSE_INDEX_BASE_ZERO) );
-#endif
-#endif /* #if !defined(HYPRE_COMPLEX) */
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csr2csc(handle,
+                                               m, n, nnzA,
+                                               d_aa, d_ia, d_ja,
+                                               csc_a, csc_j, csc_i,
+                                               action,
+                                               CUSPARSE_INDEX_BASE_ZERO) );
 #endif /* #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION */
 
    *d_ic_out = csc_i;
@@ -88,7 +77,6 @@ hypreDevice_CSRSpTransCusparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE
    *d_ac_out = csc_a;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
 #endif
 
@@ -135,25 +123,13 @@ hypreDevice_CSRSpTransRocsparse(HYPRE_Int   m,        HYPRE_Int   n,        HYPR
    void * buffer;
    buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
 
-#if !defined(HYPRE_COMPLEX)
-#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
-   HYPRE_ROCSPARSE_CALL( rocsparse_dcsr2csc(handle,
-                                            m, n, nnzA,
-                                            d_aa, d_ia, d_ja,
-                                            csc_a, csc_j, csc_i,
-                                            action,
-                                            rocsparse_index_base_zero,
-                                            buffer) );
-#elif defined(HYPRE_SINGLE)
-   HYPRE_ROCSPARSE_CALL( rocsparse_scsr2csc(handle,
-                                            m, n, nnzA,
-                                            d_aa, d_ia, d_ja,
-                                            csc_a, csc_j, csc_i,
-                                            action,
-                                            rocsparse_index_base_zero,
-                                            buffer) );
-#endif
-#endif /* #if !defined(HYPRE_COMPLEX) */
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csr2csc(handle,
+                                                 m, n, nnzA,
+                                                 d_aa, d_ia, d_ja,
+                                                 csc_a, csc_j, csc_i,
+                                                 action,
+                                                 rocsparse_index_base_zero,
+                                                 buffer) );
 
    hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 
@@ -238,7 +214,6 @@ hypreDevice_CSRSpTrans(HYPRE_Int   m,        HYPRE_Int   n,        HYPRE_Int    
    *d_ac_out = d_ac;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPTRANS] += hypre_MPI_Wtime();
 #endif
 

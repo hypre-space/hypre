@@ -83,7 +83,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
    HYPRE_BigInt    *new_col_map_offd_P = NULL;
 
-   HYPRE_Real       orig_row_sum, new_row_sum, gm_row_sum;
+   /* HYPRE_Real       orig_row_sum, new_row_sum; */
+   HYPRE_Real       gm_row_sum;
 
    HYPRE_Int        orig_diag_start, orig_offd_start, j_offd_pos, j_diag_pos;
    HYPRE_Int        new_nnz_diag, new_nnz_offd;
@@ -664,8 +665,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
    for (i = 0; i < num_rows_P; i++)
    {
-      orig_row_sum = 0.0;
-      new_row_sum = 0.0;
+      /* orig_row_sum = 0.0; */
+      /* new_row_sum = 0.0; */
       num_new_p_diag = 0;
       num_new_p_offd = 0;
 
@@ -766,7 +767,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
             /* diag entries */
             for (j = 0; j < p_num_diag_elements; j++)
             {
-               orig_row_sum +=  P_diag_data[orig_diag_start + j];
+               /* orig_row_sum +=  P_diag_data[orig_diag_start + j]; */
                P_diag_data_new[j_diag_pos] = 0.0;
 
                new_col = col_map[ P_diag_j[orig_diag_start + j]];
@@ -805,7 +806,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
             p_count_offd = p_count_diag; /* for indexing into is_q*/
             for (j = 0; j < p_num_offd_elements; j++)
             {
-               orig_row_sum +=  P_offd_data[orig_offd_start + j];
+               /* orig_row_sum +=  P_offd_data[orig_offd_start + j]; */
                P_offd_data_new[j_offd_pos] = 0.0;
 
                /* j needs to go back to regular numbering - will be
@@ -1919,11 +1920,10 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                      fcn_num = (HYPRE_Int) fmod(new_col, num_functions);
                   }
 
-                  if (fcn_num < orig_nf)
-                  {
-                     new_row_sum +=  P_diag_data_new[kk];
-                  }
-
+                  /* if (fcn_num < orig_nf) */
+                  /* { */
+                  /*    new_row_sum +=  P_diag_data_new[kk]; */
+                  /* } */
                }
                for (kk = P_offd_i_new[i] ; kk <  P_offd_i_new[i] + num_new_p_offd; kk++)
                {
@@ -1939,11 +1939,10 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                      fcn_num = (HYPRE_Int) fmod((HYPRE_Real)big_new_col, num_functions);
                   }
 
-                  if (fcn_num < orig_nf)
-                  {
-                     new_row_sum +=  P_offd_data_new[kk];
-                  }
-
+                  /* if (fcn_num < orig_nf) */
+                  /* { */
+                  /*    new_row_sum +=  P_offd_data_new[kk]; */
+                  /* } */
                }
             }
             /* if we had no fc, then the Q entries are zero - let's do

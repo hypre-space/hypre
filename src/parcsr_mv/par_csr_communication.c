@@ -329,6 +329,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                   HYPRE_MemoryLocation recv_memory_location,
                                   void                *recv_data_in )
 {
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleCreate_v2");
+#endif
+
    HYPRE_Int                  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    HYPRE_Int                  num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    MPI_Comm                   comm      = hypre_ParCSRCommPkgComm(comm_pkg);
@@ -409,8 +413,14 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    {
       //send_data = _hypre_TAlloc(char, num_send_bytes, hypre_MEMORY_HOST_PINNED);
       send_data = hypre_TAlloc(char, num_send_bytes, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPushRange("MPI-D2H");
+#endif
       hypre_TMemcpy(send_data, send_data_in, char, num_send_bytes, HYPRE_MEMORY_HOST,
                     HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPopRange();
+#endif
    }
    else
    {
@@ -432,9 +442,6 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 #else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
    send_data = send_data_in;
    recv_data = recv_data_in;
-   // TODO RL: it seems that we need to sync the CUDA stream before doing GPU-GPU MPI.
-   // Need to check MPI documentation whether this is acutally true
-   hypre_SyncComputeStream(hypre_handle());
 #endif
 
    num_requests = num_sends + num_recvs;
@@ -597,6 +604,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    hypre_ParCSRCommHandleNumRequests(comm_handle)        = num_requests;
    hypre_ParCSRCommHandleRequests(comm_handle)           = requests;
 
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPopRange();
+#endif
+
    return ( comm_handle );
 }
 
@@ -608,13 +619,23 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       return hypre_error_flag;
    }
 
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleDestroy");
+#endif
+
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
       hypre_MPI_Status *status0;
       status0 = hypre_CTAlloc(hypre_MPI_Status,
                               hypre_ParCSRCommHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPushRange("hypre_MPI_Waitall");
+#endif
       hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
                         hypre_ParCSRCommHandleRequests(comm_handle), status0);
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPopRange();
+#endif
       hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
@@ -633,13 +654,18 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    if ( act_recv_memory_location == hypre_MEMORY_DEVICE ||
         act_recv_memory_location == hypre_MEMORY_UNIFIED )
    {
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPushRange("MPI-H2D");
+#endif
       hypre_TMemcpy( hypre_ParCSRCommHandleRecvData(comm_handle),
                      hypre_ParCSRCommHandleRecvDataBuffer(comm_handle),
                      char,
                      hypre_ParCSRCommHandleNumRecvBytes(comm_handle),
                      HYPRE_MEMORY_DEVICE,
                      HYPRE_MEMORY_HOST );
-
+#if defined(HYPRE_USING_NVTX)
+      hypre_GpuProfilingPopRange();
+#endif
       //hypre_HostPinnedFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle));
       hypre_TFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
    }
@@ -647,6 +673,10 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_NVTX)
+   hypre_GpuProfilingPopRange();
+#endif
 
    return hypre_error_flag;
 }
@@ -1016,7 +1046,7 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg),   HYPRE_MEMORY_DEVICE);
    //_hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), hypre_MEMORY_DEVICE);
    //_hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), hypre_MEMORY_DEVICE);
-   hypre_TFree(hypre_ParCSRCommPkgWorkSpace(comm_pkg), HYPRE_MEMORY_DEVICE);
+   hypre_CSRMatrixDestroy(hypre_ParCSRCommPkgMatrixE(comm_pkg));
 #endif
 
    hypre_TFree(comm_pkg, HYPRE_MEMORY_HOST);

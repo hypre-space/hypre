@@ -50,31 +50,27 @@ typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 
 typedef struct _hypre_ParCSRCommPkg
 {
-   MPI_Comm                     comm;
-
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int                   *send_map_starts;
-   HYPRE_Int                   *send_map_elmts;
-   HYPRE_Int                   *device_send_map_elmts;
-
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
-
+   MPI_Comm                          comm;
+   HYPRE_Int                         num_sends;
+   HYPRE_Int                        *send_procs;
+   HYPRE_Int                        *send_map_starts;
+   HYPRE_Int                        *send_map_elmts;
+   HYPRE_Int                        *device_send_map_elmts;
+   HYPRE_Int                         num_recvs;
+   HYPRE_Int                        *recv_procs;
+   HYPRE_Int                        *recv_vec_starts;
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
-
+   hypre_MPI_Datatype               *send_mpi_types;
+   hypre_MPI_Datatype               *recv_mpi_types;
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
-
-   /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
 #if defined(HYPRE_USING_GPU)
-   HYPRE_Complex *tmp_data;
-   HYPRE_Complex *buf_data;
-   char          *work_space;
+   /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
+   HYPRE_Complex                    *tmp_data;
+   HYPRE_Complex                    *buf_data;
+   /* for matmultT/matvecT */
+   hypre_CSRMatrix                  *matrix_E;
 #endif
 } hypre_ParCSRCommPkg;
 
@@ -105,7 +101,7 @@ typedef struct _hypre_ParCSRCommPkg
 #if defined(HYPRE_USING_GPU)
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
-#define hypre_ParCSRCommPkgWorkSpace(comm_pkg)           ((comm_pkg) -> work_space)
+#define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
 #endif
 
 static inline void

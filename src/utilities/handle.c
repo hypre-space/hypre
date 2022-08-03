@@ -14,12 +14,32 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-/* GPU SpGemm */
+/* GPU SpTrans */
 HYPRE_Int
-hypre_SetSpGemmUseCusparse( HYPRE_Int use_cusparse )
+hypre_SetSpTransUseVendor( HYPRE_Int use_vendor )
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_HandleSpgemmUseCusparse(hypre_handle()) = use_cusparse;
+   hypre_HandleSpTransUseVendor(hypre_handle()) = use_vendor;
+#endif
+   return hypre_error_flag;
+}
+
+/* GPU SpMV */
+HYPRE_Int
+hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpMVUseVendor(hypre_handle()) = use_vendor;
+#endif
+   return hypre_error_flag;
+}
+
+/* GPU SpGemm */
+HYPRE_Int
+hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpgemmUseVendor(hypre_handle()) = use_vendor;
 #endif
    return hypre_error_flag;
 }
@@ -36,6 +56,15 @@ hypre_SetSpGemmAlgorithm( HYPRE_Int value )
    {
       hypre_error_in_arg(1);
    }
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SetSpGemmBinned( HYPRE_Int value )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpgemmBinned(hypre_handle()) = value;
 #endif
    return hypre_error_flag;
 }
@@ -72,22 +101,6 @@ hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value )
    if (value > 0.0)
    {
       hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle()) = value;
-   }
-   else
-   {
-      hypre_error_in_arg(1);
-   }
-#endif
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SetSpGemmHashType( char value )
-{
-#if defined(HYPRE_USING_GPU)
-   if (value == 'L' || value == 'Q' || value == 'D')
-   {
-      hypre_HandleSpgemmHashType(hypre_handle()) = value;
    }
    else
    {

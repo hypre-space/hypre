@@ -52,10 +52,12 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
    hypre_TMemcpy(d_jb_sorted, d_jb, HYPRE_Int,     nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(d_b_sorted,  d_b,  HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-   /* For rocSPARSE, the CSR SpGEMM implementation does not require the columns
-      to be sorted!
-     hypre_SortCSRRocsparse(m, k, nnzA, descrA, d_ia, d_ja_sorted, d_a_sorted);
-     hypre_SortCSRRocsparse(k, n, nnzB, descrB, d_ib, d_jb_sorted, d_b_sorted); */
+   /* For rocSPARSE, the CSR SpGEMM implementation does not require the columns to be sorted! */
+   /* RL: for matrices with long rows, it seemed that the sorting is still needed */
+#if 0
+   hypre_SortCSRRocsparse(m, k, nnzA, descrA, d_ia, d_ja_sorted, d_a_sorted);
+   hypre_SortCSRRocsparse(k, n, nnzB, descrB, d_ib, d_jb_sorted, d_b_sorted);
+#endif
 
    // nnzTotalDevHostPtr points to host memory
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
@@ -77,32 +79,15 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
    size_t rs_buffer_size = 0;
    void *rs_buffer;
 
-#if !defined(HYPRE_COMPLEX)
-#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
-   {
-      HYPRE_ROCSPARSE_CALL( rocsparse_dcsrgemm_buffer_size(handle,
-                                                           transA, transB,
-                                                           m, n, k,
-                                                           &alpha, // \alpha = 1
-                                                           descrA, nnzA, d_ia, d_ja_sorted,
-                                                           descrB, nnzB, d_ib, d_jb_sorted,
-                                                           NULL, // \beta = 0
-                                                           NULL,   0,    NULL, NULL, // D is nothing
-                                                           infoC, &rs_buffer_size) );
-   }
-#elif defined(HYPRE_SINGLE)
-   {
-      HYPRE_ROCSPARSE_CALL( rocsparse_scsrgemm_buffer_size(handle, transA, transB,
-                                                           m, n, k,
-                                                           &alpha, // \alpha = 1
-                                                           descrA, nnzA, d_ia, d_ja_sorted,
-                                                           descrB, nnzB, d_ib, d_jb_sorted,
-                                                           NULL, // \beta = 0
-                                                           NULL,   0,    NULL, NULL,
-                                                           infoC, &rs_buffer_size) );
-   }
-#endif
-#endif
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrgemm_buffer_size(handle,
+                                                             transA, transB,
+                                                             m, n, k,
+                                                             &alpha, // \alpha = 1
+                                                             descrA, nnzA, d_ia, d_ja_sorted,
+                                                             descrB, nnzB, d_ib, d_jb_sorted,
+                                                             NULL, // \beta = 0
+                                                             NULL,   0,    NULL, NULL, // D is nothing
+                                                             infoC, &rs_buffer_size) );
 
    rs_buffer = hypre_TAlloc(char, rs_buffer_size, HYPRE_MEMORY_DEVICE);
 
@@ -131,33 +116,15 @@ hypreDevice_CSRSpGemmRocsparse(HYPRE_Int           m,
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
    d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
 
-#if !defined(HYPRE_COMPLEX)
-#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
-   {
-      HYPRE_ROCSPARSE_CALL( rocsparse_dcsrgemm(handle, transA, transB,
-                                               m, n, k,
-                                               &alpha, // alpha = 1
-                                               descrA, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                               descrB, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                               NULL, // beta = 0
-                                               NULL,   0,    NULL,       NULL, NULL, // D is nothing
-                                               descrC,       d_c, d_ic, d_jc,
-                                               infoC, rs_buffer) );
-   }
-#elif defined(HYPRE_SINGLE)
-   {
-      HYPRE_ROCSPARSE_CALL( rocsparse_scsrgemm(handle, transA, transB,
-                                               m, n, k,
-                                               &alpha, // alpha = 1
-                                               descrA, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                               descrB, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                               NULL, // beta = 0
-                                               NULL,   0,    NULL,       NULL, NULL, // D is nothing
-                                               descrC,       d_c, d_ic, d_jc,
-                                               infoC, rs_buffer) );
-   }
-#endif
-#endif
+   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrgemm(handle, transA, transB,
+                                                 m, n, k,
+                                                 &alpha, // alpha = 1
+                                                 descrA, nnzA, d_a_sorted, d_ia, d_ja_sorted,
+                                                 descrB, nnzB, d_b_sorted, d_ib, d_jb_sorted,
+                                                 NULL, // beta = 0
+                                                 NULL,   0,    NULL,       NULL, NULL, // D is nothing
+                                                 descrC,       d_c, d_ic, d_jc,
+                                                 infoC, rs_buffer) );
 
    // Free up the memory needed by rocsparse
    hypre_TFree(rs_buffer, HYPRE_MEMORY_DEVICE);

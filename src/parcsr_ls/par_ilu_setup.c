@@ -39,7 +39,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            *qperm               = hypre_ParILUDataQPerm(ilu_data);
    HYPRE_Real           tol_ddPQ             = hypre_ParILUDataTolDDPQ(ilu_data);
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* pointers to cusparse data, note that they are not NULL only when needed */
    cusparseMatDescr_t      matL_des          = hypre_ParILUDataMatLMatrixDescription(ilu_data);
    cusparseMatDescr_t      matU_des          = hypre_ParILUDataMatUMatrixDescription(ilu_data);
@@ -62,6 +62,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int               *A_diag_fake      = hypre_ParILUDataMatAFakeDiagonal(ilu_data);
    hypre_Vector            *Ftemp_upper      = NULL;
    hypre_Vector            *Utemp_lower      = NULL;
+   HYPRE_Int               test_opt;
 #endif
 
    hypre_ParCSRMatrix   *matA                = hypre_ParILUDataMatA(ilu_data);
@@ -108,9 +109,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            buffer_size;
    HYPRE_Int            send_size;
    HYPRE_Int            recv_size;
-#ifdef HYPRE_USING_CUDA
-   HYPRE_Int            test_opt;
-#endif
+
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -119,7 +118,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* create cuda and cusparse information when needed */
    /* Use most of them from global information */
    /* set matrix L descripter, L is a lower triangular matrix with unit diagonal entries */
@@ -362,13 +361,13 @@ hypre_ILUSetup( void               *ilu_vdata,
       switch (ilu_type)
       {
          case 10: case 11: case 40: case 41:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (hypre_ParILUDataIluType(ilu_data) != 10 &&
                 hypre_ParILUDataIluType(ilu_data) != 11)
             {
 #endif
                HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             }
 #endif
             break;
@@ -418,7 +417,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    switch (ilu_type)
    {
       case 0:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          /* only apply the setup of ILU0 with cusparse */
          if (fill_level == 0)
          {
@@ -440,7 +439,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       case 1:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm, n, n, matL_des, matU_des,
                                   ilu_solve_policy, &ilu_solve_buffer,
                                   &matBL_info, &matBU_info, &matSL_info, &matSU_info, &matBLU_d, &matS,
@@ -451,7 +450,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       case 10:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          if (fill_level == 0)
          {
             /* Only support ILU0 */
@@ -473,7 +472,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       case 11:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm, n, nLU, matL_des, matU_des,
                                   ilu_solve_policy, &ilu_solve_buffer,
                                   &matBL_info, &matBU_info, &matSL_info, &matSU_info, &matBLU_d, &matS,
@@ -502,7 +501,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                      &matS, &u_end); //ddPQ + GMRES + hypre_ilut()
          break;
       case 50:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          test_opt = hypre_ParILUDataTestOption(ilu_data);
          hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des, ilu_solve_policy,
                                      &ilu_solve_buffer, &matAL_info, &matAU_info, &matBL_info, &matBU_info, &matSL_info, &matSU_info,
@@ -514,7 +513,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       default:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          hypre_ILUSetupILU0Device(matA, perm, perm, n, n, matL_des, matU_des, ilu_solve_policy,
                                   &ilu_solve_buffer,
                                   &matBL_info, &matBU_info, &matSL_info, &matSU_info, &matBLU_d, &matS,
@@ -530,7 +529,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       case 10: case 11:
          if (matS)
          {
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* create working vectors */
 
             Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matS),
@@ -805,7 +804,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
       case 50:
       {
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          if (matS)
          {
             /* create working vectors */
@@ -1027,7 +1026,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
    }
    /* set pointers to ilu data */
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* set cusparse pointers */
    //hypre_ParILUDataILUSolveBuffer(ilu_data)  = ilu_solve_buffer;
    hypre_ParILUDataMatAILUDevice(ilu_data)      = matALU_d;
@@ -1077,7 +1076,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    size_C = hypre_ParCSRMatrixGlobalNumRows(matA);
    /* switch to compute complexity */
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    HYPRE_Int nnzBEF = 0;
    HYPRE_Int nnzG;/* Global nnz */
    if (ilu_type == 0 && fill_level == 0)
@@ -1170,7 +1169,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                                        hypre_ParCSRMatrixDNumNonzeros(matL) +
                                                        hypre_ParCSRMatrixDNumNonzeros(matU)) /
                                                       hypre_ParCSRMatrixDNumNonzeros(matA);
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    }
 #endif
    if ((my_id == 0) && (print_level > 0))
@@ -1199,7 +1198,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    return hypre_error_flag;
 }
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /* Extract submatrix from diagonal part of A into a new CSRMatrix without sort rows
  * WARNING: We don't put diagonal to the first entry of each row since this function is now for cuSparse only
@@ -1531,13 +1530,8 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
    HYPRE_Int               matA_buffersize;
    void                    *matA_buffer         = NULL;
 
-   HYPRE_Int               isDoublePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int               isSinglePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
    cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
-
-   hypre_assert(isDoublePrecision || isSinglePrecision);
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
    hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
@@ -1546,51 +1540,26 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrilu02Info(&matA_info));
 
    /* 3. Get working array size */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrilu02_bufferSize(handle, n, nnz_A, descr,
-                                                       (hypre_double *) A_data, A_i, A_j,
-                                                       matA_info, &matA_buffersize));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrilu02_bufferSize(handle, n, nnz_A, descr,
-                                                       (float *) A_data, A_i, A_j,
-                                                       matA_info, &matA_buffersize));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, n, nnz_A, descr,
+                                                          A_data, A_i, A_j,
+                                                          matA_info, &matA_buffersize));
+
    /* 4. Create working array, since they won't be visited by host, allocate on device */
    matA_buffer                                  = hypre_MAlloc(matA_buffersize, HYPRE_MEMORY_DEVICE);
 
    /* 5. Now perform the analysis */
    /* 5-1. Analysis */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrilu02_analysis(handle, n, nnz_A, descr,
-                                                     (hypre_double *) A_data, A_i, A_j,
-                                                     matA_info, ilu_solve_policy, matA_buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrilu02_analysis(handle, n, nnz_A, descr,
-                                                     (float *) A_data, A_i, A_j,
-                                                     matA_info, ilu_solve_policy, matA_buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, n, nnz_A, descr,
+                                                        A_data, A_i, A_j,
+                                                        matA_info, ilu_solve_policy, matA_buffer));
+
    /* 5-2. Check for zero pivot */
    HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
 
    /* 6. Apply the factorization */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrilu02(handle, n, nnz_A, descr,
-                                            (hypre_double *) A_data, A_i, A_j,
-                                            matA_info, ilu_solve_policy, matA_buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrilu02(handle, n, nnz_A, descr,
-                                            (float *) A_data, A_i, A_j,
-                                            matA_info, ilu_solve_policy, matA_buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
+                                               A_data, A_i, A_j,
+                                               matA_info, ilu_solve_policy, matA_buffer));
 
    /* Check for zero pivot */
    HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
@@ -1663,11 +1632,6 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    HYPRE_Int               solve_oldbuffersize  = *buffer_sizep;
    void                    *solve_buffer        = *bufferp;
 
-   HYPRE_Int               isDoublePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int               isSinglePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   hypre_assert(isDoublePrecision || isSinglePrecision);
-
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
    /* 1. Create info for ilu setup and solve */
@@ -1675,28 +1639,16 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matU_info)));
 
    /* 2. Get working array size */
-   if (isDoublePrecision)
-   {
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
+                                                        nnz_A,
+                                                        matL_des, A_data, A_i, A_j,
+                                                        matL_info, &matL_buffersize));
 
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, nnz_A,
-                                                     matL_des, (hypre_double *) A_data, A_i, A_j,
-                                                     matL_info, &matL_buffersize));
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
+                                                        nnz_A,
+                                                        matU_des, A_data, A_i, A_j,
+                                                        matU_info, &matU_buffersize));
 
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, nnz_A,
-                                                     matU_des, (hypre_double *) A_data, A_i, A_j,
-                                                     matU_info, &matU_buffersize));
-   }
-   else if (isSinglePrecision)
-   {
-
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, nnz_A,
-                                                     matL_des, (float *) A_data, A_i, A_j,
-                                                     matL_info, &matL_buffersize));
-
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n, nnz_A,
-                                                     matU_des, (float *) A_data, A_i, A_j,
-                                                     matU_info, &matU_buffersize));
-   }
    solve_buffersize = hypre_max( matL_buffersize, matU_buffersize );
    /* 3. Create working array, since they won't be visited by host, allocate on device */
    if (solve_buffersize > solve_oldbuffersize)
@@ -1713,32 +1665,15 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    }
 
    /* 4. Now perform the analysis */
-   if (isDoublePrecision)
-   {
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      n, nnz_A, matL_des,
+                                                      A_data, A_i, A_j,
+                                                      matL_info, ilu_solve_policy, solve_buffer));
 
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, nnz_A, matL_des,
-                                                   (hypre_double *) A_data, A_i, A_j,
-                                                   matL_info, ilu_solve_policy, solve_buffer));
-
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, nnz_A, matU_des,
-                                                   (hypre_double *) A_data, A_i, A_j,
-                                                   matU_info, ilu_solve_policy, solve_buffer));
-   }
-   else if (isSinglePrecision)
-   {
-
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, nnz_A, matL_des,
-                                                   (float *) A_data, A_i, A_j,
-                                                   matL_info, ilu_solve_policy, solve_buffer));
-
-      HYPRE_CUSPARSE_CALL(cusparseScsrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, nnz_A, matU_des,
-                                                   (float *) A_data, A_i, A_j,
-                                                   matU_info, ilu_solve_policy, solve_buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      n, nnz_A, matU_des,
+                                                      A_data, A_i, A_j,
+                                                      matU_info, ilu_solve_policy, solve_buffer));
 
    /* Done with analysis, finishing up */
    /* Set return value */
@@ -2755,11 +2690,6 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* cusparse */
-   HYPRE_Int               isDoublePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double);
-   HYPRE_Int               isSinglePrecision    = sizeof(HYPRE_Complex) == sizeof(hypre_double) / 2;
-
-   hypre_assert(isDoublePrecision || isSinglePrecision);
-
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
    /* compute P = -UB\(LB\F)
@@ -2791,56 +2721,26 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* check buffer size and create buffer */
-
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (hypre_double *)&alpha, matL_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                         BLUm_diag_j, (hypre_double *)rhs, n, malL_info, policy, &buffer_size));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (float *)&alpha, matL_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                         (float *)rhs, n, malL_info, policy, &buffer_size));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
+                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                           n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
+                                                           BLUm_diag_j, rhs, n, malL_info, policy, &buffer_size));
 
    buffer = hypre_MAlloc(buffer_size, HYPRE_MEMORY_DEVICE);
 
    /* analysis */
-
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (hypre_double *)&alpha, matL_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                    BLUm_diag_j, (hypre_double *)rhs, n, malL_info, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (float *)&alpha, matL_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                    (float *)rhs, n, malL_info, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
+                                                      BLUm_diag_j, rhs, n, malL_info, policy, buffer));
 
    /* solve phase */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_solve( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (hypre_double *)&alpha, matL_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                 BLUm_diag_j, (hypre_double *)rhs, n, malL_info, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_solve( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (float *)&alpha, matL_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                 (float *)rhs, n, malL_info, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                   CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                   n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
+                                                   BLUm_diag_j, rhs, n, malL_info, policy, buffer));
+
    /* now P = -UB\(LB\F) -> UB*P = -(LB\F)
     */
    alpha = -1.0;
@@ -2851,20 +2751,11 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* check buffer size and create buffer */
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (hypre_double *)&alpha, matU_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                         BLUm_diag_j, (hypre_double *)rhs, n, malU_info, policy, &buffer_size));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (float *)&alpha, matU_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                         (float *)rhs, n, malU_info, policy, &buffer_size));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
+                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                           n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
+                                                           BLUm_diag_j, rhs, n, malU_info, policy, &buffer_size));
 
    if (buffer_size > buffer_size_old)
    {
@@ -2874,36 +2765,17 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* analysis */
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (hypre_double *)&alpha, matU_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                    BLUm_diag_j, (hypre_double *)rhs, n, malU_info, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (float *)&alpha, matU_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                    (float *)rhs, n, malU_info, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
+                                                      BLUm_diag_j, rhs, n, malU_info, policy, buffer));
 
    /* solve phase */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_solve( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (hypre_double *)&alpha, matU_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                 BLUm_diag_j, (hypre_double *)rhs, n, malU_info, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_solve( handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (float *)&alpha, matU_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                 (float *)rhs, n, malU_info, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                   CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                   n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
+                                                   BLUm_diag_j, rhs, n, malU_info, policy, buffer));
+
    /* wait till GPU done to copy data */
    cudaDeviceSynchronize();
    /* now form P, (n + m) * m */
@@ -2990,20 +2862,10 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* check buffer size and create buffer */
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (hypre_double *)&alpha, matU_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                         BLUm_diag_j, (hypre_double *)rhs, m, malU_info2, policy, &buffer_size));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (float *)&alpha, matU_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                         (float *)rhs, m, malU_info2, policy, &buffer_size));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
+                                                           CUSPARSE_OPERATION_TRANSPOSE,
+                                                           n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
+                                                           BLUm_diag_j, rhs, m, malU_info2, policy, &buffer_size));
 
    if (buffer_size > buffer_size_old)
    {
@@ -3013,36 +2875,16 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* analysis */
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (hypre_double *)&alpha, matU_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                    BLUm_diag_j, (hypre_double *)rhs, m, malU_info2, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (float *)&alpha, matU_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                    (float *)rhs, m, malU_info2, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
+                                                      CUSPARSE_OPERATION_TRANSPOSE,
+                                                      n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
+                                                      BLUm_diag_j, rhs, m, malU_info2, policy, buffer));
 
    /* solve phase */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_solve( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (hypre_double *)&alpha, matU_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                 BLUm_diag_j, (hypre_double *)rhs, m, malU_info2, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_solve( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (float *)&alpha, matU_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                 (float *)rhs, m, malU_info2, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
+                                                   CUSPARSE_OPERATION_TRANSPOSE,
+                                                   n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
+                                                   BLUm_diag_j, rhs, m, malU_info2, policy, buffer));
 
    /* R = - (EiUB ) / LB -> LB'R' = -EiUB'
     */
@@ -3052,20 +2894,10 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* check buffer size and create buffer */
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (hypre_double *)&alpha, matL_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                         BLUm_diag_j, (hypre_double *)rhs, m, malL_info2, policy, &buffer_size));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_bufferSizeExt( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                         CUSPARSE_OPERATION_TRANSPOSE,
-                                                         n, m, nnz_BLUm, (float *)&alpha, matL_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                         (float *)rhs, m, malL_info2, policy, &buffer_size));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
+                                                           CUSPARSE_OPERATION_TRANSPOSE,
+                                                           n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
+                                                           BLUm_diag_j, rhs, m, malL_info2, policy, &buffer_size));
 
    if (buffer_size > buffer_size_old)
    {
@@ -3075,36 +2907,17 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
 
    /* analysis */
 
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (hypre_double *)&alpha, matL_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                    BLUm_diag_j, (hypre_double *)rhs, m, malL_info2, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_analysis( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                    CUSPARSE_OPERATION_TRANSPOSE,
-                                                    n, m, nnz_BLUm, (float *)&alpha, matL_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                    (float *)rhs, m, malL_info2, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
+                                                      CUSPARSE_OPERATION_TRANSPOSE,
+                                                      n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
+                                                      BLUm_diag_j, rhs, m, malL_info2, policy, buffer));
 
    /* solve phase */
-   if (isDoublePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseDcsrsm2_solve( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (hypre_double *)&alpha, matL_des, (hypre_double *)BLUm_diag_data, BLUm_diag_i,
-                                                 BLUm_diag_j, (hypre_double *)rhs, m, malL_info2, policy, buffer));
-   }
-   else if (isSinglePrecision)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseScsrsm2_solve( handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                 CUSPARSE_OPERATION_TRANSPOSE,
-                                                 n, m, nnz_BLUm, (float *)&alpha, matL_des, (float *)BLUm_diag_data, BLUm_diag_i, BLUm_diag_j,
-                                                 (float *)rhs, m, malL_info2, policy, buffer));
-   }
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
+                                                   CUSPARSE_OPERATION_TRANSPOSE,
+                                                   n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
+                                                   BLUm_diag_j, rhs, m, malL_info2, policy, buffer));
+
    cudaDeviceSynchronize();
    /* now form R, m * (n + m) */
    HYPRE_Int            ctrR = 0;
@@ -6229,7 +6042,7 @@ hypre_NSHSetup( void               *nsh_vdata,
    U_array = u;
 
    /* NSH compute approximate inverse, see par_ilu.c */
-   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, DIVIDE_TOL, mr_max_row_nnz,
+   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, HYPRE_REAL_MIN, mr_max_row_nnz,
                              nsh_max_row_nnz, mr_max_iter, nsh_max_iter, mr_col_version, print_level);
 
    /* set pointers to NSH data */

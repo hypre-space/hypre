@@ -1119,6 +1119,34 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
                                              HYPRE_Real   kap_tolerance);
 
 /**
+ * (Optional) Defines triangular solver for ILU(k,T) smoother: 0-iterative, 1-direct (default)
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
+										 HYPRE_Int     ilu_tri_solve);
+
+/**
+ * (Optional) Defines number of lower Jacobi iterations for ILU(k,T) smoother triangular solve.
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
+												 HYPRE_Int     ilu_lower_jacobi_iters);
+
+/**
+ * (Optional) Defines number of upper Jacobi iterations for ILU(k,T) smoother triangular solve.
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
+												 HYPRE_Int     ilu_upper_jacobi_iters);
+
+/**
+ * Set Local Reordering paramter (1==RCM, 0==None)
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
+												HYPRE_Int    ilu_reordering_type);
+
+/**
  * (Optional) Defines which parallel restriction operator is used.
  * There are the following options for restr_type:
  *
@@ -3932,6 +3960,8 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
+ *
+ *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetFLevelRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
@@ -3941,11 +3971,29 @@ HYPRE_Int
 HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
 
 /**
+ * (Optional) Set the relaxation type for F-relaxation at each level.
+ * This function takes precedence over, and will replace \e HYPRE_MGRSetFRelaxMethod
+ * and HYPRE_MGRSetRelaxType.
+ * Options for \e relax_type entries are:
+ *
+ *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
+ *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
+ *    - 2 : AMG.
+ **/
+HYPRE_Int
+HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
+                            HYPRE_Int *relax_type );
+
+/**
  * (Optional) Set the strategy for coarse grid computation.
  * Options for \e cg_method are:
  *
  *    - 0 : Galerkin coarse grid computation using RAP.
- *    - 1 : Non-Galerkin coarse grid computation with dropping strategy.
+ *    - 1 - 4 : Non-Galerkin coarse grid computation with dropping strategy.
+ *         - 1: inv(A_FF) approximated by its (block) diagonal inverse
+ *         - 2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
+ *         - 3: CPR-like approximation with inv(A_FF) approximated by its block diagonal inverse
+ *         - 4: inv(A_FF) approximated by sparse approximate inverse
  **/
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
@@ -3970,6 +4018,8 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_function
  *    - 3    : approximate inverse
  *    - 4    : pAIR distance 1
  *    - 5    : pAIR distance 2
+ *    - 12   : Block Jacobi
+ *    - 13   : CPR-like restriction operator
  *    - else : use classical modified interpolation
  *
  * The default is injection.
@@ -3995,10 +4045,11 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
  * Options for \e interp_type are:
  *
  *    - 0    : injection \f$[0  I]^{T}\f$
- *    - 1    : unscaled (not recommended)
+ *    - 1    : L1-Jacobi
  *    - 2    : diagonal scaling (Jacobi)
  *    - 3    : classical modified interpolation
  *    - 4    : approximate inverse
+ *    - 12   : Block Jacobi
  *    - else : classical modified interpolation
  *
  * The default is diagonal scaling.
@@ -4019,6 +4070,10 @@ HYPRE_Int
 HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
                             HYPRE_Int nsweeps );
 
+HYPRE_Int
+HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver,
+                                 HYPRE_Int *nsweeps );
+
 /**
  * (Optional) Set number of interpolation sweeps.
  * This option is for \e interp_type > 2.
@@ -4027,6 +4082,14 @@ HYPRE_Int
 HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
                              HYPRE_Int nsweeps );
 
+/**
+ * (Optional) Set block size for block (global) smoother and interp/restriction.
+ * This option is for \e interp_type/restrict_type == 12, and
+ * \e smooth_type == 0 or 1.
+ **/
+HYPRE_Int
+HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver,
+                                  HYPRE_Int blk_size );
 
 HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
                               HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
@@ -4115,26 +4178,51 @@ HYPRE_MGRSetTol( HYPRE_Solver solver,
  * Default is 0 (no global smoothing).
  **/
 HYPRE_Int
-HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver,
+HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver,
                                   HYPRE_Int smooth_iter );
+
+/**
+ * (Optional) Determines how many sweeps of global smoothing to do on each level.
+ * Default is 0 (no global smoothing).
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
+                              HYPRE_Int *smooth_iters );
+/**
+ * (Optional) Set the smoothing order for global smoothing at each level.
+ * Options for \e level_smooth_order are:
+ *    - 1 : Pre-smoothing (default)
+ *    - 2 : Post-smoothing
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
+                              HYPRE_Int level_smooth_order );
 
 /**
  * (Optional) Determines type of global smoother.
  * Options for \e smooth_type are:
  *
  *    - 0 : block Jacobi (default)
- *    - 1 : Jacobi
- *    - 2 : Gauss-Seidel, sequential (very slow!)
- *    - 3 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
- *    - 4 : hybrid Gauss-Seidel or SOR, forward solve
- *    - 5 : hybrid Gauss-Seidel or SOR, backward solve
- *    - 6 : hybrid chaotic Gauss-Seidel (works only with OpenMP)
- *    - 7 : hybrid symmetric Gauss-Seidel or SSOR
+ *    - 1 : block Gauss-Siedel
+ *    - 2 : Jacobi
+ *    - 3 : Gauss-Seidel, sequential (very slow!)
+ *    - 4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
+ *    - 5 : hybrid Gauss-Seidel or SOR, forward solve
+ *    - 6 : hybrid Gauss-Seidel or SOR, backward solve
  *    - 8 : Euclid (ILU)
+ *    - 16 : HYPRE_ILU
  **/
 HYPRE_Int
-HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver,
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
                               HYPRE_Int smooth_type );
+
+/**
+ * (Optional) Determines type of global smoother for each level.
+ * See \e HYPRE_MGRSetGlobalSmoothType for global smoother options.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
+                             HYPRE_Int *smooth_type );
 
 /**
  * (Optional) Return the number of MGR iterations.
@@ -4216,6 +4304,27 @@ HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
+
+/**
+ * (Optional) Set triangular solver type (0) direct (1) iterative
+ * Set this to 1 Jacobi iterations. The default is 0 direct method.
+ **/
+HYPRE_Int
+HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve );
+
+/**
+ * (Optional) Set number of lower Jacobi iterations for the triangular L solves
+ * Set this to integer > 0 when using iterative tri_solve (0). The default is 5 iterations.
+ **/
+HYPRE_Int
+HYPRE_ILUSetLowerJacobiIters( HYPRE_Solver solver, HYPRE_Int lower_jacobi_iterations );
+
+/**
+ * (Optional) Set number of upper Jacobi iterations for the triangular U solves
+ * Set this to integer > 0 when using iterative tri_solve (0). The default is 5 iterations.
+ **/
+HYPRE_Int
+HYPRE_ILUSetUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int upper_jacobi_iterations );
 
 /**
  * (Optional) Set the convergence tolerance for the ILU smoother.

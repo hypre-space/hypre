@@ -717,7 +717,7 @@ hypre_F90_IFACE(hypre_mgrsetmaxglobalsmoothit, HYPRE_MGRSETMAXGLOBALSMOOTHIT)
   hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int)
-           ( HYPRE_MGRSetMaxGlobalsmoothIters(
+           ( HYPRE_MGRSetMaxGlobalSmoothIters(
                 hypre_F90_PassObj (HYPRE_Solver, solver),
                 hypre_F90_PassInt (max_iter) ) );
 }
@@ -733,7 +733,7 @@ hypre_F90_IFACE(hypre_mgrsetglobalsmoothtype, HYPRE_MGRSETGLOBALSMOOTHTYPE)
   hypre_F90_Int *ierr )
 {
    *ierr = (hypre_F90_Int)
-           ( HYPRE_MGRSetGlobalsmoothType(
+           ( HYPRE_MGRSetGlobalSmoothType(
                 hypre_F90_PassObj (HYPRE_Solver, solver),
                 hypre_F90_PassInt (iter_type) ) );
 }

@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.24.0)
-set(HYPRE_NUMBER  22400)
-set(HYPRE_DATE    2022/02/11)
+set(HYPRE_VERSION 2.25.0)
+set(HYPRE_NUMBER  22500)
+set(HYPRE_DATE    2022/06/15)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -105,9 +105,11 @@ set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flag
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
+option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC "Use device async malloc" OFF)
 # CUDA options
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
+option(HYPRE_ENABLE_CUSOLVER         "Use cuSOLVER" OFF)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
@@ -216,11 +218,6 @@ if (HYPRE_WITH_CUDA)
 
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 
-  # Use ${CMAKE_CXX_COMPILER} as the cuda host compiler.
-  if (NOT CMAKE_CUDA_HOST_COMPILER)
-    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
-  endif ()
-
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
     string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
@@ -230,6 +227,12 @@ if (HYPRE_WITH_CUDA)
   # Check if CUDA is available, then enable it
   include(CheckLanguage)
   check_language(CUDA)
+
+  # Use ${CMAKE_CXX_COMPILER} as the cuda host compiler.
+  if (NOT CMAKE_CUDA_HOST_COMPILER)
+    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
+  endif ()
+
   if (CMAKE_CUDA_COMPILER)
 
     enable_language(CUDA)
@@ -240,6 +243,10 @@ if (HYPRE_WITH_CUDA)
     endif ()
 
     set(CMAKE_CUDA_STANDARD_REQUIRED ON CACHE BOOL "" FORCE)
+
+    if (HYPRE_ENABLE_DEVICE_MALLOC_ASYNC)
+      set(HYPRE_USING_DEVICE_MALLOC_ASYNC ON CACHE BOOL "" FORCE)
+    endif ()
 
     set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
     set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)

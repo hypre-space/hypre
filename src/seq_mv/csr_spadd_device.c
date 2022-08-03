@@ -105,7 +105,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
-      HYPRE_THRUST_CALL( transform, d_aa, d_aa + nnzA, d_at, alpha * _1 );
+      hypreDevice_ComplexScalen( d_aa, nnzA, d_at, alpha );
    }
 
    if (beta == 1.0)
@@ -114,7 +114,7 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    }
    else
    {
-      HYPRE_THRUST_CALL( transform, d_ab, d_ab + nnzB, d_at + nnzA, beta * _1 );
+      hypreDevice_ComplexScalen( d_ab, nnzB, d_at + nnzA, beta );
    }
 
    /* expansion: i */
@@ -182,7 +182,6 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    *d_ac_out = d_ac;
 
 #ifdef HYPRE_PROFILE
-   cudaThreadSynchronize();
    hypre_profile_times[HYPRE_TIMER_ID_SPADD] += hypre_MPI_Wtime();
 #endif
 

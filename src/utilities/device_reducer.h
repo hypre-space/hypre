@@ -176,7 +176,7 @@ T blockReduceSum(T val)
 
 template<typename T>
 __global__ void
-OneBlockReduceKernel(T *arr, HYPRE_Int N)
+OneBlockReduceKernel(hypre_DeviceItem &item, T *arr, HYPRE_Int N)
 {
    T sum;
    sum = 0.0;
@@ -267,7 +267,7 @@ struct ReduceSum
          /* 2nd reduction with only *one* block */
          hypre_assert(nblocks >= 0 && nblocks <= 1024);
          const dim3 gDim(1), bDim(1024);
-         HYPRE_CUDA_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
+         HYPRE_GPU_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
          hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
          val += init;
       }

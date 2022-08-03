@@ -1100,12 +1100,20 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Relax7Jacobi");
+#endif
+
    HYPRE_Int       num_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_Vector    l1_norms_vec;
    hypre_ParVector l1_norms_parvec;
 
+   hypre_VectorNumVectors(&l1_norms_vec) = 1;
+   hypre_VectorMultiVecStorageMethod(&l1_norms_vec) = 0;
+   hypre_VectorOwnsData(&l1_norms_vec) = 0;
    hypre_VectorData(&l1_norms_vec) = l1_norms;
    hypre_VectorSize(&l1_norms_vec) = num_rows;
+
    /* TODO XXX
     * The next line is NOT 100% correct, which should be the memory location of l1_norms instead of f
     * But how do I know it? As said, don't use raw pointers, don't use raw pointers!
@@ -1145,6 +1153,10 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_SetSyncCudaCompute(sync_stream);
    hypre_SyncComputeStream(hypre_handle());
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
