@@ -55,6 +55,11 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matmU         = hypre_ParILUDataMatUModified(ilu_data);
 #endif
 
+#if defined(HYPRE_USING_CUSPARSE)
+   hypre_Vector         *Adiag_diag    = hypre_ParILUDataADiagDiag(ilu_data);
+#endif
+   hypre_Vector         *Ztemp         = hypre_ParILUDataZTemp(ilu_data);
+
    /* get matrices */
    HYPRE_Int            ilu_type       = hypre_ParILUDataIluType(ilu_data);
    HYPRE_Int            *perm          = hypre_ParILUDataPerm(ilu_data);
@@ -75,6 +80,9 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Int            logging        = hypre_ParILUDataLogging(ilu_data);
    HYPRE_Int            print_level    = hypre_ParILUDataPrintLevel(ilu_data);
    HYPRE_Int            max_iter       = hypre_ParILUDataMaxIter(ilu_data);
+   HYPRE_Int            tri_solve            = hypre_ParILUDataTriSolve(ilu_data);
+   HYPRE_Int            lower_jacobi_iters   = hypre_ParILUDataLowerJacobiIters(ilu_data);
+   HYPRE_Int            upper_jacobi_iters   = hypre_ParILUDataUpperJacobiIters(ilu_data);
    HYPRE_Real           *norms         = hypre_ParILUDataRelResNorms(ilu_data);
    hypre_ParVector      *Ftemp         = hypre_ParILUDataFTemp(ilu_data);
    hypre_ParVector      *Utemp         = hypre_ParILUDataUTemp(ilu_data);
@@ -246,12 +254,26 @@ hypre_ILUSolve( void               *ilu_vdata,
       {
          case 0: case 1:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-            /* Apply GPU-accelerated LU solve */
-            hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
-                                     ilu_solve_policy,
-                                     ilu_solve_buffer, F_array, U_array, perm, n, Utemp, Ftemp);//BJ-cusparse
+		    if ( tri_solve == 1 )
+            {
+   			   /* Apply GPU-accelerated LU solve */
+			   hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
+										ilu_solve_policy,
+										ilu_solve_buffer, F_array, U_array, perm, n, Utemp, Ftemp);//BJ-cusparse
+            }
+            else
+            {
+               hypre_ILUSolveDeviceLUIter(matA, matBLU_d,
+										  F_array, U_array, perm, n, Utemp, Ftemp, Ztemp,
+										  &Adiag_diag, lower_jacobi_iters, upper_jacobi_iters);//BJ-cusparse
+			   /* Assign this now, in case it was set in method above */
+			   hypre_ParILUDataADiagDiag(ilu_data) = Adiag_diag;
+            }
 #else
-            hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
+            if ( tri_solve == 1 )
+               hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
+            else
+               hypre_ILUSolveLUIter(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp, Ztemp, lower_jacobi_iters, upper_jacobi_iters); //BJ
 #endif
             break;
          case 10: case 11:
@@ -293,11 +315,29 @@ hypre_ILUSolve( void               *ilu_vdata,
          default:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
-            hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
-                                     ilu_solve_policy,
-                                     ilu_solve_buffer, F_array, U_array, perm, n, Utemp, Ftemp);//BJ-cusparse
+            if ( tri_solve == 1 )
+            {
+               /* Apply GPU-accelerated LU solve */
+               hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
+                                        ilu_solve_policy,
+                                        ilu_solve_buffer, F_array, U_array, perm, n, Utemp, Ftemp);//BJ-cusparse
+			}
+            else
+            {
+               hypre_ILUSolveDeviceLUIter(matA, matBLU_d, F_array, U_array, perm, n, Utemp, Ftemp,
+                                          Ztemp, &Adiag_diag, lower_jacobi_iters, upper_jacobi_iters);//BJ-cusparse
+               /* Assign this now, in case it was set in method above */
+               hypre_ParILUDataADiagDiag(ilu_data) = Adiag_diag;
+            }
 #else
-            hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
+            if ( tri_solve == 1 )
+            {
+               hypre_ILUSolveLU(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
+            }
+            else
+            {
+               hypre_ILUSolveLUIter(matA, F_array, U_array, perm, n, matL, matD, matU, Utemp, Ftemp, Ztemp, lower_jacobi_iters, upper_jacobi_iters); //BJ
+            }
 #endif
             break;
 
@@ -798,6 +838,122 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    return hypre_error_flag;
 }
 
+
+/* Incomplete LU solve
+ * L, D and U factors only have local scope (no off-diagonal processor terms)
+ * so apart from the residual calculation (which uses A), the solves with the
+ * L and U factors are local.
+*/
+
+HYPRE_Int
+hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
+                     hypre_ParVector    *u, HYPRE_Int *perm,
+                     HYPRE_Int nLU, hypre_ParCSRMatrix *L,
+                     HYPRE_Real* D, hypre_ParCSRMatrix *U,
+                     hypre_ParVector *ftemp, hypre_ParVector *utemp,
+                     hypre_Vector *xtemp, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters)
+{
+   hypre_CSRMatrix *L_diag = hypre_ParCSRMatrixDiag(L);
+   HYPRE_Real      *L_diag_data = hypre_CSRMatrixData(L_diag);
+   HYPRE_Int       *L_diag_i = hypre_CSRMatrixI(L_diag);
+   HYPRE_Int       *L_diag_j = hypre_CSRMatrixJ(L_diag);
+
+   hypre_CSRMatrix *U_diag = hypre_ParCSRMatrixDiag(U);
+   HYPRE_Real      *U_diag_data = hypre_CSRMatrixData(U_diag);
+   HYPRE_Int       *U_diag_i = hypre_CSRMatrixI(U_diag);
+   HYPRE_Int       *U_diag_j = hypre_CSRMatrixJ(U_diag);
+
+   hypre_Vector    *utemp_local = hypre_ParVectorLocalVector(utemp);
+   HYPRE_Real      *utemp_data  = hypre_VectorData(utemp_local);
+
+   hypre_Vector    *ftemp_local = hypre_ParVectorLocalVector(ftemp);
+   HYPRE_Real      *ftemp_data  = hypre_VectorData(ftemp_local);
+
+   HYPRE_Real      *xtemp_data  = hypre_VectorData(xtemp);
+
+   HYPRE_Real      alpha;
+   HYPRE_Real      beta;
+   HYPRE_Real      sum;
+   HYPRE_Int       i, j, k1, k2, kk;
+
+   /* begin */
+   alpha = -1.0;
+   beta = 1.0;
+
+   /* Initialize Utemp to zero.
+    * This is necessary for correctness, when we use optimized
+    * vector operations in the case where sizeof(L, D or U) < sizeof(A)
+    */
+   //hypre_ParVectorSetConstantValues( utemp, 0.);
+   /* compute residual */
+   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
+
+   /* L solve - Forward solve */
+   /* copy rhs to account for diagonal of L (which is identity) */
+
+   /* Initialize iteration to 0 */
+   for( i = 0; i < nLU; i++ )
+   {
+      utemp_data[perm[i]] = 0.0;
+   }
+
+   /* Jacobi iteration loop */
+   for( kk = 0; kk < lower_jacobi_iters; kk++ ) {
+      /* u^{k+1} = f - Lu^k */
+
+      /* Do a SpMV with L and save the results in xtemp */
+      for ( i = 0; i < nLU; i++ )
+      {
+         sum = 0.0;
+         k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+         for(j=k1; j <k2; j++)
+         {
+            sum += L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
+         }
+         xtemp_data[i] = sum;
+      }
+
+      for( i = 0; i < nLU; i++ )
+      {
+         utemp_data[perm[i]] = ftemp_data[perm[i]] - xtemp_data[i];
+      }
+   } /* end jacobi loop */
+
+   /* Initialize iteration to 0 */
+   for( i = 0; i < nLU; i++ )
+   {
+      /* this should is doable without the permutation */
+      //ftemp_data[perm[i]] = utemp_data[perm[i]];
+      ftemp_data[perm[i]] = 0.0;
+   }
+
+   /* Jacobi iteration loop */
+   for( kk = 0; kk < upper_jacobi_iters; kk++ ) {
+      /* u^{k+1} = f - Uu^k */
+
+      /* Do a SpMV with U and save the results in xtemp */
+      for ( i = 0; i < nLU; ++i )
+      {
+         sum = 0.0;
+         k1 = U_diag_i[i] ; k2 = U_diag_i[i+1];
+         for(j=k1; j <k2; j++)
+         {
+            sum += U_diag_data[j] * ftemp_data[perm[U_diag_j[j]]];
+         }
+         xtemp_data[i] = sum;
+      }
+
+      for ( i = 0; i < nLU; ++i )
+      {
+         ftemp_data[perm[i]] = D[i]*(utemp_data[perm[i]] - xtemp_data[i]);
+      }
+   } /* end jacobi loop */
+
+   /* Update solution */
+   hypre_ParVectorAxpy(beta, ftemp, u);
+
+   return hypre_error_flag;
+}
 
 /* Incomplete LU solve RAS
  * L, D and U factors only have local scope (no off-diagonal processor terms)
