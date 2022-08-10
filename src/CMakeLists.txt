@@ -452,7 +452,7 @@ if (HYPRE_USING_CUDA)
 endif ()
 
 if (HYPRE_USING_SYCL)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${DPLROOT}/include)
+  target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
   if (HYPRE_ENABLE_ONEMKLSPARSE)
     set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
   endif()
