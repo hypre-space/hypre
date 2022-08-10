@@ -14,7 +14,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #define SPMV_BLOCKDIM 512
 #define VERSION 1
@@ -80,9 +80,15 @@ hypre_csr_v_k_shuffle(hypre_DeviceItem &item,
     *               warp-shuffle reduction
     *           (1 group of K threads) per row
     *------------------------------------------------------------*/
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int grid_ngroups = item.get_group_range(2) * (SPMV_BLOCKDIM / K);
+   HYPRE_Int grid_group_id = (item.get_group(2) * SPMV_BLOCKDIM + item.get_local_id(2)) / K;
+   const HYPRE_Int group_lane = item.get_local_id(2) & (K - 1);
+#else
    const HYPRE_Int grid_ngroups = gridDim.x * (SPMV_BLOCKDIM / K);
    HYPRE_Int grid_group_id = (blockIdx.x * SPMV_BLOCKDIM + threadIdx.x) / K;
    const HYPRE_Int group_lane = threadIdx.x & (K - 1);
+#endif
 
    for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < n); grid_group_id += grid_ngroups)
    {
@@ -94,7 +100,7 @@ hypre_csr_v_k_shuffle(hypre_DeviceItem &item,
          {
             grid_row_id = read_only_load(&row_id[grid_group_id]);
          }
-         grid_row_id = __shfl_sync(HYPRE_WARP_FULL_MASK, grid_row_id, 0, K);
+         grid_row_id = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, grid_row_id, 0, K);
       }
       else
       {
@@ -105,8 +111,8 @@ hypre_csr_v_k_shuffle(hypre_DeviceItem &item,
       {
          p = read_only_load(&d_ia[grid_row_id + group_lane]);
       }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1, K);
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0, K);
+      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, K);
+      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, K);
 
       T sum = 0.0;
 #if VERSION == 1
@@ -142,7 +148,7 @@ hypre_csr_v_k_shuffle(hypre_DeviceItem &item,
 #pragma unroll
       for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
       {
-         sum += __shfl_down_sync(HYPRE_WARP_FULL_MASK, sum, d);
+         sum += warp_shuffle_down_sync(item, HYPRE_WARP_FULL_MASK, sum, d);
       }
       if (grid_group_id < n && group_lane == 0)
       {
@@ -179,13 +185,21 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
                              T         *d_y )
 {
    const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
+#if defined(HYPRE_USING_SYCL)
+   const dim3 bDim(1, 1, SPMV_BLOCKDIM);
+#else
    const dim3 bDim(SPMV_BLOCKDIM);
+#endif
 
    if (rownnz >= 64)
    {
       const HYPRE_Int group_size = 32;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+#if defined(HYPRE_USING_SYCL)
+      const dim3 gDim(1, 1, (nrows + num_groups_per_block - 1) / num_groups_per_block);
+#else
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+#endif
       HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                         nrows, rowid, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
@@ -193,7 +207,11 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
    {
       const HYPRE_Int group_size = 16;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+#if defined(HYPRE_USING_SYCL)
+      const dim3 gDim(1, 1, (nrows + num_groups_per_block - 1) / num_groups_per_block);
+#else
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+#endif
       HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                         nrows, rowid, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
@@ -201,7 +219,11 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
    {
       const HYPRE_Int group_size = 8;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+#if defined(HYPRE_USING_SYCL)
+      const dim3 gDim(1, 1, (nrows + num_groups_per_block - 1) / num_groups_per_block);
+#else
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+#endif
       HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                         nrows, rowid, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
@@ -209,7 +231,11 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
    {
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+#if defined(HYPRE_USING_SYCL)
+      const dim3 gDim(1, 1, (nrows + num_groups_per_block - 1) / num_groups_per_block);
+#else
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+#endif
       HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                         nrows, rowid, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
@@ -217,7 +243,11 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
    {
       const HYPRE_Int group_size = 4;
       const HYPRE_Int num_groups_per_block = SPMV_BLOCKDIM / group_size;
+#if defined(HYPRE_USING_SYCL)
+      const dim3 gDim(1, 1, (nrows + num_groups_per_block - 1) / num_groups_per_block);
+#else
       const dim3 gDim((nrows + num_groups_per_block - 1) / num_groups_per_block);
+#endif
       HYPRE_GPU_LAUNCH( (hypre_csr_v_k_shuffle<F, group_size, T>), gDim, bDim,
                         nrows, rowid, alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
    }
@@ -323,4 +353,4 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  nrows,
 
    return hypre_error_flag;
 }
-#endif /*#if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
+#endif /*#if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */

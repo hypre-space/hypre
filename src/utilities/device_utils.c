@@ -429,7 +429,7 @@ dim3
 hypre_GetDefaultDeviceBlockDimension()
 {
 #if defined(HYPRE_USING_SYCL)
-   dim3 bDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()), 1, 1);
+   dim3 bDim(1, 1, hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
 #else
    dim3 bDim(HYPRE_1D_BLOCK_SIZE, 1, 1);
 #endif
@@ -472,7 +472,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int   n,
    }
 
 #if defined(HYPRE_USING_SYCL)
-   dim3 gDim(num_blocks, 1, 1);
+   dim3 gDim(1, 1, num_blocks);
 #else
    dim3 gDim(num_blocks, 1, 1);
 #endif
@@ -965,7 +965,12 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0);
+   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
+   HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+   /* HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0); */
+   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, tmp, 0);
+   hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif

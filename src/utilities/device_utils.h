@@ -642,6 +642,32 @@ T read_only_load( const T *ptr )
    return *ptr;
 #endif
 }
+
+static __device__ __forceinline__
+hypre_int next_power_of_2(hypre_int n)
+{
+   if (n <= 0)
+   {
+      return 0;
+   }
+
+   /* if n is power of 2, return itself */
+   if ( (n & (n - 1)) == 0 )
+   {
+      return n;
+   }
+
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   n ^= (n >>  1);
+   n  = (n <<  1);
+
+   return n;
+}
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -732,7 +758,7 @@ hypre_int hypre_gpu_get_num_blocks()
 /* return the flattened block id in grid */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_block_id()
+hypre_int hypre_gpu_get_block_id(hypre_DeviceItem &item)
 {
    switch (dim)
    {
@@ -761,7 +787,7 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
-   return hypre_gpu_get_block_id<gdim>() * hypre_gpu_get_num_threads<bdim>(item) +
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_threads<bdim>(item) +
           hypre_gpu_get_thread_id<bdim>(item);
 }
 
@@ -778,7 +804,7 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
-   return hypre_gpu_get_block_id<gdim>() * hypre_gpu_get_num_warps<bdim>(item) +
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item) +
           hypre_gpu_get_warp_id<bdim>(item);
 }
 
@@ -909,9 +935,30 @@ hypre_int warp_any_sync(hypre_DeviceItem &item, unsigned mask, hypre_int predica
 
 template <typename T>
 static __device__ __forceinline__
-T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line, hypre_int width=HYPRE_WARP_SIZE)
 {
-   return __shfl_sync(mask, val, src_line);
+   return __shfl_sync(mask, val, src_line, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta, hypre_int width=HYPRE_WARP_SIZE)
+{
+   return __shfl_up_sync(mask, val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta, hypre_int width=HYPRE_WARP_SIZE)
+{
+   return __shfl_down_sync(mask, val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask, hypre_int width=HYPRE_WARP_SIZE)
+{
+   return __shfl_xor_sync(mask, val, lane_mask, width);
 }
 
 template <typename T>
@@ -984,31 +1031,6 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
       in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
    return in;
-}
-
-static __device__ __forceinline__
-hypre_int next_power_of_2(hypre_int n)
-{
-   if (n <= 0)
-   {
-      return 0;
-   }
-
-   /* if n is power of 2, return itself */
-   if ( (n & (n - 1)) == 0 )
-   {
-      return n;
-   }
-
-   n |= (n >>  1);
-   n |= (n >>  2);
-   n |= (n >>  4);
-   n |= (n >>  8);
-   n |= (n >> 16);
-   n ^= (n >>  1);
-   n  = (n <<  1);
-
-   return n;
 }
 
 template<typename T1, typename T2>
@@ -1184,7 +1206,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_num_threads(hypre_DeviceItem &item)
 {
-   return static_cast<hypre_int>(item.get_group().get_local_range().size());
+   return static_cast<hypre_int>(item.get_local_range().size());
 }
 
 /* return the flattened thread id in block */
@@ -1192,7 +1214,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
 {
-   return static_cast<hypre_int>(item.get_local_linear_id());
+   return item.get_local_linear_id();
 }
 
 /* return the number of warps in block */
@@ -1216,8 +1238,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   sycl::sub_group SG = item.get_sub_group();
-   return (hypre_int) item.get_sub_group().get_local_linear_id();
+   return item.get_sub_group().get_local_id();
 }
 
 /* return the num of blocks in grid */
@@ -1233,7 +1254,7 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_block_id(hypre_DeviceItem &item)
 {
-   return static_cast<hypre_int>(item.get_group_linear_id());
+   return item.get_group_linear_id();
 }
 
 /* return the number of threads in grid */
@@ -1249,7 +1270,8 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
-   return static_cast<hypre_int>(item.get_global_linear_id());
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_threads<bdim>(item) +
+          hypre_gpu_get_thread_id<bdim>(item);
 }
 
 /* return the number of warps in grid */
@@ -1277,14 +1299,18 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)
    {
-      T t = item.get_sub_group().shuffle_up(in, d >> 1);
+      /* WM: try */
+      /* T t = item.get_sub_group().shuffle_up(in, d >> 1); */
+      T t = sycl::shift_group_right(item.get_sub_group(), in, d >> 1);
       if ( (lane_id & (d - 1)) == (d - 1) )
       {
          in += t;
       }
    }
 
-   all_sum = item.get_sub_group().shuffle(in, HYPRE_WARP_SIZE - 1);
+   /* WM: try */
+   /* all_sum = item.get_sub_group().shuffle(in, HYPRE_WARP_SIZE - 1); */
+   all_sum = sycl::group_broadcast(item.get_sub_group(), in, HYPRE_WARP_SIZE - 1);
 
    if (lane_id == HYPRE_WARP_SIZE - 1)
    {
@@ -1294,7 +1320,9 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      T t = item.get_sub_group().shuffle_xor(in, d);
+      /* WM: try */
+      /* T t = item.get_sub_group().shuffle_xor(in, d); */
+      T t = sycl::permute_group_by_xor(item.get_sub_group(), in, d);
 
       if ( (lane_id & (d - 1)) == (d - 1))
       {
@@ -1321,10 +1349,74 @@ template <typename T>
 static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
 {
-   /* WM: NOTE - seems that barrier is required in order to produce correct results here, but I don't know why... */
-   /* this may be a bug in the underlying sycl implementation that needs to be fixed */
+   /* WM: todo - try removing barrier with new implementation */
    item.get_sub_group().barrier();
-   return item.get_sub_group().shuffle(val, src_line);
+   return sycl::group_broadcast(item.get_sub_group(), val, src_line);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line, hypre_int width)
+{
+   /* WM: assume src_line < width? */
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_start = (lane_id / width) * width;
+   hypre_int src_in_warp = group_start + src_line;
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta)
+{
+   return sycl::shift_group_right(item.get_sub_group(), val, delta);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta, hypre_int width)
+{
+   /* WM: assume group_delta < group_size? */
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_start = (lane_id / width) * width;
+   hypre_int src_in_warp = sycl::max(group_start, lane_id - delta);
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta)
+{
+   return sycl::shift_group_left(item.get_sub_group(), val, delta);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta, hypre_int width)
+{
+   /* WM: assume group_delta < group_size? */
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_end = ((lane_id / width) + 1) * width - 1;
+   hypre_int src_in_warp = sycl::min(group_end, lane_id + delta);
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask)
+{
+   return sycl::permute_group_by_xor(item.get_sub_group(), val, lane_mask);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask, hypre_int width)
+{
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_end = ((lane_id / width) + 1) * width - 1;
+   hypre_int src_in_warp = lane_id ^ lane_mask;
+   src_in_warp = src_in_warp > group_end ? lane_id : src_in_warp;
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
 template <typename T>
@@ -1333,7 +1425,9 @@ T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in += item.get_sub_group().shuffle_down(in, d);
+      /* WM: try */
+      /* in += item.get_sub_group().shuffle_down(in, d); */
+      in += sycl::shift_group_left(item.get_sub_group(), in, d);
    }
    return in;
 }
@@ -1344,7 +1438,9 @@ T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in += item.get_sub_group().shuffle_xor(in, d);
+      /* WM: try */
+      /* in += item.get_sub_group().shuffle_xor(in, d); */
+      in += sycl::permute_group_by_xor(item.get_sub_group(), in, d);
    }
    return in;
 }
@@ -1355,7 +1451,9 @@ T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::max(in, item.get_sub_group().shuffle_down(in, d));
+      /* WM: try */
+      /* in = std::max(in, item.get_sub_group().shuffle_down(in, d)); */
+      in = std::max(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1366,7 +1464,9 @@ T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::max(in, item.get_sub_group().shuffle_xor(in, d));
+      /* WM: try */
+      /* in = std::max(in, item.get_sub_group().shuffle_xor(in, d)); */
+      in = std::max(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1377,7 +1477,9 @@ T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::min(in, item.get_sub_group().shuffle_down(in, d));
+      /* WM: try */
+      /* in = std::min(in, item.get_sub_group().shuffle_down(in, d)); */
+      in = std::min(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1388,7 +1490,9 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::min(in, item.get_sub_group().shuffle_xor(in, d));
+      /* WM: try */
+      /* in = std::min(in, item.get_sub_group().shuffle_xor(in, d)); */
+      in = std::min(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1460,6 +1564,12 @@ struct equal
    equal(T val_) { val = val_; }
 
    constexpr bool operator()(const T &x) const { return (x == val); }
+};
+
+template<typename T1, typename T2>
+struct type_cast
+{
+   constexpr T2 operator()(const T1 &x) const { return (T2) x; }
 };
 
 template<typename... T>

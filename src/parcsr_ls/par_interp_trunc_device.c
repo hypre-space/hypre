@@ -438,9 +438,9 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    else
    {
 #if defined(HYPRE_USING_SYCL)
-      dim3 bDim(256, 1, 1);
+      dim3 bDim(1, 1, 256);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
-      size_t shmem_bytes = bDim.get(0) * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+      size_t shmem_bytes = bDim.get(2) * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
 #else
       dim3 bDim(256);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
