@@ -125,9 +125,9 @@ hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
    {
       HYPRE_ONEDPL_CALL( std::inclusive_scan,
                          oneapi::dpl::make_transform_iterator(oneapi::dpl::make_permutation_iterator(d_c, row_id),
-                                                         row_size(SHMEM_HASH_SIZE)),
+                                                              row_size(SHMEM_HASH_SIZE)),
                          oneapi::dpl::make_transform_iterator(oneapi::dpl::make_permutation_iterator(d_c, row_id),
-                                                         row_size(SHMEM_HASH_SIZE)) + m,
+                                                              row_size(SHMEM_HASH_SIZE)) + m,
                          d_i + 1 );
    }
    else

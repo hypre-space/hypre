@@ -9,7 +9,6 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-/* WM: todo */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #define HYPRE_SPGEMM_ROWNNZ_BINNED(BIN, SHMEM_HASH_SIZE, GROUP_SIZE, GHASH, CAN_FAIL, RF)  \
@@ -136,7 +135,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    *rownnz_exact_ptr = !HYPRE_ONEDPL_CALL( std::any_of,
                                            d_rf,
                                            d_rf + m,
-                                           [] (const auto & x) {return x;} );
+   [] (const auto & x) {return x;} );
 #else
    *rownnz_exact_ptr = !HYPRE_THRUST_CALL( any_of,
                                            d_rf,
@@ -216,11 +215,11 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 #if defined(HYPRE_USING_SYCL)
          oneapi::dpl::counting_iterator count(0);
          HYPRE_Int *new_end = hypreSycl_copy_if(
-                               count,
-                               count + m,
-                               d_rf,
-                               d_rind,
-                               [] (const auto & x) {return x;} );
+                                 count,
+                                 count + m,
+                                 d_rf,
+                                 d_rind,
+         [] (const auto & x) {return x;} );
 #else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
@@ -327,7 +326,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                count + m,
                                d_rf,
                                d_rind,
-                               [] (const auto & x) {return x;} );
+         [] (const auto & x) {return x;} );
 #else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,

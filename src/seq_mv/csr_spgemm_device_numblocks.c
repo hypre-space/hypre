@@ -31,7 +31,8 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo - is this right? */
-   multiProcessorCount = hypre_HandleDevice(hypre_handle())->get_info<sycl::info::device::max_compute_units>();
+   multiProcessorCount = hypre_HandleDevice(
+                            hypre_handle())->get_info<sycl::info::device::max_compute_units>();
    hypre_printf("WM: debug - multiProcessorCount = %d\n", multiProcessorCount);
 #endif
 

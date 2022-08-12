@@ -21,7 +21,12 @@
 template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int *HashKeys,
+hypre_spgemm_hash_insert_symbl( 
+#if defined(HYPRE_USING_SYCL)
+                                HYPRE_Int *HashKeys,
+#else
+                                volatile HYPRE_Int *HashKeys,
+#endif
                                 HYPRE_Int           key,
                                 HYPRE_Int          &count )
 {
@@ -42,8 +47,13 @@ hypre_spgemm_hash_insert_symbl( volatile HYPRE_Int *HashKeys,
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: TODO - atomics */
-      HYPRE_Int old = 0;
+      auto v = sycl::atomic_ref<
+         HYPRE_Int, sycl::memory_order::relaxed,
+         sycl::memory_scope::device,
+         sycl::access::address_space::generic_space>(HashKeys[j]);
+      HYPRE_Int minus_one = -1;
+      v.compare_exchange_strong(minus_one, key);
+      HYPRE_Int old = v.load();
 #else
       HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #endif
@@ -65,7 +75,11 @@ template <char HASHTYPE>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
+#if defined(HYPRE_USING_SYCL)
+                                HYPRE_Int *HashKeys,
+#else
                                 volatile HYPRE_Int *HashKeys,
+#endif
                                 HYPRE_Int           key,
                                 HYPRE_Int          &count )
 {
@@ -85,8 +99,14 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: TODO - atomics */
-      HYPRE_Int old = 0;
+      /* WM: why can't I use address_space::local_space below? Get error at link time when building drivers */
+      auto v = sycl::atomic_ref<
+         HYPRE_Int, sycl::memory_order::relaxed,
+         sycl::memory_scope::device,
+         sycl::access::address_space::generic_space>(HashKeys[j]);
+      HYPRE_Int minus_one = -1;
+      v.compare_exchange_strong(minus_one, key);
+      HYPRE_Int old = v.load();
 #else
       HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #endif
@@ -113,7 +133,11 @@ hypre_spgemm_compute_row_symbl( hypre_DeviceItem   &item,
                                 const HYPRE_Int    *ja,
                                 const HYPRE_Int    *ib,
                                 const HYPRE_Int    *jb,
+#if defined(HYPRE_USING_SYCL)
+                                HYPRE_Int *s_HashKeys,
+#else
                                 volatile HYPRE_Int *s_HashKeys,
+#endif
                                 HYPRE_Int           g_HashSize,
                                 HYPRE_Int          *g_HashKeys,
                                 char               &failed )
@@ -160,7 +184,8 @@ hypre_spgemm_compute_row_symbl( hypre_DeviceItem   &item,
       const HYPRE_Int rowB_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 0, blockDim_x);
       const HYPRE_Int rowB_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, tmp, 1, blockDim_x);
 
-      for (HYPRE_Int k = rowB_start + threadIdx_x; warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
+      for (HYPRE_Int k = rowB_start + threadIdx_x;
+           warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
            k += blockDim_x)
       {
          if (k < rowB_end)
@@ -202,7 +227,7 @@ template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_
 __global__ void
 hypre_spgemm_symbolic( hypre_DeviceItem             &item,
 #if defined(HYPRE_USING_SYCL)
-                      char                             *shmem_ptr,
+                       char                             *shmem_ptr,
 #endif
                        const HYPRE_Int               M,
                        const HYPRE_Int* __restrict__ rind,
@@ -231,19 +256,22 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
 #endif
    /* lane id inside the group */
    volatile const HYPRE_Int lane_id = get_group_lane_id(item);
-   /* shared memory hash table */
 #if defined(HYPRE_USING_SYCL)
+   /* shared memory hash table */
    HYPRE_Int *s_HashKeys = (HYPRE_Int*) shmem_ptr;
+   /* shared memory hash table for this group */
+   HYPRE_Int *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
 #else
+   /* shared memory hash table */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
    volatile HYPRE_Int *s_HashKeys = shared_mem;
 #else
    __shared__ volatile HYPRE_Int s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
 #endif
-#endif
    /* shared memory hash table for this group */
    volatile HYPRE_Int *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
+#endif
 
    const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_SYMBL_UNROLL, SHMEM_HASH_SIZE);
 
@@ -253,7 +281,8 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
-   for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M); i += grid_num_groups)
+   for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M);
+        i += grid_num_groups)
    {
       HYPRE_Int ii = -1;
       char failed = 0;

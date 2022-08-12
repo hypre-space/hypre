@@ -380,7 +380,8 @@ void hypre_spgemm_rownnz_cohen( HYPRE_Int  M,
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   dim3 gDim( 1, 1, (nsamples * N + bDim.get(0) * HYPRE_WARP_SIZE - 1) / (bDim.get(0) * HYPRE_WARP_SIZE) );
+   dim3 gDim( 1, 1, (nsamples * N + bDim.get(0) * HYPRE_WARP_SIZE - 1) / (bDim.get(
+                                                                             0) * HYPRE_WARP_SIZE) );
 #else
    dim3 gDim( (nsamples * N + bDim.z * HYPRE_WARP_SIZE - 1) / (bDim.z * HYPRE_WARP_SIZE), 1, 1 );
 #endif

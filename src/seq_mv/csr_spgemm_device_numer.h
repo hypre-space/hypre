@@ -24,8 +24,14 @@
 template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
+hypre_spgemm_hash_insert_numer( 
+#if defined(HYPRE_USING_SYCL)
+                                HYPRE_Int     *HashKeys,
+                                HYPRE_Complex *HashVals,
+#else
+                                volatile HYPRE_Int     *HashKeys,
                                 volatile HYPRE_Complex *HashVals,
+#endif
                                 HYPRE_Int               key,
                                 HYPRE_Complex           val )
 {
@@ -46,8 +52,13 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: TODO */
-      HYPRE_Int old = 0;
+      auto v = sycl::atomic_ref<
+         HYPRE_Int, sycl::memory_order::relaxed,
+         sycl::memory_scope::device,
+         sycl::access::address_space::generic_space>(HashKeys[j]);
+      HYPRE_Int minus_one = -1;
+      v.compare_exchange_strong(minus_one, key);
+      HYPRE_Int old = v.load();
 #else
       HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 #endif
@@ -56,7 +67,11 @@ hypre_spgemm_hash_insert_numer( volatile HYPRE_Int     *HashKeys,
       {
          /* this slot was open or contained 'key', update value */
 #if defined(HYPRE_USING_SYCL)
-         /* WM: TODO */
+         auto v = sycl::atomic_ref<
+            HYPRE_Complex, sycl::memory_order::relaxed,
+            sycl::memory_scope::device,
+            sycl::access::address_space::generic_space>(HashVals[j]);
+         v.fetch_add(val);
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
 #endif
@@ -71,8 +86,13 @@ template <char HASHTYPE>
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
+#if defined(HYPRE_USING_SYCL)
+                                HYPRE_Int     *HashKeys,
+                                HYPRE_Complex *HashVals,
+#else
                                 volatile HYPRE_Int     *HashKeys,
                                 volatile HYPRE_Complex *HashVals,
+#endif
                                 HYPRE_Int               key,
                                 HYPRE_Complex           val )
 {
@@ -92,17 +112,27 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      /* WM: TODO */
-      HYPRE_Int old = 0;
+      auto v = sycl::atomic_ref<
+         HYPRE_Int, sycl::memory_order::relaxed,
+         sycl::memory_scope::device,
+         sycl::access::address_space::generic_space>(HashKeys[j]);
+      HYPRE_Int minus_one = -1;
+      v.compare_exchange_strong(minus_one, key);
+      HYPRE_Int old = v.load();
 #else
       HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 #endif
 
+      /* WM: Question - should never have the case where old == -1, correct? Unless key == 1, in which case this is still redundant?  */
       if (old == -1 || old == key)
       {
          /* this slot was open or contained 'key', update value */
 #if defined(HYPRE_USING_SYCL)
-         /* WM: TODO */
+         auto v = sycl::atomic_ref<
+            HYPRE_Complex, sycl::memory_order::relaxed,
+            sycl::memory_scope::device,
+            sycl::access::address_space::generic_space>(HashVals[j]);
+         v.fetch_add(val);
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
 #endif
@@ -130,8 +160,13 @@ hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
                                 const    HYPRE_Complex *ab,
                                 HYPRE_Int              *jc,
                                 HYPRE_Complex          *ac,
+#if defined(HYPRE_USING_SYCL)
+                                HYPRE_Int     *s_HashKeys,
+                                HYPRE_Complex *s_HashVals,
+#else
                                 volatile HYPRE_Int     *s_HashKeys,
                                 volatile HYPRE_Complex *s_HashVals,
+#endif
                                 HYPRE_Int               g_HashSize,
                                 HYPRE_Int              *g_HashKeys,
                                 HYPRE_Complex          *g_HashVals )
@@ -183,7 +218,8 @@ hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
       if (IA1) { hypre_device_assert(rowB == -1 || rowB_end - rowB_start == iend_c - istart_c); }
 #endif
 
-      for (HYPRE_Int k = rowB_start + threadIdx_x; warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
+      for (HYPRE_Int k = rowB_start + threadIdx_x;
+           warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
            k += blockDim_x)
       {
          if (k < rowB_end)
@@ -220,8 +256,13 @@ static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
                                         HYPRE_Int               lane_id,
+#if defined(HYPRE_USING_SYCL)
+                                        HYPRE_Int     *s_HashKeys,
+                                        HYPRE_Complex *s_HashVals,
+#else
                                         volatile HYPRE_Int     *s_HashKeys,
                                         volatile HYPRE_Complex *s_HashVals,
+#endif
                                         HYPRE_Int               ghash_size,
                                         HYPRE_Int              *jg_start,
                                         HYPRE_Complex          *ag_start,
@@ -254,7 +295,8 @@ hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
    if (HAS_GHASH)
    {
       /* copy global memory hash table into C */
-      for (HYPRE_Int k = lane_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < ghash_size); k += STEP_SIZE)
+      for (HYPRE_Int k = lane_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < ghash_size);
+           k += STEP_SIZE)
       {
          HYPRE_Int sum;
          HYPRE_Int key = k < ghash_size ? jg_start[k] : -1;
@@ -311,11 +353,15 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 #endif
    /* lane id inside the group */
    volatile const HYPRE_Int lane_id = get_group_lane_id(item);
-   /* shared memory hash table */
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int *s_HashKeys = (HYPRE_Int*) &(shmem_ptr[0]);
-   HYPRE_Complex *s_HashVals = (HYPRE_Complex*) &(s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE]);
+   /* shared memory hash table */
+   HYPRE_Int *s_HashKeys = (HYPRE_Int*) & (shmem_ptr[0]);
+   HYPRE_Complex *s_HashVals = (HYPRE_Complex*) & (s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE]);
+   /* shared memory hash table for this group */
+   HYPRE_Int     *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
+   HYPRE_Complex *group_s_HashVals = s_HashVals + group_id * SHMEM_HASH_SIZE;
 #else
+   /* shared memory hash table */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
    volatile HYPRE_Int     *s_HashKeys = shared_mem;
@@ -325,10 +371,10 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    __shared__ volatile HYPRE_Int     s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
    __shared__ volatile HYPRE_Complex s_HashVals[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
 #endif
-#endif
    /* shared memory hash table for this group */
    volatile HYPRE_Int     *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
    volatile HYPRE_Complex *group_s_HashVals = s_HashVals + group_id * SHMEM_HASH_SIZE;
+#endif
 
    const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_NUMER_UNROLL, SHMEM_HASH_SIZE);
 
@@ -338,7 +384,8 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
-   for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M); i += grid_num_groups)
+   for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M);
+        i += grid_num_groups)
    {
       HYPRE_Int ii = -1;
 
@@ -648,7 +695,8 @@ hypre_spgemm_copy_from_Cext_into_C( hypre_DeviceItem    &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
-   for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M); i += grid_num_groups)
+   for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M);
+        i += grid_num_groups)
    {
       HYPRE_Int istart_c = 0, iend_c = 0, istart_x = 0;
 

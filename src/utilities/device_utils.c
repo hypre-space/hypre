@@ -1695,6 +1695,21 @@ hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
    return hypreDevice_Filln(d_x, n, v);
 }
 
+/*--------------------------------------------------------------------
+ * hypreDevice_IntegerReduceSum
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_IntegerReduceSum( HYPRE_Int  n,
+                              HYPRE_Int *d_i )
+{
+#if defined(HYPRE_USING_SYCL)
+   return HYPRE_ONEDPL_CALL(std::reduce, d_i, d_i + n);
+#else
+   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
+#endif
+}
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1780,17 +1795,6 @@ void hypre_CudaCompileFlagCheck()
    }
 
 #endif // defined(HYPRE_USING_CUDA)
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_IntegerReduceSum
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_IntegerReduceSum( HYPRE_Int  n,
-                              HYPRE_Int *d_i )
-{
-   return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
 }
 
 /*--------------------------------------------------------------------

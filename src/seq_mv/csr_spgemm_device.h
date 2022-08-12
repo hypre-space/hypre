@@ -468,7 +468,7 @@ hypre_spgemm_get_num_groups_per_block()
    return hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
 #elif defined(HYPRE_USING_HIP)
    return hypre_max(512 / GROUP_SIZE, 1);
-/* WM: todo - what should this be for intel? */
+   /* WM: todo - what should this be for intel? */
 #elif defined(HYPRE_USING_SYCL)
    return hypre_max(512 / GROUP_SIZE, 1);
 #endif
