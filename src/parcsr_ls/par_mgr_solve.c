@@ -797,7 +797,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
                                                   U_array[level], 1.0, F_array[level], Vtemp);
 
-               resnorm = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+               resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
                init_resnorm = resnorm;
                rhs_norm = sqrt(hypre_ParVectorInnerProd(F_array[level], F_array[level]));
 
@@ -834,7 +834,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   old_resnorm = resnorm;
                   hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
                                                      U_array[level], 1.0, F_array[level], Vtemp);
-                  resnorm = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+                  resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
 
                   if (old_resnorm) { conv_factor = resnorm / old_resnorm; }
                   else { conv_factor = resnorm; }
