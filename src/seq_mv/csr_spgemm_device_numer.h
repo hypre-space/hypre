@@ -24,16 +24,16 @@
 template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_numer( 
+hypre_spgemm_hash_insert_numer(
 #if defined(HYPRE_USING_SYCL)
-                                HYPRE_Int     *HashKeys,
-                                HYPRE_Complex *HashVals,
+   HYPRE_Int     *HashKeys,
+   HYPRE_Complex *HashVals,
 #else
-                                volatile HYPRE_Int     *HashKeys,
-                                volatile HYPRE_Complex *HashVals,
+   volatile HYPRE_Int     *HashKeys,
+   volatile HYPRE_Complex *HashVals,
 #endif
-                                HYPRE_Int               key,
-                                HYPRE_Complex           val )
+   HYPRE_Int               key,
+   HYPRE_Complex           val )
 {
    HYPRE_Int j = 0;
 
@@ -52,10 +52,10 @@ hypre_spgemm_hash_insert_numer(
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      auto v = sycl::atomic_ref<
-         HYPRE_Int, sycl::memory_order::relaxed,
-         sycl::memory_scope::device,
-         sycl::access::address_space::generic_space>(HashKeys[j]);
+      auto v = sycl::atomic_ref <
+               HYPRE_Int, sycl::memory_order::relaxed,
+               sycl::memory_scope::device,
+               sycl::access::address_space::generic_space > (HashKeys[j]);
       HYPRE_Int minus_one = -1;
       v.compare_exchange_strong(minus_one, key);
       HYPRE_Int old = v.load();
@@ -67,10 +67,10 @@ hypre_spgemm_hash_insert_numer(
       {
          /* this slot was open or contained 'key', update value */
 #if defined(HYPRE_USING_SYCL)
-         auto v = sycl::atomic_ref<
-            HYPRE_Complex, sycl::memory_order::relaxed,
-            sycl::memory_scope::device,
-            sycl::access::address_space::generic_space>(HashVals[j]);
+         auto v = sycl::atomic_ref <
+                  HYPRE_Complex, sycl::memory_order::relaxed,
+                  sycl::memory_scope::device,
+                  sycl::access::address_space::generic_space > (HashVals[j]);
          v.fetch_add(val);
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
@@ -112,10 +112,10 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      auto v = sycl::atomic_ref<
-         HYPRE_Int, sycl::memory_order::relaxed,
-         sycl::memory_scope::device,
-         sycl::access::address_space::generic_space>(HashKeys[j]);
+      auto v = sycl::atomic_ref <
+               HYPRE_Int, sycl::memory_order::relaxed,
+               sycl::memory_scope::device,
+               sycl::access::address_space::generic_space > (HashKeys[j]);
       HYPRE_Int minus_one = -1;
       v.compare_exchange_strong(minus_one, key);
       HYPRE_Int old = v.load();
@@ -128,10 +128,10 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
       {
          /* this slot was open or contained 'key', update value */
 #if defined(HYPRE_USING_SYCL)
-         auto v = sycl::atomic_ref<
-            HYPRE_Complex, sycl::memory_order::relaxed,
-            sycl::memory_scope::device,
-            sycl::access::address_space::generic_space>(HashVals[j]);
+         auto v = sycl::atomic_ref <
+                  HYPRE_Complex, sycl::memory_order::relaxed,
+                  sycl::memory_scope::device,
+                  sycl::access::address_space::generic_space > (HashVals[j]);
          v.fetch_add(val);
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);

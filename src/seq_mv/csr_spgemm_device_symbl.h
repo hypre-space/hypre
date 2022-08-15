@@ -21,14 +21,14 @@
 template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int UNROLL_FACTOR>
 static __device__ __forceinline__
 HYPRE_Int
-hypre_spgemm_hash_insert_symbl( 
+hypre_spgemm_hash_insert_symbl(
 #if defined(HYPRE_USING_SYCL)
-                                HYPRE_Int *HashKeys,
+   HYPRE_Int *HashKeys,
 #else
-                                volatile HYPRE_Int *HashKeys,
+   volatile HYPRE_Int *HashKeys,
 #endif
-                                HYPRE_Int           key,
-                                HYPRE_Int          &count )
+   HYPRE_Int           key,
+   HYPRE_Int          &count )
 {
    HYPRE_Int j = 0;
 
@@ -47,10 +47,10 @@ hypre_spgemm_hash_insert_symbl(
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      auto v = sycl::atomic_ref<
-         HYPRE_Int, sycl::memory_order::relaxed,
-         sycl::memory_scope::device,
-         sycl::access::address_space::generic_space>(HashKeys[j]);
+      auto v = sycl::atomic_ref <
+               HYPRE_Int, sycl::memory_order::relaxed,
+               sycl::memory_scope::device,
+               sycl::access::address_space::generic_space > (HashKeys[j]);
       HYPRE_Int minus_one = -1;
       v.compare_exchange_strong(minus_one, key);
       HYPRE_Int old = v.load();
@@ -100,10 +100,10 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
       /* WM: why can't I use address_space::local_space below? Get error at link time when building drivers */
-      auto v = sycl::atomic_ref<
-         HYPRE_Int, sycl::memory_order::relaxed,
-         sycl::memory_scope::device,
-         sycl::access::address_space::generic_space>(HashKeys[j]);
+      auto v = sycl::atomic_ref <
+               HYPRE_Int, sycl::memory_order::relaxed,
+               sycl::memory_scope::device,
+               sycl::access::address_space::generic_space > (HashKeys[j]);
       HYPRE_Int minus_one = -1;
       v.compare_exchange_strong(minus_one, key);
       HYPRE_Int old = v.load();
