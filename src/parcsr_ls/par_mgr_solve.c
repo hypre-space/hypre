@@ -352,7 +352,8 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
 
    /* (Re)set local_size for Vtemp */
    local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[0]));
-   hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)) = local_size;
+   hypre_ParVectorSetLocalSize(Vtemp, local_size);
+
    /* smoother on finest level:
     * This is separated from subsequent levels since the finest level matrix
     * may be larger than what is needed for the vcycle solve
@@ -425,6 +426,11 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
          /* update level */
          ++level;
 
+         /* Update scratch vector sizes */
+         local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
+         hypre_ParVectorSetLocalSize(Vtemp, local_size);
+         hypre_ParVectorSetLocalSize(Ztemp, local_size);
+
          CF_marker = NULL;
          if (CF_marker_array[level])
          {
@@ -439,8 +445,6 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
          }
          else
          {
-            local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
-            hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)) = local_size;
             Aux_F = F_array[level];
             Aux_U = U_array[level];
             /* relax and visit next coarse grid */
@@ -472,8 +476,6 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
          else
          {
             // solve with relaxation
-            local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
-            hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)) = local_size;
             Aux_F = F_array[level];
             Aux_U = U_array[level];
             for (j = 0; j < num_sweeps; j++)
@@ -515,9 +517,10 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
          cycle_param = 2;
          if (level == 0) { cycle_param = 99; }
 
-         // reset vtemp size
+         /* Update scratch vector sizes */
          local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
-         hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)) = local_size;
+         hypre_ParVectorSetLocalSize(Vtemp, local_size);
+         hypre_ParVectorSetLocalSize(Ztemp, local_size);
          //hypre_printf("Vcycle smoother (up cycle): vtemp size = %d, level = %d \n", hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)), level);
       }
       else
@@ -538,6 +541,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    MPI_Comm          comm;
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
+   HYPRE_Int       local_size;
    HYPRE_Int       Solve_err_flag;
    HYPRE_Int       level;
    HYPRE_Int       coarse_grid;
@@ -614,6 +618,12 @@ hypre_MGRCycle( void               *mgr_vdata,
    /***** Main loop ******/
    while (Not_Finished)
    {
+      /* Update scratch vector sizes */
+      local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
+      hypre_ParVectorSetLocalSize(Vtemp, local_size);
+      hypre_ParVectorSetLocalSize(Ztemp, local_size);
+      hypre_ParVectorSetLocalSize(Utemp, local_size);
+
       /* Do coarse grid correction solve */
       if (cycle_type == 3)
       {
@@ -787,7 +797,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
                                                   U_array[level], 1.0, F_array[level], Vtemp);
 
-               resnorm = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+               resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
                init_resnorm = resnorm;
                rhs_norm = sqrt(hypre_ParVectorInnerProd(F_array[level], F_array[level]));
 
@@ -824,7 +834,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   old_resnorm = resnorm;
                   hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
                                                      U_array[level], 1.0, F_array[level], Vtemp);
-                  resnorm = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+                  resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
 
                   if (old_resnorm) { conv_factor = resnorm / old_resnorm; }
                   else { conv_factor = resnorm; }

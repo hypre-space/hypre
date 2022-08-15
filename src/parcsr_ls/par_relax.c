@@ -1109,8 +1109,12 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    hypre_Vector    l1_norms_vec;
    hypre_ParVector l1_norms_parvec;
 
+   hypre_VectorNumVectors(&l1_norms_vec) = 1;
+   hypre_VectorMultiVecStorageMethod(&l1_norms_vec) = 0;
+   hypre_VectorOwnsData(&l1_norms_vec) = 0;
    hypre_VectorData(&l1_norms_vec) = l1_norms;
    hypre_VectorSize(&l1_norms_vec) = num_rows;
+
    /* TODO XXX
     * The next line is NOT 100% correct, which should be the memory location of l1_norms instead of f
     * But how do I know it? As said, don't use raw pointers, don't use raw pointers!
@@ -1725,4 +1729,3 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-

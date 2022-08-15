@@ -39,6 +39,8 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpTransUseVendor(data) = 1;
 #else
    hypre_DeviceDataSpgemmUseVendor(data)  = 0;
+   hypre_DeviceDataSpMVUseVendor(data)    = 0;
+   hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
    /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
 #if defined(HYPRE_USING_CUDA)
@@ -565,6 +567,101 @@ hypreDevice_IVAXPYMarked( HYPRE_Int      n,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_IVAXPYMarked, gDim, bDim, n, a, x, y, marker, marker_val );
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_IVAMXPMY
+ *
+ * Device kernel for hypreDevice_IVAMXPMY. The template argument MM tells
+ * the maximum number of vectors in the unrolled loop
+ *--------------------------------------------------------------------------*/
+
+template <HYPRE_Int MM>
+__global__ void
+hypreGPUKernel_IVAMXPMY( hypre_DeviceItem &item,
+                         HYPRE_Int         m,
+                         HYPRE_Int         n,
+                         HYPRE_Complex    *a,
+                         HYPRE_Complex    *x,
+                         HYPRE_Complex    *y)
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      HYPRE_Complex val = 1.0 / a[i];
+      if (MM > 0)
+      {
+#pragma unroll
+         for (HYPRE_Int j = 0; j < MM; j++)
+         {
+            y[i + j * n] += x[i + j * n] * val;
+         }
+      }
+      else
+      {
+         /* Generic case */
+         for (HYPRE_Int j = 0; j < m; j++)
+         {
+            y[i + j * n] += x[i + j * n] * val;
+         }
+      }
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * hypreDevice_IVAMXPMY
+ *
+ * Inverse Vector AXPY for m vectors x and y of size n stored column-wise:
+ *
+ *   y[i +       0] += x[i +       0] / a[i]
+ *   y[i +       n] += x[i +       n] / a[i]
+ *     ...           ...
+ *   y[i + (m-1)*n] += x[i + (m-1)*n] / a[i]
+ *
+ * Note: does not work for row-wise multivectors
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_IVAMXPMY( HYPRE_Int       m,
+                      HYPRE_Int       n,
+                      HYPRE_Complex  *a,
+                      HYPRE_Complex  *x,
+                      HYPRE_Complex  *y)
+{
+   /* trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   switch (m)
+   {
+      case 1:
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_IVAXPY, gDim, bDim, n, a, x, y );
+         break;
+
+      case 2:
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_IVAMXPMY<2>, gDim, bDim, m, n, a, x, y );
+         break;
+
+      case 3:
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_IVAMXPMY<3>, gDim, bDim, m, n, a, x, y );
+         break;
+
+      case 4:
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_IVAMXPMY<4>, gDim, bDim, m, n, a, x, y );
+         break;
+
+      default:
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_IVAMXPMY<0>, gDim, bDim, m, n, a, x, y );
+         break;
+   }
 
    return hypre_error_flag;
 }
@@ -1660,7 +1757,9 @@ hypreDevice_Filln(T *d_x, size_t n, T v)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
+hypreDevice_ComplexFilln( HYPRE_Complex *d_x,
+                          size_t         n,
+                          HYPRE_Complex  v )
 {
    return hypreDevice_Filln(d_x, n, v);
 }
@@ -1670,7 +1769,9 @@ hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_CharFilln(char *d_x, size_t n, char v)
+hypreDevice_CharFilln( char   *d_x,
+                       size_t  n,
+                       char    v )
 {
    return hypreDevice_Filln(d_x, n, v);
 }
@@ -1680,7 +1781,9 @@ hypreDevice_CharFilln(char *d_x, size_t n, char v)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v)
+hypreDevice_IntFilln( HYPRE_Int *d_x,
+                      size_t     n,
+                      HYPRE_Int  v )
 {
    return hypreDevice_Filln(d_x, n, v);
 }
@@ -1690,7 +1793,9 @@ hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v)
+hypreDevice_BigIntFilln( HYPRE_BigInt *d_x,
+                         size_t        n,
+                         HYPRE_BigInt  v)
 {
    return hypreDevice_Filln(d_x, n, v);
 }
@@ -1866,6 +1971,69 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
                            HYPRE_Complex  v )
 {
    return hypreDevice_Scalen(d_x, n, d_y, v);
+}
+
+/*--------------------------------------------------------------------
+ * hypreGPUKernel_StridedCopy
+ *--------------------------------------------------------------------*/
+
+template<typename T>
+__global__ void
+hypreGPUKernel_StridedCopy(hypre_DeviceItem &item,
+                           HYPRE_Int         size,
+                           HYPRE_Int         stride,
+                           T                *in,
+                           T                *out )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < size)
+   {
+      out[i] = in[i * stride];
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_StridedCopy
+ *--------------------------------------------------------------------*/
+
+template<typename T>
+HYPRE_Int
+hypreDevice_StridedCopy( HYPRE_Int  size,
+                         HYPRE_Int  stride,
+                         T         *in,
+                         T         *out )
+{
+   if (size < 1 || stride < 1)
+   {
+      return hypre_error_flag;
+   }
+
+   if (in == out)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Cannot perform in-place strided copy");
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_StridedCopy, gDim, bDim, size, stride, in, out );
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_IntStridedCopy
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_IntStridedCopy( HYPRE_Int  size,
+                            HYPRE_Int  stride,
+                            HYPRE_Int *in,
+                            HYPRE_Int *out )
+{
+   return hypreDevice_StridedCopy(size, stride, in, out);
 }
 
 /*--------------------------------------------------------------------
