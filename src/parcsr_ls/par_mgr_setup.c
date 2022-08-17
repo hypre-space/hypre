@@ -1240,14 +1240,13 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             F_marker_data[j] = -CF_marker[j];
          }
-         HYPRE_BigInt *num_fpts_global;
+         HYPRE_BigInt num_fpts_global[2];
          hypre_ParCSRMatrix *P_FF_ptr;
          hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, F_marker, NULL, num_fpts_global);
          hypre_MGRBuildPDevice(A_array[lev], F_marker_data, num_fpts_global, 0, &P_FF_ptr);
          P_FF_array[lev] = P_FF_ptr;
 
          hypre_IntArrayDestroy(F_marker);
-         hypre_TFree(num_fpts_global, HYPRE_MEMORY_HOST);
 #endif
          F_fine_array[lev + 1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
