@@ -78,6 +78,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
    else
    {
+      hypre_printf("WM: debug - WARNING: USING CUSTOM SPGEMM\n");
       d_a  = hypre_CSRMatrixPatternOnly(A) ? NULL : d_a;
       d_b  = hypre_CSRMatrixPatternOnly(B) ? NULL : d_b;
 

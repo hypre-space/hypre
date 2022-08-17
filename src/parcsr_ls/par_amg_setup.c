@@ -1134,6 +1134,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**** Do the appropriate coarsening ****/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarsening");
+         hypre_printf("WM: debug - coarsning\n");
 
          if (nodal == 0) /* no nodal coarsening */
          {
@@ -1594,6 +1595,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
+         hypre_printf("WM: debug - interpolation\n");
 
          if (level < agg_num_levels)
          {
@@ -2504,27 +2506,31 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_Vector *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
                   hypre_TFree(hypre_VectorData(Vtemp_local), memory_location);
                   hypre_VectorSize(Vtemp_local) = local_P_sz;
-                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors, memory_location);
+                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                memory_location);
                   if (Ztemp)
                   {
                      hypre_Vector *Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
                      hypre_TFree(hypre_VectorData(Ztemp_local), memory_location);
                      hypre_VectorSize(Ztemp_local) = local_P_sz;
-                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors, memory_location);
+                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                   memory_location);
                   }
                   if (Ptemp)
                   {
                      hypre_Vector *Ptemp_local = hypre_ParVectorLocalVector(Ptemp);
                      hypre_TFree(hypre_VectorData(Ptemp_local), memory_location);
                      hypre_VectorSize(Ptemp_local) = local_P_sz;
-                     hypre_VectorData(Ptemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors, memory_location);
+                     hypre_VectorData(Ptemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                   memory_location);
                   }
                   if (Rtemp)
                   {
                      hypre_Vector *Rtemp_local = hypre_ParVectorLocalVector(Rtemp);
                      hypre_TFree(hypre_VectorData(Rtemp_local), memory_location);
                      hypre_VectorSize(Rtemp_local) = local_P_sz;
-                     hypre_VectorData(Rtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors, memory_location);
+                     hypre_VectorData(Rtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                   memory_location);
                   }
                }
                /*if (hypre_ParCSRMatrixGlobalNumRows(A_array[0]) < hypre_ParCSRMatrixGlobalNumCols(P))
@@ -2613,6 +2619,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
+            hypre_printf("WM: debug - rap\n");
             if (ns == 1)
             {
                hypre_ParCSRMatrix *Q = NULL;
@@ -2812,6 +2819,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
 
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
+      hypre_printf("WM: debug - rap\n");
       if (debug_flag == 1) { wall_time = time_getWallclockSeconds(); }
 
       if (block_mode)

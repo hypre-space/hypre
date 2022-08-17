@@ -623,6 +623,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                hypre_ParCSRMatrix *P,
                                HYPRE_Int           keep_transpose )
 {
+   hypre_printf("WM: debug - inside hypre_ParCSRMatrixRAPKTDevice()\n");
    hypre_CSRMatrix *R_diag = hypre_ParCSRMatrixDiag(R);
    hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(R);
 
@@ -851,6 +852,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_SyncComputeStream(hypre_handle());
 
+   hypre_printf("WM: debug - finished hypre_ParCSRMatrixRAPKTDevice()\n");
    return C;
 }
 
@@ -940,12 +942,16 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      &num_cols_offd_C, &col_map_offd_C, &map_offd_to_C);
 
 #if defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
-                         col_map_offd_C,
-                         col_map_offd_C + num_cols_offd_C,
-                         big_work,
-                         big_work + Cext_offd_nnz,
-                         oneapi::dpl::make_permutation_iterator(hypre_CSRMatrixJ(Cext), work) );
+      /* WM: lower_bound does not accept zero length values */
+      if (Cext_offd_nnz > 0)
+      {
+         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                            col_map_offd_C,
+                            col_map_offd_C + num_cols_offd_C,
+                            big_work,
+                            big_work + Cext_offd_nnz,
+                            oneapi::dpl::make_permutation_iterator(hypre_CSRMatrixJ(Cext), work) );
+      }
 
       HYPRE_ONEDPL_CALL( std::transform,
                          oneapi::dpl::make_permutation_iterator(hypre_CSRMatrixJ(Cext), work),
