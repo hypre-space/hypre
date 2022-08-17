@@ -68,6 +68,7 @@
    }                                                                                      \
 }
 
+// VPM: TODO - extend this to SYCL
 #define HYPRE_SPMV_GPU_LAUNCH(nv)                                                         \
    if (avg_rownnz >= 64)                                                                  \
    {                                                                                      \
