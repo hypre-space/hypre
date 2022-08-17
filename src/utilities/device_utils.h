@@ -890,9 +890,34 @@ hypre_int warp_any_sync(hypre_DeviceItem &item, unsigned mask, hypre_int predica
 
 template <typename T>
 static __device__ __forceinline__
-T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line,
+                    hypre_int width = HYPRE_WARP_SIZE)
 {
    return __shfl_sync(mask, val, src_line);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
+                       hypre_int width = HYPRE_WARP_SIZE)
+{
+   return __shfl_up_sync(mask, val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
+                         hypre_int width = HYPRE_WARP_SIZE)
+{
+   return __shfl_down_sync(mask, val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask,
+                        hypre_int width = HYPRE_WARP_SIZE)
+{
+   return __shfl_xor_sync(mask, val, lane_mask, width);
 }
 
 template <typename T>
