@@ -115,6 +115,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
 
    // VPM: offset > 0 does not work with multivectors. Remove offset? See comment above
    hypre_assert(!(offset != 0 && num_vectors > 1));
+   hypre_assert(num_vectors > 0);
 
    HYPRE_Int nx = trans ? hypre_CSRMatrixNumRows(A) : hypre_CSRMatrixNumCols(A);
    HYPRE_Int ny = trans ? hypre_CSRMatrixNumCols(A) : hypre_CSRMatrixNumRows(A);
