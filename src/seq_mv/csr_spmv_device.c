@@ -184,7 +184,6 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  nrows,
                              T          beta,
                              T         *d_y )
 {
-   hypre_printf("WM: debug - WARNING: USING hypreDevice_CSRMatrixMatvec()\n");
    const HYPRE_Int rownnz = (nnz + nrows - 1) / nrows;
 #if defined(HYPRE_USING_SYCL)
    const dim3 bDim(1, 1, SPMV_BLOCKDIM);
@@ -268,7 +267,6 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
                            hypre_Vector    *y,
                            HYPRE_Int        fill )
 {
-   hypre_printf("WM: debug - WARNING: USING hypre_CSRMatrixSpMVDevice()\n");
    HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(B);
 
    if (nnz <= 0 || alpha == 0.0)

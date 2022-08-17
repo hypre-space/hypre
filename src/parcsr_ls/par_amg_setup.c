@@ -1134,7 +1134,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          /**** Do the appropriate coarsening ****/
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarsening");
-         hypre_printf("WM: debug - coarsning\n");
 
          if (nodal == 0) /* no nodal coarsening */
          {
@@ -1595,7 +1594,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-         hypre_printf("WM: debug - interpolation\n");
 
          if (level < agg_num_levels)
          {
@@ -2619,7 +2617,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-            hypre_printf("WM: debug - rap\n");
             if (ns == 1)
             {
                hypre_ParCSRMatrix *Q = NULL;
@@ -2819,7 +2816,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
 
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
-      hypre_printf("WM: debug - rap\n");
       if (debug_flag == 1) { wall_time = time_getWallclockSeconds(); }
 
       if (block_mode)

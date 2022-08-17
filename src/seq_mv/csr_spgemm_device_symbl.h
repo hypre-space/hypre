@@ -587,7 +587,7 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #endif
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: TODO - sycl version of the above? */
+   /* WM: todo - sycl version of the above? */
 #endif
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;

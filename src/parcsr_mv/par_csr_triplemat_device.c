@@ -623,7 +623,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                hypre_ParCSRMatrix *P,
                                HYPRE_Int           keep_transpose )
 {
-   hypre_printf("WM: debug - inside hypre_ParCSRMatrixRAPKTDevice()\n");
    hypre_CSRMatrix *R_diag = hypre_ParCSRMatrixDiag(R);
    hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(R);
 
@@ -852,7 +851,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_SyncComputeStream(hypre_handle());
 
-   hypre_printf("WM: debug - finished hypre_ParCSRMatrixRAPKTDevice()\n");
    return C;
 }
 
