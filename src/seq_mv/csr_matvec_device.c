@@ -57,6 +57,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    /* Local variables */
    HYPRE_Int  use_vendor;
 
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
    /* Force use of hypre's SpMV for row-wise multivectors */
    if ((num_vectors_x > 1 && multivec_storage_x == 1) ||
        (num_vectors_y > 1 && multivec_storage_y == 1))
@@ -67,6 +68,13 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    {
       use_vendor = hypre_HandleSpMVUseVendor(hypre_handle());
    }
+#else
+   /* TODO - enable cuda 10, rocsparse, and onemkle sparse support for multi-vectors */
+   if(num_vectors_x > 1 || num_vectors_y > 1)
+   {
+      use_vendor = 0;
+   }
+#endif
 
    if (use_vendor)
    {
@@ -81,9 +89,9 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
 #endif
    }
    else
-#endif
+#endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) ||defined(HYPRE_USING_SYCL)
       hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)

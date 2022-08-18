@@ -51,9 +51,9 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
                                 T                *d_y )
 {
 #if defined (HYPRE_USING_SYCL)
-   const HYPRE_Int  grid_ngroups  = item.get_group_range(2) * (HYPRE_SPMV_BLOCKDIM / K);
-   HYPRE_Int        grid_group_id = (item.get_group(2) * HYPRE_SPMV_BLOCKDIM + item.get_local_id(2)) / K;
-   const HYPRE_Int  group_lane    = item.get_local_id(2) & (K - 1);
+   const HYPRE_Int  grid_ngroups  = item.get_group_range(0) * (HYPRE_SPMV_BLOCKDIM / K);
+   HYPRE_Int        grid_group_id = (item.get_group(0) * HYPRE_SPMV_BLOCKDIM + item.get_local_id(0)) / K;
+   const HYPRE_Int  group_lane    = item.get_local_id(0) & (K - 1);
 #else
    const HYPRE_Int  grid_ngroups  = gridDim.x * (HYPRE_SPMV_BLOCKDIM / K);
    HYPRE_Int        grid_group_id = (blockIdx.x * HYPRE_SPMV_BLOCKDIM + threadIdx.x) / K;
@@ -181,11 +181,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
                              T         *d_y )
 {
    const HYPRE_Int avg_rownnz = (num_nonzeros + nrows - 1) / nrows;
-#if defined(HYPRE_USING_SYCL)
-   const dim3 bDim(1, 1, HYPRE_SPMV_BLOCKDIM);
-#else
    const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
-#endif
 
    /* Note: cannot transform this into a loop because num_vectors is a template argument */
    switch (num_vectors)
