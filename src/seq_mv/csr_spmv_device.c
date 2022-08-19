@@ -345,39 +345,99 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    /* Choose matrix fill mode */
    switch (fill)
    {
-      case -2:
+      case HYPRE_SPMV_FILL_STRICT_LOWER:
          /* Strict lower matrix */
-         hypreDevice_CSRMatrixMatvec<-2>(num_vectors_x, num_rows, d_rownnz_A, num_nonzeros,
-                                         idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                                         alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_STRICT_LOWER>(num_vectors_x,
+                                                                   num_rows,
+                                                                   d_rownnz_A,
+                                                                   num_nonzeros,
+                                                                   idxstride_x,
+                                                                   idxstride_y,
+                                                                   vecstride_x,
+                                                                   vecstride_y,
+                                                                   alpha,
+                                                                   d_ia,
+                                                                   d_ja,
+                                                                   d_a,
+                                                                   d_x,
+                                                                   beta,
+                                                                   d_y);
          break;
 
-      case -1:
+      case HYPRE_SPMV_FILL_LOWER:
          /* Lower matrix */
-         hypreDevice_CSRMatrixMatvec<-1>(num_vectors_x, num_rows, d_rownnz_A, num_nonzeros,
-                                         idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                                         alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_LOWER>(num_vectors_x,
+                                                            num_rows,
+                                                            d_rownnz_A,
+                                                            num_nonzeros,
+                                                            idxstride_x,
+                                                            idxstride_y,
+                                                            vecstride_x,
+                                                            vecstride_y,
+                                                            alpha,
+                                                            d_ia,
+                                                            d_ja,
+                                                            d_a,
+                                                            d_x,
+                                                            beta,
+                                                            d_y);
          break;
 
-      case 0:
-         /* Whole matrix */
-         hypreDevice_CSRMatrixMatvec<0>(num_vectors_x, num_rows, d_rownnz_A, num_nonzeros,
-                                        idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                                        alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+      case HYPRE_SPMV_FILL_WHOLE:
+         /* Full matrix */
+         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_WHOLE>(num_vectors_x,
+                                                            num_rows,
+                                                            d_rownnz_A,
+                                                            num_nonzeros,
+                                                            idxstride_x,
+                                                            idxstride_y,
+                                                            vecstride_x,
+                                                            vecstride_y,
+                                                            alpha,
+                                                            d_ia,
+                                                            d_ja,
+                                                            d_a,
+                                                            d_x,
+                                                            beta,
+                                                            d_y);
          break;
 
-      case 1:
+      case HYPRE_SPMV_FILL_UPPER:
          /* Upper matrix */
-         hypreDevice_CSRMatrixMatvec<1>(num_vectors_x, num_rows, d_rownnz_A, num_nonzeros,
-                                        idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                                        alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_UPPER>(num_vectors_x,
+                                                            num_rows,
+                                                            d_rownnz_A,
+                                                            num_nonzeros,
+                                                            idxstride_x,
+                                                            idxstride_y,
+                                                            vecstride_x,
+                                                            vecstride_y,
+                                                            alpha,
+                                                            d_ia,
+                                                            d_ja,
+                                                            d_a,
+                                                            d_x,
+                                                            beta,
+                                                            d_y);
          break;
 
-      case 2:
+      case HYPRE_SPMV_FILL_STRICT_UPPER:
          /* Strict upper matrix */
-         hypreDevice_CSRMatrixMatvec<2>(num_vectors_x, num_rows, d_rownnz_A, num_nonzeros,
-                                        idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                                        alpha, d_ia, d_ja, d_a, d_x, beta, d_y);
+         hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_STRICT_UPPER>(num_vectors_x,
+                                                                   num_rows,
+                                                                   d_rownnz_A,
+                                                                   num_nonzeros,
+                                                                   idxstride_x,
+                                                                   idxstride_y,
+                                                                   vecstride_x,
+                                                                   vecstride_y,
+                                                                   alpha,
+                                                                   d_ia,
+                                                                   d_ja,
+                                                                   d_a,
+                                                                   d_x,
+                                                                   beta,
+                                                                   d_y);
          break;
 
       default:
@@ -421,10 +481,21 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  num_rows,
    HYPRE_Int        vecstride_y = 1;
    HYPRE_Int       *d_rownnz    = NULL;
 
-   hypreDevice_CSRMatrixMatvec<0, HYPRE_Int>(num_vectors, num_rows, d_rownnz, num_nonzeros,
-                                             idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                                             alpha, d_ia, d_ja, d_a,
-                                             d_x, beta, d_y);
+   hypreDevice_CSRMatrixMatvec<HYPRE_SPMV_FILL_WHOLE, HYPRE_Int>(num_vectors,
+                                                                 num_rows,
+                                                                 d_rownnz,
+                                                                 num_nonzeros,
+                                                                 idxstride_x,
+                                                                 idxstride_y,
+                                                                 vecstride_x,
+                                                                 vecstride_y,
+                                                                 alpha,
+                                                                 d_ia,
+                                                                 d_ja,
+                                                                 d_a,
+                                                                 d_x,
+                                                                 beta,
+                                                                 d_y);
 
    return hypre_error_flag;
 }
