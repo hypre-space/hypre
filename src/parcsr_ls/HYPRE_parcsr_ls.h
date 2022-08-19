@@ -1123,28 +1123,28 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
-										 HYPRE_Int     ilu_tri_solve);
+                                         HYPRE_Int     ilu_tri_solve);
 
 /**
  * (Optional) Defines number of lower Jacobi iterations for ILU(k,T) smoother triangular solve.
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
-												 HYPRE_Int     ilu_lower_jacobi_iters);
+                                                 HYPRE_Int     ilu_lower_jacobi_iters);
 
 /**
  * (Optional) Defines number of upper Jacobi iterations for ILU(k,T) smoother triangular solve.
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
-												 HYPRE_Int     ilu_upper_jacobi_iters);
+                                                 HYPRE_Int     ilu_upper_jacobi_iters);
 
 /**
  * Set Local Reordering paramter (1==RCM, 0==None)
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
-												HYPRE_Int    ilu_reordering_type);
+                                                HYPRE_Int    ilu_reordering_type);
 
 /**
  * (Optional) Defines which parallel restriction operator is used.

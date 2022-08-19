@@ -51,9 +51,10 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
                                 T                *d_y )
 {
 #if defined (HYPRE_USING_SYCL)
+   HYPRE_Int        item_local_id = item.get_local_id(0);
    const HYPRE_Int  grid_ngroups  = item.get_group_range(0) * (HYPRE_SPMV_BLOCKDIM / K);
-   HYPRE_Int        grid_group_id = (item.get_group(0) * HYPRE_SPMV_BLOCKDIM + item.get_local_id(0)) / K;
-   const HYPRE_Int  group_lane    = item.get_local_id(0) & (K - 1);
+   HYPRE_Int        grid_group_id = (item.get_group(0) * HYPRE_SPMV_BLOCKDIM + item_local_id) / K;
+   const HYPRE_Int  group_lane    = item_local_id & (K - 1);
 #else
    const HYPRE_Int  grid_ngroups  = gridDim.x * (HYPRE_SPMV_BLOCKDIM / K);
    HYPRE_Int        grid_group_id = (blockIdx.x * HYPRE_SPMV_BLOCKDIM + threadIdx.x) / K;
@@ -61,7 +62,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
 #endif
 
    for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < num_rows);
-          grid_group_id += grid_ngroups)
+        grid_group_id += grid_ngroups)
    {
       HYPRE_Int grid_row_id = -1, p = 0, q = 0;
 

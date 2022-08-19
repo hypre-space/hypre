@@ -31,7 +31,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
    if (idxstride != 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-         "hypre_ParVectorGetValuesDevice not implemented for non-columnwise vector storage\n");
+                        "hypre_ParVectorGetValuesDevice not implemented for non-columnwise vector storage\n");
       return hypre_error_flag;
    }
 

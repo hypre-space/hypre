@@ -1286,9 +1286,9 @@ HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
-                        HYPRE_Int 	     ilu_tri_solve)
+                               HYPRE_Int        ilu_tri_solve)
 {
-   return( hypre_BoomerAMGSetILUTriSolve( (void *) solver, ilu_tri_solve ) );
+   return ( hypre_BoomerAMGSetILUTriSolve( (void *) solver, ilu_tri_solve ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1297,9 +1297,9 @@ HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
-                                       HYPRE_Int 	     ilu_lower_jacobi_iters)
+                                       HYPRE_Int        ilu_lower_jacobi_iters)
 {
-   return( hypre_BoomerAMGSetILULowerJacobiIters( (void *) solver, ilu_lower_jacobi_iters ) );
+   return ( hypre_BoomerAMGSetILULowerJacobiIters( (void *) solver, ilu_lower_jacobi_iters ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1308,9 +1308,9 @@ HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
-                                       HYPRE_Int 	     ilu_upper_jacobi_iters)
+                                       HYPRE_Int        ilu_upper_jacobi_iters)
 {
-   return( hypre_BoomerAMGSetILUUpperJacobiIters( (void *) solver, ilu_upper_jacobi_iters ) );
+   return ( hypre_BoomerAMGSetILUUpperJacobiIters( (void *) solver, ilu_upper_jacobi_iters ) );
 }
 
 /*--------------------------------------------------------------------------

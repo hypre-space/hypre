@@ -70,7 +70,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    }
 #else
    /* TODO - enable cuda 10, rocsparse, and onemkle sparse support for multi-vectors */
-   if(num_vectors_x > 1 || num_vectors_y > 1)
+   if (num_vectors_x > 1 || num_vectors_y > 1)
    {
       use_vendor = 0;
    }
