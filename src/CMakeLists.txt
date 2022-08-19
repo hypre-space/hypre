@@ -105,9 +105,11 @@ set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flag
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
+option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC "Use device async malloc" OFF)
 # CUDA options
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
+option(HYPRE_ENABLE_CUSOLVER         "Use cuSOLVER" OFF)
 option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
@@ -117,6 +119,8 @@ set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
 option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
 option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
 option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
+set(HYPRE_SYCL_TARGET            ""   CACHE STRING  "Target SYCL architecture, e.g. 'spir64_gen'.")
+set(HYPRE_SYCL_TARGET_BACKEND    ""   CACHE STRING  "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
@@ -216,11 +220,6 @@ if (HYPRE_WITH_CUDA)
 
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 
-  # Use ${CMAKE_CXX_COMPILER} as the cuda host compiler.
-  if (NOT CMAKE_CUDA_HOST_COMPILER)
-    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
-  endif ()
-
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
     string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
@@ -230,6 +229,12 @@ if (HYPRE_WITH_CUDA)
   # Check if CUDA is available, then enable it
   include(CheckLanguage)
   check_language(CUDA)
+
+  # Use ${CMAKE_CXX_COMPILER} as the cuda host compiler.
+  if (NOT CMAKE_CUDA_HOST_COMPILER)
+    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
+  endif ()
+
   if (CMAKE_CUDA_COMPILER)
 
     enable_language(CUDA)
@@ -240,6 +245,10 @@ if (HYPRE_WITH_CUDA)
     endif ()
 
     set(CMAKE_CUDA_STANDARD_REQUIRED ON CACHE BOOL "" FORCE)
+
+    if (HYPRE_ENABLE_DEVICE_MALLOC_ASYNC)
+      set(HYPRE_USING_DEVICE_MALLOC_ASYNC ON CACHE BOOL "" FORCE)
+    endif ()
 
     set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
     set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
@@ -302,6 +311,12 @@ if (HYPRE_WITH_SYCL)
   # Set CXX compiler to dpcpp
   set(CMAKE_CXX_COMPILER "dpcpp")
 
+  # Set linker to dpcpp
+  set(CMAKE_LINKER "dpcpp")
+  set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
+  set(CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
+  set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP " ")
+
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
     string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
@@ -327,6 +342,13 @@ if (HYPRE_WITH_SYCL)
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
+
+  if (HYPRE_SYCL_TARGET)
+    add_link_options("SHELL:-fsycl-targets=${HYPRE_SYCL_TARGET}")
+  endif ()
+  if (HYPRE_SYCL_TARGET_BACKEND)
+    add_link_options("SHELL:-Xsycl-target-backend '${HYPRE_SYCL_TARGET_BACKEND}'")
+  endif ()
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
@@ -430,6 +452,7 @@ if (HYPRE_USING_CUDA)
 endif ()
 
 if (HYPRE_USING_SYCL)
+  target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
   if (HYPRE_ENABLE_ONEMKLSPARSE)
     set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
   endif()

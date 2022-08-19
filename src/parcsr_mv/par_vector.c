@@ -112,7 +112,9 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorInitialize
+ * hypre_ParVectorInitialize_v2
+ *
+ * Initialize a hypre_ParVector at a given memory location
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -130,10 +132,32 @@ hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memo
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorInitialize
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParVectorInitialize( hypre_ParVector *vector )
 {
    return hypre_ParVectorInitialize_v2(vector, hypre_ParVectorMemoryLocation(vector));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorSetComponent
+ *
+ * Set the identifier of the active component of a hypre_ParVector for the
+ * purpose of Set/AddTo/Get values functions.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetComponent( hypre_ParVector *vector,
+                             HYPRE_Int        component )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_VectorComponent(local_vector) = component;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -150,6 +174,21 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
       return hypre_error_flag;
    }
    hypre_ParVectorOwnsData(vector) = owns_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorSetLocalSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector,
+                             HYPRE_Int        local_size )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_SeqVectorSetSize(local_vector, local_size);
 
    return hypre_error_flag;
 }
@@ -181,7 +220,7 @@ hypre_ParVector*
 hypre_ParVectorRead( MPI_Comm    comm,
                      const char *file_name )
 {
-   char             new_file_name[80];
+   char             new_file_name[256];
    hypre_ParVector *par_vector;
    HYPRE_Int        my_id;
    HYPRE_BigInt     partitioning[2];
@@ -226,7 +265,7 @@ HYPRE_Int
 hypre_ParVectorPrint( hypre_ParVector  *vector,
                       const char       *file_name )
 {
-   char          new_file_name[80];
+   char          new_file_name[256];
    hypre_Vector *local_vector;
    MPI_Comm      comm;
    HYPRE_Int     my_id;
@@ -1011,14 +1050,21 @@ hypre_FillResponseParToVectorAll( void       *p_recv_contact_buf,
    return hypre_error_flag;
 }
 
-/* -----------------------------------------------------------------------------
- * return the sum of all local elements of the vector
- * ----------------------------------------------------------------------------- */
+/*--------------------------------------------------------------------
+ * hypre_ParVectorLocalSumElts
+ *
+ * Return the sum of all local elements of the vector
+ *--------------------------------------------------------------------*/
 
-HYPRE_Complex hypre_ParVectorLocalSumElts( hypre_ParVector * vector )
+HYPRE_Complex
+hypre_ParVectorLocalSumElts( hypre_ParVector *vector )
 {
    return hypre_SeqVectorSumElts( hypre_ParVectorLocalVector(vector) );
 }
+
+/*--------------------------------------------------------------------
+ * hypre_ParVectorGetValuesHost
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
@@ -1027,19 +1073,17 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
                              HYPRE_BigInt     base,
                              HYPRE_Complex   *values)
 {
-   HYPRE_Int     i, ierr = 0;
-   HYPRE_BigInt  first_index = hypre_ParVectorFirstIndex(vector);
-   HYPRE_BigInt  last_index = hypre_ParVectorLastIndex(vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
-   HYPRE_Complex *data = hypre_VectorData(local_vector);
+   HYPRE_BigInt    first_index  = hypre_ParVectorFirstIndex(vector);
+   HYPRE_BigInt    last_index   = hypre_ParVectorLastIndex(vector);
+   hypre_Vector   *local_vector = hypre_ParVectorLocalVector(vector);
 
-   /*
-   if (hypre_VectorOwnsData(local_vector) == 0)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Vector does not own data! -- hypre_ParVectorGetValues.");
-      return hypre_error_flag;
-   }
-   */
+   HYPRE_Int       component    = hypre_VectorComponent(local_vector);
+   HYPRE_Int       vecstride    = hypre_VectorVectorStride(local_vector);
+   HYPRE_Int       idxstride    = hypre_VectorIndexStride(local_vector);
+   HYPRE_Complex  *data         = hypre_VectorData(local_vector);
+   HYPRE_Int       vecoffset    = component * vecstride;
+
+   HYPRE_Int       i, ierr = 0;
 
    if (indices)
    {
@@ -1051,12 +1095,12 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
          HYPRE_BigInt index = indices[i] - base;
          if (index < first_index || index > last_index)
          {
-            ierr ++;
+            ierr++;
          }
          else
          {
             HYPRE_Int local_index = (HYPRE_Int) (index - first_index);
-            values[i] = data[local_index];
+            values[i] = data[vecoffset + local_index * idxstride];
          }
       }
 
@@ -1080,12 +1124,16 @@ hypre_ParVectorGetValuesHost(hypre_ParVector *vector,
 #endif
       for (i = 0; i < num_values; i++)
       {
-         values[i] = data[i];
+         values[i] = data[vecoffset + i * idxstride];
       }
    }
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_ParVectorGetValues2
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorGetValues2(hypre_ParVector *vector,
@@ -1107,6 +1155,10 @@ hypre_ParVectorGetValues2(hypre_ParVector *vector,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_ParVectorGetValues
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorGetValues(hypre_ParVector *vector,

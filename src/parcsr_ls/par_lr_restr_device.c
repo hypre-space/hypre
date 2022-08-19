@@ -10,7 +10,8 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int nr_of_rows,
+__global__ void hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_DeviceItem &item,
+                                                                   HYPRE_Int nr_of_rows,
                                                                    HYPRE_Int *Fmap, HYPRE_Int *Cmap, HYPRE_Int *Z_diag_i, HYPRE_Int *Z_diag_j, HYPRE_Complex *Z_diag_a,
                                                                    HYPRE_Int *R_diag_i, HYPRE_Int *R_diag_j, HYPRE_Complex *R_diag_a);
 
@@ -316,7 +317,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
 
 /*-----------------------------------------------------------------------*/
 __global__ void
-hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
+hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_DeviceItem    &item,
+                                                   HYPRE_Int      nr_of_rows,
                                                    HYPRE_Int     *Fmap,
                                                    HYPRE_Int     *Cmap,
                                                    HYPRE_Int     *Z_diag_i,
@@ -337,28 +339,28 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( HYPRE_Int      nr_of_rows,
     */
    /*-----------------------------------------------------------------------*/
 
-   HYPRE_Int i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (i >= nr_of_rows)
    {
       return;
    }
 
-   HYPRE_Int p, q, pZ;
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int p = 0, q, pZ = 0;
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
 
    /* diag part */
    if (lane < 2)
    {
       p = read_only_load(R_diag_i + i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
    if (lane < 1)
    {
       pZ = read_only_load(Z_diag_i + i + lane);
    }
-   pZ = __shfl_sync(HYPRE_WARP_FULL_MASK, pZ, 0);
+   pZ = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pZ, 0);
 
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {

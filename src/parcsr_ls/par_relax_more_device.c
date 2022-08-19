@@ -22,7 +22,8 @@
  * to be used for the MaxEigEstimate
  */
 __global__ void
-hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
+hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
+                                  HYPRE_Int      nrows,
                                   HYPRE_Int     *diag_ia,
                                   HYPRE_Int     *diag_ja,
                                   HYPRE_Complex *diag_aa,
@@ -33,15 +34,15 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
                                   HYPRE_Complex *row_sum_upper,
                                   HYPRE_Int      scale)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p, q;
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0, q;
 
    HYPRE_Complex diag_value = 0.0;
    HYPRE_Complex row_sum_i  = 0.0;
@@ -51,16 +52,11 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    {
       p = read_only_load(diag_ia + row_i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j >= q)
-      {
-         continue;
-      }
-
       HYPRE_Complex aij = read_only_load(&diag_aa[j]);
       if ( read_only_load(&diag_ja[j]) == row_i )
       {
@@ -76,24 +72,19 @@ hypreCUDAKernel_CSRMaxEigEstimate(HYPRE_Int      nrows,
    {
       p = read_only_load(offd_ia + row_i + lane);
    }
-   q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-   p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
 
-   for (HYPRE_Int j = p + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
-      if (j >= q)
-      {
-         continue;
-      }
-
       HYPRE_Complex aij = read_only_load(&offd_aa[j]);
       row_sum_i += fabs(aij);
    }
 
    // Get the row_sum and diagonal value on lane 0
-   row_sum_i = warp_reduce_sum(row_sum_i);
+   row_sum_i = warp_reduce_sum(item, row_sum_i);
 
-   diag_value = warp_reduce_sum(diag_value);
+   diag_value = warp_reduce_sum(item, diag_value);
 
    if (lane == 0)
    {

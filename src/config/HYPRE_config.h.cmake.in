@@ -31,6 +31,9 @@
 /* Use complex values */
 #cmakedefine HYPRE_COMPLEX 1
 
+/* Use cudaMallocAsync */
+#cmakedefine HYPRE_USING_DEVICE_MALLOC_ASYNC 1
+
 /* Debug mode */
 #cmakedefine HYPRE_DEBUG 1
 
@@ -81,6 +84,9 @@
 
 /* Use cuSPARSE */
 #cmakedefine HYPRE_USING_CUSPARSE 1
+
+/* Use cuSOLVER */
+#cmakedefine HYPRE_USING_CUSOLVER 1
 
 /* Use device memory pool */
 #cmakedefine HYPRE_USING_DEVICE_POOL 1

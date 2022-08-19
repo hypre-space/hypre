@@ -134,7 +134,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #define hypre_device_assert(EX) assert(EX)
 #elif defined(HYPRE_USING_HIP)
 /* FIXME: Currently, asserts in device kernels in HIP do not behave well */
-#define hypre_device_assert(EX)
+#define hypre_device_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
 #endif
 #else /* #ifdef HYPRE_DEBUG */
 /* this is to silence compiler's unused variable warnings */
@@ -1353,6 +1353,7 @@ typedef struct
 #define hypre_HandleCubUvmAllocator(hypre_handle)                hypre_DeviceDataCubUvmAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDevice(hypre_handle)                         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxWorkGroupSize(hypre_handle)         hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStreamNum(hypre_handle)               hypre_DeviceDataComputeStreamNum(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleReduceBuffer(hypre_handle)                   hypre_DeviceDataReduceBuffer(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_DeviceDataStructCommRecvBuffer(hypre_HandleDeviceData(hypre_handle))
@@ -1363,10 +1364,13 @@ typedef struct
 #define hypre_HandleSpMVUseVendor(hypre_handle)                  hypre_DeviceDataSpMVUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseVendor(hypre_handle)               hypre_DeviceDataSpTransUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmBinned(hypre_handle)                   hypre_DeviceDataSpgemmBinned(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmNumBin(hypre_handle)                   hypre_DeviceDataSpgemmNumBin(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmHighestBin(hypre_handle)               hypre_DeviceDataSpgemmHighestBin(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpgemmBlockNumDim(hypre_handle)              hypre_DeviceDataSpgemmBlockNumDim(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_DeviceDataSpgemmRownnzEstimateMethod(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_DeviceDataSpgemmRownnzEstimateMultFactor(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleSpgemmHashType(hypre_handle)                 hypre_DeviceDataSpgemmHashType(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceAllocator(hypre_handle)                hypre_DeviceDataDeviceAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_DeviceDataUseGpuRand(hypre_HandleDeviceData(hypre_handle))
 
@@ -1757,8 +1761,8 @@ typedef struct
  * 1) Merge sort can take advantage of eliminating duplicates.
  * 2) Merge sort is more efficiently parallelizable than qsort
  */
-HYPRE_Int hypre_MergeOrderedArrays( HYPRE_Int size1, HYPRE_Int *array1, HYPRE_Int size2,
-                                    HYPRE_Int *array2, HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr);
+HYPRE_Int hypre_IntArrayMergeOrdered( hypre_IntArray *array1, hypre_IntArray *array2,
+                                      hypre_IntArray *array3 );
 void hypre_union2(HYPRE_Int n1, HYPRE_BigInt *arr1, HYPRE_Int n2, HYPRE_BigInt *arr2, HYPRE_Int *n3,
                   HYPRE_BigInt *arr3, HYPRE_Int *map1, HYPRE_Int *map2);
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
@@ -1781,10 +1785,13 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Comple
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
+HYPRE_Int hypreDevice_IVAMXPMY(HYPRE_Int m, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IntFilln(HYPRE_Int *d_x, size_t n, HYPRE_Int v);
 HYPRE_Int hypreDevice_BigIntFilln(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt v);
 HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v);
 HYPRE_Int hypreDevice_CharFilln(char *d_x, size_t n, char v);
+HYPRE_Int hypreDevice_IntStridedCopy ( HYPRE_Int size, HYPRE_Int stride,
+                                       HYPRE_Int *in, HYPRE_Int *out );
 HYPRE_Int hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
 HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                     HYPRE_Complex v);
@@ -1792,6 +1799,8 @@ HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *
                                    HYPRE_Complex *d_z, HYPRE_Complex a);
 HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
                                HYPRE_Int a);
+HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
+                                  HYPRE_BigInt *d_z, HYPRE_BigInt a);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);
@@ -1802,9 +1811,12 @@ HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE
                                 HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
 
 HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
-                                     HYPRE_Int has_offd, HYPRE_BigInt first_col, HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
-                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a, HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
-                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib, HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
+                                     HYPRE_Int has_offd, HYPRE_BigInt first_col,
+                                     HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
+                                     HYPRE_Int *d_diag_j, HYPRE_Complex *d_diag_a,
+                                     HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
+                                     HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib,
+                                     HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
 
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
 
@@ -1844,6 +1856,7 @@ HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
+HYPRE_Int hypre_SetSpGemmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
@@ -3159,6 +3172,126 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
 #endif
 
 #endif // hypre_HOPSCOTCH_HASH_HEADER
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/*
+*   Matrix Market I/O library for ANSI C
+*
+*   See http://math.nist.gov/MatrixMarket for details.
+*
+*
+*/
+
+#ifndef MM_IO_H
+#define MM_IO_H
+
+#define MM_MAX_LINE_LENGTH 1025
+#define MatrixMarketBanner "%%MatrixMarket"
+#define MM_MAX_TOKEN_LENGTH 64
+
+typedef char MM_typecode[4];
+
+HYPRE_Int hypre_mm_is_valid(MM_typecode matcode); /* too complex for a macro */
+HYPRE_Int hypre_mm_read_banner(FILE *f, MM_typecode *matcode);
+HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_Int *nz);
+
+/********************* MM_typecode query fucntions ***************************/
+
+#define hypre_mm_is_matrix(typecode)    ((typecode)[0]=='M')
+
+#define hypre_mm_is_sparse(typecode)    ((typecode)[1]=='C')
+#define hypre_mm_is_coordinate(typecode)((typecode)[1]=='C')
+#define hypre_mm_is_dense(typecode)   ((typecode)[1]=='A')
+#define hypre_mm_is_array(typecode)   ((typecode)[1]=='A')
+
+#define hypre_mm_is_complex(typecode) ((typecode)[2]=='C')
+#define hypre_mm_is_real(typecode)    ((typecode)[2]=='R')
+#define hypre_mm_is_pattern(typecode) ((typecode)[2]=='P')
+#define hypre_mm_is_integer(typecode) ((typecode)[2]=='I')
+
+#define hypre_mm_is_symmetric(typecode)((typecode)[3]=='S')
+#define hypre_mm_is_general(typecode) ((typecode)[3]=='G')
+#define hypre_mm_is_skew(typecode) ((typecode)[3]=='K')
+#define hypre_mm_is_hermitian(typecode)((typecode)[3]=='H')
+
+
+
+/********************* MM_typecode modify fucntions ***************************/
+
+#define hypre_mm_set_matrix(typecode) ((*typecode)[0]='M')
+#define hypre_mm_set_coordinate(typecode) ((*typecode)[1]='C')
+#define hypre_mm_set_array(typecode)  ((*typecode)[1]='A')
+#define hypre_mm_set_dense(typecode)  hypre_mm_set_array(typecode)
+#define hypre_mm_set_sparse(typecode) hypre_mm_set_coordinate(typecode)
+
+#define hypre_mm_set_complex(typecode)((*typecode)[2]='C')
+#define hypre_mm_set_real(typecode)   ((*typecode)[2]='R')
+#define hypre_mm_set_pattern(typecode)((*typecode)[2]='P')
+#define hypre_mm_set_integer(typecode)((*typecode)[2]='I')
+
+
+#define hypre_mm_set_symmetric(typecode)((*typecode)[3]='S')
+#define hypre_mm_set_general(typecode)  ((*typecode)[3]='G')
+#define hypre_mm_set_skew(typecode)     ((*typecode)[3]='K')
+#define hypre_mm_set_hermitian(typecode)((*typecode)[3]='H')
+
+#define hypre_mm_clear_typecode(typecode) ((*typecode)[0]=(*typecode)[1]= \
+      (*typecode)[2]=' ',(*typecode)[3]='G')
+
+#define hypre_mm_initialize_typecode(typecode) hypre_mm_clear_typecode(typecode)
+
+
+/********************* Matrix Market error codes ***************************/
+
+
+#define MM_COULD_NOT_READ_FILE  11
+#define MM_PREMATURE_EOF        12
+#define MM_NOT_MTX              13
+#define MM_NO_HEADER            14
+#define MM_UNSUPPORTED_TYPE     15
+#define MM_LINE_TOO_LONG        16
+#define MM_COULD_NOT_WRITE_FILE 17
+
+
+/******************** Matrix Market internal definitions ********************
+
+   MM_matrix_typecode: 4-character sequence
+
+   object sparse/data        storage
+   dense  type        scheme
+
+   string position: [0]        [1] [2]         [3]
+
+   Matrix typecode:  M(atrix)  C(oord) R(eal)   G(eneral)
+   A(array)    C(omplex)   H(ermitian)
+   P(attern)   S(ymmetric)
+   I(nteger)   K(kew)
+
+ ***********************************************************************/
+
+#define MM_MTX_STR        "matrix"
+#define MM_ARRAY_STR      "array"
+#define MM_DENSE_STR      "array"
+#define MM_COORDINATE_STR "coordinate"
+#define MM_SPARSE_STR     "coordinate"
+#define MM_COMPLEX_STR    "complex"
+#define MM_REAL_STR       "real"
+#define MM_INT_STR        "integer"
+#define MM_GENERAL_STR    "general"
+#define MM_SYMM_STR       "symmetric"
+#define MM_HERM_STR       "hermitian"
+#define MM_SKEW_STR       "skew-symmetric"
+#define MM_PATTERN_STR    "pattern"
+
+
+/*  high level routines */
+
+#endif
 
 #ifdef __cplusplus
 }

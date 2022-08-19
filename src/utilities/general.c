@@ -153,6 +153,30 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_int max_size = 0, max_size_optin = 0;
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
+   cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
+#endif
+
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
+   hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[1] = max_size_optin;
+#endif
+
+   return hypre_error_flag;
+}
+
 /* Note: it doesn't return device_id in hypre_Handle->hypre_DeviceData,
  *       calls API instead. But these two should match at all times
  */
@@ -283,6 +307,7 @@ HYPRE_Init()
    hypre_int device_id;
    hypre_GetDevice(&device_id);
    hypre_SetDevice(device_id, _hypre_handle);
+   hypre_GetDeviceMaxShmemSize(device_id, _hypre_handle);
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
    cudaMemPool_t mempool;
@@ -409,6 +434,12 @@ HYPRE_PrintDeviceInfo()
    hypre_printf("Max Work Groups: %d\n", max_work_group);
    auto max_compute_units = device.get_info<sycl::info::device::max_compute_units>();
    hypre_printf("Max Compute Units: %d\n", max_compute_units);
+#endif
+
+#if defined(HYPRE_USING_GPU)
+   hypre_printf("MaxSharedMemoryPerBlock %d, MaxSharedMemoryPerBlockOptin %d\n",
+                hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[0],
+                hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1]);
 #endif
 
    return hypre_error_flag;

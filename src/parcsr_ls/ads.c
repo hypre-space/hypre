@@ -12,12 +12,17 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-__global__ void hypreCUDAKernel_AMSComputePi_copy1(HYPRE_Int nnz, HYPRE_Int dim, HYPRE_Int *j_in,
+__global__ void hypreCUDAKernel_AMSComputePi_copy1(hypre_DeviceItem &item, HYPRE_Int nnz,
+                                                   HYPRE_Int dim,
+                                                   HYPRE_Int *j_in,
                                                    HYPRE_Int *j_out);
-__global__ void hypreCUDAKernel_AMSComputePi_copy2(HYPRE_Int nrows, HYPRE_Int dim, HYPRE_Int *i_in,
+__global__ void hypreCUDAKernel_AMSComputePi_copy2(hypre_DeviceItem &item, HYPRE_Int nrows,
+                                                   HYPRE_Int dim,
+                                                   HYPRE_Int *i_in,
                                                    HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
                                                    HYPRE_Real *data_out);
-__global__ void hypreCUDAKernel_AMSComputePixyz_copy(HYPRE_Int nrows, HYPRE_Int dim,
+__global__ void hypreCUDAKernel_AMSComputePixyz_copy(hypre_DeviceItem &item, HYPRE_Int nrows,
+                                                     HYPRE_Int dim,
                                                      HYPRE_Int *i_in, HYPRE_Real *data_in, HYPRE_Real *Gx_data, HYPRE_Real *Gy_data, HYPRE_Real *Gz_data,
                                                      HYPRE_Real *data_x_out, HYPRE_Real *data_y_out, HYPRE_Real *data_z_out );
 #endif
