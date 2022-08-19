@@ -36,7 +36,7 @@
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
 hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
-                                HYPRE_Int         nrows,
+                                HYPRE_Int         num_rows,
                                 HYPRE_Int        *row_id,
                                 HYPRE_Int         idxstride_x,
                                 HYPRE_Int         idxstride_y,
@@ -60,14 +60,14 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
    const HYPRE_Int  group_lane    = threadIdx.x & (K - 1);
 #endif
 
-   for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < nrows);
+   for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < num_rows);
           grid_group_id += grid_ngroups)
    {
       HYPRE_Int grid_row_id = -1, p = 0, q = 0;
 
       if (row_id)
       {
-         if (grid_group_id < nrows && group_lane == 0)
+         if (grid_group_id < num_rows && group_lane == 0)
          {
             grid_row_id = read_only_load(&row_id[grid_group_id]);
          }
@@ -78,7 +78,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
          grid_row_id = grid_group_id;
       }
 
-      if (grid_group_id < nrows && group_lane < 2)
+      if (grid_group_id < num_rows && group_lane < 2)
       {
          p = read_only_load(&d_ia[grid_row_id + group_lane]);
       }
@@ -124,7 +124,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
          }
       }
 
-      if (grid_group_id < nrows && group_lane == 0)
+      if (grid_group_id < num_rows && group_lane == 0)
       {
          if (beta)
          {
@@ -165,7 +165,7 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
 template <HYPRE_Int F, typename T>
 HYPRE_Int
 hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
-                             HYPRE_Int  nrows,
+                             HYPRE_Int  num_rows,
                              HYPRE_Int *rowid,
                              HYPRE_Int  num_nonzeros,
                              HYPRE_Int  idxstride_x,
@@ -180,7 +180,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
                              T          beta,
                              T         *d_y )
 {
-   const HYPRE_Int avg_rownnz = (num_nonzeros + nrows - 1) / nrows;
+   const HYPRE_Int avg_rownnz = (num_nonzeros + num_rows - 1) / num_rows;
    const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
 
    /* Note: cannot transform this into a loop because num_vectors is a template argument */
