@@ -784,6 +784,7 @@ enable_fortran
 enable_unified_memory
 enable_cuda_streams
 enable_cusparse
+enable_cusolver
 enable_device_memory_pool
 enable_device_malloc_async
 enable_cublas
@@ -841,6 +842,8 @@ with_hip
 with_sycl
 with_cuda_home
 with_gpu_arch
+with_sycl_target
+with_sycl_target_backend
 with_raja
 with_raja_include
 with_raja_lib
@@ -1517,6 +1520,7 @@ Optional Features:
                           (default is NO).
   --enable-cuda-streams   Use CUDA streams (default is YES).
   --enable-cusparse       Use cuSPARSE (default is YES).
+  --enable-cusolver       Use cuSOLVER (default is NO).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
   --enable-device-malloc-async
@@ -1660,6 +1664,16 @@ Optional Packages:
                           files will be compiled for in ARG, where ARG is a
                           space-separated list (enclosed in quotes) of
                           numbers.
+  --with-sycl-target=ARG  User specifies sycl targets for AOT compilation in
+                          ARG, where ARG is a comma-separated list (enclosed
+                          in quotes), e.g. "spir64_gen".
+  --with-sycl-target-backend=ARG
+                          User specifies additional options for the sycl
+                          target backend for AOT compilation in ARG, where ARG
+                          contains the desired options (enclosed in
+                          double+single quotes), e.g.
+                          --with-sycl-target-backend="'-device
+                          12.1.0,12.4.0'".
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
@@ -2787,6 +2801,7 @@ hypre_using_cuda_streams=no
 hypre_using_cusparse=yes
 hypre_using_cublas=yes
 hypre_using_curand=yes
+hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
 hypre_using_umpire=no
@@ -3138,6 +3153,19 @@ if test "${enable_cusparse+set}" = set; then :
  esac
 else
   hypre_using_cusparse=yes
+
+fi
+
+
+# Check whether --enable-cusolver was given.
+if test "${enable_cusolver+set}" = set; then :
+  enableval=$enable_cusolver; case "${enableval}" in
+    yes) hypre_using_cusolver=yes ;;
+    no)  hypre_using_cusolver=no ;;
+    *)   hypre_using_cusolver=yes ;;
+ esac
+else
+  hypre_using_cusolver=no
 
 fi
 
@@ -4083,7 +4111,6 @@ fi
 
 
 
-
 # Check whether --with-hip was given.
 if test "${with_hip+set}" = set; then :
   withval=$with_hip; case "$withval" in
@@ -4132,6 +4159,39 @@ if test "${with_gpu_arch+set}" = set; then :
     if test "x${HYPRE_CUDA_SM}" = "x"
     then
        HYPRE_CUDA_SM="${withval}"
+    fi
+ fi
+
+
+fi
+
+
+
+
+# Check whether --with-sycl-target was given.
+if test "${with_sycl_target+set}" = set; then :
+  withval=$with_sycl_target;
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_SYCL_TARGET}" = "x"
+    then
+       HYPRE_SYCL_TARGET="${withval}"
+    fi
+ fi
+
+
+fi
+
+
+
+# Check whether --with-sycl-target-backend was given.
+if test "${with_sycl_target_backend+set}" = set; then :
+  withval=$with_sycl_target_backend;
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_SYCL_TARGET_BACKEND}" = "x"
+    then
+       HYPRE_SYCL_TARGET_BACKEND="${withval}"
     fi
  fi
 
@@ -9195,6 +9255,14 @@ $as_echo "#define HYPRE_USING_CURAND 1" >>confdefs.h
       HYPRE_CUDA_LIBS+=" -lcurand"
    fi
 
+   if test "$hypre_using_cusolver" = "yes"
+   then
+
+$as_echo "#define HYPRE_USING_CUSOLVER 1" >>confdefs.h
+
+      HYPRE_CUDA_LIBS+=" -lcusolver"
+   fi
+
    if test "$hypre_using_device_pool" = "yes"
    then
 
@@ -9258,8 +9326,7 @@ fi
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
-                        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
-        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+                                HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/include"
 
                 HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
 
@@ -9268,7 +9335,6 @@ fi
 $as_echo "#define HYPRE_USING_ROCSPARSE 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
 
 fi
 
@@ -9276,7 +9342,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ROCBLAS 1" >>confdefs.h
 
-              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
 
 fi
 
@@ -9285,7 +9350,6 @@ fi
 $as_echo "#define HYPRE_USING_ROCRAND 1" >>confdefs.h
 
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
 
 fi
 
@@ -9293,7 +9357,6 @@ fi
 
 $as_echo "#define HYPRE_USING_ROCTX 1" >>confdefs.h
 
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
 
 fi
@@ -9328,6 +9391,15 @@ $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
            SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
 
+                if test "x${HYPRE_SYCL_TARGET}" != "x"
+        then
+           LDFLAGS+=" -fsycl-targets=${HYPRE_SYCL_TARGET}"
+        fi
+        if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
+        then
+           LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+        fi
+
                 if test "$hypre_user_chose_cuflags" = "no"
         then
            CUFLAGS="${SYCLFLAGS}"
@@ -9350,7 +9422,7 @@ fi
 done
 
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
 
 fi
 

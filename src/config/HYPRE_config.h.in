@@ -169,6 +169,9 @@
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
+/* Define to 1 if using cuSolver */
+#undef HYPRE_USING_CUSOLVER
+
 /* Define to 1 if using cuSPARSE */
 #undef HYPRE_USING_CUSPARSE
 

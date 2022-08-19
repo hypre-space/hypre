@@ -29,7 +29,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
    hypre_ParILUData     *ilu_data      = (hypre_ParILUData*) ilu_vdata;
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* pointers to cusparse data, note that they are not NULL only when needed */
    cusparseMatDescr_t      matL_des          = hypre_ParILUDataMatLMatrixDescription(ilu_data);
    cusparseMatDescr_t      matU_des          = hypre_ParILUDataMatUMatrixDescription(ilu_data);
@@ -49,6 +49,10 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParCSRMatrix      *Aperm            = hypre_ParILUDataAperm(ilu_data);
    //hypre_ParCSRMatrix      *R                = hypre_ParILUDataR(ilu_data);
    //hypre_ParCSRMatrix      *P                = hypre_ParILUDataP(ilu_data);
+#else
+   hypre_ParCSRMatrix   *matmL         = hypre_ParILUDataMatLModified(ilu_data);
+   HYPRE_Real           *matmD         = hypre_ParILUDataMatDModified(ilu_data);
+   hypre_ParCSRMatrix   *matmU         = hypre_ParILUDataMatUModified(ilu_data);
 #endif
 
    /* get matrices */
@@ -59,11 +63,6 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matL          = hypre_ParILUDataMatL(ilu_data);
    HYPRE_Real           *matD          = hypre_ParILUDataMatD(ilu_data);
    hypre_ParCSRMatrix   *matU          = hypre_ParILUDataMatU(ilu_data);
-#ifndef HYPRE_USING_CUDA
-   hypre_ParCSRMatrix   *matmL         = hypre_ParILUDataMatLModified(ilu_data);
-   HYPRE_Real           *matmD         = hypre_ParILUDataMatDModified(ilu_data);
-   hypre_ParCSRMatrix   *matmU         = hypre_ParILUDataMatUModified(ilu_data);
-#endif
    hypre_ParCSRMatrix   *matS          = hypre_ParILUDataMatS(ilu_data);
 
    HYPRE_Int            iter, num_procs,  my_id;
@@ -97,7 +96,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real           operat_cmplxty = hypre_ParILUDataOperatorComplexity(ilu_data);
 
    HYPRE_Int            Solve_err_flag;
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    HYPRE_Int            test_opt;
 #endif
 
@@ -147,7 +146,6 @@ hypre_ILUSolve( void               *ilu_vdata,
       hypre_printf("\n\n ILU SOLVER SOLUTION INFO:\n");
    }
 
-
    /*-----------------------------------------------------------------------
     *    Compute initial residual and print
     *-----------------------------------------------------------------------*/
@@ -155,10 +153,10 @@ hypre_ILUSolve( void               *ilu_vdata,
    {
       if ( logging > 1 )
       {
-         hypre_ParVectorCopy(f, residual );
+         hypre_ParVectorCopy(f, residual);
          if (tol > 0.0)
          {
-            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual );
+            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual);
          }
          resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
       }
@@ -247,7 +245,7 @@ hypre_ILUSolve( void               *ilu_vdata,
       switch (ilu_type)
       {
          case 0: case 1:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
             hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
                                      ilu_solve_policy,
@@ -257,7 +255,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 #endif
             break;
          case 10: case 11:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
             hypre_ILUSolveCusparseSchurGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp,
                                              schur_solver, schur_precond, rhs, x, u_end,
@@ -280,7 +278,7 @@ hypre_ILUSolve( void               *ilu_vdata,
                                      Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
             break;
          case 50:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             test_opt = hypre_ParILUDataTestOption(ilu_data);
             hypre_ILUSolveRAPGMRES(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp, Xtemp, Ytemp,
                                    schur_solver, schur_precond, rhs, x, u_end,
@@ -293,7 +291,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 #endif
             break;
          default:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* Apply GPU-accelerated LU solve */
             hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBL_info, matBU_info, matBLU_d,
                                      ilu_solve_policy,
@@ -988,7 +986,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    return hypre_error_flag;
 }
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /* Permutation function (for GPU version, can just call thrust)
  * option 00: perm integer array
@@ -2084,7 +2082,7 @@ hypre_NSHSolve( void               *nsh_vdata,
       {
          old_resnorm = resnorm;
 
-         if ( logging > 1 )
+         if (logging > 1)
          {
             hypre_ParVectorCopy(F_array, residual);
             hypre_ParCSRMatrixMatvec(alpha, matA, U_array, beta, residual );

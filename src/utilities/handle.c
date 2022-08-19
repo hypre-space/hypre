@@ -61,6 +61,15 @@ hypre_SetSpGemmAlgorithm( HYPRE_Int value )
 }
 
 HYPRE_Int
+hypre_SetSpGemmBinned( HYPRE_Int value )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpgemmBinned(hypre_handle()) = value;
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value )
 {
 #if defined(HYPRE_USING_GPU)
@@ -92,22 +101,6 @@ hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value )
    if (value > 0.0)
    {
       hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle()) = value;
-   }
-   else
-   {
-      hypre_error_in_arg(1);
-   }
-#endif
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SetSpGemmHashType( char value )
-{
-#if defined(HYPRE_USING_GPU)
-   if (value == 'L' || value == 'Q' || value == 'D')
-   {
-      hypre_HandleSpgemmHashType(hypre_handle()) = value;
    }
    else
    {

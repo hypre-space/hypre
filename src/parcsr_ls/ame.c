@@ -249,7 +249,8 @@ HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
+hypreCUDAKernel_GtEliminateBoundary( hypre_DeviceItem    &item,
+                                     HYPRE_Int      nrows,
                                      HYPRE_Int     *Gt_diag_i,
                                      HYPRE_Int     *Gt_diag_j,
                                      HYPRE_Complex *Gt_diag_data,
@@ -259,15 +260,15 @@ hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
                                      HYPRE_Int     *edge_bc,
                                      HYPRE_Int     *edge_bc_offd)
 {
-   HYPRE_Int row_i = hypre_cuda_get_grid_warp_id<1, 1>();
+   HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (row_i >= nrows)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
-   HYPRE_Int p1, q1, p2 = 0, q2 = 0;
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p1 = 0, q1, p2 = 0, q2 = 0;
    bool nonempty_offd = Gt_offd_j != NULL;
    bool bdr = false;
 
@@ -280,18 +281,19 @@ hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
       }
    }
 
-   q1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 1);
-   p1 = __shfl_sync(HYPRE_WARP_FULL_MASK, p1, 0);
+   q1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 1);
+   p1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p1, 0);
    if (nonempty_offd)
    {
-      q2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 1);
-      p2 = __shfl_sync(HYPRE_WARP_FULL_MASK, p2, 0);
+      q2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 1);
+      p2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p2, 0);
    }
 
-   for (HYPRE_Int j = p1 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q1); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p1 + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q1);
+        j += HYPRE_WARP_SIZE)
    {
       const hypre_int k = j < q1 && read_only_load(&edge_bc[read_only_load(&Gt_diag_j[j])]) != 0;
-      if ( __any_sync(HYPRE_WARP_FULL_MASK, k) )
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, k) )
       {
          bdr = true;
          break;
@@ -300,10 +302,11 @@ hypreCUDAKernel_GtEliminateBoundary( HYPRE_Int      nrows,
 
    if (!bdr)
    {
-      for (HYPRE_Int j = p2 + lane; __any_sync(HYPRE_WARP_FULL_MASK, j < q2); j += HYPRE_WARP_SIZE)
+      for (HYPRE_Int j = p2 + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q2);
+           j += HYPRE_WARP_SIZE)
       {
          const hypre_int k = j < q2 && read_only_load(&edge_bc_offd[read_only_load(&Gt_offd_j[j])]) != 0;
-         if ( __any_sync(HYPRE_WARP_FULL_MASK, k) )
+         if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, k) )
          {
             bdr = true;
             break;
