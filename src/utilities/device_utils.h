@@ -893,7 +893,7 @@ static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line,
                     hypre_int width = HYPRE_WARP_SIZE)
 {
-   return __shfl_sync(mask, val, src_line);
+   return __shfl_sync(mask, val, src_line, width);
 }
 
 template <typename T>
