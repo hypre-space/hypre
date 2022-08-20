@@ -84,6 +84,7 @@ HYPRE_Int HYPRE_ParVectorScale( HYPRE_Complex value, HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
 HYPRE_Int HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                    HYPRE_ParVector *vector );
+HYPRE_Int HYPRE_ParVectorToVectorAll( HYPRE_ParVector par_vector, HYPRE_Vector *vector );
 HYPRE_Int HYPRE_ParVectorGetValues( HYPRE_ParVector vector, HYPRE_Int num_values,
                                     HYPRE_BigInt *indices, HYPRE_Complex *values );
 

@@ -356,13 +356,18 @@ HYPRE_Int
 HYPRE_ParCSRMatrixToCSRMatrixAll( HYPRE_ParCSRMatrix  par_matrix,
                                   HYPRE_CSRMatrix    *csr_matrix )
 {
+   hypre_CSRMatrix      **csr_matrix_ptr = NULL;
+   HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(par_matrix);
+
    if (!par_matrix)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
-   csr_matrix = (HYPRE_CSRMatrix*) hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
+   *csr_matrix_ptr = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix,
+                                                      memory_location);
+   csr_matrix = (HYPRE_CSRMatrix*) csr_matrix_ptr;
 
    return hypre_error_flag;
 }

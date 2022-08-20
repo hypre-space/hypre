@@ -164,11 +164,13 @@ void
 hypre_F90_IFACE(hypre_parvectortovectorall, HYPRE_PARVECTORTOVECTORALL)
 ( hypre_F90_Obj *par_vector,
   hypre_F90_Obj *vector,
+  hypre_F90_Int *memory_location,
   hypre_F90_Int *ierr        )
 {
    *vector = (hypre_F90_Obj)(
                 hypre_ParVectorToVectorAll
-                ( (hypre_ParVector *) *par_vector ) );
+                ( (hypre_ParVector *) *par_vector,
+                  ((HYPRE_MemoryLocation) *memory_location) ) );
 
    *ierr = 0;
 }

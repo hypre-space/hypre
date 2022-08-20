@@ -363,7 +363,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       hypre_CSRMatrix *P_CSR = NULL;
       hypre_Vector *sv = NULL;
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(*P);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(*P, HYPRE_MEMORY_HOST);
 
       if (!myid)
       {
@@ -381,7 +381,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       {
          for (i = 0; i < num_smooth_vecs; i++)
          {
-            sv = hypre_ParVectorToVectorAll(smooth_vecs[i]);
+            sv = hypre_ParVectorToVectorAll(smooth_vecs[i], HYPRE_MEMORY_HOST);
 
             if (!myid)
             {
@@ -397,7 +397,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
          }
       }
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
       if (!myid)
       {
          hypre_sprintf(new_file, "%s.level.%d", "A", level );
@@ -1505,7 +1505,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       char new_file[80];
       hypre_CSRMatrix *P_CSR;
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(new_P);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(new_P, HYPRE_MEMORY_HOST);
 
       if (!myid)
       {
@@ -1670,7 +1670,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
       hypre_CSRMatrix *P_CSR = NULL;
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(P);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(P, HYPRE_MEMORY_HOST);
       if (!myid)
       {
          hypre_sprintf(new_file, "%s.level.%d", "P_new_orig", level );
@@ -1683,7 +1683,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
       hypre_CSRMatrixDestroy(P_CSR);
 
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
       if (!myid)
       {
          hypre_sprintf(new_file, "%s.level.%d", "A", level );
@@ -2402,7 +2402,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
       char new_file[80];
       hypre_CSRMatrix *P_CSR;
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(P);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(P, HYPRE_MEMORY_HOST);
 
       if (!myid)
       {

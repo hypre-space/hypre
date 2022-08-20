@@ -89,6 +89,7 @@ HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha, HYPRE_ParVector x, HYPRE_Pa
 HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                     HYPRE_ParVector *vector );
+HYPRE_Int HYPRE_ParVectorToVectorAll( HYPRE_ParVector par_vector, HYPRE_Vector *vector );
 HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_values,
                                      HYPRE_BigInt *indices, HYPRE_Complex *values);
 
@@ -427,7 +428,8 @@ HYPRE_Int GenerateDiagAndOffd ( hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 HYPRE_Int hypre_ParCSRMatrixMergeDiagAndOffd ( hypre_ParCSRMatrix *par_matrix, hypre_CSRMatrix **csr_matrix_ptr );
 HYPRE_Int hypre_MergeDiagAndOffdHost ( hypre_ParCSRMatrix *par_matrix, hypre_CSRMatrix **csr_matrix_ptr );
 HYPRE_Int hypre_MergeDiagAndOffdDevice ( hypre_ParCSRMatrix *A, hypre_CSRMatrix **B_ptr );
-hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll ( hypre_ParCSRMatrix *par_matrix );
+hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll ( hypre_ParCSRMatrix *par_matrix,
+                                                    HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParCSRMatrixCopy ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
                                    HYPRE_Int copy_data );
 HYPRE_Int hypre_FillResponseParToCSRMatrix ( void *p_recv_contact_buf, HYPRE_Int contact_size,
@@ -522,7 +524,8 @@ HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y, h
                                        HYPRE_Int k, HYPRE_Int unroll, HYPRE_Real *prod_x, HYPRE_Real *prod_y );
 hypre_ParVector *hypre_VectorToParVector ( MPI_Comm comm, hypre_Vector *v,
                                            HYPRE_BigInt *vec_starts );
-hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v );
+hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v,
+                                           HYPRE_MemoryLocation  memory_location );
 HYPRE_Int hypre_ParVectorPrintIJ ( hypre_ParVector *vector, HYPRE_Int base_j,
                                    const char *filename );
 HYPRE_Int hypre_ParVectorReadIJ ( MPI_Comm comm, const char *filename, HYPRE_Int *base_j_ptr,

@@ -1776,18 +1776,20 @@ hypre_MergeDiagAndOffdHost(hypre_ParCSRMatrix  *par_matrix,
  * Generates a CSRMatrix from a ParCSRMatrix on all processors that have
  * parts of the ParCSRMatrix
  *
+ * The resulting matrix lives in the memory space given by memory_location
+ *
  * Warning: this only works for a ParCSRMatrix that is smaller than 2^31-1
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
+hypre_ParCSRMatrixToCSRMatrixAll( hypre_ParCSRMatrix   *par_matrix,
+                                  HYPRE_MemoryLocation  memory_location )
 {
    MPI_Comm                   comm = hypre_ParCSRMatrixComm(par_matrix);
    HYPRE_Int                  num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_matrix);
    HYPRE_Int                  num_cols = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    HYPRE_BigInt               first_row_index = hypre_ParCSRMatrixFirstRowIndex(par_matrix);
    HYPRE_BigInt               last_row_index  = hypre_ParCSRMatrixLastRowIndex(par_matrix);
-   HYPRE_MemoryLocation       memory_location = hypre_ParCSRMatrixMemoryLocation(par_matrix);
 
    hypre_CSRMatrix           *matrix;
    HYPRE_Int                 *matrix_i;
@@ -2098,7 +2100,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
       hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
    }
 
-   /* Move local matrix to default memory location */
+   /* Move resulting matrix to the memory location passed as input */
    hypre_CSRMatrixMigrate(matrix, memory_location);
 
    return matrix;

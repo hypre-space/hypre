@@ -220,6 +220,30 @@ HYPRE_VectorToParVector( MPI_Comm         comm,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParVectorToVectorAll
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorToVectorAll( HYPRE_ParVector  par_vector,
+                            HYPRE_Vector    *vector )
+{
+   hypre_Vector         **vector_ptr = NULL;
+   HYPRE_MemoryLocation   memory_location = hypre_ParVectorMemoryLocation(par_vector);
+
+   if (!par_vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *vector_ptr = hypre_ParVectorToVectorAll(par_vector,
+                                            memory_location);
+   vector = (HYPRE_Vector*) vector_ptr;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParVectorGetValues
  *--------------------------------------------------------------------------*/
 

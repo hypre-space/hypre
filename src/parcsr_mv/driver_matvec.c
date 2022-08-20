@@ -65,7 +65,7 @@ main( HYPRE_Int   argc,
                                               row_starts, col_starts);
    hypre_printf(" converted\n");
 
-   matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
+   matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix, HYPRE_MEMORY_HOST);
 
    hypre_sprintf(file_name, "matrix1.%d", my_id);
 

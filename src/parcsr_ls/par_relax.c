@@ -1345,10 +1345,12 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
 
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A
+    *           Vector     from ParVector    f
+    *  All processors are needed for these routines
     *-----------------------------------------------------------------*/
-   /* all processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-   f_vector = hypre_ParVectorToVectorAll(f);
+   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
+   f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
+
    if (num_rows)
    {
       A_CSR_i = hypre_CSRMatrixI(A_CSR);
@@ -1424,10 +1426,12 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
 
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A
+    *           Vector     from ParVector    f
+    *  All processors are needed for these routines
     *-----------------------------------------------------------------*/
-   /* all processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-   f_vector = hypre_ParVectorToVectorAll(f);
+   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
+   f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
+
    if (num_rows)
    {
       A_CSR_i = hypre_CSRMatrixI(A_CSR);
