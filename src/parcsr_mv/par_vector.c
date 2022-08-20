@@ -624,12 +624,12 @@ hypre_Vector *
 hypre_ParVectorToVectorAll( hypre_ParVector      *par_v,
                             HYPRE_MemoryLocation  memory_location )
 {
-   MPI_Comm                     comm = hypre_ParVectorComm(par_v);
+   MPI_Comm                     comm         = hypre_ParVectorComm(par_v);
    HYPRE_Int                    num_vectors  = hypre_ParVectorNumVectors(par_v);
    HYPRE_BigInt                 global_size  = hypre_ParVectorGlobalSize(par_v);
    HYPRE_BigInt                 first_index  = hypre_ParVectorFirstIndex(par_v);
    HYPRE_BigInt                 last_index   = hypre_ParVectorLastIndex(par_v);
-   hypre_Vector                *local_vector = hypre_ParVectorLocalVector(par_v);
+   hypre_Vector                *local_vector;
 
    hypre_Vector                *vector;
    HYPRE_Complex               *vector_data;
@@ -664,6 +664,16 @@ hypre_ParVectorToVectorAll( hypre_ParVector      *par_v,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    local_size = (HYPRE_Int)(last_index - first_index + 1);
+   if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(par_v)) !=
+       hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
+   {
+      local_vector = hypre_SeqVectorCloneDeep_v2(hypre_ParVectorLocalVector(par_v),
+                                                 HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      local_vector = hypre_ParVectorLocalVector(par_v);
+   }
 
    /* determine procs which hold data of par_v and store ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact
@@ -853,6 +863,11 @@ hypre_ParVectorToVectorAll( hypre_ParVector      *par_v,
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
    hypre_TFree(new_vec_starts, HYPRE_MEMORY_HOST);
+   if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(par_v)) !=
+       hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
+   {
+      hypre_SeqVectorDestroy(local_vector);
+   }
 
    return vector;
 }
