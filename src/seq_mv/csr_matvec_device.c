@@ -51,13 +51,14 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    /* Input variables */
    HYPRE_Int  num_vectors_x      = hypre_VectorNumVectors(x);
    HYPRE_Int  num_vectors_y      = hypre_VectorNumVectors(y);
-   HYPRE_Int  multivec_storage_x = hypre_VectorMultiVecStorageMethod(x);
-   HYPRE_Int  multivec_storage_y = hypre_VectorMultiVecStorageMethod(y);
 
    /* Local variables */
    HYPRE_Int  use_vendor = hypre_HandleSpMVUseVendor(hypre_handle());
 
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   HYPRE_Int  multivec_storage_x = hypre_VectorMultiVecStorageMethod(x);
+   HYPRE_Int  multivec_storage_y = hypre_VectorMultiVecStorageMethod(y);
+
    /* Force use of hypre's SpMV for row-wise multivectors */
    if ((num_vectors_x > 1 && multivec_storage_x == 1) ||
        (num_vectors_y > 1 && multivec_storage_y == 1))
