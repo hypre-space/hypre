@@ -197,8 +197,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define HYPRE_WARP_SIZE       64
 #define HYPRE_WARP_BITSHIFT   6
 #elif defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       16
-#define HYPRE_WARP_BITSHIFT   4
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
 #endif
 
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
@@ -297,6 +297,28 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
+#define HYPRE_GPU_DEBUG_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)           \
+{                                                                                            \
+   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   {                                                                                         \
+     /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]); */                                             \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
+         sycl::range<1> shmem_range(shmem_size);                                             \
+         sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
+            sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, debug_stream, shmem_accessor.get_pointer(), __VA_ARGS__);\
          });                                                                                 \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
@@ -1360,8 +1382,6 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)
    {
-      /* WM: try */
-      /* T t = item.get_sub_group().shuffle_up(in, d >> 1); */
       T t = sycl::shift_group_right(item.get_sub_group(), in, d >> 1);
       if ( (lane_id & (d - 1)) == (d - 1) )
       {
@@ -1369,8 +1389,6 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
       }
    }
 
-   /* WM: try */
-   /* all_sum = item.get_sub_group().shuffle(in, HYPRE_WARP_SIZE - 1); */
    all_sum = sycl::group_broadcast(item.get_sub_group(), in, HYPRE_WARP_SIZE - 1);
 
    if (lane_id == HYPRE_WARP_SIZE - 1)
@@ -1381,8 +1399,6 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* T t = item.get_sub_group().shuffle_xor(in, d); */
       T t = sycl::permute_group_by_xor(item.get_sub_group(), in, d);
 
       if ( (lane_id & (d - 1)) == (d - 1))
@@ -1410,7 +1426,7 @@ template <typename T>
 static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
 {
-   /* WM: todo - try removing barrier with new implementation */
+   /* WM: todo - I'm still getting bad results if I try to remove this barrier. Needs investigation. */
    item.get_sub_group().barrier();
    return sycl::group_broadcast(item.get_sub_group(), val, src_line);
 }
@@ -1420,10 +1436,9 @@ static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line,
                     hypre_int width)
 {
-   /* WM: assume src_line < width? */
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_start = (lane_id / width) * width;
-   hypre_int src_in_warp = group_start + src_line;
+   hypre_int src_in_warp = group_start + (src_line % width);
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
@@ -1439,10 +1454,10 @@ static __device__ __forceinline__
 T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
                        hypre_int width)
 {
-   /* WM: assume group_delta < group_size? */
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_start = (lane_id / width) * width;
-   hypre_int src_in_warp = sycl::max(group_start, lane_id - delta);
+   /* WM: todo - double check */
+   hypre_int src_in_warp = lane_id - delta >= group_start ? lane_id - delta : lane_id;
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
@@ -1458,10 +1473,10 @@ static __device__ __forceinline__
 T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
                          hypre_int width)
 {
-   /* WM: assume group_delta < group_size? */
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_end = ((lane_id / width) + 1) * width - 1;
-   hypre_int src_in_warp = sycl::min(group_end, lane_id + delta);
+   /* WM: todo - double check */
+   hypre_int src_in_warp = lane_id + delta <= group_end ? lane_id + delta : lane_id;
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
@@ -1490,8 +1505,6 @@ T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* in += item.get_sub_group().shuffle_down(in, d); */
       in += sycl::shift_group_left(item.get_sub_group(), in, d);
    }
    return in;
@@ -1503,8 +1516,6 @@ T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* in += item.get_sub_group().shuffle_xor(in, d); */
       in += sycl::permute_group_by_xor(item.get_sub_group(), in, d);
    }
    return in;
@@ -1516,8 +1527,6 @@ T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* in = std::max(in, item.get_sub_group().shuffle_down(in, d)); */
       in = std::max(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
    return in;
@@ -1529,8 +1538,6 @@ T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* in = std::max(in, item.get_sub_group().shuffle_xor(in, d)); */
       in = std::max(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
    return in;
@@ -1542,8 +1549,6 @@ T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* in = std::min(in, item.get_sub_group().shuffle_down(in, d)); */
       in = std::min(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
    return in;
@@ -1555,8 +1560,6 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      /* WM: try */
-      /* in = std::min(in, item.get_sub_group().shuffle_xor(in, d)); */
       in = std::min(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
    return in;

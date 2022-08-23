@@ -51,7 +51,7 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 #endif
 
 //#define HYPRE_SPGEMM_TIMING
-//#define HYPRE_SPGEMM_PRINTF
+#define HYPRE_SPGEMM_PRINTF
 //#define HYPRE_SPGEMM_NVTX
 
 /* ----------------------------------------------------------------------------------------------- *

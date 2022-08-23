@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
@@ -36,8 +37,13 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
    const HYPRE_Int BIN = HYPRE_SPGEMM_DEFAULT_BIN;
 
 #ifdef HYPRE_SPGEMM_PRINTF
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int max_rc = HYPRE_ONEDPL_CALL(std::reduce, d_rc, d_rc + m, 0,      sycl::maximum<HYPRE_Int>());
+   HYPRE_Int min_rc = HYPRE_ONEDPL_CALL(std::reduce, d_rc, d_rc + m, max_rc, sycl::minimum<HYPRE_Int>());
+#else
    HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0,      thrust::maximum<HYPRE_Int>());
    HYPRE_Int min_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, max_rc, thrust::minimum<HYPRE_Int>());
+#endif
    HYPRE_SPGEMM_PRINT("%s[%d]: max RC %d, min RC %d\n", __FILE__, __LINE__, max_rc, min_rc);
 #endif
 
@@ -182,6 +188,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
                                                 HYPRE_Int      *nnzC_out )
 
 {
+   hypre_printf("WM: debug - inside hypreDevice_CSRSpGemmNumerWithRownnzUpperbound()\n");
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] -= hypre_MPI_Wtime();
 #endif
@@ -221,6 +228,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] += hypre_MPI_Wtime();
 #endif
 
+   hypre_printf("WM: debug - finished hypreDevice_CSRSpGemmNumerWithRownnzUpperbound()\n");
    return hypre_error_flag;
 }
 

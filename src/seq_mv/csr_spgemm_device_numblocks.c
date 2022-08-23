@@ -6,7 +6,6 @@
  ******************************************************************************/
 #include "seq_mv.h"
 
-/* WM: todo */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #include "csr_spgemm_device.h"

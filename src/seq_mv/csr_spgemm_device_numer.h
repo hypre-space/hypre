@@ -123,7 +123,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
       HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 #endif
 
-      /* WM: Question - should never have the case where old == -1, correct? Unless key == 1, in which case this is still redundant?  */
+      /* WM: todo - question: should never have the case where old == -1, correct? Unless key == 1, in which case this is still redundant?  */
       if (old == -1 || old == key)
       {
          /* this slot was open or contained 'key', update value */
@@ -597,8 +597,13 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
                       "exact_rownnz %d, need_ghash %d, ghash %p size %d\n",
                       __FILE__, __LINE__, BIN, m, k, n,
                       HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, exact_rownnz, need_ghash, d_ghash_i, ghash_size);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.get(2), gDim.get(1), gDim.get(0), bDim.get(2), bDim.get(1),
+                      bDim.get(0));
+#else
    HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y,
                       bDim.z);
+#endif
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
@@ -834,6 +839,7 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo */
+   numBlocksPerSm = 1;
 #endif
 
    *num_blocks_ptr = multiProcessorCount * numBlocksPerSm;
