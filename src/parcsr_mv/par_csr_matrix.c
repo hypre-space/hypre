@@ -128,6 +128,8 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_ParCSRMatrixSocDiagJ(matrix) = NULL;
    hypre_ParCSRMatrixSocOffdJ(matrix) = NULL;
+   hypre_ParCSRMatrixSendPinned(matrix) = NULL;
+   hypre_ParCSRMatrixRecvPinned(matrix) = NULL;
 #endif
 
    return matrix;
@@ -204,6 +206,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypre_TFree(hypre_ParCSRMatrixSocDiagJ(matrix), HYPRE_MEMORY_DEVICE);
       hypre_TFree(hypre_ParCSRMatrixSocOffdJ(matrix), HYPRE_MEMORY_DEVICE);
+      _hypre_TFree(hypre_ParCSRMatrixSendPinned(matrix), hypre_MEMORY_HOST_PINNED);
+      _hypre_TFree(hypre_ParCSRMatrixRecvPinned(matrix), hypre_MEMORY_HOST_PINNED);
 #endif
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);

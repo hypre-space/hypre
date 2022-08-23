@@ -325,6 +325,29 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 }
 
 static inline void *
+hypre_HostGetDevicePointer_core(void * hostPtr)
+{
+    void * devPtr = NULL;
+#if defined(HYPRE_USING_CUDA)
+    HYPRE_CUDA_CALL( cudaHostGetDevicePointer(&devPtr, hostPtr, 0) );
+#endif
+#if defined(HYPRE_USING_HIP)
+    HYPRE_HIP_CALL( hipHostGetDevicePointer(&devPtr, hostPtr, hipHostRegisterMapped) );
+#endif
+    return devPtr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_Free
+ *--------------------------------------------------------------------------*/
+
+void *
+hypre_HostGetDevicePointer(void *hostPtr)
+{
+   return hypre_HostGetDevicePointer_core(hostPtr);
+}
+
+static inline void *
 hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
@@ -334,11 +357,12 @@ hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 #else
 
 #if defined(HYPRE_USING_CUDA)
-   HYPRE_CUDA_CALL( cudaMallocHost(&ptr, size) );
+   //HYPRE_CUDA_CALL( cudaMallocHost(&ptr, size) );
+   HYPRE_CUDA_CALL( cudaHostAlloc(&ptr, size, cudaHostAllocMapped) );
 #endif
 
 #if defined(HYPRE_USING_HIP)
-   HYPRE_HIP_CALL( hipHostMalloc(&ptr, size) );
+   HYPRE_HIP_CALL( hipHostMalloc(&ptr, size, hipHostRegisterMapped) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -546,6 +570,41 @@ _hypre_Free(void *ptr, hypre_MemoryLocation location)
    hypre_Free_core(ptr, location);
 }
 
+/*--------------------------------------------------------------------------
+ * MemcpyAsync
+ *--------------------------------------------------------------------------*/
+static inline void
+hypre_MemcpyAsync_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst,
+                       hypre_MemoryLocation loc_src)
+{
+   if (dst == NULL || src == NULL)
+   {
+      if (size)
+      {
+         hypre_printf("hypre_Memcpy warning: copy %ld bytes from %p to %p !\n", size, src, dst);
+         hypre_assert(0);
+      }
+
+      return;
+   }
+
+   if (dst == src)
+   {
+      return;
+   }
+
+   /* 2: UVM <-- Host, UVM <-- Pinned */
+   if (loc_dst == hypre_MEMORY_UNIFIED || loc_dst == hypre_MEMORY_DEVICE)
+   {
+#if defined(HYPRE_USING_CUDA)
+     HYPRE_CUDA_CALL( cudaMemcpyAsync(dst, src, size, cudaMemcpyHostToDevice, hypre_HandleComputeStream(hypre_handle())) );
+#endif
+#if defined(HYPRE_USING_HIP)
+      HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice, hypre_HandleComputeStream(hypre_handle())) );
+#endif
+     return;
+   }
+}
 
 /*--------------------------------------------------------------------------
  * Memcpy
@@ -925,6 +984,18 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst,
 {
    hypre_Memcpy_core( dst, src, size, hypre_GetActualMemLocation(loc_dst),
                       hypre_GetActualMemLocation(loc_src) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_Memcpy
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_MemcpyAsync(void *dst, void *src, size_t size, HYPRE_MemoryLocation loc_dst,
+                  HYPRE_MemoryLocation loc_src)
+{
+   hypre_MemcpyAsync_core( dst, src, size, hypre_GetActualMemLocation(loc_dst),
+                           hypre_GetActualMemLocation(loc_src) );
 }
 
 /*--------------------------------------------------------------------------

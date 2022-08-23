@@ -351,6 +351,10 @@ typedef struct hypre_ParCSRMatrix_struct
    /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
    HYPRE_Int            *soc_diag_j;
    HYPRE_Int            *soc_offd_j;
+
+   /* These arrays are reserved for pinned data transfer */
+   char                 *send_pinned;
+   char                 *recv_pinned;
 #endif
 
 } hypre_ParCSRMatrix;
@@ -389,6 +393,8 @@ typedef struct hypre_ParCSRMatrix_struct
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 #define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
 #define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
+#define hypre_ParCSRMatrixSendPinned(matrix)             ((matrix) -> send_pinned)
+#define hypre_ParCSRMatrixRecvPinned(matrix)             ((matrix) -> recv_pinned)
 #endif
 
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
@@ -858,7 +864,11 @@ hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate ( HYPRE_Int job, hypre_ParC
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job,
                                                           hypre_ParCSRCommPkg *comm_pkg, HYPRE_MemoryLocation send_memory_location, void *send_data_in,
                                                           HYPRE_MemoryLocation recv_memory_location, void *recv_data_in );
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v3 ( HYPRE_Int job,
+                                                          hypre_ParCSRCommPkg *comm_pkg, HYPRE_MemoryLocation send_memory_location, void *send_data_in, void *send_data_pinned,
+                                                          HYPRE_MemoryLocation recv_memory_location, void *recv_data_in, void *recv_data_pinned );
 HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
+HYPRE_Int hypre_ParCSRCommHandleDestroy_v3 ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_ParCSRCommPkgCreate_core ( MPI_Comm comm, HYPRE_BigInt *col_map_offd,
                                       HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts, HYPRE_Int num_cols_diag,
                                       HYPRE_Int num_cols_offd, HYPRE_Int *p_num_recvs, HYPRE_Int **p_recv_procs,
