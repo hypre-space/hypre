@@ -20,6 +20,8 @@ cusparseSpMatDescr_t hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int n, HYPRE_Int
 cusparseDnVecDescr_t hypre_VectorToCusparseDnVec(const hypre_Vector *x, HYPRE_Int offset,
                                                  HYPRE_Int size_override);
 
+cusparseDnMatDescr_t hypre_VectorToCusparseDnMat(const hypre_Vector *x);
+
 HYPRE_Int hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                               cusparseMatDescr_t descr_A, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,
                                               cusparseMatDescr_t descr_B, HYPRE_Int nnzB, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex *d_b,

@@ -62,9 +62,10 @@ ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save} -rtol ${rto
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-mixedint
 
-# CUDA with UM with shared library [no run]
+# CUDA with UM with shared library
 co="--with-cuda --enable-unified-memory --with-openmp --enable-hopscotch --enable-shared --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+ro="-gpumemcheck -rt -mpibind -cudamemcheck -save ${save}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 #CUDA with UM and single precision

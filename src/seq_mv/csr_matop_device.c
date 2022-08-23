@@ -1178,6 +1178,99 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+/* type 0: diag
+ *      1: abs diag
+ *      2: diag inverse
+ *      3: diag inverse sqrt
+ *      4: abs diag inverse sqrt
+ */
+__global__ void
+hypreCUDAKernel_CSRExtractDiag( hypre_DeviceItem    &item,
+                                HYPRE_Int      nrows,
+                                HYPRE_Int     *ia,
+                                HYPRE_Int     *ja,
+                                HYPRE_Complex *aa,
+                                HYPRE_Complex *d,
+                                HYPRE_Int      type)
+{
+   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0, q = 0;
+
+   if (lane < 2)
+   {
+      p = read_only_load(ia + row + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   HYPRE_Int has_diag = 0;
+
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      hypre_int find_diag = j < q && ja[j] == row;
+
+      if (find_diag)
+      {
+         if (type == 0)
+         {
+            d[row] = aa[j];
+         }
+         else if (type == 1)
+         {
+            d[row] = fabs(aa[j]);
+         }
+         else if (type == 2)
+         {
+            d[row] = 1.0 / aa[j];
+         }
+         else if (type == 3)
+         {
+            d[row] = 1.0 / sqrt(aa[j]);
+         }
+         else if (type == 4)
+         {
+            d[row] = 1.0 / sqrt(fabs(aa[j]));
+         }
+      }
+
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
+      {
+         has_diag = 1;
+         break;
+      }
+   }
+
+   if (!has_diag && lane == 0)
+   {
+      d[row] = 0.0;
+   }
+}
+
+void
+hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
+                                      HYPRE_Complex   *d,
+                                      HYPRE_Int        type)
+{
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
+
+   hypre_SyncComputeStream(hypre_handle());
+}
+
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -1503,100 +1596,6 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
-}
-
-/* type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
- *      4: abs diag inverse sqrt
- */
-__global__ void
-hypreCUDAKernel_CSRExtractDiag( hypre_DeviceItem    &item,
-                                HYPRE_Int      nrows,
-                                HYPRE_Int     *ia,
-                                HYPRE_Int     *ja,
-                                HYPRE_Complex *aa,
-                                HYPRE_Complex *d,
-                                HYPRE_Int      type)
-{
-   HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row >= nrows)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0, q = 0;
-
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   HYPRE_Int has_diag = 0;
-
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && ja[j] == row;
-
-      if (find_diag)
-      {
-         if (type == 0)
-         {
-            d[row] = aa[j];
-         }
-         else if (type == 1)
-         {
-            d[row] = fabs(aa[j]);
-         }
-         else if (type == 2)
-         {
-            d[row] = 1.0 / aa[j];
-         }
-         else if (type == 3)
-         {
-            d[row] = 1.0 / sqrt(aa[j]);
-         }
-         else if (type == 4)
-         {
-            d[row] = 1.0 / sqrt(fabs(aa[j]));
-         }
-      }
-
-      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
-      {
-         has_diag = 1;
-         break;
-      }
-   }
-
-   if (!has_diag && lane == 0)
-   {
-      d[row] = 0.0;
-   }
-}
-
-void
-hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
-                                      HYPRE_Complex   *d,
-                                      HYPRE_Int        type)
-{
-   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   dim3           bDim, gDim;
-
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_CSRExtractDiag, gDim, bDim, nrows, A_i, A_j, A_data, d, type );
-
-   hypre_SyncComputeStream(hypre_handle());
 }
 
 /* A = alp * I */

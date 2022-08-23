@@ -1254,7 +1254,6 @@ AS_HELP_STRING([--with-cuda],
 [hypre_using_cuda=no]
 )
 
-
 dnl ***** HIP
 AC_ARG_WITH(hip,
 AS_HELP_STRING([--with-hip],
@@ -1279,6 +1278,7 @@ esac],
 [hypre_using_sycl=no]
 )
 
+dnl ***** CUDA options
 
 AC_ARG_WITH(cuda-home,
 AS_HELP_STRING([--with-cuda-home=DIR],
@@ -1299,6 +1299,39 @@ AS_HELP_STRING([--with-gpu-arch=ARG],
     if test "x${HYPRE_CUDA_SM}" = "x"
     then
        HYPRE_CUDA_SM="${withval}"
+    fi
+ fi
+]
+)
+
+dnl ***** SYCL options
+
+AC_ARG_WITH(sycl-target,
+AS_HELP_STRING([--with-sycl-target=ARG],
+               [User specifies sycl targets for AOT compilation in ARG, where ARG is a comma-separated
+                list (enclosed in quotes), e.g. "spir64_gen".]),
+[
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_SYCL_TARGET}" = "x"
+    then
+       HYPRE_SYCL_TARGET="${withval}"
+    fi
+ fi
+]
+)
+
+AC_ARG_WITH(sycl-target-backend,
+AS_HELP_STRING([--with-sycl-target-backend=ARG],
+               [User specifies additional options for the sycl target backend for AOT compilation in ARG,
+                where ARG contains the desired options (enclosed in double+single quotes),
+                e.g. --with-sycl-target-backend="'-device 12.1.0,12.4.0'".]),
+[
+ if test "x${withval}" != "x"
+ then
+    if test "x${HYPRE_SYCL_TARGET_BACKEND}" = "x"
+    then
+       HYPRE_SYCL_TARGET_BACKEND="${withval}"
     fi
  fi
 ]
@@ -2384,10 +2417,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
            CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
-        dnl rocThrust depends on rocPrim so we need both for Thrust on AMD GPUs.
+        dnl PB: ROCm 5.2 parked all the headers in /opt/rocm-X.Y/include so we just point there.
+        dnl     This is backwards compatible to previous ROCm versions.
         dnl These are header-only so no linking needed.
-        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/rocthrust/include"
-        HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocprim/include"
+        HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/include"
 
         dnl HIP library
         HYPRE_HIP_LIBS="-L${HYPRE_ROCM_PREFIX}/lib -lamdhip64"
@@ -2396,7 +2429,6 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocsparse/include"
                ])
 
         dnl Note rocSPARSE requires rocBLAS, so this is only controlling
@@ -2404,20 +2436,17 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl So we don't need to add any extra libs or anything.
         AS_IF([test x"$hypre_using_rocblas" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCBLAS, 1, [rocBLAS being used])
-              HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocblas/include"
               ])
 
         dnl rocRAND: random number generation on AMD GPUs
         AS_IF([test x"$hypre_using_rocrand" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/rocrand/include"
                ])
 
         dnl rocTX tracing API
         AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
-               HYPRE_HIP_INCL="${HYPRE_HIP_INCL} -I${HYPRE_ROCM_PREFIX}/roctracer/include"
                HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
                ])
 
@@ -2448,7 +2477,15 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
 
-        LDFLAGS+="-fsycl-targets=spir64_gen -Xsycl-target-backend '-device 12.1.0,12.4.0'"
+        dnl AOT compilation for specific devices
+        if test "x${HYPRE_SYCL_TARGET}" != "x"
+        then
+           LDFLAGS+=" -fsycl-targets=${HYPRE_SYCL_TARGET}"
+        fi
+        if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
+        then
+           LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+        fi
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
         if test "$hypre_user_chose_cuflags" = "no"
@@ -2461,7 +2498,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
                                 [hypre_found_mkl=yes],
                                 AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
                ])
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])

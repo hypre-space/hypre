@@ -16,11 +16,24 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
                                HYPRE_BigInt     base,
                                HYPRE_Complex   *values)
 {
-   HYPRE_Int     ierr = 0;
-   HYPRE_BigInt  first_index = hypre_ParVectorFirstIndex(vector);
-   HYPRE_BigInt  last_index = hypre_ParVectorLastIndex(vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
-   HYPRE_Complex *data = hypre_VectorData(local_vector);
+   HYPRE_BigInt    first_index  = hypre_ParVectorFirstIndex(vector);
+   HYPRE_BigInt    last_index   = hypre_ParVectorLastIndex(vector);
+   hypre_Vector   *local_vector = hypre_ParVectorLocalVector(vector);
+
+   HYPRE_Int       component    = hypre_VectorComponent(local_vector);
+   HYPRE_Int       vecstride    = hypre_VectorVectorStride(local_vector);
+   HYPRE_Int       idxstride    = hypre_VectorIndexStride(local_vector);
+   HYPRE_Complex  *data         = hypre_VectorData(local_vector);
+   HYPRE_Int       vecoffset    = component * vecstride;
+
+   HYPRE_Int       ierr = 0;
+
+   if (idxstride != 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "hypre_ParVectorGetValuesDevice not implemented for non-columnwise vector storage\n");
+      return hypre_error_flag;
+   }
 
    /* If indices == NULL, assume that num_values components
       are to be retrieved from block starting at vec_start */
@@ -40,7 +53,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
                             thrust::make_transform_iterator(indices, _1 - base - first_index),
                             thrust::make_transform_iterator(indices, _1 - base - first_index) + num_values,
                             indices,
-                            data,
+                            data + vecoffset,
                             values,
                             in_range<HYPRE_BigInt>(first_index + base, last_index + base) );
       }
@@ -49,7 +62,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
          HYPRE_THRUST_CALL( gather,
                             thrust::make_transform_iterator(indices, _1 - base - first_index),
                             thrust::make_transform_iterator(indices, _1 - base - first_index) + num_values,
-                            data,
+                            data + vecoffset,
                             values);
       }
    }
@@ -61,7 +74,8 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
          return hypre_error_flag;
       }
 
-      hypre_TMemcpy(values, data, HYPRE_Complex, num_values, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(values, data + vecoffset, HYPRE_Complex, num_values,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
    return hypre_error_flag;

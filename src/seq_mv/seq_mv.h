@@ -237,14 +237,12 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Complex  *data;
-   HYPRE_Int       size;
-
-   /* Does the Vector create/destroy `data'? */
-   HYPRE_Int       owns_data;
-
-   /* memory location of array data */
-   HYPRE_MemoryLocation  memory_location;
+   HYPRE_Complex        *data;
+   HYPRE_Int             size;      /* Number of elements of a single vector component */
+   HYPRE_Int             component; /* Index of a multivector component
+                                    (used for set/get routines )*/
+   HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
+   HYPRE_MemoryLocation  memory_location; /* memory location of data array */
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -263,15 +261,15 @@ typedef struct
 
 #define hypre_VectorData(vector)                  ((vector) -> data)
 #define hypre_VectorSize(vector)                  ((vector) -> size)
+#define hypre_VectorComponent(vector)             ((vector) -> component)
 #define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
 #define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
 #define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
-#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride )
-#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride )
+#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
+#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride)
 
 #endif
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -510,6 +508,7 @@ HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector, HYPRE_Int owns_data );
+HYPRE_Int hypre_SeqVectorSetSize ( hypre_Vector *vector, HYPRE_Int size );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
 HYPRE_Int hypre_SeqVectorPrint ( hypre_Vector *vector, char *file_name );
 HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex value );
@@ -581,8 +580,10 @@ HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre
                                      hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
 
-HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int alpha,
-                                        HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta, HYPRE_Int *d_y );
+HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int num_rows, HYPRE_Int num_nonzeros,
+                                        HYPRE_Int alpha, HYPRE_Int *d_ia, HYPRE_Int *d_ja,
+                                        HYPRE_Int *d_a, HYPRE_Int *d_x, HYPRE_Int beta,
+                                        HYPRE_Int *d_y );
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData* hypre_CsrsvDataCreate();
