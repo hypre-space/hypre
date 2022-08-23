@@ -4163,7 +4163,7 @@ hypre_BoomerAMGSetILUDroptol( void     *data,
 }
 HYPRE_Int
 hypre_BoomerAMGSetILUTriSolve( void     *data,
-                        HYPRE_Int    ilu_tri_solve)
+                               HYPRE_Int    ilu_tri_solve)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -4178,7 +4178,7 @@ hypre_BoomerAMGSetILUTriSolve( void     *data,
 }
 HYPRE_Int
 hypre_BoomerAMGSetILULowerJacobiIters( void     *data,
-                        HYPRE_Int    ilu_lower_jacobi_iters)
+                                       HYPRE_Int    ilu_lower_jacobi_iters)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -4194,7 +4194,7 @@ hypre_BoomerAMGSetILULowerJacobiIters( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetILUUpperJacobiIters( void     *data,
-                        HYPRE_Int    ilu_upper_jacobi_iters)
+                                       HYPRE_Int    ilu_upper_jacobi_iters)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
