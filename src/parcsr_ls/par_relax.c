@@ -988,7 +988,8 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
    if (num_procs > 1)
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      v_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends),
+      v_buf_data = hypre_CTAlloc(HYPRE_Real,
+                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends),
                                  HYPRE_MEMORY_HOST);
       v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 
@@ -1507,79 +1508,94 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   if (num_procs > 1)
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+
+   if (exec == HYPRE_EXEC_DEVICE &&
+       hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_UNIFIED)
    {
-      if (!comm_pkg)
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Kaczmarz relaxation is not available on the device w/o unified memory!");
+      return hypre_error_flag;
+   }
+   else
+#endif
+   {
+      if (num_procs > 1)
       {
-         hypre_MatvecCommPkgCreate(A);
-         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+         if (!comm_pkg)
+         {
+            hypre_MatvecCommPkgCreate(A);
+            comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+         }
+
+         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+         u_buf_data = hypre_TAlloc(HYPRE_Real,
+                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                   HYPRE_MEMORY_HOST);
+         u_offd_data = hypre_TAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+
+         index = 0;
+         for (i = 0; i < num_sends; i++)
+         {
+            start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+            for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+            {
+               u_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+            }
+         }
+
+         comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, u_buf_data, u_offd_data);
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+         hypre_TFree(u_buf_data, HYPRE_MEMORY_HOST);
       }
 
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      u_buf_data = hypre_TAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                                HYPRE_MEMORY_HOST);
-      u_offd_data = hypre_TAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
-
-      index = 0;
-      for (i = 0; i < num_sends; i++)
+      /* Forward local pass */
+      for (i = 0; i < num_rows; i++)
       {
-         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+         res = f_data[i];
+         for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
          {
-            u_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+            res -= A_diag_data[j] * u_data[A_diag_j[j]];
+         }
+
+         for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
+         {
+            res -= A_offd_data[j] * u_offd_data[A_offd_j[j]];
+         }
+
+         res /= l1_norms[i];
+
+         for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
+         {
+            u_data[A_diag_j[j]] += omega * res * A_diag_data[j];
          }
       }
 
-      comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, u_buf_data, u_offd_data);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-      hypre_TFree(u_buf_data, HYPRE_MEMORY_HOST);
+      /* Backward local pass */
+      for (i = num_rows - 1; i > -1; i--)
+      {
+         res = f_data[i];
+         for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
+         {
+            res -= A_diag_data[j] * u_data[A_diag_j[j]];
+         }
+
+         for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
+         {
+            res -= A_offd_data[j] * u_offd_data[A_offd_j[j]];
+         }
+
+         res /= l1_norms[i];
+
+         for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
+         {
+            u_data[A_diag_j[j]] += omega * res * A_diag_data[j];
+         }
+      }
+
+      hypre_TFree(u_offd_data, HYPRE_MEMORY_HOST);
    }
-
-   /* Forward local pass */
-   for (i = 0; i < num_rows; i++)
-   {
-      res = f_data[i];
-      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
-      {
-         res -= A_diag_data[j] * u_data[A_diag_j[j]];
-      }
-
-      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
-      {
-         res -= A_offd_data[j] * u_offd_data[A_offd_j[j]];
-      }
-
-      res /= l1_norms[i];
-
-      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
-      {
-         u_data[A_diag_j[j]] += omega * res * A_diag_data[j];
-      }
-   }
-
-   /* Backward local pass */
-   for (i = num_rows - 1; i > -1; i--)
-   {
-      res = f_data[i];
-      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
-      {
-         res -= A_diag_data[j] * u_data[A_diag_j[j]];
-      }
-
-      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
-      {
-         res -= A_offd_data[j] * u_offd_data[A_offd_j[j]];
-      }
-
-      res /= l1_norms[i];
-
-      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
-      {
-         u_data[A_diag_j[j]] += omega * res * A_diag_data[j];
-      }
-   }
-
-   hypre_TFree(u_offd_data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
