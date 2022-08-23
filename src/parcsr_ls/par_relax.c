@@ -1383,18 +1383,11 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
 
       hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
       hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
    }
-   else
-   {
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
+
+   /* Free memory */
+   hypre_CSRMatrixDestroy(A_CSR);
+   hypre_SeqVectorDestroy(f_vector);
 
    return relax_error;
 }
@@ -1472,18 +1465,11 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
       hypre_TFree(piv, HYPRE_MEMORY_HOST);
       hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
       hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
    }
-   else
-   {
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
+
+   /* Free memory */
+   hypre_CSRMatrixDestroy(A_CSR);
+   hypre_SeqVectorDestroy(f_vector);
 
    return relax_error;
 }
@@ -1597,8 +1583,6 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-
-
 
 HYPRE_Int
 hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
