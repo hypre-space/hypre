@@ -1781,7 +1781,7 @@ hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
 HYPRE_Int
 hypre_umpire_pinned_pooled_free(void *ptr)
 {
-   const hypre_Handle *handle = hypre_handle();
+   hypre_Handle *handle = hypre_handle();
    const char *pool_name = hypre_HandleUmpirePinnedPoolName(handle);
    umpire_allocator pooled_allocator;
 

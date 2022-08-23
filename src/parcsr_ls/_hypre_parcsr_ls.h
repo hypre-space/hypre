@@ -160,6 +160,9 @@ typedef struct
    HYPRE_Int            ilu_max_row_nnz;
    HYPRE_Int            ilu_max_iter;
    HYPRE_Real           ilu_droptol;
+   HYPRE_Int            ilu_tri_solve;
+   HYPRE_Int            ilu_lower_jacobi_iters;
+   HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
 
    HYPRE_Int            fsai_max_steps;
@@ -406,6 +409,9 @@ typedef struct
 #define hypre_ParAMGDataILULevel(amg_data) ((amg_data)->ilu_lfil)
 #define hypre_ParAMGDataILUMaxRowNnz(amg_data) ((amg_data)->ilu_max_row_nnz)
 #define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
+#define hypre_ParAMGDataILUTriSolve(amg_data) ((amg_data)->ilu_tri_solve)
+#define hypre_ParAMGDataILULowerJacobiIters(amg_data) ((amg_data)->ilu_lower_jacobi_iters)
+#define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
@@ -1369,6 +1375,11 @@ HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver solver, HYPRE_Int ilu_lfil);
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_max_row_nnz);
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
+HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver solver, HYPRE_Int ilu_tri_solve);
+HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver solver,
+                                                 HYPRE_Int ilu_lower_jacobi_iters);
+HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver solver,
+                                                 HYPRE_Int ilu_upper_jacobi_iters);
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
@@ -2006,6 +2017,9 @@ HYPRE_Int hypre_BoomerAMGSetEuBJ ( void *data, HYPRE_Int eu_bj );
 HYPRE_Int hypre_BoomerAMGSetILUType( void *data, HYPRE_Int ilu_type);
 HYPRE_Int hypre_BoomerAMGSetILULevel( void *data, HYPRE_Int ilu_lfil);
 HYPRE_Int hypre_BoomerAMGSetILUDroptol( void *data, HYPRE_Real ilu_droptol);
+HYPRE_Int hypre_BoomerAMGSetILUTriSolve( void *data, HYPRE_Int ilu_tri_solve);
+HYPRE_Int hypre_BoomerAMGSetILULowerJacobiIters( void *data, HYPRE_Int ilu_lower_jacobi_iters);
+HYPRE_Int hypre_BoomerAMGSetILUUpperJacobiIters( void *data, HYPRE_Int ilu_upper_jacobi_iters);
 HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter);
 HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz);
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type);
@@ -3019,6 +3033,9 @@ HYPRE_Int hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold
 HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve );
+HYPRE_Int hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters );
+HYPRE_Int hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters );
 HYPRE_Int hypre_ILUSetup( void *ilu_vdata, hypre_ParCSRMatrix *A, hypre_ParVector    *f,
                           hypre_ParVector    *u );
 HYPRE_Int hypre_ILUSolve( void *ilu_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,

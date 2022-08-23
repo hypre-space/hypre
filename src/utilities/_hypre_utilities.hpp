@@ -947,9 +947,34 @@ hypre_int warp_any_sync(hypre_DeviceItem &item, unsigned mask, hypre_int predica
 
 template <typename T>
 static __device__ __forceinline__
-T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line,
+                    hypre_int width = HYPRE_WARP_SIZE)
 {
-   return __shfl_sync(mask, val, src_line);
+   return __shfl_sync(mask, val, src_line, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
+                       hypre_int width = HYPRE_WARP_SIZE)
+{
+   return __shfl_up_sync(mask, val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
+                         hypre_int width = HYPRE_WARP_SIZE)
+{
+   return __shfl_down_sync(mask, val, delta, width);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask,
+                        hypre_int width = HYPRE_WARP_SIZE)
+{
+   return __shfl_xor_sync(mask, val, lane_mask, width);
 }
 
 template <typename T>
@@ -1314,10 +1339,75 @@ template <typename T>
 static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
 {
-   /* WM: NOTE - seems that barrier is required in order to produce correct results here, but I don't know why... */
-   /* this may be a bug in the underlying sycl implementation that needs to be fixed */
+   /* WM: todo - try removing barrier with new implementation */
    item.get_sub_group().barrier();
-   return item.get_sub_group().shuffle(val, src_line);
+   return sycl::group_broadcast(item.get_sub_group(), val, src_line);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line,
+                    hypre_int width)
+{
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_start = (lane_id / width) * width;
+   hypre_int src_in_warp = group_start + src_line;
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta)
+{
+   return sycl::shift_group_right(item.get_sub_group(), val, delta);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
+                       hypre_int width)
+{
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_start = (lane_id / width) * width;
+   hypre_int src_in_warp = sycl::max(group_start, lane_id - delta);
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta)
+{
+   return sycl::shift_group_left(item.get_sub_group(), val, delta);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int delta,
+                         hypre_int width)
+{
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_end = ((lane_id / width) + 1) * width - 1;
+   hypre_int src_in_warp = sycl::min(group_end, lane_id + delta);
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask)
+{
+   return sycl::permute_group_by_xor(item.get_sub_group(), val, lane_mask);
+}
+
+template <typename T>
+static __device__ __forceinline__
+T warp_shuffle_xor_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int lane_mask,
+                        hypre_int width)
+{
+   hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
+   hypre_int group_end = ((lane_id / width) + 1) * width - 1;
+   hypre_int src_in_warp = lane_id ^ lane_mask;
+   src_in_warp = src_in_warp > group_end ? lane_id : src_in_warp;
+   return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
 template <typename T>
@@ -1443,7 +1533,7 @@ struct modulo
    T val;
    modulo(T val_) { val = val_; }
 
-   constexpr bool operator()(const T &x) const { return (x % val); }
+   constexpr T operator()(const T &x) const { return (x % val); }
 };
 
 template<typename T>

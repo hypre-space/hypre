@@ -179,6 +179,21 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorSetLocalSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector,
+                             HYPRE_Int        local_size )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_SeqVectorSetSize(local_vector, local_size);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorSetNumVectors
  * call before calling hypre_ParVectorInitialize
  * probably this will do more harm than good, use hypre_ParMultiVectorCreate
@@ -205,7 +220,7 @@ hypre_ParVector*
 hypre_ParVectorRead( MPI_Comm    comm,
                      const char *file_name )
 {
-   char             new_file_name[80];
+   char             new_file_name[256];
    hypre_ParVector *par_vector;
    HYPRE_Int        my_id;
    HYPRE_BigInt     partitioning[2];
@@ -250,7 +265,7 @@ HYPRE_Int
 hypre_ParVectorPrint( hypre_ParVector  *vector,
                       const char       *file_name )
 {
-   char          new_file_name[80];
+   char          new_file_name[256];
    hypre_Vector *local_vector;
    MPI_Comm      comm;
    HYPRE_Int     my_id;

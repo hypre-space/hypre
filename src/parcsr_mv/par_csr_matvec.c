@@ -354,6 +354,7 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int ierr = 0;
    HYPRE_Int num_sends, jv;
+   HYPRE_Int i;
 
    HYPRE_Int vecstride     = hypre_VectorVectorStride(y_local);
    HYPRE_Int idxstride     = hypre_VectorIndexStride(y_local);
@@ -567,7 +568,6 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
       HYPRE_Complex *recv_data = (HYPRE_Complex *) y_buf_data[jv];
       HYPRE_Complex *locl_data = y_local_data + jv * vecstride;
 
-      HYPRE_Int i;
       for (i = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
            i < hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
            i ++)
@@ -757,4 +757,3 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
    return ierr;
 }
-

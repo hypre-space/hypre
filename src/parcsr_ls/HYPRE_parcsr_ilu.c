@@ -96,6 +96,36 @@ HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetTriSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve )
+{
+   return hypre_ILUSetTriSolve( solver, tri_solve );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetLowerJacobiIters
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetLowerJacobiIters( HYPRE_Solver solver, HYPRE_Int lower_jacobi_iters )
+{
+   return hypre_ILUSetLowerJacobiIters( solver, lower_jacobi_iters );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetUpperJacobiIters
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int upper_jacobi_iters )
+{
+   return hypre_ILUSetUpperJacobiIters( solver, upper_jacobi_iters );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetTol
  *--------------------------------------------------------------------------*/
 

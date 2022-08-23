@@ -1119,6 +1119,34 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
                                              HYPRE_Real   kap_tolerance);
 
 /**
+ * (Optional) Defines triangular solver for ILU(k,T) smoother: 0-iterative, 1-direct (default)
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
+                                         HYPRE_Int     ilu_tri_solve);
+
+/**
+ * (Optional) Defines number of lower Jacobi iterations for ILU(k,T) smoother triangular solve.
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
+                                                 HYPRE_Int     ilu_lower_jacobi_iters);
+
+/**
+ * (Optional) Defines number of upper Jacobi iterations for ILU(k,T) smoother triangular solve.
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
+                                                 HYPRE_Int     ilu_upper_jacobi_iters);
+
+/**
+ * Set Local Reordering paramter (1==RCM, 0==None)
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
+                                                HYPRE_Int    ilu_reordering_type);
+
+/**
  * (Optional) Defines which parallel restriction operator is used.
  * There are the following options for restr_type:
  *
@@ -4276,6 +4304,27 @@ HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
+
+/**
+ * (Optional) Set triangular solver type (0) direct (1) iterative
+ * Set this to 1 Jacobi iterations. The default is 0 direct method.
+ **/
+HYPRE_Int
+HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve );
+
+/**
+ * (Optional) Set number of lower Jacobi iterations for the triangular L solves
+ * Set this to integer > 0 when using iterative tri_solve (0). The default is 5 iterations.
+ **/
+HYPRE_Int
+HYPRE_ILUSetLowerJacobiIters( HYPRE_Solver solver, HYPRE_Int lower_jacobi_iterations );
+
+/**
+ * (Optional) Set number of upper Jacobi iterations for the triangular U solves
+ * Set this to integer > 0 when using iterative tri_solve (0). The default is 5 iterations.
+ **/
+HYPRE_Int
+HYPRE_ILUSetUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int upper_jacobi_iterations );
 
 /**
  * (Optional) Set the convergence tolerance for the ILU smoother.

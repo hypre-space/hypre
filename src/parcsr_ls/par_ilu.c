@@ -23,7 +23,7 @@ hypre_ILUCreate()
 
    ilu_data                               = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    hypre_ParILUDataMatLMatrixDescription(ilu_data) = NULL;
    hypre_ParILUDataMatUMatrixDescription(ilu_data) = NULL;
    hypre_ParILUDataMatBLILUSolveInfo(ilu_data) = NULL;
@@ -81,6 +81,9 @@ hypre_ILUCreate()
    hypre_ParILUDataNumIterations(ilu_data) = 0;
 
    hypre_ParILUDataMaxIter(ilu_data) = 20;
+   hypre_ParILUDataTriSolve(ilu_data) = 1;
+   hypre_ParILUDataLowerJacobiIters(ilu_data) = 5;
+   hypre_ParILUDataUpperJacobiIters(ilu_data) = 5;
    hypre_ParILUDataTol(ilu_data) = 1.0e-7;
 
    hypre_ParILUDataLogging(ilu_data) = 0;
@@ -120,6 +123,9 @@ hypre_ILUCreate()
       NULL;/* this is not the default option, set it only when switched to */
    hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = 0;
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = 1;
+   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = 1;
+   hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = 5;
+   hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = 5;
    hypre_ParILUDataSchurPrecondTol(ilu_data) = 0.0;
 
    /* -> SCHUR-NSH */
@@ -148,7 +154,7 @@ hypre_ILUDestroy( void *data )
 {
    hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    if (hypre_ParILUDataILUSolveBuffer(ilu_data))
    {
       hypre_TFree(hypre_ParILUDataILUSolveBuffer(ilu_data), HYPRE_MEMORY_DEVICE);
@@ -373,12 +379,12 @@ hypre_ILUDestroy( void *data )
       switch (hypre_ParILUDataIluType(ilu_data))
       {
          case 10: case 11: case 40: case 41:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (hypre_ParILUDataIluType(ilu_data) != 10 && hypre_ParILUDataIluType(ilu_data) != 11)
             {
 #endif
                HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             }
 #endif
             break;
@@ -497,12 +503,12 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
       switch (hypre_ParILUDataIluType(ilu_data))
       {
          case 10: case 11: case 40: case 41:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (hypre_ParILUDataIluType(ilu_data) != 10 && hypre_ParILUDataIluType(ilu_data) != 11)
             {
 #endif
                HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             }
 #endif
             break;
@@ -555,6 +561,30 @@ hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
    hypre_ParILUDataMaxIter(ilu_data) = max_iter;
+   return hypre_error_flag;
+}
+/* Set ILU triangular solver type */
+HYPRE_Int
+hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataTriSolve(ilu_data) = tri_solve;
+   return hypre_error_flag;
+}
+/* Set Lower Jacobi iterations for iterative triangular solver */
+HYPRE_Int
+hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataLowerJacobiIters(ilu_data) = lower_jacobi_iters;
+   return hypre_error_flag;
+}
+/* Set Upper Jacobi iterations for iterative triangular solver */
+HYPRE_Int
+hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataUpperJacobiIters(ilu_data) = upper_jacobi_iters;
    return hypre_error_flag;
 }
 /* Set convergence tolerance for ILU solver */
@@ -719,6 +749,30 @@ hypre_ILUSetSchurPrecondMaxIter( void *ilu_vdata, HYPRE_Int sp_max_iter )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = sp_max_iter;
+   return hypre_error_flag;
+}
+/* Set triangular solver type for Precond of Schur System */
+HYPRE_Int
+hypre_ILUSetSchurPrecondTriSolve( void *ilu_vdata, HYPRE_Int sp_tri_solve )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = sp_tri_solve;
+   return hypre_error_flag;
+}
+/* Set Lower Jacobi iterations for Precond of Schur System */
+HYPRE_Int
+hypre_ILUSetSchurPrecondLowerJacobiIters( void *ilu_vdata, HYPRE_Int sp_lower_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = sp_lower_jacobi_iters;
+   return hypre_error_flag;
+}
+/* Set Upper Jacobi iterations for Precond of Schur System */
+HYPRE_Int
+hypre_ILUSetSchurPrecondUpperJacobiIters( void *ilu_vdata, HYPRE_Int sp_upper_jacobi_iters )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = sp_upper_jacobi_iters;
    return hypre_error_flag;
 }
 /* Set onvergence tolerance for Precond of Schur System */
@@ -938,6 +992,9 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
 
    hypre_printf("\n ILU Solver Parameters: \n");
    hypre_printf("Max number of iterations: %d\n", hypre_ParILUDataMaxIter(ilu_data));
+   hypre_printf("Triangular solver type: %d\n", hypre_ParILUDataTriSolve(ilu_data));
+   hypre_printf("Lower Jacobi Iterations: %d\n", hypre_ParILUDataLowerJacobiIters(ilu_data));
+   hypre_printf("Upper Jacobi Iterations: %d\n", hypre_ParILUDataUpperJacobiIters(ilu_data));
    hypre_printf("Stopping tolerance: %e\n", hypre_ParILUDataTol(ilu_data));
 
    return hypre_error_flag;
@@ -1740,7 +1797,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    /* data objects for communication */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg      *comm_pkg;
-   hypre_ParCSRCommPkg      *comm_pkg_tmp;
+   hypre_ParCSRCommPkg      *comm_pkg_tmp = NULL;
    hypre_ParCSRCommHandle   *comm_handle_count;
    hypre_ParCSRCommHandle   *comm_handle_marker;
    hypre_ParCSRCommHandle   *comm_handle_j;
@@ -2763,7 +2820,7 @@ hypre_ILULocalRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end)
    return hypre_error_flag;
 }
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUCusparseSchurGMRESDummySetup
@@ -3661,7 +3718,7 @@ hypre_ParILURAPSchurGMRESMatvecDestroyH( void *matvec_data )
    return 0;
 }
 
-#endif
+#endif /* if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE) */
 
 /* NSH create and solve and help functions */
 

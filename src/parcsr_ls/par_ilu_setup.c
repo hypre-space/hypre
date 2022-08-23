@@ -39,7 +39,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            *qperm               = hypre_ParILUDataQPerm(ilu_data);
    HYPRE_Real           tol_ddPQ             = hypre_ParILUDataTolDDPQ(ilu_data);
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* pointers to cusparse data, note that they are not NULL only when needed */
    cusparseMatDescr_t      matL_des          = hypre_ParILUDataMatLMatrixDescription(ilu_data);
    cusparseMatDescr_t      matU_des          = hypre_ParILUDataMatUMatrixDescription(ilu_data);
@@ -62,6 +62,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int               *A_diag_fake      = hypre_ParILUDataMatAFakeDiagonal(ilu_data);
    hypre_Vector            *Ftemp_upper      = NULL;
    hypre_Vector            *Utemp_lower      = NULL;
+   HYPRE_Int               test_opt;
 #endif
 
    hypre_ParCSRMatrix   *matA                = hypre_ParILUDataMatA(ilu_data);
@@ -108,9 +109,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            buffer_size;
    HYPRE_Int            send_size;
    HYPRE_Int            recv_size;
-#ifdef HYPRE_USING_CUDA
-   HYPRE_Int            test_opt;
-#endif
+
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -119,7 +118,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* create cuda and cusparse information when needed */
    /* Use most of them from global information */
    /* set matrix L descripter, L is a lower triangular matrix with unit diagonal entries */
@@ -362,13 +361,13 @@ hypre_ILUSetup( void               *ilu_vdata,
       switch (ilu_type)
       {
          case 10: case 11: case 40: case 41:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (hypre_ParILUDataIluType(ilu_data) != 10 &&
                 hypre_ParILUDataIluType(ilu_data) != 11)
             {
 #endif
                HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             }
 #endif
             break;
@@ -418,7 +417,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    switch (ilu_type)
    {
       case 0:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          /* only apply the setup of ILU0 with cusparse */
          if (fill_level == 0)
          {
@@ -440,7 +439,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       case 1:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm, n, n, matL_des, matU_des,
                                   ilu_solve_policy, &ilu_solve_buffer,
                                   &matBL_info, &matBU_info, &matSL_info, &matSU_info, &matBLU_d, &matS,
@@ -451,7 +450,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       case 10:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          if (fill_level == 0)
          {
             /* Only support ILU0 */
@@ -473,7 +472,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       case 11:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm, n, nLU, matL_des, matU_des,
                                   ilu_solve_policy, &ilu_solve_buffer,
                                   &matBL_info, &matBU_info, &matSL_info, &matSU_info, &matBLU_d, &matS,
@@ -502,7 +501,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                      &matS, &u_end); //ddPQ + GMRES + hypre_ilut()
          break;
       case 50:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          test_opt = hypre_ParILUDataTestOption(ilu_data);
          hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des, ilu_solve_policy,
                                      &ilu_solve_buffer, &matAL_info, &matAU_info, &matBL_info, &matBU_info, &matSL_info, &matSU_info,
@@ -514,7 +513,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
          break;
       default:
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          hypre_ILUSetupILU0Device(matA, perm, perm, n, n, matL_des, matU_des, ilu_solve_policy,
                                   &ilu_solve_buffer,
                                   &matBL_info, &matBU_info, &matSL_info, &matSU_info, &matBLU_d, &matS,
@@ -530,7 +529,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       case 10: case 11:
          if (matS)
          {
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             /* create working vectors */
 
             Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matS),
@@ -805,7 +804,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
       case 50:
       {
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
          if (matS)
          {
             /* create working vectors */
@@ -1027,7 +1026,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
    }
    /* set pointers to ilu data */
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* set cusparse pointers */
    //hypre_ParILUDataILUSolveBuffer(ilu_data)  = ilu_solve_buffer;
    hypre_ParILUDataMatAILUDevice(ilu_data)      = matALU_d;
@@ -1077,7 +1076,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    size_C = hypre_ParCSRMatrixGlobalNumRows(matA);
    /* switch to compute complexity */
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    HYPRE_Int nnzBEF = 0;
    HYPRE_Int nnzG;/* Global nnz */
    if (ilu_type == 0 && fill_level == 0)
@@ -1170,7 +1169,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                                        hypre_ParCSRMatrixDNumNonzeros(matL) +
                                                        hypre_ParCSRMatrixDNumNonzeros(matU)) /
                                                       hypre_ParCSRMatrixDNumNonzeros(matA);
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    }
 #endif
    if ((my_id == 0) && (print_level > 0))
@@ -1199,7 +1198,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    return hypre_error_flag;
 }
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /* Extract submatrix from diagonal part of A into a new CSRMatrix without sort rows
  * WARNING: We don't put diagonal to the first entry of each row since this function is now for cuSparse only
