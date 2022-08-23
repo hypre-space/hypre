@@ -680,9 +680,10 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-            val = 1.0 / b_data[i];
             for (i = 0; i < size; i++)
             {
+               val = 1.0 / b_data[i];
+
                y_data[i]        += x_data[i]        * val;
                y_data[i + size] += x_data[i + size] * val;
             }
@@ -712,9 +713,9 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
 #endif
-            val = 1.0 / b_data[i];
             for (i = 0; i < size; i++)
             {
+               val = 1.0 / b_data[i];
                for (j = 0; j < num_vectors_x; j++)
                {
                   y_data[i + size * j] += x_data[i + size * j] * val;
@@ -912,7 +913,8 @@ hypre_SeqVectorSumElts( hypre_Vector *v )
    HYPRE_Complex sum;
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_VectorMemoryLocation(v) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(v));
+
    if (exec == HYPRE_EXEC_DEVICE)
    {
       sum = hypre_SeqVectorSumEltsDevice(v);
