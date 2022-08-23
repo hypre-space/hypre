@@ -882,7 +882,7 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
    hypre_VectorNumVectors(&vec_y)            = num_components;
    hypre_VectorMultiVecStorageMethod(&vec_y) = 0;
 
-/* WM: todo - port hypre_CSRMatrixSpMVDevice() to sycl */
+   /* WM: todo - port hypre_CSRMatrixSpMVDevice() to sycl */
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Complex *data = hypre_TAlloc(HYPRE_Complex,
                                       hypre_CSRMatrixNumNonzeros(matrix_E),

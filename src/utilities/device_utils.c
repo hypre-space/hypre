@@ -1147,11 +1147,14 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
    return hypre_error_flag;
 }
 
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2,
-                                                    HYPRE_Int     *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Real *keys2,
-                                                    HYPRE_Int     *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1, HYPRE_Int  *keys2,
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
+                                                    HYPRE_Int *keys1, HYPRE_Int *keys2,
+                                                    HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
+                                                    HYPRE_Int *keys1, HYPRE_Real *keys2,
+                                                    HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
+                                                    HYPRE_Int *keys1, HYPRE_Int *keys2,
                                                     HYPRE_Complex *vals, HYPRE_Int opt);
 
 /*--------------------------------------------------------------------

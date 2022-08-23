@@ -453,10 +453,10 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
    const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmBlockNumDim(hypre_handle())[1][BIN],
-                                           (m + bDim.z - 1) / bDim.z );
+                                           (HYPRE_Int) ((m + bDim.z - 1) / bDim.z) );
    dim3 gDim( num_blocks );
    // number of active groups
-   HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_groups = hypre_min((HYPRE_Int) (bDim.z * gDim.x), m);
 
    const char HASH_TYPE = HYPRE_SPGEMM_HASH_TYPE;
 
@@ -708,4 +708,3 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 }
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
-

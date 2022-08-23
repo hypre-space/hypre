@@ -102,6 +102,33 @@ hypre_VectorToCusparseDnVec(const hypre_Vector *x,
    return vecX;
 }
 
+/*
+ * @brief Creates a cuSPARSE dense matrix descriptor from a hypre_Vector
+ * @param[in] *x Pointer to a hypre_Vector
+ * @return cuSPARSE dense matrix descriptor
+ * @warning Assumes CSRMatrix uses doubles for values
+ */
+cusparseDnMatDescr_t
+hypre_VectorToCusparseDnMat(const hypre_Vector *x)
+{
+   HYPRE_Int             storage = hypre_VectorMultiVecStorageMethod(x);
+   HYPRE_Int             num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int             size = hypre_VectorSize(x);
+   HYPRE_Complex        *data = hypre_VectorData(x);
+
+   cudaDataType          data_type = hypre_HYPREComplexToCudaDataType();
+   cusparseDnMatDescr_t  matX;
+
+   HYPRE_CUSPARSE_CALL( cusparseCreateDnMat(&matX,
+                                            size,
+                                            num_vectors,
+                                            (storage == 0) ? size : num_vectors,
+                                            data,
+                                            data_type,
+                                            (storage == 0) ? CUSPARSE_ORDER_COL : CUSPARSE_ORDER_ROW) );
+   return matX;
+}
+
+
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 #endif // #if defined(HYPRE_USING_CUSPARSE)
-
