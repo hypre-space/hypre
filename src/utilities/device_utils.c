@@ -1805,6 +1805,69 @@ hypreDevice_BigIntFilln( HYPRE_BigInt *d_x,
    return hypreDevice_Filln(d_x, n, v);
 }
 
+/*--------------------------------------------------------------------
+ * hypreGPUKernel_StridedCopy
+ *--------------------------------------------------------------------*/
+
+template<typename T>
+__global__ void
+hypreGPUKernel_StridedCopy(hypre_DeviceItem &item,
+                           HYPRE_Int         size,
+                           HYPRE_Int         stride,
+                           T                *in,
+                           T                *out )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < size)
+   {
+      out[i] = in[i * stride];
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_StridedCopy
+ *--------------------------------------------------------------------*/
+
+template<typename T>
+HYPRE_Int
+hypreDevice_StridedCopy( HYPRE_Int  size,
+                         HYPRE_Int  stride,
+                         T         *in,
+                         T         *out )
+{
+   if (size < 1 || stride < 1)
+   {
+      return hypre_error_flag;
+   }
+
+   if (in == out)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Cannot perform in-place strided copy");
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_StridedCopy, gDim, bDim, size, stride, in, out );
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_IntStridedCopy
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_IntStridedCopy( HYPRE_Int  size,
+                            HYPRE_Int  stride,
+                            HYPRE_Int *in,
+                            HYPRE_Int *out )
+{
+   return hypreDevice_StridedCopy(size, stride, in, out);
+}
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1972,69 +2035,6 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
                            HYPRE_Complex  v )
 {
    return hypreDevice_Scalen(d_x, n, d_y, v);
-}
-
-/*--------------------------------------------------------------------
- * hypreGPUKernel_StridedCopy
- *--------------------------------------------------------------------*/
-
-template<typename T>
-__global__ void
-hypreGPUKernel_StridedCopy(hypre_DeviceItem &item,
-                           HYPRE_Int         size,
-                           HYPRE_Int         stride,
-                           T                *in,
-                           T                *out )
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < size)
-   {
-      out[i] = in[i * stride];
-   }
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_StridedCopy
- *--------------------------------------------------------------------*/
-
-template<typename T>
-HYPRE_Int
-hypreDevice_StridedCopy( HYPRE_Int  size,
-                         HYPRE_Int  stride,
-                         T         *in,
-                         T         *out )
-{
-   if (size < 1 || stride < 1)
-   {
-      return hypre_error_flag;
-   }
-
-   if (in == out)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Cannot perform in-place strided copy");
-      return hypre_error_flag;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_StridedCopy, gDim, bDim, size, stride, in, out );
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_IntStridedCopy
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_IntStridedCopy( HYPRE_Int  size,
-                            HYPRE_Int  stride,
-                            HYPRE_Int *in,
-                            HYPRE_Int *out )
-{
-   return hypreDevice_StridedCopy(size, stride, in, out);
 }
 
 /*--------------------------------------------------------------------
