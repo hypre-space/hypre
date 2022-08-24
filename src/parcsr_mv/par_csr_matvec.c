@@ -635,7 +635,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       #pragma omp target teams distribute parallel for private(j) is_device_ptr(y_buf_data, y_local_data, d_send_map_elmts)
       for (j = start; j < end; j++)
       {
-         y_local_data[device_send_map_elmts[j]] += y_buf_data[j];
+         y_local_data[d_send_map_elmts[j]] += y_buf_data[j];
       }
    }
 
