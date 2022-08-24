@@ -976,7 +976,7 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
    HYPRE_Complex       *v_ext_data    = NULL;
    HYPRE_Complex       *v_buf_data    = NULL;
 
-   HYPRE_Complex        zero             = 0.0;
+   HYPRE_Complex        zero          = 0.0;
    HYPRE_Complex        res;
 
    HYPRE_Int num_procs, my_id, i, j, ii, jj, index, num_sends, start;
@@ -985,64 +985,79 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   if (num_procs > 1)
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+
+   if (exec == HYPRE_EXEC_DEVICE &&
+       hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_UNIFIED)
    {
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      v_buf_data = hypre_CTAlloc(HYPRE_Real,
-                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends),
-                                 HYPRE_MEMORY_HOST);
-      v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
-
-      index = 0;
-      for (i = 0; i < num_sends; i++)
-      {
-         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
-         {
-            v_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
-         }
-      }
-
-      comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, v_ext_data);
-
-      /*-----------------------------------------------------------------
-       * Copy current approximation into temporary vector.
-       *-----------------------------------------------------------------*/
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-      comm_handle = NULL;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Chaotic GS relaxation is not available on the device!");
+      return hypre_error_flag;
    }
+   else
+#endif
+   {
+      if (num_procs > 1)
+      {
+         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+         v_buf_data = hypre_CTAlloc(HYPRE_Real,
+                                    hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends),
+                                    HYPRE_MEMORY_HOST);
+         v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+
+         index = 0;
+         for (i = 0; i < num_sends; i++)
+         {
+            start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+            for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+            {
+               v_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+            }
+         }
+
+         comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, v_ext_data);
+
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+         comm_handle = NULL;
+      }
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < num_rows; i++)
-   {
-      /*-----------------------------------------------------------
-       * If i is of the right type ( C or F or All) and diagonal is
-       * nonzero, relax point i; otherwise, skip it.
-       * Relax only C or F points as determined by relax_points.
-       *-----------------------------------------------------------*/
-      if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_diag_data[A_diag_i[i]] != zero )
+      for (i = 0; i < num_rows; i++)
       {
-         res = f_data[i];
-         for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
+         /*-----------------------------------------------------------
+          * If i is of the right type ( C or F or All) and diagonal is
+          * nonzero, relax point i; otherwise, skip it.
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------*/
+         if ( (relax_points == 0 || cf_marker[i] == relax_points) &&
+              A_diag_data[A_diag_i[i]] != zero )
          {
-            ii = A_diag_j[jj];
-            res -= A_diag_data[jj] * u_data[ii];
+            res = f_data[i];
+            for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
+            {
+               ii = A_diag_j[jj];
+               res -= A_diag_data[jj] * u_data[ii];
+            }
+            for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
+            {
+               ii = A_offd_j[jj];
+               res -= A_offd_data[jj] * v_ext_data[ii];
+            }
+            u_data[i] = res / A_diag_data[A_diag_i[i]];
          }
-         for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
-         {
-            ii = A_offd_j[jj];
-            res -= A_offd_data[jj] * v_ext_data[ii];
-         }
-         u_data[i] = res / A_diag_data[A_diag_i[i]];
       }
-   }
 
-   if (num_procs > 1)
-   {
-      hypre_TFree(v_ext_data, HYPRE_MEMORY_HOST);
-      hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+      if (num_procs > 1)
+      {
+         hypre_TFree(v_ext_data, HYPRE_MEMORY_HOST);
+         hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+      }
    }
 
    return hypre_error_flag;
@@ -1515,7 +1530,7 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
        hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_UNIFIED)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Kaczmarz relaxation is not available on the device w/o unified memory!");
+                        "Kaczmarz relaxation is not available on the device!");
       return hypre_error_flag;
    }
    else
