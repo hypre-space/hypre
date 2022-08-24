@@ -473,13 +473,48 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int   n,
       hypre_assert(0);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   dim3 gDim(1, 1, num_blocks);
-#else
-   dim3 gDim(num_blocks, 1, 1);
-#endif
+   dim3 gDim = hypre_dim3(num_blocks);
 
    return gDim;
+}
+
+/*--------------------------------------------------------------------
+ * hypre_dim3
+ * NOTE: these functions are necessary due to different linearization
+ * procedures between cuda/hip and sycl
+ *--------------------------------------------------------------------*/
+
+dim3
+hypre_dim3(HYPRE_Int x)
+{
+#if defined(HYPRE_USING_SYCL)
+   dim3 d(1, 1, x);
+#else
+   dim3 d(x, 1, 1);
+#endif
+   return d;
+}
+
+dim3
+hypre_dim3(HYPRE_Int x, HYPRE_Int y)
+{
+#if defined(HYPRE_USING_SYCL)
+   dim3 d(1, y, x);
+#else
+   dim3 d(x, y, 1);
+#endif
+   return d;
+}
+
+dim3
+hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z)
+{
+#if defined(HYPRE_USING_SYCL)
+   dim3 d(z, y, x);
+#else
+   dim3 d(x, y, z);
+#endif
+   return d;
 }
 
 /*--------------------------------------------------------------------
@@ -1147,14 +1182,14 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
    return hypre_error_flag;
 }
 
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                    HYPRE_Int  *keys2,
-                                                    HYPRE_Int     *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                    HYPRE_Real *keys2,
-                                                    HYPRE_Int     *vals, HYPRE_Int opt);
-template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                    HYPRE_Int  *keys2,
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
+                                                    HYPRE_Int *keys1, HYPRE_Int *keys2,
+                                                    HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
+                                                    HYPRE_Int *keys1, HYPRE_Real *keys2,
+                                                    HYPRE_Int *vals, HYPRE_Int opt);
+template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
+                                                    HYPRE_Int *keys1, HYPRE_Int *keys2,
                                                     HYPRE_Complex *vals, HYPRE_Int opt);
 
 /*--------------------------------------------------------------------
@@ -1326,8 +1361,8 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
    if (ny <= 2)
    {
       /* trivial cases, n = 1, 2 */
-      dim3 bDim(1, 1, 1);
-      dim3 gDim(1, 1, 1);
+      dim3 bDim = hypre_dim3(1);
+      dim3 gDim = hypre_dim3(1);
       HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else

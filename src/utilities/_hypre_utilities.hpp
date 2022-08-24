@@ -1692,6 +1692,10 @@ dim3 hypre_GetDefaultDeviceBlockDimension();
 
 dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
 
+dim3 hypre_dim3(HYPRE_Int x);
+dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
+dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
+
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
    HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
 
