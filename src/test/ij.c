@@ -2361,10 +2361,12 @@ main( hypre_int argc,
    /*-----------------------------------------------------------------
     * Check if compile GPU arch matches the device
     *-----------------------------------------------------------------*/
+#if defined (HYPRE_USING_CUDA)
    if (default_exec_policy == HYPRE_EXEC_DEVICE)
    {
       hypre_CudaCompileFlagCheck();
    }
+#endif
 
    /*-----------------------------------------------------------------
     * GPU Device binding
