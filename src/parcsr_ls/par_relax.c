@@ -643,7 +643,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    HYPRE_Int           *A_offd_j      = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int            num_rows      = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int            num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
    hypre_Vector        *u_local       = hypre_ParVectorLocalVector(u);
    HYPRE_Complex       *u_data        = hypre_VectorData(u_local);
    hypre_Vector        *f_local       = hypre_ParVectorLocalVector(f);
@@ -661,7 +660,13 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    const HYPRE_Real     one_minus_omega  = 1.0 - omega;
    HYPRE_Int            num_procs, my_id, num_threads, j, num_sends;
 
-   hypre_ParCSRCommHandle *comm_handle;
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+   // JSP: persistent comm can be similarly used for other smoothers
+   hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
+#else
+   hypre_ParCSRCommHandle           *comm_handle;
+   HYPRE_Int                         num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+#endif
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -683,11 +688,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
       Ztemp_data  = hypre_VectorData(Ztemp_local);
    }
    */
-
-#if defined(HYPRE_USING_PERSISTENT_COMM)
-   // JSP: persistent comm can be similarly used for other smoothers
-   hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
-#endif
 
    if (num_procs > 1)
    {
@@ -739,7 +739,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #else
       hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
-      comm_handle = NULL;
 
 #ifdef HYPRE_PROFILE
       hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
