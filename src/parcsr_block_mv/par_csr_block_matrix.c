@@ -635,11 +635,9 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
 HYPRE_Int
 hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 {
-
    HYPRE_Int        num_recvs, *recv_procs, *recv_vec_starts;
-
    HYPRE_Int        num_sends, *send_procs, *send_map_starts;
-   HYPRE_Int        *send_map_elmts;
+   HYPRE_Int       *send_map_elmts;
 
    HYPRE_Int        num_cols_off_d;
    HYPRE_BigInt    *col_map_off_d;
@@ -647,10 +645,9 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    HYPRE_BigInt     first_col_diag;
    HYPRE_BigInt     global_num_cols;
 
+   MPI_Comm         comm;
 
-   MPI_Comm   comm;
-
-   hypre_ParCSRCommPkg   *comm_pkg;
+   hypre_ParCSRCommPkg   *comm_pkg = NULL;
    hypre_IJAssumedPart   *apart;
 
    /*-----------------------------------------------------------
@@ -666,7 +663,7 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    first_col_diag = hypre_ParCSRBlockMatrixFirstColDiag(A);
 
    /* Create the assumed partition */
-   if  (hypre_ParCSRBlockMatrixAssumedPartition(A) == NULL)
+   if (hypre_ParCSRBlockMatrixAssumedPartition(A) == NULL)
    {
       hypre_ParCSRBlockMatrixCreateAssumedPartition(A);
    }
@@ -700,18 +697,11 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
     * setup commpkg
     *----------------------------------------------------------*/
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs, recv_procs, recv_vec_starts,
+                                    num_sends, send_procs, send_map_starts,
+                                    send_map_elmts,
+                                    &comm_pkg);
 
    hypre_ParCSRBlockMatrixCommPkg(A) = comm_pkg;
 
@@ -741,7 +731,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
    HYPRE_Int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
    hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParCSRCommPkg *tmp_comm_pkg;
+   hypre_ParCSRCommPkg *tmp_comm_pkg = NULL;
 
    hypre_CSRBlockMatrix *diag = hypre_ParCSRBlockMatrixDiag(B);
 
@@ -852,13 +842,16 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
       jdata_send_map_starts[i + 1] = start_index;
    }
 
-   tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-   hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-   hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_send_map_starts;
+   /* Create temporary communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs,
+                                    hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    jdata_recv_vec_starts,
+                                    num_sends,
+                                    hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    jdata_send_map_starts,
+                                    NULL,
+                                    &tmp_comm_pkg);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
    comm_handle = NULL;
@@ -870,17 +863,22 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
     *--------------------------------------------------------------------------*/
 
    for (i = 0; i < num_recvs; i++)
+   {
       for (j = recv_vec_starts[i]; j < recv_vec_starts[i + 1]; j++)
       {
          B_ext_i[j + 1] += B_ext_i[j];
       }
+   }
 
    num_nonzeros = B_ext_i[num_rows_B_ext];
 
    B_ext = hypre_CSRBlockMatrixCreate(block_size, num_rows_B_ext, num_cols_B,
                                       num_nonzeros);
    B_ext_j = hypre_CTAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST);
-   if (data) { B_ext_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros * bnnz, HYPRE_MEMORY_HOST); }
+   if (data)
+   {
+      B_ext_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros * bnnz, HYPRE_MEMORY_HOST);
+   }
 
    for (i = 0; i < num_recvs; i++)
    {
@@ -888,8 +886,6 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
       num_nonzeros = B_ext_i[recv_vec_starts[i + 1]] - start_index;
       jdata_recv_vec_starts[i + 1] = B_ext_i[recv_vec_starts[i + 1]];
    }
-
-   hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
 
    comm_handle = hypre_ParCSRCommHandleCreate(21, tmp_comm_pkg, B_int_j, B_ext_j);
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -905,17 +901,25 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    hypre_CSRBlockMatrixI(B_ext) = B_ext_i;
    hypre_CSRBlockMatrixBigJ(B_ext) = B_ext_j;
-   if (data) { hypre_CSRBlockMatrixData(B_ext) = B_ext_data; }
+   if (data)
+   {
+      hypre_CSRBlockMatrixData(B_ext) = B_ext_data;
+   }
 
-   hypre_TFree(B_int_i, HYPRE_MEMORY_HOST);
-   hypre_TFree(B_int_j, HYPRE_MEMORY_HOST);
-   if (data) { hypre_TFree(B_int_data, HYPRE_MEMORY_HOST); }
+   /* Free memory */
    hypre_TFree(jdata_send_map_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(jdata_recv_vec_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_int_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(B_int_j, HYPRE_MEMORY_HOST);
+   if (data)
+   {
+      hypre_TFree(B_int_data, HYPRE_MEMORY_HOST);
+   }
 
    return B_ext;
 }
+
 /*--------------------------------------------------------------------------
  * hypre_ParVectorCreateFromBlock
  *--------------------------------------------------------------------------*/

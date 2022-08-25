@@ -32,7 +32,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParCSRCommPkg    *tmp_comm_pkg;
+   hypre_ParCSRCommPkg    *tmp_comm_pkg = NULL;
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -649,7 +649,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
    if (num_procs > 1)
    {
-      tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
       Pext_send_map_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
       Pext_recv_vec_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
       Pext_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
@@ -767,15 +766,12 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
             Pext_recv_vec_start[pass][i + 1] = Pext_recv_size;
          }
 
-         hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
-         hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
-         hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = send_procs;
-         hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) =
-            Pext_send_map_start[pass];
-         hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-         hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = recv_procs;
-         hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) =
-            Pext_recv_vec_start[pass];
+         /* Create temporary communication package */
+         hypre_ParCSRCommPkgCreateAndFill(comm,
+                                          num_recvs, recv_procs, Pext_recv_vec_start[pass],
+                                          num_sends, send_procs, Pext_send_map_start[pass],
+                                          NULL,
+                                          &tmp_comm_pkg);
 
          if (Pext_recv_size)
          {
@@ -2167,4 +2163,3 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    return ierr;
 }
-
