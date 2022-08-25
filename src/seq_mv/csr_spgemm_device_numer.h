@@ -598,7 +598,8 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
                       __FILE__, __LINE__, BIN, m, k, n,
                       HASH_TYPE, SHMEM_HASH_SIZE, GROUP_SIZE, exact_rownnz, need_ghash, d_ghash_i, ghash_size);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.get(2), gDim.get(1), gDim.get(0), bDim.get(2), bDim.get(1),
+   HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.get(2), gDim.get(1), gDim.get(0),
+                      bDim.get(2), bDim.get(1),
                       bDim.get(0));
 #else
    HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y,
