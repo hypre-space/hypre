@@ -227,7 +227,8 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvecOutOfPlace
- * y = alpha*A*x + beta*b
+ *
+ * Performs y <- alpha * A * x + beta * b
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -301,6 +302,8 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
    HYPRE_BigInt             x_size        = hypre_ParVectorGlobalSize(x);
    HYPRE_BigInt             y_size        = hypre_ParVectorGlobalSize(y);
 
+   HYPRE_Complex           *y_tmp_data;
+   HYPRE_Complex           *y_buf_data;
    HYPRE_Complex           *y_local_data  = hypre_VectorData(y_local);
    HYPRE_Int                idxstride     = hypre_VectorIndexStride(y_local);
    HYPRE_Int                num_vectors   = hypre_VectorNumVectors(y_local);
@@ -308,8 +311,6 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
    HYPRE_Int                num_recvs;
    HYPRE_Int                i;
    HYPRE_Int                ierr = 0;
-   HYPRE_Complex           *y_tmp_data;
-   HYPRE_Complex           *y_buf_data;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
