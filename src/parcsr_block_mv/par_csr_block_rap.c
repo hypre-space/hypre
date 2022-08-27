@@ -41,7 +41,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    HYPRE_Complex *RAP_ext_data = NULL;
 
    hypre_ParCSRCommHandle *comm_handle = NULL;
-   hypre_ParCSRCommPkg *tmp_comm_pkg;
+   hypre_ParCSRCommPkg *tmp_comm_pkg = NULL;
 
    HYPRE_Int *jdata_recv_vec_starts;
    HYPRE_Int *jdata_send_map_starts;
@@ -90,21 +90,26 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
     *--------------------------------------------------------------------------*/
 
    if (num_recvs && num_sends)
+   {
       comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_RT,
                                                  &RAP_int_i[1], &RAP_ext_i[1]);
+   }
    else if (num_recvs)
+   {
       comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_RT,
                                                  &RAP_int_i[1], NULL);
+   }
    else if (num_sends)
+   {
       comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg_RT,
                                                  NULL, &RAP_ext_i[1]);
+   }
 
-   tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = send_procs;
+   /* Create temporary communication package - note: send and recv are reversed */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_sends, send_procs, jdata_send_map_starts,
+                                    num_recvs, recv_procs, jdata_recv_vec_starts,
+                                    NULL, &tmp_comm_pkg);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
    comm_handle = NULL;
@@ -114,10 +119,12 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
     *--------------------------------------------------------------------------*/
 
    for (i = 0; i < num_sends; i++)
+   {
       for (j = send_map_starts[i]; j < send_map_starts[i + 1]; j++)
       {
          RAP_ext_i[j + 1] += RAP_ext_i[j];
       }
+   }
 
    num_rows = send_map_starts[num_sends];
    num_nonzeros = RAP_ext_i[num_rows];
@@ -131,9 +138,6 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    {
       jdata_send_map_starts[i] = RAP_ext_i[send_map_starts[i]];
    }
-
-   hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_send_map_starts;
-   hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
 
    comm_handle = hypre_ParCSRBlockCommHandleCreate(1, bnnz, tmp_comm_pkg,
                                                    (void *) RAP_int_data, (void *) RAP_ext_data);
@@ -152,12 +156,12 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
       hypre_CSRBlockMatrixData(RAP_ext) = RAP_ext_data;
    }
 
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-   comm_handle = NULL;
-
+   /* Free memory */
    hypre_TFree(jdata_recv_vec_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(jdata_send_map_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+   comm_handle = NULL;
 
    return RAP_ext;
 }

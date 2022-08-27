@@ -179,6 +179,21 @@ hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorSetLocalSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetLocalSize( hypre_ParVector *vector,
+                             HYPRE_Int        local_size )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_SeqVectorSetSize(local_vector, local_size);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorSetNumVectors
  * call before calling hypre_ParVectorInitialize
  * probably this will do more harm than good, use hypre_ParMultiVectorCreate
@@ -205,7 +220,7 @@ hypre_ParVector*
 hypre_ParVectorRead( MPI_Comm    comm,
                      const char *file_name )
 {
-   char             new_file_name[80];
+   char             new_file_name[256];
    hypre_ParVector *par_vector;
    HYPRE_Int        my_id;
    HYPRE_BigInt     partitioning[2];
@@ -250,7 +265,7 @@ HYPRE_Int
 hypre_ParVectorPrint( hypre_ParVector  *vector,
                       const char       *file_name )
 {
-   char          new_file_name[80];
+   char          new_file_name[256];
    hypre_Vector *local_vector;
    MPI_Comm      comm;
    HYPRE_Int     my_id;
@@ -401,7 +416,7 @@ hypre_ParVectorScale( HYPRE_Complex    alpha,
 {
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_SeqVectorScale( alpha, y_local);
+   return hypre_SeqVectorScale(alpha, y_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -416,7 +431,7 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_SeqVectorAxpy( alpha, x_local, y_local);
+   return hypre_SeqVectorAxpy(alpha, x_local, y_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -524,7 +539,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
    hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
 
-   if  (num_vectors == 1)
+   if (num_vectors == 1)
    {
       par_vector = hypre_ParVectorCreate(comm, global_size, vec_starts);
    }
