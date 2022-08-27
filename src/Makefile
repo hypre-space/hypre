@@ -25,6 +25,7 @@ HYPRE_KRYLOV_DIRS =\
 #These are the directories for the IJ interface
 HYPRE_IJ_DIRS =\
  seq_mv\
+ seq_ls\
  parcsr_mv\
  parcsr_block_mv\
  distributed_matrix\
@@ -76,7 +77,6 @@ HYPRE_DIRS =\
 HYPRE_EXTRA_DIRS =\
  ${HYPRE_DOCS_DIRS}\
  ${HYPRE_TEST_DIRS}\
- seq_ls/pamg
 
 #################################################################
 # Targets
@@ -179,7 +179,7 @@ checkpar:
         echo "Testing SStruct ..."; \
         (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; ./checktest.sh); \
-        (cd test; ./cleantest.sh); 
+        (cd test; ./cleantest.sh);
 
 install: all
 	@ \
