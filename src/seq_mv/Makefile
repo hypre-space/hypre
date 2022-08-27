@@ -15,6 +15,7 @@ C_COMPILE_FLAGS =\
  ${CINCLUDES}
 
 HEADERS =\
+ dense_matrix.h\
  csr_matrix.h\
  HYPRE_seq_mv.h\
  mapped_matrix.h\
@@ -24,6 +25,7 @@ HEADERS =\
  vector.h
 
 FILES =\
+ dense_matrix.c\
  csr_matop.c\
  csr_matrix.c\
  csr_matvec.c\

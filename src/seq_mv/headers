@@ -37,6 +37,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
+cat dense_matrix.h          >> $INTERNAL_HEADER
 cat csr_matrix.h            >> $INTERNAL_HEADER
 cat mapped_matrix.h         >> $INTERNAL_HEADER
 cat multiblock_matrix.h     >> $INTERNAL_HEADER
@@ -58,4 +59,3 @@ cat >> $INTERNAL_HEADER <<@
 #endif
 
 @
-
