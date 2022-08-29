@@ -677,6 +677,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       P_offd_data = hypre_CSRMatrixData(P_offd);
       P_offd_i = hypre_CSRMatrixI(P_offd);
       P_offd_j = hypre_CSRMatrixJ(P_offd);
+      P_offd_size = hypre_CSRMatrixNumNonzeros(P_offd);
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
