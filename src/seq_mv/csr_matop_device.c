@@ -665,6 +665,98 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
+                                     HYPRE_BigInt     *col_map,
+                                     HYPRE_Int       **col_idx_new_ptr,
+                                     HYPRE_BigInt    **col_map_new_ptr)
+{
+   HYPRE_Int  num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int  nnz      = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int *tmp_j    = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *tmp_end;
+   HYPRE_Int  num_cols_new;
+
+   hypre_TMemcpy(tmp_j, A_j, HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   HYPRE_THRUST_CALL(sort, tmp_j, tmp_j + nnz);
+   tmp_end = HYPRE_THRUST_CALL(unique, tmp_j, tmp_j + nnz);
+   num_cols_new = tmp_end - tmp_j;
+
+   hypre_assert(num_cols_new <= num_cols);
+
+HYPRE_Int all_compressed;
+HYPRE_Int compressed = num_cols - num_cols_new;
+MPI_Reduce(&compressed, &all_compressed, 1, HYPRE_MPI_INT, hypre_MPI_SUM, 0, hypre_MPI_COMM_WORLD);
+hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Compress All %d\n", all_compressed);
+
+   if (num_cols_new < num_cols)
+   {
+int myid;
+hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+printf("%d: %d %d %d\n", myid, num_cols_new, num_cols, nnz);
+      HYPRE_Int    *offd_mark = NULL;
+      HYPRE_BigInt *col_map_new;
+
+      if (num_cols_new)
+      {
+         offd_mark = hypre_TAlloc(HYPRE_Int, num_cols, HYPRE_MEMORY_DEVICE);
+      }
+
+      if (col_map_new_ptr)
+      {
+         col_map_new = hypre_TAlloc(HYPRE_BigInt, num_cols_new, HYPRE_MEMORY_DEVICE);
+      }
+
+      HYPRE_THRUST_CALL( scatter,
+                         thrust::counting_iterator<HYPRE_Int>(0),
+                         thrust::counting_iterator<HYPRE_Int>(num_cols_new),
+                         tmp_j,
+                         offd_mark );
+
+      HYPRE_THRUST_CALL(gather, A_j, A_j + nnz, offd_mark, A_j);
+
+      if (col_map_new_ptr)
+      {
+         HYPRE_THRUST_CALL(gather, tmp_j, tmp_j + num_cols_new, col_map, col_map_new);
+      }
+
+      hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
+
+      hypre_CSRMatrixNumCols(A) = num_cols_new;
+
+      if (col_idx_new_ptr)
+      {
+         *col_idx_new_ptr = tmp_j;
+      }
+      else
+      {
+         hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
+      }
+
+      if (col_map_new_ptr)
+      {
+         *col_map_new_ptr = col_map_new;
+      }
+   }
+   else
+   {
+      if (col_idx_new_ptr)
+      {
+         *col_idx_new_ptr = NULL;
+      }
+
+      if (col_map_new_ptr)
+      {
+         *col_map_new_ptr = NULL;
+      }
+
+      hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
+   }
+
+   return hypre_error_flag;
+}
+
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

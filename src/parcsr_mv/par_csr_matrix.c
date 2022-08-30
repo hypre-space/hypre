@@ -2885,3 +2885,19 @@ hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
    }
 #endif
 }
+
+void
+hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A)
+{
+#if defined(HYPRE_USING_GPU)
+   if (hypre_ParCSRMatrixColMapOffd(A) == NULL)
+   {
+      const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+      hypre_ParCSRMatrixColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd,
+                                                     HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixDeviceColMapOffd(A), HYPRE_BigInt,
+                    num_cols_A_offd,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+#endif
+}

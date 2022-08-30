@@ -6261,3 +6261,31 @@ hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_ParCSRMatrixCompressOffdMap(hypre_ParCSRMatrix *A)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixCompressOffdMap");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixCompressOffdMapDevice(A);
+   }
+   else
+#endif
+   {
+      // RL: I guess it's not needed for the host code [?]
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
+}
+
