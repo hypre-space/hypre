@@ -1000,6 +1000,8 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
 HYPRE_Int
 hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A)
 {
+   hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
+
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_BigInt    *col_map_offd_A  = hypre_ParCSRMatrixDeviceColMapOffd(A);

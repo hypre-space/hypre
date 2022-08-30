@@ -1750,7 +1750,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
                       agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
                   {
-                     hypre_ParCSRMatrixCompressOffdMapDevice(P);
+                     hypre_ParCSRMatrixCompressOffdMap(P);
                   }
 
                   hypre_MatvecCommPkgCreate(P);
@@ -1944,7 +1944,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
                       agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
                   {
-                     hypre_ParCSRMatrixCompressOffdMapDevice(P);
+                     hypre_ParCSRMatrixCompressOffdMap(P);
                   }
 
                   hypre_MatvecCommPkgCreate(P);
