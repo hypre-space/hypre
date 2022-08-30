@@ -685,16 +685,8 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
 
    hypre_assert(num_cols_new <= num_cols);
 
-HYPRE_Int all_compressed;
-HYPRE_Int compressed = num_cols - num_cols_new;
-MPI_Reduce(&compressed, &all_compressed, 1, HYPRE_MPI_INT, hypre_MPI_SUM, 0, hypre_MPI_COMM_WORLD);
-hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Compress All %d\n", all_compressed);
-
    if (num_cols_new < num_cols)
    {
-int myid;
-hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-printf("%d: %d %d %d\n", myid, num_cols_new, num_cols, nnz);
       HYPRE_Int    *offd_mark = NULL;
       HYPRE_BigInt *col_map_new;
 
