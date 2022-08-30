@@ -594,7 +594,6 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-hypre_ParPrintf(hypre_MPI_COMM_WORLD, "AH\n");
    hypre_ParCSRMatrixCompressOffdMapDevice(C);
 
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
@@ -836,7 +835,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-hypre_ParPrintf(hypre_MPI_COMM_WORLD, "AH\n");
    hypre_ParCSRMatrixCompressOffdMapDevice(C);
 
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
