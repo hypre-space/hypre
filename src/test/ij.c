@@ -2373,10 +2373,7 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Init() and should not be changed after
     *-----------------------------------------------------------------*/
-   if (default_exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
-   }
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
 
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
@@ -8545,10 +8542,7 @@ final:
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   if (default_exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_ResetCudaDevice(NULL);
-   }
+   hypre_ResetCudaDevice(NULL);
 #endif
 
    return (0);
