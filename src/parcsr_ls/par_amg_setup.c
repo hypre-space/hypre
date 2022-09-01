@@ -34,6 +34,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
+   HYPRE_Int            num_vectors;
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
@@ -307,6 +308,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    R_block_array = hypre_ParAMGDataRBlockArray(amg_data);
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data);
+
+   /* Get the number of vector components when LHS/RHS are passed in */
+   if ((f != NULL) && (u != NULL))
+   {
+      /* Verify that the number of vectors held by f and u match */
+      if (hypre_ParVectorNumVectors(f) != hypre_ParVectorNumVectors(u))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for RHS and LHS do not match!\n");
+         return hypre_error_flag;
+      }
+      num_vectors = hypre_ParVectorNumVectors(f);
+   }
+   else
+   {
+      num_vectors = 1;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -756,6 +773,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
+   hypre_ParVectorNumVectors(Vtemp) = num_vectors;
    hypre_ParVectorInitialize_v2(Vtemp, memory_location);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
@@ -769,6 +787,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       Ptemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                     hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                     hypre_ParCSRMatrixRowStarts(A_array[0]));
+      hypre_ParVectorNumVectors(Ptemp) = num_vectors;
       hypre_ParVectorInitialize_v2(Ptemp, memory_location);
       hypre_ParAMGDataPtemp(amg_data) = Ptemp;
 
@@ -780,6 +799,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          Rtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                        hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                        hypre_ParCSRMatrixRowStarts(A_array[0]));
+         hypre_ParVectorNumVectors(Rtemp) = num_vectors;
          hypre_ParVectorInitialize_v2(Rtemp, memory_location);
          hypre_ParAMGDataRtemp(amg_data) = Rtemp;
       }
@@ -939,12 +959,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                      hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                      hypre_ParCSRMatrixRowStarts(A_array[level]));
+            hypre_ParVectorNumVectors(F_array[level]) = num_vectors;
             hypre_ParVectorInitialize_v2(F_array[level], memory_location);
 
             U_array[level] =
                hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                      hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                      hypre_ParCSRMatrixRowStarts(A_array[level]));
+            hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
             hypre_ParVectorInitialize_v2(U_array[level], memory_location);
          }
       }
@@ -2482,27 +2504,31 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_Vector *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
                   hypre_TFree(hypre_VectorData(Vtemp_local), memory_location);
                   hypre_VectorSize(Vtemp_local) = local_P_sz;
-                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, memory_location);
+                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                memory_location);
                   if (Ztemp)
                   {
                      hypre_Vector *Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
                      hypre_TFree(hypre_VectorData(Ztemp_local), memory_location);
                      hypre_VectorSize(Ztemp_local) = local_P_sz;
-                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, memory_location);
+                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                   memory_location);
                   }
                   if (Ptemp)
                   {
                      hypre_Vector *Ptemp_local = hypre_ParVectorLocalVector(Ptemp);
                      hypre_TFree(hypre_VectorData(Ptemp_local), memory_location);
                      hypre_VectorSize(Ptemp_local) = local_P_sz;
-                     hypre_VectorData(Ptemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, memory_location);
+                     hypre_VectorData(Ptemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                   memory_location);
                   }
                   if (Rtemp)
                   {
                      hypre_Vector *Rtemp_local = hypre_ParVectorLocalVector(Rtemp);
                      hypre_TFree(hypre_VectorData(Rtemp_local), memory_location);
                      hypre_VectorSize(Rtemp_local) = local_P_sz;
-                     hypre_VectorData(Rtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, memory_location);
+                     hypre_VectorData(Rtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz * num_vectors,
+                                                                   memory_location);
                   }
                }
                /*if (hypre_ParCSRMatrixGlobalNumRows(A_array[0]) < hypre_ParCSRMatrixGlobalNumCols(P))
@@ -3050,12 +3076,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
+         hypre_ParVectorNumVectors(F_array[level]) = num_vectors;
          hypre_ParVectorInitialize_v2(F_array[level], memory_location);
 
          U_array[level] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[level]),
                                   hypre_ParCSRMatrixGlobalNumRows(A_array[level]),
                                   hypre_ParCSRMatrixRowStarts(A_array[level]));
+         hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
          hypre_ParVectorInitialize_v2(U_array[level], memory_location);
       }
    }
