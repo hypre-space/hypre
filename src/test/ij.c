@@ -468,6 +468,7 @@ main( hypre_int argc,
 
    /* default execution policy and memory space */
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_DEVICE;
    HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
 
 #ifdef HYPRE_USING_DEVICE_POOL
@@ -1251,6 +1252,16 @@ main( hypre_int argc,
       {
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec2_host") == 0 )
+      {
+         arg_index++;
+         exec2_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec2_device") == 0 )
+      {
+         arg_index++;
+         exec2_policy = HYPRE_EXEC_DEVICE;
       }
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
@@ -2357,16 +2368,6 @@ main( hypre_int argc,
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
-
-   /*-----------------------------------------------------------------
-    * Check if compile GPU arch matches the device
-    *-----------------------------------------------------------------*/
-#if defined (HYPRE_USING_CUDA)
-   if (default_exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_CudaCompileFlagCheck();
-   }
-#endif
 
    /*-----------------------------------------------------------------
     * GPU Device binding
@@ -4116,6 +4117,8 @@ main( hypre_int argc,
 
       if (second_time)
       {
+         HYPRE_SetExecutionPolicy(exec2_policy);
+
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -4931,6 +4934,8 @@ main( hypre_int argc,
 
       if (second_time)
       {
+         HYPRE_SetExecutionPolicy(exec2_policy);
+
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
