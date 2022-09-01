@@ -469,7 +469,7 @@ main( hypre_int argc,
    /* default execution policy and memory space */
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_DEVICE;
-   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
 #ifdef HYPRE_USING_DEVICE_POOL
    /* device pool allocator */
