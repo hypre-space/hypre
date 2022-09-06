@@ -8,6 +8,8 @@
 #ifndef hypre_ParFSAI_DATA_HEADER
 #define hypre_ParFSAI_DATA_HEADER
 
+//#define DEBUG_FSAI
+
 /*--------------------------------------------------------------------------
  * hypre_ParFSAIData
  *--------------------------------------------------------------------------*/
@@ -17,8 +19,7 @@ typedef struct hypre_ParFSAIData_struct
    /* FSAI Setup data */
    HYPRE_Int             algo_type;       /* FSAI algorithm implementation type */
    HYPRE_Int             max_steps;       /* Maximum iterations run per row */
-   HYPRE_Int
-   max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
+   HYPRE_Int             max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
    HYPRE_Real            kap_tolerance;   /* Minimum amount of change between two steps */
    hypre_ParCSRMatrix   *Gmat;            /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *GTmat;           /* Matrix holding the transpose of the FSAI factor */
@@ -40,6 +41,11 @@ typedef struct hypre_ParFSAIData_struct
    /* log info */
    HYPRE_Int             logging;
    HYPRE_Int             print_level;
+
+   /* Additional device variables */
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int            *info;
+#endif
 } hypre_ParFSAIData;
 
 /*--------------------------------------------------------------------------
@@ -70,4 +76,8 @@ typedef struct hypre_ParFSAIData_struct
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
 #define hypre_ParFSAIDataPrintLevel(fsai_data)              ((fsai_data) -> print_level)
 
+/* Additional device variables */
+#if defined (HYPRE_USING_GPU)
+#define hypre_ParFSAIDataInfo(fsai_data)                    ((fsai_data) -> info)
+#endif
 #endif

@@ -42,7 +42,11 @@ hypre_FSAICreate()
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    /* setup params */
+#if defined(HYPRE_USING_GPU)
+   algo_type = 3;
+#else
    algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+#endif
    max_steps = 3;
    max_step_size = 5;
    kap_tolerance = 1.0e-3;

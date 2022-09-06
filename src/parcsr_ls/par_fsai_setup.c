@@ -9,8 +9,6 @@
 #include "_hypre_blas.h"
 #include "_hypre_lapack.h"
 
-#define DEBUG 0
-
 /*****************************************************************************
  *
  * Routine for driving the setup phase of FSAI
@@ -568,7 +566,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
                /* Solve A[P, P] G[i, P]' = -A[i, P] */
                hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
 
-               /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
+               /* Determine psi_{k+1} = G_temp[i] * A[P, P] * G_temp[i]' */
                new_psi = A_a[A_i[i]];
                for (j = 0; j < patt_size; j++)
                {
@@ -827,7 +825,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
                /* Solve A[P, P] G[i, P]' = -A[i, P] */
                hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
 
-               /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
+               /* Determine psi_{k+1} = G_temp[i] * A[P, P] * G_temp[i]' */
                new_psi = A_a[A_i[i]];
                for (j = 0; j < patt_size; j++)
                {
@@ -964,16 +962,15 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIDataRWork(fsai_data) = r_work;
    hypre_ParFSAIDataZWork(fsai_data) = z_work;
 
-   /* Create and initialize the matrix G */
+   /* Create the matrix G */
    max_nnzrow_diag_G   = max_steps * max_step_size + 1;
    max_nonzeros_diag_G = num_rows_diag_A * max_nnzrow_diag_G;
    G = hypre_ParCSRMatrixCreate(comm, num_rows_A, num_cols_A,
                                 row_starts_A, col_starts_A,
                                 0, max_nonzeros_diag_G, 0);
-   hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data) = G;
 
-   /* Compute lower triangular factor G */
+   /* Initialize and compute lower triangular factor G */
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation  memloc_A = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memloc_A);
@@ -985,13 +982,18 @@ hypre_FSAISetup( void               *fsai_vdata,
    else
 #endif
    {
+      /* Initialize matrix */
+      hypre_ParCSRMatrixInitialize(G);
+
       switch (algo_type)
       {
          case 1:
+            // TODO: Change name to hypre_FSAISetupAdaptive
             hypre_FSAISetupNative(fsai_vdata, A, f, u);
             break;
 
          case 2:
+            // TODO: Change name to hypre_FSAISetupAdaptiveOMPDynamic
             hypre_FSAISetupOMPDyn(fsai_vdata, A, f, u);
             break;
 
@@ -1017,10 +1019,13 @@ hypre_FSAISetup( void               *fsai_vdata,
       hypre_FSAIPrintStats(fsai_data, A);
    }
 
-#if DEBUG
+#if defined (DEBUG_FSAI)
    char filename[] = "FSAI.out.G.ij";
    hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
+
+#if defined (HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_FSAIDumpLocalLSDense(fsai_vdata, "fsai_dense_ls.out", A);
+#endif
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;
