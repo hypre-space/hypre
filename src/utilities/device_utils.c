@@ -754,6 +754,8 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
 #else
+
+   hypre_GpuProfilingPushRange("CsrRowPtrsToIndices");
    HYPRE_THRUST_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
    HYPRE_THRUST_CALL( scatter_if,
                       thrust::counting_iterator<HYPRE_Int>(0),
@@ -765,6 +767,7 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
                       d_row_ind );
    HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       thrust::maximum<HYPRE_Int>());
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -808,11 +811,13 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                       count + nrows + 1,
                       d_row_ptr);
 #else
+   hypre_GpuProfilingPushRange("CSRIndicesToPtrs");
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -1116,6 +1121,7 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
                         TupleComp3<T1, T2, T3>());
    }
 #else
+   hypre_GpuProfilingPushRange("StableSortByTupleKey");
    auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
    auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
 
@@ -1143,6 +1149,7 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
                         vals,
                         TupleComp3<T1, T2>());
    }
+   hypre_GpuProfilingPopRange();
 #endif
    return hypre_error_flag;
 }

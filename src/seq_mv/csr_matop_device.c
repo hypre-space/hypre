@@ -1915,6 +1915,8 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 HYPRE_Int
 hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 {
+   hypre_GpuProfilingPushRange("CSRMatrixSort");
+
 #if defined(HYPRE_USING_CUSPARSE)
    hypre_SortCSRCusparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
                          hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
@@ -1927,6 +1929,8 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE!\n");
 #endif
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
