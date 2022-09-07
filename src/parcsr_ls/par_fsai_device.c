@@ -20,109 +20,6 @@
 #define HYPRE_THRUST_ZIP3(A, B, C) thrust::make_zip_iterator(thrust::make_tuple(A, B, C))
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixMarkDropCols
- *--------------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_CSRMatrixMarkDropCols( hypre_DeviceItem &item,
-                                      HYPRE_Int         num_rows,
-                                      HYPRE_Int        *mat_i,
-                                      HYPRE_Int        *mat_j )
-{
-   HYPRE_Int  lane = (threadIdx.x + blockIdx.x * blockDim.x) & (HYPRE_WARP_SIZE - 1);
-   HYPRE_Int  p, q;
-   HYPRE_Int  i, j;
-
-   for (i = (threadIdx.x + blockIdx.x * blockDim.x) / HYPRE_WARP_SIZE;
-        i < num_rows;
-        i += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE )
-   {
-      if (lane < 2)
-      {
-         p = read_only_load(mat_i + i + lane);
-      }
-      q = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 1);
-      p = __shfl_sync(HYPRE_WARP_FULL_MASK, p, 0);
-
-      for (j = p + lane; j < q; j += HYPRE_WARP_SIZE)
-      {
-         if (mat_j[j] >= i)
-         {
-            mat_j[j] = -1;
-         }
-      }
-   }
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractTriangularDevice
- *
- * TODO: Reuse work arrays accross other functions
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixExtractTriangularDevice(hypre_CSRMatrix *matrix)
-{
-   HYPRE_Int       num_rows = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int       nnz      = hypre_CSRMatrixNumNonzeros(matrix);
-   HYPRE_Int      *mat_i    = hypre_CSRMatrixI(matrix);
-   HYPRE_Int      *mat_j    = hypre_CSRMatrixJ(matrix);
-   HYPRE_Complex  *mat_a    = hypre_CSRMatrixData(matrix);
-
-   HYPRE_Int      *mat_ii;
-   HYPRE_Int      *mat_ii_new;
-   HYPRE_Int      *mat_j_new;
-   HYPRE_Complex  *mat_a_new;
-   HYPRE_Int       nnz_new;
-
-   mat_ii     = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-   mat_ii_new = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-   mat_j_new  = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-   mat_a_new  = hypre_TAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_DEVICE);
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
-   /* dim3 bDim = {1, 1, 1}; */
-   /* dim3 gDim = {1, 1, 1}; */
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixMarkDropCols, gDim, bDim,
-                     num_rows, mat_i, mat_j );
-
-   /* Build row indices array */
-   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, nnz, mat_i, mat_ii);
-
-   hypre_GpuProfilingPushRange("CopyIf");
-   auto new_end = HYPRE_THRUST_CALL(
-                     copy_if,
-                     HYPRE_THRUST_ZIP3(mat_ii,       mat_j,       mat_a),
-                     HYPRE_THRUST_ZIP3(mat_ii + nnz, mat_j + nnz, mat_a + nnz),
-                     mat_j,
-                     HYPRE_THRUST_ZIP3(mat_ii_new,   mat_j_new,   mat_a_new),
-                     is_nonnegative<HYPRE_Int>() );
-
-   nnz_new = thrust::get<0>(new_end.get_iterator_tuple()) - mat_ii_new;
-   hypre_GpuProfilingPopRange();
-
-   /* Recompute row pointer */
-   hypreDevice_CsrRowIndicesToPtrs_v2(num_rows, nnz_new, mat_ii_new, mat_i);
-
-   /* TODO: Reallocate mat_j_new and mat_a_new? */
-
-   /* Update matrix info */
-   hypre_CSRMatrixJ(matrix)           = mat_j_new;
-   hypre_CSRMatrixData(matrix)        = mat_a_new;
-   hypre_CSRMatrixNumNonzeros(matrix) = nnz_new;
-
-   /* Free memory */
-   hypre_TFree(mat_ii, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(mat_ii_new, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(mat_j, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(mat_a, HYPRE_MEMORY_DEVICE);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * hypreGPUKernel_ComplexArrayToArrayOfPtrs
  *--------------------------------------------------------------------------*/
 
@@ -380,10 +277,17 @@ hypreGPUKernel_FSAITruncateCandidate( hypre_DeviceItem &item,
                                       HYPRE_Int        *K_j,
                                       HYPRE_Complex    *K_a )
 {
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-   HYPRE_Int   p = 0;
-   HYPRE_Int   q = 0;
-   HYPRE_Int   i, j;
+   HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int      p = 0;
+   HYPRE_Int      q = 0;
+   HYPRE_Int      i, j, k, kk, cnt;
+   HYPRE_Int      col;
+   hypre_int      bitmask;
+   HYPRE_Complex  val;
+   HYPRE_Int      max_lane;
+   HYPRE_Int      max_idx;
+   HYPRE_Complex  max_val;
+   HYPRE_Complex  warp_max_val;
 
    /* Grid-stride loop over matrix rows */
    for (i = (blockDim.x * blockIdx.x + threadIdx.x) / HYPRE_WARP_SIZE;
@@ -397,47 +301,82 @@ hypreGPUKernel_FSAITruncateCandidate( hypre_DeviceItem &item,
       q = __shfl_sync(0xFFFFFFFFU, p, 1);
       p = __shfl_sync(0xFFFFFFFFU, p, 0);
 
-      /* Mark unwanted column entries with -1 */
-      HYPRE_Int keep = 0;
-
-      j = p + lane;
-      if (j < q)
+      k = 0;
+      while (k < max_nonzeros_row)
       {
-         /* TODO: This is not necessary if passing K already lower triangular*/
-         if (K_j[j] >= i)
+         /* Initialize variables */
+         j = p + k + lane;
+         max_val = 0.0;
+         max_idx = -1;
+
+         /* Find maximum val/col pair in each lane */
+         if (j < q)
          {
-            K_j[j] = -1;
+            if (K_j[j] < i)
+            {
+               max_val = abs(K_a[j]);
+               max_idx = j;
+            }
+         }
+
+         for (j += HYPRE_WARP_SIZE; j < q; j += HYPRE_WARP_SIZE)
+         {
+            if (K_j[j] < i)
+            {
+               val = abs(K_a[j]);
+               if (val > max_val)
+               {
+                  max_val = val;
+                  max_idx = j;
+               }
+            }
+         }
+
+         /* Find maximum coefficient in absolute value in the warp */
+         warp_max_val = max_val;
+         #pragma unroll
+         for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
+         {
+            warp_max_val = max(warp_max_val, __shfl_xor_sync(0xFFFFFFFFU, warp_max_val, d));
+         }
+
+         /* Reorder col/val entries associated with warp_max_val */
+         bitmask = __ballot_sync(0xFFFFFFFFU, warp_max_val == max_val);
+         if (warp_max_val > 0.0)
+         {
+            cnt = min((HYPRE_Int) __popc(bitmask), max_nonzeros_row - k);
+
+            for (kk = 0; kk < cnt; kk++)
+            {
+               __syncwarp();
+               max_lane = __ffs(bitmask) - 1;
+               if (lane == max_lane)
+               {
+                  col = K_j[p + k + kk];
+                  val = K_a[p + k + kk];
+
+                  K_j[p + k + kk] = K_j[max_idx];
+                  K_a[p + k + kk] = max_val;
+
+                  K_j[max_idx] = col;
+                  K_a[max_idx] = val;
+               }
+
+               /* Update bitmask */
+               bitmask ^= (1 << max_lane);
+            }
+
+            /* Update number of nonzeros per row */
+            k += cnt;
          }
          else
          {
-            keep++;
-         }
-      }
-
-      /* We need this because some unwanted columns have large coefficients */
-      HYPRE_Int flag    = (HYPRE_Int) __ballot_sync(0xFFFFFFFFU, keep > 0);
-      HYPRE_Int discard = flag;
-      HYPRE_Int nnz_cnt = __popc(flag);
-
-      keep = flag;
-      if (nnz_cnt > max_nonzeros_row)
-      {
-         // TODO: max_nonzeros_row can be a template argument
-         for (HYPRE_Int k = 0; k < max_nonzeros_row; k++)
-         {
-            discard ^= (1 << (__ffs(discard) - 1));
-         }
-         keep = flag ^ discard;
-
-         /* Exclude columns */
-         if ((1 << lane) & discard)
-         {
-            K_j[p + lane] = -1;
+            break;
          }
       }
 
       /* Exclude remaining columns */
-      for (j = p + HYPRE_WARP_SIZE + lane; j < q; j += HYPRE_WARP_SIZE)
+      for (j = p + k + lane; j < q; j += HYPRE_WARP_SIZE)
       {
          K_j[j] = -1;
       }
@@ -572,21 +511,15 @@ hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
 
       /* Allocate memory for row indices array*/
       hypre_GpuProfilingPushRange("Storage1");
+      //nnz = max_nonzeros_row * num_rows;
       mat_ii     = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
       mat_ii_new = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
       mat_j_new  = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
       mat_a_new  = hypre_TAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_DEVICE);
       hypre_GpuProfilingPopRange();
 
-      hypre_GpuProfilingPushRange("SortCoefsCol");
-
       /* Build row indices array */
       hypreDevice_CsrRowPtrsToIndices_v2(num_rows, nnz, mat_i, mat_ii);
-
-      /* Sort rows with increasing absolute coefficient order */
-      hypreDevice_StableSortByTupleKey(nnz, mat_ii, mat_a, mat_j, 1);
-      hypre_GpuProfilingPopRange();
-
 
       /* Mark unwanted entries with -1 */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -736,15 +669,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Set pattern matrix diagonal matrix */
    hypre_CSRMatrix  *K_diag = hypre_ParCSRMatrixDiag(Ktilde);
-
-   /* Extract lower triangular portion */
-   hypre_CSRMatrixExtractTriangularDevice(K_diag);
-
-#if defined (DEBUG_FSAI)
-   {
-      hypre_ParCSRMatrixPrintIJ(Ktilde, 0, 0, "FSAI.out.Hl.ij");
-   }
-#endif
 
    /* Filter candidate pattern */
    hypre_FSAITruncateCandidateDevice(K_diag, max_nonzeros_row, filter_option, filter_threshold);
