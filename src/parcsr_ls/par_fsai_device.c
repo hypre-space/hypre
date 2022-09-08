@@ -46,10 +46,8 @@ hypreGPUKernel_ComplexArrayToArrayOfPtrs( hypre_DeviceItem  &item,
  *   2) rhs_data: right hand side coefficients.
  *   3) G_r: number of nonzero coefficients per row of the matrix G.
  *
- * Notes:
- *   1) Naive implementation using one thread per row
- *   2) A_j and P_j are sorted in the intervals (A_i[i], A_i[i+1])
- *      and (P_i[i], P_i[i+1]), respectively
+ * TODO:
+ *   1) Minimize intra-warp divergence.
  *--------------------------------------------------------------------*/
 
 __global__ void
@@ -65,93 +63,121 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                                       HYPRE_Complex    *rhs_data,
                                       HYPRE_Int        *G_r )
 {
-   HYPRE_Int      i, j;
-   HYPRE_Int      il, jl;
-   HYPRE_Int      row;
-   HYPRE_Int      Aptr, Pptr;
+   HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int      i, j, jj, k;
+   HYPRE_Int      pj, qj;
+   HYPRE_Int      pk, qk;
+   HYPRE_Int      A_col, P_col;
+   hypre_int      bitmask;
+   HYPRE_Complex  val;
 
    /* Grid-stride loop over matrix rows */
-   for (i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   for (i = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
         i < num_rows;
-        i += hypre_gpu_get_grid_num_threads<1, 1>(item))
+        i += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE)
    {
       /* Set identity matrix */
-      for (j = 0; j < ldim; j++)
+      for (j = lane; j < ldim; j += HYPRE_WARP_SIZE)
       {
          mat_(ldim, i, j, j) = 1.0;
       }
 
-      /* Set right hand side vector */
-      il = 0;
-      Aptr = A_i[i];
-      Pptr = P_i[i];
-      while ((Pptr < P_i[i + 1]) && (Aptr < A_i[i + 1]))
+      if (lane < 2)
       {
-         if (P_j[Pptr] >= i)
+         pj = read_only_load(P_i + i + lane);
+         pk = read_only_load(A_i + i + lane);
+      }
+      qj = __shfl_sync(HYPRE_WARP_FULL_MASK, pj, 1);
+      pj = __shfl_sync(HYPRE_WARP_FULL_MASK, pj, 0);
+      qk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 1);
+      pk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 0);
+
+      /* Set right hand side vector */
+      for (j = pj; j < qj; j++)
+      {
+         if (lane == 0)
          {
-            break;
+            P_col = read_only_load(P_j + j);
          }
-         else if (P_j[Pptr] < A_j[Aptr])
+         P_col = __shfl_sync(HYPRE_WARP_FULL_MASK, P_col, 0);
+
+         for (k = pk + lane;
+              __any_sync(HYPRE_WARP_FULL_MASK, k < qk);
+              k += HYPRE_WARP_SIZE)
          {
-            Pptr++;
-            il++;
+            if (k < qk)
+            {
+               A_col = read_only_load(A_j + k);
+            }
+            else
+            {
+               A_col = -1;
+            }
+
+            bitmask = __ballot_sync(0xFFFFFFFFU, A_col == P_col);
+            if (bitmask > 0)
+            {
+               if (lane == (__ffs(bitmask) - 1))
+               {
+                  rhs_(ldim, i, j - pj) = - read_only_load(A_a + k);
+               }
+               break;
+            }
          }
-         else if (A_j[Aptr] < P_j[Pptr])
-         {
-            Aptr++;
-         }
-         else
-         {
-            rhs_(ldim, i, il) = - A_a[Aptr];
-            Aptr++;
-            Pptr++;
-            il++;
-         }
-      } /* Gather RHS entries */
+      }
 
       /* Loop over requested rows */
-      il = 0;
-      for (j = P_i[i]; j < P_i[i + 1]; j++)
+      for (j = pj; j < qj; j++)
       {
-         row = P_j[j];
-
-         /* Skip upper triangular pattern */
-         if (row < i)
+         if (lane < 2)
          {
-            /* Gather matrix entries */
-            Aptr = A_i[row];
-            Pptr = P_i[i];
-            jl = 0;
-            while ((Pptr < P_i[i + 1]) && (Aptr < A_i[row + 1]))
+            pk = read_only_load(A_i + P_j[j] + lane);
+         }
+         qk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 1);
+         pk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 0);
+
+         /* Visit only the lower triangular part */
+         for (jj = pj; jj <= j; jj++)
+         {
+            if (lane == 0)
             {
-               if (P_j[Pptr] >= i)
+               P_col = read_only_load(P_j + jj);
+            }
+            P_col = __shfl_sync(HYPRE_WARP_FULL_MASK, P_col, 0);
+
+            for (k = pk + lane;
+                 __any_sync(HYPRE_WARP_FULL_MASK, k < qk);
+                 k += HYPRE_WARP_SIZE)
+            {
+               if (k < qk)
                {
-                  break;
-               }
-               else if (P_j[Pptr] < A_j[Aptr])
-               {
-                  Pptr++;
-                  jl++;
-               }
-               else if (A_j[Aptr] < P_j[Pptr])
-               {
-                  Aptr++;
+                  A_col = read_only_load(A_j + k);
                }
                else
                {
-                  mat_(ldim, i, il, jl) = A_a[Aptr];
-                  Aptr++;
-                  Pptr++;
-                  jl++;
+                  A_col = -1;
                }
-            } /* Gather entries */
 
-            il++;
-         } /* Skip upper triangular pattern */
-      } /* Loop over requested rows */
+               bitmask = __ballot_sync(0xFFFFFFFFU, A_col == P_col);
+               if (bitmask > 0)
+               {
+                  if (lane == (__ffs(bitmask) - 1))
+                  {
+                     val = read_only_load(A_a + k);
+                     mat_(ldim, i, j - pj, jj - pj) = val;
+                     mat_(ldim, i, jj - pj, j - pj) = val;
+                  }
+                  break;
+               }
+            }
+         }
+      }
 
       /* Set number of nonzero coefficients per row of G */
-      G_r[i] = il + 1;
+      if (lane == 0)
+      {
+         G_r[i] = qj - pj + 1;
+      }
    } /* Grid-stride loop over matrix rows */
 }
 
@@ -406,7 +432,7 @@ hypreDevice_FSAIExtractSubSystems( HYPRE_Int       num_rows,
    }
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
    /* dim3 bDim = {1, 1, 1}; */
    /* dim3 gDim = {1, 1, 1}; */
 
@@ -611,6 +637,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    Atilde = hypre_ParCSRMatrixClone(A, 1);
    hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, 5e-2, filter_option);
 
+   /* TODO: Check if Atilde is diagonal */
+
    /* Compute power pattern */
    switch (num_levels)
    {
@@ -693,9 +721,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* TODO: implement faster diagonal extraction (use "i == A_j[A_i[i]]")*/
    scaling = hypre_TAlloc(HYPRE_Complex, num_rows, HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixExtractDiagonalDevice(A_diag, scaling, 0);
-
-   /* Sort matrix A */
-   hypre_CSRMatrixSortRow(A_diag);
 
    hypre_GpuProfilingPopRange();
 
@@ -813,9 +838,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
 /*--------------------------------------------------------------------------
  * hypre_FSAISetupDevice
- *
- * Notes:
- *   1) Do we need to sort the matrices?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
