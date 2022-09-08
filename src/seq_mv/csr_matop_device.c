@@ -1698,6 +1698,8 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
 
+   hypre_GpuProfilingPushRange("hypre_CSRMatrixDropSmallEntries");
+
    if (elmt_tols == NULL)
    {
       new_nnz = HYPRE_THRUST_CALL( count_if,
@@ -1760,6 +1762,8 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    hypre_CSRMatrixJ(A) = new_j;
    hypre_CSRMatrixData(A) = new_data;
    hypre_TFree(new_ii, HYPRE_MEMORY_DEVICE);
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

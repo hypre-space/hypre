@@ -1328,6 +1328,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    HYPRE_Real      *elmt_tols_diag = NULL;
    HYPRE_Real      *elmt_tols_offd = NULL;
 
+   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixDropSmallEntries");
+
    if (col_map_offd_A == NULL)
    {
       col_map_offd_A = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
@@ -1432,6 +1434,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
       hypre_TFree(elmt_tols_offd, HYPRE_MEMORY_DEVICE);
    }
    hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
