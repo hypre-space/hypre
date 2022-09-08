@@ -74,6 +74,8 @@ HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_ind
                                 HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParLaplacian27pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                  HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParLaplacian125pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                  HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParRotate7pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                              HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParVarDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
@@ -560,22 +562,28 @@ main( hypre_int argc,
          build_matrix_type      = 4;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-difconv") == 0 )
+      else if ( strcmp(argv[arg_index], "-125pt") == 0 )
       {
          arg_index++;
          build_matrix_type      = 5;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-vardifconv") == 0 )
+      else if ( strcmp(argv[arg_index], "-difconv") == 0 )
       {
          arg_index++;
          build_matrix_type      = 6;
          build_matrix_arg_index = arg_index;
       }
-      else if ( strcmp(argv[arg_index], "-rotate") == 0 )
+      else if ( strcmp(argv[arg_index], "-vardifconv") == 0 )
       {
          arg_index++;
          build_matrix_type      = 7;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rotate") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 8;
          build_matrix_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-test_ij") == 0 )
@@ -1969,11 +1977,14 @@ main( hypre_int argc,
          hypre_printf("  -fromonecsrfile <filename> : ");
          hypre_printf("matrix read from a single file (CSR format)\n");
          hypre_printf("\n");
-         hypre_printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
+         hypre_printf("  -laplacian             : build 5pt 2D laplacian problem (default) \n");
          hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
          hypre_printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
          hypre_printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
+         hypre_printf("  -125pt [<opts>]        : build 125pt (27pt squared) 3D laplacian\n");
          hypre_printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
+         hypre_printf("  -vardifconv [<opts>]   : build variable conv.-diffusion problem\n");
+         hypre_printf("  -rotate [<opts>]       : build 7pt rotated laplacian problem\n");
          hypre_printf("    -n <nx> <ny> <nz>    : total problem size \n");
          hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
          hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
@@ -2446,34 +2457,39 @@ main( hypre_int argc,
    else if ( build_matrix_type == 4 )
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
-
       hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 5 )
    {
-      BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
+      BuildParLaplacian125pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+      hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 6 )
+   {
+      BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
+   }
+   else if ( build_matrix_type == 7 )
    {
       BuildParVarDifConv(argc, argv, build_matrix_arg_index, &parcsr_A, &b);
       build_rhs_type      = 6;
       build_src_type      = 5;
    }
-   else if ( build_matrix_type == 7 )
+   else if ( build_matrix_type == 8 )
    {
       BuildParRotate7pt(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
-
    else
    {
       hypre_printf("You have asked for an unsupported problem with\n");
       hypre_printf("build_matrix_type = %d.\n", build_matrix_type);
-      return (-1);
+
+      hypre_MPI_Abort(comm, 1);
    }
+
    /* BM Oct 23, 2006 */
    if (plot_grids)
    {
-      if (build_matrix_type > 1 &&  build_matrix_type < 8)
+      if (build_matrix_type > 1 &&  build_matrix_type < 9)
          BuildParCoordinates (argc, argv, build_matrix_arg_index,
                               &coord_dim, &coordinates);
       else
@@ -2583,13 +2599,17 @@ main( hypre_int argc,
             {
                size = 7;
             }
-            if (build_matrix_type == 3)
+            else if (build_matrix_type == 3)
             {
                size = 9;
             }
-            if (build_matrix_type == 4)
+            else if (build_matrix_type == 4)
             {
                size = 27;
+            }
+            else if (build_matrix_type == 5)
+            {
+               size = 125;
             }
          }
          row_sizes = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
@@ -2603,13 +2623,17 @@ main( hypre_int argc,
       {
          mx_size = 7;
       }
-      if (build_matrix_type == 3)
+      else if (build_matrix_type == 3)
       {
          mx_size = 9;
       }
-      if (build_matrix_type == 4)
+      else if (build_matrix_type == 4)
       {
          mx_size = 27;
+      }
+      else if (build_matrix_type == 5)
+      {
+         mx_size = 125;
       }
       col_nums = hypre_CTAlloc(HYPRE_BigInt, mx_size * num_rows, HYPRE_MEMORY_HOST);
       data     = hypre_CTAlloc(HYPRE_Real,   mx_size * num_rows, HYPRE_MEMORY_HOST);
@@ -5123,9 +5147,22 @@ main( hypre_int argc,
             if (sparsity_known == 0) /* tries a more accurate estimate of the
                                         storage */
             {
-               if (build_matrix_type == 2) { size = 7; }
-               if (build_matrix_type == 3) { size = 9; }
-               if (build_matrix_type == 4) { size = 27; }
+               if (build_matrix_type == 2)
+               {
+                  size = 7;
+               }
+               else if (build_matrix_type == 3)
+               {
+                  size = 9;
+               }
+               else if (build_matrix_type == 4)
+               {
+                  size = 27;
+               }
+               else if (build_matrix_type == 5)
+               {
+                  size = 125;
+               }
             }
 
             for (i = 0; i < local_num_rows; i++)
@@ -8451,7 +8488,10 @@ final:
 
    if (test_ij || build_matrix_type == -1)
    {
-      if (ij_A) { HYPRE_IJMatrixDestroy(ij_A); }
+      if (ij_A)
+      {
+         HYPRE_IJMatrixDestroy(ij_A);
+      }
    }
    else
    {
@@ -9970,6 +10010,7 @@ BuildParLaplacian9pt( HYPRE_Int            argc,
 
    return (0);
 }
+
 /*----------------------------------------------------------------------
  * Build 27-point laplacian in 3D,
  * Parameters given in command line.
@@ -10092,6 +10133,129 @@ BuildParLaplacian27pt( HYPRE_Int            argc,
    return (0);
 }
 
+/*----------------------------------------------------------------------
+ * Build 125-point laplacian in 3D (27-pt squared)
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildParLaplacian125pt( HYPRE_Int            argc,
+                        char                *argv[],
+                        HYPRE_Int            arg_index,
+                        HYPRE_ParCSRMatrix  *A_ptr     )
+{
+   HYPRE_BigInt              nx, ny, nz;
+   HYPRE_Int                 P, Q, R;
+
+   HYPRE_ParCSRMatrix        A, B;
+
+   HYPRE_Int                 num_procs, myid;
+   HYPRE_Int                 p, q, r;
+   HYPRE_Real               *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P * Q * R) != num_procs)
+   {
+      hypre_printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      hypre_printf("  Laplacian_125pt:\n");
+      hypre_printf("    (nx, ny, nz) = (%b, %b, %b)\n", nx, ny, nz);
+      hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p) / P) % Q;
+   r = ( myid - p - P * q) / ( P * Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix
+    *-----------------------------------------------------------*/
+
+   values = hypre_CTAlloc(HYPRE_Real,  2, HYPRE_MEMORY_HOST);
+
+   values[0] = 26.0;
+   if (nx == 1 || ny == 1 || nz == 1)
+   {
+      values[0] = 8.0;
+   }
+   if (nx * ny == 1 || nx * nz == 1 || ny * nz == 1)
+   {
+      values[0] = 2.0;
+   }
+   values[1] = -1.;
+
+   B = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(hypre_MPI_COMM_WORLD,
+                                                  nx, ny, nz, P, Q, R, p, q, r, values);
+   A = (HYPRE_ParCSRMatrix) hypre_ParCSRMatMat(B, B);
+
+   HYPRE_ParCSRMatrixDestroy(B);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
+
+   *A_ptr = A;
+
+   return (0);
+}
 
 /*----------------------------------------------------------------------
  * Build 7-point in 2D
