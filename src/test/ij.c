@@ -1297,7 +1297,7 @@ main( hypre_int argc,
          use_curand = atoi(argv[arg_index++]);
       }
 #endif
-#if defined(HYPRE_USING_DEVICE_POOL)
+#if defined (HYPRE_USING_DEVICE_POOL)
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
@@ -1319,7 +1319,7 @@ main( hypre_int argc,
          arg_index++;
          mempool_max_cached_bytes = atoi(argv[arg_index++]) * 1024LL * 1024LL;
       }
-#endif
+#elif defined (HYPRE_USING_UMPIRE)
       else if ( strcmp(argv[arg_index], "-umpire_dev_pool_size") == 0 )
       {
          arg_index++;
@@ -1340,6 +1340,7 @@ main( hypre_int argc,
          arg_index++;
          umpire_host_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
       }
+#endif
       else if ( strcmp(argv[arg_index], "-negA") == 0 )
       {
          arg_index++;
