@@ -472,12 +472,18 @@ main( hypre_int argc,
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined (HYPRE_USING_DEVICE_POOL)
    /* device pool allocator */
    hypre_uint mempool_bin_growth   = 8,
               mempool_min_bin      = 3,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
+
+#elif defined (HYPRE_USING_UMPIRE)
+   size_t umpire_dev_pool_size    = 4294967296; // 4 GiB
+   size_t umpire_uvm_pool_size    = 4294967296; // 4 GiB
+   size_t umpire_pinned_pool_size = 4294967296; // 4 GiB
+   size_t umpire_host_pool_size   = 4294967296; // 4 GiB
 #endif
 
    /* Initialize MPI */
@@ -1291,7 +1297,7 @@ main( hypre_int argc,
          use_curand = atoi(argv[arg_index++]);
       }
 #endif
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
       else if ( strcmp(argv[arg_index], "-mempool_growth") == 0 )
       {
          arg_index++;
@@ -1314,6 +1320,26 @@ main( hypre_int argc,
          mempool_max_cached_bytes = atoi(argv[arg_index++]) * 1024LL * 1024LL;
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-umpire_dev_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_dev_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-umpire_uvm_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_uvm_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-umpire_pinned_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_pinned_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-umpire_host_pool_size") == 0 )
+      {
+         arg_index++;
+         umpire_host_pool_size = (size_t) 1073741824 * atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-negA") == 0 )
       {
          arg_index++;
@@ -2335,6 +2361,14 @@ main( hypre_int argc,
          hypre_printf("       2=W-cycle  \n");
          hypre_printf("       3=F-cycle  \n");
          /* end AMG-DD options */
+#if defined (HYPRE_USING_UMPIRE)
+         /* hypre umpire options */
+         hypre_printf("  -umpire_dev_pool_size <val>      : device memory pool size (GiB)\n");
+         hypre_printf("  -umpire_uvm_pool_size <val>      : device unified virtual memory pool size (GiB)\n");
+         hypre_printf("  -umpire_pinned_pool_size <val>   : pinned memory pool size (GiB)\n");
+         hypre_printf("  -umpire_host_pool_size <val>     : host memory pool size (GiB)\n");
+         /* end umpire options */
+#endif
       }
 
       goto final;
@@ -2378,22 +2412,22 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-#ifdef HYPRE_USING_DEVICE_POOL
+#if defined(HYPRE_USING_DEVICE_POOL)
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
    HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
                                mempool_max_bin, mempool_max_cached_bytes );
-#endif
 
-#if defined(HYPRE_USING_UMPIRE)
+#elif defined(HYPRE_USING_UMPIRE)
    /* Setup Umpire pools */
    HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
    HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
    HYPRE_SetUmpireHostPoolName("HYPRE_HOST_POOL_TEST");
    HYPRE_SetUmpirePinnedPoolName("HYPRE_PINNED_POOL_TEST");
-   HYPRE_SetUmpireDevicePoolSize(4LL * 1024 * 1024 * 1024);
-   HYPRE_SetUmpireUMPoolSize(4LL * 1024 * 1024 * 1024);
-   HYPRE_SetUmpireHostPoolSize(4LL * 1024 * 1024 * 1024);
-   HYPRE_SetUmpirePinnedPoolSize(4LL * 1024 * 1024 * 1024);
+
+   HYPRE_SetUmpireDevicePoolSize(umpire_dev_pool_size);
+   HYPRE_SetUmpireUMPoolSize(umpire_uvm_pool_size);
+   HYPRE_SetUmpireHostPoolSize(umpire_host_pool_size);
+   HYPRE_SetUmpirePinnedPoolSize(umpire_pinned_pool_size);
 #endif
 
    /* default memory location */
