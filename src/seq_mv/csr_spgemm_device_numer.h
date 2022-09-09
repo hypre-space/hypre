@@ -10,6 +10,8 @@
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
+/* WM: debug */
+#define HYPRE_DEBUG
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - *
                 Numerical Multiplication
@@ -255,7 +257,9 @@ template <HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_GHASH, HYPRE
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
+      HYPRE_Int *jc,
                                         HYPRE_Int               lane_id,
+                                        HYPRE_Int               do_shared_copy,
 #if defined(HYPRE_USING_SYCL)
                                         HYPRE_Int     *s_HashKeys,
                                         HYPRE_Complex *s_HashVals,
@@ -275,7 +279,7 @@ hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
    /* copy shared memory hash table into C */
    //#pragma unroll UNROLL_FACTOR
 
-   if (warp_any_sync(item, HYPRE_WARP_FULL_MASK, s_HashKeys != NULL))
+   if (warp_any_sync(item, HYPRE_WARP_FULL_MASK, do_shared_copy))
    {
       for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
       {
@@ -377,6 +381,8 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 #endif
 
    const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_NUMER_UNROLL, SHMEM_HASH_SIZE);
+   HYPRE_Int do_shared_copy;
+   HYPRE_Int valid_ptr;
 
 #if defined(HYPRE_USING_SYCL)
    hypre_device_assert(item.get_local_range(2) * item.get_local_range(1) == GROUP_SIZE);
@@ -384,14 +390,29 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
+/* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
+ *            syncthreads(), but this is not true for sycl (all threads must call the collective).
+ *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */ 
+#if defined(HYPRE_USING_SYCL)
+   for (HYPRE_Int i = grid_group_id; sycl::any_of_group(item.get_group(), i < M);
+        i += grid_num_groups)
+#else
    for (HYPRE_Int i = grid_group_id; warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M);
         i += grid_num_groups)
+#endif
    {
+      /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
+#if defined(HYPRE_USING_SYCL)
+      valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) && (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M); 
+#else
+      valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M; 
+#endif
+
       HYPRE_Int ii = -1;
 
       if (HAS_RIND)
       {
-         group_read<GROUP_SIZE>(item, rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, ii);
+         group_read<GROUP_SIZE>(item, rind + i, valid_ptr, ii);
       }
       else
       {
@@ -403,7 +424,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 
       if (HAS_GHASH)
       {
-         group_read<GROUP_SIZE>(item, ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
+         group_read<GROUP_SIZE>(item, ig + grid_group_id, valid_ptr,
                                 istart_g, iend_g);
 
          /* size of global hash table allocated for this row
@@ -419,7 +440,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
       }
 
       /* initialize group's shared memory hash table */
-      if (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M)
+      if (valid_ptr)
       {
 #pragma unroll UNROLL_FACTOR
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
@@ -435,15 +456,15 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
       HYPRE_Int istart_a = 0, iend_a = 0;
 
       /* load the start and end position of row ii of A */
-      group_read<GROUP_SIZE>(item, ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_a, iend_a);
+      group_read<GROUP_SIZE>(item, ia + ii, valid_ptr, istart_a, iend_a);
 
       /* start/end position of row of C */
       HYPRE_Int istart_c = 0;
 #if defined(HYPRE_DEBUG)
       HYPRE_Int iend_c = 0;
-      group_read<GROUP_SIZE>(item, ic + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c, iend_c);
+      group_read<GROUP_SIZE>(item, ic + ii, valid_ptr, istart_c, iend_c);
 #else
-      group_read<GROUP_SIZE>(item, ic + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c);
+      group_read<GROUP_SIZE>(item, ic + ii, valid_ptr, istart_c);
 #endif
 
       /* work with two hash tables */
@@ -479,10 +500,13 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
        * if GROUP_SIZE < WARP_SIZE, the whole group copies */
       if (get_warp_in_group_id<GROUP_SIZE>(item) == 0)
       {
+         do_shared_copy = (iend_a > istart_a + 1) && (valid_ptr);
          jsum = hypre_spgemm_copy_from_hash_into_C_row<GROUP_SIZE, SHMEM_HASH_SIZE, HAS_GHASH, UNROLL_FACTOR>
                 (item,
+                 jc,
                  lane_id,
-                 (iend_a > istart_a + 1) && (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M) ? group_s_HashKeys : NULL,
+                 do_shared_copy,
+                 group_s_HashKeys,
                  group_s_HashVals,
                  ghash_size,
                  jg + istart_g, ag + istart_g,
@@ -511,7 +535,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
       if (FAILED_SYMBL)
       {
          /* when symb mult was failed, save (exact) row nnz */
-         if ((GROUP_SIZE >= HYPRE_WARP_SIZE || i < M) && lane_id == 0)
+         if ((valid_ptr) && lane_id == 0)
          {
             rc[ii] = jsum;
          }

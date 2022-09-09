@@ -238,7 +238,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    HYPRE_Int  i;
 
 #if defined(HYPRE_USING_OPENMP)
-      #pragma omp parallel for HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
    for (i = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
         i < hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);

@@ -177,7 +177,6 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                   HYPRE_Int  in_rc,
                                   HYPRE_Int *d_rc )
 {
-   hypre_printf("WM: debug - inside hypreDevice_CSRSpGemmRownnzNoBin()\n");
    constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
    constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
    const HYPRE_Int BIN = 5;
@@ -189,7 +188,6 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 
    hypre_spgemm_symbolic_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
    (m, NULL, k, n, need_ghash, d_ia, d_ja, d_ib, d_jb, d_rc, can_fail, d_rf);
-   hypre_printf("WM: debug - inside hypreDevice_CSRSpGemmRownnzNoBin() 1, can_fail = %d\n", can_fail);
 
    if (can_fail)
    {
@@ -243,7 +241,6 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
 
-   hypre_printf("WM: debug - finished hypreDevice_CSRSpGemmRownnzNoBin()\n");
    return hypre_error_flag;
 }
 
@@ -389,7 +386,6 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
 #endif
 
    const HYPRE_Int binned = hypre_HandleSpgemmBinned(hypre_handle());
-   hypre_printf("WM: debug - inside hypreDevice_CSRSpGemmRownnz(), binned = %d\n", binned);
 
    if (binned)
    {

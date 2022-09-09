@@ -61,6 +61,8 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_SPGEMM_PRINT("%s[%d]: nnzC %d\n", __FILE__, __LINE__, nnzC);
 #endif
+   hypre_printf("WM: debug - exact_rownnz = %d\n", exact_rownnz);
+
 
    /* even with exact rownnz, still may need global hash, since shared hash is smaller than symbol */
    hypre_spgemm_numerical_with_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
@@ -190,7 +192,6 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
                                                 HYPRE_Int      *nnzC_out )
 
 {
-   hypre_printf("WM: debug - inside hypreDevice_CSRSpGemmNumerWithRownnzUpperbound()\n");
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] -= hypre_MPI_Wtime();
 #endif
@@ -230,7 +231,6 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] += hypre_MPI_Wtime();
 #endif
 
-   hypre_printf("WM: debug - finished hypreDevice_CSRSpGemmNumerWithRownnzUpperbound()\n");
    return hypre_error_flag;
 }
 

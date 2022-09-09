@@ -10,7 +10,7 @@
 #include "../parcsr_block_mv/par_csr_block_matrix.h"
 #include "_hypre_utilities.hpp"
 
-#define DEBUG 0
+#define DEBUG 1
 #define PRINT_CF 0
 
 #define DEBUG_SAVE_ALL_OPS 0

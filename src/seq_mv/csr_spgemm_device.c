@@ -83,7 +83,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 
       HYPRE_Int *d_rc = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
       const HYPRE_Int alg = hypre_HandleSpgemmAlgorithm(hypre_handle());
-      hypre_printf("WM: debug - in custom spgemm, alg = %d\n", alg);
+      hypre_printf("\n\nWM: debug - in custom spgemm, alg = %d\n\n", alg);
 
       if (hypre_HandleSpgemmNumBin(hypre_handle()) == 0)
       {
@@ -94,9 +94,30 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       {
          hypreDevice_CSRSpGemmRownnz
          (m, k, n, nnza, d_ia, d_ja, d_ib, d_jb, 0 /* without input rc */, d_rc);
+         /* WM: debug */
+         hypre_printf("WM: debug - final d_rc = ");
+         HYPRE_Int i;
+         for (i = 0; i < m; i++)
+            hypre_printf("%d ", d_rc[i]);
+         hypre_printf("\n");
 
          hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
          (m, k, n, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_rc, 1, &d_ic, &d_jc, &d_c, &nnzC);
+         /* WM: debug */
+         hypre_printf("WM: debug - final d_ic = ");
+         for (i = 0; i < m + 1; i++)
+            hypre_printf("%d ", d_ic[i]);
+         hypre_printf("\n");
+         /* WM: debug */
+         hypre_printf("WM: debug - final d_jc = ");
+         for (i = 0; i < nnzC; i++)
+            hypre_printf("%d ", d_jc[i]);
+         hypre_printf("\n");
+         /* WM: debug */
+         hypre_printf("WM: debug - final d_c = ");
+         for (i = 0; i < nnzC; i++)
+            hypre_printf("%e ", d_c[i]);
+         hypre_printf("\n");
       }
       else /* if (alg == 3) */
       {
@@ -130,6 +151,28 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM] += hypre_MPI_Wtime();
 #endif
+
+   /* WM: debug - check results agains host implementation */
+   hypre_printf("WM: debug - check against host\n");
+   hypre_CSRMatrix *C_host = hypre_CSRMatrixMultiplyHost(A, B);
+   hypre_CSRMatrix *error = hypre_CSRMatrixAddHost(1.0, C, -1.0, C_host);
+   HYPRE_Real err_norm = hypre_CSRMatrixFnorm(error); 
+   hypre_printf("WM: debug - err_norm = %e\n", err_norm);
+   if (err_norm)
+   {
+      hypre_CSRMatrixPrint(A, "A");
+      hypre_CSRMatrixPrint(B, "B");
+      hypre_CSRMatrixPrint(C_host, "C_host");
+      hypre_CSRMatrixPrint(C, "C_device");
+      hypre_CSRMatrixPrint(C_host, "error");
+   }
+   hypre_CSRMatrixDestroy(error);
+   hypre_CSRMatrixDestroy(C_host);
+   if (err_norm)
+   {
+      hypre_MPI_Finalize();
+      exit(1);
+   }
 
    return hypre_error_flag;
 }
