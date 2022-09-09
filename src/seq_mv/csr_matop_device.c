@@ -1717,6 +1717,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
 
    if (new_nnz == nnz)
    {
+      hypre_GpuProfilingPopRange();
       hypre_TFree(A_ii, HYPRE_MEMORY_DEVICE);
       return hypre_error_flag;
    }
