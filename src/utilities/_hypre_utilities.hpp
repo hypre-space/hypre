@@ -1907,7 +1907,7 @@ struct ReduceSum
    {
       T val;
 
-      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+      HYPRE_ExecutionPolicy exec_policy = hypre_HandleDefaultExecPolicy(hypre_handle());
 
       if (exec_policy == HYPRE_EXEC_HOST)
       {

@@ -280,7 +280,7 @@ hypre_EndTiming( HYPRE_Int time_index )
    {
 #if defined(HYPRE_USING_GPU)
       hypre_Handle *hypre_handle_ = hypre_handle();
-      if (hypre_HandleStructExecPolicy(hypre_handle_) == HYPRE_EXEC_DEVICE)
+      if (hypre_HandleDefaultExecPolicy(hypre_handle_) == HYPRE_EXEC_DEVICE)
       {
          hypre_SyncCudaDevice(hypre_handle_);
       }
