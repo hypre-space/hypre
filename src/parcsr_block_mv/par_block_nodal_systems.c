@@ -9,17 +9,17 @@
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBlockCreateNodalA
-
- This is the block version of creating a nodal norm matrix.
-
- option: determine which type of "norm" (or other measurement) is used.
-
- 1 = frobenius
- 2 = sum of abs. value of all elements
- 3 = largest element (positive or negative)
- 4 = 1-norm
- 5 = inf - norm
- 6 = sum of all elements
+ *
+ * This is the block version of creating a nodal norm matrix.
+ *
+ * Option: determine which type of "norm" (or other measurement) is used.
+ *
+ *   1 = frobenius
+ *   2 = sum of abs. value of all elements
+ *   3 = largest element (positive or negative)
+ *   4 = 1-norm
+ *   5 = inf - norm
+ *   6 = sum of all elements
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -164,54 +164,50 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    /* copy the commpkg */
    if (comm_pkg)
    {
-      comm_pkg_AN = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRCommPkgComm(comm_pkg_AN) = comm;
-
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      hypre_ParCSRCommPkgNumSends(comm_pkg_AN) = num_sends;
-
       num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-      hypre_ParCSRCommPkgNumRecvs(comm_pkg_AN) = num_recvs;
-
+      recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+      recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
       send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
       send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
       if (num_sends)
       {
          send_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
-         send_map_elmts_AN = hypre_CTAlloc(HYPRE_Int,  send_map_starts[num_sends], HYPRE_MEMORY_HOST);
+         send_map_elmts_AN = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends],
+                                           HYPRE_MEMORY_HOST);
       }
       send_map_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_sends + 1, HYPRE_MEMORY_HOST);
-      send_map_starts_AN[0] = 0;
       for (i = 0; i < num_sends; i++)
       {
          send_procs_AN[i] = send_procs[i];
          send_map_starts_AN[i + 1] = send_map_starts[i + 1];
       }
+
       cnt = send_map_starts_AN[num_sends];
       for (i = 0; i < cnt; i++)
       {
          send_map_elmts_AN[i] = send_map_elmts[i];
       }
-      hypre_ParCSRCommPkgSendProcs(comm_pkg_AN) = send_procs_AN;
-      hypre_ParCSRCommPkgSendMapStarts(comm_pkg_AN) = send_map_starts_AN;
-      hypre_ParCSRCommPkgSendMapElmts(comm_pkg_AN) = send_map_elmts_AN;
 
-      recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-      recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
       recv_vec_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs + 1, HYPRE_MEMORY_HOST);
-      if (num_recvs) { recv_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST); }
-
-      recv_vec_starts_AN[0] = recv_vec_starts[0];
+      if (num_recvs)
+      {
+         recv_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
+      }
       for (i = 0; i < num_recvs; i++)
       {
          recv_procs_AN[i] = recv_procs[i];
          recv_vec_starts_AN[i + 1] = recv_vec_starts[i + 1];
-
       }
-      hypre_ParCSRCommPkgRecvProcs(comm_pkg_AN) = recv_procs_AN;
-      hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_AN) = recv_vec_starts_AN;
 
+      /* Create communication package */
+      hypre_ParCSRCommPkgCreateAndFill(comm,
+                                       num_recvs, recv_procs_AN, recv_vec_starts_AN,
+                                       num_sends, send_procs_AN, send_map_starts_AN,
+                                       send_map_elmts_AN,
+                                       &comm_pkg_AN);
    }
 
    /* the off-diag part */

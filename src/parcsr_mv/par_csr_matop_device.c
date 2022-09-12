@@ -484,7 +484,7 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    HYPRE_Int        B_int_nnz;
 
    hypre_ParCSRCommHandle *comm_handle, *comm_handle_j, *comm_handle_a;
-   hypre_ParCSRCommPkg    *comm_pkg_j;
+   hypre_ParCSRCommPkg    *comm_pkg_j = NULL;
 
    HYPRE_Int *jdata_recv_vec_starts;
    HYPRE_Int *jdata_send_map_starts;
@@ -534,12 +534,12 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
       jdata_recv_vec_starts[i] = B_ext_i_h[recv_vec_starts[i]];
    }
 
-   comm_pkg_j = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm(comm_pkg_j)      = comm;
-   hypre_ParCSRCommPkgNumSends(comm_pkg_j)  = num_recvs;
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg_j)  = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg_j) = recv_procs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg_j) = send_procs;
+   /* Create the communication package - note the order of send/recv is reversed */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_sends, send_procs, jdata_send_map_starts,
+                                    num_recvs, recv_procs, jdata_recv_vec_starts,
+                                    NULL,
+                                    &comm_pkg_j);
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
@@ -564,10 +564,6 @@ hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix      *B_ext,
    {
       jdata_send_map_starts[i] = B_int_i_h[send_map_starts[i]];
    }
-
-   /* note the order of send/recv is reversed */
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = jdata_send_map_starts;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_j) = jdata_recv_vec_starts;
 
    /* RL: assume B_ext_a_d and B_ext_j_d are ready at input */
    /* send/recv CSR rows */
@@ -694,7 +690,7 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    HYPRE_BigInt  *d_send_j, *d_recv_j;
    HYPRE_Int     *send_jstarts, *recv_jstarts;
    HYPRE_Complex *d_send_a = NULL, *d_recv_a = NULL;
-   hypre_ParCSRCommPkg     *comm_pkg_j;
+   hypre_ParCSRCommPkg     *comm_pkg_j = NULL;
    hypre_ParCSRCommHandle  *comm_handle, *comm_handle_j, *comm_handle_a;
    /* HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A); */
    /* diag part of A */
@@ -831,14 +827,15 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    }
 
    /* ready to send and recv: create a communication package for data */
-   comm_pkg_j = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm         (comm_pkg_j) = comm;
-   hypre_ParCSRCommPkgNumSends     (comm_pkg_j) = num_sends;
-   hypre_ParCSRCommPkgSendProcs    (comm_pkg_j) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_j) = send_jstarts;
-   hypre_ParCSRCommPkgNumRecvs     (comm_pkg_j) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs    (comm_pkg_j) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_j) = recv_jstarts;
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs,
+                                    hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    recv_jstarts,
+                                    num_sends,
+                                    hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    send_jstarts,
+                                    NULL,
+                                    &comm_pkg_j);
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI)
    /* RL: make sure d_send_j/d_send_a is ready before issuing GPU-GPU MPI */
@@ -919,45 +916,83 @@ hypre_ParcsrGetExternalRowsDeviceWait(void *vrequest)
 
 HYPRE_Int
 hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
-                                  HYPRE_Int             local_ncols )
+                                  HYPRE_Int             num_cols )
 {
-   HYPRE_Int  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   HYPRE_Int  num_elemt = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-   HYPRE_Int *send_map  = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
+   /* Input variables */
+   HYPRE_Int        num_sends      = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int        num_elements   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_Int        num_components = hypre_ParCSRCommPkgNumComponents(comm_pkg);
+   HYPRE_Int       *send_map       = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
+   HYPRE_Int       *send_map_def;
 
-   hypre_CSRMatrix *matrix_E = hypre_CSRMatrixCreate(local_ncols, num_elemt, num_elemt);
+   /* Local variables */
+   hypre_CSRMatrix *matrix_E;
+   HYPRE_Int       *e_i;
+   HYPRE_Int       *e_ii;
+   HYPRE_Int       *e_j;
+   HYPRE_Int       *new_end;
+   HYPRE_Int        nid;
+
+   /* Update number of elements exchanged when communicating multivectors */
+   num_elements /= num_components;
+
+   /* Create matrix_E */
+   matrix_E = hypre_CSRMatrixCreate(num_cols, num_elements, num_elements);
    hypre_CSRMatrixMemoryLocation(matrix_E) = HYPRE_MEMORY_DEVICE;
 
-   HYPRE_Int *e_ii = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *e_j  = hypre_TAlloc(HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE);
+   /* Build default (original) send_map_elements array */
+   if (num_components > 1)
+   {
+      send_map_def = hypre_TAlloc(HYPRE_Int, num_elements, HYPRE_MEMORY_DEVICE);
+      hypreDevice_IntStridedCopy(num_elements, num_components, send_map, send_map_def);
+   }
+   else
+   {
+      send_map_def = send_map;
+   }
 
-   hypre_TMemcpy(e_ii, send_map, HYPRE_Int, num_elemt, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
+   /* Allocate arrays */
+   e_ii = hypre_TAlloc(HYPRE_Int, num_elements, HYPRE_MEMORY_DEVICE);
+   e_j  = hypre_TAlloc(HYPRE_Int, num_elements, HYPRE_MEMORY_DEVICE);
+
+   /* Build e_ii and e_j */
+   hypre_TMemcpy(e_ii, send_map_def, HYPRE_Int, num_elements,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   hypreSycl_sequence(e_j, e_j + num_elemt, 0);
-   hypreSycl_stable_sort_by_key(e_ii, e_ii + num_elemt, e_j);
+   hypreSycl_sequence(e_j, e_j + num_elements, 0);
+   hypreSycl_stable_sort_by_key(e_ii, e_ii + num_elements, e_j);
 #else
-   HYPRE_THRUST_CALL( sequence, e_j, e_j + num_elemt);
-   HYPRE_THRUST_CALL( stable_sort_by_key, e_ii, e_ii + num_elemt, e_j );
+   HYPRE_THRUST_CALL(sequence, e_j, e_j + num_elements);
+   HYPRE_THRUST_CALL(stable_sort_by_key, e_ii, e_ii + num_elements, e_j);
 #endif
 
-   HYPRE_Int *e_i = hypreDevice_CsrRowIndicesToPtrs(local_ncols, num_elemt, e_ii);
+   /* Construct row pointers from row indices */
+   e_i = hypreDevice_CsrRowIndicesToPtrs(num_cols, num_elements, e_ii);
 
+   /* Find row indices with nonzero coefficients */
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int *new_end = HYPRE_ONEDPL_CALL( std::unique, e_ii, e_ii + num_elemt);
+   new_end = HYPRE_ONEDPL_CALL(std::unique, e_ii, e_ii + num_elements);
 #else
-   HYPRE_Int *new_end = HYPRE_THRUST_CALL( unique, e_ii, e_ii + num_elemt);
+   new_end = HYPRE_THRUST_CALL(unique, e_ii, e_ii + num_elements);
 #endif
-   HYPRE_Int nid = new_end - e_ii;
-   e_ii = hypre_TReAlloc_v2(e_ii, HYPRE_Int, num_elemt, HYPRE_Int, nid,
-                            HYPRE_MEMORY_DEVICE);
+   nid = new_end - e_ii;
+   e_ii = hypre_TReAlloc_v2(e_ii, HYPRE_Int, num_elements,
+                            HYPRE_Int, nid, HYPRE_MEMORY_DEVICE);
 
+   /* Set matrix_E pointers */
    hypre_CSRMatrixI(matrix_E) = e_i;
    hypre_CSRMatrixJ(matrix_E) = e_j;
    hypre_CSRMatrixNumRownnz(matrix_E) = nid;
    hypre_CSRMatrixRownnz(matrix_E) = e_ii;
 
+   /* Set matrix_E */
    hypre_ParCSRCommPkgMatrixE(comm_pkg) = matrix_E;
+
+   /* Free memory */
+   if (num_components > 1)
+   {
+      hypre_TFree(send_map_def, HYPRE_MEMORY_DEVICE);
+   }
 
    return hypre_error_flag;
 }

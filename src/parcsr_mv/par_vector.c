@@ -416,7 +416,7 @@ hypre_ParVectorScale( HYPRE_Complex    alpha,
 {
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_SeqVectorScale( alpha, y_local);
+   return hypre_SeqVectorScale(alpha, y_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -431,7 +431,7 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_SeqVectorAxpy( alpha, x_local, y_local);
+   return hypre_SeqVectorAxpy(alpha, x_local, y_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -539,7 +539,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
    hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
 
-   if  (num_vectors == 1)
+   if (num_vectors == 1)
    {
       par_vector = hypre_ParVectorCreate(comm, global_size, vec_starts);
    }
