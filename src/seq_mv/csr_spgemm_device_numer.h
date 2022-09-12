@@ -38,6 +38,7 @@ hypre_spgemm_hash_insert_numer(
    HYPRE_Complex           val )
 {
    HYPRE_Int j = 0;
+   HYPRE_Int old = -1;
 
 #pragma unroll UNROLL_FACTOR
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
@@ -58,11 +59,10 @@ hypre_spgemm_hash_insert_numer(
                HYPRE_Int, sycl::memory_order::relaxed,
                sycl::memory_scope::device,
                sycl::access::address_space::generic_space > (HashKeys[j]);
-      HYPRE_Int minus_one = -1;
-      v.compare_exchange_strong(minus_one, key);
-      HYPRE_Int old = v.load();
+      old = -1;
+      v.compare_exchange_strong(old, key);
 #else
-      HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
+      old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 #endif
 
       if (old == -1 || old == key)
@@ -99,6 +99,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
                                 HYPRE_Complex           val )
 {
    HYPRE_Int j = 0;
+   HYPRE_Int old = -1;
 
    for (HYPRE_Int i = 0; i < HashSize; i++)
    {
@@ -118,14 +119,12 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
                HYPRE_Int, sycl::memory_order::relaxed,
                sycl::memory_scope::device,
                sycl::access::address_space::generic_space > (HashKeys[j]);
-      HYPRE_Int minus_one = -1;
-      v.compare_exchange_strong(minus_one, key);
-      HYPRE_Int old = v.load();
+      old = -1;
+      v.compare_exchange_strong(old, key);
 #else
-      HYPRE_Int old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
+      old = atomicCAS((HYPRE_Int *)(HashKeys + j), -1, key);
 #endif
 
-      /* WM: todo - question: should never have the case where old == -1, correct? Unless key == 1, in which case this is still redundant?  */
       if (old == -1 || old == key)
       {
          /* this slot was open or contained 'key', update value */
@@ -257,7 +256,7 @@ template <HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_GHASH, HYPRE
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
-      HYPRE_Int *jc,
+                                        HYPRE_Int *jc,
                                         HYPRE_Int               lane_id,
                                         HYPRE_Int               do_shared_copy,
 #if defined(HYPRE_USING_SYCL)
@@ -390,9 +389,9 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
-/* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
- *            syncthreads(), but this is not true for sycl (all threads must call the collective).
- *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */ 
+   /* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
+    *            syncthreads(), but this is not true for sycl (all threads must call the collective).
+    *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */
 #if defined(HYPRE_USING_SYCL)
    for (HYPRE_Int i = grid_group_id; sycl::any_of_group(item.get_group(), i < M);
         i += grid_num_groups)
@@ -403,9 +402,10 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    {
       /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
 #if defined(HYPRE_USING_SYCL)
-      valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) && (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M); 
+      valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) && (GROUP_SIZE >= HYPRE_WARP_SIZE ||
+                                                                       i < M);
 #else
-      valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M; 
+      valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M;
 #endif
 
       HYPRE_Int ii = -1;

@@ -31,6 +31,8 @@ hypre_spgemm_hash_insert_symbl(
    HYPRE_Int          &count )
 {
    HYPRE_Int j = 0;
+   HYPRE_Int old = -1;
+   bool success;
 
 #pragma unroll UNROLL_FACTOR
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
@@ -51,13 +53,11 @@ hypre_spgemm_hash_insert_symbl(
                HYPRE_Int, sycl::memory_order::relaxed,
                sycl::memory_scope::device,
                sycl::access::address_space::generic_space > (HashKeys[j]);
-      HYPRE_Int minus_one = -1;
-      v.compare_exchange_strong(minus_one, key);
-      HYPRE_Int old = v.load();
+      old = -1;
+      success = v.compare_exchange_strong(old, key);
 #else
-      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
+      old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #endif
-
       if (old == -1)
       {
          count++;
@@ -84,6 +84,7 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
                                 HYPRE_Int          &count )
 {
    HYPRE_Int j = 0;
+   HYPRE_Int old = -1;
 
    for (HYPRE_Int i = 0; i < HashSize; i++)
    {
@@ -104,11 +105,10 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
                HYPRE_Int, sycl::memory_order::relaxed,
                sycl::memory_scope::device,
                sycl::access::address_space::generic_space > (HashKeys[j]);
-      HYPRE_Int minus_one = -1;
-      v.compare_exchange_strong(minus_one, key);
-      HYPRE_Int old = v.load();
+      old = -1;
+      v.compare_exchange_strong(old, key);
 #else
-      HYPRE_Int old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
+      old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #endif
 
       if (old == -1)
@@ -241,50 +241,50 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
                        char*            __restrict__ rf )
 {
    /* number of groups in the grid */
-   #if defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    volatile const HYPRE_Int grid_num_groups = get_num_groups(item) * item.get_group_range(2);
-   #else
+#else
    volatile const HYPRE_Int grid_num_groups = get_num_groups(item) * gridDim.x;
-   #endif
+#endif
    /* group id inside the block */
    volatile const HYPRE_Int group_id = get_group_id(item);
    /* group id in the grid */
-   #if defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    volatile const HYPRE_Int grid_group_id = item.get_group(2) * get_num_groups(item) + group_id;
-   #else
+#else
    volatile const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups(item) + group_id;
-   #endif
+#endif
    /* lane id inside the group */
    volatile const HYPRE_Int lane_id = get_group_lane_id(item);
-   #if defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    /* shared memory hash table */
    HYPRE_Int *s_HashKeys = (HYPRE_Int*) shmem_ptr;
    /* shared memory hash table for this group */
    HYPRE_Int *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
-   #else
+#else
    /* shared memory hash table */
-   #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
    volatile HYPRE_Int *s_HashKeys = shared_mem;
-   #else
+#else
    __shared__ volatile HYPRE_Int s_HashKeys[NUM_GROUPS_PER_BLOCK * SHMEM_HASH_SIZE];
-   #endif
+#endif
    /* shared memory hash table for this group */
    volatile HYPRE_Int *group_s_HashKeys = s_HashKeys + group_id * SHMEM_HASH_SIZE;
-   #endif
+#endif
 
    const HYPRE_Int UNROLL_FACTOR = hypre_min(HYPRE_SPGEMM_SYMBL_UNROLL, SHMEM_HASH_SIZE);
    HYPRE_Int valid_ptr;
 
-   #if defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_SYCL)
    hypre_device_assert(item.get_local_range(2) * item.get_local_range(1) == GROUP_SIZE);
-   #else
+#else
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
-   #endif
+#endif
 
-/* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
- *            syncthreads(), but this is not true for sycl (all threads must call the collective).
- *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */ 
+   /* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
+    *            syncthreads(), but this is not true for sycl (all threads must call the collective).
+    *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */
 #if defined(HYPRE_USING_SYCL)
    for (HYPRE_Int i = grid_group_id; sycl::any_of_group(item.get_group(), i < M);
         i += grid_num_groups)
@@ -295,9 +295,10 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
    {
       /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
 #if defined(HYPRE_USING_SYCL)
-      valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) && (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M); 
+      valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) &&
+                                      (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
 #else
-      valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M; 
+      valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M;
 #endif
 
       HYPRE_Int ii = -1;
@@ -334,7 +335,7 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
       /* initialize group's shared memory hash table */
       if (valid_ptr)
       {
-   #pragma unroll UNROLL_FACTOR
+#pragma unroll UNROLL_FACTOR
          for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += GROUP_SIZE)
          {
             group_s_HashKeys[k] = -1;
@@ -363,9 +364,9 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
                 (item, istart_a, iend_a, ja, ib, jb, group_s_HashKeys, ghash_size, jg + istart_g, failed);
       }
 
-   #if defined(HYPRE_DEBUG)
+#if defined(HYPRE_DEBUG)
       hypre_device_assert(CAN_FAIL || failed == 0);
-   #endif
+#endif
 
       /* num of nonzeros of this row (an upper bound)
        * use s_HashKeys as shared memory workspace */
@@ -398,9 +399,9 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
 
       if ((valid_ptr) && lane_id == 0)
       {
-   #if defined(HYPRE_DEBUG)
+#if defined(HYPRE_DEBUG)
          hypre_device_assert(ii >= 0);
-   #endif
+#endif
          rc[ii] = jsum;
 
          if (CAN_FAIL)
@@ -491,7 +492,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 #endif
 #endif
 
-#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
+#if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const size_t shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * sizeof(HYPRE_Int);
 #else
    const size_t shmem_bytes = 0;

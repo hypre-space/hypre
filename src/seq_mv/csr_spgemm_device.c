@@ -98,7 +98,9 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          hypre_printf("WM: debug - final d_rc = ");
          HYPRE_Int i;
          for (i = 0; i < m; i++)
+         {
             hypre_printf("%d ", d_rc[i]);
+         }
          hypre_printf("\n");
 
          hypreDevice_CSRSpGemmNumerWithRownnzUpperbound
@@ -106,17 +108,23 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
          /* WM: debug */
          hypre_printf("WM: debug - final d_ic = ");
          for (i = 0; i < m + 1; i++)
+         {
             hypre_printf("%d ", d_ic[i]);
+         }
          hypre_printf("\n");
          /* WM: debug */
          hypre_printf("WM: debug - final d_jc = ");
          for (i = 0; i < nnzC; i++)
+         {
             hypre_printf("%d ", d_jc[i]);
+         }
          hypre_printf("\n");
          /* WM: debug */
          hypre_printf("WM: debug - final d_c = ");
          for (i = 0; i < nnzC; i++)
+         {
             hypre_printf("%e ", d_c[i]);
+         }
          hypre_printf("\n");
       }
       else /* if (alg == 3) */
@@ -156,7 +164,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    hypre_printf("WM: debug - check against host\n");
    hypre_CSRMatrix *C_host = hypre_CSRMatrixMultiplyHost(A, B);
    hypre_CSRMatrix *error = hypre_CSRMatrixAddHost(1.0, C, -1.0, C_host);
-   HYPRE_Real err_norm = hypre_CSRMatrixFnorm(error); 
+   HYPRE_Real err_norm = hypre_CSRMatrixFnorm(error);
    hypre_printf("WM: debug - err_norm = %e\n", err_norm);
    if (err_norm)
    {
