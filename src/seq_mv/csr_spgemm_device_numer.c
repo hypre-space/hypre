@@ -61,7 +61,6 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_SPGEMM_PRINT("%s[%d]: nnzC %d\n", __FILE__, __LINE__, nnzC);
 #endif
-   hypre_printf("WM: debug - exact_rownnz = %d\n", exact_rownnz);
 
 
    /* even with exact rownnz, still may need global hash, since shared hash is smaller than symbol */

@@ -32,7 +32,6 @@ hypre_spgemm_hash_insert_symbl(
 {
    HYPRE_Int j = 0;
    HYPRE_Int old = -1;
-   bool success;
 
 #pragma unroll UNROLL_FACTOR
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
@@ -49,12 +48,12 @@ hypre_spgemm_hash_insert_symbl(
 
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
-      auto v = sycl::atomic_ref <
+      auto atomic_key = sycl::atomic_ref <
                HYPRE_Int, sycl::memory_order::relaxed,
                sycl::memory_scope::device,
                sycl::access::address_space::generic_space > (HashKeys[j]);
       old = -1;
-      success = v.compare_exchange_strong(old, key);
+      atomic_key.compare_exchange_strong(old, key);
 #else
       old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #endif
@@ -101,12 +100,12 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
       /* WM: todo - question: why can't I use address_space::local_space below? Get error at link time when building drivers */
-      auto v = sycl::atomic_ref <
+      auto atomic_key = sycl::atomic_ref <
                HYPRE_Int, sycl::memory_order::relaxed,
                sycl::memory_scope::device,
                sycl::access::address_space::generic_space > (HashKeys[j]);
       old = -1;
-      v.compare_exchange_strong(old, key);
+      atomic_key.compare_exchange_strong(old, key);
 #else
       old = atomicCAS((HYPRE_Int*)(HashKeys + j), -1, key);
 #endif
@@ -296,7 +295,7 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
       /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
 #if defined(HYPRE_USING_SYCL)
       valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) &&
-                                      (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
+                  (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
 #else
       valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M;
 #endif
@@ -494,6 +493,7 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const size_t shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * sizeof(HYPRE_Int);
+   hypre_printf("WM: debug - shmem_bytes = %d\n", shmem_bytes);
 #else
    const size_t shmem_bytes = 0;
 #endif

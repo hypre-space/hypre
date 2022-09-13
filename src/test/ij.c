@@ -291,7 +291,7 @@ main( hypre_int argc,
    HYPRE_Int spgemm_use_vendor = 0;
    HYPRE_Int spmv_use_vendor = 1;
    HYPRE_Int use_curand = 1;
-#if defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_HIP)
    spgemm_use_vendor = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
@@ -3530,6 +3530,10 @@ main( hypre_int argc,
 
    if (print_system)
    {
+      /* WM: debug */
+      hypre_CSRMatrixPrint(hypre_ParCSRMatrixDiag(parcsr_A), "A");
+      hypre_MPI_Finalize();
+      exit(0);
       if (ij_A)
       {
          HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");

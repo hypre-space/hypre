@@ -32,7 +32,6 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    /* WM: todo - is this right? */
    multiProcessorCount = hypre_HandleDevice(
                             hypre_handle())->get_info<sycl::info::device::max_compute_units>();
-   hypre_printf("WM: debug - multiProcessorCount = %d\n", multiProcessorCount);
 #endif
 
    typedef HYPRE_Int arrType[4][HYPRE_SPGEMM_MAX_NBIN + 1];
