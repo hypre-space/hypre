@@ -147,7 +147,6 @@ template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int GROUP_SIZE, bool H
 static __device__ __forceinline__
 void
 hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
-                                sycl::stream debug_stream,
                                 HYPRE_Int               istart_a,
                                 HYPRE_Int               iend_a,
                                 HYPRE_Int               istart_c,
@@ -239,7 +238,7 @@ hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
             {
                /* first try to insert into shared memory hash table */
                HYPRE_Int pos = hypre_spgemm_hash_insert_numer<SHMEM_HASH_SIZE, HASHTYPE, UNROLL_FACTOR>
-                               (item, debug_stream, s_HashKeys, s_HashVals, k_idx, k_val);
+                               (s_HashKeys, s_HashVals, k_idx, k_val);
 
                if (HAS_GHASH && -1 == pos)
                {
@@ -324,7 +323,7 @@ template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_
 __global__ void
 hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 #if defined(HYPRE_USING_SYCL)
-                      sycl::stream debug_stream,
+      sycl::stream debug_stream,
                       char                             *shmem_ptr,
 #endif
                       const HYPRE_Int                   M,
@@ -474,7 +473,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
       if (iend_a == istart_a + 1)
       {
          hypre_spgemm_compute_row_numer<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, true, UNROLL_FACTOR>
-         (item, debug_stream, istart_a, iend_a, istart_c,
+         (item, istart_a, iend_a, istart_c,
 #if defined(HYPRE_DEBUG)
           iend_c,
 #endif
@@ -484,7 +483,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
       else
       {
          hypre_spgemm_compute_row_numer<SHMEM_HASH_SIZE, HASHTYPE, GROUP_SIZE, HAS_GHASH, false, UNROLL_FACTOR>
-         (item, debug_stream, istart_a, iend_a, istart_c,
+         (item, istart_a, iend_a, istart_c,
 #if defined(HYPRE_DEBUG)
           iend_c,
 #endif
