@@ -54,9 +54,9 @@ hypre_spgemm_hash_insert_numer(
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
       auto atomic_key = sycl::atomic_ref <
-               HYPRE_Int, sycl::memory_order::relaxed,
-               sycl::memory_scope::device,
-               sycl::access::address_space::generic_space > (HashKeys[j]);
+                        HYPRE_Int, sycl::memory_order::relaxed,
+                        sycl::memory_scope::device,
+                        sycl::access::address_space::generic_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -69,9 +69,9 @@ hypre_spgemm_hash_insert_numer(
 #if defined(HYPRE_USING_SYCL)
          /* WM: debug - just commenting out the atomic add below gets rid of the hang */
          auto atomic_val = sycl::atomic_ref <
-                  HYPRE_Complex, sycl::memory_order::relaxed,
-                  sycl::memory_scope::device,
-                  sycl::access::address_space::generic_space > (HashVals[j]);
+                           HYPRE_Complex, sycl::memory_order::relaxed,
+                           sycl::memory_scope::device,
+                           sycl::access::address_space::generic_space > (HashVals[j]);
          atomic_val.fetch_add(val);
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
@@ -115,9 +115,9 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
       auto atomic_key = sycl::atomic_ref <
-               HYPRE_Int, sycl::memory_order::relaxed,
-               sycl::memory_scope::device,
-               sycl::access::address_space::generic_space > (HashKeys[j]);
+                        HYPRE_Int, sycl::memory_order::relaxed,
+                        sycl::memory_scope::device,
+                        sycl::access::address_space::generic_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -129,9 +129,9 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
          /* this slot was open or contained 'key', update value */
 #if defined(HYPRE_USING_SYCL)
          auto atomic_val = sycl::atomic_ref <
-                  HYPRE_Complex, sycl::memory_order::relaxed,
-                  sycl::memory_scope::device,
-                  sycl::access::address_space::generic_space > (HashVals[j]);
+                           HYPRE_Complex, sycl::memory_order::relaxed,
+                           sycl::memory_scope::device,
+                           sycl::access::address_space::generic_space > (HashVals[j]);
          atomic_val.fetch_add(val);
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
@@ -147,7 +147,7 @@ template <HYPRE_Int SHMEM_HASH_SIZE, char HASHTYPE, HYPRE_Int GROUP_SIZE, bool H
 static __device__ __forceinline__
 void
 hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
-      sycl::stream debug_stream,
+                                sycl::stream debug_stream,
                                 HYPRE_Int               istart_a,
                                 HYPRE_Int               iend_a,
                                 HYPRE_Int               istart_c,
@@ -223,8 +223,8 @@ hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
            warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
            k += blockDim_x)
       {
-/* WM: note - have a warp_any_sync(k < rowB_end) to enter the loop directly followed by if (k < rowB_end)... do we need the any_sync above? */
-/*        I seem to be getting a hang here in sycl... does the use of atomics below require all threads in the group/subgroup to hit this or something? */
+         /* WM: note - have a warp_any_sync(k < rowB_end) to enter the loop directly followed by if (k < rowB_end)... do we need the any_sync above? */
+         /*        I seem to be getting a hang here in sycl... does the use of atomics below require all threads in the group/subgroup to hit this or something? */
          if (k < rowB_end)
          {
             const HYPRE_Int     k_idx = read_only_load(jb + k);
@@ -324,7 +324,7 @@ template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_
 __global__ void
 hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 #if defined(HYPRE_USING_SYCL)
-      sycl::stream debug_stream,
+                      sycl::stream debug_stream,
                       char                             *shmem_ptr,
 #endif
                       const HYPRE_Int                   M,
@@ -406,7 +406,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
       /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
 #if defined(HYPRE_USING_SYCL)
       valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) &&
-                                      (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
+                  (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
 #else
       valid_ptr = GROUP_SIZE >= HYPRE_WARP_SIZE || i < M;
 #endif

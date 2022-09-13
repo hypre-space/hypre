@@ -49,9 +49,9 @@ hypre_spgemm_hash_insert_symbl(
       /* try to insert key+1 into slot j */
 #if defined(HYPRE_USING_SYCL)
       auto atomic_key = sycl::atomic_ref <
-               HYPRE_Int, sycl::memory_order::relaxed,
-               sycl::memory_scope::device,
-               sycl::access::address_space::generic_space > (HashKeys[j]);
+                        HYPRE_Int, sycl::memory_order::relaxed,
+                        sycl::memory_scope::device,
+                        sycl::access::address_space::generic_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -101,9 +101,9 @@ hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
 #if defined(HYPRE_USING_SYCL)
       /* WM: todo - question: why can't I use address_space::local_space below? Get error at link time when building drivers */
       auto atomic_key = sycl::atomic_ref <
-               HYPRE_Int, sycl::memory_order::relaxed,
-               sycl::memory_scope::device,
-               sycl::access::address_space::generic_space > (HashKeys[j]);
+                        HYPRE_Int, sycl::memory_order::relaxed,
+                        sycl::memory_scope::device,
+                        sycl::access::address_space::generic_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
