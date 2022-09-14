@@ -1226,7 +1226,6 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
 }
 
@@ -1556,13 +1555,13 @@ HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);
 
-#endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 

@@ -1868,6 +1868,123 @@ hypreDevice_IntStridedCopy( HYPRE_Int  size,
    return hypreDevice_StridedCopy(size, stride, in, out);
 }
 
+/*--------------------------------------------------------------------
+ * hypreDevice_CsrRowPtrsToIndicesWithRowNum
+ *
+ * Input:  d_row_num, of size nrows, contains the rows indices that
+ *         can be HYPRE_BigInt or HYPRE_Int
+ * Output: d_row_ind
+ *--------------------------------------------------------------------*/
+
+template <typename T>
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
+                                           HYPRE_Int  nnz,
+                                           HYPRE_Int *d_row_ptr,
+                                           T         *d_row_num,
+                                           T         *d_row_ind )
+{
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
+
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+#else
+   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
+#endif
+
+   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
+                                                              HYPRE_Int  nnz,
+                                                              HYPRE_Int *d_row_ptr,
+                                                              HYPRE_Int *d_row_num,
+                                                              HYPRE_Int *d_row_ind );
+#if defined(HYPRE_MIXEDINT)
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int     nrows,
+                                                              HYPRE_Int     nnz,
+                                                              HYPRE_Int    *d_row_ptr,
+                                                              HYPRE_BigInt *d_row_num,
+                                                              HYPRE_BigInt *d_row_ind );
+#endif
+
+/*--------------------------------------------------------------------
+ * hypreDevice_StableSortTupleByTupleKey
+ *
+ * opt:
+ *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')
+ *                         [normal tupe comp]
+ *
+ *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a')
+ *                         [used in assembly to put diagonal first]
+ *--------------------------------------------------------------------*/
+
+template <typename T1, typename T2, typename T3, typename T4>
+HYPRE_Int
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
+                                      T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
+                                      HYPRE_Int opt)
+{
+#if defined(HYPRE_USING_SYCL)
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys1, keys2, vals1, vals2);
+
+   if (opt == 0)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort,
+                        zipped_begin,
+                        zipped_begin + N,
+                        std::less< std::tuple<T1, T2, T3, T4> >());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort,
+                        zipped_begin,
+                        zipped_begin + N,
+                        TupleComp3<T1, T2, T3, T4>());
+   }
+#else
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
+
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key,
+                        begin_keys,
+                        end_keys,
+                        begin_vals,
+                        thrust::less< thrust::tuple<T1, T2> >());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key,
+                        begin_keys,
+                        end_keys,
+                        begin_vals,
+                        TupleComp3<T1, T2>());
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
+                                                         HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#if defined(HYPRE_MIXEDINT)
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
+                                                         HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#endif
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2038,52 +2155,6 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
 }
 
 /*--------------------------------------------------------------------
- * hypreDevice_CsrRowPtrsToIndicesWithRowNum
- *
- * Input:  d_row_num, of size nrows, contains the rows indices that
- *         can be HYPRE_BigInt or HYPRE_Int
- * Output: d_row_ind
- *--------------------------------------------------------------------*/
-
-template <typename T>
-HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
-                                           HYPRE_Int  nnz,
-                                           HYPRE_Int *d_row_ptr,
-                                           T         *d_row_num,
-                                           T         *d_row_ind )
-{
-   /* trivial case */
-   if (nrows <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
-
-   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
-
-   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
-                                                              HYPRE_Int  nnz,
-                                                              HYPRE_Int *d_row_ptr,
-                                                              HYPRE_Int *d_row_num,
-                                                              HYPRE_Int *d_row_ind );
-#if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int     nrows,
-                                                              HYPRE_Int     nnz,
-                                                              HYPRE_Int    *d_row_ptr,
-                                                              HYPRE_BigInt *d_row_num,
-                                                              HYPRE_BigInt *d_row_ind );
-#endif
-
-/*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector
  *--------------------------------------------------------------------*/
 
@@ -2230,54 +2301,6 @@ hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------
- * hypreDevice_StableSortTupleByTupleKey
- *
- * opt:
- *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')
- *                         [normal tupe comp]
- *
- *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a')
- *                         [used in assembly to put diagonal first]
- *--------------------------------------------------------------------*/
-
-template <typename T1, typename T2, typename T3, typename T4>
-HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
-                                      T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt)
-{
-   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
-   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
-   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
-
-   if (opt == 0)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key,
-                        begin_keys,
-                        end_keys,
-                        begin_vals,
-                        thrust::less< thrust::tuple<T1, T2> >());
-   }
-   else if (opt == 2)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key,
-                        begin_keys,
-                        end_keys,
-                        begin_vals,
-                        TupleComp3<T1, T2>());
-   }
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                         HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
-#if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
-                                                         HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
-#endif
 
 #if defined(HYPRE_USING_CUSPARSE)
 
