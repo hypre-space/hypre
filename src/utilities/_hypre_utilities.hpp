@@ -1283,7 +1283,6 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
 }
 

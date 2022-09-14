@@ -300,19 +300,16 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    [] (const auto & x) {return 0.0;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
-   /* WM: debug */
-   /* auto new_end = oneapi::dpl::reduce_by_segment( */
-   /*                   oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream( */
-   /*                                                                                 hypre_handle())), */
-   /*                   I0_J0_zip,                                                    /1* keys_first *1/ */
-   /*                   I0_J0_zip + N0,                                               /1* keys_last *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(X0, A0),                       /1* values_first *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(I, J),                         /1* keys_output *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(X, A),                         /1* values_output *1/ */
-   /*                   std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /1* binary_pred *1/ */
-   /*                   hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /1* binary_op *1/); */
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                     I0_J0_zip,                                                    /* keys_first */
+                     I0_J0_zip + N0,                                               /* keys_last */
+                     oneapi::dpl::make_zip_iterator(X0, A0),                       /* values_first */
+                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
+                     oneapi::dpl::make_zip_iterator(X, A),                         /* values_output */
+                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /* binary_pred */
+                     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /* binary_op */);
 
-   /* *N1 = std::get<0>(new_end.first.base()) - I; */
+   *N1 = std::get<0>(new_end.first.base()) - I;
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
@@ -395,20 +392,16 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - why can't I just use ONEDPL_CALL here? Look for other places as well... */
-   /* WM: debug */
-   /* auto new_end = oneapi::dpl::reduce_by_segment( */
-   /*                   oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream( */
-   /*                                                                                 hypre_handle())), */
-   /*                   oneapi::dpl::make_zip_iterator(I0, J0),                 /1* keys_first *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0),       /1* keys_last *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(X0, A0),                 /1* values_first *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(I, J),                   /1* keys_output *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(X, A),                   /1* values_output *1/ */
-   /*                   std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /1* binary_pred *1/ */
-   /*                   hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /1* binary_op *1/); */
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                     oneapi::dpl::make_zip_iterator(I0, J0),                 /* keys_first */
+                     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0),       /* keys_last */
+                     oneapi::dpl::make_zip_iterator(X0, A0),                 /* values_first */
+                     oneapi::dpl::make_zip_iterator(I, J),                   /* keys_output */
+                     oneapi::dpl::make_zip_iterator(X, A),                   /* values_output */
+                     std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /* binary_pred */
+                     hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /* binary_op */);
 
-   /* *N1 = std::get<0>(new_end.first.base()) - I; */
+   *N1 = std::get<0>(new_end.first.base()) - I;
 #else
    auto new_end = HYPRE_THRUST_CALL(
                      reduce_by_key,
@@ -477,16 +470,13 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
 
-   /* WM: debug */
-   /* auto new_end = oneapi::dpl::reduce_by_segment( */
-   /*                   oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream( */
-   /*                                                                                 hypre_handle())), */
-   /*                   I0_J0_zip,                                                    /1* keys_first *1/ */
-   /*                   I0_J0_zip + N0,                                               /1* keys_last *1/ */
-   /*                   A0,                                                           /1* values_first *1/ */
-   /*                   oneapi::dpl::make_zip_iterator(I, J),                         /1* keys_output *1/ */
-   /*                   A,                                                            /1* values_output *1/ */
-   /*                   std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >()     /1* binary_pred *1/); */
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                     I0_J0_zip,                                                    /* keys_first */
+                     I0_J0_zip + N0,                                               /* keys_last */
+                     A0,                                                           /* values_first */
+                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
+                     A,                                                            /* values_output */
+                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >()     /* binary_pred */);
 #else
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
@@ -510,12 +500,9 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                      thrust::equal_to< thrust::tuple<HYPRE_Int, HYPRE_Int> >()        /* binary_pred */);
 #endif
 
-   /* WM: debug - commenting out */
-   HYPRE_Int Nt;
-   /* HYPRE_Int Nt = new_end.second - A; */
+   HYPRE_Int Nt = new_end.second - A;
 
-   /* WM: debug - commenting out */
-   /* hypre_assert(Nt <= N0); */
+   hypre_assert(Nt <= N0);
 
    /* remove numrical zeros */
 #if defined(HYPRE_USING_SYCL)
