@@ -323,7 +323,7 @@ template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_
 __global__ void
 hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 #if defined(HYPRE_USING_SYCL)
-      sycl::stream debug_stream,
+                      sycl::stream debug_stream,
                       char                             *shmem_ptr,
 #endif
                       const HYPRE_Int                   M,
