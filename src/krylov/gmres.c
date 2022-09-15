@@ -277,56 +277,53 @@ hypre_GMRESSolve(void  *gmres_vdata,
                  void  *x)
 {
    hypre_GMRESData      *gmres_data         = (hypre_GMRESData *)gmres_vdata;
-   hypre_GMRESFunctions *gmres_functions    = gmres_data->functions;
+   hypre_GMRESFunctions *gmres_functions    = (gmres_data -> functions);
+
    HYPRE_Int             k_dim              = (gmres_data -> k_dim);
    HYPRE_Int             min_iter           = (gmres_data -> min_iter);
    HYPRE_Int             max_iter           = (gmres_data -> max_iter);
    HYPRE_Int             rel_change         = (gmres_data -> rel_change);
    HYPRE_Int             skip_real_r_check  = (gmres_data -> skip_real_r_check);
-   HYPRE_Int       hybrid             = (gmres_data -> hybrid);
+   HYPRE_Int             hybrid             = (gmres_data -> hybrid);
    HYPRE_Real            r_tol              = (gmres_data -> tol);
    HYPRE_Real            cf_tol             = (gmres_data -> cf_tol);
    HYPRE_Real            a_tol              = (gmres_data -> a_tol);
    void                 *matvec_data        = (gmres_data -> matvec_data);
    void                 *r                  = (gmres_data -> r);
    void                 *w                  = (gmres_data -> w);
+
    /* note: w_2 is only allocated if rel_change = 1 */
    void                 *w_2                = (gmres_data -> w_2);
-
    void                **p                  = (gmres_data -> p);
-
 
    HYPRE_Int           (*precond)(void*, void*, void*, void*) = (gmres_functions -> precond);
    HYPRE_Int            *precond_data = (HYPRE_Int*) (gmres_data -> precond_data);
 
    HYPRE_Int             print_level        = (gmres_data -> print_level);
    HYPRE_Int             logging            = (gmres_data -> logging);
-
    HYPRE_Real           *norms              = (gmres_data -> norms);
    /* not used yet   char           *log_file_name  = (gmres_data -> log_file_name);*/
    /*   FILE           *fp; */
 
-   HYPRE_Int        break_value = 0;
-   HYPRE_Int        i, j, k;
-   HYPRE_Real *rs, **hh, *c, *s, *rs_2;
-   HYPRE_Int        iter;
-   HYPRE_Int        my_id, num_procs;
-   HYPRE_Real epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
-   HYPRE_Real w_norm;
+   HYPRE_Int             break_value = 0;
+   HYPRE_Int             i, j, k;
+   HYPRE_Real           *rs, **hh, *c, *s, *rs_2;
+   HYPRE_Int             iter;
+   HYPRE_Int             my_id, num_procs;
+   HYPRE_Real            epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
+   HYPRE_Real            w_norm;
 
-   HYPRE_Real epsmac = 1.e-16;
-   HYPRE_Real ieee_check = 0.;
+   HYPRE_Real            epsmac = 1.e-16;
+   HYPRE_Real            ieee_check = 0.;
 
-   HYPRE_Real guard_zero_residual;
-   HYPRE_Real cf_ave_0 = 0.0;
-   HYPRE_Real cf_ave_1 = 0.0;
-   HYPRE_Real weight;
-   HYPRE_Real r_norm_0;
-   HYPRE_Real relative_error = 1.0;
-
-   HYPRE_Int        rel_change_passed = 0, num_rel_change_check = 0;
-
-   HYPRE_Real real_r_norm_old, real_r_norm_new;
+   HYPRE_Real            guard_zero_residual;
+   HYPRE_Real            cf_ave_0 = 0.0;
+   HYPRE_Real            cf_ave_1 = 0.0;
+   HYPRE_Real            weight;
+   HYPRE_Real            r_norm_0;
+   HYPRE_Real            relative_error = 1.0;
+   HYPRE_Int             rel_change_passed = 0, num_rel_change_check = 0;
+   HYPRE_Real            real_r_norm_old, real_r_norm_new;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
