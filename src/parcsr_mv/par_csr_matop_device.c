@@ -1772,6 +1772,18 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix  *par_A,
        return hypre_error_flag;
     }
 
+    if (x_vecstride <= 0)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive x vector stride!\n");
+       return hypre_error_flag;
+    }
+
+    if (y_vecstride <= 0)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive y vector stride!\n");
+       return hypre_error_flag;
+    }
+
     if (num_rows != y_size)
     {
        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible y size!\n");
@@ -1783,7 +1795,7 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix  *par_A,
     *---------------------------------------------*/
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypreDevice_DiagScaleVector(num_rows, A_i, A_data, y_data, 0.0, x_data);
+   hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
    //hypre_SyncComputeStream(hypre_handle());
 
 #else
