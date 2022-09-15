@@ -188,17 +188,17 @@ HYPRE_Int
 hypre_GMRESSetup( void *gmres_vdata,
                   void *A,
                   void *b,
-                  void *x         )
+                  void *x )
 {
-   hypre_GMRESData *gmres_data     = (hypre_GMRESData *)gmres_vdata;
-   hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
+   hypre_GMRESData      *gmres_data      = (hypre_GMRESData *)gmres_vdata;
+   hypre_GMRESFunctions *gmres_functions = (gmres_data -> functions);
 
-   HYPRE_Int            k_dim            = (gmres_data -> k_dim);
-   HYPRE_Int            max_iter         = (gmres_data -> max_iter);
-   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (gmres_functions->precond_setup);
-   void          *precond_data     = (gmres_data -> precond_data);
+   HYPRE_Int             k_dim           = (gmres_data -> k_dim);
+   HYPRE_Int             max_iter        = (gmres_data -> max_iter);
+   void                 *precond_data    = (gmres_data -> precond_data);
+   HYPRE_Int             rel_change      = (gmres_data -> rel_change);
 
-   HYPRE_Int            rel_change       = (gmres_data -> rel_change);
+   HYPRE_Int (*precond_setup)(void*, void*, void*, void*) = (gmres_functions->precond_setup);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -214,10 +214,12 @@ hypre_GMRESSetup( void *gmres_vdata,
    {
       (gmres_data -> p) = (void**)(*(gmres_functions->CreateVectorArray))(k_dim + 1, x);
    }
+
    if ((gmres_data -> r) == NULL)
    {
       (gmres_data -> r) = (*(gmres_functions->CreateVector))(b);
    }
+
    if ((gmres_data -> w) == NULL)
    {
       (gmres_data -> w) = (*(gmres_functions->CreateVector))(b);
@@ -230,7 +232,6 @@ hypre_GMRESSetup( void *gmres_vdata,
          (gmres_data -> w_2) = (*(gmres_functions->CreateVector))(b);
       }
    }
-
 
    if ((gmres_data -> matvec_data) == NULL)
    {
