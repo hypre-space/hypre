@@ -3649,7 +3649,7 @@ main( hypre_int argc,
       e_dot_e = bf_dot_bf - b_dot_b;
       if (myid == 0)
       {
-         hypre_printf("\nVector/Multivector error = %e\n", e_dot_e);
+         hypre_printf("\nVector/Multivector error = %e\n\n", e_dot_e);
       }
 
       /* Free memory */
