@@ -1271,10 +1271,6 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
    hypre_SyncComputeStream(hypre_handle());
 }
 
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 /* check if diagonal entry is the first one at each row
  * Return: the number of rows that do not have the first entry as diagonal
  * RL: only check if it's a non-empty row
@@ -1309,9 +1305,15 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
                      hypre_CSRMatrixNumRows(A),
                      hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int ierr = HYPRE_ONEDPL_CALL( std::reduce,
+                                       result,
+                                       result + hypre_CSRMatrixNumRows(A) );
+#else
    HYPRE_Int ierr = HYPRE_THRUST_CALL( reduce,
                                        result,
                                        result + hypre_CSRMatrixNumRows(A) );
+#endif
 
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 
@@ -1319,6 +1321,10 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 
    return ierr;
 }
+
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 __global__ void
 hypreCUDAKernel_CSRMatrixFixZeroDiagDevice( hypre_DeviceItem    &item,
