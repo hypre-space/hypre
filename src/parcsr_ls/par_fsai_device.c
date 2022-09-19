@@ -851,9 +851,10 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                   hypre_ParVector    *f,
                                   hypre_ParVector    *u )
 {
-   hypre_ParFSAIData   *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
-   hypre_ParCSRMatrix  *G         = hypre_ParFSAIDataGmat(fsai_data);
-   hypre_CSRMatrix     *G_diag    = hypre_ParCSRMatrixDiag(G);
+   hypre_ParFSAIData   *fsai_data   = (hypre_ParFSAIData*) fsai_vdata;
+   hypre_ParCSRMatrix  *G           = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_CSRMatrix     *G_diag      = hypre_ParCSRMatrixDiag(G);
+   HYPRE_Int            max_nnz_row = hypre_ParFSAIDataMaxNnzRow(fsai_data);
 
    hypre_CSRMatrix     *A_diag    = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int            num_rows  = hypre_CSRMatrixNumRows(A_diag);
@@ -869,7 +870,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    HYPRE_Int           *info;
 
    /* TODO: these variables belong to hypre_ParFSAIData */
-   HYPRE_Int            max_nonzeros_row = 8;
    HYPRE_Int            num_levels = 2;
    HYPRE_Int            filter_option = 2;
    HYPRE_Real           filter_threshold = 0.0;
@@ -885,7 +885,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Compute filtered version of A */
    Atilde = hypre_ParCSRMatrixClone(A, 1);
-   hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, 5e-2, filter_option);
+   hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, 0.01, filter_option);
 
    /* TODO: Check if Atilde is diagonal */
 
@@ -952,10 +952,11 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #if defined (FSAI_USING_UNMARKED_TRUNCATION)
    HYPRE_Int  *K_e = NULL;
 
-   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nonzeros_row, filter_option, filter_threshold);
+   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row,
+                                             filter_option, filter_threshold);
 #else
 
-   hypre_FSAITruncateCandidateDevice(K_diag, max_nonzeros_row, filter_option, filter_threshold);
+   hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, filter_option, filter_threshold);
    HYPRE_Int  *K_e = hypre_CSRMatrixI(K_diag) + 1;
 
    /* Sort candidate pattern matrix */
@@ -989,11 +990,11 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* Allocate storage */
    hypre_GpuProfilingPushRange("Storage1");
    HYPRE_Complex  *mat_data = hypre_CTAlloc(HYPRE_Complex,
-                                            max_nonzeros_row * max_nonzeros_row * num_rows,
+                                            max_nnz_row * max_nnz_row * num_rows,
                                             HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex  *rhs_data = hypre_CTAlloc(HYPRE_Complex, max_nonzeros_row * num_rows,
+   HYPRE_Complex  *rhs_data = hypre_CTAlloc(HYPRE_Complex, max_nnz_row * num_rows,
                                             HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex  *sol_data = hypre_CTAlloc(HYPRE_Complex, max_nonzeros_row * num_rows,
+   HYPRE_Complex  *sol_data = hypre_CTAlloc(HYPRE_Complex, max_nnz_row * num_rows,
                                             HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
 
@@ -1006,7 +1007,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                      hypre_CSRMatrixI(K_diag),
                                      K_e,
                                      hypre_CSRMatrixJ(K_diag),
-                                     max_nonzeros_row,
+                                     max_nnz_row,
                                      mat_data,
                                      rhs_data,
                                      hypre_CSRMatrixI(G_diag) + 1);
@@ -1014,7 +1015,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Copy rhs to solution vector */
    hypre_GpuProfilingPushRange("CopyRHS");
-   hypre_TMemcpy(sol_data, rhs_data, HYPRE_Complex, max_nonzeros_row * num_rows,
+   hypre_TMemcpy(sol_data, rhs_data, HYPRE_Complex, max_nnz_row * num_rows,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
 
@@ -1030,10 +1031,10 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
 
       HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                        num_rows, max_nonzeros_row * max_nonzeros_row, mat_data, mat_aop );
+                        num_rows, max_nnz_row * max_nnz_row, mat_data, mat_aop );
 
       HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                        num_rows, max_nonzeros_row, sol_data, sol_aop );
+                        num_rows, max_nnz_row, sol_data, sol_aop );
 
       hypre_SyncComputeStream(hypre_handle());
       hypre_GetDeviceLastError();
@@ -1053,7 +1054,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPushRange("BuildFSAI");
 
    /* Update scaling factor */
-   hypreDevice_FSAIScaling(num_rows, max_nonzeros_row, sol_data, rhs_data, scaling, info);
+   hypreDevice_FSAIScaling(num_rows, max_nnz_row, sol_data, rhs_data, scaling, info);
 
    /* Compute the row pointer G_i */
    hypreDevice_IntegerInclusiveScan(num_rows + 1, hypre_CSRMatrixI(G_diag));
@@ -1067,7 +1068,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Set column indices and coefficients of G */
    hypreDevice_FSAIGatherEntries(num_rows,
-                                 max_nonzeros_row,
+                                 max_nnz_row,
                                  sol_data,
                                  scaling,
                                  hypre_CSRMatrixI(K_diag),
