@@ -1018,12 +1018,14 @@ hypre_FSAISetup( void               *fsai_vdata,
    {
       hypre_FSAIPrintStats(fsai_data, A);
    }
+   else if (print_level > 2)
+   {
+      char filename[] = "FSAI.out.G.ij";
+      hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
+   }
 
 #if defined (DEBUG_FSAI)
-   char filename[] = "FSAI.out.G.ij";
-   hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
-
-#if defined (HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+#if !defined (HYPRE_USING_GPU) || (defined (HYPRE_USING_GPU) && defined (HYPRE_USING_UNIFIED_MEMORY))
    hypre_FSAIDumpLocalLSDense(fsai_vdata, "fsai_dense_ls.out", A);
 #endif
 #endif
