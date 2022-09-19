@@ -1104,6 +1104,13 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
                                             HYPRE_Int    max_step_size);
 
 /**
+ * (Optional) Defines maximum number of nonzero entries per row for FSAI.
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow(HYPRE_Solver solver,
+                                          HYPRE_Int    max_nnz_row);
+
+/**
  * (Optional) Defines maximum number of iterations for estimating the
  * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
  * For further explanation see description of FSAI.
@@ -1566,8 +1573,9 @@ HYPRE_Int HYPRE_FSAISolve( HYPRE_Solver       solver,
 /**
  * (Optional) Sets the algorithm type used to compute the lower triangular factor G
  *
- *      - 1: Native (can use OpenMP with static scheduling)
- *      - 2: OpenMP with dynamic scheduling
+ *      - 1: Adaptive (can use OpenMP with static scheduling)
+ *      - 2: Adaptive OpenMP with dynamic scheduling
+ *      - 3: Static - power pattern
  **/
 HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
                                  HYPRE_Int    algo_type );
@@ -1577,20 +1585,26 @@ HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
  * pattern of G
  **/
 HYPRE_Int HYPRE_FSAISetMaxSteps( HYPRE_Solver solver,
-                                 HYPRE_Int    max_steps  );
+                                 HYPRE_Int    max_steps );
 
 /**
  * (Optional) Sets the maximum step size for computing the sparsity pattern of G
  **/
 HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
-                                    HYPRE_Int    max_step_size  );
+                                    HYPRE_Int    max_step_size );
+
+/**
+ * (Optional) Sets the maximum number of off-diagonal entries per row of G
+ **/
+HYPRE_Int HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
+                                  HYPRE_Int    max_nnz_row );
 
 /**
  * (Optional) Sets the kaporin gradient reduction factor for computing the
  *  sparsity pattern of G
  **/
 HYPRE_Int HYPRE_FSAISetKapTolerance( HYPRE_Solver solver,
-                                     HYPRE_Real   kap_tolerance  );
+                                     HYPRE_Real   kap_tolerance );
 
 /**
  * (Optional) Sets the relaxation factor for FSAI

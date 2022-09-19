@@ -111,6 +111,7 @@ hypre_BoomerAMGCreate()
 
    HYPRE_Int    fsai_max_steps;
    HYPRE_Int    fsai_max_step_size;
+   HYPRE_Int    fsai_max_nnz_row;
    HYPRE_Int    fsai_eig_maxiter;
    HYPRE_Real   fsai_kap_tolerance;
 
@@ -222,6 +223,7 @@ hypre_BoomerAMGCreate()
    /* FSAI smoother params */
    fsai_max_steps = 5;
    fsai_max_step_size = 3;
+   fsai_max_nnz_row = fsai_max_steps * fsai_max_step_size;
    fsai_eig_maxiter = 5;
    fsai_kap_tolerance = 0.001;
 
@@ -365,6 +367,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetILULocalReordering(amg_data, ilu_reordering_type);
    hypre_BoomerAMGSetFSAIMaxSteps(amg_data, fsai_max_steps);
    hypre_BoomerAMGSetFSAIMaxStepSize(amg_data, fsai_max_step_size);
+   hypre_BoomerAMGSetFSAIMaxNnzRow(amg_data, fsai_max_nnz_row);
    hypre_BoomerAMGSetFSAIEigMaxIters(amg_data, fsai_eig_maxiter);
    hypre_BoomerAMGSetFSAIKapTolerance(amg_data, fsai_kap_tolerance);
 
@@ -4281,6 +4284,22 @@ hypre_BoomerAMGSetFSAIMaxStepSize( void      *data,
       return hypre_error_flag;
    }
    hypre_ParAMGDataFSAIMaxStepSize(amg_data) = fsai_max_step_size;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAIMaxNnzRow( void      *data,
+                                 HYPRE_Int  fsai_max_nnz_row)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIMaxNnzRow(amg_data) = fsai_max_nnz_row;
 
    return hypre_error_flag;
 }

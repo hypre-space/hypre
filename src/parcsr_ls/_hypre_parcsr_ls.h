@@ -167,6 +167,7 @@ typedef struct
 
    HYPRE_Int            fsai_max_steps;
    HYPRE_Int            fsai_max_step_size;
+   HYPRE_Int            fsai_max_nnz_row;
    HYPRE_Int            fsai_eig_max_iters;
    HYPRE_Real           fsai_kap_tolerance;
 
@@ -416,6 +417,7 @@ typedef struct
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
 #define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
+#define hypre_ParAMGDataFSAIMaxNnzRow(amg_data) ((amg_data)->fsai_max_nnz_row)
 #define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
 #define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
 
@@ -803,36 +805,40 @@ typedef struct
 #ifndef hypre_ParFSAI_DATA_HEADER
 #define hypre_ParFSAI_DATA_HEADER
 
+//#define DEBUG_FSAI
+
 /*--------------------------------------------------------------------------
  * hypre_ParFSAIData
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_ParFSAIData_struct
 {
+   /* FSAI Setup input data */
+   HYPRE_Int             algo_type;       /* FSAI algorithm type */
+   HYPRE_Int             max_steps;       /* Max. iterations run per row */
+   HYPRE_Int             max_step_size;   /* Max. number of nonzeros added to a row of G per step */
+   HYPRE_Int             max_nnz_row;     /* Max. number of nonzeros per row of G */
+   HYPRE_Real            kap_tolerance;   /* Min. amount of change between two steps */
+
    /* FSAI Setup data */
-   HYPRE_Int             algo_type;       /* FSAI algorithm implementation type */
-   HYPRE_Int             max_steps;       /* Maximum iterations run per row */
-   HYPRE_Int
-   max_step_size;   /* Maximum number of nonzero elements added to a row of G per step */
-   HYPRE_Real            kap_tolerance;   /* Minimum amount of change between two steps */
+   HYPRE_Real            density;         /* Density of matrix G wrt. A */
    hypre_ParCSRMatrix   *Gmat;            /* Matrix holding FSAI factor. M^(-1) = G'G */
    hypre_ParCSRMatrix   *GTmat;           /* Matrix holding the transpose of the FSAI factor */
 
-   /* FSAI Setup info */
-   HYPRE_Real            density;         /* Density of matrix G wrt A */
-
-   /* Solver Problem Data */
+   /* Solver data */
    HYPRE_Int             zero_guess;      /* Flag indicating x0 = 0 */
    HYPRE_Int             eig_max_iters;   /* Iters for computing max. eigenvalue of G^T*G*A */
    HYPRE_Int             max_iterations;  /* Maximum iterations run for the solver */
    HYPRE_Int             num_iterations;  /* Number of iterations the solver ran */
    HYPRE_Real            omega;           /* Step size for Preconditioned Richardson Solver */
-   HYPRE_Real            tolerance;         /* Tolerance for the solver */
+   HYPRE_Real            tolerance;       /* Tolerance for the solver */
    HYPRE_Real            rel_resnorm;     /* available if logging > 1 */
+
+   /* Work data */
    hypre_ParVector      *r_work;          /* work vector used to compute the residual */
    hypre_ParVector      *z_work;          /* work vector used for applying FSAI */
 
-   /* log info */
+   /* Log info data */
    HYPRE_Int             logging;
    HYPRE_Int             print_level;
 } hypre_ParFSAIData;
@@ -841,11 +847,14 @@ typedef struct hypre_ParFSAIData_struct
  *  Accessor functions for the hypre_ParFSAIData structure
  *--------------------------------------------------------------------------*/
 
-/* FSAI Setup data */
+/* FSAI Setup input data */
 #define hypre_ParFSAIDataAlgoType(fsai_data)                ((fsai_data) -> algo_type)
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
+#define hypre_ParFSAIDataMaxNnzRow(fsai_data)               ((fsai_data) -> max_nnz_row)
 #define hypre_ParFSAIDataKapTolerance(fsai_data)            ((fsai_data) -> kap_tolerance)
+
+/* FSAI Setup data */
 #define hypre_ParFSAIDataGmat(fsai_data)                    ((fsai_data) -> Gmat)
 #define hypre_ParFSAIDataGTmat(fsai_data)                   ((fsai_data) -> GTmat)
 #define hypre_ParFSAIDataDensity(fsai_data)                 ((fsai_data) -> density)
@@ -858,10 +867,12 @@ typedef struct hypre_ParFSAIData_struct
 #define hypre_ParFSAIDataOmega(fsai_data)                   ((fsai_data) -> omega)
 #define hypre_ParFSAIDataRelResNorm(fsai_data)              ((fsai_data) -> rel_resnorm)
 #define hypre_ParFSAIDataTolerance(fsai_data)               ((fsai_data) -> tolerance)
+
+/* Work data */
 #define hypre_ParFSAIDataRWork(fsai_data)                   ((fsai_data) -> r_work)
 #define hypre_ParFSAIDataZWork(fsai_data)                   ((fsai_data) -> z_work)
 
-/* log info data */
+/* Log info data */
 #define hypre_ParFSAIDataLogging(fsai_data)                 ((fsai_data) -> logging)
 #define hypre_ParFSAIDataPrintLevel(fsai_data)              ((fsai_data) -> print_level)
 
@@ -1383,6 +1394,7 @@ HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int max_nnz_row );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters ( HYPRE_Solver solver, HYPRE_Int eig_max_iters );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance ( HYPRE_Solver solver, HYPRE_Real kap_tolerance );
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
@@ -1783,6 +1795,8 @@ HYPRE_Int HYPRE_FSAISetMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
 HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver, HYPRE_Int *max_steps );
 HYPRE_Int HYPRE_FSAISetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
 HYPRE_Int HYPRE_FSAIGetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int *max_step_size );
+HYPRE_Int HYPRE_FSAISetMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int max_nnz_row );
+HYPRE_Int HYPRE_FSAIGetMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int *max_nnz_row );
 HYPRE_Int HYPRE_FSAISetKapTolerance ( HYPRE_Solver solver, HYPRE_Real  kap_tolerance );
 HYPRE_Int HYPRE_FSAIGetKapTolerance ( HYPRE_Solver solver, HYPRE_Real *kap_tolerance );
 HYPRE_Int HYPRE_FSAISetTolerance ( HYPRE_Solver solver, HYPRE_Real tolerance );
@@ -2025,6 +2039,7 @@ HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz)
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type);
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxSteps ( void *data, HYPRE_Int fsai_max_steps);
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxStepSize ( void *data, HYPRE_Int fsai_max_step_size);
+HYPRE_Int hypre_BoomerAMGSetFSAIMaxNnzRow ( void *data, HYPRE_Int fsai_max_nnz_row);
 HYPRE_Int hypre_BoomerAMGSetFSAIEigMaxIters ( void *data, HYPRE_Int fsai_eig_max_iters);
 HYPRE_Int hypre_BoomerAMGSetFSAIKapTolerance ( void *data, HYPRE_Real fsai_kap_tolerance);
 HYPRE_Int hypre_BoomerAMGSetChebyOrder ( void *data, HYPRE_Int order );
@@ -3356,6 +3371,7 @@ HYPRE_Int hypre_FSAIDestroy ( void *data );
 HYPRE_Int hypre_FSAISetAlgoType ( void *data, HYPRE_Int algo_type );
 HYPRE_Int hypre_FSAISetMaxSteps ( void *data, HYPRE_Int max_steps );
 HYPRE_Int hypre_FSAISetMaxStepSize ( void *data, HYPRE_Int max_step_size );
+HYPRE_Int hypre_FSAISetMaxNnzRow ( void *data, HYPRE_Int max_nnz_row );
 HYPRE_Int hypre_FSAISetKapTolerance ( void *data, HYPRE_Real kap_tolerance );
 HYPRE_Int hypre_FSAISetMaxIterations ( void *data, HYPRE_Int max_iterations );
 HYPRE_Int hypre_FSAISetEigMaxIters ( void *data, HYPRE_Int eig_max_iters );
@@ -3368,6 +3384,7 @@ HYPRE_Int hypre_FSAISetPrintLevel ( void *data, HYPRE_Int print_level );
 HYPRE_Int hypre_FSAIGetAlgoType ( void *data, HYPRE_Int *algo_type );
 HYPRE_Int hypre_FSAIGetMaxSteps ( void *data, HYPRE_Int *max_steps );
 HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data, HYPRE_Int *max_step_size );
+HYPRE_Int hypre_FSAIGetMaxNnzRow ( void *data, HYPRE_Int *max_nnz_row );
 HYPRE_Int hypre_FSAIGetKapTolerance ( void *data, HYPRE_Real *kap_tolerance );
 HYPRE_Int hypre_FSAIGetMaxIterations ( void *data, HYPRE_Int *max_iterations );
 HYPRE_Int hypre_FSAIGetEigMaxIters ( void *data, HYPRE_Int *eig_max_iters );
@@ -3384,16 +3401,18 @@ HYPRE_Int hypre_CSRMatrixExtractDenseMat ( hypre_CSRMatrix *A, hypre_Vector *A_s
 HYPRE_Int hypre_CSRMatrixExtractDenseRow ( hypre_CSRMatrix *A, hypre_Vector *A_subrow,
                                            HYPRE_Int *marker, HYPRE_Int row_num );
 HYPRE_Int hypre_FindKapGrad ( hypre_CSRMatrix *A_diag, hypre_Vector *kaporin_gradient,
-                              HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp, HYPRE_Int *S_Pattern, HYPRE_Int S_nnz,
+                              HYPRE_Int *kap_grad_nonzeros, hypre_Vector *G_temp,
+                              HYPRE_Int *S_Pattern, HYPRE_Int S_nnz,
                               HYPRE_Int max_row_size, HYPRE_Int row_num, HYPRE_Int *kg_marker );
 HYPRE_Int hypre_AddToPattern ( hypre_Vector *kaporin_gradient, HYPRE_Int *kap_grad_nonzeros,
-                               HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz, HYPRE_Int *kg_marker, HYPRE_Int max_step_size );
+                               HYPRE_Int *S_Pattern, HYPRE_Int *S_nnz, HYPRE_Int *kg_marker,
+                               HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetup ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                             hypre_ParVector *u );
-HYPRE_Int hypre_FSAISetupNative ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                  hypre_ParVector *u );
-HYPRE_Int hypre_FSAISetupOMPDyn ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                  hypre_ParVector *u );
+HYPRE_Int hypre_FSAISetupNative ( void *fsai_vdata, hypre_ParCSRMatrix *A,
+                                  hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_FSAISetupOMPDyn ( void *fsai_vdata, hypre_ParCSRMatrix *A,
+                                  hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_FSAIPrintStats ( void *fsai_vdata, hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_FSAIComputeOmega ( void *fsai_vdata, hypre_ParCSRMatrix *A );
 void hypre_swap2_ci ( HYPRE_Complex *v, HYPRE_Int *w, HYPRE_Int i, HYPRE_Int j );
@@ -3408,11 +3427,12 @@ HYPRE_Int hypre_FSAIApply ( void *fsai_vdata, HYPRE_Complex alpha, hypre_ParVect
                             hypre_ParVector *x );
 
 /* par_fsai_device.c */
-HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                 hypre_ParVector *u );
+HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A,
+                                 hypre_ParVector *f, hypre_ParVector *u );
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

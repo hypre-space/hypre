@@ -170,6 +170,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_reordering_type;
    HYPRE_Int     fsai_max_steps;
    HYPRE_Int     fsai_max_step_size;
+   HYPRE_Int     fsai_max_nnz_row;
    HYPRE_Int     fsai_eig_max_iters;
    HYPRE_Real    fsai_kap_tolerance;
    HYPRE_Int     needZ = 0;
@@ -266,6 +267,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
    fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
    fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
+   fsai_max_nnz_row = hypre_ParAMGDataFSAIMaxNnzRow(amg_data);
    fsai_eig_max_iters = hypre_ParAMGDataFSAIEigMaxIters(amg_data);
    fsai_kap_tolerance = hypre_ParAMGDataFSAIKapTolerance(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
@@ -3448,6 +3450,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_FSAICreate(&smoother[j]);
          HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
+         HYPRE_FSAISetMaxNnzRow(smoother[j], fsai_max_nnz_row);
          HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
          HYPRE_FSAISetTolerance(smoother[j], 0.0);
          HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
@@ -3460,9 +3463,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                          (HYPRE_ParVector) U_array[j]);
 
 #if DEBUG_SAVE_ALL_OPS
-         char file[256];
-         hypre_sprintf(file, "G_%02d.IJ.out", j);
-         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]), 0, 0, file);
+         {
+            char filename[256];
+            hypre_sprintf(file, "G_%02d.IJ.out", j);
+            hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]),
+                                      0, 0, file);
+         }
 #endif
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)

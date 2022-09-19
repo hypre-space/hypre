@@ -111,6 +111,28 @@ HYPRE_FSAIGetMaxSteps( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetMaxNnzRow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
+                        HYPRE_Int    max_nnz_row  )
+{
+   return ( hypre_FSAISetMaxNnzRow( (void *) solver, max_nnz_row ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetMaxNnzRow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetMaxNnzRow( HYPRE_Solver  solver,
+                        HYPRE_Int    *max_nnz_row  )
+{
+   return ( hypre_FSAIGetMaxNnzRow( (void *) solver, max_nnz_row ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetMaxStepSize
  *--------------------------------------------------------------------------*/
 
