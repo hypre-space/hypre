@@ -1988,8 +1988,12 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    }
 }
 
-/* Scale CSR matrix A = scalar * A
- */
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixScale
+ *
+ * Scales CSR matrix: A = scalar * A.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixScale( hypre_CSRMatrix *A,
                       HYPRE_Complex    scalar)
@@ -2017,7 +2021,51 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* diagonal scaling A := diag(ld) * A * diag(rd) */
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScaleHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixDiagScaleHost( hypre_CSRMatrix *A,
+                              hypre_Vector    *ld,
+                              hypre_Vector    *rd)
+{
+
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+
+   HYPRE_Complex *ldata  = hypre_VectorData(ld);
+   HYPRE_Complex *rdata  = hypre_VectorData(rd);
+
+   HYPRE_Int      i, j;
+   HYPRE_Complex  sl;
+   HYPRE_Complex  sr;
+
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel for private(i, j, sl, sr) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < nrows; i++)
+   {
+      sl = ldata ? ldata[i] : 1.0;
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
+      {
+         sr = rdata ? rdata[A_j[j]] : 1.0;
+         A_data[j] = sl * A_data[j] * sr;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScale
+ *
+ * Computes A = diag(ld) * A * diag(rd), where the diagonal matrices
+ * "diag(ld)" and "diag(rd)" are stored as local vectors.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
                           hypre_Vector    *ld,
@@ -2028,6 +2076,7 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
 
    if (!ldata && !rdata)
    {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices coefficients are not set\n");
       return hypre_error_flag;
    }
 
@@ -2042,25 +2091,15 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
    else
 #endif
    {
-      HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-      HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-      HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-      HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-      HYPRE_Int      i, j;
-
-      for (i = 0; i < nrows; i++)
-      {
-         HYPRE_Complex sl = ldata ? ldata[i] : 1.0;
-         for (j = A_i[i]; j < A_i[i + 1]; j++)
-         {
-            HYPRE_Complex sr = rdata ? rdata[A_j[j]] : 1.0;
-            A_data[j] = sl * A_data[j] * sr;
-         }
-      }
+      hypre_CSRMatrixDiagScaleHost(A, ld, rd);
    }
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSetConstantValues
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
