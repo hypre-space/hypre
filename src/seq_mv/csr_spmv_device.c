@@ -262,9 +262,6 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
    }
 }
 
-// Explicit instantiation
-
-
 /*--------------------------------------------------------------------------
  * hypreDevice_CSRMatrixMatvec
  *
