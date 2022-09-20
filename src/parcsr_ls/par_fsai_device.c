@@ -856,9 +856,10 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_CSRMatrix     *G_diag      = hypre_ParCSRMatrixDiag(G);
    HYPRE_Int            max_nnz_row = hypre_ParFSAIDataMaxNnzRow(fsai_data);
    HYPRE_Int            num_levels  = hypre_ParFSAIDataNumLevels(fsai_data);
+   HYPRE_Real           threshold   = hypre_ParFSAIDataThreshold(fsai_data);
 
-   hypre_CSRMatrix     *A_diag    = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int            num_rows  = hypre_CSRMatrixNumRows(A_diag);
+   hypre_CSRMatrix     *A_diag      = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int            num_rows    = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int            num_nonzeros_G;
 
    hypre_ParCSRMatrix  *Atilde;
@@ -869,10 +870,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* TODO: Move to fsai_data? */
    HYPRE_Complex       *scaling;
    HYPRE_Int           *info;
-
-   /* TODO: these variables belong to hypre_ParFSAIData */
-   HYPRE_Int            filter_option = 2;
-   HYPRE_Real           filter_threshold = 0.0;
 
    /* Error code array for FSAI */
    info = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
@@ -885,7 +882,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Compute filtered version of A */
    Atilde = hypre_ParCSRMatrixClone(A, 1);
-   hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, 0.01, filter_option);
+   hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, threshold, 2);
 
    /* TODO: Check if Atilde is diagonal */
 
@@ -952,11 +949,10 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #if defined (FSAI_USING_UNMARKED_TRUNCATION)
    HYPRE_Int  *K_e = NULL;
 
-   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row,
-                                             filter_option, filter_threshold);
+   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row, 2, threshold);
 #else
 
-   hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, filter_option, filter_threshold);
+   hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, 2, threshold);
    HYPRE_Int  *K_e = hypre_CSRMatrixI(K_diag) + 1;
 
    /* Sort candidate pattern matrix */

@@ -151,6 +151,7 @@ typedef struct
    HYPRE_Int            fsai_max_step_size;
    HYPRE_Int            fsai_max_nnz_row;
    HYPRE_Int            fsai_num_levels;
+   HYPRE_Real           fsai_threshold;
    HYPRE_Int            fsai_eig_max_iters;
    HYPRE_Real           fsai_kap_tolerance;
 
@@ -402,6 +403,7 @@ typedef struct
 #define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
 #define hypre_ParAMGDataFSAIMaxNnzRow(amg_data) ((amg_data)->fsai_max_nnz_row)
 #define hypre_ParAMGDataFSAINumLevels(amg_data) ((amg_data)->fsai_num_levels)
+#define hypre_ParAMGDataFSAIThreshold(amg_data) ((amg_data)->fsai_threshold)
 #define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
 #define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
 

@@ -133,6 +133,28 @@ HYPRE_FSAIGetMaxNnzRow( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetMaxStepSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
+                          HYPRE_Int    max_step_size )
+{
+   return ( hypre_FSAISetMaxStepSize( (void *) solver, max_step_size ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetMaxStepSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetMaxStepSize( HYPRE_Solver  solver,
+                          HYPRE_Int    *max_step_size )
+{
+   return ( hypre_FSAIGetMaxStepSize( (void *) solver, max_step_size ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetNumLevels
  *--------------------------------------------------------------------------*/
 
@@ -155,25 +177,25 @@ HYPRE_FSAIGetNumLevels( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FSAISetMaxStepSize
+ * HYPRE_FSAISetThreshold
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
-                          HYPRE_Int    max_step_size )
+HYPRE_FSAISetThreshold( HYPRE_Solver solver,
+                        HYPRE_Real   threshold )
 {
-   return ( hypre_FSAISetMaxStepSize( (void *) solver, max_step_size ) );
+   return ( hypre_FSAISetThreshold( (void *) solver, threshold ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FSAIGetMaxStepSize
+ * HYPRE_FSAIGetThreshold
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_FSAIGetMaxStepSize( HYPRE_Solver  solver,
-                          HYPRE_Int    *max_step_size )
+HYPRE_FSAIGetThreshold( HYPRE_Solver  solver,
+                        HYPRE_Real   *threshold )
 {
-   return ( hypre_FSAIGetMaxStepSize( (void *) solver, max_step_size ) );
+   return ( hypre_FSAIGetThreshold( (void *) solver, threshold ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -1369,12 +1369,23 @@ HYPRE_BoomerAMGSetFSAINumLevels( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAIThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAIThreshold( HYPRE_Solver  solver,
+                                 HYPRE_Real    threshold )
+{
+   return ( hypre_BoomerAMGSetFSAIThreshold( (void *) solver, threshold ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFSAIEigMaxIters
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFSAIEigMaxIters( HYPRE_Solver  solver,
-                                   HYPRE_Int     eig_max_iters  )
+                                   HYPRE_Int     eig_max_iters )
 {
    return ( hypre_BoomerAMGSetFSAIEigMaxIters( (void *) solver, eig_max_iters ) );
 }

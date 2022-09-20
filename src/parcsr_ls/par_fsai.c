@@ -256,6 +256,29 @@ hypre_FSAISetNumLevels( void      *data,
 }
 
 HYPRE_Int
+hypre_FSAISetThreshold( void       *data,
+                        HYPRE_Real  threshold )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (threshold < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataThreshold(fsai_data) = threshold;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_FSAISetKapTolerance( void       *data,
                            HYPRE_Real  kap_tolerance )
 {
@@ -548,6 +571,23 @@ hypre_FSAIGetNumLevels( void      *data,
    }
 
    *num_levels = hypre_ParFSAIDataNumLevels(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetThreshold( void       *data,
+                        HYPRE_Real *threshold )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *threshold = hypre_ParFSAIDataThreshold(fsai_data);
 
    return hypre_error_flag;
 }

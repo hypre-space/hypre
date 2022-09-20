@@ -172,6 +172,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     fsai_max_step_size;
    HYPRE_Int     fsai_max_nnz_row;
    HYPRE_Int     fsai_num_levels;
+   HYPRE_Real    fsai_threshold;
    HYPRE_Int     fsai_eig_max_iters;
    HYPRE_Real    fsai_kap_tolerance;
    HYPRE_Int     needZ = 0;
@@ -270,6 +271,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
    fsai_max_nnz_row = hypre_ParAMGDataFSAIMaxNnzRow(amg_data);
    fsai_num_levels = hypre_ParAMGDataFSAINumLevels(amg_data);
+   fsai_threshold = hypre_ParAMGDataFSAIThreshold(amg_data);
    fsai_eig_max_iters = hypre_ParAMGDataFSAIEigMaxIters(amg_data);
    fsai_kap_tolerance = hypre_ParAMGDataFSAIKapTolerance(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
@@ -3454,6 +3456,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
          HYPRE_FSAISetMaxNnzRow(smoother[j], fsai_max_nnz_row);
          HYPRE_FSAISetNumLevels(smoother[j], fsai_num_levels);
+         HYPRE_FSAISetThreshold(smoother[j], fsai_threshold);
          HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
          HYPRE_FSAISetTolerance(smoother[j], 0.0);
          HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
