@@ -1325,6 +1325,17 @@ HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAIAlgoType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAIAlgoType( HYPRE_Solver  solver,
+                                HYPRE_Int     algo_type )
+{
+   return ( hypre_BoomerAMGSetFSAIAlgoType( (void *) solver, algo_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFSAIMaxSteps
  *--------------------------------------------------------------------------*/
 

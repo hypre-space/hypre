@@ -168,6 +168,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_upper_jacobi_iters;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
+   HYPRE_Int     fsai_algo_type;
    HYPRE_Int     fsai_max_steps;
    HYPRE_Int     fsai_max_step_size;
    HYPRE_Int     fsai_max_nnz_row;
@@ -267,6 +268,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_upper_jacobi_iters = hypre_ParAMGDataILUUpperJacobiIters(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
+   fsai_algo_type = hypre_ParAMGDataFSAIAlgoType(amg_data);
    fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
    fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
    fsai_max_nnz_row = hypre_ParAMGDataFSAIMaxNnzRow(amg_data);
@@ -3452,6 +3454,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
       {
          HYPRE_FSAICreate(&smoother[j]);
+         HYPRE_FSAISetAlgoType(smoother[j], fsai_algo_type);
          HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
          HYPRE_FSAISetMaxNnzRow(smoother[j], fsai_max_nnz_row);

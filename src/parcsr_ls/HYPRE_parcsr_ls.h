@@ -1090,36 +1090,43 @@ HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
                                         HYPRE_Real        ilu_droptol);
 
 /**
+ * (Optional) Defines the algorithm type for setting up FSAI
+ * For further explanation see HYPRE_FSAISetAlgoType.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIAlgoType(HYPRE_Solver solver,
+                                         HYPRE_Int    algo_type);
+
+/**
  * (Optional) Defines maximum number of steps for FSAI.
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetMaxSteps.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps(HYPRE_Solver solver,
                                          HYPRE_Int    max_steps);
 
 /**
  * (Optional) Defines maximum step size for FSAI.
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetMaxStepSize.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
                                             HYPRE_Int    max_step_size);
 
 /**
  * (Optional) Defines maximum number of nonzero entries per row for FSAI.
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetMaxNnzRow.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow(HYPRE_Solver solver,
                                           HYPRE_Int    max_nnz_row);
 
 /**
  * (Optional) Defines number of levels for computing the candidate pattern for FSAI
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetNumLevels.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAINumLevels(HYPRE_Solver solver,
                                           HYPRE_Int    num_levels);
 
 /**
  * (Optional) Defines the threshold for computing the candidate pattern for FSAI
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetThreshold.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold(HYPRE_Solver solver,
                                           HYPRE_Real   threshold);
@@ -1127,14 +1134,14 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold(HYPRE_Solver solver,
 /**
  * (Optional) Defines maximum number of iterations for estimating the
  * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetEigMaxIters.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
                                             HYPRE_Int    eig_max_iters);
 
 /**
  * (Optional) Defines the kaporin dropping tolerance.
- * For further explanation see description of FSAI.
+ * For further explanation see HYPRE_FSAISetKapTolerance.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
                                              HYPRE_Real   kap_tolerance);
@@ -1596,68 +1603,79 @@ HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
 
 /**
  * (Optional) Sets the maximum number of steps for computing the sparsity
- * pattern of G
+ * pattern of G. This input parameter makes sense when using adaptive FSAI,
+ * i.e., algorithm type 1 or 2.
  **/
 HYPRE_Int HYPRE_FSAISetMaxSteps( HYPRE_Solver solver,
                                  HYPRE_Int    max_steps );
 
 /**
- * (Optional) Sets the maximum step size for computing the sparsity pattern of G
+ * (Optional) Sets the maximum step size for computing the sparsity pattern of G.
+ * This input parameter makes sense when using adaptive FSAI, i.e., algorithm
+ * type 1 or 2.
  **/
 HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
                                     HYPRE_Int    max_step_size );
 
 /**
- * (Optional) Sets the maximum number of off-diagonal entries per row of G
- * when using the static FSAI algorithm.
+ * (Optional) Sets the maximum number of off-diagonal entries per row of G.
+ * This input parameter makes sense when using static FSAI, i.e., algorithm
+ * type 3.
  **/
 HYPRE_Int HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
                                   HYPRE_Int    max_nnz_row );
 
 /**
- * (Optional) Sets the number of levels for computing the candidate pattern of G
- * when using the static FSAI algorithm.
+ * (Optional) Sets the number of levels for computing the candidate pattern of G.
+ * This input parameter makes sense when using static FSAI, i.e., algorithm
+ * type 3.
  **/
 HYPRE_Int HYPRE_FSAISetNumLevels( HYPRE_Solver solver,
                                   HYPRE_Int    num_levels );
 
 /**
  * (Optional) Sets the threshold for computing the candidate pattern of G
- * when using the static FSAI algorithm.
+ * This input parameter makes sense when using static FSAI, i.e., algorithm
+ * type 3.
  **/
 HYPRE_Int HYPRE_FSAISetThreshold( HYPRE_Solver solver,
                                   HYPRE_Real   threshold );
 
 /**
  * (Optional) Sets the kaporin gradient reduction factor for computing the
- *  sparsity pattern of G
+ * sparsity pattern of G. This input parameter makes sense when using adaptive
+ * FSAI, i.e., algorithm types 1 or 2.
  **/
 HYPRE_Int HYPRE_FSAISetKapTolerance( HYPRE_Solver solver,
                                      HYPRE_Real   kap_tolerance );
 
 /**
- * (Optional) Sets the relaxation factor for FSAI
+ * (Optional) Sets the relaxation factor for FSAI. This input parameter makes
+ * sense to all algorithm types for setting up FSAI.
  **/
 HYPRE_Int HYPRE_FSAISetOmega( HYPRE_Solver solver,
                               HYPRE_Real   omega );
 
 /**
- * (Optional) Sets the maximum number of iterations (sweeps) for FSAI
+ * (Optional) Sets the maximum number of iterations (sweeps) for FSAI. This
+ * input parameter makes sense to all algorithm types for setting up FSAI.
  **/
 HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
                                       HYPRE_Int    max_iterations );
 
 /**
  * (Optional) Set number of iterations for computing maximum
- * eigenvalue of the preconditioned operator.
+ * eigenvalue of the preconditioned operator. This input parameter makes
+ * sense to all algorithm types for setting up FSAI.
  **/
 HYPRE_Int HYPRE_FSAISetEigMaxIters( HYPRE_Solver solver,
                                     HYPRE_Int    eig_max_iters );
 
 /**
  * (Optional) Set the convergence tolerance, if FSAI is used
- * as a solver. When using FSAI as a preconditioner, set the tolerance
- * to 0.0. The default is \f$10^{-6}\f$.
+ * as a solver. This input parameter makes sense to all algorithm types
+ * for setting up FSAI. When using FSAI as a preconditioner, set the
+ * tolerance to 0.0. The default is \f$10^{-6}\f$.
  **/
 HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
                                   HYPRE_Real   tolerance );

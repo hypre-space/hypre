@@ -165,6 +165,7 @@ typedef struct
    HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
 
+   HYPRE_Int            fsai_algo_type;
    HYPRE_Int            fsai_max_steps;
    HYPRE_Int            fsai_max_step_size;
    HYPRE_Int            fsai_max_nnz_row;
@@ -417,6 +418,7 @@ typedef struct
 #define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataFSAIAlgoType(amg_data) ((amg_data)->fsai_algo_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
 #define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
 #define hypre_ParAMGDataFSAIMaxNnzRow(amg_data) ((amg_data)->fsai_max_nnz_row)
@@ -1401,6 +1403,7 @@ HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver solver,
                                                  HYPRE_Int ilu_upper_jacobi_iters);
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
+HYPRE_Int HYPRE_BoomerAMGSetFSAIAlgoType ( HYPRE_Solver solver, HYPRE_Int algo_type );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow ( HYPRE_Solver solver, HYPRE_Int max_nnz_row );
@@ -2052,6 +2055,7 @@ HYPRE_Int hypre_BoomerAMGSetILUUpperJacobiIters( void *data, HYPRE_Int ilu_upper
 HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter);
 HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz);
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type);
+HYPRE_Int hypre_BoomerAMGSetFSAIAlgoType ( void *data, HYPRE_Int fsai_algo_type);
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxSteps ( void *data, HYPRE_Int fsai_max_steps);
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxStepSize ( void *data, HYPRE_Int fsai_max_step_size);
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxNnzRow ( void *data, HYPRE_Int fsai_max_nnz_row);
