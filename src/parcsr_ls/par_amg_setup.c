@@ -3108,6 +3108,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (addlvl > -1 ||
        grid_relax_type[1] ==  7 || grid_relax_type[2] ==  7 || grid_relax_type[3] ==  7 ||
        grid_relax_type[1] ==  8 || grid_relax_type[2] ==  8 || grid_relax_type[3] ==  8 ||
+       grid_relax_type[1] == 11 || grid_relax_type[2] == 11 || grid_relax_type[3] == 11 ||
+       grid_relax_type[1] == 12 || grid_relax_type[2] == 12 || grid_relax_type[3] == 12 ||
        grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
        grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
        grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18)
@@ -3298,10 +3300,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
 
-      if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 &&
+      if (grid_relax_type[0] == 11 || grid_relax_type[1] == 11 || grid_relax_type[2] == 11 || grid_relax_type[3] == 11 ||
+		  grid_relax_type[0] == 12 || grid_relax_type[1] == 12 || grid_relax_type[2] == 12 || grid_relax_type[3] == 12 ||
+		  grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 &&
                                                                  j == (num_levels - 1)))
       {
-         HYPRE_Real *l1_norm_data = NULL;
+		 HYPRE_Real *l1_norm_data = NULL;
 
          hypre_ParCSRComputeL1Norms(A_array[j], 5, NULL, &l1_norm_data);
 

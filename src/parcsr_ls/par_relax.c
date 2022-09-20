@@ -123,12 +123,12 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          break;
 
       case 11: /* Two Stage Gauss Seidel. Forward sweep only */
-         hypre_BoomerAMGRelax11TwoStageGaussSeidel(A, f, cf_marker, relax_points, relax_weight, omega, u,
+         hypre_BoomerAMGRelax11TwoStageGaussSeidel(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u,
                                                    Vtemp, Ztemp);
          break;
 
       case 12: /* Two Stage Gauss Seidel. Uses the diagonal matrix for the GS part */
-         hypre_BoomerAMGRelax12TwoStageGaussSeidel(A, f, cf_marker, relax_points, relax_weight, omega, u,
+         hypre_BoomerAMGRelax12TwoStageGaussSeidel(A, f, cf_marker, relax_points, relax_weight, omega, l1_norms, u,
                                                    Vtemp, Ztemp);
          break;
 
@@ -1677,6 +1677,7 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
                                            HYPRE_Int           relax_points,
                                            HYPRE_Real          relax_weight,
                                            HYPRE_Real          omega,
+                                           HYPRE_Real         *A_diag_diag,
                                            hypre_ParVector    *u,
                                            hypre_ParVector    *Vtemp,
                                            hypre_ParVector    *Ztemp )
@@ -1688,7 +1689,7 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice(A, f, relax_weight, omega, u, Vtemp, Ztemp, 1);
+      hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice(A, f, relax_weight, omega, A_diag_diag, u, Vtemp, Ztemp, 1);
    }
    else
 #endif
@@ -1707,6 +1708,7 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
                                            HYPRE_Int           relax_points,
                                            HYPRE_Real          relax_weight,
                                            HYPRE_Real          omega,
+										   HYPRE_Real         *A_diag_diag,
                                            hypre_ParVector    *u,
                                            hypre_ParVector    *Vtemp,
                                            hypre_ParVector    *Ztemp )
@@ -1718,7 +1720,7 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice(A, f, relax_weight, omega, u, Vtemp, Ztemp, 2);
+      hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice(A, f, relax_weight, omega, A_diag_diag, u, Vtemp, Ztemp, 2);
    }
    else
 #endif

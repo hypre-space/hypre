@@ -81,6 +81,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
                                                 hypre_ParVector    *f,
                                                 HYPRE_Real          relax_weight,
                                                 HYPRE_Real          omega,
+												HYPRE_Real         *A_diag_diag,
                                                 hypre_ParVector    *u,
                                                 hypre_ParVector    *r,
                                                 hypre_ParVector    *z,
@@ -90,8 +91,6 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
 
    hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   HYPRE_Complex   *A_diag_data  = hypre_CSRMatrixData(A_diag);
    hypre_Vector    *u_local      = hypre_ParVectorLocalVector(u);
    hypre_Vector    *r_local      = hypre_ParVectorLocalVector(r);
    hypre_Vector    *z_local      = hypre_ParVectorLocalVector(z);
@@ -106,13 +105,8 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
 
    hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, r);
 
-   hypreDevice_DiagScaleVector(num_vectors, num_rows, A_diag_i, A_diag_data, r_data, 0.0, z_data);
+   hypreDevice_DiagScaleVector2(num_vectors, num_rows, A_diag_diag, r_data, 1.0, z_data, u_data, 1);
 
-   // set this so that axpy works out properly. Reset later.
-   hypre_VectorSize(z_local) = rsize;
-
-   // 1) u = u + z
-   hypre_SeqVectorAxpy(multiplier, z_local, u_local);
    multiplier *= -1.0;
 
    for (i = 0; i < num_inner_iters; ++i)
@@ -120,12 +114,9 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
       // 2) r = Lz
       hypre_CSRMatrixSpMVDevice(0, 1.0, A_diag, z_local, 0.0, r_local, -2);
       // 3) z = r/D, u = u + m*z
-      hypreDevice_DiagScaleVector2(num_vectors, num_rows, A_diag_i, A_diag_data, r_data, multiplier, z_data, u_data);
+      hypreDevice_DiagScaleVector2(num_vectors, num_rows, A_diag_diag, r_data, multiplier, z_data, u_data, num_inner_iters>i+1);
       multiplier *= -1.0;
    }
-
-   // reset this
-   hypre_VectorSize(z_local) = zsize;
 
    hypre_GpuProfilingPopRange();
 
