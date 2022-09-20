@@ -262,6 +262,9 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
    }
 }
 
+// Explicit instantiation
+
+
 /*--------------------------------------------------------------------------
  * hypreDevice_CSRMatrixMatvec
  *
@@ -300,12 +303,11 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
       return hypre_error_flag;
    }
 
-   HYPRE_Int       i;
    const HYPRE_Int avg_rownnz = (num_nonzeros + num_rows - 1) / num_rows;
 
-   static constexpr int group_sizes[5] = {32, 16, 8, 4, 4};
+   static constexpr HYPRE_Int group_sizes[5] = {32, 16, 8, 4, 4};
 
-   static constexpr int unroll_depth[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+   static constexpr HYPRE_Int unroll_depth[9] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
    static HYPRE_Int avg_rownnz_lower_bounds[5] = {64, 32, 16, 8, 0};
 
@@ -315,81 +317,46 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
                                                 HYPRE_SPMV_BLOCKDIM / group_sizes[3],
                                                 HYPRE_SPMV_BLOCKDIM / group_sizes[4] };
 
-   typedef void (* funcptr)(hypre_DeviceItem &item, HYPRE_Int num_rows, HYPRE_Int num_vectors,
-                            HYPRE_Int *row_id, HYPRE_Int idxstride_x, HYPRE_Int idxstride_y,
-                            HYPRE_Int vecstride_x, HYPRE_Int vecstride_y, T alpha,
-                            HYPRE_Int *d_ia, HYPRE_Int *d_ja, T *d_a, T *d_x, T beta, T *d_y );
-
-   static funcptr kernel[9][5] = {
-      /* nv = 1 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[1], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[1], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[1], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[1], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[1], T> },
-      /* nv = 2 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[2], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[2], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[2], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[2], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[2], T> },
-      /* nv = 3 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[3], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[3], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[3], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[3], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[3], T> },
-      /* nv = 4 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[4], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[4], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[4], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[4], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[4], T> },
-      /* nv = 5 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[5], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[5], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[5], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[5], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[5], T> },
-      /* nv = 6 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[6], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[6], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[6], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[6], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[6], T> },
-      /* nv = 7 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[7], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[7], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[7], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[7], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[7], T> },
-      /* nv = 8 */
-      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[8], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[8], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[8], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[8], T>,
-        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[8], T> },
-      /* nv > 8 */
-      { hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[0], unroll_depth[9], T>,
-        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[1], unroll_depth[9], T>,
-        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[2], unroll_depth[9], T>,
-        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[3], unroll_depth[9], T>,
-        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[4], unroll_depth[9], T> }};
+   const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
 
    /* Select execution path */
-   for (i = 0; i < 5; i++)
+   switch (num_vectors)
    {
-      if (avg_rownnz >= avg_rownnz_lower_bounds[i])
-      {
-         const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
-         const dim3 gDim((num_rows + num_groups_per_block[i] - 1) / num_groups_per_block[i]);
-
-         HYPRE_GPU_LAUNCH( kernel[hypre_min(num_vectors - 1, 8)][i],
-                           gDim, bDim, num_rows, num_vectors, rowid,
-                           idxstride_x, idxstride_y, vecstride_x, vecstride_y,
-                           alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
+      case unroll_depth[1]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[1]);
          break;
-      }
+
+      case unroll_depth[2]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[2]);
+         break;
+
+      case unroll_depth[3]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[3]);
+         break;
+
+      case unroll_depth[4]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[4]);
+         break;
+
+      case unroll_depth[5]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[5]);
+         break;
+
+      case unroll_depth[6]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[6]);
+         break;
+
+      case unroll_depth[7]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[7]);
+         break;
+
+      case unroll_depth[8]:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffle, unroll_depth[8]);
+         break;
+
+      default:
+         HYPRE_SPMV_GPU_LAUNCH(hypreGPUKernel_CSRMatvecShuffleGT8, unroll_depth[8]);
+         break;
    }
 
    return hypre_error_flag;
