@@ -52,6 +52,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                                HYPRE_Int            max_elmts,
                                                hypre_ParCSRMatrix **P_ptr )
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildModPartialExtInterpDevice() - %s : %d\n", __FILE__, __LINE__);
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -327,6 +328,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                                  HYPRE_Int            max_elmts,
                                                  hypre_ParCSRMatrix **P_ptr )
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildModPartialExtPEInterpDevice() - %s : %d\n", __FILE__, __LINE__);
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);

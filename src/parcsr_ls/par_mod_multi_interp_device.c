@@ -23,17 +23,6 @@ struct tuple_plus
    }
 };
 
-template<typename T>
-struct tuple_minus
-{
-   __host__ __device__
-   std::tuple<T, T> operator()( const std::tuple<T, T> & x1, const std::tuple<T, T> & x2) const
-   {
-      return std::make_tuple( std::get<0>(x1) - std::get<0>(x2),
-                              std::get<1>(x1) - std::get<1>(x2) );
-   }
-};
-
 struct local_equal_plus_constant
 {
    HYPRE_BigInt _value;
@@ -250,6 +239,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int        i;
    HYPRE_Int        num_passes, p, remaining;
+   HYPRE_Int        pass_starts_p1, pass_starts_p2;
    HYPRE_BigInt     remaining_big; /* tmp variable for reducing global_remaining */
    HYPRE_BigInt     global_remaining;
    HYPRE_Int        cnt, cnt_old, cnt_rem, current_pass;
@@ -716,15 +706,18 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int stop  = pass_starts[i + 2];
 
 #if defined(HYPRE_USING_SYCL)
-      auto zip1 = oneapi::dpl::make_zip_iterator(Pi_diag_i, Pi_offd_i);
-      /* WM: debug - commenting out for now due to compile error that I don't understand */
-      /* WM: do I need to do the permutation and the transform in two steps? */
-      /* HYPRE_ONEDPL_CALL( std::transform, */
-      /*                    zip1 + 1, */
-      /*                    zip1 + stop - start + 1, */
-      /*                    zip1, */
-      /*                    oneapi::dpl::make_permutation_iterator( zip1, pass_order + start ), */
-      /*                    tuple_minus<HYPRE_Int>() ); */
+      HYPRE_ONEDPL_CALL( std::transform,
+                         Pi_diag_i + 1,
+                         Pi_diag_i + stop - start + 1,
+                         Pi_diag_i,
+                         oneapi::dpl::make_permutation_iterator( P_diag_i, pass_order + start ),
+                         std::minus<HYPRE_Int>() );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         Pi_offd_i + 1,
+                         Pi_offd_i + stop - start + 1,
+                         Pi_offd_i,
+                         oneapi::dpl::make_permutation_iterator( P_offd_i, pass_order + start ),
+                         std::minus<HYPRE_Int>() );
 #else
       HYPRE_THRUST_CALL( transform,
                          thrust::make_zip_iterator(thrust::make_tuple(Pi_diag_i, Pi_offd_i)) + 1,
@@ -781,10 +774,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          P_diag_j );
 
       auto perm2 = oneapi::dpl::make_permutation_iterator( P_diag_i, pass_order );
+      auto perm3 = oneapi::dpl::make_permutation_iterator( P_diag_data, perm2 );
       HYPRE_ONEDPL_CALL( std::transform,
-                         perm2,
-                         perm2 + pass_starts[1],
-                         perm2,
+                         perm3,
+                         perm3 + pass_starts[1],
+                         perm3,
       [] (const auto & x) {return 1.0;} );
 #else
       HYPRE_THRUST_CALL( scatter,
@@ -819,8 +813,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_points, "warp", bDim);
 
+      pass_starts_p1 = pass_starts[p + 1];
+      pass_starts_p2 = pass_starts[p + 2];
       HYPRE_GPU_LAUNCH( hypreCUDAKernel_insert_remaining_weights, gDim, bDim,
-                        pass_starts[p + 1], pass_starts[p + 2], pass_order,
+                        pass_starts_p1, pass_starts_p2, pass_order,
                         Pi_diag_i, Pi_diag_j, Pi_diag_data,
                         P_diag_i, P_diag_j, P_diag_data,
                         Pi_offd_i, Pi_offd_j, Pi_offd_data,
@@ -883,9 +879,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
          dim3 gDim = hypre_GetDefaultDeviceGridDimension(npoints, "warp", bDim);
 
+         pass_starts_p1 = pass_starts[p + 1];
+         pass_starts_p2 = pass_starts[p + 2];
          HYPRE_GPU_LAUNCH( hypreCUDAKernel_populate_big_P_offd_j, gDim, bDim,
-                           pass_starts[p + 1],
-                           pass_starts[p + 2],
+                           pass_starts_p1,
+                           pass_starts_p2,
                            pass_order,
                            P_offd_i,
                            P_offd_j,
@@ -1038,6 +1036,9 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
+
+   HYPRE_Int *Soc_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int *Soc_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
 
    HYPRE_BigInt    *col_map_offd_P     = NULL;
    HYPRE_BigInt    *col_map_offd_P_dev = NULL;
@@ -1228,8 +1229,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                         A_offd_i,
                         A_offd_j,
                         A_offd_data,
-                        hypre_ParCSRMatrixSocDiagJ(S),
-                        hypre_ParCSRMatrixSocOffdJ(S),
+                        Soc_diag_j,
+                        Soc_offd_j,
                         P_diag_i,
                         P_offd_i,
                         P_diag_j,
@@ -1312,6 +1313,9 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
+
+   HYPRE_Int *Soc_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int *Soc_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
 
    HYPRE_BigInt    *col_map_offd_Q     = NULL;
    HYPRE_BigInt    *col_map_offd_Q_dev = NULL;
@@ -1513,8 +1517,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                         A_offd_i,
                         A_offd_j,
                         A_offd_data,
-                        hypre_ParCSRMatrixSocDiagJ(S),
-                        hypre_ParCSRMatrixSocOffdJ(S),
+                        Soc_diag_j,
+                        Soc_offd_j,
                         Q_diag_i,
                         Q_offd_i,
                         Q_diag_j,

@@ -59,6 +59,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             interp_type,
                                      hypre_ParCSRMatrix  **P_ptr)
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildDirInterpDevice() - %s : %d\n", __FILE__, __LINE__);
    MPI_Comm                comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
@@ -1100,6 +1101,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                                         HYPRE_Int            debug_flag,
                                         hypre_ParCSRMatrix **P_ptr)
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildInterpOnePntDevice() - %s : %d\n", __FILE__, __LINE__);
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
