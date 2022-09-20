@@ -1347,6 +1347,28 @@ HYPRE_BoomerAMGSetFSAIMaxStepSize( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAIMaxNnzRow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAIMaxNnzRow( HYPRE_Solver  solver,
+                                 HYPRE_Int     max_nnz_row )
+{
+   return ( hypre_BoomerAMGSetFSAIMaxNnzRow( (void *) solver, max_nnz_row ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAINumLevels
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAINumLevels( HYPRE_Solver  solver,
+                                 HYPRE_Int     num_levels )
+{
+   return ( hypre_BoomerAMGSetFSAINumLevels( (void *) solver, num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFSAIEigMaxIters
  *--------------------------------------------------------------------------*/
 

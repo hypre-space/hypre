@@ -1111,6 +1111,13 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow(HYPRE_Solver solver,
                                           HYPRE_Int    max_nnz_row);
 
 /**
+ * (Optional) Defines number of levels for computing the candidate pattern for FSAI
+ * For further explanation see description of FSAI.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAINumLevels(HYPRE_Solver solver,
+                                          HYPRE_Int    num_levels);
+
+/**
  * (Optional) Defines maximum number of iterations for estimating the
  * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
  * For further explanation see description of FSAI.
@@ -1598,6 +1605,12 @@ HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
                                   HYPRE_Int    max_nnz_row );
+
+/**
+ * (Optional) Sets the number of levels for computing the candidate pattern of G
+ **/
+HYPRE_Int HYPRE_FSAISetNumLevels( HYPRE_Solver solver,
+                                  HYPRE_Int    num_levels );
 
 /**
  * (Optional) Sets the kaporin gradient reduction factor for computing the

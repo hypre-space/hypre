@@ -22,6 +22,7 @@ hypre_FSAICreate()
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
    HYPRE_Int            max_nnz_row;
+   HYPRE_Int            num_levels;
    HYPRE_Real           kap_tolerance;
 
    /* solver params */
@@ -51,6 +52,7 @@ hypre_FSAICreate()
    max_steps = 3;
    max_step_size = 5;
    max_nnz_row = max_steps * max_step_size;
+   num_levels = 2;
    kap_tolerance = 1.0e-3;
 
    /* solver params */
@@ -82,6 +84,7 @@ hypre_FSAICreate()
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
    hypre_FSAISetMaxNnzRow(fsai_data, max_nnz_row);
+   hypre_FSAISetNumLevels(fsai_data, num_levels);
    hypre_FSAISetKapTolerance(fsai_data, kap_tolerance);
 
    hypre_FSAISetMaxIterations(fsai_data, max_iterations);
@@ -225,6 +228,29 @@ hypre_FSAISetMaxNnzRow( void      *data,
    }
 
    hypre_ParFSAIDataMaxNnzRow(fsai_data) = max_nnz_row;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetNumLevels( void      *data,
+                        HYPRE_Int  num_levels )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (num_levels < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataNumLevels(fsai_data) = num_levels;
 
    return hypre_error_flag;
 }
@@ -505,6 +531,23 @@ hypre_FSAIGetMaxNnzRow( void      *data,
    }
 
    *max_nnz_row = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetNumLevels( void      *data,
+                        HYPRE_Int *num_levels )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *num_levels = hypre_ParFSAIDataNumLevels(fsai_data);
 
    return hypre_error_flag;
 }

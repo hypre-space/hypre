@@ -855,6 +855,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_ParCSRMatrix  *G           = hypre_ParFSAIDataGmat(fsai_data);
    hypre_CSRMatrix     *G_diag      = hypre_ParCSRMatrixDiag(G);
    HYPRE_Int            max_nnz_row = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+   HYPRE_Int            num_levels  = hypre_ParFSAIDataNumLevels(fsai_data);
 
    hypre_CSRMatrix     *A_diag    = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int            num_rows  = hypre_CSRMatrixNumRows(A_diag);
@@ -870,7 +871,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    HYPRE_Int           *info;
 
    /* TODO: these variables belong to hypre_ParFSAIData */
-   HYPRE_Int            num_levels = 2;
    HYPRE_Int            filter_option = 2;
    HYPRE_Real           filter_threshold = 0.0;
 
