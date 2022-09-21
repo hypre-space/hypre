@@ -338,6 +338,10 @@ HYPRE_Init()
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_CUSOLVER)
+   hypre_HandleVendorSolverHandle(_hypre_handle);
+#endif
+
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA)
    hypre_CudaCompileFlagCheck();
@@ -675,4 +679,3 @@ HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
-

@@ -1344,6 +1344,7 @@ typedef struct
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCusparseHandle(hypre_handle)                 hypre_DeviceDataCusparseHandle(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleVendorSolverHandle(hypre_handle)             hypre_DeviceDataVendorSolverHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStream(hypre_handle)                  hypre_DeviceDataComputeStream(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCubBinGrowth(hypre_handle)                   hypre_DeviceDataCubBinGrowth(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCubMinBin(hypre_handle)                      hypre_DeviceDataCubMinBin(hypre_HandleDeviceData(hypre_handle))
@@ -1778,8 +1779,9 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
-                                      HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_rows, HYPRE_Int *A_i,
+                                      HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta,
+                                      HYPRE_Complex *y);
 HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                        HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);

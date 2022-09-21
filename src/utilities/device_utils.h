@@ -19,9 +19,22 @@ using hypre_DeviceItem = void*;
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
+
+#if defined(HYPRE_USING_CURAND)
 #include <curand.h>
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
 #include <cublas_v2.h>
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
 #include <cusparse.h>
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER)
+#include <cusolverDn.h>
+#endif
 
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
@@ -378,6 +391,14 @@ using hypre_DeviceItem = sycl::nd_item<1>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#define HYPRE_CUSOLVER_CALL(call) do {                                                       \
+   cusolverStatus_t err = call;                                                              \
+   if (CUSOLVER_STATUS_SUCCESS != err) {                                                     \
+      printf("cuSOLVER ERROR (code = %d) at %s:%d\n",                                        \
+            err, __FILE__, __LINE__);                                                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
 #define HYPRE_ONEMKL_CALL(call)                                                              \
    try                                                                                       \
    {                                                                                         \
@@ -400,9 +421,11 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
 #elif defined(HYPRE_USING_SYCL)
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
@@ -436,6 +459,10 @@ struct hypre_DeviceData
 
 #if defined(HYPRE_USING_ROCSPARSE)
    rocsparse_handle                  cusparse_handle;
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER)
+   cusolverDnHandle_t                vendor_solver_handle;
 #endif
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -548,6 +575,10 @@ cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_ROCSPARSE)
 rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER)
+cusolverDnHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
