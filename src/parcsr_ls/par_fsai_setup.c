@@ -926,6 +926,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIData       *fsai_data     = (hypre_ParFSAIData*) fsai_vdata;
    HYPRE_Int                max_steps     = hypre_ParFSAIDataMaxSteps(fsai_data);
    HYPRE_Int                max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int                max_nnz_row   = hypre_ParFSAIDataMaxNnzRow(fsai_data);
    HYPRE_Int                algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
    HYPRE_Int                print_level   = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int                eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
@@ -963,7 +964,14 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIDataZWork(fsai_data) = z_work;
 
    /* Create the matrix G */
-   max_nnzrow_diag_G   = max_steps * max_step_size + 1;
+   if (algo_type == 1 || algo_type == 2)
+   {
+      max_nnzrow_diag_G = max_steps * max_step_size + 1;
+   }
+   else
+   {
+      max_nnzrow_diag_G = max_nnz_row + 1;
+   }
    max_nonzeros_diag_G = num_rows_diag_A * max_nnzrow_diag_G;
    G = hypre_ParCSRMatrixCreate(comm, num_rows_A, num_cols_A,
                                 row_starts_A, col_starts_A,
@@ -1025,7 +1033,8 @@ hypre_FSAISetup( void               *fsai_vdata,
    }
 
 #if defined (DEBUG_FSAI)
-#if !defined (HYPRE_USING_GPU) || (defined (HYPRE_USING_GPU) && defined (HYPRE_USING_UNIFIED_MEMORY))
+#if !defined (HYPRE_USING_GPU) ||
+    (defined (HYPRE_USING_GPU) && defined (HYPRE_USING_UNIFIED_MEMORY))
    hypre_FSAIDumpLocalLSDense(fsai_vdata, "fsai_dense_ls.out", A);
 #endif
 #endif
