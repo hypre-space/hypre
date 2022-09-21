@@ -183,6 +183,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                         HYPRE_Int           *dof_func,
                                         hypre_ParCSRMatrix **P_ptr )
 {
+   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildModMultipassDevice() - %s : %d\n", __FILE__, __LINE__);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
 #endif
@@ -733,13 +734,20 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
 #if defined(HYPRE_USING_SYCL)
+   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
    auto zip2 = oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i );
+   HYPRE_Int *P_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *P_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       zip2,
                       zip2 + n_fine + 1,
-                      zip2,
+                      oneapi::dpl::make_zip_iterator(P_diag_i_tmp, P_offd_i_tmp),
                       std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                       tuple_plus<HYPRE_Int>() );
+   hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
