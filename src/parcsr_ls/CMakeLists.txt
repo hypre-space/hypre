@@ -77,6 +77,7 @@ set(SRCS
   par_fsai.c
   par_fsai_setup.c
   par_fsai_solve.c
+  par_fsai_device.c
   par_gauss_elim.c
   par_gsmg.c
   par_indepset.c
