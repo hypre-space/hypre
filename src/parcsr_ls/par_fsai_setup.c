@@ -1126,7 +1126,17 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
                                   hypre_ParCSRMatrixGlobalNumRows(A),
                                   hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(eigvec);
+
+   /* VPM: temporary hack for improving random number generation */
+#if defined (HYPRE_USING_GPU)
+   hypre_Vector  *eigvec_local = hypre_ParVectorLocalVector(eigvec);
+   HYPRE_Complex *eigvec_data  = hypre_VectorData(eigvec_local);
+   HYPRE_Int     *eigvec_size  = hypre_VectorSize(eigvec_local);
+
+   hypre_CurandUniform(eigvec_size, eigvec_data, 0, 0, 0, 0);
+#else
    hypre_ParVectorSetRandomValues(eigvec, 256);
+#endif
 
    /* Power method iteration */
    for (i = 0; i < eig_max_iters; i++)
