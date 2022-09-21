@@ -633,6 +633,8 @@ SUPERLU_LIBS
 SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
+MAGMA_LIBS
+MAGMA_INCLUDE
 HYPRE_SYCL_LIBS
 HYPRE_SYCL_INCL
 HYPRE_HIP_LIBS
@@ -834,6 +836,9 @@ with_superlu_lib
 with_dsuperlu
 with_dsuperlu_include
 with_dsuperlu_lib
+with_magma
+with_magma_include
+with_magma_lib
 with_fei_inc_dir
 with_mli
 with_MPI
@@ -4061,6 +4066,30 @@ if test "${with_dsuperlu_lib+set}" = set; then :
 fi
 
 
+if test "x$with_magma" = "xyes"; then :
+
+$as_echo "#define HYPRE_USING_MAGMA 1" >>confdefs.h
+
+fi
+
+
+# Check whether --with-magma-include was given.
+if test "${with_magma_include+set}" = set; then :
+  withval=$with_magma_include; for dmagma_inc_dir in $withval; do
+    MAGMA_INCLUDE="-I$magma_inc_dir $MAGMA_INCLUDE"
+ done
+
+fi
+
+
+
+# Check whether --with-magma-lib was given.
+if test "${with_magma_lib+set}" = set; then :
+  withval=$with_magma_lib; for magma_lib in $withval; do
+    MAGMA_LIBS="$MAGMA_LIBS $magma_lib"
+ done
+
+fi
 
 
 # Check whether --with-fei-inc-dir was given.

@@ -93,6 +93,7 @@ option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
 option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
 option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
+option(HYPRE_WITH_MAGMA              "Use TPL MAGMA" OFF)
 option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)  # TODO: Finish this cmake feature
 option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
 option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
@@ -124,6 +125,8 @@ set(HYPRE_SYCL_TARGET_BACKEND    ""   CACHE STRING  "Additional SYCL backend opt
 
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
+option(TPL_MAGMA_LIBRARIES           "List of absolute paths to MAGMA link libraries [].")
+option(TPL_MAGMA_INCLUDE_DIRS        "List of absolute paths to MAGMA include directories [].")
 option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
 
@@ -185,6 +188,12 @@ endif ()
 
 if (HYPRE_WITH_DSUPERLU)
   set(HYPRE_USING_DSUPERLU ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_HYPRE_BLAS OFF CACHE BOOL "" FORCE)
+  set(HYPRE_USING_HYPRE_LAPACK OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_MAGMA)
+  set(HYPRE_USING_MAGMA ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_HYPRE_BLAS OFF CACHE BOOL "" FORCE)
   set(HYPRE_USING_HYPRE_LAPACK OFF CACHE BOOL "" FORCE)
 endif ()
@@ -443,6 +452,32 @@ if (DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif ()
 
+# FIXME Check for case if MAGMA without CUDA/HIP
+# Find MAGMA, if requested
+if (HYPRE_USING_MAGMA)
+  if (NOT TPL_MAGMA_LIBRARIES)
+    message(FATAL_ERROR "TPL_MAGMA_LIBRARIES option should be set for MAGMA support.")
+  endif ()
+
+  if (NOT TPL_MAGMA_INCLUDE_DIRS)
+    message(FATAL_ERROR "TPL_MAGMA_INCLUDE_DIRS option be set for MAGMA support.")
+  endif ()
+
+  foreach (dir ${TPL_MAGMA_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "MAGMA include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using MAGMA.")
+  set(MAGMA_FOUND TRUE)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_LIBRARIES} stdc++)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_INCLUDE_DIRS})
+endif (HYPRE_USING_MAGMA)
+
+if (MAGMA_FOUND)
+  set(HYPRE_USING_MAGMA TRUE)
+endif ()
 if (HYPRE_USING_CUDA)
   target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
   if (HYPRE_HAVE_MPI)
