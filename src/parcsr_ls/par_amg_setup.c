@@ -3464,7 +3464,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_FSAISetTolerance(smoother[j], 0.0);
          HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
          HYPRE_FSAISetEigMaxIters(smoother[j], fsai_eig_max_iters);
-         HYPRE_FSAISetPrintLevel(smoother[j], 1);
+         HYPRE_FSAISetPrintLevel(smoother[j], (amg_print_level >= 1) ? 1 : 0);
 
          HYPRE_FSAISetup(smoother[j],
                          (HYPRE_ParCSRMatrix) A_array[j],
