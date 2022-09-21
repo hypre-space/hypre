@@ -183,7 +183,6 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                         HYPRE_Int           *dof_func,
                                         hypre_ParCSRMatrix **P_ptr )
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildModMultipassDevice() - %s : %d\n", __FILE__, __LINE__);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
 #endif

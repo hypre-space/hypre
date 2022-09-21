@@ -59,7 +59,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             interp_type,
                                      hypre_ParCSRMatrix  **P_ptr)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildDirInterpDevice() - %s : %d\n", __FILE__, __LINE__);
    MPI_Comm                comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
@@ -87,6 +86,9 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *S_offd   = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
+
+   HYPRE_Int *Soc_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int *Soc_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
 
    hypre_ParCSRMatrix *P;
    HYPRE_Int          *tmp_map_offd_h = NULL;
@@ -265,8 +267,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef, gDim, bDim,
                         n_fine, A_diag_i, A_diag_j, A_diag_data,
                         A_offd_i, A_offd_j, A_offd_data,
-                        hypre_ParCSRMatrixSocDiagJ(S),
-                        hypre_ParCSRMatrixSocOffdJ(S),
+                        Soc_diag_j,
+                        Soc_offd_j,
                         CF_marker, CF_marker_offd,
                         num_functions, dof_func, dof_func_offd,
                         P_diag_i, P_diag_j, P_diag_data,
@@ -278,8 +280,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       HYPRE_GPU_LAUNCH( hypre_BoomerAMGBuildDirInterp_getcoef_v2, gDim, bDim,
                         n_fine, A_diag_i, A_diag_j, A_diag_data,
                         A_offd_i, A_offd_j, A_offd_data,
-                        hypre_ParCSRMatrixSocDiagJ(S),
-                        hypre_ParCSRMatrixSocOffdJ(S),
+                        Soc_diag_j,
+                        Soc_offd_j,
                         CF_marker, CF_marker_offd,
                         num_functions, dof_func, dof_func_offd,
                         P_diag_i, P_diag_j, P_diag_data,
@@ -1101,7 +1103,6 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                                         HYPRE_Int            debug_flag,
                                         hypre_ParCSRMatrix **P_ptr)
 {
-   hypre_printf("WM: debug - inside hypre_BoomerAMGBuildInterpOnePntDevice() - %s : %d\n", __FILE__, __LINE__);
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
