@@ -42,6 +42,7 @@ hypre_FSAISolve( void               *fsai_vdata,
    HYPRE_Complex        zero = 0.0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("FSAISolve");
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -129,6 +130,7 @@ hypre_FSAISolve( void               *fsai_vdata,
       hypre_ParFSAIDataRelResNorm(fsai_data)    = 0.0;
    }
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -157,8 +159,14 @@ hypre_FSAIApply( void               *fsai_vdata,
    HYPRE_Complex        one  = 1.0;
    HYPRE_Complex        zero = 0.0;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("FSAIApply");
+
    hypre_ParCSRMatrixMatvec(one, G, b, zero, z_work);
    hypre_ParCSRMatrixMatvec(omega, GT, z_work, alpha, x);
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
