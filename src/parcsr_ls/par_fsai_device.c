@@ -725,7 +725,7 @@ hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
    HYPRE_Int     *mat_j_new;
    HYPRE_Complex *mat_a_new;
 
-   if (trunc_factor > 0)
+   if (trunc_factor > 0.0)
    {
       /* TODO */
    }
@@ -809,7 +809,7 @@ hypre_FSAITruncateCandidateUnmarkedDevice( hypre_CSRMatrix *matrix,
 
    HYPRE_Int     *mat_e;
 
-   if (trunc_factor > 0)
+   if (trunc_factor > 0.0)
    {
       /* TODO */
    }
@@ -882,7 +882,12 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Compute filtered version of A */
    Atilde = hypre_ParCSRMatrixClone(A, 1);
-   hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, threshold, 2);
+
+   /* Pre-filter to reduce SpGEMM cost */
+   if (num_levels > 1)
+   {
+      hypre_ParCSRMatrixDropSmallEntriesDevice(Atilde, threshold, 2);
+   }
 
    /* TODO: Check if Atilde is diagonal */
 
@@ -949,10 +954,10 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #if defined (FSAI_USING_UNMARKED_TRUNCATION)
    HYPRE_Int  *K_e = NULL;
 
-   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row, 2, threshold);
+   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row, 2, 0.0);
 #else
 
-   hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, 2, threshold);
+   hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, 2, 0.0);
    HYPRE_Int  *K_e = hypre_CSRMatrixI(K_diag) + 1;
 
    /* Sort candidate pattern matrix */
@@ -1042,6 +1047,69 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
     *-----------------------------------------------------*/
 
    /* TODO */
+   hypre_GpuProfilingPushRange("SolveLS");
+   {
+#if HYPRE_DEBUG
+      HYPRE_Int *h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+#endif
+      const cublasFillMode_t uplo = CUBLAS_FILL_MODE_LOWER;
+
+      hypre_GpuProfilingPushRange("Factorization");
+      HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                  uplo,
+                                                  max_nnz_row,
+                                                  mat_aop,
+                                                  max_nnz_row,
+                                                  info,
+                                                  num_rows));
+      hypre_GpuProfilingPopRange();
+
+#if HYPRE_DEBUG
+     hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+     for (HYPRE_Int k = 0; k < num_rows; k++)
+     {
+        if (h_info[k] != 0)
+        {
+           hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
+                           "Cholesky factorization failed at system #%d, row %d\n",
+                           k, h_info[k]);
+        }
+     }
+#endif
+
+      hypre_GpuProfilingPushRange("Solve");
+      HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                  uplo,
+                                                  max_nnz_row,
+                                                  1,
+                                                  mat_aop,
+                                                  max_nnz_row,
+                                                  sol_aop,
+                                                  max_nnz_row,
+                                                  info,
+                                                  num_rows));
+      hypre_GpuProfilingPopRange();
+
+#if HYPRE_DEBUG
+     hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+     for (HYPRE_Int k = 0; k < num_rows; k++)
+     {
+        if (h_info[k] != 0)
+        {
+           hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
+                           "Cholesky solution failed at system #%d with code %d\n",
+                           k, h_info[k]);
+        }
+     }
+#endif
+
+#if HYPRE_DEBUG
+      hypre_TFree(h_info, HYPRE_MEMORY_HOST);
+#endif
+   }
+   hypre_GpuProfilingPopRange();
 
    /*-----------------------------------------------------
     *  Finalize construction of the triangular factor
