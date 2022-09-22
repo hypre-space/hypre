@@ -6368,6 +6368,29 @@ hypre_ParCSRMatrixDiagScale( hypre_ParCSRMatrix *par_A,
                              hypre_ParVector    *par_ld,
                              hypre_ParVector    *par_rd )
 {
+   /* Input variables */
+   hypre_CSRMatrix    *A_diag = hypre_ParCSRMatrixDiag(par_A);
+   hypre_CSRMatrix    *A_offd = hypre_ParCSRMatrixOffd(par_A);
+   hypre_Vector       *ld;
+
+   /* Sanity check */
+   if (!par_rd && !par_ld)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices are not set!\n");
+      return hypre_error_flag;
+   }
+
+   /* Perform row scaling only (no communication) */
+   if (!par_rd && par_ld)
+   {
+      ld = hypre_ParVectorLocalVector(par_ld);
+
+      hypre_CSRMatrixDiagScale(A_diag, ld, NULL);
+      hypre_CSRMatrixDiagScale(A_offd, ld, NULL);
+
+      return hypre_error_flag;
+   }
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
