@@ -679,8 +679,13 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
    HYPRE_Int  num_cols_new;
 
    hypre_TMemcpy(tmp_j, A_j, HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::sort, tmp_j, tmp_j + nnz);
+   tmp_end = HYPRE_ONEDPL_CALL(std::unique, tmp_j, tmp_j + nnz);
+#else
    HYPRE_THRUST_CALL(sort, tmp_j, tmp_j + nnz);
    tmp_end = HYPRE_THRUST_CALL(unique, tmp_j, tmp_j + nnz);
+#endif
    num_cols_new = tmp_end - tmp_j;
 
    hypre_assert(num_cols_new <= num_cols);
@@ -700,6 +705,20 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
          col_map_new = hypre_TAlloc(HYPRE_BigInt, num_cols_new, HYPRE_MEMORY_DEVICE);
       }
 
+#if defined(HYPRE_USING_SYCL)
+      oneapi::dpl::counting_iterator count(0);
+      hypreSycl_scatter( count,
+                         count + num_cols_new,
+                         tmp_j,
+                         offd_mark );
+
+      hypreSycl_gather(A_j, A_j + nnz, offd_mark, A_j);
+
+      if (col_map_new_ptr)
+      {
+         hypreSycl_gather(tmp_j, tmp_j + num_cols_new, col_map, col_map_new);
+      }
+#else
       HYPRE_THRUST_CALL( scatter,
                          thrust::counting_iterator<HYPRE_Int>(0),
                          thrust::counting_iterator<HYPRE_Int>(num_cols_new),
@@ -712,6 +731,7 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
       {
          HYPRE_THRUST_CALL(gather, tmp_j, tmp_j + num_cols_new, col_map, col_map_new);
       }
+#endif
 
       hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
 
