@@ -914,6 +914,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       case 4:
          /* First pass */
          B = hypre_ParCSRMatMatDevice(Atilde, Atilde);
+         hypre_ParCSRMatrixDropSmallEntriesDevice(B, threshold, 2);
 
          /* Second pass */
          Ktilde = hypre_ParCSRMatMatDevice(B, B);
