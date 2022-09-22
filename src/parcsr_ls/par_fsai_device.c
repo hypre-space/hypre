@@ -9,6 +9,11 @@
 #include "_hypre_utilities.hpp"
 #include "par_fsai.h"
 
+#ifdef HYPRE_USING_MAGMA
+#include <magma_v2.h>
+#include <magma_lapack.h>
+#endif
+
 #define FSAI_USING_UNMARKED_TRUNCATION
 
 #if defined(HYPRE_USING_GPU)
@@ -1053,9 +1058,25 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #if HYPRE_DEBUG
       HYPRE_Int *h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 #endif
-      const cublasFillMode_t uplo = CUBLAS_FILL_MODE_LOWER;
 
       hypre_GpuProfilingPushRange("Factorization");
+
+#if HYPRE_USING_MAGMA
+      const magma_uplo_t uplo = MagmaLower;
+      magma_queue_t queue = NULL;
+      magma_int_t dev = 0;
+      magma_queue_create( dev, &queue );
+      // FIXME: Add HYPRE_MAGMA_CALL / error handling!
+      //magma_int_t err;
+      magma_dpotrf_batched(uplo,
+                                 max_nnz_row,
+                                 mat_aop,
+                                 max_nnz_row,
+                                 info,
+                                 num_rows,
+                                 queue);
+#else
+      const cublasFillMode_t uplo = CUBLAS_FILL_MODE_LOWER;
       HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                   uplo,
                                                   max_nnz_row,
@@ -1063,6 +1084,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                                   max_nnz_row,
                                                   info,
                                                   num_rows));
+#endif
+
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
@@ -1080,6 +1103,17 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #endif
 
       hypre_GpuProfilingPushRange("Solve");
+#if HYPRE_USING_MAGMA
+      magma_dpotrs_batched(uplo,
+                                 max_nnz_row,
+                                 1,
+                                 mat_aop,
+                                 max_nnz_row,
+                                 sol_aop,
+                                 max_nnz_row,
+                                 num_rows,
+                                 queue);
+#else
       HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                   uplo,
                                                   max_nnz_row,
@@ -1090,6 +1124,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                                   max_nnz_row,
                                                   info,
                                                   num_rows));
+#endif
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
