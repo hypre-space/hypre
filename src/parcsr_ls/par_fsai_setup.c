@@ -1053,12 +1053,15 @@ hypre_FSAIPrintStats( void *fsai_vdata,
                       hypre_ParCSRMatrix *A )
 {
    /* Data structure variables */
-   hypre_ParFSAIData      *fsai_data      = (hypre_ParFSAIData*) fsai_vdata;
-   HYPRE_Int               algo_type      = hypre_ParFSAIDataAlgoType(fsai_data);
-   HYPRE_Real              kap_tolerance  = hypre_ParFSAIDataKapTolerance(fsai_data);
-   HYPRE_Int               max_steps      = hypre_ParFSAIDataMaxSteps(fsai_data);
-   HYPRE_Int               max_step_size  = hypre_ParFSAIDataMaxStepSize(fsai_data);
-   HYPRE_Int               eig_max_iters  = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   hypre_ParFSAIData      *fsai_data     = (hypre_ParFSAIData*) fsai_vdata;
+   HYPRE_Int               algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
+   HYPRE_Real              kap_tolerance = hypre_ParFSAIDataKapTolerance(fsai_data);
+   HYPRE_Int               max_steps     = hypre_ParFSAIDataMaxSteps(fsai_data);
+   HYPRE_Int               max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int               max_nnz_row   = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+   HYPRE_Int               num_levels    = hypre_ParFSAIDataNumLevels(fsai_data);
+   HYPRE_Real              threshold     = hypre_ParFSAIDataThreshold(fsai_data);
+   HYPRE_Int               eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
    HYPRE_Real              density;
 
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -1087,9 +1090,18 @@ hypre_FSAIPrintStats( void *fsai_vdata,
       hypre_printf("| No. MPI tasks:     %6d |\n", nprocs);
       hypre_printf("| No. threads:       %6d |\n", hypre_NumThreads());
       hypre_printf("| Algorithm type:    %6d |\n", algo_type);
-      hypre_printf("| Max no. steps:     %6d |\n", max_steps);
-      hypre_printf("| Max step size:     %6d |\n", max_step_size);
-      hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
+      if (algo_type == 1 || algo_type == 2)
+      {
+         hypre_printf("| Max no. steps:     %6d |\n", max_steps);
+         hypre_printf("| Max step size:     %6d |\n", max_step_size);
+         hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
+      }
+      else
+      {
+         hypre_printf("| Max nnz. row:      %6d |\n", max_nnz_row);
+         hypre_printf("| Number of levels:  %6d |\n", num_levels);
+         hypre_printf("| Threshold:       %8.1e |\n", threshold);
+      }
       hypre_printf("| Prec. density:   %8.3f |\n", density);
       hypre_printf("| Eig max iters:     %6d |\n", eig_max_iters);
       hypre_printf("| Omega factor:    %8.3f |\n", hypre_ParFSAIDataOmega(fsai_data));
