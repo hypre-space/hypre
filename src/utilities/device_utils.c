@@ -2202,7 +2202,6 @@ hypreDevice_DiagScaleVector( HYPRE_Int       num_vectors,
    return hypre_error_flag;
 }
 
-/*-----------------------------
 /*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector2
  *--------------------------------------------------------------------*/
