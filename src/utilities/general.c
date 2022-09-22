@@ -391,7 +391,9 @@ HYPRE_Finalize()
 #endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
-   hypre_PrintMemoryTracker();
+   hypre_PrintMemoryTracker(hypre_total_bytes, hypre_peak_bytes, hypre_current_bytes,
+                            hypre_memory_tracker_print, hypre_memory_tracker_filename);
+
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
 #endif
 
