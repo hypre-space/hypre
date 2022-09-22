@@ -1330,7 +1330,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
 
    hypre_GpuProfilingPushRange("hypre_ParCSRMatrixDropSmallEntries");
 
-   if (col_map_offd_A == NULL)
+   if ((col_map_offd_A == NULL) && (num_cols_A_offd > 0))
    {
       col_map_offd_A = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(col_map_offd_A, h_col_map_offd_A, HYPRE_BigInt, num_cols_A_offd,
