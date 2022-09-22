@@ -1730,34 +1730,160 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRDiagScaleVector( HYPRE_ParCSRMatrix HA,
-                             HYPRE_ParVector    Hy,
-                             HYPRE_ParVector    Hx )
+hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix  *par_A,
+                             hypre_ParVector     *par_y,
+                             hypre_ParVector     *par_x )
 {
-   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
-   hypre_ParVector    *y = (hypre_ParVector *) Hy;
-   hypre_ParVector    *x = (hypre_ParVector *) Hx;
-   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   HYPRE_Int ierr = 0;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, 0.0, x_data);
-   //hypre_SyncComputeStream(hypre_handle());
-#else /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-   HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-   #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
-#elif defined(HYPRE_USING_OPENMP)
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < local_size; i++)
-   {
-      x_data[i] = y_data[i] / A_data[A_i[i]];
-   }
-#endif /* #if defined(HYPRE_USING_CUDA) */
+   /* Local Matrix and Vectors */
+   hypre_CSRMatrix    *A_diag        = hypre_ParCSRMatrixDiag(par_A);
+   hypre_Vector       *x             = hypre_ParVectorLocalVector(par_x);
+   hypre_Vector       *y             = hypre_ParVectorLocalVector(par_y);
 
-   return ierr;
+   /* Local vector x info */
+   HYPRE_Complex      *x_data        = hypre_VectorData(x);
+   HYPRE_Int           x_size        = hypre_VectorSize(x);
+   HYPRE_Int           x_num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int           x_vecstride   = hypre_VectorVectorStride(x);
+
+   /* Local vector y info */
+   HYPRE_Complex      *y_data        = hypre_VectorData(y);
+   HYPRE_Int           y_size        = hypre_VectorSize(y);
+   HYPRE_Int           y_num_vectors = hypre_VectorNumVectors(y);
+   HYPRE_Int           y_vecstride   = hypre_VectorVectorStride(y);
+
+   /* Local matrix A info */
+   HYPRE_Complex      *A_data        = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int          *A_i           = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int           num_rows      = hypre_CSRMatrixNumRows(A_diag);
+
+   /*---------------------------------------------
+    * Sanity checks
+    *---------------------------------------------*/
+
+    if (x_num_vectors != y_num_vectors)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible number of vectors!\n");
+       return hypre_error_flag;
+    }
+
+    if (num_rows != x_size)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible x size!\n");
+       return hypre_error_flag;
+    }
+
+    if (x_vecstride <= 0)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive x vector stride!\n");
+       return hypre_error_flag;
+    }
+
+    if (y_vecstride <= 0)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive y vector stride!\n");
+       return hypre_error_flag;
+    }
+
+    if (num_rows != y_size)
+    {
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible y size!\n");
+       return hypre_error_flag;
+    }
+
+   /*---------------------------------------------
+    * Computation
+    *---------------------------------------------*/
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
+   //hypre_SyncComputeStream(hypre_handle());
+
+#else
+   /* Local variables */
+   HYPRE_Int      i, k;
+   HYPRE_Complex  coef;
+
+   switch (x_num_vectors)
+   {
+      case 1:
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data, y_data, A_data, A_i)
+#elif defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            x_data[i] = y_data[i] / A_data[A_i[i]];
+         }
+         break;
+
+      case 2:
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         #pragma omp target teams distribute parallel for private(i, coef) is_device_ptr(x_data, y_data, A_data, A_i)
+#elif defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            x_data[i] = y_data[i] * coef;
+            x_data[i + x_vecstride] = y_data[i + y_vecstride] * coef;
+         }
+         break;
+
+      case 3:
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         #pragma omp target teams distribute parallel for private(i, coef) is_device_ptr(x_data, y_data, A_data, A_i)
+#elif defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            x_data[i] = y_data[i] * coef;
+            x_data[i +     x_vecstride] = y_data[i +     y_vecstride] * coef;
+            x_data[i + 2 * x_vecstride] = y_data[i + 2 * y_vecstride] * coef;
+         }
+         break;
+
+      case 4:
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         #pragma omp target teams distribute parallel for private(i, coef) is_device_ptr(x_data, y_data, A_data, A_i)
+#elif defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            x_data[i] = y_data[i] * coef;
+            x_data[i +     x_vecstride] = y_data[i +     y_vecstride] * coef;
+            x_data[i + 2 * x_vecstride] = y_data[i + 2 * y_vecstride] * coef;
+            x_data[i + 3 * x_vecstride] = y_data[i + 3 * y_vecstride] * coef;
+         }
+         break;
+
+      default:
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+         #pragma omp target teams distribute parallel for private(i, k, coef) is_device_ptr(x_data, y_data, A_data, A_i)
+#elif defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, k, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            for (k = 0; k < x_num_vectors; k++)
+            {
+               x_data[i + k * x_vecstride] = y_data[i + k * y_vecstride] * coef;
+            }
+         }
+         break;
+   }
+
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+   return hypre_error_flag;
 }

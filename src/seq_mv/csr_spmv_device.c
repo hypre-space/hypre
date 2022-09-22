@@ -21,6 +21,121 @@
 #include "csr_spmv_device.h"
 
 /*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRMatvecShuffleGT8
+ *
+ * Templated SpMV device kernel based of warp-shuffle reduction.
+ * Uses groups of K threads per row.
+ * Specialized function for num_vectors > 8
+ *
+ * Template parameters:
+ *   1) K:  number of threads working on a single row. K = 2, 4, 8, 16, 32
+ *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
+ *   3) NV: number of vectors (> 1 for multi-component vectors)
+ *   4) T:  data type of matrix/vector coefficients
+ *--------------------------------------------------------------------------*/
+
+template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
+__global__ void
+hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
+                                   HYPRE_Int         num_rows,
+                                   HYPRE_Int         num_vectors,
+                                   HYPRE_Int        *row_id,
+                                   HYPRE_Int         idxstride_x,
+                                   HYPRE_Int         idxstride_y,
+                                   HYPRE_Int         vecstride_x,
+                                   HYPRE_Int         vecstride_y,
+                                   T                 alpha,
+                                   HYPRE_Int        *d_ia,
+                                   HYPRE_Int        *d_ja,
+                                   T                *d_a,
+                                   T                *d_x,
+                                   T                 beta,
+                                   T                *d_y )
+{
+#if defined (HYPRE_USING_SYCL)
+   HYPRE_Int        item_local_id = item.get_local_id(0);
+   const HYPRE_Int  grid_ngroups  = item.get_group_range(0) * (HYPRE_SPMV_BLOCKDIM / K);
+   HYPRE_Int        grid_group_id = (item.get_group(0) * HYPRE_SPMV_BLOCKDIM + item_local_id) / K;
+   const HYPRE_Int  group_lane    = item_local_id & (K - 1);
+#else
+   const HYPRE_Int  grid_ngroups  = gridDim.x * (HYPRE_SPMV_BLOCKDIM / K);
+   HYPRE_Int        grid_group_id = (blockIdx.x * HYPRE_SPMV_BLOCKDIM + threadIdx.x) / K;
+   const HYPRE_Int  group_lane    = threadIdx.x & (K - 1);
+#endif
+   T sum[64];
+
+   for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < num_rows);
+        grid_group_id += grid_ngroups)
+   {
+      HYPRE_Int grid_row_id = -1, p = 0, q = 0;
+
+      if (row_id)
+      {
+         if (grid_group_id < num_rows && group_lane == 0)
+         {
+            grid_row_id = read_only_load(&row_id[grid_group_id]);
+         }
+         grid_row_id = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, grid_row_id, 0, K);
+      }
+      else
+      {
+         grid_row_id = grid_group_id;
+      }
+
+      if (grid_group_id < num_rows && group_lane < 2)
+      {
+         p = read_only_load(&d_ia[grid_row_id + group_lane]);
+      }
+      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, K);
+      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, K);
+
+      for (HYPRE_Int i = 0; i < num_vectors; i++)
+      {
+         sum[i] = T(0.0);
+      }
+
+#pragma unroll 1
+      for (p += group_lane; p < q; p += K * 2)
+      {
+         HYPRE_SPMV_ADD_SUM(p, num_vectors)
+         if (p + K < q)
+         {
+            HYPRE_SPMV_ADD_SUM((p + K), num_vectors)
+         }
+      }
+
+      // parallel reduction
+      for (HYPRE_Int i = 0; i < num_vectors; i++)
+      {
+         for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
+         {
+            sum[i] += warp_shuffle_down_sync(item, HYPRE_WARP_FULL_MASK, sum[i], d);
+         }
+      }
+
+      if (grid_group_id < num_rows && group_lane == 0)
+      {
+         if (beta)
+         {
+            for (HYPRE_Int i = 0; i < num_vectors; i++)
+            {
+               d_y[grid_row_id * idxstride_y + i * vecstride_y] =
+                  alpha * sum[i] +
+                  beta * d_y[grid_row_id * idxstride_y + i * vecstride_y];
+            }
+         }
+         else
+         {
+            for (HYPRE_Int i = 0; i < num_vectors; i++)
+            {
+               d_y[grid_row_id * idxstride_y + i * vecstride_y] = alpha * sum[i];
+            }
+         }
+      }
+   }
+}
+
+/*--------------------------------------------------------------------------
  * hypreGPUKernel_CSRMatvecShuffle
  *
  * Templated SpMV device kernel based of warp-shuffle reduction.
@@ -29,14 +144,16 @@
  * Template parameters:
  *   1) K:  number of threads working on a single row. K = 2, 4, 8, 16, 32
  *   2) F:  fill-mode. See hypreDevice_CSRMatrixMatvec for supported values
- *   3) NV: number of vectors (> 1 for multivectors)
+ *   3) NV: number of vectors (> 1 for multi-component vectors)
  *   4) T:  data type of matrix/vector coefficients
  *--------------------------------------------------------------------------*/
 
 template <HYPRE_Int F, HYPRE_Int K, HYPRE_Int NV, typename T>
 __global__ void
+//__launch_bounds__(512, 1)
 hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
                                 HYPRE_Int         num_rows,
+                                HYPRE_Int         num_vectors,
                                 HYPRE_Int        *row_id,
                                 HYPRE_Int         idxstride_x,
                                 HYPRE_Int         idxstride_y,
@@ -91,10 +208,10 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
 #pragma unroll 1
       for (p += group_lane; p < q; p += K * 2)
       {
-         HYPRE_SPMV_ADD_SUM(p)
+         HYPRE_SPMV_ADD_SUM(p, NV)
          if (p + K < q)
          {
-            HYPRE_SPMV_ADD_SUM((p + K))
+            HYPRE_SPMV_ADD_SUM((p + K), NV)
          }
       }
 #elif HYPRE_SPMV_VERSION == 2
@@ -103,23 +220,21 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
       {
          if (p < q)
          {
-            HYPRE_SPMV_ADD_SUM(p)
+            HYPRE_SPMV_ADD_SUM(p, NV)
          }
       }
 #else
 #pragma unroll 1
       for (p += group_lane;  p < q; p += K)
       {
-         HYPRE_SPMV_ADD_SUM(p)
+         HYPRE_SPMV_ADD_SUM(p, NV)
       }
 #endif
 
       // parallel reduction
-#pragma unroll
-      for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
+      for (HYPRE_Int i = 0; i < NV; i++)
       {
-#pragma unroll
-         for (HYPRE_Int i = 0; i < NV; i++)
+         for (HYPRE_Int d = K / 2; d > 0; d >>= 1)
          {
             sum[i] += warp_shuffle_down_sync(item, HYPRE_WARP_FULL_MASK, sum[i], d);
          }
@@ -129,7 +244,6 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
       {
          if (beta)
          {
-#pragma unroll
             for (HYPRE_Int i = 0; i < NV; i++)
             {
                d_y[grid_row_id * idxstride_y + i * vecstride_y] =
@@ -139,7 +253,6 @@ hypreGPUKernel_CSRMatvecShuffle(hypre_DeviceItem &item,
          }
          else
          {
-#pragma unroll
             for (HYPRE_Int i = 0; i < NV; i++)
             {
                d_y[grid_row_id * idxstride_y + i * vecstride_y] = alpha * sum[i];
@@ -181,79 +294,102 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
                              T          beta,
                              T         *d_y )
 {
-   const HYPRE_Int avg_rownnz = (num_nonzeros + num_rows - 1) / num_rows;
-   const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
-
-   /* Note: cannot transform this into a loop because num_vectors is a template argument */
-   switch (num_vectors)
+   if (num_vectors > 64)
    {
-      case 1:
-         HYPRE_SPMV_GPU_LAUNCH(1);
-         break;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre's SpMV: (num_vectors > 64) not implemented");
+      return hypre_error_flag;
+   }
 
-      case 2:
-         HYPRE_SPMV_GPU_LAUNCH(2);
-         break;
+   HYPRE_Int       i;
+   const HYPRE_Int avg_rownnz = (num_nonzeros + num_rows - 1) / num_rows;
 
-      case 3:
-         HYPRE_SPMV_GPU_LAUNCH(3);
-         break;
+   static constexpr int group_sizes[5] = {32, 16, 8, 4, 4};
 
-      case 4:
-         HYPRE_SPMV_GPU_LAUNCH(4);
-         break;
+   static constexpr int unroll_depth[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-      case 5:
-         HYPRE_SPMV_GPU_LAUNCH(5);
-         break;
+   static HYPRE_Int avg_rownnz_lower_bounds[5] = {64, 32, 16, 8, 0};
 
-      case 6:
-         HYPRE_SPMV_GPU_LAUNCH(6);
-         break;
+   static HYPRE_Int num_groups_per_block[5] = { HYPRE_SPMV_BLOCKDIM / group_sizes[0],
+                                                HYPRE_SPMV_BLOCKDIM / group_sizes[1],
+                                                HYPRE_SPMV_BLOCKDIM / group_sizes[2],
+                                                HYPRE_SPMV_BLOCKDIM / group_sizes[3],
+                                                HYPRE_SPMV_BLOCKDIM / group_sizes[4] };
 
-      case 7:
-         HYPRE_SPMV_GPU_LAUNCH(7);
-         break;
+   typedef void (* funcptr)(hypre_DeviceItem &item, HYPRE_Int num_rows, HYPRE_Int num_vectors,
+                            HYPRE_Int *row_id, HYPRE_Int idxstride_x, HYPRE_Int idxstride_y,
+                            HYPRE_Int vecstride_x, HYPRE_Int vecstride_y, T alpha,
+                            HYPRE_Int *d_ia, HYPRE_Int *d_ja, T *d_a, T *d_x, T beta, T *d_y );
 
-      case 8:
-         HYPRE_SPMV_GPU_LAUNCH(8);
-         break;
+   static funcptr kernel[9][5] = {
+      /* nv = 1 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[1], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[1], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[1], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[1], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[1], T> },
+      /* nv = 2 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[2], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[2], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[2], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[2], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[2], T> },
+      /* nv = 3 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[3], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[3], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[3], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[3], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[3], T> },
+      /* nv = 4 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[4], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[4], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[4], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[4], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[4], T> },
+      /* nv = 5 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[5], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[5], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[5], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[5], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[5], T> },
+      /* nv = 6 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[6], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[6], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[6], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[6], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[6], T> },
+      /* nv = 7 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[7], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[7], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[7], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[7], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[7], T> },
+      /* nv = 8 */
+      { hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[0], unroll_depth[8], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[1], unroll_depth[8], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[2], unroll_depth[8], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[3], unroll_depth[8], T>,
+        hypreGPUKernel_CSRMatvecShuffle<F, group_sizes[4], unroll_depth[8], T> },
+      /* nv > 8 */
+      { hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[0], unroll_depth[9], T>,
+        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[1], unroll_depth[9], T>,
+        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[2], unroll_depth[9], T>,
+        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[3], unroll_depth[9], T>,
+        hypreGPUKernel_CSRMatvecShuffleGT8<F, group_sizes[4], unroll_depth[9], T> }};
 
-      case 9:
-         HYPRE_SPMV_GPU_LAUNCH(9);
-         break;
+   /* Select execution path */
+   for (i = 0; i < 5; i++)
+   {
+      if (avg_rownnz >= avg_rownnz_lower_bounds[i])
+      {
+         const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
+         const dim3 gDim((num_rows + num_groups_per_block[i] - 1) / num_groups_per_block[i]);
 
-      case 10:
-         HYPRE_SPMV_GPU_LAUNCH(10);
+         HYPRE_GPU_LAUNCH( kernel[hypre_min(num_vectors - 1, 8)][i],
+                           gDim, bDim, num_rows, num_vectors, rowid,
+                           idxstride_x, idxstride_y, vecstride_x, vecstride_y,
+                           alpha, d_ia, d_ja, d_a, d_x, beta, d_y );
          break;
-
-      case 11:
-         HYPRE_SPMV_GPU_LAUNCH(11);
-         break;
-
-      case 12:
-         HYPRE_SPMV_GPU_LAUNCH(12);
-         break;
-
-      case 13:
-         HYPRE_SPMV_GPU_LAUNCH(13);
-         break;
-
-      case 14:
-         HYPRE_SPMV_GPU_LAUNCH(14);
-         break;
-
-      case 15:
-         HYPRE_SPMV_GPU_LAUNCH(15);
-         break;
-
-      case 16:
-         HYPRE_SPMV_GPU_LAUNCH(16);
-         break;
-
-      default:
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "hypre's SpMV: (num_vectors > 16) not implemented");
-         return hypre_error_flag;
+      }
    }
 
    return hypre_error_flag;
@@ -273,7 +409,7 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
  *   2) op(B) = B (trans = 0) or B^T (trans = 1)
  *      op(B) = B^T: not recommended since it computes B^T at every call
  *
- *   3) multivectors up to 16 components (1 <= num_vectors <= 16)
+ *   3) multi-component vectors up to 64 components (1 <= num_vectors <= 64)
  *
  * Notes:
  *   1) if B has no numerical values, assume the values are all ones
@@ -459,7 +595,7 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
  *
  * Sparse matrix/vector multiplication with integer data on GPUs
  *
- * Note: This function does not support multivectors
+ * Note: This function does not support multi-component vectors
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
