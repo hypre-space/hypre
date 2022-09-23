@@ -1152,7 +1152,7 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
 #if defined (HYPRE_USING_GPU)
    hypre_Vector  *eigvec_local = hypre_ParVectorLocalVector(eigvec);
    HYPRE_Complex *eigvec_data  = hypre_VectorData(eigvec_local);
-   HYPRE_Int     *eigvec_size  = hypre_VectorSize(eigvec_local);
+   HYPRE_Int      eigvec_size  = hypre_VectorSize(eigvec_local);
 
    hypre_CurandUniform(eigvec_size, eigvec_data, 0, 0, 0, 0);
 #else
