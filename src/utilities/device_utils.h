@@ -352,6 +352,13 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
 #endif
 
+#define HYPRE_MAGMA_CALL(call) do {                                                          \
+   magma_int_t err = call;                                                                   \
+   if (MAGMA_SUCCESS != err) {                                                               \
+      printf("MAGMA ERROR (code = %d, %s) at %s:%d\n",                                      \
+            err, __FILE__, __LINE__);                                                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
