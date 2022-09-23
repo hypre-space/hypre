@@ -1150,6 +1150,12 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
     *  Free memory
     *-----------------------------------------------------*/
 
+   hypre_ParCSRMatrixDestroy(Ktilde);
+   if (num_levels > 1)
+   {
+      hypre_ParCSRMatrixDestroy(Atilde);
+   }
+
    /* TODO: can we free some of these earlier?*/
 #if defined (FSAI_USING_UNMARKED_TRUNCATION)
    hypre_TFree(K_e, HYPRE_MEMORY_DEVICE);
