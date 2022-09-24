@@ -335,7 +335,7 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
                   }
                }
 
-               hypre_assert(p);
+               //hypre_assert(p);
 
                if (p)
                {
@@ -469,6 +469,11 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
       hypre_assert(qq[i].head == qq[i].actual_size);
    }
 #endif
+
+   hypre_assert(curr_bytes[hypre_MEMORY_HOST] == 0);
+   hypre_assert(curr_bytes[hypre_MEMORY_HOST_PINNED] == 0);
+   hypre_assert(curr_bytes[hypre_MEMORY_DEVICE] == 0);
+   hypre_assert(curr_bytes[hypre_MEMORY_UNIFIED] == 0);
 
    if (do_print)
    {
