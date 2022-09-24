@@ -5,6 +5,13 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/*--------------------------------------------------------------------------
+ * Memory tracker
+ * Do NOT use hypre_T* in this file since we don't want to track them,
+ * Do NOT use hypre_printf, hypre_fprintf, which have hypre_TAlloc/Free
+ * endless for-loop otherwise
+ *--------------------------------------------------------------------------*/
+
 #include "_hypre_utilities.h"
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
@@ -26,6 +33,19 @@ char *hypre_basename(const char *name)
     }
   }
   return (char *) base;
+}
+
+hypre_int
+hypre_MemoryTrackerQueueComp(const void *e1,
+                             const void *e2)
+{
+   void *p1 = ((hypre_MemoryTrackerEntry *) e1) -> ptr;
+   void *p2 = ((hypre_MemoryTrackerEntry *) e2) -> ptr;
+
+    if (p1 < p2) { return -1; }
+    if (p1 > p2) { return  1; }
+
+    return 0;
 }
 
 
@@ -57,7 +77,8 @@ hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
    return hypre_error_flag;
 }
 
-hypre_MemoryTrackerEvent hypre_MemoryTrackerGetNext(hypre_MemoryTracker *tracker)
+hypre_MemoryTrackerEvent
+hypre_MemoryTrackerGetNext(hypre_MemoryTracker *tracker)
 {
    hypre_MemoryTrackerEvent i, k = HYPRE_MEMORY_EVENT_NUM;
    hypre_MemoryTrackerQueue *q = tracker->queue;
@@ -78,10 +99,19 @@ hypre_MemoryTrackerEvent hypre_MemoryTrackerGetNext(hypre_MemoryTracker *tracker
    return k;
 }
 
-/*--------------------------------------------------------------------------
- * Memory tracker
- * do not use hypre_T* in the following since we don't want to track them   *
- *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_MemoryTrackerSortQueue(hypre_MemoryTrackerQueue *q)
+{
+   if (!q) { return hypre_error_flag; }
+
+   free(q->sorted_data);
+   q->sorted_data = (hypre_MemoryTrackerEntry *) malloc(q->actual_size * sizeof(hypre_MemoryTrackerEntry));
+   memcpy(q->sorted_data, q->data, q->actual_size * sizeof(hypre_MemoryTrackerEntry));
+   qsort(q->sorted_data, q->actual_size, sizeof(hypre_MemoryTrackerEntry), hypre_MemoryTrackerQueueComp);
+
+   return hypre_error_flag;
+}
+
 hypre_MemoryTracker *
 hypre_MemoryTrackerCreate()
 {
@@ -99,6 +129,7 @@ hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker)
       for (i = 0; i < HYPRE_MEMORY_EVENT_NUM; i++)
       {
          free(tracker->queue[i].data);
+         free(tracker->queue[i].sorted_data);
       }
 
       free(tracker);
@@ -191,6 +222,7 @@ hypre_MemoryTrackerInsert2(const char           *action,
    /* insert an entry */
    hypre_MemoryTrackerEntry *entry = queue->data + queue->actual_size;
 
+   entry->index = queue->actual_size;
    entry->time_step = tracker->curr_time_step;
    sprintf(entry->action, "%s", action);
    entry->ptr = ptr;
@@ -210,8 +242,8 @@ hypre_MemoryTrackerInsert2(const char           *action,
    queue->actual_size ++;
 }
 
-/* Do not use hypre_printf, hypre_fprintf, which have TAlloc.
- * Endless loop otherwise */
+#define HYPRE_MEMORY_TRACKER_BINARY_SEARCH 1
+
 HYPRE_Int
 hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
                           size_t     *peak_bytes_o,
@@ -228,7 +260,9 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    hypre_MemoryTrackerEvent i;
 
    hypre_MemoryTracker *tracker = hypre_memory_tracker();
-   hypre_MemoryTrackerQueue *q = tracker->queue;
+   hypre_MemoryTrackerQueue *qq = tracker->queue;
+   hypre_MemoryTrackerQueue *qa = &qq[HYPRE_MEMORY_EVENT_ALLOC];
+   hypre_MemoryTrackerQueue *qf = &qq[HYPRE_MEMORY_EVENT_FREE];
 
    if (do_print)
    {
@@ -256,9 +290,13 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
             "FILE", "LINE", "FUNCTION", "HOST", "PINNED", "DEVICE", "UNIFIED");
    }
 
+#if HYPRE_MEMORY_TRACKER_BINARY_SEARCH
+   hypre_MemoryTrackerSortQueue(qf);
+#endif
+
    for (i = hypre_MemoryTrackerGetNext(tracker); i < HYPRE_MEMORY_EVENT_NUM; i = hypre_MemoryTrackerGetNext(tracker))
    {
-      hypre_MemoryTrackerEntry *entry = &q[i].data[q[i].head++];
+      hypre_MemoryTrackerEntry *entry = &qq[i].data[qq[i].head++];
 
       if (strstr(entry->action, "alloc") != NULL)
       {
@@ -269,26 +307,64 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 
          if (entry->pair == (size_t) -1)
          {
-            /* RL TODO: linear search, not scalable */
-            for (j = q[HYPRE_MEMORY_EVENT_FREE].head; j < q[HYPRE_MEMORY_EVENT_FREE].actual_size; j++)
+#if HYPRE_MEMORY_TRACKER_BINARY_SEARCH
+            hypre_MemoryTrackerEntry key = { .ptr = entry->ptr };
+            hypre_MemoryTrackerEntry *result = bsearch(&key,
+                                                       qf->sorted_data,
+                                                       qf->actual_size,
+                                                       sizeof(hypre_MemoryTrackerEntry),
+                                                       hypre_MemoryTrackerQueueComp);
+
+            if (result)
             {
-               if ( q[HYPRE_MEMORY_EVENT_FREE].data[j].pair == (size_t) -1 &&
-                    q[HYPRE_MEMORY_EVENT_FREE].data[j].ptr == entry->ptr &&
-                    q[HYPRE_MEMORY_EVENT_FREE].data[j].memory_location == entry->memory_location )
+               hypre_MemoryTrackerEntry *p;
+
+               for (; result >= qf->sorted_data && result->ptr == entry->ptr; result --);
+
+               for (p = NULL, result ++;
+                    result < qf->sorted_data + qf->actual_size && result->ptr == entry->ptr;
+                    result ++)
+               {
+                  if (qf->data[result->index].pair == (size_t) -1 &&
+                      qf->data[result->index].memory_location == entry->memory_location)
+                  {
+                     if (!p || result->time_step < p->time_step)
+                     {
+                        p = result;
+                     }
+                  }
+               }
+
+               hypre_assert(p);
+
+               if (p)
+               {
+                  entry->pair = p->index;
+                  qf->data[entry->pair].pair = qq[i].head - 1;
+                  qf->data[entry->pair].nbytes = entry->nbytes;
+               }
+            }
+#else
+            for (j = qf->head; j < qf->actual_size; j++)
+            {
+               if ( qf->data[j].pair == (size_t) -1 &&
+                    qf->data[j].ptr == entry->ptr &&
+                    qf->data[j].memory_location == entry->memory_location )
                {
                   entry->pair = j;
-                  q[HYPRE_MEMORY_EVENT_FREE].data[j].pair = q[i].head - 1;
-                  q[HYPRE_MEMORY_EVENT_FREE].data[j].nbytes = entry->nbytes;
+                  qf->data[j].pair = qq[i].head - 1;
+                  qf->data[j].nbytes = entry->nbytes;
                   break;
                }
             }
+#endif
          }
       }
       else if (strstr(entry->action, "free") != NULL)
       {
-         if (entry->pair < q[HYPRE_MEMORY_EVENT_ALLOC].actual_size)
+         if (entry->pair < qa->actual_size)
          {
-            curr_bytes[entry->memory_location] -= q[HYPRE_MEMORY_EVENT_ALLOC].data[entry->pair].nbytes;
+            curr_bytes[entry->memory_location] -= qa->data[entry->pair].nbytes;
          }
       }
 
@@ -390,16 +466,16 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 #if defined(HYPRE_DEBUG)
    for (i = HYPRE_MEMORY_EVENT_ALLOC; i < HYPRE_MEMORY_EVENT_NUM; i++)
    {
-      hypre_assert(q[i].head == q[i].actual_size);
+      hypre_assert(qq[i].head == qq[i].actual_size);
    }
 #endif
 
    if (do_print)
    {
       fprintf(file, "\n\"==== Warnings:\"\n");
-      for (j = 0; j < q[HYPRE_MEMORY_EVENT_ALLOC].actual_size; j++)
+      for (j = 0; j < qa->actual_size; j++)
       {
-         hypre_MemoryTrackerEntry *entry = &q[HYPRE_MEMORY_EVENT_ALLOC].data[j];
+         hypre_MemoryTrackerEntry *entry = &qa->data[j];
          if (entry->pair == (size_t) -1)
          {
             fprintf(file, " %6zu, %9s, %16p, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
@@ -407,14 +483,14 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
          }
          else
          {
-            hypre_assert(entry->pair < q[HYPRE_MEMORY_EVENT_FREE].actual_size);
-            hypre_assert(q[HYPRE_MEMORY_EVENT_FREE].data[entry->pair].pair == j);
+            hypre_assert(entry->pair < qf->actual_size);
+            hypre_assert(qf->data[entry->pair].pair == j);
          }
       }
 
-      for (j = 0; j < q[HYPRE_MEMORY_EVENT_FREE].actual_size; j++)
+      for (j = 0; j < qf->actual_size; j++)
       {
-         hypre_MemoryTrackerEntry *entry = &q[HYPRE_MEMORY_EVENT_FREE].data[j];
+         hypre_MemoryTrackerEntry *entry = &qf->data[j];
          if (entry->pair == (size_t) -1)
          {
             fprintf(file, " %6zu, %9s, %16p, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
@@ -422,8 +498,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
          }
          else
          {
-            hypre_assert(entry->pair < q[HYPRE_MEMORY_EVENT_ALLOC].actual_size);
-            hypre_assert(q[HYPRE_MEMORY_EVENT_ALLOC].data[entry->pair].pair == j);
+            hypre_assert(entry->pair < qa->actual_size);
+            hypre_assert(qa->data[entry->pair].pair == j);
          }
       }
    }

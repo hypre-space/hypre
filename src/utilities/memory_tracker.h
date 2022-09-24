@@ -26,6 +26,7 @@ typedef enum _hypre_MemoryTrackerEvent
 
 typedef struct
 {
+   size_t                index;
    size_t                time_step;
    char                  action[16];
    void                 *ptr;
@@ -45,6 +46,7 @@ typedef struct
    size_t                    actual_size;
    size_t                    alloced_size;
    hypre_MemoryTrackerEntry *data;
+   hypre_MemoryTrackerEntry *sorted_data;
 } hypre_MemoryTrackerQueue;
 
 typedef struct
