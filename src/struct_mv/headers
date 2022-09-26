@@ -51,6 +51,7 @@ cat protos.h               >> $INTERNAL_HEADER
 #===========================================================================
 # BoxLoops
 #===========================================================================
+cat boxloop_dispatcher.h   >> $INTERNAL_HEADER
 cat boxloop_omp_device.h   >> $INTERNAL_HEADER
 cat boxloop_host.h         >> $INTERNAL_HEADER
 
