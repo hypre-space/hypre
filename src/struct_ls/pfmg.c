@@ -70,6 +70,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 
       if ((pfmg_data -> num_levels) > -1)
       {
+         HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(pfmg_data->A_l[0]);
+
          for (l = 0; l < (pfmg_data -> num_levels); l++)
          {
             if (pfmg_data -> active_l[l])
@@ -104,7 +106,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l + 1]);
          }
 
-         hypre_TFree(pfmg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pfmg_data -> data, memory_location);
          hypre_TFree(pfmg_data -> data_const, HYPRE_MEMORY_HOST);
 
          hypre_TFree(pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);

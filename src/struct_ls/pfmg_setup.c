@@ -131,12 +131,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             num_level_GPU = 0;
-   HYPRE_MemoryLocation  data_location = HYPRE_MEMORY_DEVICE;
    HYPRE_Int             max_box_size  = 0;
    HYPRE_Int             device_level  = (pfmg_data -> devicelevel);
    HYPRE_Int             myrank;
    hypre_MPI_Comm_rank(comm, &myrank );
 #endif
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 
 #if DEBUG
    char                  filename[255];
@@ -465,7 +465,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #endif
    }
 
-   data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
@@ -902,7 +902,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
+hypre_PFMGComputeDxyz_CS( HYPRE_Int           i,
                           hypre_StructMatrix *A,
                           HYPRE_Real         *cxyz,
                           HYPRE_Real         *sqcxyz)
@@ -913,12 +913,11 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    HYPRE_Int              Ai;
    HYPRE_Real            *Ap;
    HYPRE_Int              constant_coefficient;
-
-   HYPRE_Real            tcx, tcy, tcz;
-   HYPRE_Real            Adiag = 0, diag;
-   HYPRE_Int             Astenc, sdiag = 0;
-
-   HYPRE_Int             si;
+   HYPRE_Real             tcx, tcy, tcz;
+   HYPRE_Real             Adiag = 0, diag;
+   HYPRE_Int              Astenc, sdiag = 0;
+   HYPRE_Int              si;
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -951,7 +950,7 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    }
    else if (constant_coefficient == 2)
    {
-      hypre_TMemcpy(&Adiag, &Ap[Ai], HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&Adiag, &Ap[Ai], HYPRE_Real, 1, HYPRE_MEMORY_HOST, memory_location);
    }
 
    diag = 1.0;

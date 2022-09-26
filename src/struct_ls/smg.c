@@ -67,6 +67,8 @@ hypre_SMGDestroy( void *smg_vdata )
 
       if ((smg_data -> num_levels) > -1)
       {
+         HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(smg_data->A_l[0]);
+
          for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
             hypre_SMGRelaxDestroy(smg_data -> relax_data_l[l]);
@@ -109,7 +111,7 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l + 1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l + 1]);
          }
-         hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(smg_data -> data, memory_location);
          hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> PT_grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> A_l, HYPRE_MEMORY_HOST);
