@@ -26,7 +26,7 @@ hypre_SeqMultivectorCreate( HYPRE_Int size, HYPRE_Int num_vectors  )
 {
    hypre_Multivector *mvector;
 
-   mvector = (hypre_Multivector *) hypre_MAlloc(sizeof(hypre_Multivector), HYPRE_MEMORY_HOST);
+   mvector = hypre_TAlloc(hypre_Multivector, 1, HYPRE_MEMORY_HOST);
 
    hypre_MultivectorNumVectors(mvector) = num_vectors;
    hypre_MultivectorSize(mvector) = size;
@@ -54,12 +54,12 @@ hypre_SeqMultivectorInitialize( hypre_Multivector *mvector )
 
    if (NULL == hypre_MultivectorData(mvector))
       hypre_MultivectorData(mvector) =
-         (HYPRE_Complex *) hypre_MAlloc(sizeof(HYPRE_Complex) * size * num_vectors, HYPRE_MEMORY_HOST);
+         hypre_TAlloc(HYPRE_Complex, size * num_vectors, HYPRE_MEMORY_HOST);
 
    /* now we create a "mask" of "active" vectors; initially all active */
    if (NULL == mvector->active_indices)
    {
-      mvector->active_indices hypre_CTAlloc(HYPRE_Int,  num_vectors, HYPRE_MEMORY_HOST);
+      mvector->active_indices hypre_CTAlloc(HYPRE_Int, num_vectors, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < num_vectors; i++) { mvector->active_indices[i] = i; }
       mvector->num_active_vectors = num_vectors;
@@ -120,7 +120,7 @@ hypre_SeqMultivectorSetMask(hypre_Multivector *mvector, HYPRE_Int * mask)
    HYPRE_Int  i, num_vectors = mvector->num_vectors;
 
    if (mvector->active_indices != NULL) { hypre_TFree(mvector->active_indices, HYPRE_MEMORY_HOST); }
-   mvector->active_indices hypre_CTAlloc(HYPRE_Int,  num_vectors, HYPRE_MEMORY_HOST);
+   mvector->active_indices hypre_CTAlloc(HYPRE_Int, num_vectors, HYPRE_MEMORY_HOST);
 
    mvector->num_active_vectors = 0;
 
