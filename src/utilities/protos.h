@@ -40,9 +40,6 @@ HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #endif
 
 /* general.c */
-#ifdef HYPRE_USING_MEMORY_TRACKER
-hypre_MemoryTracker* hypre_memory_tracker();
-#endif
 hypre_Handle* hypre_handle();
 hypre_Handle* hypre_HandleCreate();
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
@@ -380,6 +377,8 @@ hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 
 /* memory_tracker.c */
+#ifdef HYPRE_USING_MEMORY_TRACKER
+hypre_MemoryTracker* hypre_memory_tracker();
 hypre_MemoryTracker * hypre_MemoryTrackerCreate();
 void hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker);
 void hypre_MemoryTrackerInsert1(const char *action, void *ptr, size_t nbytes,
@@ -392,4 +391,5 @@ void hypre_MemoryTrackerInsert2(const char *action, void *ptr, void *ptr2, size_
 HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o, size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
+#endif
 

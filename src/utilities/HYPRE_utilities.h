@@ -108,6 +108,7 @@ typedef HYPRE_Int MPI_Comm;
 #define HYPRE_ERROR_ARG             4   /* argument error */
 /* bits 4-8 are reserved for the index of the argument error */
 #define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
+#define HYPRE_MAX_FILE_NAME_LEN  1024   /* longest filename length used in hypre */
 
 /*--------------------------------------------------------------------------
  * HYPRE init/finalize

@@ -235,6 +235,8 @@ hypre_MemoryTrackerInsert2(const char           *action,
    entry->line = line;
    entry->pair = (size_t) -1;
 
+   //if (entry->time_step == 1643183) {assert(0);}
+
    /* increase the time step */
    tracker->curr_time_step ++;
 
@@ -258,6 +260,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    size_t curr_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
    size_t j;
    hypre_MemoryTrackerEvent i;
+
+   HYPRE_Int leakcheck = 1;
 
    hypre_MemoryTracker *tracker = hypre_memory_tracker();
    hypre_MemoryTrackerQueue *qq = tracker->queue;
@@ -291,7 +295,10 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    }
 
 #if HYPRE_MEMORY_TRACKER_BINARY_SEARCH
-   hypre_MemoryTrackerSortQueue(qf);
+   if (leakcheck)
+   {
+      hypre_MemoryTrackerSortQueue(qf);
+   }
 #endif
 
    for (i = hypre_MemoryTrackerGetNext(tracker); i < HYPRE_MEMORY_EVENT_NUM; i = hypre_MemoryTrackerGetNext(tracker))
@@ -301,11 +308,15 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
       if (strstr(entry->action, "alloc") != NULL)
       {
          totl_bytes[entry->memory_location] += entry->nbytes;
-         curr_bytes[entry->memory_location] += entry->nbytes;
-         peak_bytes[entry->memory_location] = hypre_max( curr_bytes[entry->memory_location],
-                                                         peak_bytes[entry->memory_location] );
 
-         if (entry->pair == (size_t) -1)
+         if (leakcheck)
+         {
+            curr_bytes[entry->memory_location] += entry->nbytes;
+            peak_bytes[entry->memory_location] = hypre_max( curr_bytes[entry->memory_location],
+                                                            peak_bytes[entry->memory_location] );
+         }
+
+         if (leakcheck && entry->pair == (size_t) -1)
          {
 #if HYPRE_MEMORY_TRACKER_BINARY_SEARCH
             hypre_MemoryTrackerEntry key = { .ptr = entry->ptr };
@@ -360,7 +371,7 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 #endif
          }
       }
-      else if (strstr(entry->action, "free") != NULL)
+      else if (leakcheck && strstr(entry->action, "free") != NULL)
       {
          if (entry->pair < qa->actual_size)
          {
@@ -470,12 +481,7 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    }
 #endif
 
-   hypre_assert(curr_bytes[hypre_MEMORY_HOST] == 0);
-   hypre_assert(curr_bytes[hypre_MEMORY_HOST_PINNED] == 0);
-   hypre_assert(curr_bytes[hypre_MEMORY_DEVICE] == 0);
-   hypre_assert(curr_bytes[hypre_MEMORY_UNIFIED] == 0);
-
-   if (do_print)
+   if (leakcheck && do_print)
    {
       fprintf(file, "\n\"==== Warnings:\"\n");
       for (j = 0; j < qa->actual_size; j++)
@@ -512,6 +518,14 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    if (file)
    {
       fclose(file);
+   }
+
+   if (leakcheck)
+   {
+      hypre_assert(curr_bytes[hypre_MEMORY_HOST] == 0);
+      hypre_assert(curr_bytes[hypre_MEMORY_HOST_PINNED] == 0);
+      hypre_assert(curr_bytes[hypre_MEMORY_DEVICE] == 0);
+      hypre_assert(curr_bytes[hypre_MEMORY_UNIFIED] == 0);
    }
 
    return hypre_error_flag;
