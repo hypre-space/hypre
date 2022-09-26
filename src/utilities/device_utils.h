@@ -132,6 +132,8 @@ using hypre_DeviceItem = sycl::nd_item<1>;
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#define HYPRE_MAX_NTHREADS_BLOCK 1024
+
 // HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_WARP_SIZE       32
