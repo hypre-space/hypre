@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
                                                  HYPRE_Int nr_of_rows,
@@ -722,4 +722,4 @@ hypre_BoomerAMGCorrectCFMarker2Device(hypre_IntArray *CF_marker, hypre_IntArray 
    return 0;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* #if defined(HYPRE_USING_GPU) */

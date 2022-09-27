@@ -334,7 +334,7 @@ hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
  *      generic device functions (cuda/hip/sycl)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataComputeStream
@@ -1868,7 +1868,7 @@ hypreDevice_IntStridedCopy( HYPRE_Int  size,
    return hypreDevice_StridedCopy(size, stride, in, out);
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions

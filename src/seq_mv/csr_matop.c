@@ -933,7 +933,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 {
    hypre_CSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
                                                       hypre_CSRMatrixMemoryLocation(B) );
 
@@ -1280,7 +1280,7 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1586,7 +1586,7 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1891,7 +1891,7 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
 {
    hypre_assert( (CF_i && CF_j) || (!CF_i && !CF_j) );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1974,7 +1974,7 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
                                 HYPRE_Complex   *d,
                                 HYPRE_Int        type)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

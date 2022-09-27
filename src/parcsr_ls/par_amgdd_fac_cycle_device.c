@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_JacobiDevice( void     *amgdd_vdata,

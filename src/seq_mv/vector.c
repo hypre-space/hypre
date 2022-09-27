@@ -501,7 +501,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -525,7 +525,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#else // #if defined(HYPRE_USING_GPU)
 
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -538,7 +538,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
       y_data[i] *= alpha;
    }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());
@@ -572,7 +572,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -597,7 +597,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 
-#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#else // #if defined(HYPRE_USING_GPU)
 
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -610,7 +610,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
       y_data[i] += alpha * x_data[i];
    }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());
@@ -668,7 +668,7 @@ hypre_SeqVectorElmdivpy( hypre_Vector *x,
    hypre_assert(hypre_VectorMultiVecStorageMethod(b) == 0);
    hypre_assert(hypre_VectorMultiVecStorageMethod(y) == 0);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
    //RL: TODO back to hypre_GetExecPolicy2 later
    HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
@@ -845,7 +845,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
    //hypre_SeqVectorPrefetch(x, HYPRE_MEMORY_DEVICE);
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #ifndef HYPRE_COMPLEX
 
@@ -879,7 +879,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #error "Complex inner product"
 #endif // #ifndef HYPRE_COMPLEX
 
-#else // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#else // #if defined(HYPRE_USING_GPU)
 
    HYPRE_Int i;
 #if defined(HYPRE_USING_DEVICE_OPENMP)
@@ -892,7 +892,7 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
       result += hypre_conj(y_data[i]) * x_data[i];
    }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());

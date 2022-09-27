@@ -616,7 +616,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    /* The assert is here because this code has been tested for column-wise vector storage only. */
    hypre_assert(idxstride == 1);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int  num_cols_diag = hypre_CSRMatrixNumCols(diag);
 
    /* unpack recv data on device */
@@ -820,7 +820,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
    return ierr;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvecT_unpack

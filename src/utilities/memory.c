@@ -48,7 +48,7 @@ void
 hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
 {
 #if defined(HYPRE_DEBUG)
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    if (!ptr)
    {
       return;

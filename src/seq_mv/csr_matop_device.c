@@ -187,7 +187,7 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
@@ -744,7 +744,7 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
@@ -1877,7 +1877,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    {
       if ( !hypre_HandleSpTransUseVendor(hypre_handle()) )
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
       }
