@@ -275,7 +275,7 @@ hypre_BoomerAMGCreate()
    keepT = 0;
    modu_rap = 0;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    keepT           =  1;
    modu_rap        =  1;
    coarsen_type    =  8;

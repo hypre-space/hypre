@@ -322,7 +322,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
       }
 #endif
 
+#if defined(HYPRE_USING_GPU)
       hypre_SyncComputeStream(hypre_handle());
+#endif
    }
    else
 #endif /* defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */

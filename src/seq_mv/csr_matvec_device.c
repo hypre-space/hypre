@@ -159,7 +159,9 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
    }
 
+#if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_GpuProfilingPopRange();
@@ -309,7 +311,9 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                         dBuffer) );
    }
 
+#if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());
+#endif
 
    /* Free memory */
    HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );

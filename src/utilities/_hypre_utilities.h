@@ -1854,7 +1854,6 @@ char *hypre_strcpy(char *destination, const char *source);
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute();
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */

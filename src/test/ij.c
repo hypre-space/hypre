@@ -1909,7 +1909,7 @@ main( hypre_int argc,
    {
       restri_type = air;    /* Set Restriction to be AIR */
       interp_type = 100;    /* 1-pt Interp */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
       relax_type = 7;
 #else
       relax_type = 0;
