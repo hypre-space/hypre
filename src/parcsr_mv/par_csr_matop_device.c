@@ -1757,7 +1757,7 @@ hypre_ParCSRDiagScaleVector( HYPRE_ParCSRMatrix HA,
    {
       x_data[i] = y_data[i] / A_data[A_i[i]];
    }
-#endif /* #if defined(HYPRE_USING_CUDA) */
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
    return ierr;
 }

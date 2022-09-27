@@ -15,7 +15,7 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 #define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_SPMV_CSR_ALG2
@@ -495,4 +495,4 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
-#endif // #if defined(HYPRE_USING_GPU)
+#endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

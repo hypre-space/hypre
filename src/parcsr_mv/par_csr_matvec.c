@@ -148,7 +148,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     * Then, initialize x_tmp
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
    {
       hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
@@ -171,7 +171,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     * Allocate data buffer
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (!hypre_ParCSRCommPkgBufData(comm_pkg))
    {
       hypre_ParCSRCommPkgBufData(comm_pkg) =
@@ -219,6 +219,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
                       permuted_source +
                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                       x_buf_data );
+#endif
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int *d_send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
@@ -231,7 +232,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       x_buf_data[i] = x_local_data[d_send_map_elmts[i]];
    }
-#endif
 
 #else
    /* pack send data on Host */
@@ -258,7 +258,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CSRMatrixMatvecOutOfPlace(alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
 
@@ -280,7 +280,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
-#if !defined(HYPRE_USING_GPU)
+#if !defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_DEVICE_OPENMP)
    /* overlapped local computation when using CPU */
    hypre_CSRMatrixMatvecOutOfPlace(alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
@@ -316,7 +316,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    hypre_SeqVectorDestroy(x_tmp);
 
-#if !defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_PERSISTENT_COMM)
+#if !defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_TFree(x_buf_data, HYPRE_MEMORY_DEVICE);
 #endif
 
@@ -486,7 +486,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
     * Then, initialize y_tmp
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
    {
       hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
@@ -509,7 +509,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
     * Allocate data buffer
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (!hypre_ParCSRCommPkgBufData(comm_pkg))
    {
       hypre_ParCSRCommPkgBufData(comm_pkg) =
@@ -551,7 +551,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* when using GPUs, start local matvec first in order to overlap with communication */
    /* diagT is optional. Used only if it's present. */
    if (diagT)
@@ -582,7 +582,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
-#if !defined(HYPRE_USING_GPU)
+#if !defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_DEVICE_OPENMP)
    /* overlapped local computation when not using GPUs */
    /* diagT is optional. Used only if it's present. */
    if (diagT)
@@ -657,7 +657,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
    hypre_SeqVectorDestroy(y_tmp);
 
-#if !defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_PERSISTENT_COMM)
+#if !defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_TFree(y_buf_data, HYPRE_MEMORY_DEVICE);
 #endif
 

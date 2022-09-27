@@ -300,7 +300,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(v));
 
    //hypre_SeqVectorPrefetch(v, HYPRE_MEMORY_DEVICE);
@@ -325,7 +325,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
       hypre_SyncComputeStream(hypre_handle());
    }
    else
-#endif /* defined(HYPRE_USING_GPU) */
+#endif /* defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */
    {
       HYPRE_Int i;
 

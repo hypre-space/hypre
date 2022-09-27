@@ -2481,7 +2481,7 @@ hypre_bind_device( HYPRE_Int myid,
                    HYPRE_Int nproc,
                    MPI_Comm  comm )
 {
-#ifdef HYPRE_USING_GPU
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* proc id (rank) on the running node */
    HYPRE_Int myNodeid;
    /* num of procs (size) on the node */
@@ -2510,7 +2510,7 @@ hypre_bind_device( HYPRE_Int myid,
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
 #endif
 
-#endif /* #ifdef HYPRE_USING_GPU */
+#endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return hypre_error_flag;
 }
