@@ -20,7 +20,6 @@
 
 /* RDF: Why is this include here? */
 #include "_hypre_struct_mv.h"
-#include "_hypre_struct_mv.hpp"
 
 #ifdef HYPRE_DEBUG
 /*#include <cegdb.h>*/
@@ -3019,13 +3018,14 @@ AddValuesVector( hypre_StructGrid   *gridvector,
                  HYPRE_Real          value  )
 {
    /* #include  "_hypre_struct_mv.h" */
-   HYPRE_Int            ierr = 0;
+   HYPRE_Int            i, ierr = 0;
    hypre_BoxArray      *gridboxes;
    HYPRE_Int            ib;
    hypre_IndexRef       ilower;
    hypre_IndexRef       iupper;
    hypre_Box           *box;
    HYPRE_Real          *values;
+   HYPRE_Real          *values_h;
    HYPRE_Int            volume, dim;
    HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(zvector);
 
@@ -3038,6 +3038,7 @@ AddValuesVector( hypre_StructGrid   *gridvector,
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   = hypre_BoxVolume(box);
       values   = hypre_CTAlloc(HYPRE_Real, volume, memory_location);
+      values_h = hypre_CTAlloc(HYPRE_Real, volume, HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------------
        * For periodic b.c. in all directions, need rhs to satisfy
@@ -3045,28 +3046,21 @@ AddValuesVector( hypre_StructGrid   *gridvector,
        *  sink of equal strength.  All other problems have rhs = 1.
        *-----------------------------------------------------------*/
 
-#define DEVICE_VAR is_device_ptr(values)
       if ((dim == 2 && period[0] != 0 && period[1] != 0) ||
           (dim == 3 && period[0] != 0 && period[1] != 0 && period[2] != 0))
       {
-         hypre_LoopBegin(volume, i)
-         {
-            values[i] = 0.0;
-            values[0]         =  value;
-            values[volume - 1] = -value;
-
-         }
-         hypre_LoopEnd()
+         values_h[0] = value;
+         values_h[volume - 1] = -value;
       }
       else
       {
-         hypre_LoopBegin(volume, i)
+         for (i = 0; i < volume; i++)
          {
-            values[i] = value;
+            values_h[i] = value;
          }
-         hypre_LoopEnd()
       }
-#undef DEVICE_VAR
+
+      hypre_TMemcpy(values, values_h, HYPRE_Real, volume, memory_location, HYPRE_MEMORY_HOST);
 
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
@@ -3074,6 +3068,7 @@ AddValuesVector( hypre_StructGrid   *gridvector,
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
 
       hypre_TFree(values, memory_location);
+      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -3097,13 +3092,14 @@ AddValuesMatrix(HYPRE_StructMatrix A,
                 HYPRE_Real         conz)
 {
 
-   HYPRE_Int            ierr = 0;
+   HYPRE_Int            d, ierr = 0;
    hypre_BoxArray      *gridboxes;
    HYPRE_Int            s, bi;
    hypre_IndexRef       ilower;
    hypre_IndexRef       iupper;
    hypre_Box           *box;
    HYPRE_Real          *values;
+   HYPRE_Real          *values_h;
    HYPRE_Real           east, west;
    HYPRE_Real           north, south;
    HYPRE_Real           top, bottom;
@@ -3147,36 +3143,40 @@ AddValuesMatrix(HYPRE_StructMatrix A,
             box    = hypre_BoxArrayBox(gridboxes, bi);
             volume = hypre_BoxVolume(box);
             values = hypre_CTAlloc(HYPRE_Real, stencil_size * volume, memory_location);
+            values_h = hypre_CTAlloc(HYPRE_Real, stencil_size * volume, HYPRE_MEMORY_HOST);
 
-#define DEVICE_VAR is_device_ptr(values)
             if (dim == 1)
             {
-               hypre_LoopBegin(volume, d)
-               HYPRE_Int i = stencil_size * d;
-               values[i    ] = west;
-               values[i + 1] = center;
-               hypre_LoopEnd()
+               for (d = 0; d < volume; d++)
+               {
+                  HYPRE_Int i = stencil_size * d;
+                  values_h[i] = west;
+                  values_h[i + 1] = center;
+               }
             }
             else if (dim == 2)
             {
-               hypre_LoopBegin(volume, d)
-               HYPRE_Int i = stencil_size * d;
-               values[i    ] = west;
-               values[i + 1] = south;
-               values[i + 2] = center;
-               hypre_LoopEnd()
+               for (d = 0; d < volume; d++)
+               {
+                  HYPRE_Int i = stencil_size * d;
+                  values_h[i] = west;
+                  values_h[i + 1] = south;
+                  values_h[i + 2] = center;
+               }
             }
             else if (dim == 3)
             {
-               hypre_LoopBegin(volume, d)
-               HYPRE_Int i = stencil_size * d;
-               values[i    ] = west;
-               values[i + 1] = south;
-               values[i + 2] = bottom;
-               values[i + 3] = center;
-               hypre_LoopEnd()
+               for (d = 0; d < volume; d++)
+               {
+                  HYPRE_Int i = stencil_size * d;
+                  values_h[i] = west;
+                  values_h[i + 1] = south;
+                  values_h[i + 2] = bottom;
+                  values_h[i + 3] = center;
+               }
             }
-#undef DEVICE_VAR
+
+            hypre_TMemcpy(values, values_h, HYPRE_Real, stencil_size * volume, memory_location, HYPRE_MEMORY_HOST);
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3185,11 +3185,12 @@ AddValuesMatrix(HYPRE_StructMatrix A,
                                            stencil_indices, values);
 
             hypre_TFree(values, memory_location);
+            hypre_TFree(values_h, HYPRE_MEMORY_HOST);
          }
       }
       else if ( constant_coefficient == 1 )
       {
-         values = hypre_CTAlloc(HYPRE_Real,  stencil_size, HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc(HYPRE_Real, stencil_size, HYPRE_MEMORY_HOST);
          switch (dim)
          {
             case 1:
@@ -3220,7 +3221,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,
          hypre_assert( constant_coefficient == 2 );
 
          /* stencil index for the center equals dim, so it's easy to leave out */
-         values   =  hypre_CTAlloc(HYPRE_Real,  stencil_size - 1, HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc(HYPRE_Real, stencil_size - 1, HYPRE_MEMORY_HOST);
          switch (dim)
          {
             case 1:
@@ -3243,26 +3244,27 @@ AddValuesMatrix(HYPRE_StructMatrix A,
          }
          hypre_TFree(values, HYPRE_MEMORY_HOST);
 
-
          hypre_ForBoxI(bi, gridboxes)
          {
             box    = hypre_BoxArrayBox(gridboxes, bi);
             volume = hypre_BoxVolume(box);
             values = hypre_CTAlloc(HYPRE_Real, volume, memory_location);
+            values_h = hypre_CTAlloc(HYPRE_Real, volume, HYPRE_MEMORY_HOST);
+            HYPRE_Int i;
 
-#define DEVICE_VAR is_device_ptr(values)
-            hypre_LoopBegin(volume, i)
+            for (i = 0; i < volume; i++)
             {
-               values[i] = center;
+               values_h[i] = center;
             }
-            hypre_LoopEnd()
-#undef DEVICE_VAR
+
+            hypre_TMemcpy(values, values_h, HYPRE_Real, volume, memory_location, HYPRE_MEMORY_HOST);
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices + dim, values);
             hypre_TFree(values, memory_location);
+            hypre_TFree(values_h, HYPRE_MEMORY_HOST);
          }
       }
    }
@@ -3306,38 +3308,38 @@ AddValuesMatrix(HYPRE_StructMatrix A,
             box    = hypre_BoxArrayBox(gridboxes, bi);
             volume = hypre_BoxVolume(box);
             values = hypre_CTAlloc(HYPRE_Real, stencil_size * volume, memory_location);
+            values_h = hypre_CTAlloc(HYPRE_Real, stencil_size * volume, HYPRE_MEMORY_HOST);
 
-#define DEVICE_VAR is_device_ptr(values)
-            hypre_LoopBegin(volume, d)
+            for (d = 0; d < volume; d++)
             {
                HYPRE_Int i = stencil_size * d;
                switch (dim)
                {
                   case 1:
-                     values[i  ] = west;
-                     values[i + 1] = center;
-                     values[i + 2] = east;
+                     values_h[i] = west;
+                     values_h[i + 1] = center;
+                     values_h[i + 2] = east;
                      break;
                   case 2:
-                     values[i  ] = west;
-                     values[i + 1] = south;
-                     values[i + 2] = center;
-                     values[i + 3] = east;
-                     values[i + 4] = north;
+                     values_h[i] = west;
+                     values_h[i + 1] = south;
+                     values_h[i + 2] = center;
+                     values_h[i + 3] = east;
+                     values_h[i + 4] = north;
                      break;
                   case 3:
-                     values[i  ] = west;
-                     values[i + 1] = south;
-                     values[i + 2] = bottom;
-                     values[i + 3] = center;
-                     values[i + 4] = east;
-                     values[i + 5] = north;
-                     values[i + 6] = top;
+                     values_h[i] = west;
+                     values_h[i + 1] = south;
+                     values_h[i + 2] = bottom;
+                     values_h[i + 3] = center;
+                     values_h[i + 4] = east;
+                     values_h[i + 5] = north;
+                     values_h[i + 6] = top;
                      break;
                }
             }
-            hypre_LoopEnd()
-#undef DEVICE_VAR
+
+            hypre_TMemcpy(values, values_h, HYPRE_Real, stencil_size * volume, memory_location, HYPRE_MEMORY_HOST);
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3345,6 +3347,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,
                                            stencil_indices, values);
 
             hypre_TFree(values, memory_location);
+            hypre_TFree(values_h, HYPRE_MEMORY_HOST);
          }
       }
       else if ( constant_coefficient == 1 )
@@ -3438,20 +3441,22 @@ AddValuesMatrix(HYPRE_StructMatrix A,
             box    = hypre_BoxArrayBox(gridboxes, bi);
             volume = hypre_BoxVolume(box);
             values = hypre_CTAlloc(HYPRE_Real, volume, memory_location);
+            values_h = hypre_CTAlloc(HYPRE_Real, volume, HYPRE_MEMORY_HOST);
+            HYPRE_Int i;
 
-#define DEVICE_VAR is_device_ptr(values)
-            hypre_LoopBegin(volume, i)
+            for (i = 0; i < volume; i++)
             {
-               values[i] = center;
+               values_h[i] = center;
             }
-            hypre_LoopEnd()
-#undef DEVICE_VAR
+
+            hypre_TMemcpy(values, values_h, HYPRE_Real, volume, memory_location, HYPRE_MEMORY_HOST);
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
             hypre_TFree(values, memory_location);
+            hypre_TFree(values_h, HYPRE_MEMORY_HOST);
          }
       }
    }
