@@ -69,6 +69,8 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
       return hypre_error_flag;
    }
 
+   hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle), HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
    hypre_HandleDeviceData(hypre_handle_) = NULL;

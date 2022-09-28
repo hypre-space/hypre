@@ -95,8 +95,6 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    }
 
    hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_DeviceDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_DeviceDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (data->curand_generator)
