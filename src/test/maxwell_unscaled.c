@@ -1340,10 +1340,13 @@ main( hypre_int argc,
 
    HYPRE_Int             arg_index, part, box, var, entry, s, i, j, k;
 
+   HYPRE_Int print_mem_tracker = 0;
+   char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_vendor = 0;
 #endif
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
 
    /*-----------------------------------------------------------
@@ -1492,6 +1495,16 @@ main( hypre_int argc,
          spgemm_use_vendor = atoi(argv[arg_index++]);
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
+      {
+         arg_index++;
+         print_mem_tracker = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mem_tracker_filename") == 0 )
+      {
+         arg_index++;
+         snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
@@ -1503,6 +1516,11 @@ main( hypre_int argc,
          break;
       }
    }
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   hypre_MemoryTrackerSetPrint(print_mem_tracker);
+   if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
+#endif
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
@@ -1978,6 +1996,17 @@ main( hypre_int argc,
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   if (default_exec_policy == HYPRE_EXEC_HOST)
+   {
+      if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
+      {
+         hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
+         hypre_assert(0);
+      }
+   }
+#endif
 
    return (0);
 }
