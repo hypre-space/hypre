@@ -21,8 +21,17 @@ typedef enum _hypre_MemoryTrackerEvent
    HYPRE_MEMORY_EVENT_ALLOC = 0,
    HYPRE_MEMORY_EVENT_FREE,
    HYPRE_MEMORY_EVENT_COPY,
-   HYPRE_MEMORY_EVENT_NUM
+   HYPRE_MEMORY_NUM_EVENTS,
 } hypre_MemoryTrackerEvent;
+
+typedef enum _hypre_MemcpyType
+{
+   hypre_MEMCPY_H2H = 0,
+   hypre_MEMCPY_D2H,
+   hypre_MEMCPY_H2D,
+   hypre_MEMCPY_D2D,
+   hypre_MEMCPY_NUM_TYPES,
+} hypre_MemcpyType;
 
 typedef struct
 {
@@ -42,17 +51,22 @@ typedef struct
 
 typedef struct
 {
-   size_t                    head;
-   size_t                    actual_size;
-   size_t                    alloced_size;
-   hypre_MemoryTrackerEntry *data;
-   hypre_MemoryTrackerEntry *sorted_data;
+   size_t                     head;
+   size_t                     actual_size;
+   size_t                     alloced_size;
+   hypre_MemoryTrackerEntry  *data;
+   /* Free Queue is sorted based on (ptr, time_step) ascendingly */
+   hypre_MemoryTrackerEntry  *sorted_data;
+   /* compressed sorted_data with the same ptr */
+   size_t                     sorted_data_compressed_len;
+   size_t                    *sorted_data_compressed_offset;
+   hypre_MemoryTrackerEntry **sorted_data_compressed;
 } hypre_MemoryTrackerQueue;
 
 typedef struct
 {
    size_t                   curr_time_step;
-   hypre_MemoryTrackerQueue queue[HYPRE_MEMORY_EVENT_NUM];
+   hypre_MemoryTrackerQueue queue[HYPRE_MEMORY_NUM_EVENTS];
 } hypre_MemoryTracker;
 
 #define hypre_TAlloc(type, count, location)                                                         \

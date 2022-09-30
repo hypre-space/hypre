@@ -24,6 +24,34 @@
  *
  *****************************************************************************/
 
+HYPRE_Int
+hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
+                            char                 *memory_location_name)
+{
+   if (memory_location == hypre_MEMORY_HOST)
+   {
+      sprintf(memory_location_name, "%s", "HOST");
+   }
+   else if (memory_location == hypre_MEMORY_HOST_PINNED)
+   {
+      sprintf(memory_location_name, "%s", "HOST_PINNED");
+   }
+   else if (memory_location == hypre_MEMORY_DEVICE)
+   {
+      sprintf(memory_location_name, "%s", "DEVICE");
+   }
+   else if (memory_location == hypre_MEMORY_UNIFIED)
+   {
+      sprintf(memory_location_name, "%s", "UNIFIED");
+   }
+   else
+   {
+      sprintf(memory_location_name, "%s", "");
+   }
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_OutOfMemory
  *--------------------------------------------------------------------------*/
