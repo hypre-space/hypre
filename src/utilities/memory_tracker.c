@@ -567,12 +567,13 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
             hypre_GetMemoryLocationName(t, memory_location);
             fprintf(stderr, "%zu bytes of %s memory may not be freed\n", curr_bytes[t], memory_location);
          }
+
       }
 
-      //hypre_assert(curr_bytes[hypre_MEMORY_HOST] == 0);
-      //hypre_assert(curr_bytes[hypre_MEMORY_HOST_PINNED] == 0);
-      //hypre_assert(curr_bytes[hypre_MEMORY_DEVICE] == 0);
-      //hypre_assert(curr_bytes[hypre_MEMORY_UNIFIED] == 0);
+      for (t = hypre_MEMORY_HOST; t <= hypre_MEMORY_UNIFIED; t++)
+      {
+         hypre_assert(curr_bytes[t] == 0);
+      }
    }
 
    //HYPRE_Real t1 = hypre_MPI_Wtime() - t0;
