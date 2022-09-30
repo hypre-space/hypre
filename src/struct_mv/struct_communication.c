@@ -768,11 +768,8 @@ hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
 {
    HYPRE_Complex *ptr;
 
-   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
-   {
-      ptr = hypre_CTAlloc(HYPRE_Complex, size, memory_location);
-   }
-   else
+#if defined(HYPRE_USING_GPU)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       if (size > hypre_HandleStructCommSendBufferSize(hypre_handle()))
       {
@@ -783,6 +780,11 @@ hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
       }
 
       ptr = hypre_HandleStructCommSendBuffer(hypre_handle());
+   }
+   else
+#endif
+   {
+      ptr = hypre_CTAlloc(HYPRE_Complex, size, memory_location);
    }
 
    return ptr;

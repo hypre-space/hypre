@@ -367,5 +367,29 @@
 #define hypre_BoxLoop2ReductionBeginHost   zypre_BoxLoop2ReductionBegin
 #define hypre_BoxLoop2ReductionEndHost     zypre_BoxLoop2ReductionEnd
 
+//TODO TEMP FIX
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_USING_SYCL)
+#define hypre_BoxLoopGetIndex          hypre_BoxLoopGetIndexHost
+#define hypre_BoxLoopBlock()           0
+#define hypre_BoxLoop0Begin            hypre_BoxLoop0BeginHost
+#define hypre_BoxLoop0End              hypre_BoxLoop0EndHost
+#define hypre_BoxLoop1Begin            hypre_BoxLoop1BeginHost
+#define hypre_BoxLoop1End              hypre_BoxLoop1EndHost
+#define hypre_BoxLoop2Begin            hypre_BoxLoop2BeginHost
+#define hypre_BoxLoop2End              hypre_BoxLoop2EndHost
+#define hypre_BoxLoop3Begin            hypre_BoxLoop3BeginHost
+#define hypre_BoxLoop3End              hypre_BoxLoop3EndHost
+#define hypre_BoxLoop4Begin            hypre_BoxLoop4BeginHost
+#define hypre_BoxLoop4End              hypre_BoxLoop4EndHost
+#define hypre_BasicBoxLoop1Begin       hypre_BasicBoxLoop1BeginHost
+#define hypre_BasicBoxLoop2Begin       hypre_BasicBoxLoop2BeginHost
+#define hypre_LoopBegin                hypre_LoopBeginHost
+#define hypre_LoopEnd                  hypre_LoopEndHost
+#define hypre_BoxLoop1ReductionBegin   hypre_BoxLoop1ReductionBeginHost
+#define hypre_BoxLoop1ReductionEnd     hypre_BoxLoop1ReductionEndHost
+#define hypre_BoxLoop2ReductionBegin   hypre_BoxLoop2ReductionBeginHost
+#define hypre_BoxLoop2ReductionEnd     hypre_BoxLoop2ReductionEndHost
+#endif
+
 #endif /* #ifndef HYPRE_BOXLOOP_HOST_HEADER */
 
