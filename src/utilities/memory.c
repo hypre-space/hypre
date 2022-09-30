@@ -34,7 +34,7 @@ hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
    }
    else if (memory_location == hypre_MEMORY_HOST_PINNED)
    {
-      sprintf(memory_location_name, "%s", "HOST_PINNED");
+      sprintf(memory_location_name, "%s", "HOST PINNED");
    }
    else if (memory_location == hypre_MEMORY_DEVICE)
    {
