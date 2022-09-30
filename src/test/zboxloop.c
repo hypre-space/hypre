@@ -339,7 +339,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("Old BoxLoop times [DEVICE]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoop times [DEVICE]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
@@ -425,7 +425,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoop times [HOST]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoop times [HOST]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
@@ -504,7 +504,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoopReduction times [DEVICE]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoopReduction times [DEVICE]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
@@ -546,7 +546,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoopReduction times [HOST]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoopReduction times [HOST]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
