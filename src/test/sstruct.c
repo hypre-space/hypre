@@ -2433,8 +2433,10 @@ main( hypre_int argc,
 
    /* end lobpcg */
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    HYPRE_Int print_mem_tracker = 0;
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+#endif
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_vendor = 0;
@@ -2855,6 +2857,7 @@ main( hypre_int argc,
          spgemm_use_vendor = atoi(argv[arg_index++]);
       }
 #endif
+#if defined(HYPRE_USING_MEMORY_TRACKER)
       else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
       {
          arg_index++;
@@ -2865,6 +2868,7 @@ main( hypre_int argc,
          arg_index++;
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
+#endif
       else
       {
          arg_index++;

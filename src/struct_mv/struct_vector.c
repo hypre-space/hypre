@@ -219,7 +219,9 @@ hypre_StructVectorSetValues( hypre_StructVector *vector,
    hypre_Box           *grid_box;
    HYPRE_Complex       *vecp;
    HYPRE_Int            i, istart, istop;
+#if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
+#endif
 
    if (outside > 0)
    {
@@ -440,7 +442,9 @@ hypre_StructVectorClearValues( hypre_StructVector *vector,
    hypre_Box           *grid_box;
    HYPRE_Complex       *vecp;
    HYPRE_Int            i, istart, istop;
+#if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
+#endif
 
    if (outside > 0)
    {

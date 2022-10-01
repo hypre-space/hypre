@@ -432,7 +432,7 @@ else                                                            \
 #define hypre_BoxLoop2ReductionEndDevice     hypre_BoxLoop2ReductionEndCUDA
 
 
-//TODO
+//TODO TEMP FIX
 #define hypre_BoxLoopGetIndex          hypre_BoxLoopGetIndexDevice
 #define hypre_BoxLoopBlock()           0
 #define hypre_BoxLoop0Begin            hypre_BoxLoop0BeginDevice

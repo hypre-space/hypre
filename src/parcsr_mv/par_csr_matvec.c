@@ -220,6 +220,10 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
     *--------------------------------------------------------------------*/
    hypre_SeqVectorDestroy(x_tmp);
 
+#if !defined(HYPRE_USING_PERSISTENT_COMM)
+   hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
+#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return ierr;
@@ -491,6 +495,10 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
     * Free memory
     *--------------------------------------------------------------------*/
    hypre_SeqVectorDestroy(y_tmp);
+
+#if !defined(HYPRE_USING_PERSISTENT_COMM)
+   hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
+#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 
