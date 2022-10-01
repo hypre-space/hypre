@@ -45,7 +45,6 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_krylov.h"
 #include "ex.h"
-#include "_hypre_utilities.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
