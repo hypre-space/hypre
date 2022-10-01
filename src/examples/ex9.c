@@ -45,6 +45,7 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_krylov.h"
 #include "ex.h"
+#include "_hypre_utilities.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -624,6 +625,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructGMRESGetNumIterations(solver, &its);
 
          /* clean up */
+         HYPRE_SStructSysPFMGDestroy(precond);
          HYPRE_SStructGMRESDestroy(solver);
       }
       else if (solver_id == 1) /* SysPFMG */
