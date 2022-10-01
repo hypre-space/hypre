@@ -466,8 +466,10 @@ main( hypre_int argc,
    HYPRE_Int amgdd_fac_cycle_type = 1;
    HYPRE_Int amgdd_num_ghost_layers = 1;
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    HYPRE_Int print_mem_tracker = 0;
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+#endif
 
    /* default execution policy and memory space */
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
@@ -1345,6 +1347,7 @@ main( hypre_int argc,
          arg_index++;
          benchmark = atoi(argv[arg_index++]);
       }
+#if defined(HYPRE_USING_MEMORY_TRACKER)
       else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
       {
          arg_index++;
@@ -1355,6 +1358,7 @@ main( hypre_int argc,
          arg_index++;
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
+#endif
       else
       {
          arg_index++;

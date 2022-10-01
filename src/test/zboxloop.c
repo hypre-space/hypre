@@ -353,6 +353,7 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       xi1 = 0;
+#undef HYPRE_OMP_CLAUSE
 #define HYPRE_OMP_CLAUSE firstprivate(xi1)
       zypre_BoxLoop0Begin(dim, loop_size);
       {

@@ -573,7 +573,9 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
    HYPRE_Int            constant_coefficient;
    HYPRE_Complex       *matp;
    HYPRE_Int            i, s, istart, istop;
+#if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(matrix);
+#endif
 
    /*-----------------------------------------------------------------------
     * Initialize some things

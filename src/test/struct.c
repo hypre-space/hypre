@@ -137,8 +137,10 @@ main( hypre_int argc,
    HYPRE_Int           sum;
 
    HYPRE_Int           print_system = 0;
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    HYPRE_Int           print_mem_tracker = 0;
    char                mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+#endif
 
    /* begin lobpcg */
 
@@ -527,6 +529,7 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
+#if defined(HYPRE_USING_MEMORY_TRACKER)
       else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
       {
          arg_index++;
@@ -537,6 +540,7 @@ main( hypre_int argc,
          arg_index++;
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
+#endif
       /* end lobpcg */
       else
       {
