@@ -725,9 +725,9 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
             if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
             {
-               hypre_Memcpy(Ap, h_Ap, nvars * nvars * sizeof(HYPRE_Real*), memory_location, HYPRE_MEMORY_HOST);
-               hypre_Memcpy(bp, h_bp, nvars * sizeof(HYPRE_Real*), memory_location, HYPRE_MEMORY_HOST);
-               hypre_Memcpy(xp, h_xp, nvars * sizeof(HYPRE_Real*), memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(Ap, h_Ap, HYPRE_Real *, nvars * nvars, memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(bp, h_bp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(xp, h_xp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
             }
 
             hypre_ForBoxI(j, compute_box_a)
@@ -853,8 +853,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
             if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
             {
-               hypre_Memcpy(bp, h_bp, nvars * sizeof(HYPRE_Real*), memory_location, HYPRE_MEMORY_HOST);
-               hypre_Memcpy(tp, h_tp, nvars * sizeof(HYPRE_Real*), memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(bp, h_bp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(tp, h_tp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
             }
 
             hypre_ForBoxI(j, compute_box_a)
@@ -935,7 +935,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
                if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
                {
-                  hypre_Memcpy(Ap, h_Ap, nvars * nvars * sizeof(HYPRE_Real*), memory_location, HYPRE_MEMORY_HOST);
+                  hypre_TMemcpy(Ap, h_Ap, HYPRE_Real *, nvars * nvars, memory_location, HYPRE_MEMORY_HOST);
                }
 
 #define DEVICE_VAR is_device_ptr(tp,Ap)

@@ -3377,7 +3377,7 @@ hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE
    }
    if (u_temp)
    {
-      hypre_Free( u_temp, HYPRE_MEMORY_HOST);
+      hypre_TFree( u_temp, HYPRE_MEMORY_HOST);
    }
    /* modified ILU0 factorization */
    hypre_ILUSetupMILU0(A, perm, perm, n, n, mLptr, mDptr, mUptr, &S_temp, &u_temp, 1);
@@ -3387,7 +3387,7 @@ hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE
    }
    if (u_temp)
    {
-      hypre_Free( u_temp, HYPRE_MEMORY_HOST);
+      hypre_TFree( u_temp, HYPRE_MEMORY_HOST);
    }
 
    /* pointer to the start location */
