@@ -55,6 +55,7 @@ typedef struct
    */
 
    /* pointers for vector and matrix data */
+   HYPRE_MemoryLocation    memory_location;
    HYPRE_Real            **Ap;
    HYPRE_Real            **bp;
    HYPRE_Real            **xp;
@@ -128,10 +129,7 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
 
    if (relax_data)
    {
-      HYPRE_MemoryLocation memory_location;
-
-      memory_location = hypre_StructMatrixMemoryLocation(
-            hypre_SStructPMatrixSMatrix(relax_data -> A, 0, 0));
+      HYPRE_MemoryLocation memory_location = relax_data -> memory_location;
 
       nvars = hypre_SStructPMatrixNVars(relax_data -> A);
 
@@ -516,6 +514,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    (relax_data -> bp)    = bp;
    (relax_data -> tp)    = tp;
    (relax_data -> xp)    = xp;
+   (relax_data -> memory_location) = memory_location;
    (relax_data -> compute_pkgs) = compute_pkgs;
    (relax_data -> svec_compute_pkgs) = svec_compute_pkgs;
    (relax_data -> comm_handle) = comm_handle;
@@ -550,7 +549,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   hypre_SStructPVector *b,
                   hypre_SStructPVector *x           )
 {
-   hypre_NodeRelaxData   *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
+   hypre_NodeRelaxData  *relax_data        = (hypre_NodeRelaxData  *)relax_vdata;
 
    HYPRE_Int             max_iter          = (relax_data -> max_iter);
    HYPRE_Int             zero_guess        = (relax_data -> zero_guess);
@@ -592,9 +591,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
    HYPRE_Real          **h_xp;
    HYPRE_Real          **h_tp;
 
-   HYPRE_MemoryLocation  memory_location;
-
-   memory_location = hypre_StructMatrixMemoryLocation(hypre_SStructPMatrixSMatrix(A, 0, 0));
+   HYPRE_MemoryLocation  memory_location = relax_data -> memory_location;
 
    /* Ap, bp, xp, tp are device pointers */
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)

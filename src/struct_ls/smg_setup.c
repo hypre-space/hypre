@@ -81,11 +81,6 @@ hypre_SMGSetup( void               *smg_vdata,
    char                  filename[255];
 #endif
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int             num_level_GPU = 0;
-   HYPRE_Int             max_box_size  = 0;
-   HYPRE_Int             device_level  = (smg_data -> devicelevel);
-#endif
    HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 
    /*-----------------------------------------------------
@@ -283,6 +278,7 @@ hypre_SMGSetup( void               *smg_vdata,
    data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
 
+   (smg_data -> memory_location) = memory_location;
    (smg_data -> data) = data;
    (smg_data -> data_const) = data_const;
 
@@ -584,12 +580,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
 #endif
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
-   {
-      hypre_SetDeviceOn();
-   }
-#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

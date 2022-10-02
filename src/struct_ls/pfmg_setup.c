@@ -129,18 +129,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int             num_level_GPU = 0;
-   HYPRE_Int             max_box_size  = 0;
-   HYPRE_Int             device_level  = (pfmg_data -> devicelevel);
-   HYPRE_Int             myrank;
-   hypre_MPI_Comm_rank(comm, &myrank );
-#endif
-   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
-
 #if DEBUG
    char                  filename[255];
 #endif
+
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -471,6 +464,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    //hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
 #endif
 
+   (pfmg_data -> memory_location) = memory_location;
    (pfmg_data -> data) = data;
    (pfmg_data -> data_const) = data_const;
 

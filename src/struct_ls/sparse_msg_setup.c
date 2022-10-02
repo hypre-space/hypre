@@ -554,7 +554,9 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    }
 
    data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
+
    (smsg_data -> data) = data;
+   (smsg_data -> memory_location) = memory_location;
 
    hypre_StructVectorInitializeData(t_a[0], data);
    hypre_StructVectorAssemble(t_a[0]);
