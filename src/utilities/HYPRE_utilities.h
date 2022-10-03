@@ -182,8 +182,7 @@ typedef enum _HYPRE_MemoryLocation
 {
    HYPRE_MEMORY_UNDEFINED = -1,
    HYPRE_MEMORY_HOST,
-   HYPRE_MEMORY_DEVICE,
-   HYPRE_NUM_MEMORY_LOCATION
+   HYPRE_MEMORY_DEVICE
 } HYPRE_MemoryLocation;
 
 HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
@@ -199,8 +198,7 @@ typedef enum _HYPRE_ExecutionPolicy
 {
    HYPRE_EXEC_UNDEFINED = -1,
    HYPRE_EXEC_HOST,
-   HYPRE_EXEC_DEVICE,
-   HYPRE_NUM_EXEC_POLICY
+   HYPRE_EXEC_DEVICE
 } HYPRE_ExecutionPolicy;
 
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
