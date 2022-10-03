@@ -114,7 +114,7 @@ hypre_MGRCreate()
    (mgr_data -> level_smooth_iters) = NULL;
    (mgr_data -> level_smooth_type) = NULL;
    (mgr_data -> level_smoother) = NULL;
-   (mgr_data -> global_smooth_cycle) = 1; // Pre or Post global smoothing
+   (mgr_data -> global_smooth_cycle) = 1; // Pre = 1 or Post  = 2 global smoothing
 
    (mgr_data -> logging) = 0;
    (mgr_data -> print_level) = 0;
