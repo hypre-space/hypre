@@ -16,9 +16,9 @@
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
 
-size_t hypre_total_bytes[hypre_MEMORY_UNIFIED + 1];
-size_t hypre_peak_bytes[hypre_MEMORY_UNIFIED + 1];
-size_t hypre_current_bytes[hypre_MEMORY_UNIFIED + 1];
+size_t hypre_total_bytes[hypre_NUM_MEMORY_LOCATION];
+size_t hypre_peak_bytes[hypre_NUM_MEMORY_LOCATION];
+size_t hypre_current_bytes[hypre_NUM_MEMORY_LOCATION];
 HYPRE_Int hypre_memory_tracker_print = 0;
 char hypre_memory_tracker_filename[HYPRE_MAX_FILE_NAME_LEN] = "HypreMemoryTrack.log";
 
@@ -292,9 +292,9 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 {
    char   filename[HYPRE_MAX_FILE_NAME_LEN + 16];
    FILE  *file = NULL;
-   size_t totl_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-   size_t peak_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-   size_t curr_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
+   size_t totl_bytes[hypre_NUM_MEMORY_LOCATION] = {0};
+   size_t peak_bytes[hypre_NUM_MEMORY_LOCATION] = {0};
+   size_t curr_bytes[hypre_NUM_MEMORY_LOCATION] = {0};
    size_t copy_bytes[hypre_MEMCPY_NUM_TYPES] = {0};
    size_t j;
    hypre_MemoryTrackerEvent i;

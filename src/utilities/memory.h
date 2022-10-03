@@ -105,7 +105,8 @@ typedef enum _hypre_MemoryLocation
    hypre_MEMORY_HOST,
    hypre_MEMORY_HOST_PINNED,
    hypre_MEMORY_DEVICE,
-   hypre_MEMORY_UNIFIED
+   hypre_MEMORY_UNIFIED,
+   hypre_NUM_MEMORY_LOCATION
 } hypre_MemoryLocation;
 
 /*-------------------------------------------------------
