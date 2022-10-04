@@ -1348,8 +1348,14 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_vendor = 0;
 #endif
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+#else
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2002,7 +2008,7 @@ main( hypre_int argc,
    hypre_MPI_Finalize();
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
-   if (default_exec_policy == HYPRE_EXEC_HOST)
+   if (memory_location == HYPRE_MEMORY_HOST)
    {
       if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
       {

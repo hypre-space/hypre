@@ -472,9 +472,15 @@ main( hypre_int argc,
 #endif
 
    /* default execution policy and memory space */
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_HOST;
+#else
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
    HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_DEVICE;
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+#endif
 
 #ifdef HYPRE_USING_DEVICE_POOL
    /* device pool allocator */
@@ -8563,7 +8569,7 @@ final:
    hypre_MPI_Finalize();
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
-   if (default_exec_policy == HYPRE_EXEC_HOST && (!second_time || exec2_policy == HYPRE_EXEC_HOST))
+   if (memory_location == HYPRE_MEMORY_HOST)
    {
       if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
       {
