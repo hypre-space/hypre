@@ -986,6 +986,10 @@ HYPRE_Int hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix *mat, HYPRE_BigInt 
                                           HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values );
 HYPRE_Int hypre_ParCSRDiagScaleVector( HYPRE_ParCSRMatrix HA, HYPRE_ParVector Hy,
                                        HYPRE_ParVector Hx );
+HYPRE_Int hypre_ParCSRDiagScaleVectorHost( HYPRE_ParCSRMatrix HA, HYPRE_ParVector Hy,
+                                           HYPRE_ParVector Hx );
+HYPRE_Int hypre_ParCSRDiagScaleVectorDevice( HYPRE_ParCSRMatrix HA, HYPRE_ParVector Hy,
+                                             HYPRE_ParVector Hx );
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol,
                                               HYPRE_Int type);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_Real tol,
