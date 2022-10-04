@@ -36,6 +36,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
 
+   HYPRE_MemoryLocation memory_location_RAP = hypre_ParCSRMatrixMemoryLocation(A);
+
    hypre_CSRMatrix *RT_diag = hypre_ParCSRMatrixDiag(RT);
    hypre_CSRMatrix *RT_offd = hypre_ParCSRMatrixOffd(RT);
    HYPRE_Int             num_cols_diag_RT = hypre_CSRMatrixNumCols(RT_diag);
@@ -1056,8 +1058,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       RAP_int = NULL;
    }
 
-   RAP_diag_i = hypre_TAlloc(HYPRE_Int,  num_cols_diag_RT + 1, HYPRE_MEMORY_DEVICE);
-   RAP_offd_i = hypre_TAlloc(HYPRE_Int,  num_cols_diag_RT + 1, HYPRE_MEMORY_DEVICE);
+   RAP_diag_i = hypre_TAlloc(HYPRE_Int,  num_cols_diag_RT + 1, memory_location_RAP);
+   RAP_offd_i = hypre_TAlloc(HYPRE_Int,  num_cols_diag_RT + 1, memory_location_RAP);
 
    first_col_diag_RAP = first_col_diag_P;
    last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
@@ -1501,15 +1503,15 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    RAP_diag_size = jj_count_diag;
    if (RAP_diag_size)
    {
-      RAP_diag_data = hypre_CTAlloc(HYPRE_Real, RAP_diag_size, HYPRE_MEMORY_DEVICE);
-      RAP_diag_j    = hypre_CTAlloc(HYPRE_Int,  RAP_diag_size, HYPRE_MEMORY_DEVICE);
+      RAP_diag_data = hypre_CTAlloc(HYPRE_Real, RAP_diag_size, memory_location_RAP);
+      RAP_diag_j    = hypre_CTAlloc(HYPRE_Int,  RAP_diag_size, memory_location_RAP);
    }
 
    RAP_offd_size = jj_count_offd;
    if (RAP_offd_size)
    {
-      RAP_offd_data = hypre_CTAlloc(HYPRE_Real, RAP_offd_size, HYPRE_MEMORY_DEVICE);
-      RAP_offd_j    = hypre_CTAlloc(HYPRE_Int,  RAP_offd_size, HYPRE_MEMORY_DEVICE);
+      RAP_offd_data = hypre_CTAlloc(HYPRE_Real, RAP_offd_size, memory_location_RAP);
+      RAP_offd_j    = hypre_CTAlloc(HYPRE_Int,  RAP_offd_size, memory_location_RAP);
    }
 
    if (RAP_offd_size == 0 && num_cols_offd_RAP != 0)

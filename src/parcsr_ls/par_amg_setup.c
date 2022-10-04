@@ -87,6 +87,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
@@ -301,6 +302,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (dof_func && hypre_IntArraySize(dof_func) < 0)
    {
       hypre_IntArraySize(dof_func) = local_size;
+      hypre_IntArrayMemoryLocation(dof_func) = memory_location;
    }
 
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
@@ -656,7 +658,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (num_C_points_coarse > 0)
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( HYPRE_MEMORY_DEVICE );
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
          HYPRE_Int *new_end =
@@ -693,7 +695,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (num_functions > 1 && dof_func == NULL)
    {
       dof_func = hypre_IntArrayCreate(local_size);
-      hypre_IntArrayInitialize(dof_func);
+      hypre_IntArrayInitialize_v2(dof_func, memory_location);
 
       offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
 
@@ -1425,8 +1427,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (level < hypre_ParAMGDataCPointsLevel(amg_data))
             {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(
-                                                                     CF_marker_array[level]) );
+               HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
+               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
                {
                   HYPRE_THRUST_CALL( scatter,
@@ -1438,7 +1440,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   if ( level + 1 < hypre_ParAMGDataCPointsLevel(amg_data) )
                   {
 
-                     HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, local_num_vars, HYPRE_MEMORY_DEVICE);
+                     HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, local_num_vars, memory_location);
                      HYPRE_THRUST_CALL( exclusive_scan,
                                         thrust::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),
                                                                         in_range<HYPRE_Int>(1, 2)),
@@ -1455,7 +1457,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                         C_points_local_marker,
                                         equal<HYPRE_Int>(2) );
 
-                     hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+                     hypre_TFree(tmp, memory_location);
                   }
 
                   HYPRE_THRUST_CALL( replace,
@@ -1990,7 +1992,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               if (hypre_IntArrayMemoryLocation(CF_marker_array[level]) == HYPRE_MEMORY_DEVICE)
+               HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
+               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+               if (exec == HYPRE_EXEC_DEVICE)
                {
                   hypre_BoomerAMGCFMarkerTo1minus1Device(CF_marker,
                                                          hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])));

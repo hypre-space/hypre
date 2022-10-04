@@ -66,8 +66,7 @@ hypre_OutOfMemory(size_t size)
 static inline void
 hypre_WrongMemoryLocation()
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY,
-                     "Wrong HYPRE MEMORY location: Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_HOST_PINNED are supported!\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Unrecognized hypre_MemoryLocation\n");
    hypre_assert(0);
    fflush(stdout);
 }
