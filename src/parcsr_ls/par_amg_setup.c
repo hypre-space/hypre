@@ -700,13 +700,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-      hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
-#else
-      for (i = 0; i < local_size; i++)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+      if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_IntArrayData(dof_func)[i] = (i + offset) % num_functions;
+         hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
       }
+      else
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+      {
+         for (i = 0; i < local_size; i++)
+         {
+            hypre_IntArrayData(dof_func)[i] = (i + offset) % num_functions;
+         }
+      }
    }
 
    A_array[0] = A;
@@ -1555,6 +1561,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   hypre_ParCSRMatrixDestroy(Sabs);
                   Sabs = NULL;
+               }
+
+               if (coarse_dof_func)
+               {
+                  hypre_IntArrayDestroy(coarse_dof_func);
+                  coarse_dof_func = NULL;
                }
 
                HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
