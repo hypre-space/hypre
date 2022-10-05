@@ -96,6 +96,8 @@ typedef struct
    ProblemPartData       *pdata;
    HYPRE_Int              max_boxsize;
 
+   HYPRE_MemoryLocation   memory_location;
+
    HYPRE_Int              nstencils;
    HYPRE_Int             *stencil_sizes;
    Index                **stencil_offsets;
@@ -234,6 +236,8 @@ ReadData( char         *filename,
 
    HYPRE_Int          part, var, entry, s, i, il, iu;
 
+   HYPRE_MemoryLocation memory_location = data_ptr -> memory_location;
+
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
@@ -281,6 +285,7 @@ ReadData( char         *filename,
     * Parse the data and fill ProblemData structure
     *-----------------------------------------------------------*/
 
+   data.memory_location = memory_location;
    data.max_boxsize = 0;
    data.symmetric_nentries = 0;
    data.symmetric_parts    = NULL;
@@ -493,7 +498,7 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
                pdata.d_graph_values =
                   hypre_TReAlloc_v2(pdata.d_graph_values, HYPRE_Real, pdata.graph_values_size,
-                                    HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+                                    HYPRE_Real, size, memory_location);
                pdata.graph_values_size = size;
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
@@ -602,7 +607,7 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.matrix_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
                pdata.d_matrix_values =
                   hypre_TReAlloc_v2(pdata.d_matrix_values, HYPRE_Real, pdata.matrix_values_size,
-                                    HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+                                    HYPRE_Real, size, memory_location);
                pdata.matrix_values_size = size;
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
@@ -717,6 +722,7 @@ DistributeData( ProblemData   global_data,
                 HYPRE_Int     myid,
                 ProblemData  *data_ptr )
 {
+   HYPRE_MemoryLocation memory_location = global_data.memory_location;
    ProblemData      data = global_data;
    ProblemPartData  pdata;
    HYPRE_Int       *pool_procs;
@@ -1072,7 +1078,7 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
          pdata.graph_values_size = 0;
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_graph_values, memory_location);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -1085,7 +1091,7 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.matrix_entries, HYPRE_MEMORY_HOST);
          pdata.matrix_values_size = 0;
          hypre_TFree(pdata.matrix_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_matrix_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_matrix_values, memory_location);
       }
 
       data.pdata[part] = pdata;
@@ -1111,6 +1117,7 @@ DistributeData( ProblemData   global_data,
 HYPRE_Int
 DestroyData( ProblemData   data )
 {
+   HYPRE_MemoryLocation memory_location = data.memory_location;
    ProblemPartData  pdata;
    HYPRE_Int        part, s;
 
@@ -1166,7 +1173,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_index_signs, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_graph_values, memory_location);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -1178,7 +1185,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.matrix_vars, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.matrix_entries, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.matrix_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_matrix_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_matrix_values, memory_location);
       }
 
    }
@@ -1356,6 +1363,8 @@ main( hypre_int argc,
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
+
+   global_data.memory_location = memory_location;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1542,7 +1551,6 @@ main( hypre_int argc,
    HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 #endif
 
-
    /*-----------------------------------------------------------
     * Distribute data
     *-----------------------------------------------------------*/
@@ -1673,7 +1681,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    values = hypre_CTAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
-   d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_DEVICE);
+   d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, memory_location);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -1726,7 +1734,7 @@ main( hypre_int argc,
             }
 
             hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
-                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                          memory_location, HYPRE_MEMORY_HOST);
 
             for (box = 0; box < pdata.nboxes; box++)
             {
@@ -1739,7 +1747,7 @@ main( hypre_int argc,
       }
 
       hypre_TMemcpy(pdata.d_graph_values, pdata.graph_values, HYPRE_Real, pdata.graph_values_size,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    memory_location, HYPRE_MEMORY_HOST);
 
       /* set non-stencil entries */
       for (entry = 0; entry < pdata.graph_nentries; entry++)
@@ -1776,7 +1784,7 @@ main( hypre_int argc,
       pdata = data.pdata[part];
 
       hypre_TMemcpy(pdata.d_matrix_values, pdata.matrix_values, HYPRE_Real, pdata.matrix_values_size,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    memory_location, HYPRE_MEMORY_HOST);
 
       for (entry = 0; entry < pdata.matrix_nentries; entry++)
       {
@@ -1841,7 +1849,7 @@ main( hypre_int argc,
    }
 
    hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                 memory_location, HYPRE_MEMORY_HOST);
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1869,7 +1877,7 @@ main( hypre_int argc,
    }
 
    hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                 memory_location, HYPRE_MEMORY_HOST);
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1917,7 +1925,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    hypre_TFree(values, HYPRE_MEMORY_HOST);
-   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_values, memory_location);
 
    if (solver_id == 1)
    {
