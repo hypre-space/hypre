@@ -1728,6 +1728,7 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScale
  *--------------------------------------------------------------------------*/
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypre_ParCSRDiagScaleVectorDevice( HYPRE_ParCSRMatrix HA,
@@ -1758,4 +1759,6 @@ hypre_ParCSRDiagScaleVectorDevice( HYPRE_ParCSRMatrix HA,
 
    return hypre_error_flag;
 }
+
+#endif
 
