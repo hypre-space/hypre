@@ -6392,11 +6392,11 @@ hypre_ParCSRMatrixDiagScale( hypre_ParCSRMatrix *par_A,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      //hypre_ParCSRMatrixDiagScaleDevice(par_A, par_ld, par_rd);
+      hypre_ParCSRMatrixDiagScaleDevice(par_A, par_ld, par_rd);
    }
    else
 #endif

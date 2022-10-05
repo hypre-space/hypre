@@ -390,6 +390,10 @@ HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *
                                        HYPRE_Complex beta, hypre_ParCSRMatrix *B,
                                        hypre_ParCSRMatrix **Cout);
 
+/* par_csr_matop_device.c */
+HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
+                                              hypre_ParVector *par_rd );
+
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i,
                                        HYPRE_Int **B_marker, HYPRE_Int *A_diag_i,
