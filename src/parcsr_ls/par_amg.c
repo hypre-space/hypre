@@ -144,6 +144,8 @@ hypre_BoomerAMGCreate()
 
    char     plot_file_name[251] = {0};
 
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
@@ -275,14 +277,15 @@ hypre_BoomerAMGCreate()
    keepT = 0;
    modu_rap = 0;
 
-#if defined(HYPRE_USING_GPU)
-   keepT           =  1;
-   modu_rap        =  1;
-   coarsen_type    =  8;
-   relax_down      = 18;
-   relax_up        = 18;
-   agg_interp_type =  7;
-#endif
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      keepT           =  1;
+      modu_rap        =  1;
+      coarsen_type    =  8;
+      relax_down      = 18;
+      relax_up        = 18;
+      agg_interp_type =  7;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -293,7 +296,7 @@ hypre_BoomerAMGCreate()
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
 
    /* memory location will be reset at the setup */
-   hypre_ParAMGDataMemoryLocation(amg_data) = hypre_HandleMemoryLocation(hypre_handle());
+   hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
 
    hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) = -1;
    hypre_ParAMGDataPartialCycleControl(amg_data) = -1;
