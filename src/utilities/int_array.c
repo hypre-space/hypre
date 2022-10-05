@@ -141,6 +141,7 @@ hypre_IntArrayCloneDeep( hypre_IntArray *x )
  * hypre_IntArraySetConstantValues
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int
 hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
                                        HYPRE_Int       value )
@@ -167,6 +168,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
 
    return hypre_error_flag;
 }
+#endif
 
 HYPRE_Int
 hypre_IntArraySetConstantValues( hypre_IntArray *v,
