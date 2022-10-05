@@ -274,7 +274,11 @@ hypre_MemoryTrackerInsert2(const char           *action,
    entry->line = line;
    entry->pair = (size_t) -1;
 
-   //if (entry->time_step == 1643183) {assert(0);}
+#if 0
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   if (myid == 0 && entry->time_step == 28111) {assert(0);}
+#endif
 
    /* increase the time step */
    tracker->curr_time_step ++;
@@ -341,8 +345,17 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
       //printf("Sort Time %.2f\n", t1);
    }
 
+   size_t total_num_events = 0;
+   size_t total_num_events_2 = 0;
+   for (i = HYPRE_MEMORY_EVENT_ALLOC; i < HYPRE_MEMORY_NUM_EVENTS; i++)
+   {
+      total_num_events_2 += qq[i].actual_size;
+   }
+
    for (i = hypre_MemoryTrackerGetNext(tracker); i < HYPRE_MEMORY_NUM_EVENTS; i = hypre_MemoryTrackerGetNext(tracker))
    {
+      total_num_events ++;
+
       hypre_MemoryTrackerEntry *entry = &qq[i].data[qq[i].head++];
 
       if (strstr(entry->action, "alloc") != NULL)
@@ -433,6 +446,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
                 );
       }
    }
+
+   hypre_assert(total_num_events == total_num_events_2);
 
    if (do_print)
    {
