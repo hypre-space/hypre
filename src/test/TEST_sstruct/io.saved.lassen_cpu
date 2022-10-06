@@ -1,0 +1,128 @@
+# Output file: io.out.0P
+Iterations = 40
+Final Relative Residual Norm = 6.360366e-07
+
+# Output file: io.out.0R
+Iterations = 40
+Final Relative Residual Norm = 6.360366e-07
+
+# Output file: io.out.1P
+Iterations = 20
+Final Relative Residual Norm = 8.532200e-07
+
+# Output file: io.out.1R
+Iterations = 20
+Final Relative Residual Norm = 8.532200e-07
+
+# Output file: io.out.2P
+Iterations = 23
+Final Relative Residual Norm = 8.435286e-07
+
+# Output file: io.out.2R
+Iterations = 23
+Final Relative Residual Norm = 8.435286e-07
+
+# Output file: io.out.3P
+Iterations = 92
+Final Relative Residual Norm = 7.654048e-07
+
+# Output file: io.out.3R
+Iterations = 92
+Final Relative Residual Norm = 7.654048e-07
+
+# Output file: io.out.4P
+Iterations = 65
+Final Relative Residual Norm = 9.321074e-07
+
+# Output file: io.out.4R
+Iterations = 65
+Final Relative Residual Norm = 9.321074e-07
+
+# Output file: io.out.5P
+Iterations = 64
+Final Relative Residual Norm = 9.708691e-04
+
+# Output file: io.out.5R
+Iterations = 64
+Final Relative Residual Norm = 9.708691e-04
+
+# Output file: io.out.6P
+Iterations = 60
+Final Relative Residual Norm = 8.657637e-07
+
+# Output file: io.out.6R
+Iterations = 60
+Final Relative Residual Norm = 8.657637e-07
+
+# Output file: io.out.7P
+Iterations = 27
+Final Relative Residual Norm = 4.507162e-07
+
+# Output file: io.out.7R
+Iterations = 27
+Final Relative Residual Norm = 4.507162e-07
+
+# Output file: io.out.100P
+Iterations = 40
+Final Relative Residual Norm = 6.360366e-07
+
+# Output file: io.out.100R
+Iterations = 40
+Final Relative Residual Norm = 6.360366e-07
+
+# Output file: io.out.101P
+Iterations = 20
+Final Relative Residual Norm = 8.532200e-07
+
+# Output file: io.out.101R
+Iterations = 20
+Final Relative Residual Norm = 8.532200e-07
+
+# Output file: io.out.102P
+Iterations = 23
+Final Relative Residual Norm = 8.435286e-07
+
+# Output file: io.out.102R
+Iterations = 23
+Final Relative Residual Norm = 8.435286e-07
+
+# Output file: io.out.103P
+Iterations = 92
+Final Relative Residual Norm = 7.654048e-07
+
+# Output file: io.out.103R
+Iterations = 92
+Final Relative Residual Norm = 7.654048e-07
+
+# Output file: io.out.104P
+Iterations = 65
+Final Relative Residual Norm = 9.321074e-07
+
+# Output file: io.out.104R
+Iterations = 65
+Final Relative Residual Norm = 9.321074e-07
+
+# Output file: io.out.105P
+Iterations = 64
+Final Relative Residual Norm = 9.708691e-04
+
+# Output file: io.out.105R
+Iterations = 64
+Final Relative Residual Norm = 9.708691e-04
+
+# Output file: io.out.106P
+Iterations = 60
+Final Relative Residual Norm = 8.657637e-07
+
+# Output file: io.out.106R
+Iterations = 60
+Final Relative Residual Norm = 8.657637e-07
+
+# Output file: io.out.107P
+Iterations = 27
+Final Relative Residual Norm = 4.507162e-07
+
+# Output file: io.out.107R
+Iterations = 27
+Final Relative Residual Norm = 4.507162e-07
+
