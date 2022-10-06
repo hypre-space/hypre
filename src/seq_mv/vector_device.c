@@ -136,7 +136,7 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
                       [alpha](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + y; } );
 #endif
 
-#eliif defined(HYPRE_USING_DEVICE_OPENMP)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
 #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
