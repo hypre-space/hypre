@@ -59,7 +59,10 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
                       hypre_CSRMatrixData(S_offd) + S_offd_nnz,
                       1.0 );
 
-   hypre_MatvecCommPkgCreate(S);
+   if (!hypre_ParCSRMatrixCommPkg(S))
+   {
+      hypre_MatvecCommPkgCreate(S);
+   }
 
    /* S(C, :) and S(:, C) */
    hypre_ParCSRMatrixGenerate1DCFDevice(S, CF_marker, coarse_row_starts, NULL, &S_CX, &S_XC);

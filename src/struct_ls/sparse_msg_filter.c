@@ -319,7 +319,6 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    HYPRE_Real            *vyp;
    HYPRE_Real            *vzp;
 
-
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
@@ -330,8 +329,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index            startv;
    hypre_Index            stride;
    hypre_Index            stridev;
-
    HYPRE_Int              i;
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -361,20 +360,19 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    HYPRE_Int      *data_indices_d; /* On device */
    hypre_Index    *stencil_shape_d;
 
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
       HYPRE_Int nboxes = hypre_BoxArraySize(compute_boxes);
-      data_indices_d  = hypre_TAlloc(HYPRE_Int,   stencil_size * nboxes, HYPRE_MEMORY_DEVICE);
-      stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size,        HYPRE_MEMORY_DEVICE);
+      data_indices_d  = hypre_TAlloc(HYPRE_Int, stencil_size * nboxes, memory_location);
+      stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size, memory_location);
       hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size * nboxes,
-                    HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_HOST);
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size,
+                    memory_location, HYPRE_MEMORY_HOST);
    }
    else
    {
-      data_indices_d  = data_indices[0];
+      data_indices_d = data_indices[0];
       stencil_shape_d = stencil_shape;
    }
 
@@ -456,10 +454,10 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 #undef DEVICE_VAR
    }
 
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_TFree(data_indices_d,  HYPRE_MEMORY_DEVICE);
-      hypre_TFree(stencil_shape_d, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(data_indices_d, memory_location);
+      hypre_TFree(stencil_shape_d, memory_location);
    }
 
    return ierr;

@@ -89,6 +89,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if (nelms <= 0)
    {
+      hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
       return hypre_error_flag;
    }
 

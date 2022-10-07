@@ -19,7 +19,7 @@ hypre_SMGSetup( void               *smg_vdata,
                 hypre_StructVector *b,
                 hypre_StructVector *x )
 {
-   hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
+   hypre_SMGData        *smg_data = (hypre_SMGData *) smg_vdata;
 
    MPI_Comm              comm = (smg_data -> comm);
    hypre_IndexRef        base_index  = (smg_data -> base_index);
@@ -71,9 +71,7 @@ hypre_SMGSetup( void               *smg_vdata,
    void                **interp_data_l;
 
    hypre_StructGrid     *grid;
-
    hypre_Box            *cbox;
-
    HYPRE_Int             i, l;
 
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
@@ -83,12 +81,8 @@ hypre_SMGSetup( void               *smg_vdata,
    char                  filename[255];
 #endif
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int             num_level_GPU = 0;
-   HYPRE_MemoryLocation  data_location;
-   HYPRE_Int             max_box_size  = 0;
-   HYPRE_Int             device_level  = (smg_data -> devicelevel);
-#endif
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
+
    /*-----------------------------------------------------
     * Set up coarsening direction
     *-----------------------------------------------------*/
@@ -281,9 +275,10 @@ hypre_SMGSetup( void               *smg_vdata,
 #endif
    }
 
-   data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
-   //printf("data =%d,data_const=%d,data_location = %d\n",data_size,data_size_const,data_location);
+
+   (smg_data -> memory_location) = memory_location;
    (smg_data -> data) = data;
    (smg_data -> data_const) = data_const;
 
@@ -585,12 +580,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
 #endif
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
-   {
-      hypre_SetDeviceOn();
-   }
-#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

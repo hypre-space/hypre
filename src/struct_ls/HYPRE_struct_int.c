@@ -11,19 +11,20 @@
 
 HYPRE_Int
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
-                                   HYPRE_Int seed )
+                                   HYPRE_Int           seed )
 {
-   hypre_Box          *v_data_box;
-
-   HYPRE_Real         *vp;
-
-   hypre_BoxArray     *boxes;
-   hypre_Box          *box;
-   hypre_Index         loop_size;
-   hypre_IndexRef      start;
-   hypre_Index         unit_stride;
-
-   HYPRE_Int           i;
+   hypre_Box           *v_data_box;
+   HYPRE_Real          *vp;
+   hypre_BoxArray      *boxes;
+   hypre_Box           *box;
+   hypre_Index          loop_size;
+   hypre_IndexRef       start;
+   hypre_Index          unit_stride;
+   HYPRE_Int            i;
+   HYPRE_Complex       *data            = hypre_StructVectorData(vector);
+   HYPRE_Complex       *data_host       = NULL;
+   HYPRE_Int            data_size       = hypre_StructVectorDataSize(vector);
+   HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -35,55 +36,36 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_SetIndex3(unit_stride, 1, 1, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      data_host = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+      hypre_StructVectorData(vector) = data_host;
+   }
+
    hypre_ForBoxI(i, boxes)
    {
-      box      = hypre_BoxArrayBox(boxes, i);
+      box   = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
 
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
       vp = hypre_StructVectorBoxData(vector, i);
 
       hypre_BoxGetSize(box, loop_size);
 
-      /* RL TODO: generate on host and copy to device. FIX? */
-#if defined(HYPRE_USING_GPU)
-      HYPRE_Int loop_n = 1, ii;
-      for (ii = 0; ii < hypre_StructVectorNDim(vector); ii++)
+      hypre_SerialBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
+                                v_data_box, start, unit_stride, vi);
       {
-         loop_n *= loop_size[ii];
-      }
-
-      HYPRE_Real *rand_host   = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_HOST);
-      HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, loop_n, HYPRE_MEMORY_DEVICE);
-
-      ii = 0;
-      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector), loop_size)
-      {
-         rand_host[ii++] = 2.0 * hypre_Rand() - 1.0;
-      }
-      hypre_SerialBoxLoop0End()
-      hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, loop_n,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-#endif
-
-#define DEVICE_VAR is_device_ptr(vp, rand_device)
-      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                          v_data_box, start, unit_stride, vi);
-      {
-#if defined(HYPRE_USING_GPU)
-         vp[vi] = rand_device[idx];
-#else
          vp[vi] = 2.0 * hypre_Rand() - 1.0;
-#endif
       }
-      hypre_BoxLoop1End(vi);
-#undef DEVICE_VAR
+      hypre_SerialBoxLoop1End(vi);
+   }
 
-#if defined(HYPRE_USING_GPU)
-      hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
-#endif
+   if (data_host)
+   {
+      hypre_TMemcpy(data, data_host, HYPRE_Complex, data_size, memory_location, HYPRE_MEMORY_HOST);
+      hypre_StructVectorData(vector) = data;
+      hypre_TFree(data_host, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

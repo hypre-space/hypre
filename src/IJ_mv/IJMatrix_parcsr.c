@@ -2066,7 +2066,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
    hypre_TFree(num_elements_total, HYPRE_MEMORY_HOST);
 
-   /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
+   /*void_contact_buf = hypre_TAlloc(char, storage*obj_size_bytes);*/
    void_contact_buf = hypre_CTAlloc(char, storage * obj_size_bytes, HYPRE_MEMORY_HOST);
    index_ptr = void_contact_buf; /* step through with this index */
 

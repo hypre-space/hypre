@@ -161,6 +161,7 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    hypre_SStructPGrid     *pgrid;
    HYPRE_Int               nvars;
    HYPRE_Int               part, var;
+   HYPRE_MemoryLocation    memory_location = hypre_SStructMatrixMemoryLocation(matrix);
 
    if (matrix)
    {
@@ -194,10 +195,10 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix),    HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix), HYPRE_MEMORY_DEVICE);
-         hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix), HYPRE_MEMORY_DEVICE);
-         hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix),    HYPRE_MEMORY_DEVICE);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix), memory_location);
+         hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix), memory_location);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix), memory_location);
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }
@@ -1093,6 +1094,8 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_Int               num_symm_calls;
    char                    new_filename[255];
 
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+
    hypre_MPI_Comm_rank(comm, &myid);
 
    /*-----------------------------------------------------------
@@ -1199,9 +1202,9 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    h_parmatrix = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(h_umatrix);
 
    /* Move ParCSRMatrix to device memory if necessary */
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
-      parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, HYPRE_MEMORY_DEVICE);
+      parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, memory_location);
    }
    else
    {
