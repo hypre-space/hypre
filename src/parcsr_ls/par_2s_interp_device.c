@@ -11,7 +11,9 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
+#if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
+#endif
 __global__ void hypreCUDAKernel_compute_weak_rowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                       bool has_offd,
                                                       HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
@@ -23,7 +25,9 @@ __global__ void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem &item, HYPRE_
                                                   HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
                                                   HYPRE_Real *rsW );
 
+#if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
+#endif
 __global__ void hypreCUDAKernel_compute_dlam_dtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                    HYPRE_Int *AFF_diag_i,
                                                    HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
