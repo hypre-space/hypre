@@ -26,7 +26,7 @@ hypre_SeqMultivectorCreate( HYPRE_Int size, HYPRE_Int num_vectors  )
 {
    hypre_Multivector *mvector;
 
-   mvector = (hypre_Multivector *) hypre_MAlloc(sizeof(hypre_Multivector), HYPRE_MEMORY_HOST);
+   mvector = hypre_TAlloc(hypre_Multivector, 1, HYPRE_MEMORY_HOST);
 
    hypre_MultivectorNumVectors(mvector) = num_vectors;
    hypre_MultivectorSize(mvector) = size;
@@ -54,12 +54,12 @@ hypre_SeqMultivectorInitialize( hypre_Multivector *mvector )
 
    if (NULL == hypre_MultivectorData(mvector))
       hypre_MultivectorData(mvector) =
-         (HYPRE_Complex *) hypre_MAlloc(sizeof(HYPRE_Complex) * size * num_vectors, HYPRE_MEMORY_HOST);
+         hypre_TAlloc(HYPRE_Complex, size * num_vectors, HYPRE_MEMORY_HOST);
 
    /* now we create a "mask" of "active" vectors; initially all active */
    if (NULL == mvector->active_indices)
    {
-      mvector->active_indices hypre_CTAlloc(HYPRE_Int,  num_vectors, HYPRE_MEMORY_HOST);
+      mvector->active_indices hypre_CTAlloc(HYPRE_Int, num_vectors, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < num_vectors; i++) { mvector->active_indices[i] = i; }
       mvector->num_active_vectors = num_vectors;
@@ -120,7 +120,7 @@ hypre_SeqMultivectorSetMask(hypre_Multivector *mvector, HYPRE_Int * mask)
    HYPRE_Int  i, num_vectors = mvector->num_vectors;
 
    if (mvector->active_indices != NULL) { hypre_TFree(mvector->active_indices, HYPRE_MEMORY_HOST); }
-   mvector->active_indices hypre_CTAlloc(HYPRE_Int,  num_vectors, HYPRE_MEMORY_HOST);
+   mvector->active_indices hypre_CTAlloc(HYPRE_Int, num_vectors, HYPRE_MEMORY_HOST);
 
    mvector->num_active_vectors = 0;
 
@@ -249,7 +249,7 @@ hypre_SeqMultivectorCopy(hypre_Multivector *x, hypre_Multivector *y)
       {
          src = x_data + size * x_active_ind[i];
          dest = y_data + size * y_active_ind[i];
-         hypre_Memcpy(dest, src, HYPRE_Complex, num_bytes, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(dest, src, HYPRE_Complex, num_bytes, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
    }
    return 0;
@@ -263,7 +263,7 @@ hypre_SeqMultivectorCopyWithoutMask(hypre_Multivector *x,
 
    hypre_assert (x->size == y->size && x->num_vectors == y->num_vectors);
    byte_count = x->size * x->num_vectors;
-   hypre_Memcpy(y->data, x->data, HYPRE_Complex, byte_count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(y->data, x->data, HYPRE_Complex, byte_count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    return 0;
 }
 

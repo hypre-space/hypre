@@ -815,6 +815,7 @@ with_MPI_flags
 with_node_aware_mpi
 with_node_aware_mpi_include
 with_memory_tracker
+with_test_using_host
 with_blas_lib
 with_blas_libs
 with_blas_lib_dirs
@@ -1595,6 +1596,8 @@ Optional Packages:
   --with-node-aware-mpi-include=DIR
                           User specifies that nap_comm.hpp is in DIR.
   --with-memory-tracker   Use memory tracker in hypre (default is NO).
+  --with-test-using-host  Use host memory in hypre test drivers (default is
+                          NO).
   --with-blas-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for BLAS. OK to use -L
                           and -l flags in the list
@@ -2819,6 +2822,8 @@ hypre_found_cuda=no
 hypre_using_node_aware_mpi=no
 hypre_using_memory_tracker=no
 
+hypre_test_using_host=no
+
 hypre_cxxstd=11
 
 hypre_using_hip=no
@@ -3782,6 +3787,20 @@ if test "${with_memory_tracker+set}" = set; then :
  esac
 else
   hypre_using_memory_tracker=no
+
+fi
+
+
+
+# Check whether --with-test_using_host was given.
+if test "${with_test_using_host+set}" = set; then :
+  withval=$with_test_using_host; case "$withval" in
+    yes) hypre_test_using_host=yes;;
+    no)  hypre_test_using_host=no ;;
+    *)   hypre_test_using_host=no ;;
+ esac
+else
+  hypre_test_using_host=no
 
 fi
 
@@ -7946,6 +7965,13 @@ if test "$hypre_using_memory_tracker" = "yes"
 then
 
 $as_echo "#define HYPRE_USING_MEMORY_TRACKER 1" >>confdefs.h
+
+fi
+
+if test "$hypre_test_using_host" = "yes"
+then
+
+$as_echo "#define HYPRE_TEST_USING_HOST 1" >>confdefs.h
 
 fi
 

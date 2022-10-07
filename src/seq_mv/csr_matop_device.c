@@ -2412,15 +2412,21 @@ hypre_SortCSRRocsparse( HYPRE_Int            n,
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
 {
 #if defined(HYPRE_USING_ROCSPARSE)
-   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
-                                                        rocsparse_operation_none,
-                                                        hypre_CSRMatrixNumRows(matrix),
-                                                        hypre_CSRMatrixNumCols(matrix),
-                                                        hypre_CSRMatrixNumNonzeros(matrix),
-                                                        hypre_CSRMatrixGPUMatDescr(matrix),
-                                                        hypre_CSRMatrixData(matrix),
-                                                        hypre_CSRMatrixI(matrix),
-                                                        hypre_CSRMatrixJ(matrix),
-                                                        hypre_CSRMatrixGPUMatInfo(matrix)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
+                                                           rocsparse_operation_none,
+                                                           hypre_CSRMatrixNumRows(matrix),
+                                                           hypre_CSRMatrixNumCols(matrix),
+                                                           hypre_CSRMatrixNumNonzeros(matrix),
+                                                           hypre_CSRMatrixGPUMatDescr(matrix),
+                                                           hypre_CSRMatrixData(matrix),
+                                                           hypre_CSRMatrixI(matrix),
+                                                           hypre_CSRMatrixJ(matrix),
+                                                           hypre_CSRMatrixGPUMatInfo(matrix)) );
+   }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }
+

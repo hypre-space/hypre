@@ -88,6 +88,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
@@ -302,6 +303,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (dof_func && hypre_IntArraySize(dof_func) < 0)
    {
       hypre_IntArraySize(dof_func) = local_size;
+      hypre_IntArrayMemoryLocation(dof_func) = memory_location;
    }
 
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
@@ -529,6 +531,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_TFree(hypre_ParAMGDataMaxEigEst(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataMinEigEst(amg_data), HYPRE_MEMORY_HOST);
 
+      if (hypre_ParAMGDataChebyDS(amg_data))
+      {
+         for (i = 0; i < old_num_levels; i++)
+         {
+            hypre_SeqVectorDestroy(hypre_ParAMGDataChebyDS(amg_data)[i]);
+         }
+         hypre_TFree(hypre_ParAMGDataChebyDS(amg_data), HYPRE_MEMORY_HOST);
+      }
+
+      if (hypre_ParAMGDataChebyCoefs(amg_data))
+      {
+         for (i = 0; i < old_num_levels; i++)
+         {
+            hypre_TFree(hypre_ParAMGDataChebyCoefs(amg_data)[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(hypre_ParAMGDataChebyCoefs(amg_data), HYPRE_MEMORY_HOST);
+      }
+
       if (hypre_ParAMGDataL1Norms(amg_data))
       {
          for (i = 0; i < old_num_levels; i++)
@@ -657,7 +677,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (num_C_points_coarse > 0)
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( HYPRE_MEMORY_DEVICE );
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
@@ -708,18 +728,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (num_functions > 1 && dof_func == NULL)
    {
       dof_func = hypre_IntArrayCreate(local_size);
-      hypre_IntArrayInitialize(dof_func);
+      hypre_IntArrayInitialize_v2(dof_func, memory_location);
 
       offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-      hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
-#else
-      for (i = 0; i < local_size; i++)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+      if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_IntArrayData(dof_func)[i] = (i + offset) % num_functions;
+         hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
       }
+      else
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+      {
+         for (i = 0; i < local_size; i++)
+         {
+            hypre_IntArrayData(dof_func)[i] = (i + offset) % num_functions;
+         }
+      }
    }
 
    A_array[0] = A;
@@ -1466,8 +1492,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else if (level < hypre_ParAMGDataCPointsLevel(amg_data))
             {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(
-                                                                     CF_marker_array[level]) );
+               HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
+               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
                {
 #if defined(HYPRE_USING_SYCL)
@@ -1487,8 +1513,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                   if ( level + 1 < hypre_ParAMGDataCPointsLevel(amg_data) )
                   {
-
-                     HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, local_num_vars, HYPRE_MEMORY_DEVICE);
+                     HYPRE_Int *tmp = hypre_TAlloc(HYPRE_Int, local_num_vars, memory_location);
 #if defined(HYPRE_USING_SYCL)
                      HYPRE_ONEDPL_CALL( std::exclusive_scan,
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),
@@ -1522,7 +1547,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                         equal<HYPRE_Int>(2) );
 #endif
 
-                     hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+                     hypre_TFree(tmp, memory_location);
                   }
 
 #if defined(HYPRE_USING_SYCL)
@@ -1628,6 +1653,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                {
                   hypre_ParCSRMatrixDestroy(Sabs);
                   Sabs = NULL;
+               }
+
+               if (coarse_dof_func)
+               {
+                  hypre_IntArrayDestroy(coarse_dof_func);
+                  coarse_dof_func = NULL;
                }
 
                HYPRE_ANNOTATE_REGION_END("%s", "Coarsening");
@@ -2065,7 +2096,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               if (hypre_IntArrayMemoryLocation(CF_marker_array[level]) == HYPRE_MEMORY_DEVICE)
+               HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
+               HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+               if (exec == HYPRE_EXEC_DEVICE)
                {
                   hypre_BoomerAMGCFMarkerTo1minus1Device(CF_marker,
                                                          hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])));

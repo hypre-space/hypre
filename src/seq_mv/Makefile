@@ -34,6 +34,7 @@ FILES =\
  HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
+ vector.c\
  vector_batched.c
 
 CUFILES =\
@@ -73,7 +74,7 @@ CUFILES =\
  csr_spgemm_device_util.c\
  csr_spmv_device.c\
  csr_sptrans_device.c\
- vector.c
+ vector_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

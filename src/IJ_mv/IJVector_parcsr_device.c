@@ -17,30 +17,36 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
-#if defined(HYPRE_USING_SYCL)
-namespace thrust = std;
-#endif
-
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
-template<typename T1, typename T2>
 #if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
+{
+   typedef std::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   {
+      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
+                              std::get<1>(x) + std::get<1>(y) );
+   }
+};
 #else
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public
    thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-#endif
 {
    typedef thrust::tuple<T1, T2> Tuple;
 
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y )
    {
       return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
                                  thrust::get<1>(x) + thrust::get<1>(y) );
    }
 };
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleSortAndReduce1
@@ -503,11 +509,12 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_data, off_proc_sora);
+         /* WM: todo - it seems like this was wrong before? I ignored the not1 negation below??? */
          auto new_end1 = hypreSycl_copy_if( zip_in,  /* first */
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */
                                             zip_out, /* result */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
@@ -515,7 +522,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          auto new_end2 = hypreSycl_remove_if( zip_in,         /* first */
                                               zip_in + nelms, /* last */
                                               is_on_proc,     /* stencil */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);
 #else

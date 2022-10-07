@@ -1360,6 +1360,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       P_diag_j );
 #endif
 
+   hypre_TFree(P_diag_j_temp_compressed, HYPRE_MEMORY_DEVICE);
+
    /* mark the offd indices for P as a subset of offd indices of A */
    HYPRE_Int *mark_P_offd_idx = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
    // note that scatter is usually not safe if the same index appears more than once in the map,
@@ -1485,6 +1487,10 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
    hypre_TFree(CF_marker_offd, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(diag_compress_marker, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(offd_compress_marker, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(P_diag_j_temp, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(P_offd_j_temp, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

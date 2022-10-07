@@ -34,6 +34,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommHandle *comm_handle;
    hypre_ParCSRCommPkg    *tmp_comm_pkg = NULL;
 
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
@@ -255,8 +257,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    if (pass_array_size) { pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST); }
    pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes + 1, HYPRE_MEMORY_HOST);
    if (n_fine) { assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
    if (n_coarse) { C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); }
 
    if (num_cols_offd)
@@ -1134,14 +1136,14 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_TFree(cnt_nz_offd_per_thread, HYPRE_MEMORY_HOST);
    hypre_TFree(max_num_threads, HYPRE_MEMORY_HOST);
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_DEVICE);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, memory_location_P);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, memory_location_P);
 
 
    if (total_nz_offd)
    {
-      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_DEVICE);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_DEVICE);
+      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, memory_location_P);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, memory_location_P);
    }
 
    for (i = 0; i < n_fine; i++)
