@@ -2018,6 +2018,73 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
    return hypreDevice_Scalen(d_x, n, d_y, v);
 }
 
+/*--------------------------------------------------------------------
+ * hypreDevice_StableSortTupleByTupleKey
+ *
+ * opt:
+ *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')
+ *                         [normal tupe comp]
+ *
+ *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a')
+ *                         [used in assembly to put diagonal first]
+ *--------------------------------------------------------------------*/
+
+template <typename T1, typename T2, typename T3, typename T4>
+HYPRE_Int
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
+                                      T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
+                                      HYPRE_Int opt)
+{
+#if defined(HYPRE_USING_SYCL)
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys1, keys2, vals1, vals2);
+
+   if (opt == 0)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort,
+                        zipped_begin,
+                        zipped_begin + N,
+                        std::less< std::tuple<T1, T2, T3, T4> >());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort,
+                        zipped_begin,
+                        zipped_begin + N,
+                        TupleComp3<T1, T2, T3, T4>());
+   }
+#else
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
+
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key,
+                        begin_keys,
+                        end_keys,
+                        begin_vals,
+                        thrust::less< thrust::tuple<T1, T2> >());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key,
+                        begin_keys,
+                        end_keys,
+                        begin_vals,
+                        TupleComp3<T1, T2>());
+   }
+#endif
+
+   return hypre_error_flag;
+}
+
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
+                                                         HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#if defined(HYPRE_MIXEDINT)
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
+                                                         HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#endif
+
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -2261,54 +2328,6 @@ hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------
- * hypreDevice_StableSortTupleByTupleKey
- *
- * opt:
- *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')
- *                         [normal tupe comp]
- *
- *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a')
- *                         [used in assembly to put diagonal first]
- *--------------------------------------------------------------------*/
-
-template <typename T1, typename T2, typename T3, typename T4>
-HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
-                                      T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt)
-{
-   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
-   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
-   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
-
-   if (opt == 0)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key,
-                        begin_keys,
-                        end_keys,
-                        begin_vals,
-                        thrust::less< thrust::tuple<T1, T2> >());
-   }
-   else if (opt == 2)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key,
-                        begin_keys,
-                        end_keys,
-                        begin_vals,
-                        TupleComp3<T1, T2>());
-   }
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                         HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
-#if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
-                                                         HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
-#endif
 
 #if defined(HYPRE_USING_CUSPARSE)
 
