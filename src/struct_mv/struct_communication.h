@@ -79,45 +79,50 @@ typedef struct hypre_CommType_struct
 
 typedef struct hypre_CommPkg_struct
 {
-   MPI_Comm          comm;
+   MPI_Comm             comm;
 
-   HYPRE_Int         first_comm; /* is this the first communication? */
+   /* is this the first communication? */
+   HYPRE_Int            first_comm;
 
-   HYPRE_Int         ndim;
-   HYPRE_Int         num_values;
-   hypre_Index       send_stride;
-   hypre_Index       recv_stride;
+   HYPRE_Int            ndim;
+   HYPRE_Int            num_values;
+   hypre_Index          send_stride;
+   hypre_Index          recv_stride;
 
-   HYPRE_Int         send_bufsize;            /* total send buffer size (in doubles) */
-   HYPRE_Int         recv_bufsize;            /* total recv buffer size (in doubles) */
-   HYPRE_Int
-   send_bufsize_first_comm; /* total send buffer size (in doubles) at the first comm. */
-   HYPRE_Int
-   recv_bufsize_first_comm; /* total recv buffer size (in doubles) at the first comm. */
+   /* total send buffer size (in doubles) */
+   HYPRE_Int            send_bufsize;
+   /* total recv buffer size (in doubles) */
+   HYPRE_Int            recv_bufsize;
+   /* total send buffer size (in doubles) at the first comm. */
+   HYPRE_Int            send_bufsize_first_comm;
+   /* total recv buffer size (in doubles) at the first comm. */
+   HYPRE_Int            recv_bufsize_first_comm;
 
-   HYPRE_Int         num_sends;
-   HYPRE_Int         num_recvs;
-   hypre_CommType   *send_types;
-   hypre_CommType   *recv_types;
+   HYPRE_Int            num_sends;
+   HYPRE_Int            num_recvs;
+   hypre_CommType      *send_types;
+   hypre_CommType      *recv_types;
 
-   hypre_CommType   *copy_from_type;
-   hypre_CommType   *copy_to_type;
+   hypre_CommType      *copy_from_type;
+   hypre_CommType      *copy_to_type;
 
    /* these pointers are just to help free up memory for send/from types */
    hypre_CommEntryType *entries;
    HYPRE_Int           *rem_boxnums;
    hypre_Box           *rem_boxes;
 
-   HYPRE_Int         num_orders;
-   HYPRE_Int       **orders;            /* num_orders x num_values */
+   HYPRE_Int            num_orders;
+   /* num_orders x num_values */
+   HYPRE_Int          **orders;
 
-   HYPRE_Int        *recv_data_offsets; /* offsets into recv data (by box) */
-   hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
+   /* offsets into recv data (by box) */
+   HYPRE_Int           *recv_data_offsets;
+   /* recv data dimensions (by box) */
+   hypre_BoxArray      *recv_data_space;
 
-   hypre_Index       identity_coord;
-   hypre_Index       identity_dir;
-   HYPRE_Int        *identity_order;
-
+   hypre_Index          identity_coord;
+   hypre_Index          identity_dir;
+   HYPRE_Int           *identity_order;
 } hypre_CommPkg;
 
 /*--------------------------------------------------------------------------
@@ -137,9 +142,8 @@ typedef struct hypre_CommHandle_struct
    HYPRE_Complex    **send_buffers;
    HYPRE_Complex    **recv_buffers;
 
-   /* these are copies of send/recv buffers on device */
-   HYPRE_Complex    **send_buffers_device;
-   HYPRE_Complex    **recv_buffers_device;
+   HYPRE_Complex    **send_buffers_mpi;
+   HYPRE_Complex    **recv_buffers_mpi;
 
    /* set = 0, add = 1 */
    HYPRE_Int          action;
@@ -250,7 +254,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleSendBuffers(comm_handle)          (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle)          (comm_handle -> recv_buffers)
 #define hypre_CommHandleAction(comm_handle)               (comm_handle -> action)
-#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_device)
-#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_device)
+#define hypre_CommHandleSendBuffersMPI(comm_handle)       (comm_handle -> send_buffers_mpi)
+#define hypre_CommHandleRecvBuffersMPI(comm_handle)       (comm_handle -> recv_buffers_mpi)
 
 #endif

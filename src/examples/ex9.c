@@ -624,6 +624,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructGMRESGetNumIterations(solver, &its);
 
          /* clean up */
+         HYPRE_SStructSysPFMGDestroy(precond);
          HYPRE_SStructGMRESDestroy(solver);
       }
       else if (solver_id == 1) /* SysPFMG */

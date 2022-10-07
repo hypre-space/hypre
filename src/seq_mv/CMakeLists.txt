@@ -57,6 +57,7 @@ set(SRCS
   csr_spmv_device.c
   csr_sptrans_device.c
   vector.c
+  vector_device.c
 )
 
 # Autogenerate csr_spgemm_device_numer$ files
@@ -123,7 +124,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     csr_spgemm_device_util.c
     csr_spmv_device.c
     csr_sptrans_device.c
-    vector.c
+    vector_device.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

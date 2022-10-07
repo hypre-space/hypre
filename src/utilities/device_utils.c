@@ -243,7 +243,7 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-         if (cuda_compute_stream_sync)
+         if (hypre_HandleDefaultExecPolicy(hypre_handle) == HYPRE_EXEC_DEVICE && cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
             HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
@@ -2025,14 +2025,16 @@ hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
  * hypre's memory model to Alloc and Free.
  *
  * See commented out code below (and do not delete)
+ *
+ * This is really only defined for CUDA and not for HIP
  *--------------------------------------------------------------------*/
 
-void hypre_CudaCompileFlagCheck()
+HYPRE_Int
+hypre_CudaCompileFlagCheck()
 {
-   // This is really only defined for CUDA and not for HIP
 #if defined(HYPRE_USING_CUDA)
-
-   HYPRE_Int device = hypre_HandleDevice(hypre_handle());
+   HYPRE_Int device;
+   hypre_GetDevice(&device);
 
    struct cudaDeviceProp props;
    cudaGetDeviceProperties(&props, device);
@@ -2053,23 +2055,29 @@ void hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   if (-1 == cuda_arch_compile)
-   {
-      hypre_error_w_msg(1, "hypre error: no proper cuda_arch found");
-   }
-   else if (cuda_arch_actual != cuda_arch_compile)
+   if (cuda_arch_actual != cuda_arch_compile)
    {
       char msg[256];
-      hypre_sprintf(msg, "hypre warning: Compile 'arch=compute_' does not match device arch %d",
-                    cuda_arch_actual);
-      hypre_error_w_msg(1, msg);
-      /*
-      hypre_printf("%s\n", msg);
-      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
-      */
-   }
 
+      if (-1 == cuda_arch_compile)
+      {
+         hypre_sprintf(msg, "hypre error: no proper cuda_arch found");
+      }
+      else
+      {
+         hypre_sprintf(msg, "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+                       cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
+      }
+
+      hypre_error_w_msg(1, msg);
+#if defined(HYPRE_DEBUG)
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s\n", msg);
+#endif
+      hypre_assert(0);
+   }
 #endif // defined(HYPRE_USING_CUDA)
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------
@@ -2081,6 +2089,12 @@ hypreDevice_IntegerReduceSum( HYPRE_Int  n,
                               HYPRE_Int *d_i )
 {
    return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
+}
+
+HYPRE_Complex
+hypreDevice_ComplexReduceSum(HYPRE_Int n, HYPRE_Complex *d_x)
+{
+   return HYPRE_THRUST_CALL(reduce, d_x, d_x + n);
 }
 
 /*--------------------------------------------------------------------
