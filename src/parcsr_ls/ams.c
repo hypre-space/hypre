@@ -541,8 +541,9 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 
    HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_l1);
 
-   HYPRE_MemoryLocation memory_location_tmp = exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST :
-                                              HYPRE_MEMORY_DEVICE;
+   HYPRE_MemoryLocation memory_location_tmp =
+      exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
+
    HYPRE_Real *diag_tmp = NULL;
 
    HYPRE_Int *cf_marker_offd = NULL;

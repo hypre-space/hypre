@@ -144,6 +144,8 @@ hypre_BoomerAMGCreate()
 
    char     plot_file_name[251] = {0};
 
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
@@ -275,14 +277,15 @@ hypre_BoomerAMGCreate()
    keepT = 0;
    modu_rap = 0;
 
-#if defined(HYPRE_USING_GPU)
-   keepT           =  1;
-   modu_rap        =  1;
-   coarsen_type    =  8;
-   relax_down      = 18;
-   relax_up        = 18;
-   agg_interp_type =  7;
-#endif
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      keepT           =  1;
+      modu_rap        =  1;
+      coarsen_type    =  8;
+      relax_down      = 18;
+      relax_up        = 18;
+      agg_interp_type =  7;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -292,7 +295,8 @@ hypre_BoomerAMGCreate()
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
 
-   hypre_ParAMGDataMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
+   /* memory location will be reset at the setup */
+   hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
 
    hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) = -1;
    hypre_ParAMGDataPartialCycleControl(amg_data) = -1;
@@ -534,6 +538,7 @@ hypre_BoomerAMGDestroy( void *data )
       MPI_Comm      new_comm = hypre_ParAMGDataNewComm(amg_data);
       HYPRE_Int    *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
       HYPRE_Int     i;
+      HYPRE_MemoryLocation memory_location = hypre_ParAMGDataMemoryLocation(amg_data);
 
 #ifdef HYPRE_USING_DSUPERLU
       // if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
@@ -844,8 +849,8 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
 
       /* destroy input CF_marker data */
-      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_DEVICE);
-      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), memory_location);
+      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
       hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
@@ -3679,8 +3684,7 @@ hypre_BoomerAMGSetDofFunc( void                 *data,
       return hypre_error_flag;
    }
    hypre_IntArrayDestroy(hypre_ParAMGDataDofFunc(amg_data));
-   /* NOTE: size of hypre_IntArray will be set during AMG setup
-    *       the memory location is assumed to be host */
+   /* NOTE: size and memory location of hypre_IntArray will be set during AMG setup */
    if (dof_func == NULL)
    {
       hypre_ParAMGDataDofFunc(amg_data) = NULL;
@@ -3688,7 +3692,6 @@ hypre_BoomerAMGSetDofFunc( void                 *data,
    else
    {
       hypre_ParAMGDataDofFunc(amg_data) = hypre_IntArrayCreate(-1);
-      hypre_IntArrayMemoryLocation(hypre_ParAMGDataDofFunc(amg_data)) = HYPRE_MEMORY_DEVICE;
       hypre_IntArrayData(hypre_ParAMGDataDofFunc(amg_data)) = dof_func;
    }
 
@@ -4825,7 +4828,6 @@ hypre_BoomerAMGSetCPoints(void         *data,
    HYPRE_BigInt     *C_points_marker = NULL;
    HYPRE_Int        *C_points_local_marker = NULL;
    HYPRE_Int         cpt_level;
-   HYPRE_Int         i;
 
    if (!amg_data)
    {
@@ -4846,11 +4848,13 @@ hypre_BoomerAMGSetCPoints(void         *data,
       return hypre_error_flag;
    }
 
+   HYPRE_MemoryLocation memory_location = hypre_ParAMGDataMemoryLocation(amg_data);
+
    /* free data not previously destroyed */
    if (hypre_ParAMGDataCPointsLevel(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), HYPRE_MEMORY_DEVICE);
-      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParAMGDataCPointsMarker(amg_data), memory_location);
+      hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
    }
 
    /* set Cpoint data */
@@ -4865,14 +4869,10 @@ hypre_BoomerAMGSetCPoints(void         *data,
 
    if (cpt_level)
    {
-      C_points_marker       = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, HYPRE_MEMORY_DEVICE);
-      C_points_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, HYPRE_MEMORY_DEVICE);
+      C_points_marker = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, memory_location);
+      C_points_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, memory_location);
 
-      /* copy Cpoints indexes */
-      for (i = 0; i < num_cpt_coarse; i++)
-      {
-         C_points_marker[i] = cpt_coarse_index[i];
-      }
+      hypre_TMemcpy(C_points_marker, cpt_coarse_index, HYPRE_BigInt, num_cpt_coarse, memory_location, HYPRE_MEMORY_HOST);
    }
    hypre_ParAMGDataCPointsMarker(amg_data)      = C_points_marker;
    hypre_ParAMGDataCPointsLocalMarker(amg_data) = C_points_local_marker;

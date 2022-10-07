@@ -246,7 +246,8 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
 
    hypre_ParMatmul_RowSizes(
       /*&C_diag_i, &C_offd_i, &B_marker,*/
-      HYPRE_MEMORY_DEVICE, /* RL: XXX */
+      /* BooleanMatrix only uses HOST memory for now */
+      HYPRE_MEMORY_HOST,
       &C_diag_i, &C_offd_i, NULL,
       A_diag_i, A_diag_j, A_offd_i, A_offd_j,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,

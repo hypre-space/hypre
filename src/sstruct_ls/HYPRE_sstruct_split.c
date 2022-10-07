@@ -185,10 +185,17 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    nparts = hypre_SStructMatrixNParts(A);
    nvars = hypre_TAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
    smatvec_data    = hypre_TAlloc(void ***,  nparts, HYPRE_MEMORY_HOST);
-   ssolver_solve   = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts),
-                                                      HYPRE_MEMORY_HOST);
-   ssolver_destroy = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts),
-                                                      HYPRE_MEMORY_HOST);
+
+   // RL: TODO TAlloc?
+   ssolver_solve   = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts), HYPRE_MEMORY_HOST);
+   ssolver_destroy = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts), HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   hypre_MemoryTrackerInsert1("malloc", ssolver_solve, sizeof(HYPRE_Int (**)()) * nparts,
+                              hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
+   hypre_MemoryTrackerInsert1("malloc", ssolver_destroy, sizeof(HYPRE_Int (**)()) * nparts,
+                              hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
+#endif
+
    ssolver_data    = hypre_TAlloc(void **,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
@@ -198,10 +205,19 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
       nvars[part] = hypre_SStructPMatrixNVars(pA);
 
       smatvec_data[part]    = hypre_TAlloc(void **,  nvars[part], HYPRE_MEMORY_HOST);
+
+      // RL: TODO TAlloc?
       ssolver_solve[part]   =
          (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]), HYPRE_MEMORY_HOST);
       ssolver_destroy[part] =
          (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]), HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+      hypre_MemoryTrackerInsert1("malloc", ssolver_solve[part], sizeof(HYPRE_Int (*)()) * nvars[part],
+                                 hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
+      hypre_MemoryTrackerInsert1("malloc", ssolver_destroy[part], sizeof(HYPRE_Int (*)()) * nvars[part],
+                                 hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
+#endif
+
       ssolver_data[part]    = hypre_TAlloc(void *,  nvars[part], HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars[part]; vi++)
       {
