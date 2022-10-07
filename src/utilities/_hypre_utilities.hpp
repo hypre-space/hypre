@@ -1619,14 +1619,11 @@ template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
+template <typename T>
+HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
+                                                    HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
+
 #endif
-<<<<<<< HEAD
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
-=======
->>>>>>> sycl_ij_matrix
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 

@@ -509,7 +509,6 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_data, off_proc_sora);
-         /* WM: todo - it seems like this was wrong before? I ignored the not1 negation below??? */
          auto new_end1 = hypreSycl_copy_if( zip_in,  /* first */
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */

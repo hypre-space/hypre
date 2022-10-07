@@ -2474,9 +2474,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         then
            SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
         else
-           SYCLFLAGS="-O3 ${SYCLFLAGS}"
+           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
         fi
-        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
         if test "x${HYPRE_SYCL_TARGET}" != "x"

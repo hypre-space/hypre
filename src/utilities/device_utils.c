@@ -243,7 +243,7 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-         if (cuda_compute_stream_sync)
+         if (hypre_HandleDefaultExecPolicy(hypre_handle) == HYPRE_EXEC_DEVICE && cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
             HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
@@ -1930,6 +1930,20 @@ hypreDevice_IntegerReduceSum( HYPRE_Int  n,
    return HYPRE_ONEDPL_CALL(std::reduce, d_i, d_i + n);
 #else
    return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
+#endif
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexReduceSum
+ *--------------------------------------------------------------------*/
+
+HYPRE_Complex
+hypreDevice_ComplexReduceSum(HYPRE_Int n, HYPRE_Complex *d_x)
+{
+#if defined(HYPRE_USING_SYCL)
+   return HYPRE_ONEDPL_CALL(std::reduce, d_x, d_x + n);
+#else
+   return HYPRE_THRUST_CALL(reduce, d_x, d_x + n);
 #endif
 }
 
