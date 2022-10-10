@@ -96,6 +96,7 @@ using hypre_DeviceItem = void*;
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
+#define CUSPARSE_NEWSPMM_VERSION 11201
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define THRUST_CALL_BLOCKING 1
 
@@ -188,6 +189,8 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#define HYPRE_MAX_NTHREADS_BLOCK 1024
 
 // HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
 #if defined(HYPRE_USING_CUDA)
@@ -1283,7 +1286,6 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
 }
 
@@ -1613,17 +1615,15 @@ HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);
 
-#endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
+#endif
 
-void hypre_CudaCompileFlagCheck();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
 #if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);
@@ -1791,26 +1791,26 @@ __inline__ __host__ __device__
 T blockReduceSum(T val)
 {
 #if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
-   //static __shared__ T shared[HYPRE_WARP_SIZE]; // Shared mem for HYPRE_WARP_SIZE partial sums
+   // Shared mem for HYPRE_WARP_SIZE partial sums
+   __shared__ T shared[HYPRE_WARP_SIZE];
 
-   __shared__ T shared[HYPRE_WARP_SIZE];        // Shared mem for HYPRE_WARP_SIZE partial sums
-
-   //HYPRE_Int lane = threadIdx.x % warpSize;
-   //HYPRE_Int wid  = threadIdx.x / warpSize;
    HYPRE_Int lane = threadIdx.x & (warpSize - 1);
    HYPRE_Int wid  = threadIdx.x >> HYPRE_WARP_BITSHIFT;
 
-   val = warpReduceSum(val);       // Each warp performs partial reduction
+   // Each warp performs partial reduction
+   val = warpReduceSum(val);
 
+   // Write reduced value to shared memory
    if (lane == 0)
    {
-      shared[wid] = val;          // Write reduced value to shared memory
+      shared[wid] = val;
    }
 
-   __syncthreads();               // Wait for all partial reductions
+   // Wait for all partial reductions
+   __syncthreads();
 
-   //read from shared memory only if that warp existed
-   if (threadIdx.x < blockDim.x / warpSize)
+   // read from shared memory only if that warp existed
+   if (threadIdx.x < (blockDim.x >> HYPRE_WARP_BITSHIFT))
    {
       val = shared[lane];
    }
@@ -1819,9 +1819,10 @@ T blockReduceSum(T val)
       val = 0.0;
    }
 
+   // Final reduce within first warp
    if (wid == 0)
    {
-      val = warpReduceSum(val); //Final reduce within first warp
+      val = warpReduceSum(val);
    }
 
 #endif
@@ -1830,15 +1831,21 @@ T blockReduceSum(T val)
 
 template<typename T>
 __global__ void
-OneBlockReduceKernel(hypre_DeviceItem &item, T *arr, HYPRE_Int N)
+OneBlockReduceKernel(hypre_DeviceItem &item,
+                     T                *arr,
+                     HYPRE_Int         N)
 {
    T sum;
+
    sum = 0.0;
+
    if (threadIdx.x < N)
    {
       sum = arr[threadIdx.x];
    }
+
    sum = blockReduceSum(sum);
+
    if (threadIdx.x == 0)
    {
       arr[0] = sum;
@@ -1866,15 +1873,6 @@ struct ReduceSum
       init = val;
       __thread_sum = 0.0;
       nblocks = -1;
-
-      if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
-      {
-         /* allocate for the max size for reducing double6 type */
-         hypre_HandleReduceBuffer(hypre_handle()) = hypre_TAlloc(HYPRE_double6, 1024,
-                                                                 HYPRE_MEMORY_DEVICE);
-      }
-
-      d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
    }
 
    /* copy constructor */
@@ -1882,6 +1880,19 @@ struct ReduceSum
    ReduceSum(const ReduceSum<T>& other)
    {
       *this = other;
+   }
+
+   __host__ void
+   Allocate2ndPhaseBuffer()
+   {
+      if (hypre_HandleReduceBuffer(hypre_handle()) == NULL)
+      {
+         /* allocate for the max size for reducing double6 type */
+         hypre_HandleReduceBuffer(hypre_handle()) =
+            hypre_TAlloc(HYPRE_double6, HYPRE_MAX_NTHREADS_BLOCK, HYPRE_MEMORY_DEVICE);
+      }
+
+      d_buf = (T*) hypre_HandleReduceBuffer(hypre_handle());
    }
 
    /* reduction within blocks */
@@ -1909,7 +1920,8 @@ struct ReduceSum
    {
       T val;
 
-      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+      const HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+      const HYPRE_ExecutionPolicy exec_policy = hypre_GetExecPolicy1(memory_location);
 
       if (exec_policy == HYPRE_EXEC_HOST)
       {
@@ -1919,8 +1931,8 @@ struct ReduceSum
       else
       {
          /* 2nd reduction with only *one* block */
-         hypre_assert(nblocks >= 0 && nblocks <= 1024);
-         const dim3 gDim(1), bDim(1024);
+         hypre_assert(nblocks >= 0 && nblocks <= HYPRE_MAX_NTHREADS_BLOCK);
+         const dim3 gDim(1), bDim(HYPRE_MAX_NTHREADS_BLOCK);
          HYPRE_GPU_LAUNCH( OneBlockReduceKernel, gDim, bDim, d_buf, nblocks );
          hypre_TMemcpy(&val, d_buf, T, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
          val += init;

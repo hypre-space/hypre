@@ -81,11 +81,19 @@ hypre_AMGDDCompGridMatrixDestroy( hypre_AMGDDCompGridMatrix *matrix )
       }
       else if (hypre_AMGDDCompGridMatrixOwnsOffdColIndices(matrix))
       {
+         HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(hypre_AMGDDCompGridMatrixOwnedOffd(matrix));
+
          if (hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)))
          {
-            hypre_TFree(hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)),
-                        hypre_CSRMatrixMemoryLocation(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)));
+            hypre_TFree(hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)), memory_location);
          }
+
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+         hypre_TFree(hypre_CSRMatrixSortedData(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)), memory_location);
+         hypre_TFree(hypre_CSRMatrixSortedJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)), memory_location);
+         hypre_CsrsvDataDestroy(hypre_CSRMatrixCsrsvData(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)));
+         hypre_GpuMatDataDestroy(hypre_CSRMatrixGPUMatData(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)));
+#endif
 
          hypre_TFree(hypre_AMGDDCompGridMatrixOwnedOffd(matrix), HYPRE_MEMORY_HOST);
       }

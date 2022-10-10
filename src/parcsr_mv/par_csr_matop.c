@@ -4148,7 +4148,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(C_tmp_offd);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
@@ -6267,3 +6267,59 @@ hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_ParCSRDiagScaleVectorHost( HYPRE_ParCSRMatrix HA,
+                                 HYPRE_ParVector    Hy,
+                                 HYPRE_ParVector    Hx )
+{
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+   hypre_ParVector    *y = (hypre_ParVector *) Hy;
+   hypre_ParVector    *x = (hypre_ParVector *) Hx;
+   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
+   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
+   HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
+   HYPRE_Int i;
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < local_size; i++)
+   {
+      x_data[i] = y_data[i] / A_data[A_i[i]];
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParCSRDiagScaleVector( HYPRE_ParCSRMatrix HA,
+                             HYPRE_ParVector    Hy,
+                             HYPRE_ParVector    Hx )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("hypre_ParCSRDiagScaleVector");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(HA) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRDiagScaleVectorDevice(HA, Hy, Hx);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRDiagScaleVectorHost(HA, Hy, Hx);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
+}
+

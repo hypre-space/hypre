@@ -2683,6 +2683,7 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    HYPRE_Int num_sends, num_cols_offd;
    HYPRE_Int local_size;
    HYPRE_Real *x_buf_data, *x_tmp_data, *x_local_data;
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_ParCSRCommPkg *comm_pkg;
    hypre_CSRMatrix *offd;
@@ -2713,15 +2714,14 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
       }
 
       x_tmp = hypre_SeqVectorCreate(num_cols_offd);
-      hypre_SeqVectorInitialize(x_tmp);
+      hypre_SeqVectorInitialize_v2(x_tmp, memory_location);
       x_tmp_data = hypre_VectorData(x_tmp);
 
       comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, x_buf_data,
                                                   x_tmp_data);
 
       tmp_vector = hypre_SeqVectorCreate(local_size);
-      hypre_VectorMemoryLocation(tmp_vector) = HYPRE_MEMORY_DEVICE;
-      hypre_SeqVectorInitialize(tmp_vector);
+      hypre_SeqVectorInitialize_v2(tmp_vector, memory_location);
       hypre_SeqVectorCopy(rhs, tmp_vector);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -2735,8 +2735,7 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    else
    {
       tmp_vector = hypre_SeqVectorCreate(local_size);
-      hypre_VectorMemoryLocation(tmp_vector) = HYPRE_MEMORY_DEVICE;
-      hypre_SeqVectorInitialize(tmp_vector);
+      hypre_SeqVectorInitialize_v2(tmp_vector, memory_location);
       hypre_SeqVectorCopy(rhs, tmp_vector);
    }
 

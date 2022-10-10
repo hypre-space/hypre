@@ -215,6 +215,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host2);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 }
 
 void runjob2( HYPRE_ParCSRMatrix parcsr_A,
@@ -341,6 +342,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host2);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 }
 
 void runjob3( HYPRE_ParCSRMatrix parcsr_A,
@@ -378,8 +380,15 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_P) == HYPRE_MEMORY_DEVICE);
 
-   hypre_MatvecCommPkgCreate(parcsr_A);
-   hypre_MatvecCommPkgCreate(parcsr_P);
+   if (!hypre_ParCSRMatrixCommPkg(parcsr_A))
+   {
+      hypre_MatvecCommPkgCreate(parcsr_A);
+   }
+
+   if (!hypre_ParCSRMatrixCommPkg(parcsr_P))
+   {
+      hypre_MatvecCommPkgCreate(parcsr_P);
+   }
 
    hypre_ParCSRMatrixSetPatternOnly(parcsr_P, boolean_P);
 
@@ -729,6 +738,7 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_D);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 #endif
 }
 
