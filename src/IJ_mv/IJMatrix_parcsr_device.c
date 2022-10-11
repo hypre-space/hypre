@@ -171,7 +171,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
 #if defined(HYPRE_USING_SYCL)
       auto zip_in = oneapi::dpl::make_zip_iterator(cols, values);
-      auto zip_out = oneapi::dpl::make_zip_iterator(stack_j + stack_elmts_current, stack_data + stack_elmts_current);
+      auto zip_out = oneapi::dpl::make_zip_iterator(stack_j + stack_elmts_current,
+                                                    stack_data + stack_elmts_current);
       auto new_end = hypreSycl_copy_if( zip_in,
                                         zip_in + len,
                                         indicator,
@@ -302,13 +303,13 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                     I0_J0_zip,                                                    /* keys_first */
-                     I0_J0_zip + N0,                                               /* keys_last */
-                     oneapi::dpl::make_zip_iterator(X0, A0),                       /* values_first */
-                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
-                     oneapi::dpl::make_zip_iterator(X, A),                         /* values_output */
-                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /* binary_pred */
-                     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /* binary_op */);
+                                     I0_J0_zip,                                                    /* keys_first */
+                                     I0_J0_zip + N0,                                               /* keys_last */
+                                     oneapi::dpl::make_zip_iterator(X0, A0),                       /* values_first */
+                                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
+                                     oneapi::dpl::make_zip_iterator(X, A),                         /* values_output */
+                                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /* binary_pred */
+                                     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /* binary_op */);
 
    *N1 = std::get<0>(new_end.first.base()) - I;
 #else
@@ -394,13 +395,13 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
 
 #if defined(HYPRE_USING_SYCL)
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                     oneapi::dpl::make_zip_iterator(I0, J0),                 /* keys_first */
-                     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0),       /* keys_last */
-                     oneapi::dpl::make_zip_iterator(X0, A0),                 /* values_first */
-                     oneapi::dpl::make_zip_iterator(I, J),                   /* keys_output */
-                     oneapi::dpl::make_zip_iterator(X, A),                   /* values_output */
-                     std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /* binary_pred */
-                     hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /* binary_op */);
+                                     oneapi::dpl::make_zip_iterator(I0, J0),                 /* keys_first */
+                                     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0),       /* keys_last */
+                                     oneapi::dpl::make_zip_iterator(X0, A0),                 /* values_first */
+                                     oneapi::dpl::make_zip_iterator(I, J),                   /* keys_output */
+                                     oneapi::dpl::make_zip_iterator(X, A),                   /* values_output */
+                                     std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /* binary_pred */
+                                     hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /* binary_op */);
 
    *N1 = std::get<0>(new_end.first.base()) - I;
 #else
@@ -472,12 +473,12 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
 
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                     I0_J0_zip,                                                    /* keys_first */
-                     I0_J0_zip + N0,                                               /* keys_last */
-                     A0,                                                           /* values_first */
-                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
-                     A,                                                            /* values_output */
-                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >()     /* binary_pred */);
+                                     I0_J0_zip,                                                    /* keys_first */
+                                     I0_J0_zip + N0,                                               /* keys_last */
+                                     A0,                                                           /* values_first */
+                                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
+                                     A,                                                            /* values_output */
+                                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >()     /* binary_pred */);
 #else
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
@@ -732,7 +733,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                          new_i,
                          new_i + new_nnz,
                          new_i_local,
-      [row_start=row_start] (const auto & x) {return x - row_start;} );
+      [row_start = row_start] (const auto & x) {return x - row_start;} );
 #else
       HYPRE_THRUST_CALL( transform,
                          new_i,

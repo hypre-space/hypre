@@ -81,7 +81,8 @@ hypre_AMGDDCompGridMatrixDestroy( hypre_AMGDDCompGridMatrix *matrix )
       }
       else if (hypre_AMGDDCompGridMatrixOwnsOffdColIndices(matrix))
       {
-         HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(hypre_AMGDDCompGridMatrixOwnedOffd(matrix));
+         HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(
+                                                   hypre_AMGDDCompGridMatrixOwnedOffd(matrix));
 
          if (hypre_CSRMatrixJ(hypre_AMGDDCompGridMatrixOwnedOffd(matrix)))
          {

@@ -534,7 +534,8 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 
    hypre_StructMatrixInitializeShell(matrix);
 
-   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix), hypre_StructMatrixMemoryLocation(matrix));
+   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix),
+                        hypre_StructMatrixMemoryLocation(matrix));
    data_const = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataConstSize(matrix),
                               HYPRE_MEMORY_HOST);
 

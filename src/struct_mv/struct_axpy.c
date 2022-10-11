@@ -55,9 +55,9 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 
 #if 0
       HYPRE_BOXLOOP (
-      hypre_BoxLoop2Begin, (hypre_StructVectorNDim(x), loop_size,
-                            x_data_box, start, unit_stride, xi,
-                            y_data_box, start, unit_stride, yi),
+         hypre_BoxLoop2Begin, (hypre_StructVectorNDim(x), loop_size,
+                               x_data_box, start, unit_stride, xi,
+                               y_data_box, start, unit_stride, yi),
       {
          yp[yi] += alpha * xp[xi];
       },

@@ -187,7 +187,8 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 
    hypre_StructVectorInitializeShell(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector), hypre_StructVectorMemoryLocation(vector));
+   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),
+                        hypre_StructVectorMemoryLocation(vector));
 
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;

@@ -686,7 +686,8 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
  *--------------------------------------------------------------------------*/
 
 /* memory.c */
-HYPRE_Int hypre_GetMemoryLocationName(hypre_MemoryLocation memory_location, char *memory_location_name);
+HYPRE_Int hypre_GetMemoryLocationName(hypre_MemoryLocation memory_location,
+                                      char *memory_location_name);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
 void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
@@ -1833,8 +1834,9 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
-                                      HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y);
+HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows, HYPRE_Int *A_i,
+                                      HYPRE_Complex *A_data, HYPRE_Complex *x, HYPRE_Complex beta,
+                                      HYPRE_Complex *y);
 HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int n, HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                        HYPRE_Complex *x, HYPRE_Complex beta, HYPRE_Complex *y, HYPRE_Complex *z);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
@@ -1949,7 +1951,8 @@ void hypre_MemoryTrackerInsert2(const char *action, void *ptr, void *ptr2, size_
                                 hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2,
                                 const char *filename,
                                 const char *function, HYPRE_Int line);
-HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o, size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
+HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
+                                    size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 #endif

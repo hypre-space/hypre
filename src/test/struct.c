@@ -3185,7 +3185,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,
                }
             }
 
-            hypre_TMemcpy(values, values_h, HYPRE_Real, stencil_size * volume, memory_location, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(values, values_h, HYPRE_Real, stencil_size * volume, memory_location,
+                          HYPRE_MEMORY_HOST);
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3348,7 +3349,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,
                }
             }
 
-            hypre_TMemcpy(values, values_h, HYPRE_Real, stencil_size * volume, memory_location, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(values, values_h, HYPRE_Real, stencil_size * volume, memory_location,
+                          HYPRE_MEMORY_HOST);
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);

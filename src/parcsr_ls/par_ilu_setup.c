@@ -1545,7 +1545,8 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
                                                           matA_info, &matA_buffersize));
 
    /* 4. Create working array, since they won't be visited by host, allocate on device */
-   matA_buffer                                  = hypre_TAlloc(char, matA_buffersize, HYPRE_MEMORY_DEVICE);
+   matA_buffer                                  = hypre_TAlloc(char, matA_buffersize,
+                                                               HYPRE_MEMORY_DEVICE);
 
    /* 5. Now perform the analysis */
    /* 5-1. Analysis */

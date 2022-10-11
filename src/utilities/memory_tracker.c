@@ -24,15 +24,15 @@ char hypre_memory_tracker_filename[HYPRE_MAX_FILE_NAME_LEN] = "HypreMemoryTrack.
 
 char *hypre_basename(const char *name)
 {
-  const char *base = name;
-  while (*name)
-  {
-    if (*name++ == '/')
-    {
-      base = name;
-    }
-  }
-  return (char *) base;
+   const char *base = name;
+   while (*name)
+   {
+      if (*name++ == '/')
+      {
+         base = name;
+      }
+   }
+   return (char *) base;
 }
 
 hypre_MemcpyType
@@ -121,13 +121,16 @@ hypre_MemoryTrackerSortQueue(hypre_MemoryTrackerQueue *q)
    free(q->sorted_data_compressed_offset);
    free(q->sorted_data_compressed);
 
-   q->sorted_data = (hypre_MemoryTrackerEntry *) malloc(q->actual_size * sizeof(hypre_MemoryTrackerEntry));
+   q->sorted_data = (hypre_MemoryTrackerEntry *) malloc(q->actual_size * sizeof(
+                                                           hypre_MemoryTrackerEntry));
    memcpy(q->sorted_data, q->data, q->actual_size * sizeof(hypre_MemoryTrackerEntry));
-   qsort(q->sorted_data, q->actual_size, sizeof(hypre_MemoryTrackerEntry), hypre_MemoryTrackerQueueCompSort);
+   qsort(q->sorted_data, q->actual_size, sizeof(hypre_MemoryTrackerEntry),
+         hypre_MemoryTrackerQueueCompSort);
 
    q->sorted_data_compressed_len = 0;
    q->sorted_data_compressed_offset = (size_t *) malloc(q->actual_size * sizeof(size_t));
-   q->sorted_data_compressed = (hypre_MemoryTrackerEntry **) malloc((q->actual_size + 1) * sizeof(hypre_MemoryTrackerEntry *));
+   q->sorted_data_compressed = (hypre_MemoryTrackerEntry **) malloc((q->actual_size + 1) * sizeof(
+                                                                       hypre_MemoryTrackerEntry *));
 
    for (i = 0; i < q->actual_size; i++)
    {
@@ -141,10 +144,11 @@ hypre_MemoryTrackerSortQueue(hypre_MemoryTrackerQueue *q)
    q->sorted_data_compressed[q->sorted_data_compressed_len] = q->sorted_data + q->actual_size;
 
    q->sorted_data_compressed_offset = (size_t *)
-      realloc(q->sorted_data_compressed_offset, q->sorted_data_compressed_len * sizeof(size_t));
+                                      realloc(q->sorted_data_compressed_offset, q->sorted_data_compressed_len * sizeof(size_t));
 
    q->sorted_data_compressed = (hypre_MemoryTrackerEntry **)
-      realloc(q->sorted_data_compressed, (q->sorted_data_compressed_len + 1) * sizeof(hypre_MemoryTrackerEntry *));
+                               realloc(q->sorted_data_compressed,
+                                       (q->sorted_data_compressed_len + 1) * sizeof(hypre_MemoryTrackerEntry *));
 
    return hypre_error_flag;
 }
@@ -200,7 +204,8 @@ hypre_MemoryTrackerInsert1(const char           *action,
                            const char           *function,
                            HYPRE_Int             line)
 {
-   hypre_MemoryTrackerInsert2(action, ptr, NULL, nbytes, memory_location, hypre_MEMORY_UNDEFINED, filename, function, line);
+   hypre_MemoryTrackerInsert2(action, ptr, NULL, nbytes, memory_location, hypre_MEMORY_UNDEFINED,
+                              filename, function, line);
 }
 
 void
@@ -333,8 +338,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 
       fprintf(file, "\"==== Operations:\"\n");
       fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
-            "ID", "EVENT", "ADDRESS1", "ADDRESS2", "BYTE", "LOCATION1", "LOCATION2",
-            "FILE", "LINE", "FUNCTION", "HOST", "PINNED", "DEVICE", "UNIFIED");
+              "ID", "EVENT", "ADDRESS1", "ADDRESS2", "BYTE", "LOCATION1", "LOCATION2",
+              "FILE", "LINE", "FUNCTION", "HOST", "PINNED", "DEVICE", "UNIFIED");
    }
 
    if (leakcheck)
@@ -352,7 +357,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
       total_num_events_2 += qq[i].actual_size;
    }
 
-   for (i = hypre_MemoryTrackerGetNext(tracker); i < HYPRE_MEMORY_NUM_EVENTS; i = hypre_MemoryTrackerGetNext(tracker))
+   for (i = hypre_MemoryTrackerGetNext(tracker); i < HYPRE_MEMORY_NUM_EVENTS;
+        i = hypre_MemoryTrackerGetNext(tracker))
    {
       total_num_events ++;
 
@@ -428,7 +434,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
             sprintf(nbytes, "%s", "--");
          }
 
-         fprintf(file, " %6zu, %9s, %16p, %16p, %10s, %10s, %10s, %28s, %8d, %54s, %11zu, %11zu, %11zu, %11zu\n",
+         fprintf(file,
+                 " %6zu, %9s, %16p, %16p, %10s, %10s, %10s, %28s, %8d, %54s, %11zu, %11zu, %11zu, %11zu\n",
                  entry->time_step,
                  entry->action,
                  entry->ptr,
@@ -453,43 +460,47 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    {
       fprintf(file, "\n\"==== Total Allocation (byte):\"\n");
       fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
-            "", "", "", "", "", "", "", "", "", "", "HOST", "PINNED", "DEVICE", "UNIFIED");
-      fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
-            "", "", "", "", "", "", "", "", "", "",
-            totl_bytes[hypre_MEMORY_HOST],
-            totl_bytes[hypre_MEMORY_HOST_PINNED],
-            totl_bytes[hypre_MEMORY_DEVICE],
-            totl_bytes[hypre_MEMORY_UNIFIED]);
+              "", "", "", "", "", "", "", "", "", "", "HOST", "PINNED", "DEVICE", "UNIFIED");
+      fprintf(file,
+              " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
+              "", "", "", "", "", "", "", "", "", "",
+              totl_bytes[hypre_MEMORY_HOST],
+              totl_bytes[hypre_MEMORY_HOST_PINNED],
+              totl_bytes[hypre_MEMORY_DEVICE],
+              totl_bytes[hypre_MEMORY_UNIFIED]);
 
       fprintf(file, "\n\"==== Peak Allocation (byte):\"\n");
       /*fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
             "", "", "", "", "", "", "", "", "", "", "HOST", "PINNED", "DEVICE", "UNIFIED"); */
-      fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
-            "", "", "", "", "", "", "", "", "", "",
-            peak_bytes[hypre_MEMORY_HOST],
-            peak_bytes[hypre_MEMORY_HOST_PINNED],
-            peak_bytes[hypre_MEMORY_DEVICE],
-            peak_bytes[hypre_MEMORY_UNIFIED]);
+      fprintf(file,
+              " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
+              "", "", "", "", "", "", "", "", "", "",
+              peak_bytes[hypre_MEMORY_HOST],
+              peak_bytes[hypre_MEMORY_HOST_PINNED],
+              peak_bytes[hypre_MEMORY_DEVICE],
+              peak_bytes[hypre_MEMORY_UNIFIED]);
 
       fprintf(file, "\n\"==== Reachable Allocation (byte):\"\n");
       /* fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
             "", "", "", "", "", "", "", "", "", "", "HOST", "PINNED", "DEVICE", "UNIFIED"); */
-      fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
-            "", "", "", "", "", "", "", "", "", "",
-            curr_bytes[hypre_MEMORY_HOST],
-            curr_bytes[hypre_MEMORY_HOST_PINNED],
-            curr_bytes[hypre_MEMORY_DEVICE],
-            curr_bytes[hypre_MEMORY_UNIFIED]);
+      fprintf(file,
+              " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
+              "", "", "", "", "", "", "", "", "", "",
+              curr_bytes[hypre_MEMORY_HOST],
+              curr_bytes[hypre_MEMORY_HOST_PINNED],
+              curr_bytes[hypre_MEMORY_DEVICE],
+              curr_bytes[hypre_MEMORY_UNIFIED]);
 
       fprintf(file, "\n\"==== Memory Copy (byte):\"\n");
       fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
-            "", "", "", "", "", "", "", "", "", "", "H2H", "D2H", "H2D", "D2D");
-      fprintf(file, " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
-            "", "", "", "", "", "", "", "", "", "",
-            copy_bytes[hypre_MEMCPY_H2H],
-            copy_bytes[hypre_MEMCPY_D2H],
-            copy_bytes[hypre_MEMCPY_H2D],
-            copy_bytes[hypre_MEMCPY_D2D]);
+              "", "", "", "", "", "", "", "", "", "", "H2H", "D2H", "H2D", "D2D");
+      fprintf(file,
+              " %6s, %9s, %16s, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11zu, %11zu, %11zu, %11zu\n",
+              "", "", "", "", "", "", "", "", "", "",
+              copy_bytes[hypre_MEMCPY_H2H],
+              copy_bytes[hypre_MEMCPY_D2H],
+              copy_bytes[hypre_MEMCPY_H2D],
+              copy_bytes[hypre_MEMCPY_D2D]);
 
    }
 
@@ -534,7 +545,7 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
          if (entry->pair == (size_t) -1)
          {
             fprintf(file, " %6zu, %9s, %16p, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
-                  entry->time_step, entry->action, entry->ptr, "", "", "", "", "", "", "Not freed", "", "", "", "");
+                    entry->time_step, entry->action, entry->ptr, "", "", "", "", "", "", "Not freed", "", "", "", "");
          }
          else
          {
@@ -552,7 +563,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
          if (entry->pair == (size_t) -1)
          {
             fprintf(file, " %6zu, %9s, %16p, %16s, %10s, %10s, %10s, %28s, %8s, %54s, %11s, %11s, %11s, %11s\n",
-                  entry->time_step, entry->action, entry->ptr, "", "", "", "", "", "", "Unpaired free", "", "", "", "");
+                    entry->time_step, entry->action, entry->ptr, "", "", "", "", "", "", "Unpaired free", "", "", "",
+                    "");
          }
          else
          {

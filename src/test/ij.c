@@ -298,6 +298,7 @@ main( hypre_int argc,
    HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
 #endif
+   HYPRE_Int      nmv = 100;
 
    /* for CGC BM Aug 25, 2006 */
    HYPRE_Int      cgcits = 1;
@@ -1281,6 +1282,11 @@ main( hypre_int argc,
       {
          arg_index++;
          spgemm_use_vendor = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-nmv") == 0 )
+      {
+         arg_index++;
+         nmv = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mv_vendor") == 0 )
       {
@@ -3704,7 +3710,7 @@ main( hypre_int argc,
       e_dot_e = bf_dot_bf - b_dot_b;
       if (myid == 0)
       {
-         hypre_printf("\nVector/Multivector error = %e\n", e_dot_e);
+         hypre_printf("\nVector/Multivector error = %e\n\n", e_dot_e);
       }
 
       /* Free memory */
@@ -3718,7 +3724,6 @@ main( hypre_int argc,
 
    if (solver_id == -1)
    {
-      HYPRE_Int nmv = 100;
       HYPRE_Int num_threads = hypre_NumThreads();
 
       if (myid == 0)

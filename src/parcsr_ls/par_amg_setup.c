@@ -691,7 +691,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                             C_points_local_marker,
                             C_points_local_marker + num_C_points_coarse,
                             C_points_local_marker,
-         [first_local_row=first_local_row] (const auto & x) {return x - first_local_row;} );
+         [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} );
 #else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
@@ -1153,15 +1153,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
 #if defined(HYPRE_USING_SYCL)
                auto perm_it = oneapi::dpl::make_permutation_iterator(
-                              hypre_IntArrayData(CF_marker_array[level]),
-                              oneapi::dpl::make_transform_iterator( isolated_F_points_marker,
-               [first_local_row=first_local_row] (const auto & x) {return x - first_local_row;} ) );
+                                 hypre_IntArrayData(CF_marker_array[level]),
+                                 oneapi::dpl::make_transform_iterator( isolated_F_points_marker,
+               [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} ) );
                hypreSycl_transform_if( perm_it,
                                        perm_it + num_isolated_F_points,
                                        isolated_F_points_marker,
                                        perm_it,
                [] (const auto & x) {return -3;},
-                                       in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
+               in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
 #else
                HYPRE_THRUST_CALL( scatter_if,
                                   thrust::make_constant_iterator(-3),
@@ -1449,15 +1449,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
 #if defined(HYPRE_USING_SYCL)
                auto perm_it = oneapi::dpl::make_permutation_iterator(
-                              hypre_IntArrayData(CF_marker_array[level]),
-                              oneapi::dpl::make_transform_iterator( F_points_marker,
-               [first_local_row=first_local_row] (const auto & x) {return x - first_local_row;} ) );
+                                 hypre_IntArrayData(CF_marker_array[level]),
+                                 oneapi::dpl::make_transform_iterator( F_points_marker,
+               [first_local_row = first_local_row] (const auto & x) {return x - first_local_row;} ) );
                hypreSycl_transform_if( perm_it,
                                        perm_it + num_F_points,
                                        F_points_marker,
                                        perm_it,
                [] (const auto & x) {return -1;},
-                                       in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
+               in_range<HYPRE_BigInt>(first_local_row, first_local_row + local_size - 1) );
 #else
                HYPRE_THRUST_CALL( scatter_if,
                                   thrust::make_constant_iterator(-1),
@@ -1497,7 +1497,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (exec == HYPRE_EXEC_DEVICE)
                {
 #if defined(HYPRE_USING_SYCL)
-                  auto perm_it = oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker_array[level]), C_points_local_marker);
+                  auto perm_it = oneapi::dpl::make_permutation_iterator(hypre_IntArrayData(CF_marker_array[level]),
+                                                                        C_points_local_marker);
                   HYPRE_ONEDPL_CALL( std::transform,
                                      perm_it,
                                      perm_it + num_C_points_coarse,
@@ -1517,9 +1518,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if defined(HYPRE_USING_SYCL)
                      HYPRE_ONEDPL_CALL( std::exclusive_scan,
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]),
-                                                                        in_range<HYPRE_Int>(1, 2)),
+                                                                             in_range<HYPRE_Int>(1, 2)),
                                         oneapi::dpl::make_transform_iterator(hypre_IntArrayData(CF_marker_array[level]) + local_num_vars,
-                                                                        in_range<HYPRE_Int>(1, 2)),
+                                                                             in_range<HYPRE_Int>(1, 2)),
                                         tmp,
                                         HYPRE_Int(0) );
 
