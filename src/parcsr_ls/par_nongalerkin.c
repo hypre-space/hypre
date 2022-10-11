@@ -7,6 +7,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "../HYPRE.h"
+#include "_hypre_IJ_mv.h"
 
 /* This file contains the routines for constructing non-Galerkin coarse grid
  * operators, based on the original Galerkin coarse grid
@@ -708,13 +709,14 @@ hypre_NonGalerkinIJBufferCompressRow( HYPRE_Int
  * Compress the entire buffer, removing duplicate rows
  **/
 HYPRE_Int
-hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
-                                   HYPRE_Int      *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */
-                                   HYPRE_Int      *ijbuf_rowcounter,
-                                   HYPRE_Real     **ijbuf_data,
-                                   HYPRE_BigInt   **ijbuf_cols,
-                                   HYPRE_BigInt   **ijbuf_rownums,
-                                   HYPRE_Int      **ijbuf_numcols)
+hypre_NonGalerkinIJBufferCompress( HYPRE_MemoryLocation memory_location,
+                                   HYPRE_Int            ijbuf_size,
+                                   HYPRE_Int           *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */
+                                   HYPRE_Int           *ijbuf_rowcounter,
+                                   HYPRE_Real         **ijbuf_data,
+                                   HYPRE_BigInt       **ijbuf_cols,
+                                   HYPRE_BigInt       **ijbuf_rownums,
+                                   HYPRE_Int          **ijbuf_numcols)
 {
    HYPRE_Int                ierr       = 0;
    HYPRE_Int                *indys     = hypre_CTAlloc(HYPRE_Int,  (*ijbuf_rowcounter),
@@ -757,10 +759,10 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
       prev_row         = -1;
       rowcounter_new   = 0;
       cnt_new          = 0;
-      data_new         = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, HYPRE_MEMORY_DEVICE);
-      cols_new         = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-      rownums_new      = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-      numcols_new      = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, HYPRE_MEMORY_DEVICE);
+      data_new         = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, memory_location);
+      cols_new         = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location);
+      rownums_new      = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location);
+      numcols_new      = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, memory_location);
       numcols_new[0]   = 0;
 
       /* Cycle through each row */
@@ -819,10 +821,10 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
       *ijbuf_rowcounter = rowcounter_new;
 
       /* Point to the new buffer */
-      hypre_TFree(*ijbuf_data,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(*ijbuf_cols,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(*ijbuf_rownums, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(*ijbuf_numcols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(*ijbuf_data,    memory_location);
+      hypre_TFree(*ijbuf_cols,    memory_location);
+      hypre_TFree(*ijbuf_rownums, memory_location);
+      hypre_TFree(*ijbuf_numcols, memory_location);
       (*ijbuf_data)    = data_new;
       (*ijbuf_cols)    = cols_new;
       (*ijbuf_rownums) = rownums_new;
@@ -843,8 +845,7 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
  *  A[row_to_write, col_to_write] += val_to_write
  **/
 HYPRE_Int
-hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
-                                B,                 /* Unassembled matrix to add an entry to */
+hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled matrix to add an entry to */
                                 HYPRE_Int    *ijbuf_cnt,          /* current buffer size */
                                 HYPRE_Int     ijbuf_size,         /* max buffer size */
                                 HYPRE_Int    *ijbuf_rowcounter,   /* num of rows in rownums, (i.e., size of rownums) */
@@ -862,6 +863,7 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
 {
    HYPRE_Int                ierr = 0;
 
+   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(B);
 
    if ( (*ijbuf_cnt) == 0 )
    {
@@ -895,7 +897,7 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
       /* Compress and Add Entries */
       hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, (*ijbuf_rowcounter), (*ijbuf_data),
                                            (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
-      hypre_NonGalerkinIJBufferCompress(ijbuf_size, ijbuf_cnt, ijbuf_rowcounter, ijbuf_data,
+      hypre_NonGalerkinIJBufferCompress(memory_location, ijbuf_size, ijbuf_cnt, ijbuf_rowcounter, ijbuf_data,
                                         ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
       ierr += HYPRE_IJMatrixAddToValues(B, *ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums),
                                         (*ijbuf_cols), (*ijbuf_data));
@@ -913,8 +915,7 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
  * Empty the IJ Buffer with a final AddToValues.
  **/
 HYPRE_Int
-hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix
-                               B,             /* See NonGalerkinIJBufferWrite for parameter descriptions */
+hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix B, /* See NonGalerkinIJBufferWrite for parameter descriptions */
                                HYPRE_Int      ijbuf_size,
                                HYPRE_Int      *ijbuf_cnt,
                                HYPRE_Int      ijbuf_rowcounter,
@@ -924,13 +925,14 @@ hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix
                                HYPRE_Int      **ijbuf_numcols)
 {
    HYPRE_Int                ierr = 0;
+   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(B);
 
    if ( (*ijbuf_cnt) > 0)
    {
       /* Compress the last row and then write */
       hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, ijbuf_rowcounter, (*ijbuf_data),
                                            (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
-      hypre_NonGalerkinIJBufferCompress(ijbuf_size, ijbuf_cnt, &ijbuf_rowcounter, ijbuf_data,
+      hypre_NonGalerkinIJBufferCompress(memory_location, ijbuf_size, ijbuf_cnt, &ijbuf_rowcounter, ijbuf_data,
                                         ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
       ierr += HYPRE_IJMatrixAddToValues(B, ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums),
                                         (*ijbuf_cols), (*ijbuf_data));
@@ -954,6 +956,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
 {
    /* MPI Communicator */
    MPI_Comm            comm               = hypre_ParCSRMatrixComm(RAP);
+
+   HYPRE_MemoryLocation memory_location_RAP = hypre_ParCSRMatrixMemoryLocation(RAP);
 
    /* Declare R_IAP */
    hypre_CSRMatrix    *R_IAP_diag         = hypre_ParCSRMatrixDiag(R_IAP);
@@ -1038,17 +1042,17 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
     * Here, we initialize the buffer and then initialize the buffer counters
     */
    ijbuf_size       = 1000;
-   ijbuf_data       = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, HYPRE_MEMORY_DEVICE);
-   ijbuf_cols       = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-   ijbuf_rownums    = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-   ijbuf_numcols    = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, HYPRE_MEMORY_DEVICE);
+   ijbuf_data       = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, memory_location_RAP);
+   ijbuf_cols       = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location_RAP);
+   ijbuf_rownums    = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location_RAP);
+   ijbuf_numcols    = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, memory_location_RAP);
    hypre_NonGalerkinIJBigBufferInit(&ijbuf_cnt, &ijbuf_rowcounter, ijbuf_cols);
    if (sym_collapse)
    {
-      ijbuf_sym_data    = hypre_CTAlloc(HYPRE_Real,    ijbuf_size, HYPRE_MEMORY_DEVICE);
-      ijbuf_sym_cols    = hypre_CTAlloc(HYPRE_BigInt,  ijbuf_size, HYPRE_MEMORY_DEVICE);
-      ijbuf_sym_rownums = hypre_CTAlloc(HYPRE_BigInt,  ijbuf_size, HYPRE_MEMORY_DEVICE);
-      ijbuf_sym_numcols = hypre_CTAlloc(HYPRE_Int,     ijbuf_size, HYPRE_MEMORY_DEVICE);
+      ijbuf_sym_data    = hypre_CTAlloc(HYPRE_Real,    ijbuf_size, memory_location_RAP);
+      ijbuf_sym_cols    = hypre_CTAlloc(HYPRE_BigInt,  ijbuf_size, memory_location_RAP);
+      ijbuf_sym_rownums = hypre_CTAlloc(HYPRE_BigInt,  ijbuf_size, memory_location_RAP);
+      ijbuf_sym_numcols = hypre_CTAlloc(HYPRE_Int,     ijbuf_size, memory_location_RAP);
       hypre_NonGalerkinIJBigBufferInit(&ijbuf_sym_cnt, &ijbuf_sym_rowcounter, ijbuf_sym_cols);
    }
 
@@ -1210,17 +1214,17 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    /* Deallocate */
    HYPRE_IJMatrixSetObjectType(Pattern, -1);
    HYPRE_IJMatrixDestroy(Pattern);
-   hypre_TFree(ijbuf_data,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(ijbuf_cols,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(ijbuf_rownums, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(ijbuf_numcols, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ijbuf_data,    memory_location_RAP);
+   hypre_TFree(ijbuf_cols,    memory_location_RAP);
+   hypre_TFree(ijbuf_rownums, memory_location_RAP);
+   hypre_TFree(ijbuf_numcols, memory_location_RAP);
 
    if (sym_collapse)
    {
-      hypre_TFree(ijbuf_sym_data,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(ijbuf_sym_cols,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(ijbuf_sym_rownums, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(ijbuf_sym_numcols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(ijbuf_sym_data,    memory_location_RAP);
+      hypre_TFree(ijbuf_sym_cols,    memory_location_RAP);
+      hypre_TFree(ijbuf_sym_rownums, memory_location_RAP);
+      hypre_TFree(ijbuf_sym_numcols, memory_location_RAP);
    }
 
    return Pattern_CSR;
@@ -1250,6 +1254,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    HYPRE_BigInt       *temp                = NULL;
    HYPRE_Int           ierr                  = 0;
    char                filename[256];
+
+   HYPRE_MemoryLocation memory_location_RAP = hypre_ParCSRMatrixMemoryLocation(RAP);
 
    /* Lumping related variables */
    HYPRE_IJMatrix      ijmatrix;
@@ -1692,17 +1698,17 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     * Here, we initialize the buffer and then initialize the buffer counters
     */
    ijbuf_size       = 1000;
-   ijbuf_data       = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, HYPRE_MEMORY_DEVICE);
-   ijbuf_cols       = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-   ijbuf_rownums    = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-   ijbuf_numcols    = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, HYPRE_MEMORY_DEVICE);
+   ijbuf_data       = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, memory_location_RAP);
+   ijbuf_cols       = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location_RAP);
+   ijbuf_rownums    = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location_RAP);
+   ijbuf_numcols    = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, memory_location_RAP);
    hypre_NonGalerkinIJBigBufferInit( &ijbuf_cnt, &ijbuf_rowcounter, ijbuf_cols );
    if (sym_collapse)
    {
-      ijbuf_sym_data   = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, HYPRE_MEMORY_DEVICE);
-      ijbuf_sym_cols   = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-      ijbuf_sym_rownums = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, HYPRE_MEMORY_DEVICE);
-      ijbuf_sym_numcols = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, HYPRE_MEMORY_DEVICE);
+      ijbuf_sym_data   = hypre_CTAlloc(HYPRE_Real,   ijbuf_size, memory_location_RAP);
+      ijbuf_sym_cols   = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location_RAP);
+      ijbuf_sym_rownums = hypre_CTAlloc(HYPRE_BigInt, ijbuf_size, memory_location_RAP);
+      ijbuf_sym_numcols = hypre_CTAlloc(HYPRE_Int,    ijbuf_size, memory_location_RAP);
       hypre_NonGalerkinIJBigBufferInit( &ijbuf_sym_cnt, &ijbuf_sym_rowcounter, ijbuf_sym_cols );
    }
 
@@ -2304,16 +2310,16 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    }
 
    /* Free matrices and variables and arrays */
-   hypre_TFree(ijbuf_data,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(ijbuf_cols,    HYPRE_MEMORY_DEVICE);
-   hypre_TFree(ijbuf_rownums, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(ijbuf_numcols, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ijbuf_data,    memory_location_RAP);
+   hypre_TFree(ijbuf_cols,    memory_location_RAP);
+   hypre_TFree(ijbuf_rownums, memory_location_RAP);
+   hypre_TFree(ijbuf_numcols, memory_location_RAP);
    if (sym_collapse)
    {
-      hypre_TFree(ijbuf_sym_data,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(ijbuf_sym_cols,    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(ijbuf_sym_rownums, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(ijbuf_sym_numcols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(ijbuf_sym_data,    memory_location_RAP);
+      hypre_TFree(ijbuf_sym_cols,    memory_location_RAP);
+      hypre_TFree(ijbuf_sym_rownums, memory_location_RAP);
+      hypre_TFree(ijbuf_sym_numcols, memory_location_RAP);
    }
 
    hypre_TFree(Pattern_offd_indices, HYPRE_MEMORY_HOST);

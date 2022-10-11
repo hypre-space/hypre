@@ -9,6 +9,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#define hypre_printf_buffer_len 4096
+char hypre_printf_buffer[hypre_printf_buffer_len];
+
 // #ifdef HYPRE_BIGINT
 
 /* these prototypes are missing by default for some compilers */
@@ -29,7 +32,15 @@ new_format( const char *format,
    HYPRE_Int   foundpercent = 0;
 
    newformatlen = 2 * strlen(format) + 1; /* worst case is all %d's to %lld's */
-   newformat = hypre_TAlloc(char,  newformatlen, HYPRE_MEMORY_HOST);
+
+   if (newformatlen > hypre_printf_buffer_len)
+   {
+      newformat = hypre_TAlloc(char, newformatlen, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      newformat = hypre_printf_buffer;
+   }
 
    nfp = newformat;
    for (fp = format; *fp != '\0'; fp++)
@@ -106,7 +117,10 @@ new_format( const char *format,
 HYPRE_Int
 free_format( char *newformat )
 {
-   hypre_TFree(newformat, HYPRE_MEMORY_HOST);
+   if (newformat != hypre_printf_buffer)
+   {
+      hypre_TFree(newformat, HYPRE_MEMORY_HOST);
+   }
 
    return 0;
 }

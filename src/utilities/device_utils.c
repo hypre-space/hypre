@@ -243,7 +243,7 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
          *cuda_compute_stream_sync_ptr = cuda_compute_stream_sync;
          break;
       case 4:
-         if (cuda_compute_stream_sync)
+         if (hypre_HandleDefaultExecPolicy(hypre_handle) == HYPRE_EXEC_DEVICE && cuda_compute_stream_sync)
          {
 #if defined(HYPRE_USING_CUDA)
             HYPRE_CUDA_CALL( cudaStreamSynchronize(hypre_HandleComputeStream(hypre_handle)) );
@@ -1871,92 +1871,55 @@ hypreDevice_IntStridedCopy( HYPRE_Int  size,
    return hypreDevice_StridedCopy(size, stride, in, out);
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      cuda/hip functions
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 /*--------------------------------------------------------------------
- * hypreGPUKernel_CompileFlagSafetyCheck
+ * hypreDevice_CsrRowPtrsToIndicesWithRowNum
  *
- * The architecture identification macro __CUDA_ARCH__ is assigned a
- * three-digit value string xy0 (ending in a literal 0) during each
- * nvcc compilation stage 1 that compiles for compute_xy.
- *
- * This macro can be used in the implementation of GPU functions for
- * determining the virtual architecture for which it is currently being
- * compiled. The host code (the non-GPU code) must not depend on it.
- *
- * Note that compute_XX refers to a PTX version and sm_XX refers to
- * a cubin version.
+ * Input:  d_row_num, of size nrows, contains the rows indices that
+ *         can be HYPRE_BigInt or HYPRE_Int
+ * Output: d_row_ind
  *--------------------------------------------------------------------*/
 
-__global__ void
-hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
-                                       hypre_int        *cuda_arch_compile )
+template <typename T>
+HYPRE_Int
+hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
+                                           HYPRE_Int  nnz,
+                                           HYPRE_Int *d_row_ptr,
+                                           T         *d_row_num,
+                                           T         *d_row_ind )
 {
-#if defined(__CUDA_ARCH__)
-   cuda_arch_compile[0] = __CUDA_ARCH__;
+   /* trivial case */
+   if (nrows <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
+
+   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
+
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather(map, map + nnz, d_row_num, d_row_ind);
+#else
+   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
 #endif
+
+   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------
- * hypre_CudaCompileFlagCheck
- *
- * Assume this function is called inside HYPRE_Init(), at a place
- * where we do not want to activate memory pooling, so we do not use
- * hypre's memory model to Alloc and Free.
- *
- * See commented out code below (and do not delete)
- *--------------------------------------------------------------------*/
-
-void hypre_CudaCompileFlagCheck()
-{
-   // This is really only defined for CUDA and not for HIP
-#if defined(HYPRE_USING_CUDA)
-
-   HYPRE_Int device = hypre_HandleDevice(hypre_handle());
-
-   struct cudaDeviceProp props;
-   cudaGetDeviceProperties(&props, device);
-   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
-   hypre_int cuda_arch_compile = -1;
-   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
-
-   hypre_int *cuda_arch_compile_d = NULL;
-   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
-   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
-                               cudaMemcpyHostToDevice) );
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
-   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
-                               cudaMemcpyDeviceToHost) );
-   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
-
-   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
-
-   if (-1 == cuda_arch_compile)
-   {
-      hypre_error_w_msg(1, "hypre error: no proper cuda_arch found");
-   }
-   else if (cuda_arch_actual != cuda_arch_compile)
-   {
-      char msg[256];
-      hypre_sprintf(msg, "hypre warning: Compile 'arch=compute_' does not match device arch %d",
-                    cuda_arch_actual);
-      hypre_error_w_msg(1, msg);
-      /*
-      hypre_printf("%s\n", msg);
-      hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
-      */
-   }
-
-#endif // defined(HYPRE_USING_CUDA)
-}
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
+                                                              HYPRE_Int  nnz,
+                                                              HYPRE_Int *d_row_ptr,
+                                                              HYPRE_Int *d_row_num,
+                                                              HYPRE_Int *d_row_ind );
+#if defined(HYPRE_MIXEDINT)
+template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int     nrows,
+                                                              HYPRE_Int     nnz,
+                                                              HYPRE_Int    *d_row_ptr,
+                                                              HYPRE_BigInt *d_row_num,
+                                                              HYPRE_BigInt *d_row_ind );
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IntegerReduceSum
@@ -1966,7 +1929,25 @@ HYPRE_Int
 hypreDevice_IntegerReduceSum( HYPRE_Int  n,
                               HYPRE_Int *d_i )
 {
+#if defined(HYPRE_USING_SYCL)
+   return HYPRE_ONEDPL_CALL(std::reduce, d_i, d_i + n);
+#else
    return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
+#endif
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexReduceSum
+ *--------------------------------------------------------------------*/
+
+HYPRE_Complex
+hypreDevice_ComplexReduceSum(HYPRE_Int n, HYPRE_Complex *d_x)
+{
+#if defined(HYPRE_USING_SYCL)
+   return HYPRE_ONEDPL_CALL(std::reduce, d_x, d_x + n);
+#else
+   return HYPRE_THRUST_CALL(reduce, d_x, d_x + n);
+#endif
 }
 
 /*--------------------------------------------------------------------
@@ -2041,50 +2022,167 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
 }
 
 /*--------------------------------------------------------------------
- * hypreDevice_CsrRowPtrsToIndicesWithRowNum
+ * hypreDevice_StableSortTupleByTupleKey
  *
- * Input:  d_row_num, of size nrows, contains the rows indices that
- *         can be HYPRE_BigInt or HYPRE_Int
- * Output: d_row_ind
+ * opt:
+ *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')
+ *                         [normal tupe comp]
+ *
+ *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a')
+ *                         [used in assembly to put diagonal first]
  *--------------------------------------------------------------------*/
 
-template <typename T>
+template <typename T1, typename T2, typename T3, typename T4>
 HYPRE_Int
-hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
-                                           HYPRE_Int  nnz,
-                                           HYPRE_Int *d_row_ptr,
-                                           T         *d_row_num,
-                                           T         *d_row_ind )
+hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
+                                      T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
+                                      HYPRE_Int opt)
 {
-   /* trivial case */
-   if (nrows <= 0)
+#if defined(HYPRE_USING_SYCL)
+   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys1, keys2, vals1, vals2);
+
+   if (opt == 0)
    {
-      return hypre_error_flag;
+      HYPRE_ONEDPL_CALL(std::stable_sort,
+                        zipped_begin,
+                        zipped_begin + N,
+                        std::less< std::tuple<T1, T2, T3, T4> >());
    }
+   else if (opt == 2)
+   {
+      HYPRE_ONEDPL_CALL(std::stable_sort,
+                        zipped_begin,
+                        zipped_begin + N,
+                        TupleComp3<T1, T2, T3, T4>());
+   }
+#else
+   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
+   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
+   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
 
-   HYPRE_Int *map = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-
-   hypreDevice_CsrRowPtrsToIndices_v2(nrows, nnz, d_row_ptr, map);
-
-   HYPRE_THRUST_CALL(gather, map, map + nnz, d_row_num, d_row_ind);
-
-   hypre_TFree(map, HYPRE_MEMORY_DEVICE);
+   if (opt == 0)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key,
+                        begin_keys,
+                        end_keys,
+                        begin_vals,
+                        thrust::less< thrust::tuple<T1, T2> >());
+   }
+   else if (opt == 2)
+   {
+      HYPRE_THRUST_CALL(stable_sort_by_key,
+                        begin_keys,
+                        end_keys,
+                        begin_vals,
+                        TupleComp3<T1, T2>());
+   }
+#endif
 
    return hypre_error_flag;
 }
 
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
-                                                              HYPRE_Int  nnz,
-                                                              HYPRE_Int *d_row_ptr,
-                                                              HYPRE_Int *d_row_num,
-                                                              HYPRE_Int *d_row_ind );
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
+                                                         HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int     nrows,
-                                                              HYPRE_Int     nnz,
-                                                              HYPRE_Int    *d_row_ptr,
-                                                              HYPRE_BigInt *d_row_num,
-                                                              HYPRE_BigInt *d_row_ind );
+template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
+                                                         HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #endif
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      cuda/hip functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/*--------------------------------------------------------------------
+ * hypreGPUKernel_CompileFlagSafetyCheck
+ *
+ * The architecture identification macro __CUDA_ARCH__ is assigned a
+ * three-digit value string xy0 (ending in a literal 0) during each
+ * nvcc compilation stage 1 that compiles for compute_xy.
+ *
+ * This macro can be used in the implementation of GPU functions for
+ * determining the virtual architecture for which it is currently being
+ * compiled. The host code (the non-GPU code) must not depend on it.
+ *
+ * Note that compute_XX refers to a PTX version and sm_XX refers to
+ * a cubin version.
+ *--------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
+                                       hypre_int        *cuda_arch_compile )
+{
+#if defined(__CUDA_ARCH__)
+   cuda_arch_compile[0] = __CUDA_ARCH__;
+#endif
+}
+
+
+/*--------------------------------------------------------------------
+ * hypre_CudaCompileFlagCheck
+ *
+ * Assume this function is called inside HYPRE_Init(), at a place
+ * where we do not want to activate memory pooling, so we do not use
+ * hypre's memory model to Alloc and Free.
+ *
+ * See commented out code below (and do not delete)
+ *
+ * This is really only defined for CUDA and not for HIP
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CudaCompileFlagCheck()
+{
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int device;
+   hypre_GetDevice(&device);
+
+   struct cudaDeviceProp props;
+   cudaGetDeviceProperties(&props, device);
+   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
+   hypre_int cuda_arch_compile = -1;
+   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
+
+   hypre_int *cuda_arch_compile_d = NULL;
+   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
+   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
+                               cudaMemcpyHostToDevice) );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
+   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
+                               cudaMemcpyDeviceToHost) );
+   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
+
+   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
+
+   if (cuda_arch_actual != cuda_arch_compile)
+   {
+      char msg[256];
+
+      if (-1 == cuda_arch_compile)
+      {
+         hypre_sprintf(msg, "hypre error: no proper cuda_arch found");
+      }
+      else
+      {
+         hypre_sprintf(msg, "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+                       cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
+      }
+
+      hypre_error_w_msg(1, msg);
+#if defined(HYPRE_DEBUG)
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s\n", msg);
+#endif
+      hypre_assert(0);
+   }
+#endif // defined(HYPRE_USING_CUDA)
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector
@@ -2292,54 +2390,6 @@ hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------
- * hypreDevice_StableSortTupleByTupleKey
- *
- * opt:
- *      0, (a,b) < (a',b') iff a < a' or (a = a' and  b  <  b')
- *                         [normal tupe comp]
- *
- *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a')
- *                         [used in assembly to put diagonal first]
- *--------------------------------------------------------------------*/
-
-template <typename T1, typename T2, typename T3, typename T4>
-HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
-                                      T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt)
-{
-   auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
-   auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
-   auto begin_vals = thrust::make_zip_iterator(thrust::make_tuple(vals1,     vals2));
-
-   if (opt == 0)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key,
-                        begin_keys,
-                        end_keys,
-                        begin_vals,
-                        thrust::less< thrust::tuple<T1, T2> >());
-   }
-   else if (opt == 2)
-   {
-      HYPRE_THRUST_CALL(stable_sort_by_key,
-                        begin_keys,
-                        end_keys,
-                        begin_vals,
-                        TupleComp3<T1, T2>());
-   }
-
-   return hypre_error_flag;
-}
-
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
-                                                         HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
-#if defined(HYPRE_MIXEDINT)
-template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
-                                                         HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
-#endif
 
 #if defined(HYPRE_USING_CUSPARSE)
 

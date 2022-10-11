@@ -110,7 +110,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    HYPRE_Int           num_fun2;
    HYPRE_BigInt       *big_map_to_node = NULL;
    HYPRE_Int          *map_to_node;
-   HYPRE_Int          *map_to_map;
+   HYPRE_Int          *map_to_map = NULL;
    HYPRE_Int          *counter;
 
    HYPRE_Real sum;
@@ -480,8 +480,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          counter = hypre_CTAlloc(HYPRE_Int, num_cols_offd_AN, HYPRE_MEMORY_HOST);
       }
 
-      map_to_map = NULL;
-      col_map_offd_AN = NULL;
       map_to_map = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       col_map_offd_AN = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_AN, HYPRE_MEMORY_HOST);
       col_map_offd_AN[0] = big_map_to_node[0];
@@ -717,8 +715,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          break;
       }
-
-      hypre_TFree(map_to_map, HYPRE_MEMORY_HOST);
    }
 
    if (diag_option == 1 )
@@ -821,6 +817,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    *AN_ptr = AN;
 
    hypre_TFree(counter, HYPRE_MEMORY_HOST);
+   hypre_TFree(map_to_map, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

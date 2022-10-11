@@ -47,6 +47,7 @@ typedef struct
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
 
+   HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
    HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;

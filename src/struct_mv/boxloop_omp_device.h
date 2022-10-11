@@ -70,7 +70,7 @@
 #define hypre_BoxLoop3End    zypre_omp4_dist_BoxLoopEnd
 #define hypre_BoxLoop4Begin  zypre_omp4_dist_BoxLoop4Begin
 #define hypre_BoxLoop4End    zypre_omp4_dist_BoxLoopEnd
-#define hypre_LoopBegin      zypre_LoopBegin
+#define hypre_LoopBegin      zypre_omp4_dist_LoopBegin
 #define hypre_LoopEnd        zypre_omp4_dist_BoxLoopEnd
 
 /* Look for more in struct_ls/red_black_gs.h" */
@@ -533,7 +533,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Basic Loop
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define zypre_LoopBegin(size, idx) \
+#define zypre_omp4_dist_LoopBegin(size, idx) \
 { \
    /* host code: */ \
    /* HYPRE_Int idx = 0; */\
@@ -543,14 +543,6 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (HYPRE_Int idx = 0; idx < hypre__tot; idx++) \
    {
-
-#if 0
-#define hypre_LoopBegin0(size, idx) \
-{ \
-   HYPRE_Int idx, hypre__size = size; \
-   for (idx = 0; idx < hypre__size; idx++) \
-   {
-#endif
 
 #define hypre_BoxLoopGetIndex(index) \
   index[0] = hypre__id_0; \
