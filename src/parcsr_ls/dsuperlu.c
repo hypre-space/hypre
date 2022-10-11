@@ -22,12 +22,12 @@ typedef struct
    HYPRE_BigInt global_num_rows;
    SuperMatrix A_dslu;
    HYPRE_Real *berr;
-   LUstruct_t dslu_data_LU;
+   dLUstruct_t dslu_data_LU;
    SuperLUStat_t dslu_data_stat;
    superlu_dist_options_t dslu_options;
    gridinfo_t dslu_data_grid;
-   ScalePermstruct_t dslu_ScalePermstruct;
-   SOLVEstruct_t dslu_solve;
+   dScalePermstruct_t dslu_ScalePermstruct;
+   dSOLVEstruct_t dslu_solve;
 }
 hypre_DSLUData;
 
