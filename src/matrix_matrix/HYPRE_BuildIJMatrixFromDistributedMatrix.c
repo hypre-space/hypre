@@ -16,9 +16,9 @@
 #endif
 
 #include <HYPRE_config.h>
-
+#ifndef WIN32
 #include "general.h"
-
+#endif
 #include "HYPRE.h"
 #include "HYPRE_utilities.h"
 

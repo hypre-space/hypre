@@ -22,7 +22,7 @@ set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 set(PROJECT_NAME HYPRE)
 project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
-  LANGUAGES C)
+  LANGUAGES C CXX)
 
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
@@ -92,6 +92,7 @@ option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake featu
 option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
 option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
+option(HYPRE_WITH_SUPERLU            "Use TPL SuperLU" OFF)
 option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
 option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)  # TODO: Finish this cmake feature
 option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
@@ -122,10 +123,13 @@ option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
 set(HYPRE_SYCL_TARGET            ""   CACHE STRING  "Target SYCL architecture, e.g. 'spir64_gen'.")
 set(HYPRE_SYCL_TARGET_BACKEND    ""   CACHE STRING  "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
+option(TPL_SUPERLU_LIBRARIES         "List of absolute paths to SuperLU link libraries [].")
+option(TPL_SUPERLU_INCLUDE_DIRS      "List of absolute paths to SuperLU include directories [].")
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
 option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
+option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
 
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
@@ -181,6 +185,11 @@ endif ()
 
 if (HYPRE_ENABLE_HOPSCOTCH)
   set(HYPRE_HOPSCOTCH ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_SUPERLU)
+  set(HYPRE_USING_SUPERLU ON CACHE BOOL "" FORCE)
+  add_compile_definitions(HAVE_SUPERLU)
 endif ()
 
 if (HYPRE_WITH_DSUPERLU)
@@ -417,6 +426,32 @@ else ()
   endif ()
 endif ()
 
+# Find SUPERLU, if requested
+if (HYPRE_USING_SUPERLU)
+  if (NOT TPL_SUPERLU_LIBRARIES)
+    message(FATAL_ERROR "TPL_SUPERLU_LIBRARIES option should be set for SuperLU support.")
+  endif ()
+
+  if (NOT TPL_SUPERLU_INCLUDE_DIRS)
+    message(FATAL_ERROR "TPL_SUPERLU_INCLUDE_DIRS option be set for SuperLU support.")
+  endif ()
+
+  foreach (dir ${TPL_SUPERLU_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "SuperLU include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using SUPERLU.")
+  set(SUPERLU_FOUND TRUE)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_LIBRARIES} stdc++)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_INCLUDE_DIRS})
+endif (HYPRE_USING_SUPERLU)
+
+if (SUPERLU_FOUND)
+  set(HYPRE_USING_SUPERLU TRUE)
+endif ()
+
 # Find DSUPERLU, if requested
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
@@ -442,6 +477,24 @@ endif (HYPRE_USING_DSUPERLU)
 if (DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif ()
+
+# Find FEI, if requested
+if (HYPRE_USING_FEI)
+  if (NOT TPL_FEI_INCLUDE_DIRS)
+    message(FATAL_ERROR "TPL_FEI_INCLUDE_DIRS option should be set for FEI support.")
+  endif ()
+
+  foreach (dir ${TPL_FEI_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "FEI include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-I${dir} ${CMAKE_CXX_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using FEI.")
+  set(FEI_FOUND TRUE)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
+endif(HYPRE_USING_FEI)
 
 if (HYPRE_USING_CUDA)
   target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
