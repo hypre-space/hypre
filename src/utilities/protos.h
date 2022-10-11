@@ -389,7 +389,8 @@ void hypre_MemoryTrackerInsert2(const char *action, void *ptr, void *ptr2, size_
                                 hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2,
                                 const char *filename,
                                 const char *function, HYPRE_Int line);
-HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o, size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
+HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
+                                    size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 #endif

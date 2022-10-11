@@ -318,7 +318,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                            CF_marker,
                            zip0,
    [] (const auto & x) {return std::make_tuple(HYPRE_Int(1), HYPRE_Int(1), HYPRE_Int(0));},
-                           equal<HYPRE_Int>(1) );
+   equal<HYPRE_Int>(1) );
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(CF_marker,          equal<HYPRE_Int>(1)),
@@ -490,7 +490,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                  perm0 + remaining,
                                  diag_shifts,
                                  perm0,
-         [current_pass=current_pass] (const auto & x) {return current_pass + 1;},
+         [current_pass = current_pass] (const auto & x) {return current_pass + 1;},
          [] (const auto & x) {return x;} );
 
          hypre_TMemcpy(points_left_old, points_left, HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE,
@@ -743,8 +743,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                       oneapi::dpl::make_zip_iterator(P_diag_i_tmp, P_offd_i_tmp),
                       std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                       tuple_plus<HYPRE_Int>() );
-   hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
    hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
    hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
@@ -1629,7 +1631,7 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
                            pass_marker,
                            fine_to_coarse,
    [] (const auto & x) {return -1;},
-   [color=color] (const auto & x) {return x != color;} );
+   [color = color] (const auto & x) {return x != color;} );
 #else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(pass_marker,          equal<HYPRE_Int>(color)),
@@ -1661,8 +1663,10 @@ hypre_modmp_compute_num_cols_offd_fine_to_coarse( HYPRE_Int  *pass_marker_offd,
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(pass_marker_offd,                       equal<HYPRE_Int>(color)),
-                      oneapi::dpl::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1, equal<HYPRE_Int>(color)),
+                      oneapi::dpl::make_transform_iterator(pass_marker_offd,
+                                                           equal<HYPRE_Int>(color)),
+                      oneapi::dpl::make_transform_iterator(pass_marker_offd + num_cols_offd_A + 1,
+                                                           equal<HYPRE_Int>(color)),
                       fine_to_coarse_offd,
                       HYPRE_Int(0) );
 #else

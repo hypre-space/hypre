@@ -312,7 +312,8 @@ hypreDevice_CSRMatrixMatvec( HYPRE_Int  num_vectors,
                                                 HYPRE_SPMV_BLOCKDIM / group_sizes[1],
                                                 HYPRE_SPMV_BLOCKDIM / group_sizes[2],
                                                 HYPRE_SPMV_BLOCKDIM / group_sizes[3],
-                                                HYPRE_SPMV_BLOCKDIM / group_sizes[4] };
+                                                HYPRE_SPMV_BLOCKDIM / group_sizes[4]
+                                              };
 
    const dim3 bDim(HYPRE_SPMV_BLOCKDIM);
 

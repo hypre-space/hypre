@@ -842,7 +842,7 @@ extern "C++"
    template<typename LOOP_BODY, typename REDUCER>
    void
    ReductionBoxLoopforall( HYPRE_Int  length,
-                           REDUCER   &reducer,
+                           REDUCER   & reducer,
                            LOOP_BODY  loop_body )
    {
       if (length <= 0)
@@ -1230,6 +1230,7 @@ extern "C++"
 
    /*********************************************************************
     * wrapper functions calling sycl parallel_for
+    * WM: todo - add runtime switch between CPU/GPU execution
     *********************************************************************/
 
    template<typename LOOP_BODY>

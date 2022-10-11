@@ -728,7 +728,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             start = hypre_BoxIMin(box);
             hypre_BoxGetSize(box, loop_size);
             zypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
-                                   ghost_box, start, stride, mi);
+                                ghost_box, start, stride, mi);
             {
                row_sizes[m + mi] = nnzs;
             }
@@ -768,9 +768,12 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
 
    hypre_SStructMatrixTmpSize(matrix) = max_row_size;
-   hypre_SStructMatrixTmpRowCoords(matrix) = hypre_CTAlloc(HYPRE_BigInt, max_row_size, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixTmpColCoords(matrix) = hypre_CTAlloc(HYPRE_BigInt, max_row_size, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixTmpCoeffs(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_row_size, HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpRowCoords(matrix) = hypre_CTAlloc(HYPRE_BigInt, max_row_size,
+                                                           HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpColCoords(matrix) = hypre_CTAlloc(HYPRE_BigInt, max_row_size,
+                                                           HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixTmpCoeffs(matrix)    = hypre_CTAlloc(HYPRE_Complex, max_row_size,
+                                                           HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -1539,7 +1542,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int                tvalues_size = 0;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
    HYPRE_Int                entry, sentry, ei, fri, toi;
-   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(hypre_SStructMatrixIJMatrix(matrix));
+   HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(hypre_SStructMatrixIJMatrix(
+                                                                              matrix));
 
    pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
 

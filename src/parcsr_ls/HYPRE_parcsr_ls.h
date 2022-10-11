@@ -4196,7 +4196,7 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
-                              HYPRE_Int global_smooth_cycle );
+                               HYPRE_Int global_smooth_cycle );
 
 /**
  * (Optional) Determines type of global smoother.

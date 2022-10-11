@@ -152,7 +152,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 #if defined(HYPRE_USING_SYCL)
    hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                      hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                           num_sends),
+                                                                                                       num_sends),
                      CF_marker,
                      int_buf_data );
 #else
@@ -184,7 +184,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 #if defined(HYPRE_USING_SYCL)
       hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                         hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                              num_sends),
+                                                                                                          num_sends),
                         dof_func,
                         int_buf_data );
 #else
@@ -395,7 +395,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                    count + num_cols_A_offd,
                                    P_marker,
                                    P_colids,
-   [] (const auto & x) { return x; } );
+      [] (const auto & x) { return x; } );
 #else
       new_end = HYPRE_THRUST_CALL(copy_if,
                                   thrust::make_counting_iterator(0),
@@ -1268,7 +1268,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       big_int_buf_data,
                       big_int_buf_data + hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                       big_int_buf_data,
-   [my_first_cpt=my_first_cpt] (const auto & x) { return x + my_first_cpt; } );
+   [my_first_cpt = my_first_cpt] (const auto & x) { return x + my_first_cpt; } );
 #else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
@@ -1373,7 +1373,8 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       perm_iter + nnz_offd,
                       perm_iter,
    [] (const auto & x) { return 1; } );
-   num_cols_P_offd = HYPRE_ONEDPL_CALL(std::reduce, mark_P_offd_idx, mark_P_offd_idx + num_cols_A_offd);
+   num_cols_P_offd = HYPRE_ONEDPL_CALL(std::reduce, mark_P_offd_idx,
+                                       mark_P_offd_idx + num_cols_A_offd);
 #else
    HYPRE_THRUST_CALL( scatter,
                       thrust::make_constant_iterator(1),

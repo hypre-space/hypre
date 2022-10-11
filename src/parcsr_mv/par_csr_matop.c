@@ -6404,9 +6404,9 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
    /* Local matrix A info */
    HYPRE_Int           num_rows      = hypre_CSRMatrixNumRows(A_diag);
 
-  /*---------------------------------------------
-   * Sanity checks
-   *---------------------------------------------*/
+   /*---------------------------------------------
+    * Sanity checks
+    *---------------------------------------------*/
 
    if (x_num_vectors != y_num_vectors)
    {

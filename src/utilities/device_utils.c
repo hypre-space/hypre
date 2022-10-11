@@ -2169,7 +2169,8 @@ hypre_CudaCompileFlagCheck()
       }
       else
       {
-         hypre_sprintf(msg, "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+         hypre_sprintf(msg,
+                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
                        cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
       }
 

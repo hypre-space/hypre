@@ -4872,7 +4872,8 @@ hypre_BoomerAMGSetCPoints(void         *data,
       C_points_marker = hypre_CTAlloc(HYPRE_BigInt, num_cpt_coarse, memory_location);
       C_points_local_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse, memory_location);
 
-      hypre_TMemcpy(C_points_marker, cpt_coarse_index, HYPRE_BigInt, num_cpt_coarse, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(C_points_marker, cpt_coarse_index, HYPRE_BigInt, num_cpt_coarse, memory_location,
+                    HYPRE_MEMORY_HOST);
    }
    hypre_ParAMGDataCPointsMarker(amg_data)      = C_points_marker;
    hypre_ParAMGDataCPointsLocalMarker(amg_data) = C_points_local_marker;

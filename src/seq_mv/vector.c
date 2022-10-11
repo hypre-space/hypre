@@ -290,7 +290,7 @@ hypre_SeqVectorSetConstantValuesHost( hypre_Vector *v,
    HYPRE_Int      i;
 
 #if defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < total_size; i++)
    {
@@ -558,7 +558,7 @@ hypre_SeqVectorAxpyHost( HYPRE_Complex alpha,
    HYPRE_Int      i;
 
 #if defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < total_size; i++)
    {
@@ -636,7 +636,7 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
          if (marker)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -649,7 +649,7 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -663,7 +663,7 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
          if (marker)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -678,7 +678,7 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -694,7 +694,7 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
          if (marker)
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -711,7 +711,7 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
          else
          {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
+            #pragma omp parallel for private(i, j) HYPRE_SMP_SCHEDULE
 #endif
             for (i = 0; i < size; i++)
             {
@@ -827,7 +827,7 @@ hypre_SeqVectorInnerProdHost( hypre_Vector *x,
    HYPRE_Int      i;
 
 #if defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < total_size; i++)
    {
@@ -887,7 +887,7 @@ hypre_SeqVectorSumEltsHost( hypre_Vector *vector )
    HYPRE_Int       i;
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < total_size; i++)
    {
