@@ -10,9 +10,9 @@
 Version 2.26.0 released 2022/10/14
 
 - Added a new feature of BoomerAMG (L1-Jacobi and Chebyshev smoothers) and
-	Krylov subspace solvers with multiple right-hand-side vectors;
+  Krylov subspace solvers with multiple right-hand-side vectors;
 - Optimized parallel sparse matrix/multi-component vector multiplication
-	on CPUs and GPUs.
+  on CPUs and GPUs.
 - Added SYCL support for the IJ interface and various AMG operators;
 - Added a runtime switch feature between CPU and GPU;
 - Added CMAKE support for CUDA;
