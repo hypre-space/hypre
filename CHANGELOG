@@ -7,10 +7,21 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.26.0 released 2022/10/14
+
+- Added a new feature of AMG and Krylov subspace solvers with multiple right-hand-side vectors;
+- Added SYCL support for the IJ interface and various AMG operators;
+- Added a runtime switch feature between CPU and GPU;
+- Added CMAKE support for CUDA;
+- Optimized the performance of AMG interpolation truncation routines with CUDA/HIP;
+- Optimized the performance of hypre's SpGEMM kernels on NVIDIA/AMD GPUs;
+- Various bug fixes
+
+
 Version 2.25.0 released 2022/06/15
 
 - New features in MGR: multilevel assignment of solver options, block Jacobi for
-  smoothers and integrid transfer, CPR, non-Galerkin.
+  smoothers and inter-grid transfer, CPR, non-Galerkin.
 - New factorized sparse approximate inverse (FSAI) solver/preconditioner.  Can
   also be used as a smoother in BoomerAMG.
 - Added various optimizations for Nvidia and AMD GPUs by removing synchronizations,
