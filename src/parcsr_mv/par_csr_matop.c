@@ -6420,13 +6420,13 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
       return hypre_error_flag;
    }
 
-   if (x_vecstride <= 0)
+   if (x_size > 0 && x_vecstride <= 0)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive x vector stride!\n");
       return hypre_error_flag;
    }
 
-   if (y_vecstride <= 0)
+   if (y_size > 0 && y_vecstride <= 0)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive y vector stride!\n");
       return hypre_error_flag;
