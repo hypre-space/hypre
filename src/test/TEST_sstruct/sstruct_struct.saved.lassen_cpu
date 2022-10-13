@@ -1,0 +1,64 @@
+# Output file: sstruct_struct.out.0
+Iterations = 5
+Final Relative Residual Norm = 2.753739e-07
+
+# Output file: sstruct_struct.out.1
+Iterations = 16
+Final Relative Residual Norm = 6.891627e-07
+
+# Output file: sstruct_struct.out.200
+Iterations = 5
+Final Relative Residual Norm = 2.753739e-07
+
+# Output file: sstruct_struct.out.201
+Iterations = 16
+Final Relative Residual Norm = 6.891627e-07
+
+# Output file: sstruct_struct.out.2D
+Iterations = 15
+Final Relative Residual Norm = 3.544959e-07
+
+# Output file: sstruct_struct.out.3Dx
+Iterations = 15
+Final Relative Residual Norm = 3.544959e-07
+
+# Output file: sstruct_struct.out.3Dy
+Iterations = 15
+Final Relative Residual Norm = 3.544959e-07
+
+# Output file: sstruct_struct.out.3Dz
+Iterations = 15
+Final Relative Residual Norm = 3.544959e-07
+
+# Output file: sstruct_struct.out.10
+Iterations = 8
+Final Relative Residual Norm = 3.476646e-07
+
+# Output file: sstruct_struct.out.11
+Iterations = 8
+Final Relative Residual Norm = 3.476646e-07
+
+# Output file: sstruct_struct.out.12
+Iterations = 8
+Final Relative Residual Norm = 3.476646e-07
+
+# Output file: sstruct_struct.out.13
+Iterations = 8
+Final Relative Residual Norm = 3.476646e-07
+
+# Output file: sstruct_struct.out.15
+Iterations = 23
+Final Relative Residual Norm = 9.655301e-07
+
+# Output file: sstruct_struct.out.16
+Iterations = 23
+Final Relative Residual Norm = 9.655301e-07
+
+# Output file: sstruct_struct.out.17
+Iterations = 23
+Final Relative Residual Norm = 9.655301e-07
+
+# Output file: sstruct_struct.out.18
+Iterations = 23
+Final Relative Residual Norm = 9.655301e-07
+

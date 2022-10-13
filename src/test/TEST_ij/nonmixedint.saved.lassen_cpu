@@ -1,0 +1,12 @@
+# Output file: nonmixedint.out.0
+BoomerAMG Iterations = 16
+Final Relative Residual Norm = 3.804106e-09
+
+# Output file: nonmixedint.out.1
+GMRES Iterations = 32
+Final GMRES Relative Residual Norm = 6.756785e-09
+
+# Output file: nonmixedint.out.2
+Iterations = 22
+Final Relative Residual Norm = 9.936851e-09
+

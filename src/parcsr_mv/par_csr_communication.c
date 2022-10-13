@@ -1145,7 +1145,7 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
                for (j = 0; j < num_vectors; j++)
                {
                   send_map_elmts_new[i * num_vectors + j] =
-                      send_map_elmts[i * num_components + j];
+                     send_map_elmts[i * num_components + j];
                }
             }
          }

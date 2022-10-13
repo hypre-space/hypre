@@ -141,36 +141,64 @@ hypre_IntArrayCloneDeep( hypre_IntArray *x )
  * hypre_IntArraySetConstantValues
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int
-hypre_IntArraySetConstantValues( hypre_IntArray *v,
-                                 HYPRE_Int       value )
+hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
+                                       HYPRE_Int       value )
 {
-   HYPRE_Int     *array_data = hypre_IntArrayData(v);
-   HYPRE_Int      size       = hypre_IntArraySize(v);
-   HYPRE_Int      ierr       = 0;
+   HYPRE_Int *array_data = hypre_IntArrayData(v);
+   HYPRE_Int  size       = hypre_IntArraySize(v);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (size > 0)
-   {
-      hypreDevice_IntFilln( array_data, size, value );
-   }
-#else
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   hypreDevice_IntFilln( array_data, size, value );
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
-#if defined(HYPRE_USING_DEVICE_OPENMP)
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(array_data)
-#elif defined(HYPRE_USING_OPENMP)
-   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
    for (i = 0; i < size; i++)
    {
       array_data[i] = value;
    }
-#endif /* defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_GPU)
-   hypre_SyncComputeStream(hypre_handle());
 #endif
 
-   return ierr;
+   hypre_SyncComputeStream(hypre_handle());
+
+   return hypre_error_flag;
+}
+#endif
+
+HYPRE_Int
+hypre_IntArraySetConstantValues( hypre_IntArray *v,
+                                 HYPRE_Int       value )
+{
+   HYPRE_Int *array_data = hypre_IntArrayData(v);
+   HYPRE_Int  size       = hypre_IntArraySize(v);
+
+   if (size <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IntArraySetConstantValuesDevice(v, value);
+   }
+   else
+#endif
+   {
+      HYPRE_Int i;
+#if defined(HYPRE_USING_OPENMP)
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+      {
+         array_data[i] = value;
+      }
+   }
+
+   return hypre_error_flag;
 }
 
