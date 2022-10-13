@@ -47,6 +47,8 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
    (smsg_data -> num_grids[1])     = 1;
    (smsg_data -> num_grids[2])     = 1;
 
+   (smsg_data -> memory_location)  = hypre_HandleMemoryLocation(hypre_handle());
+
    return (void *) smsg_data;
 }
 

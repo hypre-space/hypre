@@ -45,7 +45,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x          )
 {
-   hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
+   hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData *) smsg_vdata;
 
    MPI_Comm              comm = (smsg_data -> comm);
 
@@ -111,6 +111,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
    HYPRE_Int             ierr = 0;
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 #if DEBUG
    char                  filename[255];
 #endif
@@ -552,8 +553,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-   data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
+
    (smsg_data -> data) = data;
+   (smsg_data -> memory_location) = memory_location;
 
    hypre_StructVectorInitializeData(t_a[0], data);
    hypre_StructVectorAssemble(t_a[0]);

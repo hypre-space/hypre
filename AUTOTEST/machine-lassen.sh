@@ -50,7 +50,7 @@ save="lassen"
 ##########
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
-co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
@@ -91,6 +91,12 @@ co="--with-cuda --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_
 ro="-bench -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-bench
+
+# run on CPU
+co="--with-cuda --with-test-using-host --with-memory-tracker --enable-debug --with-gpu-arch=70"
+ro="-ij-noilu -ams -struct -sstruct -rt -mpibind -save lassen_cpu"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-cpu
 
 ############
 ## OMP4.5 ##

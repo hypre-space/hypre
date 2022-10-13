@@ -43,6 +43,7 @@ typedef struct
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
 
+   HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
    HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
@@ -66,15 +67,12 @@ typedef struct
    HYPRE_Int             num_iterations;
    HYPRE_Int             time_index;
 
-   HYPRE_Int            print_level;
+   HYPRE_Int             print_level;
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int             devicelevel;
-#endif
 } hypre_SMGData;
 
 /*--------------------------------------------------------------------------

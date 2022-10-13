@@ -1602,7 +1602,8 @@ HYPRE_Int hypre_NonGalerkinIJBufferNewRow ( HYPRE_BigInt *ijbuf_rownums, HYPRE_I
 HYPRE_Int hypre_NonGalerkinIJBufferCompressRow ( HYPRE_Int *ijbuf_cnt, HYPRE_Int ijbuf_rowcounter,
                                                  HYPRE_Real *ijbuf_data, HYPRE_BigInt *ijbuf_cols, HYPRE_BigInt *ijbuf_rownums,
                                                  HYPRE_Int *ijbuf_numcols );
-HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_Int ijbuf_size, HYPRE_Int *ijbuf_cnt,
+HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_MemoryLocation memory_location,
+                                              HYPRE_Int ijbuf_size, HYPRE_Int *ijbuf_cnt,
                                               HYPRE_Int *ijbuf_rowcounter, HYPRE_Real **ijbuf_data, HYPRE_BigInt **ijbuf_cols,
                                               HYPRE_BigInt **ijbuf_rownums, HYPRE_Int **ijbuf_numcols );
 HYPRE_Int hypre_NonGalerkinIJBufferWrite ( HYPRE_IJMatrix B, HYPRE_Int *ijbuf_cnt,

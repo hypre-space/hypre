@@ -56,7 +56,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    stencil_size  = hypre_StructStencilSize(stencil);
    stencil_data  = hypre_StructMatrixStencilData(matrix);
 
-   mask = hypre_CTAlloc(hypre_StructMatrix,  1, HYPRE_MEMORY_HOST);
+   mask = hypre_CTAlloc(hypre_StructMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_StructMatrixComm(mask) = hypre_StructMatrixComm(matrix);
 
@@ -67,7 +67,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
       hypre_StructStencilRef(hypre_StructMatrixUserStencil(matrix));
 
    mask_stencil_size  = num_stencil_indices;
-   mask_stencil_shape = hypre_CTAlloc(hypre_Index,  num_stencil_indices, HYPRE_MEMORY_HOST);
+   mask_stencil_shape = hypre_CTAlloc(hypre_Index, num_stencil_indices, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_stencil_indices; i++)
    {
       hypre_CopyIndex(stencil_shape[stencil_indices[i]],
@@ -82,6 +82,8 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixDataSpace(mask) =
       hypre_BoxArrayDuplicate(hypre_StructMatrixDataSpace(matrix));
+
+   hypre_StructMatrixMemoryLocation(mask) = hypre_StructMatrixMemoryLocation(matrix);
 
    hypre_StructMatrixData(mask) = hypre_StructMatrixData(matrix);
    hypre_StructMatrixDataConst(mask) = hypre_StructMatrixDataConst(matrix);

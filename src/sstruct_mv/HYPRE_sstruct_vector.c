@@ -28,7 +28,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              part;
 
-   vector = hypre_TAlloc(hypre_SStructVector,  1, HYPRE_MEMORY_HOST);
+   vector = hypre_TAlloc(hypre_SStructVector, 1, HYPRE_MEMORY_HOST);
 
    hypre_SStructVectorComm(vector) = comm;
    hypre_SStructVectorNDim(vector) = hypre_SStructGridNDim(grid);
@@ -36,7 +36,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructVectorObjectType(vector) = HYPRE_SSTRUCT;
    nparts = hypre_SStructGridNParts(grid);
    hypre_SStructVectorNParts(vector) = nparts;
-   pvectors = hypre_TAlloc(hypre_SStructPVector *,  nparts, HYPRE_MEMORY_HOST);
+   pvectors = hypre_TAlloc(hypre_SStructPVector *, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -79,6 +79,7 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    hypre_SStructPVector **pvectors;
    HYPRE_Int              part;
    HYPRE_Int              vector_type;
+   HYPRE_MemoryLocation   memory_location = hypre_SStructVectorMemoryLocation(vector);
 
    /* GEC1002 destroying data indices and data in vector  */
 
@@ -99,16 +100,16 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
          HYPRE_IJVectorDestroy(hypre_SStructVectorIJVector(vector));
 
          /* GEC1002 the ijdestroy takes care of the data when the
-          *  vector is type HYPRE_SSTRUCT. This is a result that the
+          * vector is type HYPRE_SSTRUCT. This is a result that the
           * ijvector does not use the owndata flag in the data structure
-          * unlike the structvector                               */
+          * unlike the struct vector                               */
 
          /* GEC if data has been allocated then free the pointer */
          hypre_TFree(hypre_SStructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
 
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
          {
-            hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_SStructVectorData(vector), memory_location);
          }
 
          hypre_TFree(vector, HYPRE_MEMORY_HOST);
@@ -145,6 +146,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    HYPRE_IJVector          ijvector;
    hypre_SStructPGrid     *pgrid;
    HYPRE_SStructVariable  *vartypes;
+   HYPRE_MemoryLocation    memory_location = hypre_HandleMemoryLocation(hypre_handle());
 
    /* GEC0902 addition of variables for ilower and iupper   */
    HYPRE_Int               ilower, iupper;
@@ -158,11 +160,11 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, datasize, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Complex, datasize, memory_location);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 
-   hypre_SStructVectorData(vector)  = data;
+   hypre_SStructVectorData(vector) = data;
 
    for (part = 0; part < nparts; part++)
    {
@@ -235,9 +237,9 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-      par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
+      par_vector = (hypre_ParVector *) hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_VectorData(parlocal_vector), hypre_VectorMemoryLocation(parlocal_vector));
       hypre_VectorData(parlocal_vector) = data ;
    }
 

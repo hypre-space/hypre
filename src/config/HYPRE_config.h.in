@@ -151,6 +151,9 @@
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
 
+/* Define to 1 if want to use host in hypre tests */
+#undef HYPRE_TEST_USING_HOST
+
 /* Using HYPRE timing routines */
 #undef HYPRE_TIMING
 

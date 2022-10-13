@@ -79,7 +79,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 {
    MPI_Comm               comm = (fgrid_element ->  comm);
 
-   hypre_PTopology       *PTopology = (hypre_PTopology       *)PTopology_vdata;
+   hypre_PTopology       *PTopology = (hypre_PTopology *) PTopology_vdata;
 
    hypre_IJMatrix        *Face_iedge;
    hypre_IJMatrix        *Element_iedge;
@@ -161,6 +161,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              row_in;
 
    HYPRE_Int              myproc;
+
+   HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(Aee);
 
    hypre_BoxInit(&copy_box, ndim);
 
@@ -921,21 +923,21 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
    if (ndim == 3)
    {
-      iFace = hypre_CTAlloc(HYPRE_BigInt, nFaces,    HYPRE_MEMORY_DEVICE);
+      iFace = hypre_CTAlloc(HYPRE_BigInt, nFaces, memory_location);
    }
-   iEdge    = hypre_CTAlloc(HYPRE_BigInt, nEdges,    HYPRE_MEMORY_DEVICE);
-   iElement = hypre_CTAlloc(HYPRE_BigInt, nElements, HYPRE_MEMORY_DEVICE);
+   iEdge    = hypre_CTAlloc(HYPRE_BigInt, nEdges, memory_location);
+   iElement = hypre_CTAlloc(HYPRE_BigInt, nElements, memory_location);
 
    /* array structures needed for forming ij_matrices */
 
    /* Element_edge. Same for 2-d and 3-d. */
-   ncols_Elementedge = hypre_CTAlloc(HYPRE_Int,  nElements, HYPRE_MEMORY_DEVICE);
+   ncols_Elementedge = hypre_CTAlloc(HYPRE_Int,  nElements, memory_location);
    for (i = 0; i < nElements; i++)
    {
       ncols_Elementedge[i] = n_Cell_iedges;
    }
-   jElement_edge    = hypre_CTAlloc(HYPRE_BigInt, nElements_iedges, HYPRE_MEMORY_DEVICE);
-   vals_Elementedge = hypre_CTAlloc(HYPRE_Real,   nElements_iedges, HYPRE_MEMORY_DEVICE);
+   jElement_edge    = hypre_CTAlloc(HYPRE_BigInt, nElements_iedges, memory_location);
+   vals_Elementedge = hypre_CTAlloc(HYPRE_Real,   nElements_iedges, memory_location);
 
    /*---------------------------------------------------------------------------
     * Fill up the row/column ranks of Element_edge. Will need to distinguish
@@ -1121,9 +1123,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            (const HYPRE_Real*) vals_Elementedge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) Element_iedge);
 
-   hypre_TFree(ncols_Elementedge, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(jElement_edge,     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(vals_Elementedge,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols_Elementedge, memory_location);
+   hypre_TFree(jElement_edge, memory_location);
+   hypre_TFree(vals_Elementedge, memory_location);
 
    /* Face_edge */
    /*------------------------------------------------------------------------------
@@ -1136,7 +1138,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
     *------------------------------------------------------------------------------*/
    if (ndim == 3)
    {
-      ncols_Faceedge = hypre_CTAlloc(HYPRE_Int, nFaces, HYPRE_MEMORY_DEVICE);
+      ncols_Faceedge = hypre_CTAlloc(HYPRE_Int, nFaces, memory_location);
       nFaces = 0;
       j = 0;
       for (part = 0; part < nparts; part++)
@@ -1209,8 +1211,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          }    /* for (t= 0; t< Face_nvars; t++) */
       }       /* for (part= 0; part< nparts; part++) */
 
-      jFace_edge    = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_DEVICE);
-      vals_Faceedge = hypre_CTAlloc(HYPRE_Real,   j, HYPRE_MEMORY_DEVICE);
+      jFace_edge    = hypre_CTAlloc(HYPRE_BigInt, j, memory_location);
+      vals_Faceedge = hypre_CTAlloc(HYPRE_Real, j, memory_location);
       for (i = 0; i < j; i++)
       {
          vals_Faceedge[i] = 1.0;
@@ -1542,10 +1544,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               (const HYPRE_Real*) vals_Faceedge);
       HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) Face_iedge);
 
-      hypre_TFree(ncols_Faceedge, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(iFace,          HYPRE_MEMORY_DEVICE);
-      hypre_TFree(jFace_edge,     HYPRE_MEMORY_DEVICE);
-      hypre_TFree(vals_Faceedge,  HYPRE_MEMORY_DEVICE);
+      hypre_TFree(ncols_Faceedge, memory_location);
+      hypre_TFree(iFace, memory_location);
+      hypre_TFree(jFace_edge, memory_location);
+      hypre_TFree(vals_Faceedge, memory_location);
    }  /* if (ndim == 3) */
 
    /* Edge_edge */
@@ -1553,7 +1555,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
     * Count the Edge_edge connections. Will need to distinguish 2-d and 3-d.
     *------------------------------------------------------------------------------*/
    /* nEdges should be correct for 2-d & 3-d */
-   ncols_Edgeiedge = hypre_CTAlloc(HYPRE_Int, nEdges, HYPRE_MEMORY_DEVICE);
+   ncols_Edgeiedge = hypre_CTAlloc(HYPRE_Int, nEdges, memory_location);
 
    nEdges = 0;
    k = 0;
@@ -1614,8 +1616,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       }  /* for (t= 0; t< Edge_nvars; t++) */
    }     /* for (part= 0; part< nparts; part++) */
 
-   jEdge_iedge    = hypre_CTAlloc(HYPRE_BigInt, k, HYPRE_MEMORY_DEVICE);
-   vals_Edgeiedge = hypre_CTAlloc(HYPRE_Real,   k, HYPRE_MEMORY_DEVICE);
+   jEdge_iedge    = hypre_CTAlloc(HYPRE_BigInt, k, memory_location);
+   vals_Edgeiedge = hypre_CTAlloc(HYPRE_Real, k, memory_location);
    for (i = 0; i < k; i++)
    {
       vals_Edgeiedge[i] = 1.0;
@@ -1821,15 +1823,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            (const HYPRE_Real*) vals_Edgeiedge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) Edge_iedge);
 
-   hypre_TFree(ncols_Edgeiedge, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(iEdge,           HYPRE_MEMORY_DEVICE);
-   hypre_TFree(jEdge_iedge,     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(vals_Edgeiedge,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols_Edgeiedge, memory_location);
+   hypre_TFree(iEdge, memory_location);
+   hypre_TFree(jEdge_iedge, memory_location);
+   hypre_TFree(vals_Edgeiedge, memory_location);
 
    /* Element_Face & Element_Edge. Element_Face only for 3-d. */
    if (ndim == 3)
    {
-      ncols_ElementFace = hypre_CTAlloc(HYPRE_Int, nElements, HYPRE_MEMORY_DEVICE);
+      ncols_ElementFace = hypre_CTAlloc(HYPRE_Int, nElements, memory_location);
       j = 2 * ndim;
       for (i = 0; i < nElements; i++)
       {
@@ -1837,15 +1839,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       }
 
       j *= nElements;
-      jElement_Face    = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_DEVICE);
-      vals_ElementFace = hypre_CTAlloc(HYPRE_Real,   j, HYPRE_MEMORY_DEVICE);
+      jElement_Face    = hypre_CTAlloc(HYPRE_BigInt, j, memory_location);
+      vals_ElementFace = hypre_CTAlloc(HYPRE_Real, j, memory_location);
       for (i = 0; i < j; i++)
       {
          vals_ElementFace[i] = 1.0;
       }
    }
 
-   ncols_ElementEdge = hypre_CTAlloc(HYPRE_Int,  nElements, HYPRE_MEMORY_DEVICE);
+   ncols_ElementEdge = hypre_CTAlloc(HYPRE_Int, nElements, memory_location);
    j = 2 * ndim;
    k = (ndim - 1) * j;
    for (i = 0; i < nElements; i++)
@@ -1854,8 +1856,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    }
 
    k *= nElements;
-   jElement_Edge   = hypre_CTAlloc(HYPRE_BigInt, k, HYPRE_MEMORY_DEVICE);
-   vals_ElementEdge = hypre_CTAlloc(HYPRE_Real,   k, HYPRE_MEMORY_DEVICE);
+   jElement_Edge   = hypre_CTAlloc(HYPRE_BigInt, k, memory_location);
+   vals_ElementEdge = hypre_CTAlloc(HYPRE_Real, k, memory_location);
    for (i = 0; i < k; i++)
    {
       vals_ElementEdge[i] = 1.0;
@@ -2114,9 +2116,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                               (const HYPRE_Real*) vals_ElementFace);
       HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) Element_Face);
 
-      hypre_TFree(ncols_ElementFace, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(jElement_Face,     HYPRE_MEMORY_DEVICE);
-      hypre_TFree(vals_ElementFace,  HYPRE_MEMORY_DEVICE);
+      hypre_TFree(ncols_ElementFace, memory_location);
+      hypre_TFree(jElement_Face, memory_location);
+      hypre_TFree(vals_ElementFace, memory_location);
    }  /* if (ndim == 3) */
 
    HYPRE_IJMatrixSetValues(Element_Edge, nElements, ncols_ElementEdge,
@@ -2124,10 +2126,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            (const HYPRE_Real*) vals_ElementEdge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) Element_Edge);
 
-   hypre_TFree(ncols_ElementEdge, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(iElement,          HYPRE_MEMORY_DEVICE);
-   hypre_TFree(jElement_Edge,     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(vals_ElementEdge,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols_ElementEdge, memory_location);
+   hypre_TFree(iElement, memory_location);
+   hypre_TFree(jElement_Edge, memory_location);
+   hypre_TFree(vals_ElementEdge, memory_location);
 
    /*-----------------------------------------------------------------------
     * edge_Edge, the actual interpolation matrix.
@@ -2148,8 +2150,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
     *-----------------------------------------------------------------------*/
 
    /* count the row/col connections */
-   iedgeEdge      = hypre_CTAlloc(HYPRE_BigInt, nedges, HYPRE_MEMORY_DEVICE);
-   ncols_edgeEdge = hypre_CTAlloc(HYPRE_Int,    nedges, HYPRE_MEMORY_DEVICE);
+   iedgeEdge      = hypre_CTAlloc(HYPRE_BigInt, nedges, memory_location);
+   ncols_edgeEdge = hypre_CTAlloc(HYPRE_Int, nedges, memory_location);
 
    /*-----------------------------------------------------------------------
     * loop first over the fedges aligning with the agglomerate coarse edges.
@@ -3267,8 +3269,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          j++;
       }
    }
-   vals_edgeEdge = hypre_CTAlloc(HYPRE_Real,   k, HYPRE_MEMORY_DEVICE);
-   jedge_Edge    = hypre_CTAlloc(HYPRE_BigInt, k, HYPRE_MEMORY_DEVICE);
+   vals_edgeEdge = hypre_CTAlloc(HYPRE_Real, k, memory_location);
+   jedge_Edge    = hypre_CTAlloc(HYPRE_BigInt, k, memory_location);
    size1         = j;
 
    /*********************************************************************
@@ -5109,10 +5111,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            (const HYPRE_Real*) vals_edgeEdge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) edge_Edge);
 
-   hypre_TFree(ncols_edgeEdge, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(iedgeEdge,      HYPRE_MEMORY_DEVICE);
-   hypre_TFree(jedge_Edge,     HYPRE_MEMORY_DEVICE);
-   hypre_TFree(vals_edgeEdge,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols_edgeEdge, memory_location);
+   hypre_TFree(iedgeEdge, memory_location);
+   hypre_TFree(jedge_Edge, memory_location);
+   hypre_TFree(vals_edgeEdge, memory_location);
 
    /* n_CtoVbox[part][cellboxi][var]  & CtoVboxnums[part][cellboxi][var][nvboxes] */
    for (part = 0; part < nparts; part++)

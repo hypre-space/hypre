@@ -119,6 +119,15 @@ hypre_int main (hypre_int argc, char *argv[])
 
    HYPRE_ParVector interior_nodes = 0;
 
+   /* default execution policy and memory space */
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+#else
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
+
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
@@ -135,8 +144,11 @@ hypre_int main (hypre_int argc, char *argv[])
     *-----------------------------------------------------------*/
    HYPRE_Init();
 
+   /* default memory location */
+   HYPRE_SetMemoryLocation(memory_location);
+
    /* default execution policy */
-   HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
+   HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
    /* use vendor implementation for SpGEMM */
@@ -155,13 +167,17 @@ hypre_int main (hypre_int argc, char *argv[])
    singular_problem = 0;
    rlx_sweeps = 1;
    rlx_weight = 1.0; rlx_omega = 1.0;
-#if defined(HYPRE_USING_GPU)
-   cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8;
-   coarse_rlx_type = 8, rlx_type = 2; /* PMIS */
-#else
-   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8;
-   coarse_rlx_type = 8, rlx_type = 2; /* HMIS-1 */
-#endif
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8;
+      coarse_rlx_type = 8, rlx_type = 2; /* PMIS */
+   }
+   else
+   {
+      cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8;
+      coarse_rlx_type = 8, rlx_type = 2; /* HMIS-1 */
+   }
+
    /* cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 0; amg_rlx_type = 3; */ /* HMIS-0 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */

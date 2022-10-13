@@ -288,14 +288,12 @@ main( hypre_int argc,
    HYPRE_Real cheby_fraction = .3;
 
 #if defined(HYPRE_USING_GPU)
-   keepTranspose = 1;
-   coarsen_type  = 8;
-   mod_rap2      = 1;
-   HYPRE_Int spgemm_use_vendor = 0;
-   HYPRE_Int spmv_use_vendor = 1;
-   HYPRE_Int use_curand = 1;
-#if defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-   spgemm_use_vendor = 1;
+   HYPRE_Int  spmv_use_vendor = 1;
+   HYPRE_Int  use_curand = 1;
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int  spgemm_use_vendor = 0;
+#else
+   HYPRE_Int  spgemm_use_vendor = 1;
 #endif
    HYPRE_Int  spgemm_alg = 1;
    HYPRE_Int  spgemm_binned = 0;
@@ -303,6 +301,7 @@ main( hypre_int argc,
    HYPRE_Int  spgemm_rowest_nsamples = -1; /* default */
    HYPRE_Real spgemm_rowest_mult = -1.0; /* default */
 #endif
+   HYPRE_Int      nmv = 100;
 
    /* for CGC BM Aug 25, 2006 */
    HYPRE_Int      cgcits = 1;
@@ -469,9 +468,56 @@ main( hypre_int argc,
    HYPRE_Int amgdd_fac_cycle_type = 1;
    HYPRE_Int amgdd_num_ghost_layers = 1;
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   HYPRE_Int print_mem_tracker = 0;
+   char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+#endif
+
    /* default execution policy and memory space */
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_HOST;
+#else
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
-   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy exec2_policy = HYPRE_EXEC_DEVICE;
+#endif
+
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
+      {
+         default_exec_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
+      {
+         default_exec_policy = HYPRE_EXEC_DEVICE;
+      }
+      else if ( strcmp(argv[arg_index], "-exec2_host") == 0 )
+      {
+         exec2_policy = HYPRE_EXEC_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-exec2_device") == 0 )
+      {
+         exec2_policy = HYPRE_EXEC_DEVICE;
+      }
+   }
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      keepTranspose = 1;
+      coarsen_type  = 8;
+      mod_rap2      = 1;
+   }
 
 #ifdef HYPRE_USING_DEVICE_POOL
    /* device pool allocator */
@@ -1240,20 +1286,15 @@ main( hypre_int argc,
       }
       /* end FSAI options */
 #if defined(HYPRE_USING_GPU)
-      else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_HOST;
-      }
-      else if ( strcmp(argv[arg_index], "-exec_device") == 0 )
-      {
-         arg_index++;
-         default_exec_policy = HYPRE_EXEC_DEVICE;
-      }
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
          spgemm_use_vendor = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-nmv") == 0 )
+      {
+         arg_index++;
+         nmv = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mv_vendor") == 0 )
       {
@@ -1329,6 +1370,18 @@ main( hypre_int argc,
          arg_index++;
          benchmark = atoi(argv[arg_index++]);
       }
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+      else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
+      {
+         arg_index++;
+         print_mem_tracker = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mem_tracker_filename") == 0 )
+      {
+         arg_index++;
+         snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
+      }
+#endif
       else
       {
          arg_index++;
@@ -1917,11 +1970,14 @@ main( hypre_int argc,
    {
       restri_type = air;    /* Set Restriction to be AIR */
       interp_type = 100;    /* 1-pt Interp */
-#if defined(HYPRE_USING_GPU)
-      relax_type = 7;
-#else
-      relax_type = 0;
-#endif
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      {
+         relax_type = 7;
+      }
+      else
+      {
+         relax_type = 0;
+      }
       ns_down = 0;
       ns_up = 3;
       /* this is a 2-D 4-by-k array using Double pointers */
@@ -2391,6 +2447,11 @@ main( hypre_int argc,
    HYPRE_SetUmpireUMPoolSize(4LL * 1024 * 1024 * 1024);
    HYPRE_SetUmpireHostPoolSize(4LL * 1024 * 1024 * 1024);
    HYPRE_SetUmpirePinnedPoolSize(4LL * 1024 * 1024 * 1024);
+#endif
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   hypre_MemoryTrackerSetPrint(print_mem_tracker);
+   if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
 #endif
 
    /* default memory location */
@@ -3027,7 +3088,7 @@ main( hypre_int argc,
       b = (HYPRE_ParVector) object;
 
       /* Initial guess */
-      hypre_Memset(values_d, 0, local_num_rows * sizeof(HYPRE_Complex), HYPRE_MEMORY_DEVICE);
+      hypre_Memset(values_d, 0, local_num_rows * sizeof(HYPRE_Complex), memory_location);
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorSetNumComponents(ij_x, num_components);
@@ -3035,7 +3096,7 @@ main( hypre_int argc,
       for (c = 0; c < num_components; c++)
       {
          HYPRE_IJVectorSetComponent(ij_x, c);
-         HYPRE_IJVectorSetValues(ij_x, local_num_rows, NULL, values_d);
+         HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values_d);
       }
       HYPRE_IJVectorAssemble(ij_x);
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
@@ -3657,7 +3718,7 @@ main( hypre_int argc,
       e_dot_e = bf_dot_bf - b_dot_b;
       if (myid == 0)
       {
-         hypre_printf("\nVector/Multivector error = %e\n", e_dot_e);
+         hypre_printf("\nVector/Multivector error = %e\n\n", e_dot_e);
       }
 
       /* Free memory */
@@ -3756,7 +3817,6 @@ main( hypre_int argc,
 
    if (solver_id == -1)
    {
-      HYPRE_Int nmv = 100;
       HYPRE_Int num_threads = hypre_NumThreads();
 
       if (myid == 0)
@@ -4186,6 +4246,8 @@ main( hypre_int argc,
 
       if (second_time)
       {
+         HYPRE_SetExecutionPolicy(exec2_policy);
+
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -4914,32 +4976,36 @@ main( hypre_int argc,
          /* create AMG coarse grid solver */
 
          HYPRE_BoomerAMGCreate(&amg_solver);
-#if defined(HYPRE_USING_GPU)
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-#else
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-         HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-         HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-         if (relax_down > -1)
+
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
          }
-         if (relax_up > -1)
+         else
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+            HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+            HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-#endif
          HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
@@ -5001,6 +5067,8 @@ main( hypre_int argc,
 
       if (second_time)
       {
+         HYPRE_SetExecutionPolicy(exec2_policy);
+
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -6614,19 +6682,19 @@ main( hypre_int argc,
          }
          indices_h = hypre_TAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_HOST);
          values_h = hypre_TAlloc(HYPRE_Complex, num_values, HYPRE_MEMORY_HOST);
-         indices_d = hypre_TAlloc(HYPRE_BigInt, num_values, HYPRE_MEMORY_DEVICE);
-         values_d = hypre_TAlloc(HYPRE_Complex, num_values, HYPRE_MEMORY_DEVICE);
+         indices_d = hypre_TAlloc(HYPRE_BigInt, num_values, memory_location);
+         values_d = hypre_TAlloc(HYPRE_Complex, num_values, memory_location);
          for (i = 0; i < num_values; i++)
          {
             indices_h[i] = first_local_row + i;
          }
-         hypre_TMemcpy(indices_d, indices_h, HYPRE_BigInt, num_values, HYPRE_MEMORY_DEVICE,
+         hypre_TMemcpy(indices_d, indices_h, HYPRE_BigInt, num_values, memory_location,
                        HYPRE_MEMORY_HOST);
 
          HYPRE_ParVectorGetValues((HYPRE_ParVector) residual, num_values, indices_d, values_d);
 
          hypre_TMemcpy(values_h, values_d, HYPRE_Complex, num_values, HYPRE_MEMORY_HOST,
-                       HYPRE_MEMORY_DEVICE);
+                       memory_location);
 
          for (i = 0; i < num_values; i++)
          {
@@ -6637,8 +6705,8 @@ main( hypre_int argc,
          }
          hypre_TFree(indices_h, HYPRE_MEMORY_HOST);
          hypre_TFree(values_h, HYPRE_MEMORY_HOST);
-         hypre_TFree(indices_d, HYPRE_MEMORY_DEVICE);
-         hypre_TFree(values_d, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(indices_d, memory_location);
+         hypre_TFree(values_d, memory_location);
       }
 
       if (second_time)
@@ -7107,32 +7175,35 @@ main( hypre_int argc,
          /* create AMG coarse grid solver */
 
          HYPRE_BoomerAMGCreate(&amg_solver);
-#if defined(HYPRE_USING_GPU)
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-#else
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-         HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-         HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-         if (relax_down > -1)
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
          }
-         if (relax_up > -1)
+         else
          {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+            HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+            HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+            if (relax_down > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+            }
+            if (relax_up > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+            }
+            if (relax_coarse > -1)
+            {
+               HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+            }
+            HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+            HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          }
-         if (relax_coarse > -1)
-         {
-            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
-         }
-         HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-#endif
          HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
@@ -7580,18 +7651,21 @@ main( hypre_int argc,
 
          HYPRE_BoomerAMGCreate(&amg_solver);
 
-#if defined(HYPRE_USING_GPU)
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-#else
-         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetCycleType(amg_solver, 1);
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 1);
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 2);
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 9, 3);
-#endif
+         if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+         {
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+            HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+         }
+         else
+         {
+            HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+            HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
+            HYPRE_BoomerAMGSetCycleType(amg_solver, 1);
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 1);
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 2);
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 9, 3);
+         }
          HYPRE_BoomerAMGSetTol(amg_solver, pc_tol);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, 1);
@@ -8323,32 +8397,35 @@ main( hypre_int argc,
       /* create AMG coarse grid solver */
 
       HYPRE_BoomerAMGCreate(&amg_solver);
-#if defined(HYPRE_USING_GPU)
-      HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
-      HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
-      HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-#else
-      HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
-      HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
-      HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-      HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
-      HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
-      HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
-      if (relax_down > -1)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 18);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 8);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
       }
-      if (relax_up > -1)
+      else
       {
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+         HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
+         HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
+         HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
+         HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+         HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
+         HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
+         if (relax_down > -1)
+         {
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
+         }
+         if (relax_up > -1)
+         {
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_up, 2);
+         }
+         if (relax_coarse > -1)
+         {
+            HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
+         }
+         HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
       }
-      if (relax_coarse > -1)
-      {
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_coarse, 3);
-      }
-      HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
-      HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-#endif
       HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
@@ -8607,6 +8684,17 @@ final:
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   if (memory_location == HYPRE_MEMORY_HOST)
+   {
+      if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
+      {
+         hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
+         hypre_assert(0);
+      }
+   }
+#endif
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
