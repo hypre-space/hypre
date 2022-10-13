@@ -28,12 +28,12 @@ struct hypre_device_allocator
 
    char *allocate(std::ptrdiff_t num_bytes)
    {
-      return _hypre_TAlloc(char, num_bytes, hypre_MEMORY_DEVICE);
+      return hypre_TAlloc(char, num_bytes, HYPRE_MEMORY_DEVICE);
    }
 
    void deallocate(char *ptr, size_t n)
    {
-      _hypre_TFree(ptr, hypre_MEMORY_DEVICE);
+      hypre_TFree(ptr, HYPRE_MEMORY_DEVICE);
    }
 };
 
