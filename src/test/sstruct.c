@@ -2917,14 +2917,17 @@ main( hypre_int argc,
 
    if (myid == 0)
    {
-#ifdef HYPRE_DEVELOP_STRING
-#ifdef HYPRE_DEVELOP_BRANCH
+#if defined(HYPRE_DEVELOP_STRING) && defined(HYPRE_DEVELOP_BRANCH)
       hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (main development branch %s)\n\n",
                    HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
-#else
-      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch)\n\n",
-                   HYPRE_DEVELOP_STRING);
-#endif
+
+#elif defined(HYPRE_DEVELOP_STRING) && !defined(HYPRE_DEVELOP_BRANCH)
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s)\n\n",
+                   HYPRE_DEVELOP_STRING, HYPRE_BRANCH_NAME);
+
+#elif defined(HYPRE_RELEASE_VERSION)
+      hypre_printf("\nUsing HYPRE_RELEASE_VERSION: %s\n\n",
+                   HYPRE_RELEASE_VERSION);
 #endif
    }
 
