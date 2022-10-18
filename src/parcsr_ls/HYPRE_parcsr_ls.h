@@ -3981,7 +3981,7 @@ HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
  *    - 2 : AMG.
  **/
 HYPRE_Int
-HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
+HYPRE_MGRSetLevelFRelaxType(HYPRE_Solver solver,
                             HYPRE_Int *relax_type );
 
 /**
@@ -4191,12 +4191,12 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
 /**
  * (Optional) Set the smoothing order for global smoothing at each level.
  * Options for \e level_smooth_order are:
- *    - 1 : Pre-smoothing (default)
- *    - 2 : Post-smoothing
+ *    - 1 : Pre-smoothing - Down cycle (default)
+ *    - 2 : Post-smoothing - Up cycle
  **/
 HYPRE_Int
-HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
-                              HYPRE_Int level_smooth_order );
+HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
+                               HYPRE_Int global_smooth_cycle );
 
 /**
  * (Optional) Determines type of global smoother.

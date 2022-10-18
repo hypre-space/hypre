@@ -33,6 +33,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
 
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int       *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int       *A_diag_j = hypre_CSRMatrixJ(A_diag);
@@ -128,8 +130,8 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    pass_starts = hypre_CTAlloc(HYPRE_Int, 11, HYPRE_MEMORY_HOST);
    /* contains beginning for each pass in pass_order field, assume no more than 10 passes */
 
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
 
    cnt = 0;
    remaining = 0;
@@ -364,10 +366,10 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       P_offd_i[i + 1] += P_offd_i[i];
    }
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], HYPRE_MEMORY_DEVICE);
-   P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], HYPRE_MEMORY_DEVICE);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, P_diag_i[n_fine], memory_location_P);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_i[n_fine], memory_location_P);
+   P_offd_j = hypre_CTAlloc(HYPRE_Int, P_offd_i[n_fine], memory_location_P);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_i[n_fine], memory_location_P);
 
    /* insert weights for coarse points */
    for (i = 0; i < pass_starts[1]; i++)
@@ -1292,7 +1294,7 @@ hypre_BoomerAMGBuildModMultipass( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParCSRMatrixMemoryLocation(S) );
    if (exec == HYPRE_EXEC_DEVICE)

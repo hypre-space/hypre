@@ -4148,7 +4148,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(C_tmp_offd);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
@@ -6267,3 +6267,198 @@ hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRDiagScaleVectorHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRDiagScaleVectorHost( hypre_ParCSRMatrix *par_A,
+                                 hypre_ParVector    *par_y,
+                                 hypre_ParVector    *par_x )
+{
+   /* Local Matrix and Vectors */
+   hypre_CSRMatrix    *A_diag        = hypre_ParCSRMatrixDiag(par_A);
+   hypre_Vector       *x             = hypre_ParVectorLocalVector(par_x);
+   hypre_Vector       *y             = hypre_ParVectorLocalVector(par_y);
+
+   /* Local vector x info */
+   HYPRE_Complex      *x_data        = hypre_VectorData(x);
+   HYPRE_Int           x_num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int           x_vecstride   = hypre_VectorVectorStride(x);
+
+   /* Local vector y info */
+   HYPRE_Complex      *y_data        = hypre_VectorData(y);
+   HYPRE_Int           y_vecstride   = hypre_VectorVectorStride(y);
+
+   /* Local matrix A info */
+   HYPRE_Complex      *A_data        = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int          *A_i           = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int           num_rows      = hypre_CSRMatrixNumRows(A_diag);
+
+   /* Local variables */
+   HYPRE_Int           i, k;
+   HYPRE_Complex       coef;
+
+   switch (x_num_vectors)
+   {
+      case 1:
+#if defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            x_data[i] = y_data[i] / A_data[A_i[i]];
+         }
+         break;
+
+      case 2:
+#if defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            x_data[i] = y_data[i] * coef;
+            x_data[i + x_vecstride] = y_data[i + y_vecstride] * coef;
+         }
+         break;
+
+      case 3:
+#if defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            x_data[i] = y_data[i] * coef;
+            x_data[i +     x_vecstride] = y_data[i +     y_vecstride] * coef;
+            x_data[i + 2 * x_vecstride] = y_data[i + 2 * y_vecstride] * coef;
+         }
+         break;
+
+      case 4:
+#if defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            x_data[i] = y_data[i] * coef;
+            x_data[i +     x_vecstride] = y_data[i +     y_vecstride] * coef;
+            x_data[i + 2 * x_vecstride] = y_data[i + 2 * y_vecstride] * coef;
+            x_data[i + 3 * x_vecstride] = y_data[i + 3 * y_vecstride] * coef;
+         }
+         break;
+
+      default:
+#if defined(HYPRE_USING_OPENMP)
+         #pragma omp parallel for private(i, k, coef) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < num_rows; i++)
+         {
+            coef = 1.0 / A_data[A_i[i]];
+
+            for (k = 0; k < x_num_vectors; k++)
+            {
+               x_data[i + k * x_vecstride] = y_data[i + k * y_vecstride] * coef;
+            }
+         }
+         break;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRDiagScaleVector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
+                             hypre_ParVector    *par_y,
+                             hypre_ParVector    *par_x )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("hypre_ParCSRDiagScaleVector");
+#endif
+
+   /* Local Matrix and Vectors */
+   hypre_CSRMatrix    *A_diag        = hypre_ParCSRMatrixDiag(par_A);
+   hypre_Vector       *x             = hypre_ParVectorLocalVector(par_x);
+   hypre_Vector       *y             = hypre_ParVectorLocalVector(par_y);
+
+   /* Local vector x info */
+   HYPRE_Int           x_size        = hypre_VectorSize(x);
+   HYPRE_Int           x_num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int           x_vecstride   = hypre_VectorVectorStride(x);
+
+   /* Local vector y info */
+   HYPRE_Int           y_size        = hypre_VectorSize(y);
+   HYPRE_Int           y_num_vectors = hypre_VectorNumVectors(y);
+   HYPRE_Int           y_vecstride   = hypre_VectorVectorStride(y);
+
+   /* Local matrix A info */
+   HYPRE_Int           num_rows      = hypre_CSRMatrixNumRows(A_diag);
+
+   /*---------------------------------------------
+    * Sanity checks
+    *---------------------------------------------*/
+
+   if (x_num_vectors != y_num_vectors)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible number of vectors!\n");
+      return hypre_error_flag;
+   }
+
+   if (num_rows != x_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible x size!\n");
+      return hypre_error_flag;
+   }
+
+   if (x_size > 0 && x_vecstride <= 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive x vector stride!\n");
+      return hypre_error_flag;
+   }
+
+   if (y_size > 0 && y_vecstride <= 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive y vector stride!\n");
+      return hypre_error_flag;
+   }
+
+   if (num_rows != y_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible y size!\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Computation
+    *---------------------------------------------*/
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRDiagScaleVectorDevice(par_A, par_y, par_x);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRDiagScaleVectorHost(par_A, par_y, par_x);
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
+   return hypre_error_flag;
+}
+

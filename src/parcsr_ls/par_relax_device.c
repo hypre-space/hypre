@@ -105,7 +105,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
 
    hypre_ParCSRMatrixMatvecOutOfPlace(-relax_weight, A, u, relax_weight, f, r);
 
-   hypreDevice_DiagScaleVector(num_rows, A_diag_i, A_diag_data, r_data, 0.0, z_data);
+   hypreDevice_DiagScaleVector(1, num_rows, A_diag_i, A_diag_data, r_data, 0.0, z_data);
 
    // set this so that axpy works out properly. Reset later.
    hypre_VectorSize(z_local) = rsize;
@@ -132,4 +132,3 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
 }
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
