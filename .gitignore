@@ -15,7 +15,6 @@ autom4te.cache
 src/TAGS
 hypre/
 cmbuild/
-!cmbuild/README.md
 
 ###############
 # Documentation
