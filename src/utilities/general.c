@@ -50,7 +50,6 @@ hypre_HandleCreate()
 
 #if defined(HYPRE_USING_GPU)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
-   hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
    /* Gauss-Seidel: SpTrSV */
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
@@ -343,7 +342,7 @@ HYPRE_Init()
 #endif
 
    /* Check if cuda arch flags in compiling match the device */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
    hypre_CudaCompileFlagCheck();
 #endif
 
@@ -396,7 +395,9 @@ HYPRE_Finalize()
 #endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
-   hypre_PrintMemoryTracker();
+   hypre_PrintMemoryTracker(hypre_total_bytes, hypre_peak_bytes, hypre_current_bytes,
+                            hypre_memory_tracker_print, hypre_memory_tracker_filename);
+
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
 #endif
 
@@ -657,25 +658,9 @@ HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy)
 }
 
 HYPRE_Int
-HYPRE_SetStructExecutionPolicy(HYPRE_ExecutionPolicy exec_policy)
-{
-   hypre_HandleStructExecPolicy(hypre_handle()) = exec_policy;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
 HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 {
    *exec_policy = hypre_HandleDefaultExecPolicy(hypre_handle());
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
-{
-   *exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
 
    return hypre_error_flag;
 }

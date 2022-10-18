@@ -316,9 +316,8 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Vtemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
       // XXX GPU calls Relax7 XXX
@@ -876,9 +875,9 @@ hypre_BoomerAMGRelax3HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Ztemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+
    // TODO implement CF relax on GPUs
    if (relax_points != 0)
    {
@@ -920,9 +919,9 @@ hypre_BoomerAMGRelax4HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *Ztemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+
    // TODO implement CF relax on GPUs
    if (relax_points != 0)
    {
@@ -1062,9 +1061,9 @@ hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A,
                                  hypre_ParVector    *Ztemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+
    // TODO implement CF relax on GPUs
    if (relax_points != 0)
    {
@@ -1181,9 +1180,9 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+
    // TODO implement CF relax on GPUs
    if (relax_points != 0)
    {
@@ -1245,9 +1244,9 @@ hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+
    // TODO implement CF relax on GPUs
    if (relax_points != 0)
    {
@@ -1292,9 +1291,9 @@ hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A), hypre_VectorMemoryLocation(f) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+
    // TODO implement CF relax on GPUs
    if (relax_points != 0)
    {
@@ -1685,9 +1684,8 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *Ztemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1715,9 +1713,8 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *Ztemp )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   //HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x), hypre_VectorMemoryLocation(b) );
-   //RL: TODO back to hypre_GetExecPolicy2 later
-   HYPRE_ExecutionPolicy exec = HYPRE_EXEC_DEVICE;
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {

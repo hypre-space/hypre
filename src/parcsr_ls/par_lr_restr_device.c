@@ -311,6 +311,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixDestroy(Z);
    hypre_TFree(Fmap, HYPRE_MEMORY_DEVICE);
    hypre_TFree(Cmap, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(Fmap_offd_global, HYPRE_MEMORY_DEVICE);
 
    return 0;
 }
