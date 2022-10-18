@@ -2396,7 +2396,7 @@ main( hypre_int argc,
                    HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
 
 #elif defined(HYPRE_DEVELOP_STRING) && !defined(HYPRE_DEVELOP_BRANCH)
-      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s)\n\n",
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch %s)\n\n",
                    HYPRE_DEVELOP_STRING, HYPRE_BRANCH_NAME);
 
 #elif defined(HYPRE_RELEASE_VERSION)
