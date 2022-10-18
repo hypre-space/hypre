@@ -10053,35 +10053,23 @@ then :
 printf "%s\n" "#define STDC_HEADERS 1" >>confdefs.h
 
 fi
-       for ac_header in "${CUDA_HOME}/include/cuda.h"
-do :
-  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+as_ac_Header=`printf "%s\n" "ac_cv_header_"${CUDA_HOME}/include/cuda.h"" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" ""${CUDA_HOME}/include/cuda.h"" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"
 then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}
+  hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}
 fi
 
-done
 
    if test "x$hypre_found_cuda" != "xyes"
    then
-             for ac_header in "${CUDA_PATH}/include/cuda.h"
-do :
-  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+      as_ac_Header=`printf "%s\n" "ac_cv_header_"${CUDA_PATH}/include/cuda.h"" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" ""${CUDA_PATH}/include/cuda.h"" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"
 then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}
+  hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}
 fi
 
-done
    fi
 
    if test "x$hypre_found_cuda" != "xyes"
@@ -10101,21 +10089,15 @@ else $as_nop
 fi
 
 
-               for ac_header in "${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"
-do :
-  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+        as_ac_Header=`printf "%s\n" "ac_cv_header_"${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" ""${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"
 then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- hypre_found_hip=yes
+  hypre_found_hip=yes
 else $as_nop
   as_fn_error $? "unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path." "$LINENO" 5
 fi
 
-done
 fi
 
 if test "x$hypre_using_raja" = "xyes"
@@ -10437,21 +10419,15 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
         if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"
 then :
-         for ac_header in "${MKLROOT}/include/mkl.h"
-do :
-  as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+  as_ac_Header=`printf "%s\n" "ac_cv_header_"${MKLROOT}/include/mkl.h"" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" ""${MKLROOT}/include/mkl.h"" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"
 then :
-  cat >>confdefs.h <<_ACEOF
-#define `printf "%s\n" "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- hypre_found_mkl=yes
+  hypre_found_mkl=yes
 else $as_nop
   as_fn_error $? "unable to find oneMKL ... Ensure that MKLROOT is set" "$LINENO" 5
 fi
 
-done
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
 
