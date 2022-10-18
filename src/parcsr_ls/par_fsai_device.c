@@ -798,9 +798,7 @@ hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
 HYPRE_Int
 hypre_FSAITruncateCandidateUnmarkedDevice( hypre_CSRMatrix *matrix,
                                            HYPRE_Int      **matrix_e,
-                                           HYPRE_Int        max_nonzeros_row,
-                                           HYPRE_Int        trunc_option,
-                                           HYPRE_Real       trunc_factor )
+                                           HYPRE_Int        max_nonzeros_row )
 {
    HYPRE_Int      num_rows  = hypre_CSRMatrixNumRows(matrix);
    HYPRE_Int     *mat_i     = hypre_CSRMatrixI(matrix);
@@ -809,34 +807,27 @@ hypre_FSAITruncateCandidateUnmarkedDevice( hypre_CSRMatrix *matrix,
 
    HYPRE_Int     *mat_e;
 
-   if (trunc_factor > 0.0)
-   {
-      /* TODO */
-   }
-   else
-   {
-      /*-----------------------------------------------------
-       * Keep only the largest coefficients in absolute value
-       *-----------------------------------------------------*/
+   /*-----------------------------------------------------
+    * Keep only the largest coefficients in absolute value
+    *-----------------------------------------------------*/
 
-      /* Allocate memory for row indices array*/
-      hypre_GpuProfilingPushRange("Storage1");
-      mat_e = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
-      hypre_GpuProfilingPopRange();
+   /* Allocate memory for row indices array*/
+   hypre_GpuProfilingPushRange("Storage1");
+   mat_e = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+   hypre_GpuProfilingPopRange();
 
-      /* Mark unwanted entries with -1 */
-      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
+   /* Mark unwanted entries with -1 */
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
 
-      hypre_GpuProfilingPushRange("TruncCand");
-      HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidateUnmarked, gDim, bDim,
-                       max_nonzeros_row, num_rows, mat_i, mat_e, mat_j, mat_a );
-      hypre_SyncComputeStream(hypre_handle());
-      hypre_GetDeviceLastError();
-      hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPushRange("TruncCand");
+   HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidateUnmarked, gDim, bDim,
+                    max_nonzeros_row, num_rows, mat_i, mat_e, mat_j, mat_a );
+   hypre_SyncComputeStream(hypre_handle());
+   hypre_GetDeviceLastError();
+   hypre_GpuProfilingPopRange();
 
-      *matrix_e = mat_e;
-   }
+   *matrix_e = mat_e;
 
    return hypre_error_flag;
 }
@@ -955,7 +946,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #if defined (FSAI_USING_UNMARKED_TRUNCATION)
    HYPRE_Int  *K_e = NULL;
 
-   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row, 2, 0.0);
+   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row);
 #else
 
    hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, 2, 0.0);
