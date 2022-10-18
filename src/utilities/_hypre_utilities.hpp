@@ -25,8 +25,7 @@ extern "C++" {
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-/* C++ style memory allocator for GPU **device** memory
- * Just wraps _hypre_TAlloc and _hypre_TFree */
+/* C++ style memory allocator for the device using the abstract memory model */
 struct hypre_device_allocator
 {
    typedef char value_type;
