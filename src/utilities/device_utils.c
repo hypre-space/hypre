@@ -2211,18 +2211,42 @@ hypreGPUKernel_DiagScaleVector( hypre_DeviceItem &item,
 
       if (beta != 0.0)
       {
-#pragma unroll NV
-         for (j = 0; j < num_vectors; j++)
+         if (NV > 0)
          {
-            y[i + j * num_rows] = x[i + j * num_rows] * val + beta * y[i + j * num_rows];
+#pragma unroll
+            for (j = 0; j < NV; j++)
+            {
+               y[i + j * num_rows] = val  * x[i + j * num_rows] +
+                                     beta * y[i + j * num_rows];
+            }
+         }
+         else
+         {
+#pragma unroll 8
+            for (j = 0; j < num_vectors; j++)
+            {
+               y[i + j * num_rows] = val  * x[i + j * num_rows] +
+                                     beta * y[i + j * num_rows];
+            }
          }
       }
       else
       {
-#pragma unroll NV
-         for (j = 0; j < num_vectors; j++)
+         if (NV > 0)
          {
-            y[i + j * num_rows] = x[i + j * num_rows] * val;
+#pragma unroll
+            for (j = 0; j < NV; j++)
+            {
+               y[i + j * num_rows] = val  * x[i + j * num_rows];
+            }
+         }
+         else
+         {
+#pragma unroll 8
+            for (j = 0; j < num_vectors; j++)
+            {
+               y[i + j * num_rows] = val  * x[i + j * num_rows];
+            }
          }
       }
    }
@@ -2291,8 +2315,13 @@ hypreDevice_DiagScaleVector( HYPRE_Int       num_vectors,
                            num_vectors, num_rows, A_i, A_data, x, beta, y );
          break;
 
-      default:
+      case 8:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector<8>, gDim, bDim,
+                           num_vectors, num_rows, A_i, A_data, x, beta, y );
+         break;
+
+      default:
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector<-1>, gDim, bDim,
                            num_vectors, num_rows, A_i, A_data, x, beta, y );
          break;
    }
