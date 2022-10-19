@@ -2111,7 +2111,6 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigI
  * a cubin version.
  *--------------------------------------------------------------------*/
 
-template <HYPRE_Int NV>
 __global__ void
 hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
                                        hypre_int        *cuda_arch_compile )
@@ -2120,7 +2119,6 @@ hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
    cuda_arch_compile[0] = __CUDA_ARCH__;
 #endif
 }
-
 
 /*--------------------------------------------------------------------
  * hypre_CudaCompileFlagCheck
