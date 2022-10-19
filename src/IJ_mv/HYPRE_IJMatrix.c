@@ -413,7 +413,7 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -621,7 +621,7 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -690,7 +690,7 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
 
       if (exec == HYPRE_EXEC_DEVICE)

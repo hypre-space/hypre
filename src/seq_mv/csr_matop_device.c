@@ -137,7 +137,7 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 
 #endif /* #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE) */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 hypre_CSRMatrix*
 hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
@@ -184,10 +184,6 @@ hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
 
    return C;
 }
-
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
@@ -687,6 +683,10 @@ hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
    return hypre_error_flag;
 }
 
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixAddPartial:
  * adds matrix rows in the CSR matrix B to the CSR Matrix A, where row_nums[i]
@@ -741,10 +741,6 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
 
    return C;
 }
-
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 HYPRE_Int
 hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
@@ -1514,6 +1510,20 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
    return ierr;
 }
 
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+#if defined(HYPRE_USING_SYCL)
+typedef std::tuple<HYPRE_Int, HYPRE_Int> Int2;
+struct Int2Unequal
+{
+   bool operator()(const Int2& t) const
+   {
+      return (std::get<0>(t) != std::get<1>(t));
+   }
+};
+#else
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Int2;
 struct Int2Unequal : public thrust::unary_function<Int2, bool>
 {
@@ -1523,6 +1533,7 @@ struct Int2Unequal : public thrust::unary_function<Int2, bool>
       return (thrust::get<0>(t) != thrust::get<1>(t));
    }
 };
+#endif
 
 HYPRE_Int
 hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
@@ -1538,10 +1549,18 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    HYPRE_Int     *new_j;
    HYPRE_Complex *new_data;
 
+#if defined(HYPRE_USING_SYCL)
+   auto zip_ij = oneapi::dpl::make_zip_iterator(A_ii, A_j);
+   new_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                zip_ij,
+                                zip_ij + nnz,
+                                Int2Unequal() );
+#else
    new_nnz = HYPRE_THRUST_CALL( count_if,
                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
                                 thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
                                 Int2Unequal() );
+#endif
 
    if (new_nnz == nnz)
    {
@@ -1557,31 +1576,51 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    {
       new_data = hypre_TAlloc(HYPRE_Complex, new_nnz, HYPRE_MEMORY_DEVICE);
 
-      thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
+#if defined(HYPRE_USING_SYCL)
+      auto zip_ija = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
+      auto zip_new_ija = oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data);
+      auto new_end = hypreSycl_copy_if(
+                        zip_ija,
+                        zip_ija + nnz,
+                        zip_ij,
+                        zip_new_ija,
+                        Int2Unequal() );
 
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   Int2Unequal() );
+      hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                        Int2Unequal() );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
+#endif
    }
    else
    {
       new_data = NULL;
 
-      thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*> > new_end;
+#if defined(HYPRE_USING_SYCL)
+      auto zip_new_ij = oneapi::dpl::make_zip_iterator(new_ii, new_j);
+      auto new_end = hypreSycl_copy_if( zip_ij,
+                                        zip_ij + nnz,
+                                        zip_ij,
+                                        zip_new_ij,
+                                        Int2Unequal() );
 
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j)),
-                                   Int2Unequal() );
+      hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j)),
+                                        Int2Unequal() );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
+#endif
    }
 
    hypre_TFree(A_ii,   HYPRE_MEMORY_DEVICE);
@@ -1597,6 +1636,10 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
 
    return hypre_error_flag;
 }
+
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 /* A = alp * I */
 hypre_CSRMatrix *
@@ -2369,15 +2412,21 @@ hypre_SortCSRRocsparse( HYPRE_Int            n,
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
 {
 #if defined(HYPRE_USING_ROCSPARSE)
-   HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
-                                                        rocsparse_operation_none,
-                                                        hypre_CSRMatrixNumRows(matrix),
-                                                        hypre_CSRMatrixNumCols(matrix),
-                                                        hypre_CSRMatrixNumNonzeros(matrix),
-                                                        hypre_CSRMatrixGPUMatDescr(matrix),
-                                                        hypre_CSRMatrixData(matrix),
-                                                        hypre_CSRMatrixI(matrix),
-                                                        hypre_CSRMatrixJ(matrix),
-                                                        hypre_CSRMatrixGPUMatInfo(matrix)) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrmv_analysis(hypre_HandleCusparseHandle(hypre_handle()),
+                                                           rocsparse_operation_none,
+                                                           hypre_CSRMatrixNumRows(matrix),
+                                                           hypre_CSRMatrixNumCols(matrix),
+                                                           hypre_CSRMatrixNumNonzeros(matrix),
+                                                           hypre_CSRMatrixGPUMatDescr(matrix),
+                                                           hypre_CSRMatrixData(matrix),
+                                                           hypre_CSRMatrixI(matrix),
+                                                           hypre_CSRMatrixJ(matrix),
+                                                           hypre_CSRMatrixGPUMatInfo(matrix)) );
+   }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }
+

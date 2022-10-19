@@ -1725,14 +1725,16 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+#if defined(HYPRE_USING_GPU)
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRDiagScale
+ * HYPRE_ParCSRDiagScaleVectorDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix  *par_A,
-                             hypre_ParVector     *par_y,
-                             hypre_ParVector     *par_x )
+hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
+                                   hypre_ParVector    *par_y,
+                                   hypre_ParVector    *par_x )
 {
    /* Local Matrix and Vectors */
    hypre_CSRMatrix    *A_diag        = hypre_ParCSRMatrixDiag(par_A);
@@ -1752,138 +1754,31 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix  *par_A,
    HYPRE_Int           y_vecstride   = hypre_VectorVectorStride(y);
 
    /* Local matrix A info */
-   HYPRE_Complex      *A_data        = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int          *A_i           = hypre_CSRMatrixI(A_diag);
    HYPRE_Int           num_rows      = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int          *A_i           = hypre_CSRMatrixI(A_diag);
+   HYPRE_Complex      *A_data        = hypre_CSRMatrixData(A_diag);
 
-   /*---------------------------------------------
-    * Sanity checks
-    *---------------------------------------------*/
-
-    if (x_num_vectors != y_num_vectors)
-    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible number of vectors!\n");
-       return hypre_error_flag;
-    }
-
-    if (num_rows != x_size)
-    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible x size!\n");
-       return hypre_error_flag;
-    }
-
-    if (x_vecstride <= 0)
-    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive x vector stride!\n");
-       return hypre_error_flag;
-    }
-
-    if (y_vecstride <= 0)
-    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! non-positive y vector stride!\n");
-       return hypre_error_flag;
-    }
-
-    if (num_rows != y_size)
-    {
-       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error! incompatible y size!\n");
-       return hypre_error_flag;
-    }
-
-   /*---------------------------------------------
-    * Computation
-    *---------------------------------------------*/
+   /* Sanity checks */
+   hypre_assert(x_vecstride == x_size);
+   hypre_assert(y_vecstride == y_size);
+   hypre_assert(x_num_vectors == y_num_vectors);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
-   //hypre_SyncComputeStream(hypre_handle());
 
-#else
-   /* Local variables */
-   HYPRE_Int      i, k;
-   HYPRE_Complex  coef;
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int i;
 
-   switch (x_num_vectors)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
+   for (i = 0; i < num_rows; i++)
    {
-      case 1:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data, y_data, A_data, A_i)
-#elif defined(HYPRE_USING_OPENMP)
-         #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rows; i++)
-         {
-            x_data[i] = y_data[i] / A_data[A_i[i]];
-         }
-         break;
-
-      case 2:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         #pragma omp target teams distribute parallel for private(i, coef) is_device_ptr(x_data, y_data, A_data, A_i)
-#elif defined(HYPRE_USING_OPENMP)
-         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rows; i++)
-         {
-            coef = 1.0 / A_data[A_i[i]];
-
-            x_data[i] = y_data[i] * coef;
-            x_data[i + x_vecstride] = y_data[i + y_vecstride] * coef;
-         }
-         break;
-
-      case 3:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         #pragma omp target teams distribute parallel for private(i, coef) is_device_ptr(x_data, y_data, A_data, A_i)
-#elif defined(HYPRE_USING_OPENMP)
-         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rows; i++)
-         {
-            coef = 1.0 / A_data[A_i[i]];
-
-            x_data[i] = y_data[i] * coef;
-            x_data[i +     x_vecstride] = y_data[i +     y_vecstride] * coef;
-            x_data[i + 2 * x_vecstride] = y_data[i + 2 * y_vecstride] * coef;
-         }
-         break;
-
-      case 4:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         #pragma omp target teams distribute parallel for private(i, coef) is_device_ptr(x_data, y_data, A_data, A_i)
-#elif defined(HYPRE_USING_OPENMP)
-         #pragma omp parallel for private(i, coef) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rows; i++)
-         {
-            coef = 1.0 / A_data[A_i[i]];
-
-            x_data[i] = y_data[i] * coef;
-            x_data[i +     x_vecstride] = y_data[i +     y_vecstride] * coef;
-            x_data[i + 2 * x_vecstride] = y_data[i + 2 * y_vecstride] * coef;
-            x_data[i + 3 * x_vecstride] = y_data[i + 3 * y_vecstride] * coef;
-         }
-         break;
-
-      default:
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-         #pragma omp target teams distribute parallel for private(i, k, coef) is_device_ptr(x_data, y_data, A_data, A_i)
-#elif defined(HYPRE_USING_OPENMP)
-         #pragma omp parallel for private(i, k, coef) HYPRE_SMP_SCHEDULE
-#endif
-         for (i = 0; i < num_rows; i++)
-         {
-            coef = 1.0 / A_data[A_i[i]];
-
-            for (k = 0; k < x_num_vectors; k++)
-            {
-               x_data[i + k * x_vecstride] = y_data[i + k * y_vecstride] * coef;
-            }
-         }
-         break;
+      x_data[i] = y_data[i] / A_data[A_i[i]];
    }
+#endif
 
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+   //hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
+
+#endif

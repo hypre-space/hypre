@@ -340,6 +340,10 @@ HYPRE_Int hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix *mat, HYPRE_BigInt 
                                           HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values );
 HYPRE_Int hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_y,
                                        hypre_ParVector *par_x );
+HYPRE_Int hypre_ParCSRDiagScaleVectorHost( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_y,
+                                           hypre_ParVector *par_x );
+HYPRE_Int hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_y,
+                                             hypre_ParVector *par_x );
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol,
                                               HYPRE_Int type);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_Real tol,
@@ -454,16 +458,24 @@ void hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A);
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b
 HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
-                                               hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *b, hypre_ParVector *y );
+                                               hypre_ParVector *x, HYPRE_Complex beta,
+                                               hypre_ParVector *b, hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlaceDevice ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
+                                                     hypre_ParVector *x, HYPRE_Complex beta,
+                                                     hypre_ParVector *b, hypre_ParVector *y );
 // y = alpha*A*x + beta*y
 HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x,
                                      HYPRE_Complex beta, hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                       hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvecTDevice ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
+                                            hypre_ParVector *x, HYPRE_Complex beta,
+                                            hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_cols,
                                             HYPRE_Complex *recv_data, HYPRE_Complex *local_data );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
-                                        hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y, HYPRE_Int *CF_marker, HYPRE_Int fpt );
+                                        hypre_ParVector *x, HYPRE_Complex beta, hypre_ParVector *y,
+                                        HYPRE_Int *CF_marker, HYPRE_Int fpt );
 
 /* par_csr_triplemat.c */
 HYPRE_Int hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg_A,
@@ -553,3 +565,4 @@ HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base,
                                          HYPRE_Complex *values);
+
