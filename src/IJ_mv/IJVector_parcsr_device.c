@@ -17,30 +17,36 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
-#if defined(HYPRE_USING_SYCL)
-namespace thrust = std;
-#endif
-
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
-template<typename T1, typename T2>
 #if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
+{
+   typedef std::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   {
+      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
+                              std::get<1>(x) + std::get<1>(y) );
+   }
+};
 #else
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public
    thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-#endif
 {
    typedef thrust::tuple<T1, T2> Tuple;
 
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y )
    {
       return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
                                  thrust::get<1>(x) + thrust::get<1>(y) );
    }
 };
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleSortAndReduce1
@@ -495,7 +501,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */
                                             zip_out, /* result */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
@@ -503,7 +509,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          auto new_end2 = hypreSycl_remove_if( zip_in,         /* first */
                                               zip_in + nelms, /* last */
                                               is_on_proc,     /* stencil */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);
 #else

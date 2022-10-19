@@ -115,7 +115,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o *.obj
+	rm -f *.o *.obj *.csv
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -159,7 +159,7 @@ sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.obj
+struct: struct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -171,7 +171,7 @@ maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.obj
+struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

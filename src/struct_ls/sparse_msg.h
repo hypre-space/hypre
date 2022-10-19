@@ -45,6 +45,7 @@ typedef struct
    hypre_StructGrid    **Py_grid_array;
    hypre_StructGrid    **Pz_grid_array;
 
+   HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
    hypre_StructMatrix  **A_array;
    hypre_StructMatrix  **Px_array;
