@@ -22,12 +22,11 @@ typedef struct
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
-   HYPRE_ExecutionPolicy  struct_exec_policy;
    /* the device buffers needed to do MPI communication for struct comm */
-   HYPRE_Complex*                    struct_comm_recv_buffer;
-   HYPRE_Complex*                    struct_comm_send_buffer;
-   HYPRE_Int                         struct_comm_recv_buffer_size;
-   HYPRE_Int                         struct_comm_send_buffer_size;
+   HYPRE_Complex*         struct_comm_recv_buffer;
+   HYPRE_Complex*         struct_comm_send_buffer;
+   HYPRE_Int              struct_comm_recv_buffer_size;
+   HYPRE_Int              struct_comm_send_buffer_size;
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
    /* device G-S options */
@@ -57,7 +56,6 @@ typedef struct
 /* accessor macros to hypre_Handle */
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
-#define hypre_HandleStructExecPolicy(hypre_handle)               ((hypre_handle) -> struct_exec_policy)
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_recv_buffer)
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_send_buffer)
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_recv_buffer_size)

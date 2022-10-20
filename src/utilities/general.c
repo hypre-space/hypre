@@ -50,6 +50,9 @@ hypre_HandleCreate()
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
+#endif
+
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
    /* Gauss-Seidel: SpTrSV */
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
