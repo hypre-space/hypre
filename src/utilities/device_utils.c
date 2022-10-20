@@ -2337,7 +2337,7 @@ template <HYPRE_Int NV>
 __global__ void
 hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
                                  HYPRE_Int         num_vectors,
-                                 HYPRE_Int         n,
+                                 HYPRE_Int         num_rows,
                                  HYPRE_Complex    *diag,
                                  HYPRE_Complex    *x,
                                  HYPRE_Complex     beta,
@@ -2350,20 +2350,37 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
    HYPRE_Complex  inv_diag;
    HYPRE_Complex  x_over_diag;
 
-   if (i < n)
+   if (i < num_rows)
    {
       inv_diag = 1.0 / diag[i];
 
-#pragma unroll NV
-      for (j = 0; j < num_vectors; j++)
+      if (NV > 0)
       {
-         x_over_diag = x[i + j * n] * inv_diag;
-
-         if (computeY)
+#pragma unroll
+         for (j = 0; j < NV; j++)
          {
-            y[i + j * n] = x_over_diag;
+            x_over_diag = x[i + j * num_rows] * inv_diag;
+
+            if (computeY)
+            {
+               y[i + j * num_rows] = x_over_diag;
+            }
+            z[i + j * num_rows] += beta * x_over_diag;
          }
-         z[i + j * n] += beta * x_over_diag;
+      }
+      else
+      {
+#pragma unroll 8
+         for (j = 0; j < num_vectors; j++)
+         {
+            x_over_diag = x[i + j * num_rows] * inv_diag;
+
+            if (computeY)
+            {
+               y[i + j * num_rows] = x_over_diag;
+            }
+            z[i + j * num_rows] += beta * x_over_diag;
+         }
       }
    }
 }
@@ -2377,7 +2394,7 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
 
 HYPRE_Int
 hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
-                              HYPRE_Int       n,
+                              HYPRE_Int       num_rows,
                               HYPRE_Complex  *diag,
                               HYPRE_Complex  *x,
                               HYPRE_Complex   beta,
@@ -2386,55 +2403,55 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
                               HYPRE_Int       computeY )
 {
    /* trivial case */
-   if (n <= 0)
+   if (num_rows <= 0)
    {
       return hypre_error_flag;
    }
    hypre_assert(num_vectors > 0);
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
 
    switch (num_vectors)
    {
       case 1:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<1>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       case 2:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<2>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       case 3:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<3>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       case 4:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<4>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       case 5:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<5>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       case 6:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<6>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       case 7:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<7>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
 
       default:
          HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<8>, gDim, bDim,
-                           num_vectors, n, diag, x, beta, y, z, computeY );
+                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
          break;
    }
 
