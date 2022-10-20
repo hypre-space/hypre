@@ -3409,14 +3409,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
 
-      if ( grid_relax_type[1] == 7  || grid_relax_type[2] == 7  ||
-          (grid_relax_type[3] == 7  && j == (num_levels - 1))   ||
+      if ( grid_relax_type[1]  == 7 || grid_relax_type[2] == 7   ||
+           (grid_relax_type[3] == 7 && j == (num_levels - 1))    ||
 
-           grid_relax_type[1] == 11 || grid_relax_type[2] == 11 ||
-          (grid_relax_type[3] == 11 && j == (num_levels - 1))   ||
+           grid_relax_type[1]  == 11 || grid_relax_type[2] == 11 ||
+           (grid_relax_type[3] == 11 && j == (num_levels - 1))   ||
 
-           grid_relax_type[1] == 12 || grid_relax_type[2] == 12 ||
-          (grid_relax_type[3] == 12 && j == (num_levels - 1)) )
+           grid_relax_type[1]  == 12 || grid_relax_type[2] == 12 ||
+           (grid_relax_type[3] == 12 && j == (num_levels - 1)) )
       {
          HYPRE_Real *l1_norm_data = NULL;
 
@@ -3427,7 +3427,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
       else if ( grid_relax_type[1] == 16 || grid_relax_type[2] == 16 ||
-               (grid_relax_type[3] == 16 && j == (num_levels - 1)) )
+                (grid_relax_type[3] == 16 && j == (num_levels - 1)) )
       {
          HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
          /* If the full array is being considered, create the relevant temp vectors */

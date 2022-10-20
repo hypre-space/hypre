@@ -2321,7 +2321,7 @@ hypreDevice_DiagScaleVector( HYPRE_Int       num_vectors,
          break;
 
       default:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector<-1>, gDim, bDim,
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector<0>, gDim, bDim,
                            num_vectors, num_rows, A_i, A_data, x, beta, y );
          break;
    }
