@@ -2187,7 +2187,7 @@ hypre_CudaCompileFlagCheck()
 /*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector
  *
- * Assumes vectors components are stored contiguously.
+ * Assumes vectors components are stored columwise.
  *--------------------------------------------------------------------*/
 
 template <HYPRE_Int NV>
