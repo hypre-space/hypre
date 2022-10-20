@@ -1527,4 +1527,4 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // defined(HYRPE_USING_GPU)
+#endif // defined(HYPRE_USING_GPU)

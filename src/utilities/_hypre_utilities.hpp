@@ -674,7 +674,7 @@ T read_only_load( const T *ptr )
    return *ptr;
 #endif
 }
-#endif // defined(HYRPE_USING_GPU)
+#endif // defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions

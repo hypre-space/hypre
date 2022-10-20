@@ -2074,7 +2074,7 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
       hypre_CSRMatrixData(A) = hypre_TAlloc(HYPRE_Complex, nnz, hypre_CSRMatrixMemoryLocation(A));
    }
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

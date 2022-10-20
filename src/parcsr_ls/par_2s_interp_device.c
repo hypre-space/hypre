@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
@@ -934,4 +934,4 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
    }
 }
 
-#endif /* #if defined(HYRPE_USING_GPU) */
+#endif /* #if defined(HYPRE_USING_GPU) */

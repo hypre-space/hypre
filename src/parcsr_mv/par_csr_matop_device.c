@@ -997,7 +997,7 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
    return hypre_error_flag;
 }
 
-#endif // defined(HYRPE_USING_GPU)
+#endif // defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 

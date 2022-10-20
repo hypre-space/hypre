@@ -149,7 +149,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    HYPRE_Int *array_data = hypre_IntArrayData(v);
    HYPRE_Int  size       = hypre_IntArraySize(v);
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
    hypreDevice_IntFilln( array_data, size, value );
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)

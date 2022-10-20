@@ -137,7 +137,7 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
 
 #endif /* #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE) */
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 hypre_CSRMatrix*
 hypre_CSRMatrixAddDevice ( HYPRE_Complex    alpha,
@@ -661,7 +661,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
    return hypre_error_flag;
 }
 
-#endif /* defined(HYRPE_USING_GPU) */
+#endif /* defined(HYPRE_USING_GPU) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -685,7 +685,7 @@ hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixAddPartial:
@@ -1267,7 +1267,7 @@ hypre_CSRMatrixExtractDiagonalDevice( hypre_CSRMatrix *A,
    hypre_SyncComputeStream(hypre_handle());
 }
 
-#endif /* defined(HYRPE_USING_GPU) */
+#endif /* defined(HYPRE_USING_GPU) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -1512,7 +1512,7 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 typedef std::tuple<HYPRE_Int, HYPRE_Int> Int2;
@@ -1637,7 +1637,7 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
    return hypre_error_flag;
 }
 
-#endif /* defined(HYRPE_USING_GPU) */
+#endif /* defined(HYPRE_USING_GPU) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
@@ -1932,7 +1932,7 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
 #elif defined(HYPRE_USING_ROCSPARSE)
          hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
                                          data);
-#elif defined(HYRPE_USING_GPU)
+#elif defined(HYPRE_USING_GPU)
          hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
 #endif
       }

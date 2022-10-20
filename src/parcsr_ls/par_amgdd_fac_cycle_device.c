@@ -149,4 +149,4 @@ hypre_BoomerAMGDD_FAC_CFL1JacobiDevice( void      *amgdd_vdata,
    return hypre_error_flag;
 }
 
-#endif // defined(HYRPE_USING_GPU)
+#endif // defined(HYPRE_USING_GPU)

@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 __global__ void hypre_BoomerAMGBuildDirInterp_getnnz( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                       HYPRE_Int *S_diag_i,
@@ -1669,4 +1669,4 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_DeviceItem    &item,
    }
 }
 
-#endif // defined(HYRPE_USING_GPU)
+#endif // defined(HYPRE_USING_GPU)

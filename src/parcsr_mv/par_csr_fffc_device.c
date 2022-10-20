@@ -1980,4 +1980,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYRPE_USING_GPU)
+#endif // #if defined(HYPRE_USING_GPU)

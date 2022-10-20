@@ -245,7 +245,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParVectorMemoryLocation(x) );
 
@@ -524,7 +524,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParVectorMemoryLocation(x) );
 

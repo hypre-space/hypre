@@ -15,7 +15,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 __global__ void
 hypreCUDAKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,

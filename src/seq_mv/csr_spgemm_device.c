@@ -136,5 +136,5 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif /* defined(HYRPE_USING_GPU) */
+#endif /* defined(HYPRE_USING_GPU) */
 

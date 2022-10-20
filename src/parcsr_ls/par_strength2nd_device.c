@@ -17,7 +17,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_utilities.h"
 
-#if defined(HYRPE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
 
 //-----------------------------------------------------------------------
 HYPRE_Int
@@ -152,4 +152,4 @@ hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix  *S,
    return 0;
 }
 
-#endif /* #if defined(HYRPE_USING_GPU) */
+#endif /* #if defined(HYPRE_USING_GPU) */
