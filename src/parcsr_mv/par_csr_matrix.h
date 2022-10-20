@@ -127,16 +127,35 @@ typedef struct hypre_ParCSRMatrix_struct
 static inline HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 {
-   HYPRE_MemoryLocation memory_diag = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matrix));
-   HYPRE_MemoryLocation memory_offd = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matrix));
+   if (!matrix) { return HYPRE_MEMORY_UNDEFINED; }
 
-   if (memory_diag != memory_offd)
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
+   HYPRE_MemoryLocation memory_diag = diag ? hypre_CSRMatrixMemoryLocation(
+                                         diag) : HYPRE_MEMORY_UNDEFINED;
+   HYPRE_MemoryLocation memory_offd = offd ? hypre_CSRMatrixMemoryLocation(
+                                         offd) : HYPRE_MEMORY_UNDEFINED;
+
+   if (diag && offd)
    {
-      hypre_printf("Warning: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag,
-                   memory_offd);
-      hypre_assert(0);
+      if (memory_diag != memory_offd)
+      {
+         char err_msg[1024];
+         hypre_sprintf(err_msg, "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag,
+                       memory_offd);
+         hypre_error_w_msg(HYPRE_ERROR_MEMORY, err_msg);
+         hypre_assert(0);
+
+         return HYPRE_MEMORY_UNDEFINED;
+      }
+
+      return memory_diag;
    }
-   return memory_diag;
+
+   if (diag) { return memory_diag; }
+   if (offd) { return memory_offd; }
+
+   return HYPRE_MEMORY_UNDEFINED;
 }
 
 /*--------------------------------------------------------------------------

@@ -24,6 +24,34 @@
  *
  *****************************************************************************/
 
+HYPRE_Int
+hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
+                            char                 *memory_location_name)
+{
+   if (memory_location == hypre_MEMORY_HOST)
+   {
+      sprintf(memory_location_name, "%s", "HOST");
+   }
+   else if (memory_location == hypre_MEMORY_HOST_PINNED)
+   {
+      sprintf(memory_location_name, "%s", "HOST PINNED");
+   }
+   else if (memory_location == hypre_MEMORY_DEVICE)
+   {
+      sprintf(memory_location_name, "%s", "DEVICE");
+   }
+   else if (memory_location == hypre_MEMORY_UNIFIED)
+   {
+      sprintf(memory_location_name, "%s", "UNIFIED");
+   }
+   else
+   {
+      sprintf(memory_location_name, "%s", "");
+   }
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_OutOfMemory
  *--------------------------------------------------------------------------*/
@@ -38,8 +66,7 @@ hypre_OutOfMemory(size_t size)
 static inline void
 hypre_WrongMemoryLocation()
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY,
-                     "Wrong HYPRE MEMORY location: Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_HOST_PINNED are supported!\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Unrecognized hypre_MemoryLocation\n");
    hypre_assert(0);
    fflush(stdout);
 }
@@ -1158,307 +1185,6 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 
    return ierr;
 }
-
-#if defined(HYPRE_USING_MEMORY_TRACKER)
-
-/*--------------------------------------------------------------------------
- * Memory tracker
- * do not use hypre_T* in the following since we don't want to track them   *
- *--------------------------------------------------------------------------*/
-hypre_MemoryTracker *
-hypre_MemoryTrackerCreate()
-{
-   hypre_MemoryTracker *ptr = (hypre_MemoryTracker *) calloc(1, sizeof(hypre_MemoryTracker));
-   return ptr;
-}
-
-void
-hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker)
-{
-   if (tracker)
-   {
-      free(tracker->data);
-      free(tracker);
-   }
-}
-
-void
-hypre_MemoryTrackerInsert(const char           *action,
-                          void                 *ptr,
-                          void                 *ptr2,
-                          size_t                nbytes,
-                          hypre_MemoryLocation  memory_location,
-                          hypre_MemoryLocation  memory_location2,
-                          const char           *filename,
-                          const char           *function,
-                          HYPRE_Int             line)
-{
-
-   if (ptr == NULL)
-   {
-      return;
-   }
-
-   hypre_MemoryTracker *tracker = hypre_memory_tracker();
-
-   if (tracker->alloced_size <= tracker->actual_size)
-   {
-      tracker->alloced_size = 2 * tracker->alloced_size + 1;
-      tracker->data = (hypre_MemoryTrackerEntry *) realloc(tracker->data,
-                                                           tracker->alloced_size * sizeof(hypre_MemoryTrackerEntry));
-   }
-
-   hypre_assert(tracker->actual_size < tracker->alloced_size);
-
-   hypre_MemoryTrackerEntry *entry = tracker->data + tracker->actual_size;
-
-   sprintf(entry->_action, "%s", action);
-   entry->_ptr = ptr;
-   entry->_ptr2 = ptr2;
-   entry->_nbytes = nbytes;
-   entry->_memory_location = memory_location;
-   entry->_memory_location2 = memory_location2;
-   sprintf(entry->_filename, "%s", filename);
-   sprintf(entry->_function, "%s", function);
-   entry->_line = line;
-   /* -1 is the initial value */
-   entry->_pair = (size_t) -1;
-
-   tracker->actual_size ++;
-}
-
-
-/* do not use hypre_printf, hypre_fprintf, which have TAlloc
- * endless loop "for (i = 0; i < tracker->actual_size; i++)" otherwise */
-HYPRE_Int
-hypre_PrintMemoryTracker()
-{
-   HYPRE_Int myid, ierr = 0;
-   char filename[256];
-   FILE *file;
-   size_t i, j;
-
-   hypre_MemoryTracker *tracker = hypre_memory_tracker();
-
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_sprintf(filename, "HypreMemoryTrack.log.%05d", myid);
-   if ((file = fopen(filename, "a")) == NULL)
-   {
-      fprintf(stderr, "Error: can't open output file %s\n", filename);
-      return hypre_error_flag;
-   }
-
-   fprintf(file, "==== Operations:\n");
-   fprintf(file,
-           "     ID        EVENT                 ADDRESS       BYTE         LOCATION                                       FILE(LINE)                                           FUNCTION  |  Memory (   H            P            D            U )\n");
-
-   size_t totl_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-   size_t peak_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-   size_t curr_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-
-   for (i = 0; i < tracker->actual_size; i++)
-   {
-      if (strstr(tracker->data[i]._action, "alloc") != NULL)
-      {
-         totl_bytes[tracker->data[i]._memory_location] += tracker->data[i]._nbytes;
-         curr_bytes[tracker->data[i]._memory_location] += tracker->data[i]._nbytes;
-         peak_bytes[tracker->data[i]._memory_location] =
-            hypre_max( curr_bytes[tracker->data[i]._memory_location],
-                       peak_bytes[tracker->data[i]._memory_location] );
-
-         /* for each unpaired "alloc", find its "free" */
-         if (tracker->data[i]._pair != (size_t) -1)
-         {
-            if ( tracker->data[i]._pair >= tracker->actual_size ||
-                 tracker->data[tracker->data[i]._pair]._pair != i)
-            {
-               fprintf(stderr, "hypre memory tracker internal error!\n");
-               hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
-            }
-
-            continue;
-         }
-
-         for (j = i + 1; j < tracker->actual_size; j++)
-         {
-            if ( strstr(tracker->data[j]._action, "free") != NULL &&
-                 tracker->data[j]._pair == (size_t) -1 &&
-                 tracker->data[i]._ptr == tracker->data[j]._ptr &&
-                 tracker->data[i]._memory_location == tracker->data[j]._memory_location )
-            {
-               tracker->data[i]._pair = j;
-               tracker->data[j]._pair = i;
-               tracker->data[j]._nbytes = tracker->data[i]._nbytes;
-               break;
-            }
-         }
-
-         if (tracker->data[i]._pair == (size_t) -1)
-         {
-            fprintf(stderr, "%6zu: %16p may not freed\n", i, tracker->data[i]._ptr );
-         }
-      }
-      else if (strstr(tracker->data[i]._action, "free") != NULL)
-      {
-         size_t pair = tracker->data[i]._pair;
-
-         if (pair == (size_t) -1)
-         {
-            fprintf(stderr, "%6zu: unpaired free at %16p\n", i, tracker->data[i]._ptr );
-         }
-         else
-         {
-            curr_bytes[tracker->data[i]._memory_location] -= tracker->data[pair]._nbytes;
-         }
-      }
-
-      if (i < tracker->prev_end)
-      {
-         continue;
-      }
-
-      char memory_location[256];
-      char memory_location2[256];
-      char nbytes[32];
-
-      if (tracker->data[i]._memory_location == hypre_MEMORY_HOST)
-      {
-         sprintf(memory_location, "%s", "HOST");
-      }
-      else if (tracker->data[i]._memory_location == hypre_MEMORY_HOST_PINNED)
-      {
-         sprintf(memory_location, "%s", "HOST_PINNED");
-      }
-      else if (tracker->data[i]._memory_location == hypre_MEMORY_DEVICE)
-      {
-         sprintf(memory_location, "%s", "DEVICE");
-      }
-      else if (tracker->data[i]._memory_location == hypre_MEMORY_UNIFIED)
-      {
-         sprintf(memory_location, "%s", "UNIFIED");
-      }
-      else
-      {
-         sprintf(memory_location, "%s", "UNDEFINED");
-      }
-
-      if (tracker->data[i]._memory_location2 == hypre_MEMORY_HOST)
-      {
-         sprintf(memory_location2, "%s", "HOST");
-      }
-      else if (tracker->data[i]._memory_location2 == hypre_MEMORY_HOST_PINNED)
-      {
-         sprintf(memory_location2, "%s", "HOST_PINNED");
-      }
-      else if (tracker->data[i]._memory_location2 == hypre_MEMORY_DEVICE)
-      {
-         sprintf(memory_location2, "%s", "DEVICE");
-      }
-      else if (tracker->data[i]._memory_location2 == hypre_MEMORY_UNIFIED)
-      {
-         sprintf(memory_location2, "%s", "UNIFIED");
-      }
-      else
-      {
-         sprintf(memory_location2, "%s", "UNDEFINED");
-      }
-
-      if (tracker->data[i]._nbytes != (size_t) -1)
-      {
-         sprintf(nbytes, "%zu", tracker->data[i]._nbytes);
-      }
-      else
-      {
-         sprintf(nbytes, "%s", "");
-      }
-
-#if 0
-      if (strstr(tracker->data[i]._action, "memcpy") != NULL &&
-          tracker->data[i]._memory_location == hypre_MEMORY_HOST &&
-          tracker->data[i]._memory_location2 == hypre_MEMORY_DEVICE )
-      {
-         fprintf(file,
-                 " %6zu %12s        %16p  %16p  %10s %16s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
-                 i,
-                 tracker->data[i]._action,
-                 tracker->data[i]._ptr,
-                 tracker->data[i]._ptr2,
-                 nbytes,
-                 memory_location,
-                 memory_location2,
-                 tracker->data[i]._filename,
-                 tracker->data[i]._line,
-                 tracker->data[i]._function,
-                 curr_bytes[hypre_MEMORY_HOST],
-                 curr_bytes[hypre_MEMORY_HOST_PINNED],
-                 curr_bytes[hypre_MEMORY_DEVICE],
-                 curr_bytes[hypre_MEMORY_UNIFIED]
-                );
-      }
-      else
-#endif
-      {
-         fprintf(file, " %6zu %12s        %16p %10s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
-                 i,
-                 tracker->data[i]._action,
-                 tracker->data[i]._ptr,
-                 nbytes,
-                 memory_location,
-                 tracker->data[i]._filename,
-                 tracker->data[i]._line,
-                 tracker->data[i]._function,
-                 curr_bytes[hypre_MEMORY_HOST],
-                 curr_bytes[hypre_MEMORY_HOST_PINNED],
-                 curr_bytes[hypre_MEMORY_DEVICE],
-                 curr_bytes[hypre_MEMORY_UNIFIED]
-                );
-      }
-   }
-
-   fprintf(file, "\n==== Total allocated (byte):\n");
-   fprintf(file, "HOST: %16zu, HOST_PINNED %16zu, DEVICE %16zu, UNIFIED %16zu\n",
-           totl_bytes[hypre_MEMORY_HOST],
-           totl_bytes[hypre_MEMORY_HOST_PINNED],
-           totl_bytes[hypre_MEMORY_DEVICE],
-           totl_bytes[hypre_MEMORY_UNIFIED]);
-
-   fprintf(file, "\n==== Peak (byte):\n");
-   fprintf(file, "HOST: %16zu, HOST_PINNED %16zu, DEVICE %16zu, UNIFIED %16zu\n",
-           peak_bytes[hypre_MEMORY_HOST],
-           peak_bytes[hypre_MEMORY_HOST_PINNED],
-           peak_bytes[hypre_MEMORY_DEVICE],
-           peak_bytes[hypre_MEMORY_UNIFIED]);
-
-   fprintf(file, "\n==== Reachable (byte):\n");
-   fprintf(file, "HOST: %16zu, HOST_PINNED %16zu, DEVICE %16zu, UNIFIED %16zu\n",
-           curr_bytes[hypre_MEMORY_HOST],
-           curr_bytes[hypre_MEMORY_HOST_PINNED],
-           curr_bytes[hypre_MEMORY_DEVICE],
-           curr_bytes[hypre_MEMORY_UNIFIED]);
-
-   fprintf(file, "\n==== Warnings:\n");
-   for (i = 0; i < tracker->actual_size; i++)
-   {
-      if (tracker->data[i]._pair == (size_t) -1)
-      {
-         if (strstr(tracker->data[i]._action, "alloc") != NULL)
-         {
-            fprintf(file, "%6zu: %p may have not been freed\n", i, tracker->data[i]._ptr );
-         }
-         else if (strstr(tracker->data[i]._action, "free") != NULL)
-         {
-            fprintf(file, "%6zu: unpaired free at %16p\n", i, tracker->data[i]._ptr );
-         }
-      }
-   }
-
-   fclose(file);
-
-   tracker->prev_end = tracker->actual_size;
-
-   return ierr;
-}
-#endif
 
 /*--------------------------------------------------------------------------*
  * Memory Pool
