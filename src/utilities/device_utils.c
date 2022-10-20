@@ -2333,7 +2333,7 @@ hypreDevice_DiagScaleVector( HYPRE_Int       num_vectors,
  * hypreGPUKernel_DiagScaleVector2
  *--------------------------------------------------------------------*/
 
-template <HYPRE_Int NV>
+template <HYPRE_Int NV, HYPRE_Int CY>
 __global__ void
 hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
                                  HYPRE_Int         num_vectors,
@@ -2342,8 +2342,7 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
                                  HYPRE_Complex    *x,
                                  HYPRE_Complex     beta,
                                  HYPRE_Complex    *y,
-                                 HYPRE_Complex    *z,
-                                 HYPRE_Int         computeY)
+                                 HYPRE_Complex    *z )
 {
    HYPRE_Int      i = hypre_gpu_get_grid_thread_id<1, 1>(item);
    HYPRE_Int      j;
@@ -2361,7 +2360,7 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
          {
             x_over_diag = x[i + j * num_rows] * inv_diag;
 
-            if (computeY)
+            if (CY)
             {
                y[i + j * num_rows] = x_over_diag;
             }
@@ -2375,7 +2374,7 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
          {
             x_over_diag = x[i + j * num_rows] * inv_diag;
 
-            if (computeY)
+            if (CY)
             {
                y[i + j * num_rows] = x_over_diag;
             }
@@ -2415,43 +2414,120 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
    switch (num_vectors)
    {
       case 1:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<1>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<1, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<1, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       case 2:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<2>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<2, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<2, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       case 3:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<3>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<3, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<3, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       case 4:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<4>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<4, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<4, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       case 5:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<5>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<5, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<5, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       case 6:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<6>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<6, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<6, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       case 7:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<7>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<7, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<7, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         break;
+
+      case 8:
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<8, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<8, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
 
       default:
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_DiagScaleVector2<8>, gDim, bDim,
-                           num_vectors, num_rows, diag, x, beta, y, z, computeY );
+         if (computeY > 0)
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<0, 1>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
+         else
+         {
+            HYPRE_GPU_LAUNCH( (hypreGPUKernel_DiagScaleVector2<0, 0>), gDim, bDim,
+                              num_vectors, num_rows, diag, x, beta, y, z );
+         }
          break;
    }
 
