@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYRPE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 template<typename T>
@@ -2515,4 +2515,4 @@ void hypreCUDAKernel_populate_big_P_offd_j( hypre_DeviceItem   &item,
    }
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // defined(HYRPE_USING_GPU)

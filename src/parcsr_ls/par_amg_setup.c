@@ -676,7 +676,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (num_C_points_coarse > 0)
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYRPE_USING_GPU)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
@@ -705,7 +705,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          num_C_points_coarse = new_end - C_points_local_marker;
       }
       else
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYRPE_USING_GPU) */
       {
          k = 0;
          for (j = 0; j < num_C_points_coarse; j++)
@@ -739,7 +739,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
       }
       else
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYRPE_USING_GPU) */
       {
          for (i = 0; i < local_size; i++)
          {
@@ -1145,7 +1145,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
             }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYRPE_USING_GPU)
             HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(
                                                                   CF_marker_array[level]) );
 
@@ -1442,7 +1442,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /* Set fine points (F_PT) given by the user */
          if ( (num_F_points > 0) && (level == 0) )
          {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYRPE_USING_GPU)
             HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(
                                                                   CF_marker_array[level]) );
             if (exec == HYPRE_EXEC_DEVICE)
@@ -1491,7 +1491,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else if (level < hypre_ParAMGDataCPointsLevel(amg_data))
             {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYRPE_USING_GPU)
                HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
                HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
