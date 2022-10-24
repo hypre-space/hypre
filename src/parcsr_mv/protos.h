@@ -565,3 +565,4 @@ HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base,
                                          HYPRE_Complex *values);
+
