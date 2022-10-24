@@ -883,7 +883,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       Ztemp = hypre_ParMultiVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                          hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                          hypre_ParCSRMatrixRowStarts(A_array[0]),
-                                         needZ);
+                                         num_vectors);
       hypre_ParVectorInitialize_v2(Ztemp, memory_location);
       hypre_ParAMGDataZtemp(amg_data) = Ztemp;
    }
@@ -3218,6 +3218,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (addlvl > -1 ||
        grid_relax_type[1] ==  7 || grid_relax_type[2] ==  7 || grid_relax_type[3] ==  7 ||
        grid_relax_type[1] ==  8 || grid_relax_type[2] ==  8 || grid_relax_type[3] ==  8 ||
+       grid_relax_type[1] == 11 || grid_relax_type[2] == 11 || grid_relax_type[3] == 11 ||
+       grid_relax_type[1] == 12 || grid_relax_type[2] == 12 || grid_relax_type[3] == 12 ||
        grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
        grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
        grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18)
@@ -3426,8 +3428,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_GpuProfilingPushRange(nvtx_name);
 #endif
 
-      if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 ||
-          (grid_relax_type[3] == 7 && j == (num_levels - 1)))
+      if ( grid_relax_type[1]  == 7 || grid_relax_type[2] == 7   ||
+           (grid_relax_type[3] == 7 && j == (num_levels - 1))    ||
+
+           grid_relax_type[1]  == 11 || grid_relax_type[2] == 11 ||
+           (grid_relax_type[3] == 11 && j == (num_levels - 1))   ||
+
+           grid_relax_type[1]  == 12 || grid_relax_type[2] == 12 ||
+           (grid_relax_type[3] == 12 && j == (num_levels - 1)) )
       {
          HYPRE_Real *l1_norm_data = NULL;
 
@@ -3496,6 +3504,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
       }
+
       if (relax_weight[j] == 0.0)
       {
          hypre_ParCSRMatrixScaledNorm(A_array[j], &relax_weight[j]);
@@ -3508,6 +3517,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Warning ! Matrix norm is zero !!!");
          }
       }
+
       if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
       {
          schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
