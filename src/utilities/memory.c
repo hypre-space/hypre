@@ -74,7 +74,6 @@ hypre_WrongMemoryLocation()
 void
 hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
 {
-#if 0
 #if defined(HYPRE_DEBUG)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    if (!ptr)
@@ -87,7 +86,6 @@ hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
    assert(location == location_ptr);
-#endif
 #endif
 #endif
 }
@@ -1523,4 +1521,3 @@ hypre_umpire_pinned_pooled_free(void *ptr)
    return hypre_error_flag;
 }
 #endif
-
