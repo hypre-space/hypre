@@ -42,7 +42,7 @@ hypre_SeqVectorSetConstantValuesDevice( hypre_Vector *v,
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(vector_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(vector_data)
    for (i = 0; i < total_size; i++)
    {
       vector_data[i] = value;
@@ -90,7 +90,7 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data)
    for (i = 0; i < total_size; i++)
    {
       y_data[i] *= alpha;
@@ -139,7 +139,7 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(y_data, x_data)
    for (i = 0; i < total_size; i++)
    {
       y_data[i] += alpha * x_data[i];
@@ -263,7 +263,7 @@ hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
-#pragma omp target teams distribute parallel for private(i) reduction(+:result) is_device_ptr(y_data, x_data) map(result)
+   #pragma omp target teams distribute parallel for private(i) reduction(+:result) is_device_ptr(y_data, x_data) map(result)
    for (i = 0; i < total_size; i++)
    {
       result += hypre_conj(y_data[i]) * x_data[i];
@@ -297,7 +297,7 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
 #elif HYPRE_USING_DEVICE_OPENMP
    HYPRE_Int i;
 
-#pragma omp target teams distribute parallel for private(i) reduction(+:sum) is_device_ptr(data) map(sum)
+   #pragma omp target teams distribute parallel for private(i) reduction(+:sum) is_device_ptr(data) map(sum)
    for (i = 0; i < total_size; i++)
    {
       sum += data[i];

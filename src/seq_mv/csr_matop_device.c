@@ -1580,20 +1580,20 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
       auto zip_ija = oneapi::dpl::make_zip_iterator(A_ii, A_j, A_data);
       auto zip_new_ija = oneapi::dpl::make_zip_iterator(new_ii, new_j, new_data);
       auto new_end = hypreSycl_copy_if(
-                                   zip_ija,
-                                   zip_ija + nnz,
-                                   zip_ij,
-                                   zip_new_ija,
-                                   Int2Unequal() );
+                        zip_ija,
+                        zip_ija + nnz,
+                        zip_ij,
+                        zip_new_ija,
+                        Int2Unequal() );
 
       hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
 #else
       auto new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   Int2Unequal() );
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                        Int2Unequal() );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
 #endif
@@ -1613,11 +1613,11 @@ hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A)
       hypre_assert( std::get<0>(new_end.base()) == new_ii + new_nnz );
 #else
       auto new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j)),
-                                   Int2Unequal() );
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)) + nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j)),
+                                        Int2Unequal() );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
 #endif

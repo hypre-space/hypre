@@ -845,7 +845,8 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_MemoryLocation memory_location,
  *  A[row_to_write, col_to_write] += val_to_write
  **/
 HYPRE_Int
-hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled matrix to add an entry to */
+hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix
+                                B,                 /* Unassembled matrix to add an entry to */
                                 HYPRE_Int    *ijbuf_cnt,          /* current buffer size */
                                 HYPRE_Int     ijbuf_size,         /* max buffer size */
                                 HYPRE_Int    *ijbuf_rowcounter,   /* num of rows in rownums, (i.e., size of rownums) */
@@ -897,7 +898,8 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled
       /* Compress and Add Entries */
       hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, (*ijbuf_rowcounter), (*ijbuf_data),
                                            (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
-      hypre_NonGalerkinIJBufferCompress(memory_location, ijbuf_size, ijbuf_cnt, ijbuf_rowcounter, ijbuf_data,
+      hypre_NonGalerkinIJBufferCompress(memory_location, ijbuf_size, ijbuf_cnt, ijbuf_rowcounter,
+                                        ijbuf_data,
                                         ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
       ierr += HYPRE_IJMatrixAddToValues(B, *ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums),
                                         (*ijbuf_cols), (*ijbuf_data));
@@ -915,7 +917,8 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled
  * Empty the IJ Buffer with a final AddToValues.
  **/
 HYPRE_Int
-hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix B, /* See NonGalerkinIJBufferWrite for parameter descriptions */
+hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix
+                               B, /* See NonGalerkinIJBufferWrite for parameter descriptions */
                                HYPRE_Int      ijbuf_size,
                                HYPRE_Int      *ijbuf_cnt,
                                HYPRE_Int      ijbuf_rowcounter,
@@ -932,7 +935,8 @@ hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix B, /* See NonGalerkinIJBufferWrite
       /* Compress the last row and then write */
       hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, ijbuf_rowcounter, (*ijbuf_data),
                                            (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
-      hypre_NonGalerkinIJBufferCompress(memory_location, ijbuf_size, ijbuf_cnt, &ijbuf_rowcounter, ijbuf_data,
+      hypre_NonGalerkinIJBufferCompress(memory_location, ijbuf_size, ijbuf_cnt, &ijbuf_rowcounter,
+                                        ijbuf_data,
                                         ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
       ierr += HYPRE_IJMatrixAddToValues(B, ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums),
                                         (*ijbuf_cols), (*ijbuf_data));

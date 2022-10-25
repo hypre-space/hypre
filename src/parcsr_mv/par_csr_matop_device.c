@@ -1725,31 +1725,52 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRDiagScale
- *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_GPU)
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRDiagScaleVectorDevice
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ParCSRDiagScaleVectorDevice( HYPRE_ParCSRMatrix HA,
-                                   HYPRE_ParVector    Hy,
-                                   HYPRE_ParVector    Hx )
+hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
+                                   hypre_ParVector    *par_y,
+                                   hypre_ParVector    *par_x )
 {
-   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
-   hypre_ParVector    *y = (hypre_ParVector *) Hy;
-   hypre_ParVector    *x = (hypre_ParVector *) Hx;
-   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
+   /* Local Matrix and Vectors */
+   hypre_CSRMatrix    *A_diag        = hypre_ParCSRMatrixDiag(par_A);
+   hypre_Vector       *x             = hypre_ParVectorLocalVector(par_x);
+   hypre_Vector       *y             = hypre_ParVectorLocalVector(par_y);
+
+   /* Local vector x info */
+   HYPRE_Complex      *x_data        = hypre_VectorData(x);
+   HYPRE_Int           x_size        = hypre_VectorSize(x);
+   HYPRE_Int           x_num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int           x_vecstride   = hypre_VectorVectorStride(x);
+
+   /* Local vector y info */
+   HYPRE_Complex      *y_data        = hypre_VectorData(y);
+   HYPRE_Int           y_size        = hypre_VectorSize(y);
+   HYPRE_Int           y_num_vectors = hypre_VectorNumVectors(y);
+   HYPRE_Int           y_vecstride   = hypre_VectorVectorStride(y);
+
+   /* Local matrix A info */
+   HYPRE_Int           num_rows      = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int          *A_i           = hypre_CSRMatrixI(A_diag);
+   HYPRE_Complex      *A_data        = hypre_CSRMatrixData(A_diag);
+
+   /* Sanity checks */
+   hypre_assert(x_vecstride == x_size);
+   hypre_assert(y_vecstride == y_size);
+   hypre_assert(x_num_vectors == y_num_vectors);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypreDevice_DiagScaleVector(local_size, A_i, A_data, y_data, 0.0, x_data);
+   hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
+
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
-#pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
-   for (i = 0; i < local_size; i++)
+
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
+   for (i = 0; i < num_rows; i++)
    {
       x_data[i] = y_data[i] / A_data[A_i[i]];
    }

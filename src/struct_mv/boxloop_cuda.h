@@ -108,7 +108,7 @@ extern "C++"
    template<typename LOOP_BODY, typename REDUCER>
    void
    ReductionBoxLoopforall( HYPRE_Int  length,
-                           REDUCER   &reducer,
+                           REDUCER   & reducer,
                            LOOP_BODY  loop_body )
    {
       if (length <= 0)

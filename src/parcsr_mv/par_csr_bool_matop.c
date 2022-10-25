@@ -1114,9 +1114,12 @@ hypre_BooleanMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
    HYPRE_BigInt  *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
    HYPRE_BigInt   first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
    HYPRE_BigInt  *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
-   HYPRE_Int      num_rows_diag = hypre_CSRBooleanMatrix_Get_NRows(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int      num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int      num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
+   HYPRE_Int      num_rows_diag = hypre_CSRBooleanMatrix_Get_NRows(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                      A));
+   HYPRE_Int      num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                      A));
+   HYPRE_Int      num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(
+                                                                      A));
    HYPRE_BigInt  *row_starts = hypre_ParCSRBooleanMatrix_Get_RowStarts(A);
 
    HYPRE_Int      num_sends;
@@ -1170,8 +1173,10 @@ hypre_BooleanMatvecCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
    HYPRE_BigInt   *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
    HYPRE_BigInt    first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
    HYPRE_BigInt   *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
-   HYPRE_Int       num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int       num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
+   HYPRE_Int       num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                       A));
+   HYPRE_Int       num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(
+                                                                       A));
 
    HYPRE_Int       num_sends;
    HYPRE_Int      *send_procs;
