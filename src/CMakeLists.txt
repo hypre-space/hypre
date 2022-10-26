@@ -22,7 +22,7 @@ set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 set(PROJECT_NAME HYPRE)
 project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
-  LANGUAGES C CXX)
+  LANGUAGES C)
 
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
@@ -480,6 +480,8 @@ endif ()
 
 # Find FEI, if requested
 if (HYPRE_USING_FEI)
+  enable_language(CXX)
+
   if (NOT TPL_FEI_INCLUDE_DIRS)
     message(FATAL_ERROR "TPL_FEI_INCLUDE_DIRS option should be set for FEI support.")
   endif ()
