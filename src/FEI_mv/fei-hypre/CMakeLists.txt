@@ -62,6 +62,8 @@ set(HYPRE_fei_SRCS
   HYPRE_fei_vector.cxx 
 )
 
-add_library(HYPRE_fei OBJECT ${HYPRE_fei_SRCS})
-
 install (FILES ${HYPRE_fei_HEADERS} DESTINATION include)
+
+target_sources(${PROJECT_NAME}
+  PRIVATE ${HYPRE_fei_SRCS}
+)
