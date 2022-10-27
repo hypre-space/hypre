@@ -68,6 +68,21 @@
 /* Use Caliper instrumentation */
 #cmakedefine HYPRE_USING_CALIPER 1
 
+/* Use UMPIRE */
+#cmakedefine HYPRE_USING_UMPIRE 1
+
+/* Use UMPIRE for device memory */
+#cmakedefine HYPRE_USING_UMPIRE_DEVICE 1
+
+/* Use UMPIRE for host memory */
+#cmakedefine HYPRE_USING_UMPIRE_HOST 1
+
+/* Use UMPIRE for pinned memory */
+#cmakedefine HYPRE_USING_UMPIRE_PINNED 1
+
+/* Use UMPIRE for unified memory */
+#cmakedefine HYPRE_USING_UMPIRE_UM 1
+
 /* Use if executing on device with CUDA */
 #cmakedefine HYPRE_USING_CUDA 1
 
