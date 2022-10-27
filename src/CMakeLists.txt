@@ -95,7 +95,7 @@ option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
 option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
 option(HYPRE_WITH_SUPERLU            "Use TPL SuperLU" OFF)
 option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
-option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)  # TODO: Finish this cmake feature
+option(HYPRE_WITH_CALIPER            "Use Caliper" OFF) # TODO: Finish this cmake feature
 option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
 option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
@@ -123,6 +123,14 @@ option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
 option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
 set(HYPRE_SYCL_TARGET            ""   CACHE STRING  "Target SYCL architecture, e.g. 'spir64_gen'.")
 set(HYPRE_SYCL_TARGET_BACKEND    ""   CACHE STRING  "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
+# Umpire resource management options
+option(HYPRE_WITH_UMPIRE             "Use Umpire Allocator for device and unified memory" OFF)
+option(HYPRE_WITH_UMPIRE_HOST        "Use Umpire Allocator for host memory" OFF)
+option(HYPRE_WITH_UMPIRE_DEVICE      "Use Umpire Allocator for device memory" OFF)
+option(HYPRE_WITH_UMPIRE_UM          "Use Umpire Allocator for unified memory" OFF)
+option(HYPRE_WITH_UMPIRE_PINNED      "Use Umpire Allocator for pinned memory" OFF)
+option(TPL_UMPIRE_LIBRARIES          "List of absolute paths to Umpire link libraries [].")
+option(TPL_UMPIRE_INCLUDE_DIRS       "List of absolute paths to Umpire include directories [].")
 
 option(TPL_SUPERLU_LIBRARIES         "List of absolute paths to SuperLU link libraries [].")
 option(TPL_SUPERLU_INCLUDE_DIRS      "List of absolute paths to SuperLU include directories [].")
@@ -215,6 +223,32 @@ endif ()
 
 if (HYPRE_SEQUENTIAL)
   set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_HOST)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_HOST ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_DEVICE)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_UM)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_PINNED)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
 
 # CUDA
@@ -532,6 +566,28 @@ if (HYPRE_USING_CALIPER)
   find_package(caliper REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC caliper)
 endif()
+
+# Find Umpire, if requested
+if (HYPRE_USING_UMPIRE)
+  if (NOT TPL_UMPIRE_LIBRARIES OR NOT TPL_UMPIRE_INCLUDE_DIRS)
+    message(FATAL_ERROR "Both TPL_UMPIRE_LIBRARIES and TPL_UMPIRE_INCLUDE_DIRS options must be set for Umpire support.")
+  endif ()
+
+  # Enable c++ (only needed if NOT CUDA as CUDA block handles enabling c++)
+  if (NOT HYPRE_WITH_CUDA)
+    enable_language(CXX)
+  endif ()
+
+  foreach (dir ${TPL_UMPIRE_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "Umpire include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using Umpire.")
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_LIBRARIES} stdc++)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_INCLUDE_DIRS})
+endif ()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(
