@@ -541,8 +541,9 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 
    HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_l1);
 
-   HYPRE_MemoryLocation memory_location_tmp = exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST :
-                                              HYPRE_MEMORY_DEVICE;
+   HYPRE_MemoryLocation memory_location_tmp =
+      exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
+
    HYPRE_Real *diag_tmp = NULL;
 
    HYPRE_Int *cf_marker_offd = NULL;
@@ -573,7 +574,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
          hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                 num_sends),
+                                                                                                             num_sends),
                            cf_marker,
                            int_buf_data );
 #else
@@ -688,7 +689,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       if ( exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, [] (const auto & x) {return !x;}, 1.0 );
+         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, [] (const auto & x) {return !x;},
+         1.0 );
 #else
          thrust::identity<HYPRE_Complex> identity;
          HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );

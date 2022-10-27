@@ -1803,6 +1803,9 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       break;
    }
 
+   hypre_SeqVectorDestroy(ftemp_upper);
+   hypre_SeqVectorDestroy(utemp_lower);
+
    return hypre_error_flag;
 }
 

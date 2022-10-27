@@ -31,6 +31,7 @@ set(SRCS
   int_array.c
   hopscotch_hash.c
   memory.c
+  memory_tracker.c
   merge_sort.c
   mmio.c
   mpi_comm_f2c.c
@@ -61,6 +62,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     int_array.c
     general.c
     memory.c
+    memory_tracker.c
     omp_device.c
     nvtx.c
   )

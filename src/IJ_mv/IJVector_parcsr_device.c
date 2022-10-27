@@ -17,30 +17,36 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
-#if defined(HYPRE_USING_SYCL)
-namespace thrust = std;
-#endif
-
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
-template<typename T1, typename T2>
 #if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
+{
+   typedef std::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   {
+      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
+                              std::get<1>(x) + std::get<1>(y) );
+   }
+};
 #else
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public
    thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-#endif
 {
    typedef thrust::tuple<T1, T2> Tuple;
 
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y )
    {
       return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
                                  thrust::get<1>(x) + thrust::get<1>(y) );
    }
 };
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleSortAndReduce1
@@ -89,7 +95,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                       oneapi::dpl::counting_iterator(0),
                       oneapi::dpl::counting_iterator(N0),
                       reverse_perm,
-                      [N0] (auto i) { return N0 - i - 1; });
+   [N0] (auto i) { return N0 - i - 1; });
 
    HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
    hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
@@ -123,13 +129,13 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
    [] (const auto & x) {return 0.0;} );
 
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                                 I0,                                                         /* keys_first */
-                                 I0 + N0,                                                    /* keys_last */
-                                 oneapi::dpl::make_zip_iterator(X0, A0),                     /* values_first */
-                                 I,                                                          /* keys_output */
-                                 oneapi::dpl::make_zip_iterator(X, A),                       /* values_output */
-                                 std::equal_to<HYPRE_BigInt>(),                              /* binary_pred */
-                                 hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()        /* binary_op */);
+                                     I0,                                                         /* keys_first */
+                                     I0 + N0,                                                    /* keys_last */
+                                     oneapi::dpl::make_zip_iterator(X0, A0),                     /* values_first */
+                                     I,                                                          /* keys_output */
+                                     oneapi::dpl::make_zip_iterator(X, A),                       /* values_output */
+                                     std::equal_to<HYPRE_BigInt>(),                              /* binary_pred */
+                                     hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()        /* binary_op */);
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
@@ -197,7 +203,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
                       oneapi::dpl::counting_iterator(0),
                       oneapi::dpl::counting_iterator(N0),
                       reverse_perm,
-                      [N0] (auto i) { return N0 - i - 1; });
+   [N0] (auto i) { return N0 - i - 1; });
 
    HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
    hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
@@ -227,12 +233,13 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    [] (const auto & x) {return 0.0;} );
 
    auto new_end = oneapi::dpl::reduce_by_segment(
-                                 oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream( hypre_handle())),
-                                 I0,      /* keys_first */
-                                 I0 + N0, /* keys_last */
-                                 A0,      /* values_first */
-                                 I,       /* keys_output */
-                                 A        /* values_output */);
+                     oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
+                                                                                   hypre_handle())),
+                     I0,      /* keys_first */
+                     I0 + N0, /* keys_last */
+                     A0,      /* values_first */
+                     I,       /* keys_output */
+                     A        /* values_output */);
 #else
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
@@ -506,7 +513,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */
                                             zip_out, /* result */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
@@ -514,7 +521,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          auto new_end2 = hypreSycl_remove_if( zip_in,         /* first */
                                               zip_in + nelms, /* last */
                                               is_on_proc,     /* stencil */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);
 #else

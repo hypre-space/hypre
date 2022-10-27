@@ -4937,6 +4937,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
    MPI_Barrier(comm_);
    status = 1;
+   solveStatus = status; //set for early return
    stime  = LSC_Wtime();
    ptime  = stime;
 

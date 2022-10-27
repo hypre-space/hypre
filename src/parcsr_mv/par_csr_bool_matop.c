@@ -246,7 +246,8 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
 
    hypre_ParMatmul_RowSizes(
       /*&C_diag_i, &C_offd_i, &B_marker,*/
-      HYPRE_MEMORY_DEVICE, /* RL: XXX */
+      /* BooleanMatrix only uses HOST memory for now */
+      HYPRE_MEMORY_HOST,
       &C_diag_i, &C_offd_i, NULL,
       A_diag_i, A_diag_j, A_offd_i, A_offd_j,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
@@ -1109,29 +1110,27 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
 HYPRE_Int
 hypre_BooleanMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
 {
-   hypre_ParCSRCommPkg  *comm_pkg;
-
-   MPI_Comm             comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
-   /*   hypre_MPI_Datatype         *recv_mpi_types;
-      hypre_MPI_Datatype         *send_mpi_types;
-   */
-   HYPRE_Int         num_sends;
-   HYPRE_Int         *send_procs;
-   HYPRE_Int         *send_map_starts;
-   HYPRE_Int         *send_map_elmts;
-   HYPRE_Int         num_recvs;
-   HYPRE_Int         *recv_procs;
-   HYPRE_Int         *recv_vec_starts;
-
+   MPI_Comm       comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
    HYPRE_BigInt  *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
-   HYPRE_BigInt  first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
+   HYPRE_BigInt   first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
    HYPRE_BigInt  *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
+   HYPRE_Int      num_rows_diag = hypre_CSRBooleanMatrix_Get_NRows(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                      A));
+   HYPRE_Int      num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                      A));
+   HYPRE_Int      num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(
+                                                                      A));
+   HYPRE_BigInt  *row_starts = hypre_ParCSRBooleanMatrix_Get_RowStarts(A);
 
-   HYPRE_Int   ierr = 0;
-   HYPRE_Int   num_rows_diag = hypre_CSRBooleanMatrix_Get_NRows(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int   num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int   num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
-   HYPRE_BigInt * row_starts = hypre_ParCSRBooleanMatrix_Get_RowStarts(A);
+   HYPRE_Int      num_sends;
+   HYPRE_Int     *send_procs;
+   HYPRE_Int     *send_map_starts;
+   HYPRE_Int     *send_map_elmts;
+   HYPRE_Int      num_recvs;
+   HYPRE_Int     *recv_procs;
+   HYPRE_Int     *recv_vec_starts;
+
+   hypre_ParCSRCommPkg  *comm_pkg = NULL;
 
    hypre_MatTCommPkgCreate_core (
       comm, col_map_offd, first_col_diag, col_starts,
@@ -1148,23 +1147,17 @@ hypre_BooleanMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
       &send_map_elmts
    );
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
+   /* Create communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs, recv_procs, recv_vec_starts,
+                                    num_sends, send_procs, send_map_starts,
+                                    send_map_elmts,
+                                    &comm_pkg);
 
    hypre_ParCSRBooleanMatrix_Get_CommPkgT(A) = comm_pkg;
 
-   return ierr;
+   return hypre_error_flag;
 }
-
 
 /* ----------------------------------------------------------------------
  * hypre_BooleanMatvecCommPkgCreate
@@ -1176,27 +1169,24 @@ hypre_BooleanMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
 HYPRE_Int
 hypre_BooleanMatvecCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
 {
-   hypre_ParCSRCommPkg  *comm_pkg;
+   MPI_Comm        comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
+   HYPRE_BigInt   *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
+   HYPRE_BigInt    first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
+   HYPRE_BigInt   *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
+   HYPRE_Int       num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                       A));
+   HYPRE_Int       num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(
+                                                                       A));
 
-   MPI_Comm             comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
-   /*   hypre_MPI_Datatype         *recv_mpi_types;
-      hypre_MPI_Datatype         *send_mpi_types;
-   */
-   HYPRE_Int         num_sends;
-   HYPRE_Int         *send_procs;
-   HYPRE_Int         *send_map_starts;
-   HYPRE_Int         *send_map_elmts;
-   HYPRE_Int         num_recvs;
-   HYPRE_Int         *recv_procs;
-   HYPRE_Int         *recv_vec_starts;
+   HYPRE_Int       num_sends;
+   HYPRE_Int      *send_procs;
+   HYPRE_Int      *send_map_starts;
+   HYPRE_Int      *send_map_elmts;
+   HYPRE_Int       num_recvs;
+   HYPRE_Int      *recv_procs;
+   HYPRE_Int      *recv_vec_starts;
 
-   HYPRE_BigInt  *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
-   HYPRE_BigInt  first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
-   HYPRE_BigInt  *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
-
-   HYPRE_Int   ierr = 0;
-   HYPRE_Int   num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int   num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
+   hypre_ParCSRCommPkg  *comm_pkg = NULL;
 
    hypre_ParCSRCommPkgCreate_core
    (
@@ -1207,22 +1197,14 @@ hypre_BooleanMatvecCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
       &send_map_elmts
    );
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   /* hypre_ParCSRCommPkgRecvMPITypes(comm_pkg) = recv_mpi_types; */
-
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
-   /* hypre_ParCSRCommPkgSendMPITypes(comm_pkg) = send_mpi_types; */
+   /* Create communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs, recv_procs, recv_vec_starts,
+                                    num_sends, send_procs, send_map_starts,
+                                    send_map_elmts,
+                                    &comm_pkg);
 
    hypre_ParCSRBooleanMatrix_Get_CommPkg(A) = comm_pkg;
 
-   return ierr;
+   return hypre_error_flag;
 }

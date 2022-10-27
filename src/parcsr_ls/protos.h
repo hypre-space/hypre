@@ -508,8 +508,10 @@ HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver, HYPRE_Int ilu_ma
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver solver, HYPRE_Int ilu_max_iter);
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver solver, HYPRE_Real ilu_droptol);
 HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver solver, HYPRE_Int ilu_tri_solve);
-HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver solver, HYPRE_Int ilu_lower_jacobi_iters);
-HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int ilu_upper_jacobi_iters);
+HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver solver,
+                                                 HYPRE_Int ilu_lower_jacobi_iters);
+HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver solver,
+                                                 HYPRE_Int ilu_upper_jacobi_iters);
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver, HYPRE_Int ilu_reordering_type);
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
@@ -1600,7 +1602,8 @@ HYPRE_Int hypre_NonGalerkinIJBufferNewRow ( HYPRE_BigInt *ijbuf_rownums, HYPRE_I
 HYPRE_Int hypre_NonGalerkinIJBufferCompressRow ( HYPRE_Int *ijbuf_cnt, HYPRE_Int ijbuf_rowcounter,
                                                  HYPRE_Real *ijbuf_data, HYPRE_BigInt *ijbuf_cols, HYPRE_BigInt *ijbuf_rownums,
                                                  HYPRE_Int *ijbuf_numcols );
-HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_Int ijbuf_size, HYPRE_Int *ijbuf_cnt,
+HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_MemoryLocation memory_location,
+                                              HYPRE_Int ijbuf_size, HYPRE_Int *ijbuf_cnt,
                                               HYPRE_Int *ijbuf_rowcounter, HYPRE_Real **ijbuf_data, HYPRE_BigInt **ijbuf_cols,
                                               HYPRE_BigInt **ijbuf_rownums, HYPRE_Int **ijbuf_numcols );
 HYPRE_Int hypre_NonGalerkinIJBufferWrite ( HYPRE_IJMatrix B, HYPRE_Int *ijbuf_cnt,
@@ -1702,25 +1705,29 @@ HYPRE_Int hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A, hypre_ParVector *
                                         HYPRE_Real *l1_norms, hypre_ParVector *u );
 
 HYPRE_Int hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                          HYPRE_Real relax_weight, HYPRE_Real omega, hypre_ParVector *u, hypre_ParVector *r,
-                                                          hypre_ParVector *z, HYPRE_Int choice);
-
-HYPRE_Int hypre_BoomerAMGRelaxTwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                   HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                   hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int num_inner_iters );
+                                                          HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                          HYPRE_Real *A_diag_diag, hypre_ParVector *u,
+                                                          hypre_ParVector *r, hypre_ParVector *z,
+                                                          HYPRE_Int choice );
 
 HYPRE_Int hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                     hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points,
+                                                     HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                     HYPRE_Real *A_diag_diag, hypre_ParVector *u,
+                                                     hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
 HYPRE_Int hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                     hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points,
+                                                     HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                     HYPRE_Real *A_diag_diag, hypre_ParVector *u,
+                                                     hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
 /* par_realx_device.c */
 HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                       HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                       HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp,
+                                                       HYPRE_Int *cf_marker, HYPRE_Int relax_points,
+                                                       HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                       HYPRE_Real *l1_norms, hypre_ParVector *u,
+                                                       hypre_ParVector *Vtemp, hypre_ParVector *Ztemp,
                                                        HYPRE_Int GS_order, HYPRE_Int Symm );
 
 /* par_relax_interface.c */

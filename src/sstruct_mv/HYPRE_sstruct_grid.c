@@ -338,8 +338,11 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
       }
    }
 
-   fem_vars    = hypre_TAlloc(HYPRE_Int,  fem_nvars, HYPRE_MEMORY_HOST);
-   fem_offsets = hypre_TAlloc(hypre_Index,  fem_nvars, HYPRE_MEMORY_HOST);
+   fem_vars    = hypre_TReAlloc(hypre_SStructGridFEMPVars(grid, part), HYPRE_Int, fem_nvars,
+                                HYPRE_MEMORY_HOST);
+   fem_offsets = hypre_TReAlloc(hypre_SStructGridFEMPOffsets(grid, part), hypre_Index, fem_nvars,
+                                HYPRE_MEMORY_HOST);
+
    for (i = 0; i < fem_nvars; i++)
    {
       block = &ordering[(1 + ndim) * i];
