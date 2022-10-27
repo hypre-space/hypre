@@ -39,6 +39,7 @@ cat error.h                    >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
 cat smp.h                      >> $INTERNAL_HEADER
 cat memory.h                   >> $INTERNAL_HEADER
+cat memory_tracker.h           >> $INTERNAL_HEADER
 cat omp_device.h               >> $INTERNAL_HEADER
 cat threading.h                >> $INTERNAL_HEADER
 cat timing.h                   >> $INTERNAL_HEADER

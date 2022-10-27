@@ -794,7 +794,8 @@ extern "C++"
    BoxLoopforall( HYPRE_Int length,
                   LOOP_BODY loop_body )
    {
-      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+      const HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+      const HYPRE_ExecutionPolicy exec_policy = hypre_GetExecPolicy1(memory_location);
 
       if (exec_policy == HYPRE_EXEC_HOST)
       {
@@ -849,7 +850,8 @@ extern "C++"
          return;
       }
 
-      HYPRE_ExecutionPolicy exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
+      const HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+      const HYPRE_ExecutionPolicy exec_policy = hypre_GetExecPolicy1(memory_location);
 
       if (exec_policy == HYPRE_EXEC_HOST)
       {
@@ -860,14 +862,15 @@ extern "C++"
       }
       else if (exec_policy == HYPRE_EXEC_DEVICE)
       {
+         /* Assume gDim cannot exceed HYPRE_MAX_NTHREADS_BLOCK (the max size for the 2nd reduction)
+          * and bDim <= WARP * WARP (because we use 1 warp fro the block-level reduction) */
          const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
          dim3 gDim = hypre_GetDefaultDeviceGridDimension(length, "thread", bDim);
+         gDim.x = hypre_min(gDim.x, HYPRE_MAX_NTHREADS_BLOCK);
 
-         /* Note: we assume gDim cannot exceed 1024
-          *       and bDim < WARP * WARP
-          */
-         gDim.x = hypre_min(gDim.x, 1024);
          reducer.nblocks = gDim.x;
+
+         reducer.Allocate2ndPhaseBuffer();
 
          /*
          hypre_printf("length= %d, blocksize = %d, gridsize = %d\n", length, bDim.x, gDim.x);
@@ -928,7 +931,7 @@ extern "C++"
       databox##k.bsize2   = 0;                                             \
    }
 
-#define zypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride) \
+#define hypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride) \
 hypre_Boxloop databox##k;                                       \
 databox##k.lsize0   = loop_size[0];                             \
 databox##k.strides0 = stride[0];                                \
@@ -986,24 +989,24 @@ else                                                            \
    hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);
 
 /* get 3-D local_idx into 'index' */
-#define hypre_BoxLoopGetIndex(index)      \
-   index[0] = hypre_IndexD(local_idx, 0); \
-   index[1] = hypre_IndexD(local_idx, 1); \
+#define hypre_BoxLoopGetIndexCUDA(index)                                                              \
+   index[0] = hypre_IndexD(local_idx, 0);                                                             \
+   index[1] = hypre_IndexD(local_idx, 1);                                                             \
    index[2] = hypre_IndexD(local_idx, 2);
 
 /* BoxLoop 0 */
-#define hypre_newBoxLoop0Begin(ndim, loop_size)                                                       \
+#define hypre_BoxLoop0BeginCUDA(ndim, loop_size)                                                      \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    BoxLoopforall(hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx)                                             \
    {
 
-#define hypre_newBoxLoop0End()                                                                        \
+#define hypre_BoxLoop0EndCUDA()                                                                       \
    });                                                                                                \
 }
 
 /* BoxLoop 1 */
-#define hypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)                           \
+#define hypre_BoxLoop1BeginCUDA(ndim, loop_size, dbox1, start1, stride1, i1)                          \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
@@ -1012,13 +1015,13 @@ else                                                            \
       hypre_newBoxLoopDeclare(databox1);                                                              \
       hypre_BoxLoopIncK(1, databox1, i1);
 
-#define hypre_newBoxLoop1End(i1)                                                                      \
+#define hypre_BoxLoop1EndCUDA(i1)                                                                     \
    });                                                                                                \
 }
 
 /* BoxLoop 2 */
-#define hypre_newBoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1,                           \
-                                                dbox2, start2, stride2, i2)                           \
+#define hypre_BoxLoop2BeginCUDA(ndim, loop_size, dbox1, start1, stride1, i1,                          \
+                                                 dbox2, start2, stride2, i2)                          \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
@@ -1029,14 +1032,14 @@ else                                                            \
       hypre_BoxLoopIncK(1, databox1, i1);                                                             \
       hypre_BoxLoopIncK(2, databox2, i2);
 
-#define hypre_newBoxLoop2End(i1, i2)                                                                  \
+#define hypre_BoxLoop2EndCUDA(i1, i2)                                                                 \
    });                                                                                                \
 }
 
 /* BoxLoop 3 */
-#define hypre_newBoxLoop3Begin(ndim, loop_size, dbox1, start1, stride1, i1,                           \
-                                                dbox2, start2, stride2, i2,                           \
-                                                dbox3, start3, stride3, i3)                           \
+#define hypre_BoxLoop3BeginCUDA(ndim, loop_size, dbox1, start1, stride1, i1,                          \
+                                                 dbox2, start2, stride2, i2,                          \
+                                                 dbox3, start3, stride3, i3)                          \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim,loop_size, dbox1, start1, stride1);                              \
@@ -1049,15 +1052,15 @@ else                                                            \
       hypre_BoxLoopIncK(2, databox2, i2);                                                             \
       hypre_BoxLoopIncK(3, databox3, i3);
 
-#define hypre_newBoxLoop3End(i1, i2, i3)                                                              \
+#define hypre_BoxLoop3EndCUDA(i1, i2, i3)                                                             \
    });                                                                                                \
 }
 
 /* BoxLoop 4 */
-#define hypre_newBoxLoop4Begin(ndim, loop_size, dbox1, start1, stride1, i1,                           \
-                                                dbox2, start2, stride2, i2,                           \
-                                                dbox3, start3, stride3, i3,                           \
-                                                dbox4, start4, stride4, i4)                           \
+#define hypre_BoxLoop4BeginCUDA(ndim, loop_size, dbox1, start1, stride1, i1,                          \
+                                                 dbox2, start2, stride2, i2,                          \
+                                                 dbox3, start3, stride3, i3,                          \
+                                                 dbox4, start4, stride4, i4)                          \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                             \
@@ -1072,45 +1075,45 @@ else                                                            \
       hypre_BoxLoopIncK(3, databox3, i3);                                                             \
       hypre_BoxLoopIncK(4, databox4, i4);
 
-#define hypre_newBoxLoop4End(i1, i2, i3, i4)                                                          \
+#define hypre_BoxLoop4EndCUDA(i1, i2, i3, i4)                                                         \
    });                                                                                                \
 }
 
 /* Basic BoxLoops have no boxes */
 /* BoxLoop 1 */
-#define zypre_newBasicBoxLoop1Begin(ndim, loop_size, stride1, i1)                                     \
+#define hypre_BasicBoxLoop1BeginCUDA(ndim, loop_size, stride1, i1)                                    \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
-   zypre_BasicBoxLoopDataDeclareK(1, ndim, loop_size, stride1);                                       \
+   hypre_BasicBoxLoopDataDeclareK(1, ndim, loop_size, stride1);                                       \
    BoxLoopforall(hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx)                                             \
    {                                                                                                  \
       hypre_newBoxLoopDeclare(databox1);                                                              \
       hypre_BoxLoopIncK(1, databox1, i1);
 
 /* BoxLoop 2 */
-#define zypre_newBasicBoxLoop2Begin(ndim, loop_size, stride1, i1, stride2, i2)                        \
+#define hypre_BasicBoxLoop2BeginCUDA(ndim, loop_size, stride1, i1, stride2, i2)                       \
 {                                                                                                     \
    hypre_newBoxLoopInit(ndim, loop_size);                                                             \
-   zypre_BasicBoxLoopDataDeclareK(1, ndim, loop_size, stride1);                                       \
-   zypre_BasicBoxLoopDataDeclareK(2, ndim, loop_size, stride2);                                       \
+   hypre_BasicBoxLoopDataDeclareK(1, ndim, loop_size, stride1);                                       \
+   hypre_BasicBoxLoopDataDeclareK(2, ndim, loop_size, stride2);                                       \
    BoxLoopforall(hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx)                                             \
    {                                                                                                  \
       hypre_newBoxLoopDeclare(databox1);                                                              \
       hypre_BoxLoopIncK(1, databox1, i1);                                                             \
       hypre_BoxLoopIncK(2, databox2, i2);                                                             \
 
-/* TODO: RL just parallel-for, it should not be here, better in utilities */
-#define hypre_LoopBegin(size, idx)                                                                    \
+/* Parallel for-loop */
+#define hypre_LoopBeginCUDA(size, idx)                                                                \
 {                                                                                                     \
    BoxLoopforall(size, HYPRE_LAMBDA (HYPRE_Int idx)                                                   \
    {
 
-#define hypre_LoopEnd()                                                                               \
+#define hypre_LoopEndCUDA()                                                                           \
    });                                                                                                \
 }
 
 /* Reduction BoxLoop1 */
-#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum)                     \
+#define hypre_BoxLoop1ReductionBeginCUDA(ndim, loop_size, dbox1, start1, stride1, i1, reducesum)                 \
 {                                                                                                                \
    hypre_newBoxLoopInit(ndim, loop_size);                                                                        \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                                        \
@@ -1119,13 +1122,13 @@ else                                                            \
       hypre_newBoxLoopDeclare(databox1);                                                                         \
       hypre_BoxLoopIncK(1, databox1, i1);
 
-#define hypre_BoxLoop1ReductionEnd(i1, reducesum)                                                                \
+#define hypre_BoxLoop1ReductionEndCUDA(i1, reducesum)                                                            \
    });                                                                                                           \
 }
 
 /* Reduction BoxLoop2 */
-#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1,                                \
-                                                      dbox2, start2, stride2, i2, reducesum)                     \
+#define hypre_BoxLoop2ReductionBeginCUDA(ndim, loop_size, dbox1, start1, stride1, i1,                            \
+                                                          dbox2, start2, stride2, i2, reducesum)                 \
 {                                                                                                                \
    hypre_newBoxLoopInit(ndim, loop_size);                                                                        \
    hypre_BoxLoopDataDeclareK(1, ndim, loop_size, dbox1, start1, stride1);                                        \
@@ -1136,31 +1139,54 @@ else                                                            \
       hypre_BoxLoopIncK(1, databox1, i1);                                                                        \
       hypre_BoxLoopIncK(2, databox2, i2);
 
-#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum)                                                            \
+#define hypre_BoxLoop2ReductionEndCUDA(i1, i2, reducesum)                                                        \
    });                                                                                                           \
 }
 
 /* Renamings */
-#define hypre_BoxLoopBlock()       0
+#define hypre_BoxLoopGetIndexDevice          hypre_BoxLoopGetIndexCUDA
+#define hypre_BoxLoopBlockDevice()           0
+#define hypre_BoxLoop0BeginDevice            hypre_BoxLoop0BeginCUDA
+#define hypre_BoxLoop0EndDevice              hypre_BoxLoop0EndCUDA
+#define hypre_BoxLoop1BeginDevice            hypre_BoxLoop1BeginCUDA
+#define hypre_BoxLoop1EndDevice              hypre_BoxLoop1EndCUDA
+#define hypre_BoxLoop2BeginDevice            hypre_BoxLoop2BeginCUDA
+#define hypre_BoxLoop2EndDevice              hypre_BoxLoop2EndCUDA
+#define hypre_BoxLoop3BeginDevice            hypre_BoxLoop3BeginCUDA
+#define hypre_BoxLoop3EndDevice              hypre_BoxLoop3EndCUDA
+#define hypre_BoxLoop4BeginDevice            hypre_BoxLoop4BeginCUDA
+#define hypre_BoxLoop4EndDevice              hypre_BoxLoop4EndCUDA
+#define hypre_BasicBoxLoop1BeginDevice       hypre_BasicBoxLoop1BeginCUDA
+#define hypre_BasicBoxLoop2BeginDevice       hypre_BasicBoxLoop2BeginCUDA
+#define hypre_LoopBeginDevice                hypre_LoopBeginCUDA
+#define hypre_LoopEndDevice                  hypre_LoopEndCUDA
+#define hypre_BoxLoop1ReductionBeginDevice   hypre_BoxLoop1ReductionBeginCUDA
+#define hypre_BoxLoop1ReductionEndDevice     hypre_BoxLoop1ReductionEndCUDA
+#define hypre_BoxLoop2ReductionBeginDevice   hypre_BoxLoop2ReductionBeginCUDA
+#define hypre_BoxLoop2ReductionEndDevice     hypre_BoxLoop2ReductionEndCUDA
 
-#define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
-#define hypre_BoxLoop0For        hypre_newBoxLoop0For
-#define hypre_BoxLoop0End        hypre_newBoxLoop0End
-#define hypre_BoxLoop1Begin      hypre_newBoxLoop1Begin
-#define hypre_BoxLoop1For        hypre_newBoxLoop1For
-#define hypre_BoxLoop1End        hypre_newBoxLoop1End
-#define hypre_BoxLoop2Begin      hypre_newBoxLoop2Begin
-#define hypre_BoxLoop2For        hypre_newBoxLoop2For
-#define hypre_BoxLoop2End        hypre_newBoxLoop2End
-#define hypre_BoxLoop3Begin      hypre_newBoxLoop3Begin
-#define hypre_BoxLoop3For        hypre_newBoxLoop3For
-#define hypre_BoxLoop3End        hypre_newBoxLoop3End
-#define hypre_BoxLoop4Begin      hypre_newBoxLoop4Begin
-#define hypre_BoxLoop4For        hypre_newBoxLoop4For
-#define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
-#define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin
-#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
+//TODO TEMP FIX
+#define hypre_BoxLoopGetIndex          hypre_BoxLoopGetIndexDevice
+#define hypre_BoxLoopBlock()           0
+#define hypre_BoxLoop0Begin            hypre_BoxLoop0BeginDevice
+#define hypre_BoxLoop0End              hypre_BoxLoop0EndDevice
+#define hypre_BoxLoop1Begin            hypre_BoxLoop1BeginDevice
+#define hypre_BoxLoop1End              hypre_BoxLoop1EndDevice
+#define hypre_BoxLoop2Begin            hypre_BoxLoop2BeginDevice
+#define hypre_BoxLoop2End              hypre_BoxLoop2EndDevice
+#define hypre_BoxLoop3Begin            hypre_BoxLoop3BeginDevice
+#define hypre_BoxLoop3End              hypre_BoxLoop3EndDevice
+#define hypre_BoxLoop4Begin            hypre_BoxLoop4BeginDevice
+#define hypre_BoxLoop4End              hypre_BoxLoop4EndDevice
+#define hypre_BasicBoxLoop1Begin       hypre_BasicBoxLoop1BeginDevice
+#define hypre_BasicBoxLoop2Begin       hypre_BasicBoxLoop2BeginDevice
+#define hypre_LoopBegin                hypre_LoopBeginDevice
+#define hypre_LoopEnd                  hypre_LoopEndDevice
+#define hypre_BoxLoop1ReductionBegin   hypre_BoxLoop1ReductionBeginDevice
+#define hypre_BoxLoop1ReductionEnd     hypre_BoxLoop1ReductionEndDevice
+#define hypre_BoxLoop2ReductionBegin   hypre_BoxLoop2ReductionBeginDevice
+#define hypre_BoxLoop2ReductionEnd     hypre_BoxLoop2ReductionEndDevice
 
 #endif
 
@@ -1204,6 +1230,7 @@ extern "C++"
 
    /*********************************************************************
     * wrapper functions calling sycl parallel_for
+    * WM: todo - add runtime switch between CPU/GPU execution
     *********************************************************************/
 
    template<typename LOOP_BODY>

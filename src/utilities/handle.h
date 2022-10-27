@@ -22,7 +22,6 @@ typedef struct
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
-   HYPRE_ExecutionPolicy  struct_exec_policy;
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
    /* device G-S options */
@@ -52,7 +51,6 @@ typedef struct
 /* accessor macros to hypre_Handle */
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
-#define hypre_HandleStructExecPolicy(hypre_handle)               ((hypre_handle) -> struct_exec_policy)
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 

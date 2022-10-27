@@ -14,8 +14,6 @@
 #include <magma_lapack.h>
 #endif
 
-#define FSAI_USING_UNMARKED_TRUNCATION
-
 #if defined(HYPRE_USING_GPU)
 
 #define mat_(ldim, k, i, j) mat_data[ldim * (ldim * k + i) + j]
@@ -291,7 +289,7 @@ hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAITruncateCandidate
+ * hypreGPUKernel_FSAITruncateCandidateOrdered
  *
  * Truncates the candidate pattern matrix (K). This function extracts
  * lower triangular portion of the matrix up to the largest
@@ -307,12 +305,12 @@ hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAITruncateCandidate( hypre_DeviceItem &item,
-                                      HYPRE_Int         max_nonzeros_row,
-                                      HYPRE_Int         num_rows,
-                                      HYPRE_Int        *K_i,
-                                      HYPRE_Int        *K_j,
-                                      HYPRE_Complex    *K_a )
+hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
+                                             HYPRE_Int         max_nonzeros_row,
+                                             HYPRE_Int         num_rows,
+                                             HYPRE_Int        *K_i,
+                                             HYPRE_Int        *K_j,
+                                             HYPRE_Complex    *K_a )
 {
    HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
    HYPRE_Int      p = 0;
@@ -421,28 +419,27 @@ hypreGPUKernel_FSAITruncateCandidate( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_FSAITruncateCandidate
+ * hypreGPUKernel_FSAITruncateCandidateUnordered
  *
  * Truncates the candidate pattern matrix (K). This function extracts
  * lower triangular portion of the matrix up to the largest
  * "max_nonzeros_row" coefficients in absolute value.
  *
  * Assumptions:
- *    1) columns are ordered with descreasing absolute coef. values
- *    2) max_nonzeros_row < warp_size.
+ *    1) max_nonzeros_row < warp_size.
  *
  * TODO:
  *    1) Use less than one warp per row when possible
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_FSAITruncateCandidateUnmarked( hypre_DeviceItem &item,
-                                              HYPRE_Int         max_nonzeros_row,
-                                              HYPRE_Int         num_rows,
-                                              HYPRE_Int        *K_i,
-                                              HYPRE_Int        *K_e,
-                                              HYPRE_Int        *K_j,
-                                              HYPRE_Complex    *K_a )
+hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
+                                               HYPRE_Int         max_nonzeros_row,
+                                               HYPRE_Int         num_rows,
+                                               HYPRE_Int        *K_i,
+                                               HYPRE_Int        *K_e,
+                                               HYPRE_Int        *K_j,
+                                               HYPRE_Complex    *K_a )
 {
    HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
    HYPRE_Int      p = 0;
@@ -714,98 +711,8 @@ hypreDevice_FSAIGatherEntries( HYPRE_Int       num_rows,
 
 HYPRE_Int
 hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
-                                   HYPRE_Int        max_nonzeros_row,
-                                   HYPRE_Int        trunc_option,
-                                   HYPRE_Real       trunc_factor )
-{
-   HYPRE_Int      num_rows     = hypre_CSRMatrixNumRows(matrix);
-   HYPRE_Int      nnz          = hypre_CSRMatrixNumNonzeros(matrix);
-   HYPRE_Int     *mat_i        = hypre_CSRMatrixI(matrix);
-   HYPRE_Int     *mat_j        = hypre_CSRMatrixJ(matrix);
-   HYPRE_Complex *mat_a        = hypre_CSRMatrixData(matrix);
-
-   HYPRE_Int      nnz_new;
-   HYPRE_Int     *mat_ii;
-   HYPRE_Int     *mat_ii_new;
-   HYPRE_Int     *mat_j_new;
-   HYPRE_Complex *mat_a_new;
-
-   if (trunc_factor > 0.0)
-   {
-      /* TODO */
-   }
-   else
-   {
-      /*-----------------------------------------------------
-       * Keep only the largest coefficients in absolute value
-       *-----------------------------------------------------*/
-
-      /* Allocate memory for row indices array*/
-      hypre_GpuProfilingPushRange("Storage1");
-      //nnz = max_nonzeros_row * num_rows;
-      mat_ii     = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-      mat_ii_new = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-      mat_j_new  = hypre_TAlloc(HYPRE_Int, nnz, HYPRE_MEMORY_DEVICE);
-      mat_a_new  = hypre_TAlloc(HYPRE_Complex, nnz, HYPRE_MEMORY_DEVICE);
-      hypre_GpuProfilingPopRange();
-
-      /* Build row indices array */
-      hypreDevice_CsrRowPtrsToIndices_v2(num_rows, nnz, mat_i, mat_ii);
-
-      /* Mark unwanted entries with -1 */
-      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
-
-      hypre_GpuProfilingPushRange("TruncCand");
-      HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidate, gDim, bDim,
-                       max_nonzeros_row, num_rows, mat_i, mat_j, mat_a );
-      hypre_SyncComputeStream(hypre_handle());
-      hypre_GetDeviceLastError();
-      hypre_GpuProfilingPopRange();
-
-      /* Remove unwanted entries */
-      hypre_GpuProfilingPushRange("CopyIf");
-      auto new_end = HYPRE_THRUST_CALL(
-                        copy_if,
-                        HYPRE_THRUST_ZIP3(mat_ii,       mat_j,       mat_a),
-                        HYPRE_THRUST_ZIP3(mat_ii + nnz, mat_j + nnz, mat_a + nnz),
-                        mat_j,
-                        HYPRE_THRUST_ZIP3(mat_ii_new,   mat_j_new,   mat_a_new),
-                        is_nonnegative<HYPRE_Int>() );
-
-      nnz_new = thrust::get<0>(new_end.get_iterator_tuple()) - mat_ii_new;
-      hypre_GpuProfilingPopRange();
-
-      /* Recompute row pointer */
-      hypreDevice_CsrRowIndicesToPtrs_v2(num_rows, nnz_new, mat_ii_new, mat_i);
-
-      /* TODO: Reallocate mat_j_new and mat_a_new? */
-
-      /* Update matrix info */
-      hypre_CSRMatrixJ(matrix)           = mat_j_new;
-      hypre_CSRMatrixData(matrix)        = mat_a_new;
-      hypre_CSRMatrixNumNonzeros(matrix) = nnz_new;
-
-      /* Free memory */
-      hypre_TFree(mat_ii, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(mat_ii_new, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(mat_j, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(mat_a, HYPRE_MEMORY_DEVICE);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_FSAITruncateCandidateUnmarkedDevice
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_FSAITruncateCandidateUnmarkedDevice( hypre_CSRMatrix *matrix,
-                                           HYPRE_Int      **matrix_e,
-                                           HYPRE_Int        max_nonzeros_row,
-                                           HYPRE_Int        trunc_option,
-                                           HYPRE_Real       trunc_factor )
+                                   HYPRE_Int      **matrix_e,
+                                   HYPRE_Int        max_nonzeros_row )
 {
    HYPRE_Int      num_rows  = hypre_CSRMatrixNumRows(matrix);
    HYPRE_Int     *mat_i     = hypre_CSRMatrixI(matrix);
@@ -814,34 +721,27 @@ hypre_FSAITruncateCandidateUnmarkedDevice( hypre_CSRMatrix *matrix,
 
    HYPRE_Int     *mat_e;
 
-   if (trunc_factor > 0.0)
-   {
-      /* TODO */
-   }
-   else
-   {
-      /*-----------------------------------------------------
-       * Keep only the largest coefficients in absolute value
-       *-----------------------------------------------------*/
+   /*-----------------------------------------------------
+    * Keep only the largest coefficients in absolute value
+    *-----------------------------------------------------*/
 
-      /* Allocate memory for row indices array*/
-      hypre_GpuProfilingPushRange("Storage1");
-      mat_e = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
-      hypre_GpuProfilingPopRange();
+   /* Allocate memory for row indices array*/
+   hypre_GpuProfilingPushRange("Storage1");
+   mat_e = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+   hypre_GpuProfilingPopRange();
 
-      /* Mark unwanted entries with -1 */
-      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
+   /* Mark unwanted entries with -1 */
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
 
-      hypre_GpuProfilingPushRange("TruncCand");
-      HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidateUnmarked, gDim, bDim,
-                       max_nonzeros_row, num_rows, mat_i, mat_e, mat_j, mat_a );
-      hypre_SyncComputeStream(hypre_handle());
-      hypre_GetDeviceLastError();
-      hypre_GpuProfilingPopRange();
+   hypre_GpuProfilingPushRange("TruncCand");
+   HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidateUnordered, gDim, bDim,
+                    max_nonzeros_row, num_rows, mat_i, mat_e, mat_j, mat_a );
+   hypre_SyncComputeStream(hypre_handle());
+   hypre_GetDeviceLastError();
+   hypre_GpuProfilingPopRange();
 
-      *matrix_e = mat_e;
-   }
+   *matrix_e = mat_e;
 
    return hypre_error_flag;
 }
@@ -870,6 +770,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_ParCSRMatrix  *Atilde;
    hypre_ParCSRMatrix  *B;
    hypre_ParCSRMatrix  *Ktilde;
+   hypre_CSRMatrix     *K_diag;
+   HYPRE_Int           *K_e = NULL;
    HYPRE_Int            i;
 
    /* TODO: Move to fsai_data? */
@@ -954,21 +856,10 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #endif
 
    /* Set pattern matrix diagonal matrix */
-   hypre_CSRMatrix  *K_diag = hypre_ParCSRMatrixDiag(Ktilde);
+   K_diag = hypre_ParCSRMatrixDiag(Ktilde);
 
    /* Filter candidate pattern */
-#if defined (FSAI_USING_UNMARKED_TRUNCATION)
-   HYPRE_Int  *K_e = NULL;
-
-   hypre_FSAITruncateCandidateUnmarkedDevice(K_diag, &K_e, max_nnz_row, 2, 0.0);
-#else
-
-   hypre_FSAITruncateCandidateDevice(K_diag, max_nnz_row, 2, 0.0);
-   HYPRE_Int  *K_e = hypre_CSRMatrixI(K_diag) + 1;
-
-   /* Sort candidate pattern matrix */
-   hypre_CSRMatrixSortRow(K_diag);
-#endif
+   hypre_FSAITruncateCandidateDevice(K_diag, &K_e, max_nnz_row);
 
 #if defined (DEBUG_FSAI)
    {
@@ -1196,9 +1087,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    }
 
    /* TODO: can we free some of these earlier?*/
-#if defined (FSAI_USING_UNMARKED_TRUNCATION)
    hypre_TFree(K_e, HYPRE_MEMORY_DEVICE);
-#endif
    hypre_TFree(rhs_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(sol_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(mat_data, HYPRE_MEMORY_DEVICE);
