@@ -278,8 +278,8 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          }
       }
       hypre_ParCSRMatrixMatvec(1.0, A, Ptemp, 0.0, Vtemp);
-      alpha = gamma / hypre_ParVectorInnerProd(Ptemp, Vtemp);
-      alphinv = 1.0 / alpha;
+      alpha = gamma / (hypre_ParVectorInnerProd(Ptemp, Vtemp) + 1.e-80);
+      alphinv = 1.0 / (alpha + 1.e-80);
       tridiag[jj + 1] = alphinv;
       tridiag[jj] *= beta;
       tridiag[jj] += alphinv;

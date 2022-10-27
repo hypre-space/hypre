@@ -2743,6 +2743,11 @@ cat >>confdefs.h <<_ACEOF
 #define HYPRE_DEVELOP_NUMBER $develop_number
 _ACEOF
 
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_BRANCH_NAME "$develop_branch"
+_ACEOF
+
     if test "x$develop_branch" = "xmaster"; then :
 
 cat >>confdefs.h <<_ACEOF
