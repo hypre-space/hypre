@@ -35,7 +35,7 @@ hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
 
    /* Since the initial guess to the jacobi iteration is 0, the result of the first L SpMV is 0, so no need to compute
       However, we still need to compute the transformation */
-   hypreDevice_zeqxmy(num_rows, input_data, 0.0, work_data, output_data);
+	hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, 0.0);
 
    /* Do the remaining iterations */
    for( kk = 1; kk < lower_jacobi_iters; ++kk ) {
@@ -44,7 +44,7 @@ hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
        hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, -2);
 
        /* transform */
-       hypreDevice_zeqxmy(num_rows, input_data, -1.0, work_data, output_data);
+		 hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, -1.0);
    }
 
    return hypre_error_flag;

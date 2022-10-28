@@ -2534,44 +2534,7 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
 
 
 /*****************************************************************
- z[i] = x[i] + alpha*y[i]
- ******************************************************************/
-
-/*
- */
-__global__ void
-hypreGPUKernel_zeqxmy(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y, HYPRE_Complex *z)
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < n)
-   {
-     z[i] = x[i] + alpha * y[i];
-   }
-}
-
-/*
- */
-HYPRE_Int
-hypreDevice_zeqxmy(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y, HYPRE_Complex *z)
-{
-   /* trivial case */
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_zeqxmy, gDim, bDim, n, x, alpha, y, z);
-
-   return hypre_error_flag;
-}
-
-
-/*****************************************************************
- z[i] = (x[i] + alpha*y[i])/d[i]
+ z[i] = (x[i] + alpha*y[i])*d[i]
  ******************************************************************/
 
 __global__ void
