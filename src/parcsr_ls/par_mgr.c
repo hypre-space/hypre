@@ -3442,7 +3442,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 4)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("interpolation");
@@ -3471,7 +3471,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 12)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("interpolation");
@@ -3568,7 +3568,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    }
    else if (restrict_type == 12)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("restriction");
@@ -3600,7 +3600,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
          HYPRE_Int point_type = CF_marker[i];
          f_marker[i] = -point_type;
       }
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_NoGPUSupport("restriction");
