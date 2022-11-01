@@ -1185,7 +1185,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                {
                   hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
                }
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
                else
                {
                   hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
@@ -1204,7 +1204,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
             }
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
             else
             {
                hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
@@ -1231,7 +1231,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          //wall_time = time_getWallclockSeconds() - wall_time;
          //hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
 
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
          hypre_IntArrayInitialize(F_marker);
          hypre_IntArraySetConstantValues(F_marker, 0);

@@ -3408,14 +3408,14 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix    *P_ptr = NULL;
    //HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
    /* Interpolation for each level */
    if (interp_type < 3)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P_ptr);
@@ -3518,7 +3518,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    hypre_ParCSRMatrix    *ST = NULL;
    //   HYPRE_Real       jac_trunc_threshold = trunc_factor;
    //   HYPRE_Real       jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
@@ -3531,7 +3531,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    /* Restriction for each level */
    if (restrict_type == 0)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R_ptr);
@@ -3546,7 +3546,7 @@ hypre_MGRBuildRestrict(hypre_ParCSRMatrix     *A,
    }
    else if (restrict_type == 1 || restrict_type == 2)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R_ptr);
