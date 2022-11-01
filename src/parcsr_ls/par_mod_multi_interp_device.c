@@ -935,16 +935,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: lower_bound currently does not accept zero length values */
-      if (P_offd_size && num_cols_offd_P)
-      {
-         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
-                            col_map_offd_P,
-                            col_map_offd_P + num_cols_offd_P,
-                            big_P_offd_j,
-                            big_P_offd_j + P_offd_size,
-                            P_offd_j );
-      }
+      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                         col_map_offd_P,
+                         col_map_offd_P + num_cols_offd_P,
+                         big_P_offd_j,
+                         big_P_offd_j + P_offd_size,
+                         P_offd_j );
 #else
       HYPRE_THRUST_CALL( lower_bound,
                          col_map_offd_P,

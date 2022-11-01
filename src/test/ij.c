@@ -10174,13 +10174,25 @@ BuildParLaplacian27pt( HYPRE_Int            argc,
    }
    values[1] = -1.;
 
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - calling GenerateLaplacian27pt()\n");
+   MPI_Barrier(MPI_COMM_WORLD);
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(hypre_MPI_COMM_WORLD,
                                                   nx, ny, nz, P, Q, R, p, q, r, values);
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - finished GenerateLaplacian27pt()\n");
+   MPI_Barrier(MPI_COMM_WORLD);
 
    hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    *A_ptr = A;
 
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - finished BuildParLaplacian27pt()\n");
+   MPI_Barrier(MPI_COMM_WORLD);
    return (0);
 }
 

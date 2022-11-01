@@ -113,6 +113,12 @@ GenerateLaplacian27pt(MPI_Comm comm,
    if (!local_num_rows) { num_cols_offd = 0; }
 
    col_map_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd, HYPRE_MEMORY_HOST);
+   /* WM: debug */
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
 
    cnt = 0;
    o_cnt = 0;
@@ -755,6 +761,10 @@ GenerateLaplacian27pt(MPI_Comm comm,
       }
    }
 
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
    diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
@@ -1626,6 +1636,10 @@ GenerateLaplacian27pt(MPI_Comm comm,
       }
    }
 
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    if (num_procs > 1)
    {
       work = hypre_CTAlloc(HYPRE_BigInt, o_cnt, HYPRE_MEMORY_HOST);
@@ -1655,11 +1669,19 @@ GenerateLaplacian27pt(MPI_Comm comm,
 
       hypre_TFree(work, HYPRE_MEMORY_HOST);
    }
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
 
    A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
                                 global_part, global_part, num_cols_offd,
                                 diag_i[local_num_rows],
                                 offd_i[local_num_rows]);
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
 
    hypre_ParCSRMatrixColMapOffd(A) = col_map_offd;
 
@@ -1679,12 +1701,24 @@ GenerateLaplacian27pt(MPI_Comm comm,
    hypre_CSRMatrixMemoryLocation(diag) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixMemoryLocation(offd) = HYPRE_MEMORY_HOST;
 
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    hypre_ParCSRMatrixMigrate(A, hypre_HandleMemoryLocation(hypre_handle()));
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
 
    hypre_TFree(nx_part,     HYPRE_MEMORY_HOST);
    hypre_TFree(ny_part,     HYPRE_MEMORY_HOST);
    hypre_TFree(nz_part,     HYPRE_MEMORY_HOST);
    hypre_TFree(big_offd_j,  HYPRE_MEMORY_HOST);
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("WM: debug - here %d\n", __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
 
    return (HYPRE_ParCSRMatrix) A;
 }

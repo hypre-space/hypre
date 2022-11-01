@@ -292,16 +292,38 @@ hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_loc
    if ( hypre_GetActualMemLocation(memory_location) != hypre_GetActualMemLocation(
            old_memory_location) )
    {
+      /* WM: debug */
+      HYPRE_Int myid;
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+      MPI_Barrier(MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("WM: debug - migrate, here %d\n", __LINE__);
+      MPI_Barrier(MPI_COMM_WORLD);
       hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A));
       hypre_ParCSRMatrixDiag(A) = A_diag;
+      /* WM: debug */
+      MPI_Barrier(MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("WM: debug - migrate, here %d\n", __LINE__);
+      MPI_Barrier(MPI_COMM_WORLD);
 
       hypre_CSRMatrix *A_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, memory_location);
+      /* WM: debug */
+      MPI_Barrier(MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("WM: debug - migrate, here %d\n", __LINE__);
+      MPI_Barrier(MPI_COMM_WORLD);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
       hypre_ParCSRMatrixOffd(A) = A_offd;
+      /* WM: debug */
+      MPI_Barrier(MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("WM: debug - migrate, here %d\n", __LINE__);
+      MPI_Barrier(MPI_COMM_WORLD);
 
       hypre_TFree(hypre_ParCSRMatrixRowindices(A), old_memory_location);
       hypre_TFree(hypre_ParCSRMatrixRowvalues(A), old_memory_location);
+      /* WM: debug */
+      MPI_Barrier(MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("WM: debug - migrate, here %d\n", __LINE__);
+      MPI_Barrier(MPI_COMM_WORLD);
    }
    else
    {

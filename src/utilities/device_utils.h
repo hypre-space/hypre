@@ -1287,6 +1287,9 @@ T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_
    /* WM: todo - try removing barrier with new implementation */
    item.get_sub_group().barrier();
    return sycl::group_broadcast(item.get_sub_group(), val, src_line);
+   /* WM: todo - group broadcast vs select_from_group... what's the difference? Should I be using the below? */
+   /* Oh, apparently group_broadcast is very fast and preferred. */
+   /* return sycl::select_from_group(item.get_sub_group(), val, src_in_warp); */
 }
 
 template <typename T>

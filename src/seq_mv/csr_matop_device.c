@@ -189,6 +189,10 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
+/* WM: currently do not have a reliable device matmat routine for sycl */
+#if defined(HYPRE_USING_SYCL)
+   return hypre_CSRMatrixMultiplyHost(A, B);
+#endif
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    hypre_CSRMatrix  *C;
@@ -402,16 +406,12 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
    if (num_cols_offd_B)
    {
 #if defined(HYPRE_USING_SYCL)
-      /* WM: NOTE - onedpl lower bound currently does not accept zero length input */
-      if (num_cols_offd_C > 0)
-      {
-         HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
-                            col_map_offd_C,
-                            col_map_offd_C + num_cols_offd_C,
-                            col_map_offd_B,
-                            col_map_offd_B + num_cols_offd_B,
-                            map_B_to_C );
-      }
+      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                         col_map_offd_C,
+                         col_map_offd_C + num_cols_offd_C,
+                         col_map_offd_B,
+                         col_map_offd_B + num_cols_offd_B,
+                         map_B_to_C );
 #else
       HYPRE_THRUST_CALL( lower_bound,
                          col_map_offd_C,
