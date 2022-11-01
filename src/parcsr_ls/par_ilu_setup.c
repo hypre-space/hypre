@@ -535,12 +535,12 @@ hypre_ILUSetup( void               *ilu_vdata,
    {
       switch (ilu_type)
       {
-         case 0: case 1: default:
-		    /* create working vectors */
-		    Ztemp = hypre_SeqVectorCreate(n>nLU ? n : nLU);
-			hypre_SeqVectorInitialize(Ztemp);
-		 break;
-	  }
+      case 0: case 1: default:
+            /* create working vectors */
+            Ztemp = hypre_SeqVectorCreate(n > nLU ? n : nLU);
+            hypre_SeqVectorInitialize(Ztemp);
+            break;
+      }
    }
 
    /* setup Schur solver */
@@ -1828,13 +1828,13 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
    /* only analyse when nacessary */
    if ( nLU > 0 )
    {
-	  if (tri_solve)
-	  {
-		 /* Analysis of BILU */
-	     HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-												 ilu_solve_policy, &matBL_info, &matBU_info,
-												 &buffer_size, &buffer);
-	  }
+      if (tri_solve)
+      {
+         /* Analysis of BILU */
+         HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
+                                                 ilu_solve_policy, &matBL_info, &matBU_info,
+                                                 &buffer_size, &buffer);
+      }
    }
 
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
@@ -1854,13 +1854,13 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       A_fake_diag_i = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
       if (SLU)
       {
-		 if (tri_solve)
-		 {
-		    /* Analysis of SILU */
+         if (tri_solve)
+         {
+            /* Analysis of SILU */
             HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
-													ilu_solve_policy, &matSL_info, &matSU_info,
-													&buffer_size, &buffer);
-		 }
+                                                    ilu_solve_policy, &matSL_info, &matSU_info,
+                                                    &buffer_size, &buffer);
+         }
       }
       else
       {
@@ -2131,12 +2131,12 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
    if ( nLU > 0 )
    {
       if (tri_solve)
-	  {
+      {
          /* Analysis of BILU */
          HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-												 ilu_solve_policy, &matBL_info, &matBU_info,
-												 &buffer_size, &buffer);
-	  }
+                                                 ilu_solve_policy, &matBL_info, &matBU_info,
+                                                 &buffer_size, &buffer);
+      }
    }
 
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
@@ -2156,13 +2156,13 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
       A_fake_diag_i = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
       if (SLU)
       {
-	     if (tri_solve)
-		 {
+         if (tri_solve)
+         {
             /* Analysis of SILU */
             HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
                                                     ilu_solve_policy, &matSL_info, &matSU_info,
                                                     &buffer_size, &buffer);
-		 }
+         }
       }
       else
       {
@@ -2433,13 +2433,13 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    /* only analyse when nacessary */
    if ( nLU > 0 )
    {
-	  if (tri_solve)
-	  {
+      if (tri_solve)
+      {
          /* Analysis of BILU */
          HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-												 ilu_solve_policy, &matBL_info, &matBU_info,
-												 &buffer_size, &buffer);
-	  }
+                                                 ilu_solve_policy, &matBL_info, &matBU_info,
+                                                 &buffer_size, &buffer);
+      }
    }
 
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
@@ -2460,12 +2460,12 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       if (SLU)
       {
          if (tri_solve)
-	     {
+         {
             /* Analysis of SILU */
             HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
                                                     ilu_solve_policy, &matSL_info, &matSU_info,
                                                     &buffer_size, &buffer);
-	     }
+         }
       }
       else
       {

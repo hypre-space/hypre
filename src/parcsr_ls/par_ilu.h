@@ -344,15 +344,18 @@ typedef struct hypre_ParNSHData_struct
 
 #ifdef HYPRE_USING_GPU
 HYPRE_Int hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
-                                       hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int n, hypre_ParVector *ftemp,
-                                       hypre_ParVector *utemp, hypre_Vector *xtemp_local,
-                                       hypre_Vector **Adiag_diag, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
-HYPRE_Int hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local, hypre_Vector *work2_local,
+                                     hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int n, hypre_ParVector *ftemp,
+                                     hypre_ParVector *utemp, hypre_Vector *xtemp_local,
+                                     hypre_Vector **Adiag_diag, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local,
+                                     hypre_Vector *work2_local,
                                      hypre_Vector *inout_local, hypre_Vector *diag_diag, HYPRE_Int lower_jacobi_iters,
-									 HYPRE_Int upper_jacobi_iters, HYPRE_Int my_id);
-HYPRE_Int hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local,
+                                     HYPRE_Int upper_jacobi_iters, HYPRE_Int my_id);
+HYPRE_Int hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local,
+                                    hypre_Vector *work_local,
                                     hypre_Vector *output_local, HYPRE_Int lower_jacobi_iters);
-HYPRE_Int hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local,
+HYPRE_Int hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local,
+                                    hypre_Vector *work_local,
                                     hypre_Vector *output_local, hypre_Vector *diag_diag, HYPRE_Int upper_jacobi_iters);
 #endif
 

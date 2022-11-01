@@ -1889,7 +1889,8 @@ HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int hypre_CudaCompileFlagCheck();
 
-HYPRE_Int hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d);
+HYPRE_Int hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y,
+                               HYPRE_Complex *z, HYPRE_Complex *d);
 
 #endif
 

@@ -28,23 +28,24 @@ hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
    HYPRE_Real              *work_data           = hypre_VectorData(work_local);
    HYPRE_Real              *output_data         = hypre_VectorData(output_local);
    HYPRE_Int               num_rows             = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int kk=0;
+   HYPRE_Int kk = 0;
 
    /* L solve - Forward solve ; u^{k+1} = f - Lu^k*/
    /* Jacobi iteration loop */
 
    /* Since the initial guess to the jacobi iteration is 0, the result of the first L SpMV is 0, so no need to compute
       However, we still need to compute the transformation */
-	hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, 0.0);
+   hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, 0.0);
 
    /* Do the remaining iterations */
-   for( kk = 1; kk < lower_jacobi_iters; ++kk ) {
+   for ( kk = 1; kk < lower_jacobi_iters; ++kk )
+   {
 
-       /* apply SpMV */
-       hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, -2);
+      /* apply SpMV */
+      hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, -2);
 
-       /* transform */
-		 hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, -1.0);
+      /* transform */
+      hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, -1.0);
    }
 
    return hypre_error_flag;
@@ -58,7 +59,7 @@ hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
    HYPRE_Real              *input_data          = hypre_VectorData(input_local);
    HYPRE_Real              *diag_diag_data      = hypre_VectorData(diag_diag);
    HYPRE_Int               num_rows             = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int kk=0;
+   HYPRE_Int kk = 0;
 
    /* U solve - Backward solve :  u^{k+1} = f - Uu^k */
    /* Jacobi iteration loop */
@@ -68,13 +69,14 @@ hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_V
    hypreDevice_zeqxmydd(num_rows, input_data, 0.0, work_data, output_data, diag_diag_data);
 
    /* Do the remaining iterations */
-   for( kk = 1; kk < upper_jacobi_iters; ++kk ) {
+   for ( kk = 1; kk < upper_jacobi_iters; ++kk )
+   {
 
-       /* apply SpMV */
-       hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, 2);
+      /* apply SpMV */
+      hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, 2);
 
-       /* transform */
-       hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_diag_data);
+      /* transform */
+      hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_diag_data);
    }
 
    return hypre_error_flag;
@@ -103,10 +105,10 @@ hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local,
 */
 HYPRE_Int
 hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
-                             hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm,
-                             HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                             hypre_Vector *xtemp_local, hypre_Vector **Adiag_diag,
-                             HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters)
+                           hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm,
+                           HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp,
+                           hypre_Vector *xtemp_local, hypre_Vector **Adiag_diag,
+                           HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters)
 {
    /* Only solve when we have stuffs to be solved */
    if (n == 0)
@@ -132,7 +134,8 @@ hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
    beta = 1.0;
 
    /* Grab the main diagonal from the diagonal block. Only do this once */
-   if (!(*Adiag_diag)) {
+   if (!(*Adiag_diag))
+   {
       /* storage for the diagonal */
       *Adiag_diag = hypre_SeqVectorCreate(n);
       hypre_SeqVectorInitialize(*Adiag_diag);
