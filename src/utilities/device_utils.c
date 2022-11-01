@@ -2538,8 +2538,13 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
  ******************************************************************/
 
 __global__ void
-hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha,
-                        HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d)
+hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item,
+                        HYPRE_Int         n,
+                        HYPRE_Complex    *x,
+                        HYPRE_Complex     alpha,
+                        HYPRE_Complex    *y,
+                        HYPRE_Complex    *z,
+                        HYPRE_Complex    *d)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -2552,8 +2557,12 @@ hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *x, H
 /*
  */
 HYPRE_Int
-hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y,
-                     HYPRE_Complex *z, HYPRE_Complex *d)
+hypreDevice_zeqxmydd(HYPRE_Int      n,
+                     HYPRE_Complex *x,
+                     HYPRE_Complex  alpha,
+                     HYPRE_Complex *y,
+                     HYPRE_Complex *z,
+                     HYPRE_Complex *d)
 {
    /* trivial case */
    if (n <= 0)
