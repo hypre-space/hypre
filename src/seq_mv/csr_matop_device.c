@@ -801,7 +801,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
    hypre_Memset(colnnz, 0, ncols_A * sizeof(HYPRE_Real), HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( oneapi::dpl::copy, reduced_col_nnz, reduced_col_nnz + num_reduced_col_indices,
+   HYPRE_ONEDPL_CALL( std::copy, reduced_col_nnz, reduced_col_nnz + num_reduced_col_indices,
                       oneapi::dpl::make_permutation_iterator(colnnz, reduced_col_indices) );
 #else
    HYPRE_THRUST_CALL(scatter, reduced_col_nnz, reduced_col_nnz + num_reduced_col_indices,

@@ -14,7 +14,7 @@ Vector/Multivector error = 0.000000e+00
 Vector/Multivector error = 0.000000e+00
 
 # Output file: vector.out.A5
-Vector/Multivector error = -1.110223e-16
+Vector/Multivector error = 0.000000e+00
 
 # Output file: vector.out.A6
 Vector/Multivector error = 0.000000e+00

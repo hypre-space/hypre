@@ -232,6 +232,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    [] (const auto & x) {return x;},
    [] (const auto & x) {return 0.0;} );
 
+   /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
    auto new_end = oneapi::dpl::reduce_by_segment(
                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
                                                                                    hypre_handle())),
