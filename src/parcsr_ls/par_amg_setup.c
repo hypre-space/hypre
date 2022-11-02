@@ -3366,8 +3366,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 
       if (j < num_levels - 1 &&
-           (grid_relax_type[1] == 8  || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
-            grid_relax_type[2] == 8  || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
+          (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
+           grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
