@@ -450,14 +450,23 @@ hypre_ILUSolve( void               *ilu_vdata,
 */
 
 HYPRE_Int
-hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                         hypre_ParVector    *u, HYPRE_Int *perm, HYPRE_Int *qperm,
-                         HYPRE_Int nLU, hypre_ParCSRMatrix *L,
-                         HYPRE_Real* D, hypre_ParCSRMatrix *U,
+hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
+                         hypre_ParVector    *f,
+                         hypre_ParVector    *u,
+                         HYPRE_Int          *perm,
+                         HYPRE_Int          *qperm,
+                         HYPRE_Int           nLU,
+                         hypre_ParCSRMatrix *L,
+                         HYPRE_Real         *D,
+                         hypre_ParCSRMatrix *U,
                          hypre_ParCSRMatrix *S,
-                         hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                         HYPRE_Solver schur_solver, HYPRE_Solver schur_precond,
-                         hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end)
+                         hypre_ParVector    *ftemp,
+                         hypre_ParVector    *utemp,
+                         HYPRE_Solver        schur_solver,
+                         HYPRE_Solver        schur_precond,
+                         hypre_ParVector    *rhs,
+                         hypre_ParVector    *x,
+                         HYPRE_Int          *u_end)
 {
    /* data objects for communication */
    //   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
@@ -611,14 +620,21 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 */
 
 HYPRE_Int
-hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                       hypre_ParVector    *u, HYPRE_Int *perm,
-                       HYPRE_Int nLU, hypre_ParCSRMatrix *L,
-                       HYPRE_Real* D, hypre_ParCSRMatrix *U,
+hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
+                       hypre_ParVector    *f,
+                       hypre_ParVector    *u,
+                       HYPRE_Int          *perm,
+                       HYPRE_Int           nLU,
+                       hypre_ParCSRMatrix *L,
+                       HYPRE_Real         *D,
+                       hypre_ParCSRMatrix *U,
                        hypre_ParCSRMatrix *S,
-                       hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                       HYPRE_Solver schur_solver,
-                       hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end)
+                       hypre_ParVector    *ftemp,
+                       hypre_ParVector    *utemp,
+                       HYPRE_Solver        schur_solver,
+                       hypre_ParVector    *rhs,
+                       hypre_ParVector    *x,
+                       HYPRE_Int          *u_end)
 {
    /* data objects for communication */
    //   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
@@ -771,11 +787,16 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 */
 
 HYPRE_Int
-hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                 hypre_ParVector    *u, HYPRE_Int *perm,
-                 HYPRE_Int nLU, hypre_ParCSRMatrix *L,
-                 HYPRE_Real* D, hypre_ParCSRMatrix *U,
-                 hypre_ParVector *ftemp, hypre_ParVector *utemp)
+hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
+                 hypre_ParVector    *f,
+                 hypre_ParVector    *u,
+                 HYPRE_Int          *perm,
+                 HYPRE_Int           nLU,
+                 hypre_ParCSRMatrix *L,
+                 HYPRE_Real         *D,
+                 hypre_ParCSRMatrix *U,
+                 hypre_ParVector    *ftemp,
+                 hypre_ParVector    *utemp)
 {
    hypre_CSRMatrix *L_diag = hypre_ParCSRMatrixDiag(L);
    HYPRE_Real      *L_diag_data = hypre_CSRMatrixData(L_diag);
@@ -852,12 +873,19 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 */
 
 HYPRE_Int
-hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                     hypre_ParVector    *u, HYPRE_Int *perm,
-                     HYPRE_Int nLU, hypre_ParCSRMatrix *L,
-                     HYPRE_Real* D, hypre_ParCSRMatrix *U,
-                     hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                     hypre_Vector *xtemp, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters)
+hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
+                     hypre_ParVector    *f,
+                     hypre_ParVector    *u,
+                     HYPRE_Int          *perm,
+                     HYPRE_Int           nLU,
+                     hypre_ParCSRMatrix *L,
+                     HYPRE_Real         *D,
+                     hypre_ParCSRMatrix *U,
+                     hypre_ParVector    *ftemp,
+                     hypre_ParVector    *utemp,
+                     hypre_Vector       *xtemp,
+                     HYPRE_Int           lower_jacobi_iters,
+                     HYPRE_Int           upper_jacobi_iters)
 {
    hypre_CSRMatrix *L_diag = hypre_ParCSRMatrixDiag(L);
    HYPRE_Real      *L_diag_data = hypre_CSRMatrixData(L_diag);
@@ -971,14 +999,18 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 */
 
 HYPRE_Int
-hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                    hypre_ParVector    *u, HYPRE_Int *perm,
+hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
+                    hypre_ParVector    *f,
+                    hypre_ParVector    *u,
+                    HYPRE_Int          *perm,
                     hypre_ParCSRMatrix *L,
-                    HYPRE_Real* D, hypre_ParCSRMatrix *U,
-                    hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                    HYPRE_Real *fext, HYPRE_Real *uext)
+                    HYPRE_Real         *D,
+                    hypre_ParCSRMatrix *U,
+                    hypre_ParVector    *ftemp,
+                    hypre_ParVector    *utemp,
+                    HYPRE_Real         *fext,
+                    HYPRE_Real         *uext)
 {
-
    hypre_ParCSRCommPkg        *comm_pkg;
    hypre_ParCSRCommHandle     *comm_handle;
    HYPRE_Int                  num_sends, begin, end;
@@ -1159,8 +1191,11 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
  * option 11: rperm real array
  * */
 HYPRE_Int
-hypre_ILUSeqVectorPerm(void *vectori, void *vectoro, HYPRE_Int size, HYPRE_Int *perm,
-                       HYPRE_Int option)
+hypre_ILUSeqVectorPerm(void      *vectori,
+                       void      *vectoro,
+                       HYPRE_Int  size,
+                       HYPRE_Int *perm,
+                       HYPRE_Int  option)
 {
    cudaDeviceSynchronize();
    HYPRE_Int i;
@@ -1222,14 +1257,21 @@ hypre_ILUSeqVectorPerm(void *vectori, void *vectoro, HYPRE_Int size, HYPRE_Int *
 */
 
 HYPRE_Int
-hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des,
-                         cusparseMatDescr_t matU_des,
-                         csrsv2Info_t matL_info, csrsv2Info_t matU_info, hypre_CSRMatrix *matLU_d,
-                         cusparseSolvePolicy_t ilu_solve_policy, void *ilu_solve_buffer,
-                         hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm,
-                         HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp)
+hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
+                         cusparseMatDescr_t    matL_des,
+                         cusparseMatDescr_t    matU_des,
+                         csrsv2Info_t          matL_info,
+                         csrsv2Info_t          matU_info,
+                         hypre_CSRMatrix      *matLU_d,
+                         cusparseSolvePolicy_t ilu_solve_policy,
+                         void                 *ilu_solve_buffer,
+                         hypre_ParVector      *f,
+                         hypre_ParVector      *u,
+                         HYPRE_Int            *perm,
+                         HYPRE_Int             n,
+                         hypre_ParVector      *ftemp,
+                         hypre_ParVector      *utemp)
 {
-
    /* Only solve when we have stuffs to be solved */
    if (n == 0)
    {
@@ -1302,16 +1344,30 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des,
 */
 
 HYPRE_Int
-hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                 hypre_ParVector *u, HYPRE_Int *perm,
-                                 HYPRE_Int nLU, hypre_ParCSRMatrix *S,
-                                 hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                                 HYPRE_Solver schur_solver, HYPRE_Solver schur_precond,
-                                 hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end,
-                                 cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des,
-                                 csrsv2Info_t matBL_info, csrsv2Info_t matBU_info, csrsv2Info_t matSL_info, csrsv2Info_t matSU_info,
-                                 hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d,
-                                 cusparseSolvePolicy_t ilu_solve_policy, void *ilu_solve_buffer)
+hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
+                                 hypre_ParVector      *f,
+                                 hypre_ParVector      *u,
+                                 HYPRE_Int            *perm,
+                                 HYPRE_Int             nLU,
+                                 hypre_ParCSRMatrix   *S,
+                                 hypre_ParVector      *ftemp,
+                                 hypre_ParVector      *utemp,
+                                 HYPRE_Solver          schur_solver,
+                                 HYPRE_Solver          schur_precond,
+                                 hypre_ParVector      *rhs,
+                                 hypre_ParVector      *x,
+                                 HYPRE_Int            *u_end,
+                                 cusparseMatDescr_t    matL_des,
+                                 cusparseMatDescr_t    matU_des,
+                                 csrsv2Info_t          matBL_info,
+                                 csrsv2Info_t          matBU_info,
+                                 csrsv2Info_t          matSL_info,
+                                 csrsv2Info_t          matSU_info,
+                                 hypre_CSRMatrix      *matBLU_d,
+                                 hypre_CSRMatrix      *matE_d,
+                                 hypre_CSRMatrix      *matF_d,
+                                 cusparseSolvePolicy_t ilu_solve_policy,
+                                 void                 *ilu_solve_buffer)
 {
    /* If we don't have S block, just do one L solve and one U solve */
    if (!S)
@@ -1486,19 +1542,37 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
 */
 
 HYPRE_Int
-hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                       hypre_ParVector *u, HYPRE_Int *perm,
-                       HYPRE_Int nLU, hypre_ParCSRMatrix *S,
-                       hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_ParVector *xtemp, hypre_ParVector *ytemp,
-                       HYPRE_Solver schur_solver, HYPRE_Solver schur_precond,
-                       hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end,
-                       cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des,
-                       csrsv2Info_t matAL_info, csrsv2Info_t matAU_info,
-                       csrsv2Info_t matBL_info, csrsv2Info_t matBU_info,
-                       csrsv2Info_t matSL_info, csrsv2Info_t matSU_info,
-                       hypre_ParCSRMatrix *Aperm, hypre_CSRMatrix *matALU_d, hypre_CSRMatrix *matBLU_d,
-                       hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d,
-                       cusparseSolvePolicy_t ilu_solve_policy, void *ilu_solve_buffer, HYPRE_Int test_opt)
+hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
+                       hypre_ParVector      *f,
+                       hypre_ParVector      *u,
+                       HYPRE_Int            *perm,
+                       HYPRE_Int             nLU,
+                       hypre_ParCSRMatrix   *S,
+                       hypre_ParVector      *ftemp,
+                       hypre_ParVector      *utemp,
+                       hypre_ParVector      *xtemp,
+                       hypre_ParVector      *ytemp,
+                       HYPRE_Solver          schur_solver,
+                       HYPRE_Solver          schur_precond,
+                       hypre_ParVector      *rhs,
+                       hypre_ParVector      *x,
+                       HYPRE_Int            *u_end,
+                       cusparseMatDescr_t    matL_des,
+                       cusparseMatDescr_t    matU_des,
+                       csrsv2Info_t          matAL_info,
+                       csrsv2Info_t          matAU_info,
+                       csrsv2Info_t          matBL_info,
+                       csrsv2Info_t          matBU_info,
+                       csrsv2Info_t          matSL_info,
+                       csrsv2Info_t          matSU_info,
+                       hypre_ParCSRMatrix   *Aperm,
+                       hypre_CSRMatrix      *matALU_d,
+                       hypre_CSRMatrix      *matBLU_d,
+                       hypre_CSRMatrix      *matE_d,
+                       hypre_CSRMatrix      *matF_d,
+                       cusparseSolvePolicy_t ilu_solve_policy,
+                       void                 *ilu_solve_buffer,
+                       HYPRE_Int             test_opt)
 {
    /* data objects for communication */
    //   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
@@ -1820,14 +1894,26 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
 #endif
 
 HYPRE_Int
-hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
-                           HYPRE_Int *perm,
-                           HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U,
-                           hypre_ParCSRMatrix *mL, HYPRE_Real *mD, hypre_ParCSRMatrix *mU,
-                           hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                           hypre_ParVector *xtemp, hypre_ParVector *ytemp,
-                           HYPRE_Solver schur_solver, HYPRE_Solver schur_precond,
-                           hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end)
+hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
+                           hypre_ParVector    *f,
+                           hypre_ParVector    *u,
+                           HYPRE_Int          *perm,
+                           HYPRE_Int           nLU,
+                           hypre_ParCSRMatrix *L,
+                           HYPRE_Real         *D,
+                           hypre_ParCSRMatrix *U,
+                           hypre_ParCSRMatrix *mL,
+                           HYPRE_Real         *mD,
+                           hypre_ParCSRMatrix *mU,
+                           hypre_ParVector    *ftemp,
+                           hypre_ParVector    *utemp,
+                           hypre_ParVector    *xtemp,
+                           hypre_ParVector    *ytemp,
+                           HYPRE_Solver        schur_solver,
+                           HYPRE_Solver        schur_precond,
+                           hypre_ParVector    *rhs,
+                           hypre_ParVector    *x,
+                           HYPRE_Int          *u_end)
 {
    //#pragma omp parallel
    //        printf("threads %d\n",omp_get_num_threads());
@@ -2336,9 +2422,12 @@ hypre_NSHSolve( void               *nsh_vdata,
  * ftemp, utemp: working vectors
 */
 HYPRE_Int
-hypre_NSHSolveInverse(hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                      hypre_ParVector *u, hypre_ParCSRMatrix *M,
-                      hypre_ParVector *ftemp, hypre_ParVector *utemp)
+hypre_NSHSolveInverse(hypre_ParCSRMatrix *A,
+                      hypre_ParVector    *f,
+                      hypre_ParVector    *u,
+                      hypre_ParCSRMatrix *M,
+                      hypre_ParVector    *ftemp,
+                      hypre_ParVector    *utemp)
 {
    HYPRE_Real      alpha;
    HYPRE_Real      beta;
@@ -2354,3 +2443,4 @@ hypre_NSHSolveInverse(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    hypre_ParVectorAxpy(beta, utemp, u);
    return hypre_error_flag;
 }
+
