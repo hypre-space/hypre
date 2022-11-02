@@ -58,7 +58,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
-   hypre_ParCSRCommPkg     *comm_pkg_SF;
+   hypre_ParCSRCommPkg     *comm_pkg_SF = NULL;
 
    /* diag part of A */
    hypre_CSRMatrix *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -150,7 +150,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int *Marker_FF2_offd_j, Marker_FF2_offd_count;
 
    /* for communication of offd F and F^2 rows of A */
-   hypre_ParCSRCommPkg *comm_pkg_FF2_i, *comm_pkg_FF2_j;
+   hypre_ParCSRCommPkg *comm_pkg_FF2_i, *comm_pkg_FF2_j = NULL;
    HYPRE_BigInt *send_FF2_j, *recv_FF2_j;
    HYPRE_Int num_sends_FF2, *send_FF2_i, send_FF2_ilen, send_FF2_jlen,
              num_recvs_FF2, *recv_FF2_i, recv_FF2_ilen, recv_FF2_jlen,
@@ -352,14 +352,15 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    }
 
    /* create a communication package for SF_j */
-   comm_pkg_SF = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm         (comm_pkg_SF) = comm;
-   hypre_ParCSRCommPkgNumSends     (comm_pkg_SF) = num_sends;
-   hypre_ParCSRCommPkgSendProcs    (comm_pkg_SF) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_SF) = send_SF_jstarts;
-   hypre_ParCSRCommPkgNumRecvs     (comm_pkg_SF) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs    (comm_pkg_SF) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_SF) = recv_SF_jstarts;
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs,
+                                    hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    recv_SF_jstarts,
+                                    num_sends,
+                                    hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    send_SF_jstarts,
+                                    NULL,
+                                    &comm_pkg_SF);
 
    /* do communication */
    comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg_SF, send_SF_j, recv_SF_j);
@@ -680,14 +681,15 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    }
 
    /* create a communication package for FF2_j */
-   comm_pkg_FF2_j = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm         (comm_pkg_FF2_j) = comm;
-   hypre_ParCSRCommPkgNumSends     (comm_pkg_FF2_j) = num_sends_FF2;
-   hypre_ParCSRCommPkgSendProcs    (comm_pkg_FF2_j) = hypre_ParCSRCommPkgSendProcs(comm_pkg_FF2_i);
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_FF2_j) = send_FF2_jstarts;
-   hypre_ParCSRCommPkgNumRecvs     (comm_pkg_FF2_j) = num_recvs_FF2;
-   hypre_ParCSRCommPkgRecvProcs    (comm_pkg_FF2_j) = hypre_ParCSRCommPkgRecvProcs(comm_pkg_FF2_i);
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_FF2_j) = recv_FF2_jstarts;
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs_FF2,
+                                    hypre_ParCSRCommPkgRecvProcs(comm_pkg_FF2_i),
+                                    recv_FF2_jstarts,
+                                    num_sends_FF2,
+                                    hypre_ParCSRCommPkgSendProcs(comm_pkg_FF2_i),
+                                    send_FF2_jstarts,
+                                    NULL,
+                                    &comm_pkg_FF2_j);
 
    /* do communication */
    /* ja */
@@ -1690,7 +1692,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Complex   *R_diag_a;
    HYPRE_Int       *R_diag_i;
    HYPRE_Int       *R_diag_j;
-   HYPRE_Complex      *R_offd_a;
+   HYPRE_Complex   *R_offd_a;
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
    HYPRE_BigInt    *col_map_offd_R;
@@ -1700,7 +1702,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_cpts/*, my_first_cpt*/;
    HYPRE_Int        nnz_diag, nnz_offd, cnt_diag, cnt_offd;
-   HYPRE_BigInt       *send_buf_i;
+   HYPRE_BigInt    *send_buf_i;
 
    /* local size */
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
@@ -1709,6 +1711,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+
+   HYPRE_MemoryLocation memory_location_R = hypre_ParCSRMatrixMemoryLocation(A);
 
    /*-------------- global number of C points and my start position */
    /*my_first_cpt = num_cpts_global[0];*/
@@ -1919,15 +1923,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /*------------- allocate arrays */
-   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, HYPRE_MEMORY_DEVICE);
-   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
-   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
+   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, memory_location_R);
+   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, memory_location_R);
+   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, memory_location_R);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
-   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, HYPRE_MEMORY_DEVICE);
-   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
-   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_DEVICE);
+   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, memory_location_R);
+   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, memory_location_R);
+   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, memory_location_R);
 
    /* redundant */
    R_diag_i[0] = 0;

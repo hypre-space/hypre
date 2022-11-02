@@ -32,7 +32,9 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParCSRCommPkg    *tmp_comm_pkg;
+   hypre_ParCSRCommPkg    *tmp_comm_pkg = NULL;
+
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -255,8 +257,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    if (pass_array_size) { pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST); }
    pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes + 1, HYPRE_MEMORY_HOST);
    if (n_fine) { assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
    if (n_coarse) { C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); }
 
    if (num_cols_offd)
@@ -649,7 +651,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
    if (num_procs > 1)
    {
-      tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
       Pext_send_map_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
       Pext_recv_vec_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
       Pext_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
@@ -767,15 +768,12 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
             Pext_recv_vec_start[pass][i + 1] = Pext_recv_size;
          }
 
-         hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
-         hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
-         hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = send_procs;
-         hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) =
-            Pext_send_map_start[pass];
-         hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-         hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = recv_procs;
-         hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) =
-            Pext_recv_vec_start[pass];
+         /* Create temporary communication package */
+         hypre_ParCSRCommPkgCreateAndFill(comm,
+                                          num_recvs, recv_procs, Pext_recv_vec_start[pass],
+                                          num_sends, send_procs, Pext_send_map_start[pass],
+                                          NULL,
+                                          &tmp_comm_pkg);
 
          if (Pext_recv_size)
          {
@@ -1138,14 +1136,14 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    hypre_TFree(cnt_nz_offd_per_thread, HYPRE_MEMORY_HOST);
    hypre_TFree(max_num_threads, HYPRE_MEMORY_HOST);
 
-   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_DEVICE);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, memory_location_P);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, memory_location_P);
 
 
    if (total_nz_offd)
    {
-      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_DEVICE);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_DEVICE);
+      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, memory_location_P);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, memory_location_P);
    }
 
    for (i = 0; i < n_fine; i++)
@@ -2141,7 +2139,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParCSRMatrixMemoryLocation(S) );
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2167,4 +2165,3 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    return ierr;
 }
-

@@ -15,7 +15,7 @@
 #include "seq_mv/protos.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 template<typename T>
 struct functor : public thrust::binary_function<T, T, T>
 {

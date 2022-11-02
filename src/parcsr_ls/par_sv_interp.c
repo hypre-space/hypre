@@ -332,7 +332,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_Real *lost_value_sv = NULL;
    HYPRE_Real *q_dist_value_sv = NULL;
 
-
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    /* only doing 2 variants */
    if (variant < 1 || variant > 2)
@@ -520,14 +520,14 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       new_ncv = ncv;   /* unchanged on level > 0 */
    }
 
-   P_diag_j_new    = hypre_CTAlloc(HYPRE_Int,  new_nnz_diag, HYPRE_MEMORY_DEVICE);
-   P_diag_data_new = hypre_CTAlloc(HYPRE_Real, new_nnz_diag, HYPRE_MEMORY_DEVICE);
-   P_diag_i_new    = hypre_CTAlloc(HYPRE_Int,  nv + 1,       HYPRE_MEMORY_DEVICE);
+   P_diag_j_new    = hypre_CTAlloc(HYPRE_Int,  new_nnz_diag, memory_location_P);
+   P_diag_data_new = hypre_CTAlloc(HYPRE_Real, new_nnz_diag, memory_location_P);
+   P_diag_i_new    = hypre_CTAlloc(HYPRE_Int,  nv + 1,       memory_location_P);
 
    P_offd_j_big    = hypre_CTAlloc(HYPRE_BigInt, new_nnz_offd, HYPRE_MEMORY_HOST);
-   P_offd_j_new    = hypre_CTAlloc(HYPRE_Int,    new_nnz_offd, HYPRE_MEMORY_DEVICE);
-   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,   new_nnz_offd, HYPRE_MEMORY_DEVICE);
-   P_offd_i_new    = hypre_CTAlloc(HYPRE_Int,    nv + 1,       HYPRE_MEMORY_DEVICE);
+   P_offd_j_new    = hypre_CTAlloc(HYPRE_Int,    new_nnz_offd, memory_location_P);
+   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,   new_nnz_offd, memory_location_P);
+   P_offd_i_new    = hypre_CTAlloc(HYPRE_Int,    nv + 1,       memory_location_P);
 
    P_diag_i_new[0] = P_diag_i[0];
    P_offd_i_new[0] = P_offd_i[0];
@@ -1866,8 +1866,8 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
 
    /* initialized to zero */
-   P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_DEVICE);
-   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_DEVICE);
+   P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location);
+   P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location);
 
    j_diag_pos = 0;
    j_offd_pos = 0;

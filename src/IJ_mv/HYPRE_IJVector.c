@@ -72,6 +72,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
 
    hypre_IJVectorComm(vec)            = comm;
+   hypre_IJVectorNumComponents(vec)   = 1;
    hypre_IJVectorObjectType(vec)      = HYPRE_UNITIALIZED;
    hypre_IJVectorObject(vec)          = NULL;
    hypre_IJVectorTranslator(vec)      = NULL;
@@ -81,6 +82,62 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorPartitioning(vec)[1] = jupper + 1;
 
    *vector = (HYPRE_IJVector) vec;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetNumComponents
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetNumComponents( HYPRE_IJVector vector,
+                                HYPRE_Int      num_components )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (num_components < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_IJVectorNumComponents(vector) = num_components;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetComponent
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetComponent( HYPRE_IJVector vector,
+                            HYPRE_Int      component )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(vec) == HYPRE_PARCSR)
+   {
+      hypre_IJVectorSetComponentPar(vector, component);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    return hypre_error_flag;
 }
@@ -240,7 +297,7 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -295,7 +352,7 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -333,7 +390,7 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
 
       if (exec == HYPRE_EXEC_DEVICE)
@@ -706,6 +763,52 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    hypre_TFree(h_values, HYPRE_MEMORY_HOST);
 
    fclose(file);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInnerProd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorInnerProd( HYPRE_IJVector  x,
+                         HYPRE_IJVector  y,
+                         HYPRE_Real     *prod )
+{
+   hypre_IJVector *xvec = (hypre_IJVector *) x;
+   hypre_IJVector *yvec = (hypre_IJVector *) y;
+
+   if (!xvec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!yvec)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(xvec) != hypre_IJVectorObjectType(yvec))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Input vectors don't have the same object type!");
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(xvec) == HYPRE_PARCSR)
+   {
+      hypre_ParVector *par_x = (hypre_ParVector*) hypre_IJVectorObject(xvec);
+      hypre_ParVector *par_y = (hypre_ParVector*) hypre_IJVectorObject(yvec);
+
+      HYPRE_ParVectorInnerProd(par_x, par_y, prod);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    return hypre_error_flag;
 }

@@ -68,7 +68,7 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* allocate tmp_buffer1 for work estimation */
    tmp_size1_h = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(tmp_size1_h, tmp_size1_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);                                                                                   \
+   hypre_TMemcpy(tmp_size1_h, tmp_size1_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    tmp_buffer1 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size1_h, HYPRE_MEMORY_DEVICE);
 
    /* do work_estimation */
@@ -98,7 +98,7 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* allocate tmp_buffer2 for computation */
    tmp_size2_h = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(tmp_size2_h, tmp_size2_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);                                                                                   \
+   hypre_TMemcpy(tmp_size2_h, tmp_size2_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    tmp_buffer2 = (void*) hypre_CTAlloc(std::uint8_t, *tmp_size2_h, HYPRE_MEMORY_DEVICE);
 
    /* do the computation */
@@ -128,7 +128,7 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* allocate col index and data arrays */
    nnzC_h = hypre_CTAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(nnzC_h, nnzC_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);                                                                                   \
+   hypre_TMemcpy(nnzC_h, nnzC_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    d_jc = hypre_CTAlloc(HYPRE_Int, *nnzC_h, HYPRE_MEMORY_DEVICE);
    d_c = hypre_CTAlloc(HYPRE_Complex, *nnzC_h, HYPRE_MEMORY_DEVICE);
    oneapi::mkl::sparse::set_csr_data(handle_C, m, n, oneapi::mkl::index_base::zero, d_ic, d_jc, d_c);

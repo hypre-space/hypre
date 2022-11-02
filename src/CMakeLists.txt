@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.25.0)
-set(HYPRE_NUMBER  22500)
-set(HYPRE_DATE    2022/06/15)
+set(HYPRE_VERSION 2.26.0)
+set(HYPRE_NUMBER  22600)
+set(HYPRE_DATE    2022/10/14)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -44,6 +44,7 @@ if (EXISTS ${HYPRE_SOURCE_DIR}/../.git)
   if (${develop_string} MATCHES ".*")
     set(HYPRE_DEVELOP_STRING  ${develop_string})
     set(HYPRE_DEVELOP_NUMBER  ${develop_number})
+    set(HYPRE_BRANCH_NAME     ${develop_branch})
     if (develop_branch MATCHES "master")
       set(HYPRE_DEVELOP_BRANCH  ${develop_branch})
     else ()
@@ -93,8 +94,9 @@ option(HYPRE_WITH_MPI                "Compile with MPI" ON)
 option(HYPRE_WITH_GPU_AWARE_MPI      "Compile with device aware GPU support" OFF)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
 option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
+option(HYPRE_WITH_SUPERLU            "Use TPL SuperLU" OFF)
 option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
-option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)  # TODO: Finish this cmake feature
+option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)
 option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
 option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
@@ -106,6 +108,7 @@ set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flag
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
+option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC "Use device async malloc" OFF)
 # CUDA options
 option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
 option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
@@ -119,11 +122,24 @@ set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
 option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
 option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
 option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
+set(HYPRE_SYCL_TARGET            ""   CACHE STRING  "Target SYCL architecture, e.g. 'spir64_gen'.")
+set(HYPRE_SYCL_TARGET_BACKEND    ""   CACHE STRING  "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
+# Umpire resource management options
+option(HYPRE_WITH_UMPIRE             "Use Umpire Allocator for device and unified memory" OFF)
+option(HYPRE_WITH_UMPIRE_HOST        "Use Umpire Allocator for host memory" OFF)
+option(HYPRE_WITH_UMPIRE_DEVICE      "Use Umpire Allocator for device memory" OFF)
+option(HYPRE_WITH_UMPIRE_UM          "Use Umpire Allocator for unified memory" OFF)
+option(HYPRE_WITH_UMPIRE_PINNED      "Use Umpire Allocator for pinned memory" OFF)
+option(TPL_UMPIRE_LIBRARIES          "List of absolute paths to Umpire link libraries [].")
+option(TPL_UMPIRE_INCLUDE_DIRS       "List of absolute paths to Umpire include directories [].")
 
+option(TPL_SUPERLU_LIBRARIES         "List of absolute paths to SuperLU link libraries [].")
+option(TPL_SUPERLU_INCLUDE_DIRS      "List of absolute paths to SuperLU include directories [].")
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
 option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
 option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
+option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
 
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
@@ -181,6 +197,11 @@ if (HYPRE_ENABLE_HOPSCOTCH)
   set(HYPRE_HOPSCOTCH ON CACHE BOOL "" FORCE)
 endif ()
 
+if (HYPRE_WITH_SUPERLU)
+  set(HYPRE_USING_SUPERLU ON CACHE BOOL "" FORCE)
+  add_compile_definitions(HAVE_SUPERLU)
+endif ()
+
 if (HYPRE_WITH_DSUPERLU)
   set(HYPRE_USING_DSUPERLU ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_HYPRE_BLAS OFF CACHE BOOL "" FORCE)
@@ -203,6 +224,32 @@ endif ()
 
 if (HYPRE_SEQUENTIAL)
   set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_HOST)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_HOST ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_DEVICE)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_UM)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_UMPIRE_PINNED)
+  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
 
 # CUDA
@@ -232,7 +279,7 @@ if (HYPRE_WITH_CUDA)
   if (NOT CMAKE_CUDA_HOST_COMPILER)
     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
   endif ()
-  
+
   if (CMAKE_CUDA_COMPILER)
 
     enable_language(CUDA)
@@ -244,7 +291,10 @@ if (HYPRE_WITH_CUDA)
 
     set(CMAKE_CUDA_STANDARD_REQUIRED ON CACHE BOOL "" FORCE)
 
-    set(HYPRE_USING_DEVICE_MALLOC_ASYNC ON CACHE BOOL "" FORCE)
+    if (HYPRE_ENABLE_DEVICE_MALLOC_ASYNC)
+      set(HYPRE_USING_DEVICE_MALLOC_ASYNC ON CACHE BOOL "" FORCE)
+    endif ()
+
     set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
     set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
 
@@ -306,6 +356,12 @@ if (HYPRE_WITH_SYCL)
   # Set CXX compiler to dpcpp
   set(CMAKE_CXX_COMPILER "dpcpp")
 
+  # Set linker to dpcpp
+  set(CMAKE_LINKER "dpcpp")
+  set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
+  set(CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
+  set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP " ")
+
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
     string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
@@ -331,6 +387,13 @@ if (HYPRE_WITH_SYCL)
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
+
+  if (HYPRE_SYCL_TARGET)
+    add_link_options("SHELL:-fsycl-targets=${HYPRE_SYCL_TARGET}")
+  endif ()
+  if (HYPRE_SYCL_TARGET_BACKEND)
+    add_link_options("SHELL:-Xsycl-target-backend '${HYPRE_SYCL_TARGET_BACKEND}'")
+  endif ()
 
   set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
 
@@ -399,6 +462,32 @@ else ()
   endif ()
 endif ()
 
+# Find SUPERLU, if requested
+if (HYPRE_USING_SUPERLU)
+  if (NOT TPL_SUPERLU_LIBRARIES)
+    message(FATAL_ERROR "TPL_SUPERLU_LIBRARIES option should be set for SuperLU support.")
+  endif ()
+
+  if (NOT TPL_SUPERLU_INCLUDE_DIRS)
+    message(FATAL_ERROR "TPL_SUPERLU_INCLUDE_DIRS option be set for SuperLU support.")
+  endif ()
+
+  foreach (dir ${TPL_SUPERLU_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "SuperLU include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using SUPERLU.")
+  set(SUPERLU_FOUND TRUE)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_LIBRARIES} stdc++)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_INCLUDE_DIRS})
+endif (HYPRE_USING_SUPERLU)
+
+if (SUPERLU_FOUND)
+  set(HYPRE_USING_SUPERLU TRUE)
+endif ()
+
 # Find DSUPERLU, if requested
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
@@ -425,6 +514,26 @@ if (DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif ()
 
+# Find FEI, if requested
+if (HYPRE_USING_FEI)
+  enable_language(CXX)
+
+  if (NOT TPL_FEI_INCLUDE_DIRS)
+    message(FATAL_ERROR "TPL_FEI_INCLUDE_DIRS option should be set for FEI support.")
+  endif ()
+
+  foreach (dir ${TPL_FEI_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "FEI include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-I${dir} ${CMAKE_CXX_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using FEI.")
+  set(FEI_FOUND TRUE)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
+endif(HYPRE_USING_FEI)
+
 if (HYPRE_USING_CUDA)
   target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
   if (HYPRE_HAVE_MPI)
@@ -434,6 +543,7 @@ if (HYPRE_USING_CUDA)
 endif ()
 
 if (HYPRE_USING_SYCL)
+  target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
   if (HYPRE_ENABLE_ONEMKLSPARSE)
     set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
   endif()
@@ -454,9 +564,38 @@ if (HYPRE_USING_SYCL)
 endif()
 
 if (HYPRE_USING_CALIPER)
-  find_package(caliper REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC caliper)
+  if (NOT TPL_CALIPER_LIBRARIES OR NOT TPL_CALIPER_INCLUDE_DIRS)
+    message(FATAL_ERROR "Both TPL_CALIPER_LIBRARIES and TPL_CALIPER_INCLUDE_DIRS options must be set for Caliper support.")
+  endif ()
+
+  foreach (dir ${TPL_CALIPER_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "Caliper include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using Caliper.")
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_CALIPER_LIBRARIES})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_CALIPER_INCLUDE_DIRS})
+
 endif()
+
+# Find Umpire, if requested
+if (HYPRE_USING_UMPIRE)
+  if (NOT TPL_UMPIRE_LIBRARIES OR NOT TPL_UMPIRE_INCLUDE_DIRS)
+    message(FATAL_ERROR "Both TPL_UMPIRE_LIBRARIES and TPL_UMPIRE_INCLUDE_DIRS options must be set for Umpire support.")
+  endif ()
+
+  foreach (dir ${TPL_UMPIRE_INCLUDE_DIRS})
+    if (NOT EXISTS ${dir})
+      message(FATAL_ERROR "Umpire include directory not found: ${dir}")
+    endif ()
+    set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
+  endforeach ()
+  message(STATUS "Enabled support for using Umpire.")
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_LIBRARIES})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_INCLUDE_DIRS})
+endif ()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(

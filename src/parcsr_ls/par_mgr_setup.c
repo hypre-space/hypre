@@ -69,7 +69,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_IntArray      **CF_marker_array = (mgr_data -> CF_marker_array);
    HYPRE_Int            *CF_marker;
    hypre_ParCSRMatrix  **A_array = (mgr_data -> A_array);
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix  **P_FF_array = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix  **P_array = (mgr_data -> P_array);
@@ -390,7 +390,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       CF_marker_array = NULL;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    if (P_FF_array)
    {
       for (j = 0; j < old_num_coarse_levels; j++)
@@ -575,7 +575,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       P_array = hypre_CTAlloc(hypre_ParCSRMatrix*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    if (P_FF_array == NULL && max_num_coarse_levels > 0)
    {
       P_FF_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
@@ -724,7 +724,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> P_array) = P_array;
    (mgr_data -> RT_array) = RT_array;
    (mgr_data -> CF_marker_array) = CF_marker_array;
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    (mgr_data -> P_FF_array) = P_FF_array;
 #endif
 
@@ -1144,7 +1144,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
          }
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          else
          {
             hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
@@ -1185,7 +1185,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                {
                   hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
                }
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
                else
                {
                   hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
@@ -1204,7 +1204,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
             }
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
             else
             {
                hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
@@ -1215,7 +1215,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_BoomerAMGSetMaxIter(aff_solver[lev], (mgr_data -> num_relax_sweeps)[lev]);
             hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
             //hypre_BoomerAMGSetStrongThreshold(aff_solver[lev], 0.6);
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
             hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
             hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
             hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
@@ -1231,7 +1231,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          //wall_time = time_getWallclockSeconds() - wall_time;
          //hypre_printf("Lev = %d, proc = %d     SetupAFF: %f\n", lev, my_id, wall_time);
 
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
          hypre_IntArrayInitialize(F_marker);
          hypre_IntArraySetConstantValues(F_marker, 0);
@@ -1240,14 +1240,13 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             F_marker_data[j] = -CF_marker[j];
          }
-         HYPRE_BigInt *num_fpts_global;
+         HYPRE_BigInt num_fpts_global[2];
          hypre_ParCSRMatrix *P_FF_ptr;
          hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, F_marker, NULL, num_fpts_global);
          hypre_MGRBuildPDevice(A_array[lev], F_marker_data, num_fpts_global, 0, &P_FF_ptr);
          P_FF_array[lev] = P_FF_ptr;
 
          hypre_IntArrayDestroy(F_marker);
-         hypre_TFree(num_fpts_global, HYPRE_MEMORY_HOST);
 #endif
          F_fine_array[lev + 1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),

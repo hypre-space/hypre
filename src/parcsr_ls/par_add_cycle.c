@@ -976,19 +976,14 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       L_recv_ptr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
    }
 
-   L_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   /* Create and fill communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs_L, L_recv_procs, L_recv_ptr,
+                                    num_sends_L, L_send_procs, L_send_ptr,
+                                    L_send_map_elmts,
+                                    &L_comm_pkg);
 
-   hypre_ParCSRCommPkgNumRecvs(L_comm_pkg) = num_recvs_L;
-   hypre_ParCSRCommPkgNumSends(L_comm_pkg) = num_sends_L;
-   hypre_ParCSRCommPkgRecvProcs(L_comm_pkg) = L_recv_procs;
-   hypre_ParCSRCommPkgSendProcs(L_comm_pkg) = L_send_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(L_comm_pkg) = L_recv_ptr;
-   hypre_ParCSRCommPkgSendMapStarts(L_comm_pkg) = L_send_ptr;
-   hypre_ParCSRCommPkgSendMapElmts(L_comm_pkg) = L_send_map_elmts;
-   hypre_ParCSRCommPkgComm(L_comm_pkg) = comm;
-
-
-   Lambda = hypre_CTAlloc(hypre_ParCSRMatrix,  1, HYPRE_MEMORY_HOST);
+   Lambda = hypre_CTAlloc(hypre_ParCSRMatrix, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixDiag(Lambda) = L_diag;
    hypre_ParCSRMatrixOffd(Lambda) = L_offd;
    hypre_ParCSRMatrixCommPkg(Lambda) = L_comm_pkg;
@@ -997,41 +992,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
 
    if (ns > 1)
    {
-      /*hypre_ParCSRCommPkg *A_comm_pkg = NULL;
-      HYPRE_Int *A_recv_ptr = NULL;
-      HYPRE_Int *A_send_ptr = NULL;
-      HYPRE_Int *A_recv_procs = NULL;
-      HYPRE_Int *A_send_procs = NULL;
-      HYPRE_Int *A_send_map_elmts = NULL;
-
-      A_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-
-      A_recv_ptr = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
-      A_send_ptr = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
-      A_recv_procs = hypre_CTAlloc(HYPRE_Int,  num_recvs_L, HYPRE_MEMORY_HOST);
-      A_send_procs = hypre_CTAlloc(HYPRE_Int,  num_sends_L, HYPRE_MEMORY_HOST);
-      A_send_map_elmts = hypre_CTAlloc(HYPRE_Int,  L_send_ptr[num_sends_L], HYPRE_MEMORY_HOST);
-
-      for (i=0; i<num_recvs_L+1; i++)
-      A_recv_ptr[i] = L_recv_ptr[i];
-      for (i=0; i<num_sends_L+1; i++)
-      A_send_ptr[i] = L_send_ptr[i];
-      for (i=0; i<num_recvs_L; i++)
-      A_recv_procs[i] = L_recv_procs[i];
-      for (i=0; i<num_sends_L; i++)
-      A_send_procs[i] = L_send_procs[i];
-      for (i=0; i < L_send_ptr[num_sends_L]; i++)
-      A_send_map_elmts[i] = L_send_map_elmts[i];
-
-      hypre_ParCSRCommPkgNumRecvs(A_comm_pkg) = num_recvs_L;
-      hypre_ParCSRCommPkgNumSends(A_comm_pkg) = num_sends_L;
-      hypre_ParCSRCommPkgRecvProcs(A_comm_pkg) = A_recv_procs;
-      hypre_ParCSRCommPkgSendProcs(A_comm_pkg) = A_send_procs;
-      hypre_ParCSRCommPkgRecvVecStarts(A_comm_pkg) = A_recv_ptr;
-      hypre_ParCSRCommPkgSendMapStarts(A_comm_pkg) = A_send_ptr;
-      hypre_ParCSRCommPkgSendMapElmts(A_comm_pkg) = A_send_map_elmts;
-      hypre_ParCSRCommPkgComm(A_comm_pkg) = comm; */
-
       Atilde = hypre_CTAlloc(hypre_ParCSRMatrix,  1, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixDiag(Atilde) = Atilde_diag;
       hypre_ParCSRMatrixOffd(Atilde) = Atilde_offd;

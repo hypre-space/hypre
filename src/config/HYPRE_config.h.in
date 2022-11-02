@@ -56,6 +56,9 @@
 /* Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt */
 #undef HYPRE_BIGINT
 
+/* Feature branch string */
+#undef HYPRE_BRANCH_NAME
+
 /* Define to 1 if using complex values */
 #undef HYPRE_COMPLEX
 
@@ -151,6 +154,9 @@
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
 
+/* Define to 1 if want to use host in hypre tests */
+#undef HYPRE_TEST_USING_HOST
+
 /* Using HYPRE timing routines */
 #undef HYPRE_TIMING
 
@@ -169,11 +175,11 @@
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
+/* Define to 1 if using cuSolver */
+#undef HYPRE_USING_CUSOLVER
+
 /* Define to 1 if using cuSPARSE */
 #undef HYPRE_USING_CUSPARSE
-
-/* Define to 1 if using cuSOLVER */
-#undef HYPRE_USING_CUSOLVER
 
 /* Define to 1 if using device async malloc */
 #undef HYPRE_USING_DEVICE_MALLOC_ASYNC

@@ -36,6 +36,7 @@ extern "C++"
 
    /*********************************************************************
     * wrapper functions calling sycl parallel_for
+    * WM: todo - add runtime switch between CPU/GPU execution
     *********************************************************************/
 
    template<typename LOOP_BODY>

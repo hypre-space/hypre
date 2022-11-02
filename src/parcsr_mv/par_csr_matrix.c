@@ -500,7 +500,7 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    HYPRE_BigInt         global_num_rows, global_num_cols;
 
    FILE                *fp;
-   char                 new_file_d[80], new_file_o[80], new_file_info[80];
+   char                 new_file_d[256], new_file_o[256], new_file_info[256];
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -587,7 +587,7 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
    HYPRE_BigInt global_num_cols;
    HYPRE_BigInt *col_map_offd;
    HYPRE_Int  my_id, i, num_procs;
-   char   new_file_d[80], new_file_o[80], new_file_info[80];
+   char   new_file_d[256], new_file_o[256], new_file_info[256];
    FILE *fp;
    HYPRE_Int num_cols_offd = 0;
    HYPRE_BigInt row_s, row_e, col_s, col_e;

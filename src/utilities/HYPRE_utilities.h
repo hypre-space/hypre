@@ -108,6 +108,7 @@ typedef HYPRE_Int MPI_Comm;
 #define HYPRE_ERROR_ARG             4   /* argument error */
 /* bits 4-8 are reserved for the index of the argument error */
 #define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
+#define HYPRE_MAX_FILE_NAME_LEN  1024   /* longest filename length used in hypre */
 
 /*--------------------------------------------------------------------------
  * HYPRE init/finalize
@@ -202,8 +203,6 @@ typedef enum _HYPRE_ExecutionPolicy
 
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
-HYPRE_Int HYPRE_SetStructExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
-HYPRE_Int HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
 
 /*--------------------------------------------------------------------------
  * HYPRE UMPIRE

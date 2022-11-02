@@ -12,7 +12,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 __global__ void
 hypreCUDAKernel_IndepSetMain(hypre_DeviceItem &item,
                              HYPRE_Int   graph_diag_size,
@@ -158,7 +158,6 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    HYPRE_Int  num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Int *send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
 
-   dim3 bDim, gDim;
    hypre_ParCSRCommHandle *comm_handle;
 
    /*------------------------------------------------------------------
@@ -169,8 +168,8 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set
     *-------------------------------------------------------*/
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_IndepSetMain, gDim, bDim,
                      graph_diag_size, graph_diag, measure_diag, measure_offd,
@@ -203,8 +202,8 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
 }
 
 /* Augments measures by some random value between 0 and 1
- * aug_rand: 1: GPU CURAND/ROCRAND; 11: GPU SEQ CURAND/ROCRAND
- *           2: CPU RAND;           12: CPU SEQ RAND
+ * aug_rand: 1: GPU RAND; 11: GPU SEQ RAND
+ *           2: CPU RAND; 12: CPU SEQ RAND
  */
 HYPRE_Int
 hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
@@ -253,4 +252,4 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

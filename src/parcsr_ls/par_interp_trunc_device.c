@@ -731,7 +731,7 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
 #endif
    hypre_GpuProfilingPushRange("Interp-Truncation");
 
-/* WM: todo - sycl */
+   /* WM: todo - sycl */
 #if !defined(HYPRE_USING_SYCL)
    if (max_elmts <= HYPRE_INTERPTRUNC_ALGORITHM_SWITCH)
    {
