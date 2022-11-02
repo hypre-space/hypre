@@ -1188,13 +1188,22 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       hypre_Memset(P_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
+      /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
       auto zip3 = oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i );
+      HYPRE_Int *P_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *P_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          zip3,
                          zip3 + num_points + 1,
-                         zip3,
+                         oneapi::dpl::make_zip_iterator( P_diag_i_tmp, P_offd_i_tmp ),
                          std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                          tuple_plus<HYPRE_Int>() );
+      hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
@@ -1475,13 +1484,22 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       hypre_Memset(Q_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
+      /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
       auto zip4 = oneapi::dpl::make_zip_iterator( Q_diag_i, Q_offd_i );
+      HYPRE_Int *Q_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *Q_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          zip4,
                          zip4 + num_points + 1,
-                         zip4,
+                         oneapi::dpl::make_zip_iterator( Q_diag_i_tmp, Q_offd_i_tmp ),
                          std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                          tuple_plus<HYPRE_Int>() );
+      hypre_TMemcpy(Q_diag_i, Q_diag_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(Q_offd_i, Q_offd_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(Q_diag_i_tmp, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(Q_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(Q_diag_i, Q_offd_i) ),

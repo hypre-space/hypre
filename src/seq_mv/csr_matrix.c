@@ -109,13 +109,6 @@ hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix      *matrix,
    /* Caveat: for pre-existing i, j, data, their memory location must be guaranteed to be consistent with `memory_location'
     * Otherwise, mismatches will exist and problems will be encountered when being used, and freed */
 
-   /* WM: debug */
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq init, here %d\n", __LINE__);
-   hypre_printf("WM: debug - rank %d: seq init, numnonzeros = %d, data = %p, memory_location = %d, here %d\n", myid, num_nonzeros, hypre_CSRMatrixData(matrix), memory_location, __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
    if ( !hypre_CSRMatrixData(matrix) && num_nonzeros )
    {
       hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, num_nonzeros, memory_location);
@@ -127,10 +120,6 @@ hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix      *matrix,
    }
    */
 
-   /* WM: debug */
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq init, here %d\n", __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
    if ( !hypre_CSRMatrixI(matrix) )
    {
       hypre_CSRMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, num_rows + 1, memory_location);
@@ -142,10 +131,6 @@ hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix      *matrix,
       hypre_CSRMatrixRownnz(matrix) = hypre_CTAlloc(HYPRE_Int,  num_rownnz, memory_location);
    }
    */
-   /* WM: debug */
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq init, bigInit = %d, here %d\n", bigInit, __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
 
    if (bigInit)
    {
@@ -161,10 +146,6 @@ hypre_CSRMatrixInitialize_v2( hypre_CSRMatrix      *matrix,
          hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, num_nonzeros, memory_location);
       }
    }
-   /* WM: debug */
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq init, here %d\n", __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
 
    return ierr;
 }
@@ -825,23 +806,9 @@ hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
 
    HYPRE_Int bigInit = hypre_CSRMatrixBigJ(A) != NULL;
 
-   /* WM: debug */
-      HYPRE_Int myid;
-      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq clone, here %d\n", __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
    hypre_CSRMatrixInitialize_v2(B, bigInit, memory_location);
-   /* WM: debug */
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq clone, here %d\n", __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
 
    hypre_CSRMatrixCopy(A, B, copy_data);
-   /* WM: debug */
-   MPI_Barrier(MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("WM: debug - seq clone, here %d\n", __LINE__);
-   MPI_Barrier(MPI_COMM_WORLD);
 
    return B;
 }
