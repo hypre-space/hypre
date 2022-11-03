@@ -2036,24 +2036,59 @@ hypre_CSRMatrixDiagScaleHost( hypre_CSRMatrix *A,
    HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
    HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
 
-   HYPRE_Complex *ldata  = hypre_VectorData(ld);
-   HYPRE_Complex *rdata  = hypre_VectorData(rd);
+   HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
+   HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
 
    HYPRE_Int      i, j;
    HYPRE_Complex  sl;
    HYPRE_Complex  sr;
 
-#ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i, j, sl, sr) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < nrows; i++)
+   if (ldata && rdata)
    {
-      sl = ldata ? ldata[i] : 1.0;
-      for (j = A_i[i]; j < A_i[i + 1]; j++)
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i, j, sl, sr) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
       {
-         sr = rdata ? rdata[A_j[j]] : 1.0;
-         A_data[j] = sl * A_data[j] * sr;
+         sl = ldata[i];
+         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         {
+            sr = rdata[A_j[j]];
+            A_data[j] = sl * A_data[j] * sr;
+         }
       }
+   }
+   else if (ldata && !rdata)
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i, j, sl) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         sl = ldata[i];
+         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         {
+            A_data[j] = sl * A_data[j];
+         }
+      }
+   }
+   else if (!ldata && rdata)
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i, j, sr) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         {
+            sr = rdata[A_j[j]];
+            A_data[j] = A_data[j] * sr;
+         }
+      }
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices are not set!\n");
    }
 
    return hypre_error_flag;
