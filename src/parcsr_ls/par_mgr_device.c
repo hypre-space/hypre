@@ -217,4 +217,20 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixExtractBlockDiagDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
+                                          HYPRE_Int             blk_size,
+                                          HYPRE_Int             point_type,
+                                          HYPRE_Int            *CF_marker,
+                                          HYPRE_Int            *blk_diag_size,
+                                          HYPRE_Real          **diag_ptr,
+                                          HYPRE_Int             diag_type )
+{
+   return hypre_error_flag;
+}
+
 #endif
