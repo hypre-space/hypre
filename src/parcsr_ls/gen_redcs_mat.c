@@ -57,6 +57,8 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    /* convert A at this level to sequential */
    A = Par_A_array[level];
 
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+
    {
       HYPRE_Real *A_seq_data = NULL;
       HYPRE_Int *A_seq_i = NULL;
@@ -200,9 +202,9 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
          if (redundant || my_id == 0)
          {
-            A_seq_i = hypre_CTAlloc(HYPRE_Int,  size + 1, HYPRE_MEMORY_DEVICE);
-            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size + 1, HYPRE_MEMORY_DEVICE);
-            if (num_functions > 1) { seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_DEVICE); }
+            A_seq_i = hypre_CTAlloc(HYPRE_Int,  size + 1, memory_location);
+            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size + 1, memory_location);
+            if (num_functions > 1) { seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, memory_location); }
          }
 
          if (redundant)
@@ -258,8 +260,8 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             }
 
             total_nnz = displs2[new_num_procs];
-            A_seq_j = hypre_CTAlloc(HYPRE_Int,  total_nnz, HYPRE_MEMORY_DEVICE);
-            A_seq_data = hypre_CTAlloc(HYPRE_Real,  total_nnz, HYPRE_MEMORY_DEVICE);
+            A_seq_j = hypre_CTAlloc(HYPRE_Int,  total_nnz, memory_location);
+            A_seq_data = hypre_CTAlloc(HYPRE_Real,  total_nnz, memory_location);
          }
          if (redundant)
          {

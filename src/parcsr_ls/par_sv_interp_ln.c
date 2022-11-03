@@ -196,6 +196,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
    HYPRE_Int g_nc;
 
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
+
 
 #if SV_DEBUG
    {
@@ -528,14 +530,14 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
 
    /* allocations */
-   P_diag_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_diag, HYPRE_MEMORY_DEVICE);
-   P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_diag, HYPRE_MEMORY_DEVICE);
-   P_diag_i_new = hypre_CTAlloc(HYPRE_Int,  num_rows_P + 1, HYPRE_MEMORY_DEVICE);
+   P_diag_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_diag, memory_location_P);
+   P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_diag, memory_location_P);
+   P_diag_i_new = hypre_CTAlloc(HYPRE_Int,  num_rows_P + 1, memory_location_P);
 
    P_offd_j_big = hypre_CTAlloc(HYPRE_BigInt,  new_nnz_offd, HYPRE_MEMORY_HOST);
-   P_offd_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_offd, HYPRE_MEMORY_DEVICE);
-   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_offd, HYPRE_MEMORY_DEVICE);
-   P_offd_i_new = hypre_CTAlloc(HYPRE_Int,  num_rows_P + 1, HYPRE_MEMORY_DEVICE);
+   P_offd_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_offd, memory_location_P);
+   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_offd, memory_location_P);
+   P_offd_i_new = hypre_CTAlloc(HYPRE_Int,  num_rows_P + 1, memory_location_P);
 
    P_diag_i_new[0] = P_diag_i[0];
    P_offd_i_new[0] = P_offd_i[0];

@@ -554,7 +554,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    hypre_ParCSRMatrix   **A_array = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array  = (mgr_data -> RT_array);
    hypre_ParCSRMatrix   **P_array   = (mgr_data -> P_array);
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix   **P_FF_array   = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix   *RAP = (mgr_data -> RAP);
@@ -736,7 +736,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                if (relax_type == 18)
                {
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
                   for (i = 0; i < nsweeps[level]; i++)
                   {
                      hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
@@ -875,7 +875,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                                                F_array[fine_grid], Vtemp);
 
             // restrict to F points
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_GPU)
             hypre_ParCSRMatrixMatvecT(1.0, P_FF_array[fine_grid], Vtemp, 0.0, F_fine_array[coarse_grid]);
 #else
             hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
@@ -887,7 +887,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                                    U_fine_array[coarse_grid]);
 
             // Interpolate the solution back to the fine grid level
-#if defined(HYPRE_USING_CUDA)
+#if defined (HYPRE_USING_GPU)
             hypre_ParCSRMatrixMatvec(1.0, P_FF_array[fine_grid], U_fine_array[coarse_grid], 1.0,
                                      U_array[fine_grid]);
 #else

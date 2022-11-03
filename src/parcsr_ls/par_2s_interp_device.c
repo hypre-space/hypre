@@ -5,32 +5,39 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
-__global__ void hypreCUDAKernel_compute_weak_rowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
-                                                      bool has_offd,
-                                                      HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
-                                                      HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
+__global__ void hypreGPUKernel_compute_weak_rowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+                                                     bool has_offd,
+                                                     HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
+                                                     HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
 
-__global__ void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
+__global__ void hypreGPUKernel_MMInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
+                                                 HYPRE_Int *AFF_diag_i,
+                                                 HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
+                                                 HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
+                                                 HYPRE_Real *rsW );
+
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
+__global__ void hypreGPUKernel_compute_dlam_dtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                   HYPRE_Int *AFF_diag_i,
-                                                  HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
-                                                  HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
-                                                  HYPRE_Real *rsW );
+                                                  HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
+                                                  HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
-__global__ void hypreCUDAKernel_compute_dlam_dtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+__global__ void hypreGPUKernel_MMPEInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
                                                    HYPRE_Int *AFF_diag_i,
-                                                   HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
-                                                   HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
-
-__global__ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
-                                                    HYPRE_Int *AFF_diag_i,
-                                                    HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
-                                                    HYPRE_Complex *AFF_offd_a, HYPRE_Complex *tmp_diag, HYPRE_Complex *tmp_offd,
-                                                    HYPRE_Complex *lam_diag, HYPRE_Complex *lam_offd, HYPRE_Int *F2_to_F, HYPRE_Real *rsW );
+                                                   HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
+                                                   HYPRE_Complex *AFF_offd_a, HYPRE_Complex *tmp_diag, HYPRE_Complex *tmp_offd,
+                                                   HYPRE_Complex *lam_diag, HYPRE_Complex *lam_offd, HYPRE_Int *F2_to_F, HYPRE_Real *rsW );
 
 void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols,
                              HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j,
@@ -90,11 +97,18 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                     Dbeta,
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       Dbeta,
                       send_buf );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
@@ -113,7 +127,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
@@ -128,12 +142,20 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                      -1 );
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
+                                               rsWA + A_nr_local,
+                                               CF_marker,
+                                               rsW,
+                                               equal<HYPRE_Int>(-2) );
+#else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
                                                CF_marker,
                                                rsW,
                                                equal<HYPRE_Int>(-2) );
+#endif
 
    hypre_assert(new_end - rsW == AF2F_nr_local);
 
@@ -141,20 +163,36 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    /* map from F2 to F */
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
+                      map_to_F,
+                      HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
+#else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F,
                       HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
+#endif
 
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int *tmp_end = hypreSycl_copy_if( map_to_F,
+                                           map_to_F + A_nr_local,
+                                           CF_marker,
+                                           map_F2_to_F,
+                                           equal<HYPRE_Int>(-2) );
+#else
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
                                            map_to_F + A_nr_local,
                                            CF_marker,
                                            map_F2_to_F,
                                            equal<HYPRE_Int>(-2) );
+#endif
 
    hypre_assert(tmp_end - map_F2_to_F == AF2F_nr_local);
 
@@ -164,15 +202,21 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
    gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
+   HYPRE_Int *As_F2F_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F));
+   HYPRE_Int *As_F2F_diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F));
+   HYPRE_Complex *As_F2F_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F));
+   HYPRE_Int *As_F2F_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F));
+   HYPRE_Int *As_F2F_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F));
+   HYPRE_Complex *As_F2F_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F));
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_MMInterpScaleAFF,
                      gDim, bDim,
                      AF2F_nr_local,
-                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
-                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
-                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
-                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
-                     hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
-                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
+                     As_F2F_diag_i,
+                     As_F2F_diag_j,
+                     As_F2F_diag_data,
+                     As_F2F_offd_i,
+                     As_F2F_offd_j,
+                     As_F2F_offd_data,
                      Dbeta,
                      Dbeta_offd,
                      map_F2_to_F,
@@ -204,12 +248,20 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     P_nr_local + 1, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   tmp_end = hypreSycl_copy_if( CF_marker,
+                                CF_marker + A_nr_local,
+                                CF_marker,
+                                C2F2_marker,
+                                out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
+#else
    tmp_end = HYPRE_THRUST_CALL( copy_if,
                                 CF_marker,
                                 CF_marker + A_nr_local,
                                 CF_marker,
                                 C2F2_marker,
                                 out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
+#endif
 
    hypre_assert(tmp_end - C2F2_marker == P_nr_local);
 
@@ -325,14 +377,19 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    dlam = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
    dtmp = hypre_TAlloc(HYPRE_Complex, AFC_nr_local, HYPRE_MEMORY_DEVICE);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
+   HYPRE_Int *As_FF_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_FF));
+   HYPRE_Int *As_FF_diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_FF));
+   HYPRE_Complex *As_FF_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF));
+   HYPRE_Int *As_FF_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF));
+   HYPRE_Complex *As_FF_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF));
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_dlam_dtmp,
                      gDim, bDim,
                      AFC_nr_local,
-                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_FF)),
-                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_FF)),
-                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF)),
-                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF)),
-                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF)),
+                     As_FF_diag_i,
+                     As_FF_diag_j,
+                     As_FF_diag_data,
+                     As_FF_offd_i,
+                     As_FF_offd_data,
                      Dbeta,
                      dlam,
                      dtmp );
@@ -358,11 +415,18 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *send_buf = hypre_TAlloc(HYPRE_Complex, num_elmts_send, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                     dtmp,
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       dtmp,
                       send_buf );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
@@ -373,11 +437,18 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                                  HYPRE_MEMORY_DEVICE, dtmp_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
+                     dlam,
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elmts_send,
                       dlam,
                       send_buf );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
@@ -396,7 +467,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
@@ -411,12 +482,20 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                      -1 );
 
    rsW = hypre_TAlloc(HYPRE_Complex, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Complex *new_end = hypreSycl_copy_if( rsWA,
+                                               rsWA + A_nr_local,
+                                               CF_marker,
+                                               rsW,
+                                               equal<HYPRE_Int>(-2) );
+#else
    HYPRE_Complex *new_end = HYPRE_THRUST_CALL( copy_if,
                                                rsWA,
                                                rsWA + A_nr_local,
                                                CF_marker,
                                                rsW,
                                                equal<HYPRE_Int>(-2) );
+#endif
 
    hypre_assert(new_end - rsW == AF2F_nr_local);
 
@@ -424,19 +503,35 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    /* map from F2 to F */
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
+                      map_to_F,
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+#else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,              is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + A_nr_local, is_negative<HYPRE_Int>()),
                       map_to_F,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+#endif
    HYPRE_Int *map_F2_to_F = hypre_TAlloc(HYPRE_Int, AF2F_nr_local, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int *tmp_end = hypreSycl_copy_if( map_to_F,
+                                           map_to_F + A_nr_local,
+                                           CF_marker,
+                                           map_F2_to_F,
+                                           equal<HYPRE_Int>(-2) );
+#else
    HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( copy_if,
                                            map_to_F,
                                            map_to_F + A_nr_local,
                                            CF_marker,
                                            map_F2_to_F,
                                            equal<HYPRE_Int>(-2) );
+#endif
 
    hypre_assert(tmp_end - map_F2_to_F == AF2F_nr_local);
 
@@ -446,15 +541,21 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
     * diagnoally scale As_F2F (from both sides) and replace the diagonal */
    gDim = hypre_GetDefaultDeviceGridDimension(AF2F_nr_local, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
+   HYPRE_Int *As_F2F_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F));
+   HYPRE_Int *As_F2F_diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F));
+   HYPRE_Complex *As_F2F_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F));
+   HYPRE_Int *As_F2F_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F));
+   HYPRE_Int *As_F2F_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F));
+   HYPRE_Complex *As_F2F_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F));
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_MMPEInterpScaleAFF,
                      gDim, bDim,
                      AF2F_nr_local,
-                     hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(As_F2F)),
-                     hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(As_F2F)),
-                     hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_F2F)),
-                     hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F)),
-                     hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F)),
-                     hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F)),
+                     As_F2F_diag_i,
+                     As_F2F_diag_j,
+                     As_F2F_diag_data,
+                     As_F2F_offd_i,
+                     As_F2F_offd_j,
+                     As_F2F_offd_data,
                      dtmp,
                      dtmp_offd,
                      dlam,
@@ -490,12 +591,20 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     P_nr_local + 1, HYPRE_MEMORY_DEVICE);
 
    HYPRE_Int *C2F2_marker = hypre_TAlloc(HYPRE_Int, P_nr_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+   tmp_end = hypreSycl_copy_if( CF_marker,
+                                CF_marker + A_nr_local,
+                                CF_marker,
+                                C2F2_marker,
+                                out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
+#else
    tmp_end = HYPRE_THRUST_CALL( copy_if,
                                 CF_marker,
                                 CF_marker + A_nr_local,
                                 CF_marker,
                                 C2F2_marker,
                                 out_of_range<HYPRE_Int>(-1, 0) /* -2 or 1 */ );
+#endif
 
    hypre_assert(tmp_end - C2F2_marker == P_nr_local);
 
@@ -561,18 +670,18 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
-                                       HYPRE_Int      AFF_nrows,
-                                       HYPRE_Int     *AFF_diag_i,
-                                       HYPRE_Int     *AFF_diag_j,
-                                       HYPRE_Complex *AFF_diag_a,
-                                       HYPRE_Int     *AFF_offd_i,
-                                       HYPRE_Int     *AFF_offd_j,
-                                       HYPRE_Complex *AFF_offd_a,
-                                       HYPRE_Complex *beta_diag,
-                                       HYPRE_Complex *beta_offd,
-                                       HYPRE_Int     *F2_to_F,
-                                       HYPRE_Real    *rsW )
+void hypreGPUKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
+                                      HYPRE_Int      AFF_nrows,
+                                      HYPRE_Int     *AFF_diag_i,
+                                      HYPRE_Int     *AFF_diag_j,
+                                      HYPRE_Complex *AFF_diag_a,
+                                      HYPRE_Int     *AFF_offd_i,
+                                      HYPRE_Int     *AFF_offd_j,
+                                      HYPRE_Complex *AFF_offd_a,
+                                      HYPRE_Complex *beta_diag,
+                                      HYPRE_Complex *beta_offd,
+                                      HYPRE_Int     *F2_to_F,
+                                      HYPRE_Real    *rsW )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -692,20 +801,20 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
-                                         HYPRE_Int      AFF_nrows,
-                                         HYPRE_Int     *AFF_diag_i,
-                                         HYPRE_Int     *AFF_diag_j,
-                                         HYPRE_Complex *AFF_diag_a,
-                                         HYPRE_Int     *AFF_offd_i,
-                                         HYPRE_Int     *AFF_offd_j,
-                                         HYPRE_Complex *AFF_offd_a,
-                                         HYPRE_Complex *tmp_diag,
-                                         HYPRE_Complex *tmp_offd,
-                                         HYPRE_Complex *lam_diag,
-                                         HYPRE_Complex *lam_offd,
-                                         HYPRE_Int     *F2_to_F,
-                                         HYPRE_Real    *rsW )
+void hypreGPUKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
+                                        HYPRE_Int      AFF_nrows,
+                                        HYPRE_Int     *AFF_diag_i,
+                                        HYPRE_Int     *AFF_diag_j,
+                                        HYPRE_Complex *AFF_diag_a,
+                                        HYPRE_Int     *AFF_offd_i,
+                                        HYPRE_Int     *AFF_offd_j,
+                                        HYPRE_Complex *AFF_offd_a,
+                                        HYPRE_Complex *tmp_diag,
+                                        HYPRE_Complex *tmp_offd,
+                                        HYPRE_Complex *lam_diag,
+                                        HYPRE_Complex *lam_offd,
+                                        HYPRE_Int     *F2_to_F,
+                                        HYPRE_Real    *rsW )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -825,4 +934,4 @@ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
    }
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */

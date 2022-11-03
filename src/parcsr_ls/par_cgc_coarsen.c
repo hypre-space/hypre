@@ -14,6 +14,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "../HYPRE.h" /* BM Aug 15, 2006 */
+#include "_hypre_IJ_mv.h"
 
 #define C_PT 1
 #define F_PT -1
@@ -948,9 +949,6 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S, HYPRE_Int *vertexran
    hypre_MPI_Comm_size (comm, &mpisize);
    hypre_MPI_Comm_rank (comm, &mpirank);
 
-   HYPRE_BigInt *big_m_n = hypre_TAlloc(HYPRE_BigInt, 2, HYPRE_MEMORY_DEVICE);
-   HYPRE_Real *weight = hypre_TAlloc(HYPRE_Real, 1, HYPRE_MEMORY_DEVICE);
-
    /* determine neighbor processors */
    num_recvs = hypre_ParCSRCommPkgNumRecvs (comm_pkg);
    recv_procs = hypre_ParCSRCommPkgRecvProcs (comm_pkg);
@@ -1053,14 +1051,16 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S, HYPRE_Int *vertexran
       rownz_offd[m] = nz;
    }
 
-
-
    HYPRE_IJMatrixCreate(comm, vertexrange_start, vertexrange_end - 1, vertexrange_start,
                         vertexrange_end - 1, &ijmatrix);
    HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
    HYPRE_IJMatrixSetDiagOffdSizes (ijmatrix, rownz_diag, rownz_offd);
    HYPRE_IJMatrixInitialize(ijmatrix);
    hypre_TFree(rownz_diag, HYPRE_MEMORY_HOST);
+
+   HYPRE_MemoryLocation memory_location = hypre_IJMatrixMemoryLocation(ijmatrix);
+   HYPRE_BigInt *big_m_n = hypre_TAlloc(HYPRE_BigInt, 2, memory_location);
+   HYPRE_Real *weight = hypre_TAlloc(HYPRE_Real, 1, memory_location);
 
    /* initialize graph */
    weight[0] = -1;
@@ -1130,8 +1130,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S, HYPRE_Int *vertexran
    hypre_TFree(pointrange_strong, HYPRE_MEMORY_HOST);
    hypre_TFree(vertexrange_strong, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(big_m_n, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(weight, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(big_m_n, memory_location);
+   hypre_TFree(weight, memory_location);
 
    /*} */
 

@@ -108,7 +108,7 @@ else()
       list(APPEND EXPORT_INTERFACE_CUDA_LIBS CUDA::cublas_static CUDA::cublasLt_static)
     else ()
       list(APPEND EXPORT_INTERFACE_CUDA_LIBS CUDA::cublas CUDA::cublasLt)
-    endif (HYPRE_SHARED)
+    endif (HYPRE_CUDA_TOOLKIT_STATIC)
   endif (HYPRE_ENABLE_CUBLAS)
 
   if (HYPRE_ENABLE_CUSOLVER)
