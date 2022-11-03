@@ -1927,4 +1927,3 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
 }
 
 #endif
-
