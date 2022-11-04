@@ -10,17 +10,17 @@
 #include "_hypre_lapack.h"
 #include "_hypre_blas.h"
 
-/* -----------------------------------------------------------------------------
- * generate AFF or AFC
- * ----------------------------------------------------------------------------- */
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFCHost
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
-                                HYPRE_Int           *CF_marker,
-                                HYPRE_BigInt        *cpts_starts,
-                                hypre_ParCSRMatrix  *S,
-                                hypre_ParCSRMatrix **A_FC_ptr,
-                                hypre_ParCSRMatrix **A_FF_ptr)
+hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
+                                    HYPRE_Int           *CF_marker,
+                                    HYPRE_BigInt        *cpts_starts,
+                                    hypre_ParCSRMatrix  *S,
+                                    hypre_ParCSRMatrix **A_FC_ptr,
+                                    hypre_ParCSRMatrix **A_FF_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -487,6 +487,35 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFC
+ *
+ * Generate AFF or AFC
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
+                                HYPRE_Int           *CF_marker,
+                                HYPRE_BigInt        *cpts_starts,
+                                hypre_ParCSRMatrix  *S,
+                                hypre_ParCSRMatrix **A_FC_ptr,
+                                hypre_ParCSRMatrix **A_FF_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, cpts_starts, S, A_FC_ptr, A_FF_ptr);
+   }
+
+   return hypre_error_flag;
+}
 
 /* -----------------------------------------------------------------------------
  * generate AFF, AFC, for 2 stage extended interpolation
