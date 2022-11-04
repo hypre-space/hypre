@@ -71,6 +71,7 @@ LFLAGS =\
 ##################################################################
 
 HYPRE_DRIVERS =\
+ amg.c\
  ij.c\
  ij_assembly.c\
  sstruct.c\
@@ -141,6 +142,10 @@ distclean: clean
 ##################################################################
 
 # C
+
+amg: amg.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 ij: ij.o
 	@echo  "Building" $@ "... "

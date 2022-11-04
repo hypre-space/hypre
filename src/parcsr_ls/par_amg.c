@@ -4952,3 +4952,37 @@ hypre_BoomerAMGSetFPoints(void         *data,
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_BoomerAMGSetCumNnzAP( void       *data,
+                            HYPRE_Real  cum_nnz_AP )
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataCumNnzAP(amg_data) = cum_nnz_AP;
+
+   return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_BoomerAMGGetCumNnzAP( void       *data,
+                            HYPRE_Real *cum_nnz_AP )
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   *cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
+
+   return hypre_error_flag;
+}
+
