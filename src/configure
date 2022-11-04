@@ -9178,6 +9178,9 @@ if test "x$hypre_using_umpire_host" = "xyes"
 then
    hypre_using_umpire=yes
 
+   LINK_CC=${LINK_CXX}
+   BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
+
 $as_echo "#define HYPRE_USING_UMPIRE_HOST 1" >>confdefs.h
 
 fi
@@ -11116,4 +11119,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-

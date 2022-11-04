@@ -1086,13 +1086,16 @@ hypre_MGRBuildPFromWp( hypre_ParCSRMatrix   *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildBlockJacobiWp
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A,
-                             HYPRE_Int            blk_size,
+                             HYPRE_Int             blk_size,
                              HYPRE_Int            *CF_marker,
                              HYPRE_BigInt         *cpts_starts,
-                             hypre_ParCSRMatrix   **Wp_ptr)
+                             hypre_ParCSRMatrix  **Wp_ptr )
 {
    hypre_ParCSRMatrix *Wp;
    hypre_ParCSRMatrix *A_FF_inv, *A_FC, *A_FF;
@@ -1112,35 +1115,39 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildPBlockJacobi
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix   *A,
                             hypre_ParCSRMatrix   *Wp,
-                            HYPRE_Int            blk_size,
+                            HYPRE_Int             blk_size,
                             HYPRE_Int            *CF_marker,
                             HYPRE_BigInt         *cpts_starts,
-                            HYPRE_Int            debug_flag,
-                            hypre_ParCSRMatrix   **P_ptr)
+                            HYPRE_Int             debug_flag,
+                            hypre_ParCSRMatrix  **P_ptr)
 {
-   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int my_id;
+   hypre_ParCSRMatrix   *Wp_tmp;
 
-   hypre_MPI_Comm_rank(comm, &my_id);
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (Wp == NULL)
    {
-      HYPRE_Real wall_time = time_getWallclockSeconds();
-      hypre_ParCSRMatrix *Wp_tmp;
       hypre_MGRBuildBlockJacobiWp(A, blk_size, CF_marker, cpts_starts, &Wp_tmp);
       hypre_MGRBuildPFromWp(A, Wp_tmp, CF_marker, debug_flag, P_ptr);
 
       hypre_ParCSRMatrixDeviceColMapOffd(Wp_tmp) = NULL;
       hypre_ParCSRMatrixColMapOffd(Wp_tmp)       = NULL;
       hypre_ParCSRMatrixDestroy(Wp_tmp);
-      wall_time = time_getWallclockSeconds() - wall_time;
    }
    else
    {
       hypre_MGRBuildPFromWp(A, Wp, CF_marker, debug_flag, P_ptr);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -3450,43 +3457,40 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
       else
 #endif
       {
-         hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global, debug_flag, &P_ptr);
+         hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global,
+                                                debug_flag, &P_ptr);
          hypre_BoomerAMGInterpTruncation(P_ptr, trunc_factor, max_elmts);
       }
    }
    else if (interp_type == 5)
    {
-      hypre_BoomerAMGBuildModExtInterp(A, CF_marker, aux_mat, num_cpts_global, 1, NULL, debug_flag,
-                                       trunc_factor, max_elmts, &P_ptr);
+      hypre_BoomerAMGBuildModExtInterp(A, CF_marker, aux_mat, num_cpts_global,
+                                       1, NULL, debug_flag, trunc_factor, max_elmts,
+                                       &P_ptr);
    }
    else if (interp_type == 6)
    {
-      hypre_BoomerAMGBuildModExtPIInterp(A, CF_marker, aux_mat, num_cpts_global, 1, NULL, debug_flag,
-                                         trunc_factor, max_elmts, &P_ptr);
+      hypre_BoomerAMGBuildModExtPIInterp(A, CF_marker, aux_mat, num_cpts_global,
+                                         1, NULL, debug_flag, trunc_factor, max_elmts,
+                                         &P_ptr);
    }
    else if (interp_type == 7)
    {
-      hypre_BoomerAMGBuildModExtPEInterp(A, CF_marker, aux_mat, num_cpts_global, 1, NULL, debug_flag,
-                                         trunc_factor, max_elmts, &P_ptr);
+      hypre_BoomerAMGBuildModExtPEInterp(A, CF_marker, aux_mat, num_cpts_global,
+                                         1, NULL, debug_flag, trunc_factor, max_elmts,
+                                         &P_ptr);
    }
    else if (interp_type == 12)
    {
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-      if (exec == HYPRE_EXEC_DEVICE)
-      {
-         hypre_NoGPUSupport("interpolation");
-      }
-      else
-#endif
-      {
-         hypre_MGRBuildPBlockJacobi(A, aux_mat, blk_size, CF_marker, num_cpts_global, debug_flag, &P_ptr);
-      }
+      hypre_MGRBuildPBlockJacobi(A, aux_mat, blk_size, CF_marker,
+                                 num_cpts_global, debug_flag, &P_ptr);
    }
    else
    {
       /* Classical modified interpolation */
-      hypre_BoomerAMGBuildInterp(A, CF_marker, aux_mat, num_cpts_global, 1, NULL, debug_flag,
-                                 trunc_factor, max_elmts, &P_ptr);
+      hypre_BoomerAMGBuildInterp(A, CF_marker, aux_mat, num_cpts_global,
+                                 1, NULL, debug_flag, trunc_factor, max_elmts,
+                                 &P_ptr);
    }
 
    /* set pointer to P */
