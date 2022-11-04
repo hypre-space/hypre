@@ -4258,7 +4258,6 @@ hypre_ParCSRMatrixExtractBlockDiag( hypre_ParCSRMatrix   *par_A,
                                     HYPRE_Real          **diag_ptr,
                                     HYPRE_Int             diag_type )
 {
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_A) );
 
@@ -4279,6 +4278,8 @@ hypre_ParCSRMatrixExtractBlockDiag( hypre_ParCSRMatrix   *par_A,
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractBlockDiagHost
+ *
+ * TODO: Move common code to hypre_ParCSRMatrixExtractBlockDiag
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -4292,7 +4293,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *A,
 {
    hypre_CSRMatrix      *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int             nrows        = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Real           *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Complex        *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
    HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
 
