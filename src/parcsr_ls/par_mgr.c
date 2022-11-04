@@ -1288,7 +1288,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
 
    if (method > 0)
    {
-      hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
+      hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
       diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, memory_location_P);
       if (method == 1)
       {
