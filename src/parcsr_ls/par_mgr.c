@@ -3580,11 +3580,14 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       else
 #endif
       {
-         hypre_MGRBuildPBlockJacobi(AT, NULL, blk_size, CF_marker, num_cpts_global, debug_flag, &R_ptr);
+         hypre_MGRBuildPBlockJacobi(AT, NULL, blk_size, CF_marker,
+                                    num_cpts_global, debug_flag, &R_ptr);
       }
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
+      /* TODO: create a function with this block (VPM) */
+
       hypre_ParCSRMatrix *blk_A_cf = NULL;
       hypre_ParCSRMatrix *blk_A_cf_transpose = NULL;
       hypre_ParCSRMatrix *Wr_transpose = NULL;
@@ -3601,9 +3604,9 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       f_marker = hypre_CTAlloc(HYPRE_Int, nrows, memory_location);
       for (i = 0; i < nrows; i++)
       {
-         HYPRE_Int point_type = CF_marker[i];
-         f_marker[i] = -point_type;
+         f_marker[i] = - CF_marker[i];
       }
+
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
@@ -3614,12 +3617,17 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       {
          /* get block A_cf */
          hypre_MGRGetAcfCPR(A, blk_size, c_marker, f_marker, &blk_A_cf);
+
          /* transpose block A_cf */
          hypre_ParCSRMatrixTranspose(blk_A_cf, &blk_A_cf_transpose, 1);
+
          /* compute block diagonal A_ff */
-         hypre_ParCSRMatrixBlockDiagMatrix(AT, blk_size, -1, CF_marker, &blk_A_ff_inv_transpose, 1);
+         hypre_ParCSRMatrixBlockDiagMatrix(AT, blk_size, -1, CF_marker,
+                                           &blk_A_ff_inv_transpose, 1);
+
          /* compute  Wr = A^{-T} * A_cf^{T}  */
          Wr_transpose = hypre_ParCSRMatMat(blk_A_ff_inv_transpose, blk_A_cf_transpose);
+
          /* compute restriction operator R = [-Wr  I] (transposed for use with RAP) */
          hypre_MGRBuildPFromWp(AT, Wr_transpose, CF_marker, debug_flag, &R_ptr);
       }
@@ -3654,6 +3662,8 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 
    return hypre_error_flag;
 }
+
+/* TODO: move matrix inversion functions outside parcsr_ls (VPM) */
 
 void hypre_blas_smat_inv_n2 (HYPRE_Real *a)
 {
