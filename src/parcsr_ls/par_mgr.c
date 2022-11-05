@@ -4521,7 +4521,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *A,
  *    otherwise : return the block diagonals
  *
  * Input parameters are:
- *    A          - original ParCSR matrix
+ *    par_A      - original ParCSR matrix
  *    blk_size   - Size of diagonal blocks to extract
  *    CF_marker  - Array prescribing submatrix from which to extract block
  *                 diagonals. Ignored if NULL.
@@ -4534,12 +4534,42 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixBlockDiagMatrix( hypre_ParCSRMatrix  *A,
+hypre_ParCSRMatrixBlockDiagMatrix( hypre_ParCSRMatrix  *par_A,
                                    HYPRE_Int            blk_size,
                                    HYPRE_Int            point_type,
                                    HYPRE_Int           *CF_marker,
                                    hypre_ParCSRMatrix **B_ptr,
                                    HYPRE_Int            diag_type )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixBlockDiagMatrixDevice(par_A, blk_size, point_type,
+                                              CF_marker, B_ptr, diag_type);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixBlockDiagMatrixHost(par_A, blk_size, point_type,
+                                            CF_marker, B_ptr, diag_type);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixBlockDiagMatrixHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
+                                       HYPRE_Int            blk_size,
+                                       HYPRE_Int            point_type,
+                                       HYPRE_Int           *CF_marker,
+                                       hypre_ParCSRMatrix **B_ptr,
+                                       HYPRE_Int            diag_type )
 {
    MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int             nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
