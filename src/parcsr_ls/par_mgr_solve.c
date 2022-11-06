@@ -371,10 +371,10 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
                                                  relax_weight,
                                                  omega,
                                                  NULL,
+                                                 0,
                                                  U_array[0],
                                                  Vtemp,
-                                                 Ztemp,
-                                                 0);
+                                                 Ztemp);
       }
    }
    else // lexicographic ordering for smoother (on F points in CF marker)
@@ -389,10 +389,10 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
                                                relax_weight,
                                                omega,
                                                NULL,
+                                               0,
                                                U_array[0],
                                                Vtemp,
-                                               Ztemp,
-                                               0);
+                                               Ztemp);
       }
    }
 
@@ -461,10 +461,10 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
                                                        relax_weight,
                                                        omega,
                                                        NULL,
+                                                       0,
                                                        Aux_U,
                                                        Vtemp,
-                                                       Ztemp,
-                                                       0);
+                                                       Ztemp);
             }
             cycle_param = 1;
          }
@@ -492,10 +492,10 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
                                                        relax_weight,
                                                        omega,
                                                        NULL,
+                                                       0,
                                                        Aux_U,
                                                        Vtemp,
-                                                       Ztemp,
-                                                       0);
+                                                       Ztemp);
             }
          }
          //hypre_printf("Vcycle smoother (coarse level): vtemp size = %d, level = %d \n", hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)), level);
@@ -684,7 +684,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   for (i = 0; i < level_smooth_iters[level]; i ++)
                   {
                      hypre_BoomerAMGRelax(A_array[level], F_array[level], NULL, level_smooth_type[level] - 1, 0, 1.0,
-                                          0.0, NULL, U_array[level], Vtemp, NULL, 0);
+                                          0.0, NULL, 0, U_array[level], Vtemp, NULL);
                   }
                }
                else if (level_smooth_type[level] == 8) //EUCLID ILU smoother
@@ -756,7 +756,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                                                  hypre_IntArrayData(CF_marker[fine_grid]),
                                                  relax_points, relax_weight,
                                                  relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
-                                                 U_array[fine_grid], Vtemp);
+                                                 0, U_array[fine_grid], Vtemp);
                   }
 #endif
                }
@@ -769,7 +769,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                                           relax_type, relax_points, relax_weight,
                                           omega,
                                           relax_l1_norms[fine_grid] ? hypre_VectorData(relax_l1_norms[fine_grid]) : NULL,
-                                          U_array[fine_grid], Vtemp, Ztemp, 0);
+                                          0, U_array[fine_grid], Vtemp, Ztemp);
                   }
                }
                else
@@ -778,7 +778,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                   {
                      Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                                            hypre_IntArrayData(CF_marker[fine_grid]),
-                                                           relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp, 0);
+                                                           relax_type, relax_points, relax_weight, omega, 
+                                                           NULL, 0, U_array[fine_grid], Vtemp, Ztemp);
                   }
                }
             }
@@ -905,7 +906,8 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                                      hypre_IntArrayData(CF_marker[fine_grid]),
-                                                     relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp, 0);
+                                                     relax_type, relax_points, relax_weight, omega,
+                                                     NULL, 0, U_array[fine_grid], Vtemp, Ztemp);
             }
          }
          //wall_time = time_getWallclockSeconds() - wall_time;
@@ -1001,7 +1003,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   {
                      hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], NULL, level_smooth_type[fine_grid] - 1,
                                           0, 1.0,
-                                          0.0, NULL, U_array[fine_grid], Vtemp, NULL, 0);
+                                          0.0, NULL, 0, U_array[fine_grid], Vtemp, NULL);
                   }
                }
                else if (level_smooth_type[fine_grid] == 8) //EUCLID ILU smoother

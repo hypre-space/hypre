@@ -188,10 +188,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 nrelax_weight[0],
                                 nomega[0],
                                 NULL,
+                                0,
                                 xn_l[0],
                                 nVtemp2_l[0],
-                                ze,
-                                0);
+                                ze);
 
          /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[0] */
          hypre_ParVectorCopy(be_l[0], eVtemp_l[0]);
@@ -209,10 +209,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 erelax_weight[0],
                                 eomega[0],
                                 NULL,
+                                0,
                                 xe_l[0],
                                 eVtemp2_l[0],
-                                ze,
-                                0);
+                                ze);
       }  /* for (j = 0; j < npre_relax; j++) */
 
       /* compute fine grid residual. Note the edge residual of
@@ -302,10 +302,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    nrelax_weight[level],
                                    nomega[level],
                                    NULL,
+                                   0,
                                    xn_l[level],
                                    nVtemp2_l[level],
-                                   ze,
-                                   0);
+                                   ze);
 
             /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[level] */
             hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
@@ -323,10 +323,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    erelax_weight[level],
                                    eomega[level],
                                    NULL,
+                                   0,
                                    xe_l[level],
                                    eVtemp2_l[level],
-                                   ze,
-                                   0);
+                                   ze);
          }  /*for (j = 0; j < npre_relax; j++) */
 
          /* compute residuals */
@@ -390,10 +390,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    nrelax_weight[level],
                                    nomega[level],
                                    NULL,
+                                   0,
                                    xn_l[level],
                                    nVtemp2_l[level],
-                                   ze,
-                                   0);
+                                   ze);
 
             /* update edge right-hand fe_l= fe_l-Aen_l*xn_l[level] */
             hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
@@ -412,10 +412,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    erelax_weight[level],
                                    eomega[level],
                                    NULL,
+                                   0,
                                    xe_l[level],
                                    eVtemp2_l[level],
-                                   ze,
-                                   0);
+                                   ze);
          }  /*for (j = 0; j < npre_relax; j++) */
       }   /* if (   (en_numlevs != edge_numlevs) */
 
@@ -430,10 +430,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 nrelax_weight[level],
                                 nomega[level],
                                 NULL,
+                                0,
                                 xn_l[level],
                                 nVtemp2_l[level],
-                                ze,
-                                0);
+                                ze);
 
          hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
          hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level],
@@ -451,10 +451,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 erelax_weight[level],
                                 eomega[level],
                                 NULL,
+                                0,
                                 xe_l[level],
                                 eVtemp2_l[level],
-                                ze,
-                                0);
+                                ze);
       }
 
       /* Continue down the edge hierarchy if more edge levels. */
@@ -484,10 +484,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                       erelax_weight[level],
                                       eomega[level],
                                       NULL,
+                                      0,
                                       xe_l[level],
                                       eVtemp2_l[level],
-                                      ze,
-                                      0);
+                                      ze);
             }
 
             /* compute residuals and restrict */
@@ -514,10 +514,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 erelax_weight[level],
                                 eomega[level],
                                 NULL,
+                                0,
                                 xe_l[level],
                                 eVtemp2_l[level],
-                                ze,
-                                0);
+                                ze);
       }  /* if (edge_numlevs > en_numlevs) */
 
       /*-----------------------------------------------------------
@@ -548,10 +548,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                       nrelax_weight[level],
                                       nomega[level],
                                       NULL,
+                                      0,
                                       xn_l[level],
                                       nVtemp2_l[level],
-                                      ze,
-                                      0);
+                                      ze);
             }
 
             /* compute residuals and restrict */
@@ -575,10 +575,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 nrelax_weight[level],
                                 nomega[level],
                                 NULL,
+                                0,
                                 xn_l[level],
                                 nVtemp2_l[level],
-                                ze,
-                                0);
+                                ze);
       }   /* else if (node_numlevs > en_numlevs) */
 
       /*---------------------------------------------------------------------
@@ -608,10 +608,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                       erelax_weight[level],
                                       eomega[level],
                                       NULL,
+                                      0,
                                       xe_l[level],
                                       eVtemp2_l[level],
-                                      ze,
-                                      0);
+                                      ze);
             }
 
          }   /* for (level = (edge_numlevs - 2); level>= en_numlevs; level--) */
@@ -637,10 +637,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                       nrelax_weight[level],
                                       nomega[level],
                                       NULL,
+                                      0,
                                       xn_l[level],
                                       nVtemp2_l[level],
-                                      ze,
-                                      0);
+                                      ze);
             }
 
          }   /* for (level = (node_numlevs - 2); level>= en_numlevs; level--) */
@@ -677,10 +677,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    nrelax_weight[level],
                                    nomega[level],
                                    NULL,
+                                   0,
                                    xn_l[level],
                                    nVtemp_l[level],
-                                   ze,
-                                   0);
+                                   ze);
 
             hypre_ParVectorCopy(be_l[level], eVtemp_l[level]);
             hypre_ParCSRMatrixMatvec(-1.0, Aen_l[level], xn_l[level],
@@ -697,10 +697,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                    erelax_weight[level],
                                    eomega[level],
                                    NULL,
+                                   0,
                                    xe_l[level],
                                    eVtemp2_l[level],
-                                   ze,
-                                   0);
+                                   ze);
          }
 
       }  /* for (level = (en_numlevs - 2); level>= 1; level--) */
@@ -759,10 +759,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 nrelax_weight[0],
                                 nomega[0],
                                 NULL,
+                                0,
                                 xn_l[0],
                                 nVtemp2_l[0],
-                                ze,
-                                0);
+                                ze);
 
          hypre_ParVectorCopy(be_l[0], eVtemp_l[0]);
          hypre_ParCSRMatrixMatvec(-1.0, Aen_l[0], xn_l[0], 1.0,
@@ -779,10 +779,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                                 erelax_weight[0],
                                 eomega[0],
                                 NULL,
+                                0,
                                 xe_l[0],
                                 eVtemp2_l[0],
-                                ze,
-                                0);
+                                ze);
       }  /* for (j = 0; j < npost_relax; j++) */
 
       (maxwell_data -> num_iterations) = (i + 1);
@@ -797,3 +797,4 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
    return hypre_error_flag;
 }
+

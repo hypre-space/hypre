@@ -39,6 +39,7 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
                    HYPRE_Real          min_eig_est,
                    HYPRE_Int           cheby_order,
                    HYPRE_Real          cheby_fraction,
+                   HYPRE_Int           zero_u,
                    hypre_ParVector    *u,              /* initial/updated approximation */
                    hypre_ParVector    *v,              /* temporary vector */
                    hypre_ParVector    *z               /* temporary vector */ )
@@ -49,28 +50,17 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
-         hypre_BoomerAMGRelax(A, f, NULL, 7, 0, relax_weight, 1.0, l1_norms, u, v, z, 0);
+         hypre_BoomerAMGRelax(A, f, NULL, 7, 0, relax_weight, 1.0, l1_norms, zero_u, u, v, z);
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
          /* !!! Note: relax_weight and omega flipped !!! */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-         if (exec == HYPRE_EXEC_DEVICE)
-         {
-            hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
-                                                        1,  1 /* symm */);
-         }
-         else
-#endif
-         {
-            hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
-                                                       1, 1 /* symm */, 0 /* skip diag */, 1, 0);
-         }
+         hypre_BoomerAMGRelaxHybridSOR(A, f, NULL, 0, omega,
+                                       relax_weight, l1_norms, u, v, z, 1, 1, 0, 1);
       }
       else if (relax_type == 3) /* Kaczmarz */
       {
-         hypre_BoomerAMGRelax(A, f, NULL, 20, 0, relax_weight, omega, l1_norms, u, v, z, 0);
+         hypre_BoomerAMGRelax(A, f, NULL, 20, 0, relax_weight, omega, l1_norms, zero_u, u, v, z);
       }
       else /* call BoomerAMG relaxation */
       {
@@ -82,7 +72,7 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
          else
          {
             hypre_BoomerAMGRelax(A, f, NULL, hypre_abs(relax_type), 0, relax_weight,
-                                 omega, l1_norms, u, v, z, 0);
+                                 omega, l1_norms, zero_u, u, v, z);
          }
       }
    }
@@ -3955,7 +3945,7 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
                            A0_min_eig_est,
                            A0_cheby_order,
                            A0_cheby_fraction,
-                           y, g0, z);
+                           0, y, g0, z);
       }
 
       /* subspace correction: y += P B^{-1} P^t r */

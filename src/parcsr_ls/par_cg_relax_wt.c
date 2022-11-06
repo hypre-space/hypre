@@ -202,21 +202,23 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    for (jj = 0; jj < num_cg_sweeps; jj++)
    {
       hypre_ParVectorSetConstantValues(Ztemp, 0.0);
+
       for (j = 0; j < num_sweeps; j++)
       {
          if (smooth_option > 6)
          {
-
             hypre_ParVectorCopy(Rtemp, Vtemp);
             alpha = -1.0;
             beta = 1.0;
             hypre_ParCSRMatrixMatvec(alpha, A,
                                      Ztemp, beta, Vtemp);
             if (smooth_option == 8)
+            {
                HYPRE_ParCSRParaSailsSolve(smoother[level],
                                           (HYPRE_ParCSRMatrix) A,
                                           (HYPRE_ParVector) Vtemp,
                                           (HYPRE_ParVector) Utemp);
+            }
             else if (smooth_option == 7)
             {
                HYPRE_ParCSRPilutSolve(smoother[level],
@@ -235,10 +237,12 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
             }
          }
          else if (smooth_option == 6)
+         {
             HYPRE_SchwarzSolve(smoother[level],
                                (HYPRE_ParCSRMatrix) A,
                                (HYPRE_ParVector) Rtemp,
                                (HYPRE_ParVector) Ztemp);
+         }
          else
          {
             Solve_err_flag = hypre_BoomerAMGRelax(A,
@@ -249,10 +253,10 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
                                                   1.0,
                                                   1.0,
                                                   l1_norms ? hypre_VectorData(l1_norms) : NULL,
+                                                  j == 0,
                                                   Ztemp,
                                                   Vtemp,
-                                                  Qtemp,
-                                                  0);
+                                                  Qtemp);
          }
 
          if (Solve_err_flag != 0)
@@ -263,6 +267,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
             return (Solve_err_flag);
          }
       }
+
       gammaold = gamma;
       gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
       if (jj == 0)

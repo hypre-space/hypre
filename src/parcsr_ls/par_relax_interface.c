@@ -26,10 +26,10 @@ hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                         HYPRE_Real          relax_weight,
                         HYPRE_Real          omega,
                         HYPRE_Real         *l1_norms,
+                        HYPRE_Int           zero_u,
                         hypre_ParVector    *u,
                         hypre_ParVector    *Vtemp,
-                        hypre_ParVector    *Ztemp,
-                        HYPRE_Int           zero_u )
+                        hypre_ParVector    *Ztemp)
 {
    HYPRE_Int i, Solve_err_flag = 0;
    HYPRE_Int relax_points[2];
@@ -52,14 +52,14 @@ hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
       for (i = 0; i < 2; i++)
       {
          Solve_err_flag = hypre_BoomerAMGRelax(A, f, cf_marker, relax_type, relax_points[i],
-                                               relax_weight, omega, l1_norms, u, Vtemp, Ztemp,
-                                               zero_u && i == 0);
+                                               relax_weight, omega, l1_norms, 
+                                               zero_u && i == 0, u, Vtemp, Ztemp);
       }
    }
    else
    {
       Solve_err_flag = hypre_BoomerAMGRelax(A, f, cf_marker, relax_type, 0, relax_weight, omega,
-                                            l1_norms, u, Vtemp, Ztemp, zero_u);
+                                            l1_norms, zero_u, u, Vtemp, Ztemp);
    }
 
    return Solve_err_flag;
@@ -76,12 +76,13 @@ hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                              HYPRE_Int           relax_points,
                              HYPRE_Real          relax_weight,
                              HYPRE_Real         *l1_norms,
+                             HYPRE_Int           zero_u,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 
 {
-   return hypre_BoomerAMGRelax(A, f, cf_marker, 18, relax_points, relax_weight, 0.0, l1_norms, u,
-                               Vtemp, NULL, 0);
+   return hypre_BoomerAMGRelax(A, f, cf_marker, 18, relax_points, relax_weight, 0.0, l1_norms,
+                               zero_u, u, Vtemp, NULL);
 }
 
 /*--------------------------------------------------------------------------
@@ -92,6 +93,7 @@ hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                                 hypre_ParVector    *f,
                                 HYPRE_Int          *cf_marker,
                                 HYPRE_Real          relax_weight,
+                                HYPRE_Int           zero_u,
                                 hypre_ParVector    *u,
                                 hypre_ParVector    *Vtemp)
 {
@@ -112,7 +114,7 @@ hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
    for (i = 0; i < 3; i++)
    {
       hypre_BoomerAMGRelax(A, f, cf_marker, relax_type, relax_points[i],
-                           relax_weight, 0.0, NULL, u, Vtemp, NULL, 0);
+                           relax_weight, 0.0, NULL, zero_u, u, Vtemp, NULL);
    }
 
    return hypre_error_flag;

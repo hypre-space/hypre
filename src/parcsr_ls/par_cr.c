@@ -3057,8 +3057,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             hypre_BoomerAMGRelax(A, Vtemp, CF_marker,
                                  rlx_type, fpt,
                                  relax_weight, omega, NULL,
-                                 e1_vec, e0_vec,
-                                 Relax_temp, 0);
+                                 0, e1_vec, e0_vec,
+                                 Relax_temp);
             /*if (i==num_CR_relax_steps-1) */
             if (i == 1)
             {

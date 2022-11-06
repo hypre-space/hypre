@@ -402,12 +402,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          hypre_GpuProfilingPushRange("Relaxation");
 #endif
 
-         HYPRE_Int sweep_count = 0;
-
          for (jj = 0; jj < cg_num_sweep; jj++)
          {
-            HYPRE_Int zero_u = level > 0 && sweep_count == 0 && cycle_param == 1;
-
             if (smooth_num_levels > level && smooth_type > 9)
             {
                hypre_ParVectorSetConstantValues(Aux_U, 0);
@@ -415,6 +411,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
             for (j = 0; j < num_sweep; j++)
             {
+               HYPRE_Int zero_u = level > 0 && jj == 0 && j == 0 && cycle_param == 1;
+
                if (num_levels == 1 && max_levels > 1)
                {
                   relax_points = 0;
@@ -527,10 +525,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                           relax_weight[level],
                                                           omega[level],
                                                           l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
+                                                          zero_u,
                                                           Aux_U,
                                                           Vtemp,
-                                                          Ztemp,
-                                                          zero_u);
+                                                          Ztemp);
                }
                else if (relax_type == 15)
                {
@@ -559,15 +557,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   if (level == num_levels - 1)
                   {
                      /* if we are on the coarsest level, the cf_marker will be null
-                        and we just do one sweep regular jacobi */
+                        and we just do one sweep regular Jacobi */
                      hypre_assert(cycle_param == 3);
                      hypre_BoomerAMGRelax(A_array[level], Aux_F, CF_marker, 0, 0, relax_weight[level],
-                                          0.0, NULL, Aux_U, Vtemp, NULL, 0);
+                                          0.0, NULL, zero_u, Aux_U, Vtemp, NULL);
                   }
                   else
                   {
                      hypre_BoomerAMGRelax_FCFJacobi(A_array[level], Aux_F, CF_marker, relax_weight[level],
-                                                    Aux_U, Vtemp);
+                                                    zero_u, Aux_U, Vtemp);
                   }
                }
                else if (old_version)
@@ -580,10 +578,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                         relax_weight[level],
                                                         omega[level],
                                                         l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
+                                                        zero_u,
                                                         Aux_U,
                                                         Vtemp,
-                                                        Ztemp,
-                                                        0);
+                                                        Ztemp);
                }
                else
                {
@@ -612,10 +610,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                              relax_weight[level],
                                                              omega[level],
                                                              l1_norms_level ? hypre_VectorData(l1_norms_level) : NULL,
+                                                             zero_u,
                                                              Aux_U,
                                                              Vtemp,
-                                                             Ztemp,
-                                                             zero_u);
+                                                             Ztemp);
                   }
                }
 
@@ -631,9 +629,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 #endif
                   return (Solve_err_flag);
                }
-
-               sweep_count ++;
-
             } /* for (j = 0; j < num_sweep; j++) */
 
             if  (smooth_num_levels > level && smooth_type > 9)
