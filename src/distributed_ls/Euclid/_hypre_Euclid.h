@@ -458,7 +458,7 @@ extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
  * enabled when compiled with the debugging (-g) option.
  */
 extern void openLogfile_dh(HYPRE_Int argc, char *argv[]);
-extern void closeLogfile_dh();
+extern void closeLogfile_dh(void);
 extern bool logInfoToStderr;
 extern bool logInfoToFile;
 extern bool logFuncsToStderr;
@@ -470,8 +470,8 @@ extern void dh_EndFunc(const char *function, HYPRE_Int priority);
 extern void printFunctionStack(FILE *fp);
 
 extern void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help); /* instantiates global objects */
-extern void EuclidFinalize();    /* deletes global objects */
-extern bool EuclidIsInitialized();
+extern void EuclidFinalize(void);    /* deletes global objects */
+extern bool EuclidIsInitialized(void);
 extern void printf_dh(const char *fmt, ...);
 extern void fprintf_dh(FILE *fp, const char *fmt, ...);
 
@@ -1995,7 +1995,7 @@ extern void closeFile_dh(FILE *fpIN);
  * binary io; these are called by functions in mat_dh_private
  *---------------------------------------------------------------------------*/
 
-bool isSmallEndian();
+bool isSmallEndian(void);
 
 /* seq only ?? */
 extern void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
