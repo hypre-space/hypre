@@ -469,7 +469,12 @@ HYPRE_Int HYPRE_IJVectorAddToValues(HYPRE_IJVector       vector,
 HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 
 /**
+ * Update vectors by setting (action 1) or
+ * adding to (action 0) values in 'vector'.
+ * Note that this function cannot update values owned by other processes
+ * and does not allow repeated index values in 'indices'.
  *
+ * Not collective.
  **/
 HYPRE_Int HYPRE_IJVectorUpdateValues(HYPRE_IJVector       vector,
                                      HYPRE_Int            nvalues,
