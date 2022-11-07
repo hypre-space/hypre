@@ -211,8 +211,8 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
                               hypre_ParVector    *u,
                               hypre_ParVector    *Vtemp )
 {
-   hypre_BoomerAMGRelax(A, f, CF_marker, 18, relax_points, relax_weight, 1.0, l1_norms, u, Vtemp,
-                        NULL, 0);
+   hypre_BoomerAMGRelax(A, f, CF_marker, 18, relax_points, relax_weight, 1.0, l1_norms, 0, u, Vtemp,
+                        NULL);
 
    return hypre_error_flag;
 }
