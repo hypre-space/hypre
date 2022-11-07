@@ -990,9 +990,11 @@ hypre_MGRSetup( void               *mgr_vdata,
       if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
       {
          HYPRE_Real *diag_inv = NULL;
-         HYPRE_Int inv_size;
-         hypre_ParCSRMatrixExtractBlockDiag(A_array[lev], block_jacobi_bsize, -1, CF_marker, &inv_size,
-                                            &diag_inv, 1);
+         HYPRE_Int   inv_num_rows;
+         HYPRE_Int   inv_size;
+
+         hypre_ParCSRMatrixExtractBlockDiag(A_array[lev], block_jacobi_bsize, -1, CF_marker,
+                                            &inv_num_rows, &inv_size, &diag_inv, 1);
          frelax_diaginv[lev] = diag_inv;
          blk_size[lev] = block_jacobi_bsize;
          hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);

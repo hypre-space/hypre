@@ -3140,13 +3140,15 @@ HYPRE_Int hypre_MGRBuildRestrict(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                        HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts_in,
                                        hypre_ParCSRMatrix **Wp_ptr);
-HYPRE_Int hypre_ParCSRMatrixExtractBlockDiag( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
+HYPRE_Int hypre_ParCSRMatrixExtractBlockDiag( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
                                               HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                              HYPRE_Int *inv_size_ptr, HYPRE_Real **diaginv_ptr,
+                                              HYPRE_Int *blk_diag_num_rows,
+                                              HYPRE_Int *blk_diag_size, HYPRE_Real**diag_ptr,
                                               HYPRE_Int diag_type );
-HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
+HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
                                                   HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                                  HYPRE_Int *inv_size_ptr, HYPRE_Real **diaginv_ptr,
+                                                  HYPRE_Int *blk_diag_num_rows,
+                                                  HYPRE_Int *blk_diag_size, HYPRE_Real**diag_ptr,
                                                   HYPRE_Int diag_type );
 HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                              HYPRE_Int point_type, HYPRE_Int *CF_marker,
@@ -3252,9 +3254,9 @@ HYPRE_Int hypre_MGRBuildPDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                  hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                                     HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                                    HYPRE_Int *inv_size_ptr,
-                                                    HYPRE_Real **diaginv_ptr,
-                                                    HYPRE_Int diag_type );
+                                                    HYPRE_Int *bdiag_num_rows_ptr,
+                                                    HYPRE_Int *bdiag_size_ptr,
+                                                    HYPRE_Real **diag_ptr, HYPRE_Int diag_type );
 HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    hypre_ParCSRMatrix **B_ptr,

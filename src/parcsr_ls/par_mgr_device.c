@@ -423,6 +423,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                           HYPRE_Int             blk_size,
                                           HYPRE_Int             point_type,
                                           HYPRE_Int            *CF_marker,
+                                          HYPRE_Int            *bdiag_num_rows_ptr,
                                           HYPRE_Int            *bdiag_size_ptr,
                                           HYPRE_Real          **diag_ptr,
                                           HYPRE_Int             diag_type )
@@ -597,6 +598,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
    /* Set output pointers and free memory */
    *bdiag_size_ptr = bdiag_size;
+   *bdiag_num_rows_ptr = num_points;
    if (diag_type == 1)
    {
       *diag_ptr = diag;
