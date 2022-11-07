@@ -36,6 +36,7 @@ FILES =\
  HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
+ vector.c\
  vector_batched.c
 
 CUFILES =\
@@ -75,7 +76,7 @@ CUFILES =\
  csr_spgemm_device_util.c\
  csr_spmv_device.c\
  csr_sptrans_device.c\
- vector.c
+ vector_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
@@ -88,8 +89,8 @@ SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 ##################################################################
 
 all:
-	make autogen
-	make lib
+	$(MAKE) autogen
+	$(MAKE) lib
 
 lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
