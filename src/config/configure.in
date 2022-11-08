@@ -1716,7 +1716,7 @@ then
 
    if test "$hypre_using_sycl" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, dpcpp)
+      AC_CHECK_PROGS(CUCC, icpx)
    fi
 fi
 
