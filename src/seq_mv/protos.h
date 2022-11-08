@@ -98,6 +98,9 @@ HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, 
 /* dense_matrix.c */
 hypre_DenseMatrix* hypre_DenseMatrixCreate( HYPRE_Int num_rows, HYPRE_Int num_cols );
 HYPRE_Int hypre_DenseMatrixDestroy( hypre_DenseMatrix *matrix );
+HYPRE_Int hypre_DenseMatrixInitialize_v2( hypre_DenseMatrix *matrix,
+                                          HYPRE_MemoryLocation *memory_location );
+HYPRE_Int hypre_DenseMatrixInitialize( hypre_DenseMatrix *matrix );
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
