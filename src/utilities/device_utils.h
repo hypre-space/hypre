@@ -107,17 +107,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* The following definitions facilitate code reuse and limits
- * if/def-ing when unifying cuda/hip code with sycl code */
-using dim3 = sycl::range<1>;
-using hypre_DeviceItem = sycl::nd_item<1>;
-#define __global__
-#define __host__
-#define __device__
-#define __forceinline__ __inline__ __attribute__((always_inline))
 
-/* WM: problems with this being inside extern C++ {} */
-/* #include <CL/sycl.hpp> */
+#include <sycl/sycl.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -128,6 +119,15 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #include <oneapi/mkl/rng.hpp>
 #endif
 #endif // defined(HYPRE_USING_SYCL)
+
+/* The following definitions facilitate code reuse and limits
+ * if/def-ing when unifying cuda/hip code with sycl code */
+using dim3 = sycl::range<1>;
+using hypre_DeviceItem = sycl::nd_item<1>;
+#define __global__
+#define __host__
+#define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
@@ -1287,9 +1287,6 @@ T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_
    /* WM: todo - try removing barrier with new implementation */
    item.get_sub_group().barrier();
    return sycl::group_broadcast(item.get_sub_group(), val, src_line);
-   /* WM: todo - group broadcast vs select_from_group... what's the difference? Should I be using the below? */
-   /* Oh, apparently group_broadcast is very fast and preferred. */
-   /* return sycl::select_from_group(item.get_sub_group(), val, src_in_warp); */
 }
 
 template <typename T>

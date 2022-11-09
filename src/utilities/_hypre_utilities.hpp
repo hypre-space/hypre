@@ -4,10 +4,6 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
-/* WM: todo - I have a problem where I need to include this outside the extern "C++" {} block, so I'm doing this manually here for now */
-#if defined(HYPRE_USING_SYCL)
-#include <CL/sycl.hpp>
-#endif
 
 #ifdef __cplusplus
 extern "C++" {
@@ -163,17 +159,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* The following definitions facilitate code reuse and limits
- * if/def-ing when unifying cuda/hip code with sycl code */
-using dim3 = sycl::range<1>;
-using hypre_DeviceItem = sycl::nd_item<1>;
-#define __global__
-#define __host__
-#define __device__
-#define __forceinline__ __inline__ __attribute__((always_inline))
 
-/* WM: problems with this being inside extern C++ {} */
-/* #include <CL/sycl.hpp> */
+#include <sycl/sycl.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -184,6 +171,15 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #include <oneapi/mkl/rng.hpp>
 #endif
 #endif // defined(HYPRE_USING_SYCL)
+
+/* The following definitions facilitate code reuse and limits
+ * if/def-ing when unifying cuda/hip code with sycl code */
+using dim3 = sycl::range<1>;
+using hypre_DeviceItem = sycl::nd_item<1>;
+#define __global__
+#define __host__
+#define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
