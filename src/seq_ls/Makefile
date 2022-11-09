@@ -20,10 +20,11 @@ HEADERS =\
  _hypre_seq_ls.h\
 
 FILES =\
- direct_solver.c
+ direct_solver.c\
+ direct_custom.c
 
 CUFILES =\
- direct_cusolver.c\
+ direct_vendor.c\
  direct_magma.c
 
 COBJS = ${FILES:.c=.o}
@@ -47,9 +48,8 @@ install: libHYPRE_seq_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_seq_ls.h $(HYPRE_INC_INSTALL)
 
-clean: deleteautogen
+clean:
 	rm -f *.o *.obj libHYPRE*
-	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 

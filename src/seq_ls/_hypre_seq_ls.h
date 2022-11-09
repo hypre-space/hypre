@@ -21,49 +21,93 @@ extern "C" {
 #define hypre_DIRECT_SOLVER_DATA_HEADER
 
 /*--------------------------------------------------------------------------
+ * hypre_DirectSolverBackend
+ *--------------------------------------------------------------------------*/
+
+typedef enum hypre_DirectSolverBackend_enum
+{
+  HYPRE_DIRECT_SOLVER_VENDOR = 0,
+  HYPRE_DIRECT_SOLVER_CUSTOM = 1
+} hypre_DirectSolverBackend;
+
+/*--------------------------------------------------------------------------
+ * hypre_DirectSolverMethod
+ *--------------------------------------------------------------------------*/
+
+typedef enum hypre_DirectSolverMethod_enum
+{
+  HYPRE_DIRECT_SOLVER_LU    = 0,
+  HYPRE_DIRECT_SOLVER_LUPIV = 1,
+  HYPRE_DIRECT_SOLVER_CHOL  = 2
+} hypre_DirectSolverMethod;
+
+/*--------------------------------------------------------------------------
  * hypre_DirectSolverData
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_DirectSolverData_struct
 {
-   HYPRE_Int            option;
-   HYPRE_Int            info;
+   hypre_DirectSolverBackend   backend;
+   hypre_DirectSolverMethod    method;
 
-#if defined (HYPRE_USING_CUSOLVER)
-   cusolverDnHandle_t   cusolver_handle;
-#endif
+   HYPRE_Int                  *pivots;
+
+   HYPRE_Int                   info_size;
+   HYPRE_Int                  *info;
+   HYPRE_MemoryLocation        memory_location;
 } hypre_DirectSolverData;
 
 /*--------------------------------------------------------------------------
  *  Accessor functions for the hypre_DirectSolverData structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_DirectSolverDataOption(data)          ((data) -> option)
+#define hypre_DirectSolverDataBackend(data)         ((data) -> backend)
+#define hypre_DirectSolverDataMethod(data)          ((data) -> method)
+#define hypre_DirectSolverDataPivots(data)          ((data) -> pivots)
+#define hypre_DirectSolverDataInfoSize(data)        ((data) -> info_size)
 #define hypre_DirectSolverDataInfo(data)            ((data) -> info)
-#define hypre_DirectSolverDataCuSolverHandle(data)  ((data) -> cusolver_handle)
+#define hypre_DirectSolverDataMemoryLocation(data)  ((data) -> memory_location)
 
 #endif
 
 /* direct_solver.c */
-void*     hypre_DirectSolverCreate ( HYPRE_Int option );
+void* hypre_DirectSolverCreate( hypre_DirectSolverBackend backend, hypre_DirectSolverMethod method,
+                                HYPRE_Int info_size, HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_DirectSolverDestroy ( void *vdata );
-HYPRE_Int hypre_DirectSolverSetup ( void *direct_vdata, hypre_DenseMatrix *A, hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolve ( void *direct_vdata, hypre_DenseMatrix *A, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverInitialize ( void* vdata );
+HYPRE_Int hypre_DirectSolverSetup ( void *vdata, hypre_DenseMatrix *A,
+                                    hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverSolve ( void *vdata, hypre_DenseMatrix *A,
+                                    hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverInvert ( void *vdata, hypre_DenseMatrix *A,
+                                     hypre_DenseMatrix *Ainv );
 
-/* direct_cusolver.c */
-#if defined (HYPRE_USING_CUSOLVER)
-void*     hypre_DirectSolverCreateCuSolver ( void );
-HYPRE_Int hypre_DirectSolverDestroyCuSolver ( void *direct_vdata );
-HYPRE_Int hypre_DirectSolverSetupCuSolver ( void *direct_vdata, hypre_DenseMatrix *A, hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolveCuSolver ( void *direct_vdata, hypre_DenseMatrix *A, hypre_Vector *f, hypre_Vector *u );
+/* direct_vendor.c */
+#if defined (HYPRE_USING_CUDA)
+HYPRE_Int hypre_DirectSolverSetupVendor ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
+                                          hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverSolveVendor ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
+                                          hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverInvertVendor ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
+                                           hypre_DenseMatrix *Ainv );
 #endif
+
+/* direct_custom.c */
+HYPRE_Int hypre_DirectSolverSetupCustom ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
+                                          hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverSolveCustom ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
+                                          hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverInvertCustom ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
+                                           hypre_DenseMatrix *Ainv );
 
 /* direct_magma.c */
 #if defined (HYPRE_USING_MAGMA)
 void*     hypre_DirectSolverCreateMagma ( void );
 HYPRE_Int hypre_DirectSolverDestroyMagma ( void *direct_vdata );
-HYPRE_Int hypre_DirectSolverSetupMagma ( void *direct_vdata, hypre_DenseMatrix *A, hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolveMagma ( void *direct_vdata, hypre_DenseMatrix *A, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverSetupMagma ( void *direct_vdata, hypre_DenseMatrix *A,
+                                         hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverSolveMagma ( void *direct_vdata, hypre_DenseMatrix *A,
+                                         hypre_Vector *f, hypre_Vector *u );
 #endif
 
 #ifdef __cplusplus
