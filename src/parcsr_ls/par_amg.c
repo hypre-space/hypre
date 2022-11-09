@@ -22,7 +22,7 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_BoomerAMGCreate()
+hypre_BoomerAMGCreate( void )
 {
    hypre_ParAMGData  *amg_data;
 

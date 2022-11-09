@@ -64,7 +64,7 @@ hypre_OutOfMemory(size_t size)
 }
 
 static inline void
-hypre_WrongMemoryLocation()
+hypre_WrongMemoryLocation(void)
 {
    hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Unrecognized hypre_MemoryLocation\n");
    hypre_assert(0);
