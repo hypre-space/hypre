@@ -548,7 +548,7 @@ endif (HYPRE_USING_MAGMA)
 if (MAGMA_FOUND)
   set(HYPRE_USING_MAGMA TRUE)
 endif ()
-=======
+
 # Find FEI, if requested
 if (HYPRE_USING_FEI)
   enable_language(CXX)
@@ -569,7 +569,6 @@ if (HYPRE_USING_FEI)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
 endif(HYPRE_USING_FEI)
 
->>>>>>> master
 if (HYPRE_USING_CUDA)
   target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
   if (HYPRE_HAVE_MPI)
