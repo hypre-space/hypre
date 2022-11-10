@@ -1297,9 +1297,11 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
 
    HYPRE_Int *result = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int nrows = hypre_CSRMatrixNumRows(A);
    HYPRE_GPU_LAUNCH( hypreCUDAKernel_CSRCheckDiagFirst, gDim, bDim,
-                     hypre_CSRMatrixNumRows(A),
-                     hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), result );
+                     nrows, A_i, A_j, result );
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_Int ierr = HYPRE_ONEDPL_CALL( std::reduce,

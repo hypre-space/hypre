@@ -50,8 +50,7 @@ save="arcticus"
 ##########
 
 # SYCL with UM in debug mode [ij, struct]
-# WM: todo - removed --enable-debug below since I'm getting some weird linking errors
-co="--with-sycl --enable-unified-memory CC=mpiicx CXX=mpiicpx --disable-fortran --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+co="--enable-debug --with-sycl --enable-unified-memory CC=mpiicx CXX=mpiicpx --disable-fortran --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
 ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um

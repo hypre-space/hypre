@@ -2473,7 +2473,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
         then
-           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+           dnl WM: remove the -g flag for debug mode because it currently causes errors on JLSE
+           SYCLFLAGS="-Wall ${SYCLFLAGS}"
         else
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
