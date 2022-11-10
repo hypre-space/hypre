@@ -57,7 +57,25 @@ main( int argc,
 {
    hypre_MPI_Init(&argc, &argv);
    HYPRE_Init();
-   HYPRE_SetSpGemmUseVendor(0);
+
+   HYPRE_Int spgemm_use_vendor = 0;
+
+   /* Parse command line args */
+   HYPRE_Int arg_index = 1;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
+      {
+         arg_index++;
+         spgemm_use_vendor = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 
    /* hypre_CSRMatrix *A_host = hypre_CSRMatrixRead("A"); */
    /* hypre_CSRMatrix *B_host = hypre_CSRMatrixRead("B"); */
@@ -84,9 +102,9 @@ main( int argc,
    if (err_norm > 0.00001)
    {
       error = hypre_CSRMatrixDeleteZeros(error, 0.000000001);
-      hypre_CSRMatrixPrint(C_host, "C_host");
-      hypre_CSRMatrixPrint(C, "C_device");
-      hypre_CSRMatrixPrint(error, "error");
+      hypre_CSRMatrixPrintMM(C_host, 0, 0, 0, "C_host");
+      hypre_CSRMatrixPrintMM(C, 0, 0, 0, "C_device");
+      hypre_CSRMatrixPrintMM(error, 0, 0, 0, "C_error");
    }
 
    hypre_CSRMatrixDestroy(error);
