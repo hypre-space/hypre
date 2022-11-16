@@ -59,7 +59,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     HYPRE_handle.c
     device_utils.c
     handle.c
-    int_array.c
+    int_array_device.c
     general.c
     memory.c
     memory_tracker.c
