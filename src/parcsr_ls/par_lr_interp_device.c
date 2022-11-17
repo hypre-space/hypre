@@ -259,12 +259,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                      W_diag_i,
                      P_diag_i );
 
-   HYPRE_ONEDPL_CALL( std::transform,
-                      P_diag_i,
-                      P_diag_i + P_nr_of_rows + 1,
-                      PWoffset,
-                      P_diag_i,
-                      std::plus<HYPRE_Int>() );
+   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    if (W_offd_i && P_offd_i)

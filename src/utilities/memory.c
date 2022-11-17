@@ -212,7 +212,7 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
       /*     Native API returns: -997 (The plugin has emitted a backend specific error) */
       /*     or a seg fault. On the other hand, removing this line can also cause the code 
        *     to hang (or run excessively slow?). */
-      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() );
+      /* HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() ); */
    }
 #endif
 }

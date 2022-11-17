@@ -477,7 +477,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         option == 1 ? map2FC : map2F2,
                         AFF_diag_ii );
 
-      hypre_assert( std::get<0>(new_end.base()) == AFF_diag_ii + AFF_diag_nnz );
 #else
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
       auto new_end = HYPRE_THRUST_CALL( copy_if,
