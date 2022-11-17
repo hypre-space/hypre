@@ -28,7 +28,7 @@ Final Relative Residual Norm = 4.607814e-09
 
 # Output file: amgdd.out.910
 GMRES Iterations = 7
-Final GMRES Relative Residual Norm = 9.441125e-10
+Final GMRES Relative Residual Norm = 9.441124e-10
 
 # Output file: amgdd.out.911
 GMRES Iterations = 7
