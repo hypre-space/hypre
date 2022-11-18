@@ -50,7 +50,8 @@ save="arcticus"
 ##########
 
 # SYCL with UM in debug mode [ij, struct]
-co="--enable-debug --with-sycl --enable-unified-memory CC=mpiicx CXX=mpiicpx --disable-fortran --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+# WM: I suppress all warnings for sycl files for now since JLSE can throw a lot of warnings
+co="--enable-debug --with-sycl --enable-unified-memory CC=mpiicx CXX=mpiicpx --disable-fortran --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
 ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um
