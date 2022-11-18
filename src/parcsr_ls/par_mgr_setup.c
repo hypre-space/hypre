@@ -993,8 +993,20 @@ hypre_MGRSetup( void               *mgr_vdata,
          HYPRE_Int   inv_num_rows;
          HYPRE_Int   inv_size;
 
-         hypre_ParCSRMatrixExtractBlockDiag(A_array[lev], block_jacobi_bsize, -1, CF_marker,
-                                            &inv_num_rows, &inv_size, &diag_inv, 1);
+         // TODO: replace this with hypre_IntArrayCount
+         inv_num_rows = 0;
+         for (i = 0; i < nloc; i++)
+         {
+            inv_num_rows += (CF_marker[i] == -1) ? 1 : 0;
+         }
+
+         // Extract block diagonal inverses
+         inv_size = inv_num_rows * block_jacobi_bsize;
+         diag_inv = hypre_CTAlloc(HYPRE_Complex, inv_size, HYPRE_MEMORY_HOST);
+
+         // TODO: Extend this to device
+         hypre_ParCSRMatrixExtractBlockDiagHost(A_array[lev], block_jacobi_bsize, inv_num_rows,
+                                                -1, CF_marker, inv_size, 1, diag_inv);
          frelax_diaginv[lev] = diag_inv;
          blk_size[lev] = block_jacobi_bsize;
          hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);

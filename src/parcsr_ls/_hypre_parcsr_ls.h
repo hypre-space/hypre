@@ -3140,22 +3140,17 @@ HYPRE_Int hypre_MGRBuildRestrict(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                        HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts_in,
                                        hypre_ParCSRMatrix **Wp_ptr);
-HYPRE_Int hypre_ParCSRMatrixExtractBlockDiag( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
-                                              HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                              HYPRE_Int *blk_diag_num_rows,
-                                              HYPRE_Int *blk_diag_size, HYPRE_Real**diag_ptr,
-                                              HYPRE_Int diag_type );
 HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
-                                                  HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                                  HYPRE_Int *blk_diag_num_rows,
-                                                  HYPRE_Int *blk_diag_size, HYPRE_Real**diag_ptr,
-                                                  HYPRE_Int diag_type );
+                                                  HYPRE_Int num_points, HYPRE_Int point_type,
+                                                  HYPRE_Int *CF_marker, HYPRE_Int diag_size,
+                                                  HYPRE_Int diag_type, HYPRE_Real *diag_data );
 HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                              HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                             hypre_ParCSRMatrix **B_ptr, HYPRE_Int diag_type );
+                                             HYPRE_Int diag_type, hypre_ParCSRMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                                  HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                                 hypre_ParCSRMatrix **B_ptr, HYPRE_Int diag_type );
+                                                 HYPRE_Int diag_type,
+                                                 hypre_ParCSRMatrix **B_ptr );
 HYPRE_Int hypre_MGRSetCoarseSolver( void *mgr_vdata,
                                     HYPRE_Int (*coarse_grid_solver_solve)(void*, void*, void*, void*),
                                     HYPRE_Int (*coarse_grid_solver_setup)(void*, void*, void*, void*),
@@ -3253,14 +3248,15 @@ HYPRE_Int hypre_MGRBuildPDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                  HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
                                  hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
-                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                                    HYPRE_Int *bdiag_num_rows_ptr,
-                                                    HYPRE_Int *bdiag_size_ptr,
-                                                    HYPRE_Real **diag_ptr, HYPRE_Int diag_type );
+                                                    HYPRE_Int num_points, HYPRE_Int point_type,
+                                                    HYPRE_Int *CF_marker, HYPRE_Int diag_size,
+                                                    HYPRE_Int diag_type, HYPRE_Int *B_diag_i,
+                                                    HYPRE_Int *B_diag_j,
+                                                    HYPRE_Complex *B_diag_data );
 HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                                   hypre_ParCSRMatrix **B_ptr,
-                                                   HYPRE_Int diag_type );
+                                                   HYPRE_Int diag_type,
+                                                   hypre_ParCSRMatrix **B_ptr );
 
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
