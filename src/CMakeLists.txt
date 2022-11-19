@@ -352,11 +352,11 @@ if (HYPRE_WITH_SYCL)
 
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 
-  # Set CXX compiler to dpcpp
-  set(CMAKE_CXX_COMPILER "dpcpp")
+  # Set CXX compiler to icpx
+  set(CMAKE_CXX_COMPILER "icpx")
 
-  # Set linker to dpcpp
-  set(CMAKE_LINKER "dpcpp")
+  # Set linker to icpx
+  set(CMAKE_LINKER "icpx")
   set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
   set(CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
   set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP " ")
@@ -385,7 +385,9 @@ if (HYPRE_WITH_SYCL)
 
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
+  add_link_options("-fsycl")
+  add_link_options("-fsycl-device-code-split=per_kernel")
+  add_link_options("-Wl,--no-relax")
 
   if (HYPRE_SYCL_TARGET)
     add_link_options("SHELL:-fsycl-targets=${HYPRE_SYCL_TARGET}")
@@ -556,9 +558,9 @@ if (HYPRE_USING_SYCL)
     set(MKL_LINK static)
     set(MKL_THREADING sequential)
     find_package(MKL CONFIG REQUIRED HINTS "$ENV{MKLROOT}/lib/cmake/mkl")
-    target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_COMPILE_OPTIONS>)
-    target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_INCLUDE_DIRECTORIES>)
-    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL_DPCPP>)
+    target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
+    target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL>)
   endif()
 endif()
 

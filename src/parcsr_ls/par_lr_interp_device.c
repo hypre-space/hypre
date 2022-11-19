@@ -212,8 +212,6 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                         HYPRE_Int     *W_offd_i,
                         HYPRE_Int     *P_offd_i )
 {
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
    // row index shift P --> W
    HYPRE_Int *PWoffset = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
