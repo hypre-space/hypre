@@ -305,7 +305,7 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
@@ -365,7 +365,7 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
@@ -554,6 +554,20 @@ HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
    hypre_BoxDestroy(set_box);
    hypre_BoxDestroy(value_box);
 
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            part, 
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values)
+{
+   /* TODO */
    return hypre_error_flag;
 }
 
