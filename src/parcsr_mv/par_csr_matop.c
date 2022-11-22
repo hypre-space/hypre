@@ -1221,14 +1221,17 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    return C;
 }
 
-/* The following function was formerly part of hypre_ParCSRMatrixExtractBExt
-   but the code was removed so it can be used for a corresponding function
-   for Boolean matrices
-
-   JSP: to allow communication overlapping, it returns comm_handle_idx and
-   comm_handle_data. Before accessing B, they should be destroyed (including
-   send_data contained in the comm_handle).
-*/
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixExtractBExt_Arrays_Overlap
+ *
+ * The following function was formerly part of hypre_ParCSRMatrixExtractBExt
+ * but the code was removed so it can be used for a corresponding function
+ * for Boolean matrices
+ *
+ * JSP: to allow communication overlapping, it returns comm_handle_idx and
+ * comm_handle_data. Before accessing B, they should be destroyed (including
+ * send_data contained in the comm_handle).
+ *--------------------------------------------------------------------------*/
 
 void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int ** pB_ext_i,
@@ -1650,6 +1653,10 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
 
    /* end generic part */
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixExtractBExt_Arrays
+ *--------------------------------------------------------------------------*/
 
 void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int ** pB_ext_i,
@@ -2192,6 +2199,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixLocalTranspose
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix  *A )
 {
@@ -2220,10 +2228,12 @@ hypre_ParCSRMatrixLocalTranspose( hypre_ParCSRMatrix  *A )
    return hypre_error_flag;
 }
 
-/* -----------------------------------------------------------------------------
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenSpanningTree
+ *
  * generate a parallel spanning tree (for Maxwell Equation)
  * G_csr is the node to edge connectivity matrix
- * ----------------------------------------------------------------------------- */
+ *--------------------------------------------------------------------------*/
 
 void
 hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
@@ -4282,14 +4292,12 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
    return hypre_error_flag;
 }
 
-/**
- * @brief Compute As = B^{-1}*A, where B is the block diagonal of A
- * @param[in]  A        :
- * @param[in]  blockSize:    block size
- * @param[out] B        :
- * @return
- * @warning
- */
+/*--------------------------------------------------------------------------
+ * hypre_ParcsrBdiagInvScal
+ *
+ * Compute As = B^{-1}*A, where B is the block diagonal of A.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
                           HYPRE_Int             blockSize,
@@ -5673,7 +5681,6 @@ hypre_ExchangeExternalRowsWait(void *vrequest)
    return B_int;
 }
 
-
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractSubmatrixFC
  *
@@ -6032,11 +6039,16 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-/* drop the entries that are not on the diagonal and smaller than:
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixDropSmallEntriesHost
+ *
+ * drop the entries that are not on the diagonal and smaller than:
  *    type 0: tol (TODO)
  *    type 1: tol*(1-norm of row)
  *    type 2: tol*(2-norm of row)
- *    type -1: tol*(infinity norm of row) */
+ *    type -1: tol*(infinity norm of row)
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
                                         HYPRE_Real          tol,
@@ -6184,12 +6196,17 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* drop the entries that are not on the diagonal and smaller than
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixDropSmallEntries
+ *
+ * drop the entries that are not on the diagonal and smaller than
  *    type 0: tol
  *    type 1: tol*(1-norm of row)
  *    type 2: tol*(2-norm of row)
  *    type -1: tol*(infinity norm of row)
- *    NOTE: some type options above unavailable on either host or device */
+ *    NOTE: some type options above unavailable on either host or device
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
                                     HYPRE_Real          tol,
@@ -6226,10 +6243,14 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    return ierr;
 }
 
-/* Scale ParCSR matrix A = scalar * A
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixScale
+ *
+ * Scale ParCSR matrix A = scalar * A
  * A: the target CSR matrix
  * scalar: real number
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A,
                         HYPRE_Complex       scalar)
@@ -6461,4 +6482,3 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
 
    return hypre_error_flag;
 }
-
