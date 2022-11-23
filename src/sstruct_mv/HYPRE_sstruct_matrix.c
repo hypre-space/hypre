@@ -374,6 +374,7 @@ HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
    HYPRE_Int           s, i, d, vindex[3];
 
+   /* Set one coefficient at a time */
    for (s = 0; s < fem_nsparse; s++)
    {
       i = fem_sparse_i[s];
@@ -620,6 +621,7 @@ HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* NOT TESTED YET */
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Int            part,
@@ -627,7 +629,43 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Complex       *values)
 {
-   /* TODO */
+   HYPRE_Int           ndim         = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph *graph        = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid  *grid         = hypre_SStructGraphGrid(graph);
+   HYPRE_Int           fem_nsparse  = hypre_SStructGraphFEMPNSparse(graph, part);
+   HYPRE_Int          *fem_sparse_i = hypre_SStructGraphFEMPSparseI(graph, part);
+   HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
+   HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
+   HYPRE_Complex      *tvalues;
+   hypre_Box          *box;
+   HYPRE_Int           s, i, d, vilower[3], viupper[3];
+   HYPRE_Int           ei, vi, nelts;
+
+   /* Set one coefficient at a time */
+   box = hypre_BoxCreate(ndim);
+   hypre_BoxSetExtents(box, ilower, iupper);
+   nelts = hypre_BoxVolume(box);
+   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, HYPRE_MEMORY_HOST);  /* TODO: Fix this */
+   for (s = 0; s < fem_nsparse; s++)
+   {
+      i = fem_sparse_i[s];
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vilower[d] = ilower[d] + hypre_IndexD(fem_offsets[i], d);
+         viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+      for (ei = 0, vi = s; ei < nelts; ei ++, vi += fem_nsparse)
+      {
+         tvalues[ei] = values[vi];
+      }
+      HYPRE_SStructMatrixAddToBoxValues(
+         matrix, part, vilower, viupper, fem_vars[i], 1, &fem_entries[s], tvalues);
+   }
+   hypre_TFree(tvalues, HYPRE_MEMORY_HOST); /* TODO: Fix this */
+   hypre_BoxDestroy(box);
+   
    return hypre_error_flag;
 }
 
