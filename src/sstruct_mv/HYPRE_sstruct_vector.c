@@ -318,7 +318,7 @@ HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
    HYPRE_Int           fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
    HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int           i, d, vindex[3];
+   HYPRE_Int           i, d, vindex[HYPRE_MAXDIM];
 
    /* Set one variable at a time */
    for (i = 0; i < fem_nvars; i++)
@@ -380,7 +380,7 @@ HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
    HYPRE_Int             fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
    HYPRE_Int            *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index          *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int             i, d, vindex[3];
+   HYPRE_Int             i, d, vindex[HYPRE_MAXDIM];
 
    hypre_SetIndex(vindex, 0);
    for (i = 0; i < fem_nvars; i++)
@@ -576,14 +576,14 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
    HYPRE_Complex      *tvalues;
    hypre_Box          *box;
-   HYPRE_Int           i, d, vilower[3], viupper[3];
+   HYPRE_Int           i, d, vilower[HYPRE_MAXDIM], viupper[HYPRE_MAXDIM];
    HYPRE_Int           ei, vi, nelts;
 
    /* Set one variable at a time */
    box = hypre_BoxCreate(ndim);
    hypre_BoxSetExtents(box, ilower, iupper);
    nelts = hypre_BoxVolume(box);
-   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, HYPRE_MEMORY_HOST);  /* TODO: Fix this */
+   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, HYPRE_MEMORY_HOST); /* TODO: Fix for GPUs */
    for (i = 0; i < fem_nvars; i++)
    {
       for (d = 0; d < ndim; d++)
@@ -592,6 +592,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
          vilower[d] = ilower[d] + hypre_IndexD(fem_offsets[i], d);
          viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
       }
+      /* TODO: Fix for GPUs */
       for (ei = 0, vi = i; ei < nelts; ei ++, vi += fem_nvars)
       {
          tvalues[ei] = values[vi];
@@ -599,7 +600,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
       HYPRE_SStructVectorAddToBoxValues(
          vector, part, vilower, viupper, fem_vars[i], tvalues);
    }
-   hypre_TFree(tvalues, HYPRE_MEMORY_HOST); /* TODO: Fix this */
+   hypre_TFree(tvalues, HYPRE_MEMORY_HOST); /* TODO: Fix for GPUs */
    hypre_BoxDestroy(box);
 
    return hypre_error_flag;

@@ -3166,8 +3166,7 @@ main( hypre_int argc,
        * Set up the matrix
        *-----------------------------------------------------------*/
 
-//      values_size = hypre_max(data.max_boxsize, data.fem_nsparse);
-      values_size = hypre_max(data.max_boxsize, data.max_boxsize*data.fem_nsparse);
+      values_size = hypre_max(data.max_boxsize, data.max_boxsize * data.fem_nsparse);
 
       values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
       d_values = hypre_TAlloc(HYPRE_Real, values_size, memory_location);
@@ -3252,9 +3251,11 @@ main( hypre_int argc,
             }
          }
 #else    // Use AddFEMBoxValues
-         for (i = 0; i < values_size; i += data.fem_nsparse)
+         /* TODO: There is probably a smarter way to do this copy */
+         for (i = 0; i < data.max_boxsize; i++)
          {
-            hypre_TMemcpy(&d_values[i], data.fem_values, HYPRE_Real,
+            j = i * data.fem_nsparse;
+            hypre_TMemcpy(&d_values[j], data.fem_values, HYPRE_Real,
                           data.fem_nsparse, memory_location, HYPRE_MEMORY_HOST);
          }
          for (part = 0; part < data.nparts; part++)
@@ -3505,6 +3506,7 @@ main( hypre_int argc,
       /* Add values for FEMRhsSet */
       if (data.fem_rhs_true)
       {
+#if 0    // Use AddFEMValues
          hypre_TMemcpy(data.d_fem_rhs_values, data.fem_rhs_values, HYPRE_Real,
                        data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
 
@@ -3529,6 +3531,24 @@ main( hypre_int argc,
                }
             }
          }
+#else    // Use AddFEMBoxValues
+         /* TODO: There is probably a smarter way to do this copy */
+         for (i = 0; i < data.max_boxsize; i++)
+         {
+            j = i * data.fem_nvars;
+            hypre_TMemcpy(&d_values[j], data.fem_rhs_values, HYPRE_Real,
+                          data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
+         }
+         for (part = 0; part < data.nparts; part++)
+         {
+            pdata = data.pdata[part];
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               HYPRE_SStructVectorAddFEMBoxValues(
+                  b, part, pdata.ilowers[box], pdata.iuppers[box], d_values);
+            }
+         }
+#endif
       }
 
       /* RhsAddToValues: add to some RHS values */
@@ -6075,7 +6095,7 @@ main( hypre_int argc,
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                                   var, d_values);
-                  hypre_TMemcpy(values, d_values, HYPRE_Real, values_size,
+                  hypre_TMemcpy(values, d_values, HYPRE_Real, data.max_boxsize,
                                 HYPRE_MEMORY_HOST, memory_location);
                   hypre_fprintf(file, "\nBox %d:\n\n", box);
                   size = 1;
