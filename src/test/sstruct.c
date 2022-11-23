@@ -3166,7 +3166,8 @@ main( hypre_int argc,
        * Set up the matrix
        *-----------------------------------------------------------*/
 
-      values_size = hypre_max(data.max_boxsize, data.fem_nsparse);
+//      values_size = hypre_max(data.max_boxsize, data.fem_nsparse);
+      values_size = data.max_boxsize*data.fem_nsparse;
       values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
       d_values = hypre_TAlloc(HYPRE_Real, values_size, memory_location);
 
@@ -3223,11 +3224,11 @@ main( hypre_int argc,
       }
       else if (data.fem_nvars > 0)
       {
-         hypre_TMemcpy(data.d_fem_values, data.fem_values, HYPRE_Real,
-                       data.fem_nvars * data.fem_nvars,
-                       memory_location, HYPRE_MEMORY_HOST);
-
          /* FEMStencilSetRow: add to stencil values */
+#if 1    // Use AddFEMValues
+         hypre_TMemcpy(data.d_fem_values, data.fem_values, HYPRE_Real,
+                       data.fem_nsparse, memory_location, HYPRE_MEMORY_HOST);
+
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -3249,6 +3250,22 @@ main( hypre_int argc,
                }
             }
          }
+#else    // Use AddFEMBoxValues
+         for (i = 0; i < values_size; i += data.fem_nsparse)
+         {
+            hypre_TMemcpy(&d_values[i], data.fem_values, HYPRE_Real,
+                          data.fem_nsparse, memory_location, HYPRE_MEMORY_HOST);
+         }
+         for (part = 0; part < data.nparts; part++)
+         {
+            pdata = data.pdata[part];
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               HYPRE_SStructMatrixAddFEMBoxValues(
+                  A, part, pdata.ilowers[box], pdata.iuppers[box], d_values);
+            }
+         }
+#endif
       }
 
       /* GraphAddEntries: set non-stencil entries */
