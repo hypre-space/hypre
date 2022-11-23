@@ -3167,7 +3167,8 @@ main( hypre_int argc,
        *-----------------------------------------------------------*/
 
 //      values_size = hypre_max(data.max_boxsize, data.fem_nsparse);
-      values_size = data.max_boxsize*data.fem_nsparse;
+      values_size = hypre_max(data.max_boxsize, data.max_boxsize*data.fem_nsparse);
+
       values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
       d_values = hypre_TAlloc(HYPRE_Real, values_size, memory_location);
 
@@ -3225,7 +3226,7 @@ main( hypre_int argc,
       else if (data.fem_nvars > 0)
       {
          /* FEMStencilSetRow: add to stencil values */
-#if 1    // Use AddFEMValues
+#if 0    // Use AddFEMValues
          hypre_TMemcpy(data.d_fem_values, data.fem_values, HYPRE_Real,
                        data.fem_nsparse, memory_location, HYPRE_MEMORY_HOST);
 
