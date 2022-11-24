@@ -561,29 +561,34 @@ HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* NOT TESTED YET */
 HYPRE_Int
 HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
-                                   HYPRE_Int            part, 
+                                   HYPRE_Int            part,
                                    HYPRE_Int           *ilower,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Complex       *values)
 {
-   HYPRE_Int           ndim         = hypre_SStructVectorNDim(vector);
-   hypre_SStructGrid  *grid         = hypre_SStructVectorGrid(vector);
-   HYPRE_Int           fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
-   HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
-   hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Complex      *tvalues;
-   hypre_Box          *box;
-   HYPRE_Int           i, d, vilower[HYPRE_MAXDIM], viupper[HYPRE_MAXDIM];
-   HYPRE_Int           ei, vi, nelts;
+   HYPRE_Int             ndim            = hypre_SStructVectorNDim(vector);
+   hypre_SStructGrid    *grid            = hypre_SStructVectorGrid(vector);
+   HYPRE_MemoryLocation  memory_location = hypre_IJVectorMemoryLocation(
+                                            hypre_SStructVectorIJVector(vector));
+
+   HYPRE_Int             fem_nvars       = hypre_SStructGridFEMPNVars(grid, part);
+   HYPRE_Int            *fem_vars        = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index          *fem_offsets     = hypre_SStructGridFEMPOffsets(grid, part);
+
+   HYPRE_Complex        *tvalues;
+   hypre_Box            *box;
+
+   HYPRE_Int             i, d, vilower[HYPRE_MAXDIM], viupper[HYPRE_MAXDIM];
+   HYPRE_Int             ei, vi, nelts;
 
    /* Set one variable at a time */
    box = hypre_BoxCreate(ndim);
    hypre_BoxSetExtents(box, ilower, iupper);
    nelts = hypre_BoxVolume(box);
-   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, HYPRE_MEMORY_HOST); /* TODO: Fix for GPUs */
+   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, memory_location);
+
    for (i = 0; i < fem_nvars; i++)
    {
       for (d = 0; d < ndim; d++)
@@ -592,15 +597,27 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
          vilower[d] = ilower[d] + hypre_IndexD(fem_offsets[i], d);
          viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
       }
-      /* TODO: Fix for GPUs */
-      for (ei = 0, vi = i; ei < nelts; ei ++, vi += fem_nvars)
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
-         tvalues[ei] = values[vi];
+         hypreDevice_ComplexStridedCopy(nelts, fem_nvars, values + i, tvalues);
       }
-      HYPRE_SStructVectorAddToBoxValues(
-         vector, part, vilower, viupper, fem_vars[i], tvalues);
+      else
+#endif
+      {
+         for (ei = 0, vi = i; ei < nelts; ei ++, vi += fem_nvars)
+         {
+            tvalues[ei] = values[vi];
+         }
+      }
+
+      HYPRE_SStructVectorAddToBoxValues(vector, part, vilower, viupper,
+                                        fem_vars[i], tvalues);
    }
-   hypre_TFree(tvalues, HYPRE_MEMORY_HOST); /* TODO: Fix for GPUs */
+
+   /* Free memory */
+   hypre_TFree(tvalues, memory_location);
    hypre_BoxDestroy(box);
 
    return hypre_error_flag;

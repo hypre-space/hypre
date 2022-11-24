@@ -20,7 +20,7 @@ GridSetVariables: 0 1 [1]
 
 # FEMStencilCreate: size
 FEMStencilCreate: 8
- 
+
 # FEMStencilSetRow: row offset[ndim] var values[size]
 FEMStencilSetRow:  0 [-1 -1 -1] 0 [  4 -1 -1  0 -1  0  0  0  ]
 FEMStencilSetRow:  1 [ 0 -1 -1] 0 [ -1  4  0 -1  0 -1  0  0  ]
@@ -31,6 +31,9 @@ FEMStencilSetRow:  5 [ 0 -1  0] 0 [  0 -1  0  0 -1  4  0 -1  ]
 FEMStencilSetRow:  6 [-1  0  0] 0 [  0  0 -1  0 -1  0  4 -1  ]
 FEMStencilSetRow:  7 [ 0  0  0] 0 [  0  0  0 -1  0 -1 -1  4  ]
 
+# FEMRhsSet: values[size]
+FEMRhsSet: [ 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 ]
+
 ###########################################################
 
 # ProcessPoolCreate: num_pools
@@ -40,4 +43,3 @@ ProcessPoolCreate: 1
 ProcessPoolSetPart: 0 0
 
 ###########################################################
-
