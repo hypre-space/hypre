@@ -1853,6 +1853,8 @@ HYPRE_Int hypreDevice_ComplexFilln(HYPRE_Complex *d_x, size_t n, HYPRE_Complex v
 HYPRE_Int hypreDevice_CharFilln(char *d_x, size_t n, char v);
 HYPRE_Int hypreDevice_IntStridedCopy ( HYPRE_Int size, HYPRE_Int stride,
                                        HYPRE_Int *in, HYPRE_Int *out );
+HYPRE_Int hypreDevice_ComplexStridedCopy ( HYPRE_Int size, HYPRE_Int stride,
+                                           HYPRE_Complex *in, HYPRE_Complex *out );
 HYPRE_Int hypreDevice_IntScalen(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int v);
 HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                     HYPRE_Complex v);
@@ -1963,7 +1965,6 @@ HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 #endif
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
