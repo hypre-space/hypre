@@ -29,7 +29,6 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                       HYPRE_Real          relax_weight,
                       HYPRE_Real          omega,
                       HYPRE_Real         *l1_norms,
-                      HYPRE_Int           zero_u,
                       hypre_ParVector    *u,
                       hypre_ParVector    *Vtemp,
                       hypre_ParVector    *Ztemp )
@@ -117,7 +116,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       case 7: /* Jacobi (uses ParMatvec) */
          hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points,
-                                     relax_weight, l1_norms, zero_u, u, Vtemp);
+                                     relax_weight, l1_norms, u, Vtemp);
          break;
 
       case 8: /* hybrid L1 Symm. Gauss-Seidel */
@@ -159,7 +158,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       case 18: /* weighted L1 Jacobi */
          hypre_BoomerAMGRelax18WeightedL1Jacobi(A, f, cf_marker, relax_points,
-                                                relax_weight, l1_norms, zero_u, u,
+                                                relax_weight, l1_norms, u,
                                                 Vtemp);
          break;
 
@@ -175,6 +174,8 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          relax_error = hypre_BoomerAMGRelax98GaussElimPivot(A, f, u);
          break;
    }
+
+   hypre_ParVectorAllZero(u) = 0;
 
    return relax_error;
 }
@@ -328,7 +329,6 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
                                         HYPRE_Int           relax_points,
                                         HYPRE_Real          relax_weight,
                                         HYPRE_Real         *l1_norms,
-                                        HYPRE_Int           zero_u,
                                         hypre_ParVector    *u,
                                         hypre_ParVector    *Vtemp )
 {
@@ -338,7 +338,7 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       // XXX GPU calls Relax7 XXX
-      return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, zero_u, u, Vtemp);
+      return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
    }
    else
 #endif
@@ -346,7 +346,7 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
       /* in the case of non-CF, use relax-7 which is faster */
       if (relax_points == 0)
       {
-         return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, zero_u, u, Vtemp);
+         return hypre_BoomerAMGRelax7Jacobi(A, f, cf_marker, relax_points, relax_weight, l1_norms, u, Vtemp);
       }
       else
       {
@@ -1079,7 +1079,6 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              HYPRE_Int           relax_points,
                              HYPRE_Real          relax_weight,
                              HYPRE_Real         *l1_norms,
-                             HYPRE_Int           zero_u,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 {
@@ -1119,8 +1118,9 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     * Perform Matvec Vtemp = w * (f - Au)
     *-----------------------------------------------------------------*/
-   if (zero_u)
+   if (hypre_ParVectorAllZero(u))
    {
+//hypre_ParPrintf(hypre_ParCSRMatrixComm(A), "A %d: skip matvec\n", hypre_ParCSRMatrixGlobalNumRows(A));
       hypre_ParVectorScale(relax_weight, Vtemp);
    }
    else
