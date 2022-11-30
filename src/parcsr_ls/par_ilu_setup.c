@@ -3366,7 +3366,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
 
       S_row_starts[1] = S_total_rows;
       S_row_starts[0] = S_total_rows - m;
-      hypre_MPI_Allreduce(&m, &S_total_rows, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&m, &S_total_rows, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm); // TODO: m is `HYPRE_Int` and S_total_rows is `HYPRE_BigInt`
       S = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
                                     S_total_rows,
                                     S_total_rows,
