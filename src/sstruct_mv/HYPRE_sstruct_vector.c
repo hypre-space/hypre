@@ -222,9 +222,8 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    ijvector = hypre_SStructVectorIJVector(vector);
 
    HYPRE_IJVectorSetObjectType(ijvector, HYPRE_PARCSR);
-
    HYPRE_IJVectorInitialize(ijvector);
-
+   HYPRE_IJVectorGetObject(ijvector, (void **) &hypre_SStructVectorParVector(vector));
 
    /* GEC1002 for HYPRE_SSTRUCT type of vector, we do not need data allocated
     * inside the parvector piece of the structure. We make that pointer within
@@ -570,8 +569,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
 {
    HYPRE_Int             ndim            = hypre_SStructVectorNDim(vector);
    hypre_SStructGrid    *grid            = hypre_SStructVectorGrid(vector);
-   HYPRE_MemoryLocation  memory_location = hypre_IJVectorMemoryLocation(
-                                            hypre_SStructVectorIJVector(vector));
+   HYPRE_MemoryLocation  memory_location = hypre_SStructVectorMemoryLocation(vector);
 
    HYPRE_Int             fem_nvars       = hypre_SStructGridFEMPNVars(grid, part);
    HYPRE_Int            *fem_vars        = hypre_SStructGridFEMPVars(grid, part);
@@ -696,9 +694,6 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 
    /* u-vector */
    HYPRE_IJVectorAssemble(ijvector);
-
-   HYPRE_IJVectorGetObject(ijvector,
-                           (void **) &hypre_SStructVectorParVector(vector));
 
    /*------------------------------------------------------
     *------------------------------------------------------*/

@@ -631,8 +631,7 @@ HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
    HYPRE_Int             ndim            = hypre_SStructMatrixNDim(matrix);
    hypre_SStructGraph   *graph           = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid    *grid            = hypre_SStructGraphGrid(graph);
-   HYPRE_MemoryLocation  memory_location = hypre_IJMatrixMemoryLocation(
-                                            hypre_SStructMatrixIJMatrix(matrix));
+   HYPRE_MemoryLocation  memory_location = hypre_SStructMatrixMemoryLocation(matrix);
 
    HYPRE_Int             fem_nsparse     = hypre_SStructGraphFEMPNSparse(graph, part);
    HYPRE_Int            *fem_sparse_i    = hypre_SStructGraphFEMPSparseI(graph, part);
