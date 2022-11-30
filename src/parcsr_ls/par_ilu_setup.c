@@ -934,7 +934,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          HYPRE_Int      m = n - nLU;
          HYPRE_BigInt   S_total_rows, S_row_starts[2];
          HYPRE_BigInt   big_m = (HYPRE_BigInt)m;
-         hypre_MPI_Allreduce( &big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
          if ( S_total_rows > 0 )
          {
@@ -952,8 +952,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             /* only do so when we hae the Schur Complement */
             {
                HYPRE_BigInt global_start;
-               hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-               S_row_starts[0] = global_start - m;
+               hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+               S_row_starts[0] = global_start - big_m;
                S_row_starts[1] = global_start;
             }
 
@@ -3353,20 +3353,17 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
 
    HYPRE_BigInt   S_total_rows, S_row_starts[2];
    HYPRE_BigInt   big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce( &big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    if (S_total_rows > 0)
    {
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         S_row_starts[0] = global_start - m;
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         S_row_starts[0] = global_start - big_m;
          S_row_starts[1] = global_start;
       }
 
-      S_row_starts[1] = S_total_rows;
-      S_row_starts[0] = S_total_rows - m;
-      hypre_MPI_Allreduce(&m, &S_total_rows, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm); // TODO: m is `HYPRE_Int` and S_total_rows is `HYPRE_BigInt`
       S = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
                                     S_total_rows,
                                     S_total_rows,
