@@ -10,17 +10,17 @@
 #include "_hypre_lapack.h"
 #include "_hypre_blas.h"
 
-/* -----------------------------------------------------------------------------
- * generate AFF or AFC
- * ----------------------------------------------------------------------------- */
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFCHost
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
-                                HYPRE_Int           *CF_marker,
-                                HYPRE_BigInt        *cpts_starts,
-                                hypre_ParCSRMatrix  *S,
-                                hypre_ParCSRMatrix **A_FC_ptr,
-                                hypre_ParCSRMatrix **A_FF_ptr)
+hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
+                                    HYPRE_Int           *CF_marker,
+                                    HYPRE_BigInt        *cpts_starts,
+                                    hypre_ParCSRMatrix  *S,
+                                    hypre_ParCSRMatrix **A_FC_ptr,
+                                    hypre_ParCSRMatrix **A_FF_ptr)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -487,10 +487,41 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFC
+ *
+ * Generate AFF or AFC
+ *--------------------------------------------------------------------------*/
 
-/* -----------------------------------------------------------------------------
+HYPRE_Int
+hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
+                                HYPRE_Int           *CF_marker,
+                                HYPRE_BigInt        *cpts_starts,
+                                hypre_ParCSRMatrix  *S,
+                                hypre_ParCSRMatrix **A_FC_ptr,
+                                hypre_ParCSRMatrix **A_FF_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixGenerateFFFCDevice(A, CF_marker, cpts_starts, S, A_FC_ptr, A_FF_ptr);
+   }
+   else
+#endif
+   {
+      hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, cpts_starts, S, A_FC_ptr, A_FF_ptr);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFC3
+ *
  * generate AFF, AFC, for 2 stage extended interpolation
- * ----------------------------------------------------------------------------- */
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
@@ -510,6 +541,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    HYPRE_Complex      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int          *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int          *A_diag_j = hypre_CSRMatrixJ(A_diag);
+
    /* off-diag part of A */
    hypre_CSRMatrix    *A_offd   = hypre_ParCSRMatrixOffd(A);
    HYPRE_Complex      *A_offd_data = hypre_CSRMatrixData(A_offd);
@@ -523,6 +555,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix    *S_diag   = hypre_ParCSRMatrixDiag(S);
    HYPRE_Int          *S_diag_i = hypre_CSRMatrixI(S_diag);
    HYPRE_Int          *S_diag_j = hypre_CSRMatrixJ(S_diag);
+
    /* off-diag part of S */
    hypre_CSRMatrix    *S_offd   = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int          *S_offd_i = hypre_CSRMatrixI(S_offd);
@@ -698,9 +731,11 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          }
          index = 0;
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                       HYPRE_MEMORY_HOST);
-         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                       HYPRE_MEMORY_HOST);
          for (i = 0; i < num_sends; i++)
          {
@@ -716,7 +751,7 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
-         comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data, big_convert_offd);
+         comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, big_buf_data, big_convert_offd);
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
@@ -1021,9 +1056,12 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
-/* -----------------------------------------------------------------------------
- * generate AFF, AFC, AFFC for 2 stage extended+i(e)interpolation
- * ----------------------------------------------------------------------------- */
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFCD3
+ *
+ * Generate AFF, AFC, AFFC for 2 stage extended+i(e)interpolation
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
@@ -1190,7 +1228,8 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          big_new_Fpts = n_new_Fpts;
 
          hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT,
+                        hypre_MPI_SUM, comm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
@@ -1233,9 +1272,11 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          }
          index = 0;
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                       HYPRE_MEMORY_HOST);
-         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                       HYPRE_MEMORY_HOST);
          for (i = 0; i < num_sends; i++)
          {
@@ -1247,11 +1288,11 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             }
          }
 
-         comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, CF_marker_offd);
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, CF_marker_offd);
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
-         comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data, big_convert_offd);
+         comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, big_buf_data, big_convert_offd);
 
          hypre_ParCSRCommHandleDestroy(comm_handle);
 
