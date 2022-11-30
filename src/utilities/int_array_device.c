@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
@@ -50,10 +51,17 @@ hypre_IntArrayCountDevice( hypre_IntArray *v,
    HYPRE_Int  *array_data  = hypre_IntArrayData(v);
    HYPRE_Int   size        = hypre_IntArraySize(v);
 
+#if defined(HYPRE_USING_SYCL)
+   *num_values_ptr = HYPRE_ONEDPL_CALL( std::count,
+                                        array_data,
+                                        array_data + size,
+                                        value );
+#else
    *num_values_ptr = HYPRE_THRUST_CALL( count,
                                         array_data,
                                         array_data + size,
                                         value );
+#endif
 
    return hypre_error_flag;
 }
