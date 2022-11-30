@@ -272,9 +272,9 @@ hypre_MatTCommPkgCreate_core (
          }
    }
 
-   hypre_MPI_Allgatherv(tmp, local_info, HYPRE_MPI_BIG_INT, recv_buf, info, displs, HYPRE_MPI_INT,
-                        comm);  // TODO There's a discrepancy here `HYPRE_MPI_BIG_INT`/`HYPRE_MPI_INT` but I don't know what's going on.
-
+   hypre_MPI_Allgatherv(tmp, local_info, HYPRE_MPI_BIG_INT,
+                        recv_buf, info, displs, HYPRE_MPI_BIG_INT,
+                        comm);
 
    /* ----------------------------------------------------------------------
     * determine send_procs and actual elements to be send (in send_map_elmts)
