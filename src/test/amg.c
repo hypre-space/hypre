@@ -92,14 +92,14 @@ main( hypre_int argc,
    HYPRE_Int local_num_rows;
 
    /* parameters for BoomerAMG */
-   HYPRE_Int    P_max_elmts = 8;
+   HYPRE_Int    P_max_elmts = 4;
    HYPRE_Int    coarsen_type = 8;
-   HYPRE_Int    num_sweeps = 2;  
+   HYPRE_Int    num_sweeps = 1;  
    HYPRE_Int    relax_type = 18;   
-   HYPRE_Int    rap2=1;
+   HYPRE_Int    rap2=0;
    //HYPRE_Int    mod_rap2=0;
-   HYPRE_Int    keepTranspose = 0;
-   HYPRE_Real   tol = 1.e-8, pc_tol = 0.;
+   HYPRE_Int    keepTranspose = 1;
+   HYPRE_Real   tol = 1.e-12, pc_tol = 0.;
    HYPRE_Real   atol = 0.0;
 
    HYPRE_Real   wall_time;
@@ -460,9 +460,11 @@ main( hypre_int argc,
       if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
       HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
       HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+      HYPRE_BoomerAMGSetNumPaths(pcg_precond, 2);
       HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
       HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
       HYPRE_BoomerAMGSetCumNnzAP(pcg_precond, cum_nnz_AP);
+      HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, 1.0);
       HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
       HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -567,9 +569,11 @@ main( hypre_int argc,
       if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
       HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
       HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+      HYPRE_BoomerAMGSetNumPaths(pcg_precond, 2);
       HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
       HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
       HYPRE_BoomerAMGSetCumNnzAP(pcg_precond, cum_nnz_AP);
+      HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, 1.0);
       HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
       HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -791,14 +795,16 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   value = hypre_CTAlloc(HYPRE_Real, 2, memory_location);
+   value = hypre_CTAlloc(HYPRE_Real, 4, memory_location);
 
+   /*value[0] = 26.0;
+   value[1] = -1.0;
+   value[2] = -1.0;
+   value[3] = -1.0;*/
    value[0] = 26.0;
-   if (nx == 1 || ny == 1 || nz == 1)
-      value[0] = 8.0;
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
-      value[0] = 2.0;
-   value[1] = -1.;
+   value[1] = -4.0;
+   value[2] = -0.15;
+   value[3] = -0.0125;
 
    local_size = nx*ny*nz;
 
@@ -1478,7 +1484,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	          if (ix > (HYPRE_BigInt)(nx*px))
       	          {
       	             col_nums[cnt] = new_row_index-nxy-nx-1;
-      	             data[cnt++] = value[1];
+      	             data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -1486,15 +1492,15 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] = hypre_map27(ix-1,iy-1,iz-1,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	          }
       	          col_nums[cnt] = new_row_index-nxy-nx;
-      	          data[cnt++] = value[1];
+      	          data[cnt++] = value[2];
       	          if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	          {
       	             col_nums[cnt] = new_row_index-nxy-nx+1;
-      	             data[cnt++] = value[1];
+      	             data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -1502,7 +1508,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] = hypre_map27(ix+1,iy-1,iz-1,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	          }
                }
@@ -1514,35 +1520,35 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] = hypre_map27(ix-1,iy-1,iz-1,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix)
       	             {
       		        col_nums[cnt] = hypre_map27(ix-1,iy-1,iz-1,px-1,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       		     col_nums[cnt] = hypre_map27(ix,iy-1,iz-1,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] = hypre_map27(ix+1,iy-1,iz-1,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix < nx_global-1)
       	             {
       		        col_nums[cnt] = hypre_map27(ix+1,iy-1,iz-1,px+1,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
                   }
                }
                if (ix > (HYPRE_BigInt)(nx*px))
       	       {   
       	          col_nums[cnt] = new_row_index-nxy-1;
-      	          data[cnt++] = value[1];
+      	          data[cnt++] = value[2];
       	       }   
                else
                {
@@ -1550,7 +1556,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] = hypre_map27(ix-1,iy,iz-1,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                }
       	       col_nums[cnt] = new_row_index-nxy;
@@ -1558,7 +1564,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                if (ix+1 < (HYPRE_BigInt)(nx*(px+1)))
       	       {   
       	          col_nums[cnt] = new_row_index-nxy+1;
-      	          data[cnt++] = value[1];
+      	          data[cnt++] = value[2];
       	       }   
                else
                {
@@ -1566,7 +1572,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] = hypre_map27(ix+1,iy,iz-1,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                }
                if (iy+1 < (HYPRE_BigInt)(ny*(py+1)))
@@ -1574,7 +1580,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	          if (ix > (HYPRE_BigInt)(nx*px))
       	          {
       	             col_nums[cnt] = new_row_index-nxy+nx-1;
-      	             data[cnt++] = value[1];
+      	             data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -1582,15 +1588,15 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] = hypre_map27(ix-1,iy+1,iz-1,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
                      }
       	          }
       	          col_nums[cnt] = new_row_index-nxy+nx;
-      	          data[cnt++] = value[1];
+      	          data[cnt++] = value[2];
       	          if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	          {
       	             col_nums[cnt] = new_row_index-nxy+nx+1;
-      	             data[cnt++] = value[1];
+      	             data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -1598,7 +1604,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] = hypre_map27(ix+1,iy+1,iz-1,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
                      }
       	          }
                }
@@ -1610,28 +1616,28 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] = hypre_map27(ix-1,iy+1,iz-1,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix)
       	             {
       		        col_nums[cnt] = hypre_map27(ix-1,iy+1,iz-1,px-1,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       		     col_nums[cnt] = hypre_map27(ix,iy+1,iz-1,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] = hypre_map27(ix+1,iy+1,iz-1,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix < nx_global-1)
       	             {
       		        col_nums[cnt] = hypre_map27(ix+1,iy+1,iz-1,px+1,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
                   }
                }
@@ -1646,7 +1652,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] = hypre_map27(ix-1,iy-1,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -1654,17 +1660,17 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] = hypre_map27(ix-1,iy-1,iz-1,px-1,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
       		     col_nums[cnt] = hypre_map27(ix,iy-1,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] = hypre_map27(ix+1,iy-1,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -1672,7 +1678,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] = hypre_map27(ix+1,iy-1,iz-1,px+1,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
                   }
@@ -1684,28 +1690,28 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] = hypre_map27(ix-1,iy-1,iz-1,px,py-1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix)
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy-1,iz-1,px-1,py-1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       		        col_nums[cnt] = hypre_map27(ix,iy-1,iz-1,px,py-1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
       	                if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	                {
       		           col_nums[cnt] = hypre_map27(ix+1,iy-1,iz-1,px,py-1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix < nx_global-1)
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy-1,iz-1,px+1,py-1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
                      }
                   }
@@ -1713,7 +1719,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix-1,iy,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                   else
                   {
@@ -1721,7 +1727,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] =hypre_map27(ix-1,iy,iz-1,px-1,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
                      }
                   }
       		  col_nums[cnt] =hypre_map27(ix,iy,iz-1,px,py,pz-1,
@@ -1731,7 +1737,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix+1,iy,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                   else
                   {
@@ -1739,7 +1745,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] =hypre_map27(ix+1,iy,iz-1,px+1,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
                      }
                   }
                   if (iy+1 < (HYPRE_BigInt)(ny*(py+1)))
@@ -1748,7 +1754,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy+1,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -1756,17 +1762,17 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy+1,iz-1,px-1,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
       		     col_nums[cnt] =hypre_map27(ix,iy+1,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy+1,iz-1,px,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -1774,7 +1780,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy+1,iz-1,px+1,py,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
                   }
@@ -1786,28 +1792,28 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy+1,iz-1,px,py+1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix)
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy+1,iz-1,px-1,py+1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       		        col_nums[cnt] =hypre_map27(ix,iy+1,iz-1,px,py+1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
       	                if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy+1,iz-1,px,py+1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix < nx_global-1)
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy+1,iz-1,px+1,py+1,pz-1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
                      }
                   }
@@ -1818,7 +1824,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	       if (ix > (HYPRE_BigInt)(nx*px))
    	       {
    	          col_nums[cnt] = new_row_index-nx-1;
-   	          data[cnt++] = value[1];
+   	          data[cnt++] = value[2];
    	       }
    	       else
    	       {
@@ -1826,7 +1832,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	          {
       		     col_nums[cnt] =hypre_map27(ix-1,iy-1,iz,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
    	       }
    	       col_nums[cnt] = new_row_index-nx;
@@ -1834,7 +1840,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	       if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
    	       {
    	          col_nums[cnt] = new_row_index-nx+1;
-   	          data[cnt++] = value[1];
+   	          data[cnt++] = value[2];
    	       }
    	       else
    	       {
@@ -1842,7 +1848,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	          {
       		     col_nums[cnt] =hypre_map27(ix+1,iy-1,iz,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
    	       }
             }
@@ -1854,13 +1860,13 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	          {
       		     col_nums[cnt] =hypre_map27(ix-1,iy-1,iz,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
    	          else if (ix)
    	          {
       		     col_nums[cnt] =hypre_map27(ix-1,iy-1,iz,px-1,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
       		  col_nums[cnt] =hypre_map27(ix,iy-1,iz,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
@@ -1869,13 +1875,13 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	          {
       		     col_nums[cnt] =hypre_map27(ix+1,iy-1,iz,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
    	          else if (ix < nx_global-1)
    	          {
       		     col_nums[cnt] =hypre_map27(ix+1,iy-1,iz,px+1,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
                }
             }
@@ -1912,7 +1918,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	       if (ix > (HYPRE_BigInt)(nx*px))
    	       {
                   col_nums[cnt] = new_row_index+nx-1;
-                  data[cnt++] = value[1];
+                  data[cnt++] = value[2];
    	       }
    	       else
    	       {
@@ -1920,7 +1926,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix-1,iy+1,iz,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
    	       }
                col_nums[cnt] = new_row_index+nx;
@@ -1928,7 +1934,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	       if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
    	       {
                   col_nums[cnt] = new_row_index+nx+1;
-                  data[cnt++] = value[1];
+                  data[cnt++] = value[2];
    	       }
    	       else
    	       {
@@ -1936,7 +1942,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix+1,iy+1,iz,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
    	       }
             }
@@ -1948,13 +1954,13 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	          {
       		     col_nums[cnt] =hypre_map27(ix-1,iy+1,iz,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
    	          else if (ix)
    	          {
       		     col_nums[cnt] =hypre_map27(ix-1,iy+1,iz,px-1,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
       		  col_nums[cnt] =hypre_map27(ix,iy+1,iz,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
@@ -1963,13 +1969,13 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	          {
       		     col_nums[cnt] =hypre_map27(ix+1,iy+1,iz,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
    	          else if (ix < nx_global-1)
    	          {
       		     col_nums[cnt] =hypre_map27(ix+1,iy+1,iz,px+1,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
    	          }
                }
             }
@@ -1980,7 +1986,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	          if (ix > (HYPRE_BigInt)(nx*px))
       	          {
       	             col_nums[cnt] = new_row_index+nxy-nx-1;
-      	             data[cnt++] = value[1];
+      	             data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -1988,15 +1994,15 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
    	             }
       	          }
       	          col_nums[cnt] = new_row_index+nxy-nx;
-      	          data[cnt++] = value[1];
+      	          data[cnt++] = value[2];
       	          if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	          {
       	             col_nums[cnt] = new_row_index+nxy-nx+1;
-      	             data[cnt++] = value[1];
+      	             data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -2004,7 +2010,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
    	             }
       	          }
                }
@@ -2016,35 +2022,35 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix)
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px-1,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       		     col_nums[cnt] =hypre_map27(ix,iy-1,iz+1,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix < nx_global-1)
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px+1,py-1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
                   }
                }
                if (ix > (HYPRE_BigInt)(nx*px))
                {
                   col_nums[cnt] = new_row_index+nxy-1;
-                  data[cnt++] = value[1];
+                  data[cnt++] = value[2];
                }
                else
                {
@@ -2052,7 +2058,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix-1,iy,iz+1,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                }
                col_nums[cnt] = new_row_index+nxy;
@@ -2060,7 +2066,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                if (ix+1 < (HYPRE_BigInt)(nx*(px+1)))
                {
                   col_nums[cnt] = new_row_index+nxy+1;
-                  data[cnt++] = value[1];
+                  data[cnt++] = value[2];
                }
                else
                {
@@ -2068,7 +2074,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix+1,iy,iz+1,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                }
                if (iy+1 < (HYPRE_BigInt)(ny*(py+1)))
@@ -2076,7 +2082,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	          if (ix > (HYPRE_BigInt)(nx*px))
       	          {
                      col_nums[cnt] = new_row_index+nxy+nx-1;
-                     data[cnt++] = value[1];
+                     data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -2084,15 +2090,15 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px-1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
                      }
       	          }
                   col_nums[cnt] = new_row_index+nxy+nx;
-                  data[cnt++] = value[1];
+                  data[cnt++] = value[2];
       	          if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	          {
                      col_nums[cnt] = new_row_index+nxy+nx+1;
-                     data[cnt++] = value[1];
+                     data[cnt++] = value[3];
       	          }
       	          else
       	          {
@@ -2100,7 +2106,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px+1,py,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
                      }
       	          }
                }
@@ -2112,28 +2118,28 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix)
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px-1,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       		     col_nums[cnt] =hypre_map27(ix,iy+1,iz+1,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else if (ix < nx_global-1)
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px+1,py+1,pz,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
                   }
                }
@@ -2148,7 +2154,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -2156,17 +2162,17 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px-1,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
       		     col_nums[cnt] =hypre_map27(ix,iy-1,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -2174,7 +2180,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px+1,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
                   }
@@ -2186,28 +2192,28 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px,py-1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix)
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy-1,iz+1,px-1,py-1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       		        col_nums[cnt] =hypre_map27(ix,iy-1,iz+1,px,py-1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
       	                if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px,py-1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix < nx_global-1)
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy-1,iz+1,px+1,py-1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
                      }
                   }
@@ -2215,7 +2221,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix-1,iy,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                   else
                   {
@@ -2223,7 +2229,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] =hypre_map27(ix-1,iy,iz+1,px-1,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
                      }
                   }
       		  col_nums[cnt] =hypre_map27(ix,iy,iz+1,px,py,pz+1,
@@ -2233,7 +2239,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                   {
       		     col_nums[cnt] =hypre_map27(ix+1,iy,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
                   }
                   else
                   {
@@ -2241,7 +2247,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
                      {
       		        col_nums[cnt] =hypre_map27(ix+1,iy,iz+1,px+1,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
                      }
                   }
                   if (iy+1 < (HYPRE_BigInt)(ny*(py+1)))
@@ -2250,7 +2256,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	             {
       		        col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -2258,17 +2264,17 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px-1,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
       		     col_nums[cnt] =hypre_map27(ix,iy+1,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		     data[cnt++] = value[1];
+      		     data[cnt++] = value[2];
       	             if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	             {
       		        col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[3];
       	             }
       	             else
       	             {
@@ -2276,7 +2282,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px+1,py,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	             }
                   }
@@ -2288,28 +2294,28 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px,py+1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix)
       	                {
       		           col_nums[cnt] =hypre_map27(ix-1,iy+1,iz+1,px-1,py+1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       		        col_nums[cnt] =hypre_map27(ix,iy+1,iz+1,px,py+1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		        data[cnt++] = value[1];
+      		        data[cnt++] = value[2];
       	                if (ix < (HYPRE_BigInt)(nx*(px+1)-1))
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px,py+1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
       	                else if (ix < nx_global-1)
       	                {
       		           col_nums[cnt] =hypre_map27(ix+1,iy+1,iz+1,px+1,py+1,pz+1,
 					Cx,Cy,Cz,nx,nxy);
-      		           data[cnt++] = value[1];
+      		           data[cnt++] = value[3];
       	                }
                      }
                   }
