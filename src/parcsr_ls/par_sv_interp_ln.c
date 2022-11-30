@@ -2503,7 +2503,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       new_col_starts[1] = (col_starts[1] / (HYPRE_BigInt)num_functions) * (HYPRE_BigInt)new_nf;
 
       if (myid == (num_procs - 1)) { g_nc = new_col_starts[1]; }
-      hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_INT, num_procs - 1, comm);
    }
    else /* not first level */
    {

@@ -420,7 +420,7 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                {
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
-               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);  // TODO: v_buf_data is `HYPRE_Complex` but `HYPRE_MPI_REAL` is exchanged
             }
          }
          hypre_MPI_Waitall(jr, requests, status);
@@ -435,7 +435,7 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
                vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
                vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);  // TODO: v_ext_data is `HYPRE_Complex` but `HYPRE_MPI_REAL` is exchanged
             }
             hypre_MPI_Waitall(jr, requests, status);
          }
@@ -568,7 +568,7 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                {
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
-               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);  // TODO: v_buf_data is `HYPRE_Complex` but `HYPRE_MPI_REAL` is exchanged
             }
          }
          hypre_MPI_Waitall(jr, requests, status);
@@ -583,7 +583,7 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
                vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
                vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);  // TODO: v_ext_data is `HYPRE_Complex` but `HYPRE_MPI_REAL` is exchanged
             }
             hypre_MPI_Waitall(jr, requests, status);
          }
