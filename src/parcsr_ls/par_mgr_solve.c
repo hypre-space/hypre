@@ -774,8 +774,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   {
                      Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                                            hypre_IntArrayData(CF_marker[fine_grid]),
-                                                           relax_type, relax_points, relax_weight, omega, 
-                                                           NULL, U_array[fine_grid], Vtemp, Ztemp);
+                                                           relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
                   }
                }
             }
@@ -902,8 +901,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             {
                Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                                      hypre_IntArrayData(CF_marker[fine_grid]),
-                                                     relax_type, relax_points, relax_weight, omega,
-                                                     NULL, U_array[fine_grid], Vtemp, Ztemp);
+                                                     relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
             }
          }
          //wall_time = time_getWallclockSeconds() - wall_time;
