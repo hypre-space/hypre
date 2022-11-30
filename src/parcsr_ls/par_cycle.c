@@ -411,9 +411,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
             for (j = 0; j < num_sweep; j++)
             {
-               //HYPRE_Int zer_u = level > 0 && jj == 0 && j == 0 && cycle_param == 1;
-               //hypre_ParVectorAllZero(Aux_U) = zer_u;
-
                if (num_levels == 1 && max_levels > 1)
                {
                   relax_points = 0;
