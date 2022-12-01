@@ -411,13 +411,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
             for (j = 0; j < num_sweep; j++)
             {
-               /* for level > 0, the all-zero flag of u can be only set in the "first down" cycle;
-                * additionally, for level == 0, we trust the flag passed in */
-               if (level > 0 || (level == 0 && hypre_ParVectorAllZero(Aux_U)))
-               {
-                  hypre_ParVectorAllZero(Aux_U) = jj == 0 && j == 0 && cycle_param == 1;
-               }
-
                if (num_levels == 1 && max_levels > 1)
                {
                   relax_points = 0;
@@ -684,6 +677,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
 
+         hypre_ParVectorAllZero(U_array[coarse_grid]) = 1;
+
          alpha = -1.0;
          beta = 1.0;
 
@@ -788,6 +783,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                      beta, U_array[fine_grid]);
             /* printf("Proc %d: level %d, n %d, Interpolation done\n", my_id, level, local_size); */
          }
+
+         hypre_ParVectorAllZero(U_array[fine_grid]) = 0;
+
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(level);
 #if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
