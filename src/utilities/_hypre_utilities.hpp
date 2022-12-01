@@ -170,7 +170,6 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
 #endif
-#endif // defined(HYPRE_USING_SYCL)
 
 /* The following definitions facilitate code reuse and limits
  * if/def-ing when unifying cuda/hip code with sycl code */
@@ -180,6 +179,8 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #define __host__
 #define __device__
 #define __forceinline__ __inline__ __attribute__((always_inline))
+
+#endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
