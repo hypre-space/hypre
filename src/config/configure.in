@@ -1716,7 +1716,7 @@ then
 
    if test "$hypre_using_sycl" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, dpcpp)
+      AC_CHECK_PROGS(CUCC, icpx)
    fi
 fi
 
@@ -2470,10 +2470,11 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
         then
-           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+           dnl WM: remove the -g flag for debug mode because it currently causes errors on JLSE
+           SYCLFLAGS="-Wall ${SYCLFLAGS}"
         else
            SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi

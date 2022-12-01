@@ -940,7 +940,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                      &num_cols_offd_C, &col_map_offd_C, &map_offd_to_C);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: lower_bound does not accept zero length values */
+      /* WM: onedpl lower_bound currently does not accept zero length values */
       if (Cext_offd_nnz > 0)
       {
          HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,

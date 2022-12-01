@@ -74,7 +74,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
-                      std::less< std::tuple<HYPRE_BigInt, char, HYPRE_Complex> >() );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -176,7 +176,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
-                      std::less< std::tuple<HYPRE_BigInt, char, HYPRE_Complex> >() );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -220,6 +220,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    [] (const auto & x) {return x;},
    [] (const auto & x) {return 0.0;} );
 
+   /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
    auto new_end = oneapi::dpl::reduce_by_segment(
                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
                                                                                    hypre_handle())),
