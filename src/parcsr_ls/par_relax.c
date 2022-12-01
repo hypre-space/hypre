@@ -1120,6 +1120,10 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
     *-----------------------------------------------------------------*/
    if (hypre_ParVectorAllZero(u))
    {
+#if defined(HYPRE_DEBUG)
+      hypre_assert(hypre_ParVectorInnerProd(u, u) == 0.0);
+      /*hypre_ParPrintf(hypre_ParCSRMatrixComm(A), "A %d: skip a matvec\n", hypre_ParCSRMatrixGlobalNumRows(A));*/
+#endif
       hypre_ParVectorScale(relax_weight, Vtemp);
    }
    else

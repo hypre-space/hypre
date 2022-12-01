@@ -239,10 +239,15 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
            (mult_additive < 0 || mult_additive >= num_levels) &&
            (simple        < 0 || simple        >= num_levels) )
       {
+         if (cycle_count > 0) { hypre_ParVectorAllZero(u) = 0; }
+
          hypre_BoomerAMGCycle(amg_data, F_array, U_array);
       }
       else
       {
+         /* RL TODO: for now, force u's all-zero flag to be FALSE */
+         hypre_ParVectorAllZero(u) = 0;
+
          hypre_BoomerAMGAdditiveCycle(amg_data);
       }
 

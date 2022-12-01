@@ -411,6 +411,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
             for (j = 0; j < num_sweep; j++)
             {
+               /* for level > 0, the all-zero flag of u can be only set in the "first down" cycle;
+                * additionally, for level == 0, we trust the flag passed in */
+               if (level > 0 || (level == 0 && hypre_ParVectorAllZero(Aux_U)))
+               {
+                  hypre_ParVectorAllZero(Aux_U) = jj == 0 && j == 0 && cycle_param == 1;
+               }
+
                if (num_levels == 1 && max_levels > 1)
                {
                   relax_points = 0;

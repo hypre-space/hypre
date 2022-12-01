@@ -306,14 +306,17 @@ HYPRE_Int
 hypre_ParVectorSetConstantValues( hypre_ParVector *v,
                                   HYPRE_Complex    value )
 {
-   if (value == 0.0)
-   {
-      hypre_ParVectorAllZero(v) = 1;
-   }
-
    hypre_Vector *v_local = hypre_ParVectorLocalVector(v);
 
    return hypre_SeqVectorSetConstantValues(v_local, value);
+}
+
+HYPRE_Int
+hypre_ParVectorSetZeros( hypre_ParVector *v )
+{
+   hypre_ParVectorAllZero(v) = 1;
+
+   return hypre_ParVectorSetConstantValues(v, 0.0);
 }
 
 /*--------------------------------------------------------------------------
