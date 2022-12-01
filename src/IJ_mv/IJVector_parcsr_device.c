@@ -282,20 +282,20 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 }
 
 /*--------------------------------------------------------------------
- * hypreCUDAKernel_IJVectorAssemblePar
+ * hypreGPUKernel_IJVectorAssemblePar
  *
  * y[map[i]-offset] = x[i] or y[map[i]] += x[i] depending on SorA,
  * same index cannot appear more than once in map
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreCUDAKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
-                                     HYPRE_Int         n,
-                                     HYPRE_Complex    *x,
-                                     HYPRE_BigInt     *map,
-                                     HYPRE_BigInt      offset,
-                                     char             *SorA,
-                                     HYPRE_Complex    *y )
+hypreGPUKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
+                                    HYPRE_Int         n,
+                                    HYPRE_Complex    *x,
+                                    HYPRE_BigInt     *map,
+                                    HYPRE_BigInt      offset,
+                                    char             *SorA,
+                                    HYPRE_Complex    *y )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -597,7 +597,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJVectorAssemblePar, gDim, bDim,
                         new_nnz, new_data, new_i,
                         vec_start, new_sora,
                         data );

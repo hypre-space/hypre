@@ -18,9 +18,9 @@
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 __global__ void
-hypreCUDAKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
-                                    HYPRE_Int *row_ptr,
-                                    HYPRE_Int *row_len, HYPRE_Int *mark)
+hypreGPUKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
+                                   HYPRE_Int *row_ptr,
+                                   HYPRE_Int *row_len, HYPRE_Int *mark)
 {
    HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -166,7 +166,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       /* mark unwanted elements as -1 */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(len1, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
                         (HYPRE_Int *) row_indexes, ncols, indicator );
 
 #if defined(HYPRE_USING_SYCL)
@@ -262,7 +262,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(N0, "thread", bDim);
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
    */
 
    /* output X: 0: keep, 1: zero-out */

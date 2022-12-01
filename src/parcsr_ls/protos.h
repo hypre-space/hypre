@@ -1705,25 +1705,29 @@ HYPRE_Int hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A, hypre_ParVector *
                                         HYPRE_Real *l1_norms, hypre_ParVector *u );
 
 HYPRE_Int hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                          HYPRE_Real relax_weight, HYPRE_Real omega, hypre_ParVector *u, hypre_ParVector *r,
-                                                          hypre_ParVector *z, HYPRE_Int choice);
-
-HYPRE_Int hypre_BoomerAMGRelaxTwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                   HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                   hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int num_inner_iters );
+                                                          HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                          HYPRE_Real *A_diag_diag, hypre_ParVector *u,
+                                                          hypre_ParVector *r, hypre_ParVector *z,
+                                                          HYPRE_Int choice );
 
 HYPRE_Int hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                     hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points,
+                                                     HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                     HYPRE_Real *A_diag_diag, hypre_ParVector *u,
+                                                     hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
 HYPRE_Int hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                     hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+                                                     HYPRE_Int *cf_marker, HYPRE_Int relax_points,
+                                                     HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                     HYPRE_Real *A_diag_diag, hypre_ParVector *u,
+                                                     hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
 /* par_realx_device.c */
 HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                       HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
-                                                       HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp,
+                                                       HYPRE_Int *cf_marker, HYPRE_Int relax_points,
+                                                       HYPRE_Real relax_weight, HYPRE_Real omega,
+                                                       HYPRE_Real *l1_norms, hypre_ParVector *u,
+                                                       hypre_ParVector *Vtemp, hypre_ParVector *Ztemp,
                                                        HYPRE_Int GS_order, HYPRE_Int Symm );
 
 /* par_relax_interface.c */
@@ -2256,6 +2260,10 @@ HYPRE_Int hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Rea
 HYPRE_Int hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
                            HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U,
                            hypre_ParVector *utemp, hypre_ParVector *ftemp);
+HYPRE_Int hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
+                               HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U,
+                               hypre_ParVector *utemp, hypre_ParVector *ftemp, hypre_Vector *xtemp, HYPRE_Int lower_jacobi_iters,
+                               HYPRE_Int upper_jacobi_iters);
 HYPRE_Int hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
                                    HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D,
                                    hypre_ParCSRMatrix *U, hypre_ParCSRMatrix *S, hypre_ParVector *ftemp, hypre_ParVector *utemp,
