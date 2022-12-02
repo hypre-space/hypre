@@ -298,8 +298,8 @@ main( hypre_int argc,
       hypre_printf("Usage: %s [<options>]\n", argv[0]);
       hypre_printf("\n");
       hypre_printf("  -problem <ID>: problem ID\n");
-      hypre_printf("       1 = solves 1 large problem with AMG-PCG (default) \n");
-      hypre_printf("       2 = simulates a time-dependent loop with AMG-GMRES\n");
+      hypre_printf("       1 = solves 1 problem with AMG-PCG (default) \n");
+      hypre_printf("       2 = solves 1 problem AMG-GMRES(100)\n");
       hypre_printf("\n");
       hypre_printf("  -n <nx> <ny> <nz>: problem size per MPI process (default: nx=ny=nz=10)\n");
       hypre_printf("\n");
