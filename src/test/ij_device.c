@@ -2300,8 +2300,8 @@ testFFFC(HYPRE_ParCSRMatrix parcsr_A)
    parcsr_A_h = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
    parcsr_S_h = hypre_ParCSRMatrixClone_v2(parcsr_S_device, 0, HYPRE_MEMORY_HOST);
    hypre_MatvecCommPkgCreate(parcsr_A_h);
-   hypre_ParCSRMatrixGenerateFFFC(parcsr_A_h, hypre_IntArrayData(h_CF_marker), coarse_pnts_global,
-                                  parcsr_S_h, &AFC_h, &AFF_h);
+   hypre_ParCSRMatrixGenerateFFFCHost(parcsr_A_h, hypre_IntArrayData(h_CF_marker),
+                                      coarse_pnts_global, parcsr_S_h, &AFC_h, &AFF_h);
 
    /* AFF * AFC */
    W_h = hypre_ParCSRMatMatHost(AFF_h, AFC_h);

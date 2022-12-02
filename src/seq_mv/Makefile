@@ -87,8 +87,8 @@ SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 ##################################################################
 
 all:
-	make autogen
-	make lib
+	$(MAKE) autogen
+	$(MAKE) lib
 
 lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
