@@ -32,7 +32,6 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
 #include <time.h>
@@ -58,7 +57,6 @@ main( hypre_int argc,
 {
    HYPRE_Int           arg_index;
    HYPRE_Int           print_usage;
-   HYPRE_Int           solver_id;
    HYPRE_Int           problem_id;
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
@@ -68,6 +66,7 @@ main( hypre_int argc,
    HYPRE_Int           max_iter = 1000;
    HYPRE_Int           mg_max_iter = 100;
    HYPRE_Real          final_res_norm;
+   HYPRE_Real          max_row_sum = 1.0;
    void               *object;
 
    HYPRE_IJMatrix      ij_A; 
@@ -83,7 +82,7 @@ main( hypre_int argc,
 
    HYPRE_Int           myid = 0;
    HYPRE_Int           num_procs = 1;
-   HYPRE_Int	       agg_num_levels = 1;
+   HYPRE_Int	       agg_num_levels = 0;
 
    HYPRE_Int	       time_index;
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
@@ -108,7 +107,7 @@ main( hypre_int argc,
    HYPRE_Real   FOM1 = 0, FOM2 = 0;
 
    /* parameters for GMRES */
-   HYPRE_Int	    k_dim = 20;
+   HYPRE_Int	    k_dim = 100;
    /* interpolation */
    HYPRE_Int      interp_type  = 17; /* default value */
 
@@ -192,7 +191,6 @@ main( hypre_int argc,
  
    debug_flag = 0;
 
-   solver_id = 1;
    problem_id = 1;
 
    ioutdat = 0;
@@ -228,11 +226,6 @@ main( hypre_int argc,
       {
          arg_index++;
          problem_id = atoi(argv[arg_index++]);
-         if (problem_id == 2) 
-	 {
-	    solver_id = 3;
-	 }
-         
       }
       else if ( strcmp(argv[arg_index], "-printstats") == 0 )
       {
@@ -258,6 +251,36 @@ main( hypre_int argc,
          arg_index++;
          keepTranspose = 1;
          rap2 = 0;
+      }
+      else if ( strcmp(argv[arg_index], "-interptype") == 0 )
+      {
+         arg_index++;
+         interp_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-k") == 0 )
+      {
+         arg_index++;
+         k_dim = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
+      {
+         arg_index++;
+         max_row_sum = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
+      {
+         arg_index++;
+         P_max_elmts = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
+      {
+         arg_index++;
+         agg_num_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rlx") == 0 )
+      {
+         arg_index++;
+         relax_type = atoi(argv[arg_index++]);
       }
       else
       {
@@ -297,7 +320,7 @@ main( hypre_int argc,
    if (myid == 0)
    {
       hypre_printf("Running with these driver parameters:\n");
-      hypre_printf("  solver ID    = %d\n\n", solver_id);
+      hypre_printf("  Problem ID    = %d\n\n", problem_id);
    }
 
    /*-----------------------------------------------------------------
@@ -358,9 +381,9 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    BuildIJLaplacian27pt(argc, argv, &system_size, &ij_A);
+
    HYPRE_IJMatrixGetObject(ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
-
 
    hypre_EndTiming(time_index);
    hypre_GetTiming("Generate Matrix", &wall_time, comm);
@@ -375,8 +398,8 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-                                              &first_local_row, &last_local_row ,
-                                              &first_local_col, &last_local_col );
+                                    &first_local_row, &last_local_row ,
+                                    &first_local_col, &last_local_col );
 
    local_num_rows = (HYPRE_Int)(last_local_row - first_local_row + 1);
 
@@ -460,7 +483,6 @@ main( hypre_int argc,
       if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
       HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
       HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
-      HYPRE_BoomerAMGSetNumPaths(pcg_precond, 2);
       HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
       HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
       HYPRE_BoomerAMGSetCumNnzAP(pcg_precond, cum_nnz_AP);
@@ -569,11 +591,10 @@ main( hypre_int argc,
       if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
       HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
       HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
-      HYPRE_BoomerAMGSetNumPaths(pcg_precond, 2);
       HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
       HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
       HYPRE_BoomerAMGSetCumNnzAP(pcg_precond, cum_nnz_AP);
-      HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, 1.0);
+      HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
       HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
       HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -677,11 +698,11 @@ main( hypre_int argc,
 HYPRE_Int
 BuildIJLaplacian27pt( HYPRE_Int         argc,
                        char            *argv[],
-                       HYPRE_BigInt      *system_size_ptr,
+                       HYPRE_BigInt    *system_size_ptr,
                        HYPRE_IJMatrix  *ij_A_ptr     )
 {
    MPI_Comm        comm = hypre_MPI_COMM_WORLD;
-   HYPRE_Int    nx, ny, nz;
+   HYPRE_Int       nx, ny, nz;
    HYPRE_Int       P, Q, R;
 
    HYPRE_IJMatrix  ij_A;
@@ -708,6 +729,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    HYPRE_BigInt Cx, Cy, Cz;
    HYPRE_Int arg_index;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   void               *object, *objectD;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -797,10 +819,6 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
  
    value = hypre_CTAlloc(HYPRE_Real, 4, memory_location);
 
-   /*value[0] = 26.0;
-   value[1] = -1.0;
-   value[2] = -1.0;
-   value[3] = -1.0;*/
    value[0] = 26.0;
    value[1] = -4.0;
    value[2] = -0.15;
@@ -808,14 +826,14 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
 
    local_size = nx*ny*nz;
 
+   row_index = (HYPRE_BigInt)(myid*local_size);
+
    row_nums = hypre_CTAlloc(HYPRE_BigInt, local_size, memory_location);
    num_cols = hypre_CTAlloc(HYPRE_Int, local_size, memory_location);
-   row_index = (HYPRE_BigInt)(myid*local_size);
 
    HYPRE_IJMatrixCreate( comm, row_index, (HYPRE_BigInt)(row_index+local_size-1),
                                row_index, (HYPRE_BigInt)(row_index+local_size-1),
                                &ij_A );
-
    HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
 
    nxy = nx*ny;
@@ -2346,7 +2364,7 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    hypre_TFree(nnz, memory_location);
 
    *system_size_ptr = global_size;
-   *ij_A_ptr = ij_A;
+   *ij_A_ptr = (HYPRE_IJMatrix) ij_A;
 
    return (0);
 }
