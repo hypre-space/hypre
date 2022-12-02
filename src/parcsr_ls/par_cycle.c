@@ -677,7 +677,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
 
-         hypre_ParVectorAllZero(U_array[coarse_grid]) = 1;
+         hypre_ParVectorAllZeros(U_array[coarse_grid]) = 1;
 
          alpha = -1.0;
          beta = 1.0;
@@ -784,7 +784,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             /* printf("Proc %d: level %d, n %d, Interpolation done\n", my_id, level, local_size); */
          }
 
-         hypre_ParVectorAllZero(U_array[fine_grid]) = 0;
+         hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
 
          HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
          HYPRE_ANNOTATE_MGLEVEL_END(level);

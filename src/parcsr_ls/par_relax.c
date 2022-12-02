@@ -175,7 +175,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          break;
    }
 
-   hypre_ParVectorAllZero(u) = 0;
+   hypre_ParVectorAllZeros(u) = 0;
 
    return relax_error;
 }
@@ -1118,7 +1118,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     * Perform Matvec Vtemp = w * (f - Au)
     *-----------------------------------------------------------------*/
-   if (hypre_ParVectorAllZero(u))
+   if (hypre_ParVectorAllZeros(u))
    {
 #if defined(HYPRE_DEBUG)
       hypre_assert(hypre_ParVectorInnerProd(u, u) == 0.0);
