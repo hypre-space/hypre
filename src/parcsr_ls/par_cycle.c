@@ -675,9 +675,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          fine_grid = level;
          coarse_grid = level + 1;
 
-         hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
-
-         hypre_ParVectorAllZeros(U_array[coarse_grid]) = 1;
+         hypre_ParVectorSetZeros(U_array[coarse_grid]);
 
          alpha = -1.0;
          beta = 1.0;
