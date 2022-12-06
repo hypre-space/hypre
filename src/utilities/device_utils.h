@@ -121,8 +121,8 @@ using namespace thrust::placeholders;
 
 /* The following definitions facilitate code reuse and limits
  * if/def-ing when unifying cuda/hip code with sycl code */
-using dim3 = sycl::range<1>;
-using hypre_DeviceItem = sycl::nd_item<1>;
+using dim3 = sycl::range<3>;
+using hypre_DeviceItem = sycl::nd_item<3>;
 #define __global__
 #define __host__
 #define __device__
