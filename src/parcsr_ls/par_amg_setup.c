@@ -3700,7 +3700,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_CreateLambda(amg_data);
    }
 
-   if (cum_nnz_AP > -1)
+   if (cum_nnz_AP > 0.0)
    {
       cum_nnz_AP = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
       for (j = 0; j < num_levels-1; j++)
