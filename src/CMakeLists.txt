@@ -352,8 +352,9 @@ if (HYPRE_WITH_SYCL)
 
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 
-  # Set CXX compiler to icpx
-  set(CMAKE_CXX_COMPILER "icpx")
+  # Set CXX compiler to dpcpp
+  # WM: note that dpcpp is deprecated, but for now oneMKL looks for the dpcpp compiler to configure things appropriately for the sycl backend
+  set(CMAKE_CXX_COMPILER "dpcpp")
 
   # Set linker to icpx
   set(CMAKE_LINKER "icpx")

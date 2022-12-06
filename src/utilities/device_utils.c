@@ -836,7 +836,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
 {
 #if defined(HYPRE_USING_SYCL)
    /* WM: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
-   /* WM: question - does thrust lower_bound do this automatically? Otherwise, I'd expect this to break for cuda also. */
+   /* Note that this is different from thrust's behavior, where lower_bound zeros out the row pointer when nnz = 0 */
    if (nnz <= 0)
    {
       hypre_Memset(d_row_ptr, 0, (nrows + 1) * sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
