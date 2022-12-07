@@ -2166,8 +2166,14 @@ then
 
    if test "x$hypre_found_cusparse" != "xyes"
    then
-      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h], [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)])
-      AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h],
+                    [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../../math_libs/include/cusparse.h],
+                    [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
    fi
 
    if test "x$hypre_found_cusparse" != "xyes"
@@ -2191,8 +2197,14 @@ then
 
    if test "x$hypre_found_cublas" != "xyes"
    then
-      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h], [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)])
-      AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h],
+                    [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../../math_libs/include/cublas.h],
+                    [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
    fi
 
    if test "x$hypre_found_cublas" != "xyes"
@@ -2216,8 +2228,14 @@ then
 
    if test "x$hypre_found_cusolver" != "xyes"
    then
-      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h], [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)])
-      AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h],
+                    [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../../math_libs/include/cusolverDn.h],
+                    [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
    fi
 
    if test "x$hypre_found_cusolver" != "xyes"
