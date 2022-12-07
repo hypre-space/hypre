@@ -8926,6 +8926,7 @@ then
       as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!" "$LINENO" 5
    fi
 fi
+
 if test "$hypre_using_cuda" = "yes"
 then
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
@@ -9103,6 +9104,230 @@ done
 fi
 
 
+if test "$hypre_using_cusparse" = "yes"
+then
+   as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/include/cusparse.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/include/cusparse.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/include/cusparse.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/include/cusparse.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}
+fi
+
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)
+fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      as_fn_error $? "unable to find cusparse.h ..." "$LINENO" 5
+   fi
+fi
+
+
+if test "$hypre_using_cublas" = "yes"
+then
+   as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}
+fi
+
+
+   if test "x$hypre_found_cublas" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_VENDOR_MATH_PATH}/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_VENDOR_MATH_PATH}/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_VENDOR_MATH_PATH}/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_VENDOR_MATH_PATH}/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes;
+fi
+
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)
+fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      as_fn_error $? "unable to find cublas.h ..." "$LINENO" 5
+   fi
+fi
+
+
+if test "$hypre_using_cusolver" = "yes"
+then
+   as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}
+fi
+
+
+   if test "x$hypre_found_cusolver" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes;
+fi
+
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)
+fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      as_fn_error $? "unable to find cusolverDn.h ..." "$LINENO" 5
+   fi
+fi
+
+
 if  test x"$hypre_using_hip" == x"yes" ; then :
    if  test -n "$ROCM_PATH"; then :
    HYPRE_ROCM_PREFIX=$ROCM_PATH
@@ -9253,6 +9478,13 @@ $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
          HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
+
+   if test x"$hypre_using_cusparse" == x"yes" || test x"$hypre_using_cublas" == x"yes" || test x"$hypre_using_cusolver" == x"yes"; then :
+  if test "x$HYPRE_CUDA_PATH" != "x$HYPRE_VENDOR_MATH_PATH"; then :
+  HYPRE_CUDA_INCLUDE+=" -I${HYPRE_VENDOR_MATH_PATH}/include"
+           HYPRE_CUDA_LIBS+=" -L${HYPRE_VENDOR_MATH_PATH}/lib64"
+fi
+fi
 
    if test "$hypre_using_gpu_profiling" = "yes"
    then

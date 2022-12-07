@@ -2137,7 +2137,10 @@ then
    fi
 fi dnl hypre_using_um
 
-dnl CUDA
+dnl *********************************************************************
+dnl * Check for CUDA header
+dnl *********************************************************************
+
 if [test "$hypre_using_cuda" = "yes"]
 then
    AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
@@ -2150,6 +2153,76 @@ then
    if test "x$hypre_found_cuda" != "xyes"
    then
       AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for cuSPARSE header
+dnl *********************************************************************
+
+if [test "$hypre_using_cusparse" = "yes"]
+then
+   AC_CHECK_FILE([${HYPRE_CUDA_PATH}/include/cusparse.h], [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}])
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h], [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)])
+      AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cusparse.h ...])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for cuBLAS header
+dnl *********************************************************************
+
+if [test "$hypre_using_cublas" = "yes"]
+then
+   AC_CHECK_FILE([${HYPRE_CUDA_PATH}/include/cublas.h], [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}])
+
+   if test "x$hypre_found_cublas" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      AC_CHECK_FILE([${HYPRE_VENDOR_MATH_PATH}/include/cublas.h], [hypre_found_cublas=yes;])
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h], [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)])
+      AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cublas.h ...])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for cuSOLVER header
+dnl *********************************************************************
+
+if [test "$hypre_using_cusolver" = "yes"]
+then
+   AC_CHECK_FILE([${HYPRE_CUDA_PATH}/include/cusolverDn.h], [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}])
+
+   if test "x$hypre_found_cusolver" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      AC_CHECK_FILE([${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h], [hypre_found_cusolver=yes;])
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h], [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs)])
+      AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cusolverDn.h ...])
    fi
 fi
 
@@ -2310,6 +2383,11 @@ then
    dnl LDFLAGS="-Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
+
+   AS_IF([test x"$hypre_using_cusparse" == x"yes" || test x"$hypre_using_cublas" == x"yes" || test x"$hypre_using_cusolver" == x"yes"],
+         [AS_IF([test "x$HYPRE_CUDA_PATH" != "x$HYPRE_VENDOR_MATH_PATH"],
+          [HYPRE_CUDA_INCLUDE+=" -I${HYPRE_VENDOR_MATH_PATH}/include"
+           HYPRE_CUDA_LIBS+=" -L${HYPRE_VENDOR_MATH_PATH}/lib64"])])
 
    if test "$hypre_using_gpu_profiling" = "yes"
    then
