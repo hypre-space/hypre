@@ -22,29 +22,29 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> time_index) = hypre_InitializeTiming("PFMG");
 
    /* set defaults */
-   (pfmg_data -> tol)              = 1.0e-06;
-   (pfmg_data -> max_iter)         = 200;
-   (pfmg_data -> rel_change)       = 0;
-   (pfmg_data -> zero_guess)       = 0;
-   (pfmg_data -> max_levels)       = 0;
-   (pfmg_data -> dxyz)[0]          = 0.0;
-   (pfmg_data -> dxyz)[1]          = 0.0;
-   (pfmg_data -> dxyz)[2]          = 0.0;
-   (pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
-   (pfmg_data -> jacobi_weight)    = 0.0;
+   (pfmg_data -> tol)               = 1.0e-06;
+   (pfmg_data -> max_iter)          = 200;
+   (pfmg_data -> rel_change)        = 0;
+   (pfmg_data -> zero_guess)        = 0;
+   (pfmg_data -> max_levels)        = 0;
+   (pfmg_data -> dxyz)[0]           = 0.0;
+   (pfmg_data -> dxyz)[1]           = 0.0;
+   (pfmg_data -> dxyz)[2]           = 0.0;
+   (pfmg_data -> relax_type)        = 1;       /* weighted Jacobi */
+   (pfmg_data -> jacobi_weight)     = 0.0;
    (pfmg_data -> usr_jacobi_weight) = 0;    /* no user Jacobi weight */
-   (pfmg_data -> rap_type)         = 0;
-   (pfmg_data -> num_pre_relax)    = 1;
-   (pfmg_data -> num_post_relax)   = 1;
-   (pfmg_data -> skip_relax)       = 1;
-   (pfmg_data -> logging)          = 0;
-   (pfmg_data -> print_level)      = 0;
+   (pfmg_data -> rap_type)          = 0;
+   (pfmg_data -> num_pre_relax)     = 1;
+   (pfmg_data -> num_post_relax)    = 1;
+   (pfmg_data -> skip_relax)        = 1;
+   (pfmg_data -> logging)           = 0;
+   (pfmg_data -> print_level)       = 0;
+
+   (pfmg_data -> memory_location)   = hypre_HandleMemoryLocation(hypre_handle());
 
    /* initialize */
    (pfmg_data -> num_levels)  = -1;
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   (pfmg_data -> devicelevel) = 200;
-#endif
+
    return (void *) pfmg_data;
 }
 
@@ -67,6 +67,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
          hypre_TFree(pfmg_data -> norms, HYPRE_MEMORY_HOST);
          hypre_TFree(pfmg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
+
+      HYPRE_MemoryLocation memory_location = pfmg_data -> memory_location;
 
       if ((pfmg_data -> num_levels) > -1)
       {
@@ -104,7 +106,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l + 1]);
          }
 
-         hypre_TFree(pfmg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pfmg_data -> data, memory_location);
          hypre_TFree(pfmg_data -> data_const, HYPRE_MEMORY_HOST);
 
          hypre_TFree(pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);

@@ -29,6 +29,7 @@ typedef struct hypre_StructMatrix_struct
 
    hypre_BoxArray       *data_space;
 
+   HYPRE_MemoryLocation  memory_location;           /* memory location of data */
    HYPRE_Complex        *data;                      /* Pointer to variable matrix data */
    HYPRE_Complex        *data_const;                /* Pointer to constant matrix data */
    HYPRE_Complex       **stencil_data;              /* Pointer for each stencil */
@@ -67,6 +68,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixStencil(matrix)             ((matrix) -> stencil)
 #define hypre_StructMatrixNumValues(matrix)           ((matrix) -> num_values)
 #define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
+#define hypre_StructMatrixMemoryLocation(matrix)      ((matrix) -> memory_location)
 #define hypre_StructMatrixData(matrix)                ((matrix) -> data)
 #define hypre_StructMatrixDataConst(matrix)           ((matrix) -> data_const)
 #define hypre_StructMatrixStencilData(matrix)         ((matrix) -> stencil_data)

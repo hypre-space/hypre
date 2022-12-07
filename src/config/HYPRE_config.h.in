@@ -56,6 +56,9 @@
 /* Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt */
 #undef HYPRE_BIGINT
 
+/* Feature branch string */
+#undef HYPRE_BRANCH_NAME
+
 /* Define to 1 if using complex values */
 #undef HYPRE_COMPLEX
 
@@ -153,6 +156,9 @@
 
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
+
+/* Define to 1 if want to use host in hypre tests */
+#undef HYPRE_TEST_USING_HOST
 
 /* Using HYPRE timing routines */
 #undef HYPRE_TIMING

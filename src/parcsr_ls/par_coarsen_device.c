@@ -288,13 +288,13 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
 }
 
 __global__ void
-hypreCUDAKernel_PMISCoarseningInit(hypre_DeviceItem &item,
-                                   HYPRE_Int   nrows,
-                                   HYPRE_Int   CF_init,
-                                   HYPRE_Int  *S_diag_i,
-                                   HYPRE_Int  *S_offd_i,
-                                   HYPRE_Real *measure_diag,
-                                   HYPRE_Int  *CF_marker_diag)
+hypreGPUKernel_PMISCoarseningInit(hypre_DeviceItem &item,
+                                  HYPRE_Int   nrows,
+                                  HYPRE_Int   CF_init,
+                                  HYPRE_Int  *S_diag_i,
+                                  HYPRE_Int  *S_offd_i,
+                                  HYPRE_Real *measure_diag,
+                                  HYPRE_Int  *CF_marker_diag)
 {
    /* global_thread_id */
    const HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
@@ -362,7 +362,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    HYPRE_Int *new_end;
 
    /* init CF_marker_diag and measure_diag: remove some special nodes */
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningInit, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_PMISCoarseningInit, gDim, bDim,
                      num_rows_diag, CF_init, S_diag_i, S_offd_i, measure_diag, CF_marker_diag );
 
    /* communicate for measure_offd */
@@ -415,16 +415,16 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
 }
 
 __global__ void
-hypreCUDAKernel_PMISCoarseningUpdateCF(hypre_DeviceItem &item,
-                                       HYPRE_Int   graph_diag_size,
-                                       HYPRE_Int  *graph_diag,
-                                       HYPRE_Int  *S_diag_i,
-                                       HYPRE_Int  *S_diag_j,
-                                       HYPRE_Int  *S_offd_i,
-                                       HYPRE_Int  *S_offd_j,
-                                       HYPRE_Real *measure_diag,
-                                       HYPRE_Int  *CF_marker_diag,
-                                       HYPRE_Int  *CF_marker_offd)
+hypreGPUKernel_PMISCoarseningUpdateCF(hypre_DeviceItem &item,
+                                      HYPRE_Int   graph_diag_size,
+                                      HYPRE_Int  *graph_diag,
+                                      HYPRE_Int  *S_diag_i,
+                                      HYPRE_Int  *S_diag_j,
+                                      HYPRE_Int  *S_offd_i,
+                                      HYPRE_Int  *S_offd_j,
+                                      HYPRE_Real *measure_diag,
+                                      HYPRE_Int  *CF_marker_diag,
+                                      HYPRE_Int  *CF_marker_offd)
 {
    HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -546,7 +546,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_PMISCoarseningUpdateCF,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_PMISCoarseningUpdateCF,
                      gDim, bDim,
                      graph_diag_size,
                      graph_diag,

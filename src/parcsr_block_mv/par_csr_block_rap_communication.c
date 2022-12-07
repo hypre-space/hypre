@@ -29,7 +29,7 @@ hypre_GetCommPkgBlockRTFromCommPkgBlockA( hypre_ParCSRBlockMatrix *RT,
    HYPRE_Int num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
    HYPRE_Int *send_procs_A = hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
 
-   hypre_ParCSRCommPkg *comm_pkg;
+   hypre_ParCSRCommPkg *comm_pkg = NULL;
    HYPRE_Int num_recvs_RT;
    HYPRE_Int *recv_procs_RT;
    HYPRE_Int *recv_vec_starts_RT;
@@ -46,7 +46,6 @@ hypre_GetCommPkgBlockRTFromCommPkgBlockA( hypre_ParCSRBlockMatrix *RT,
    HYPRE_Int i, j;
    HYPRE_Int vec_len, vec_start;
    HYPRE_Int num_procs, my_id;
-   HYPRE_Int ierr = 0;
    HYPRE_Int num_requests;
    HYPRE_Int offd_col, proc_num;
 
@@ -187,24 +186,25 @@ hypre_GetCommPkgBlockRTFromCommPkgBlockA( hypre_ParCSRBlockMatrix *RT,
       send_map_elmts_RT[i] = (HYPRE_Int)(send_big_elmts[i] - first_col_diag);
    }
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   /* Create communication package */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs_RT,
+                                    recv_procs_RT,
+                                    recv_vec_starts_RT,
+                                    num_sends_RT,
+                                    send_procs_RT,
+                                    send_map_starts_RT,
+                                    send_map_elmts_RT,
+                                    &comm_pkg);
 
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends_RT;
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs_RT;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs_RT;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs_RT;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts_RT;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts_RT;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts_RT;
+   hypre_ParCSRBlockMatrixCommPkg(RT) = comm_pkg;
 
+   /* Free memory */
    hypre_TFree(status, HYPRE_MEMORY_HOST);
    hypre_TFree(requests, HYPRE_MEMORY_HOST);
    hypre_TFree(send_big_elmts, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRBlockMatrixCommPkg(RT) = comm_pkg;
    hypre_TFree(change_array, HYPRE_MEMORY_HOST);
 
-   return ierr;
+   return hypre_error_flag;
 }
 

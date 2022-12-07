@@ -42,6 +42,7 @@ hypre_ILUCreate()
    hypre_ParILUDataFTempUpper(ilu_data) = NULL;
    hypre_ParILUDataUTempLower(ilu_data) = NULL;
    hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
+   hypre_ParILUDataADiagDiag(ilu_data) = NULL;
 #endif
 
    /* general data */
@@ -73,6 +74,7 @@ hypre_ILUCreate()
    hypre_ParILUDataUTemp(ilu_data) = NULL;
    hypre_ParILUDataXTemp(ilu_data) = NULL;
    hypre_ParILUDataYTemp(ilu_data) = NULL;
+   hypre_ParILUDataZTemp(ilu_data) = NULL;
    hypre_ParILUDataUExt(ilu_data) = NULL;
    hypre_ParILUDataFExt(ilu_data) = NULL;
    hypre_ParILUDataResidual(ilu_data) = NULL;
@@ -255,6 +257,11 @@ hypre_ILUDestroy( void *data )
       hypre_TFree( hypre_ParILUDataMatAFakeDiagonal(ilu_data), HYPRE_MEMORY_DEVICE);
       hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
    }
+   if (hypre_ParILUDataADiagDiag(ilu_data))
+   {
+      hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
+      hypre_ParILUDataADiagDiag(ilu_data) = NULL;
+   }
 #endif
 
    /* final residual vector */
@@ -288,6 +295,11 @@ hypre_ILUDestroy( void *data )
    {
       hypre_ParVectorDestroy( hypre_ParILUDataYTemp(ilu_data) );
       hypre_ParILUDataYTemp(ilu_data) = NULL;
+   }
+   if (hypre_ParILUDataZTemp(ilu_data))
+   {
+      hypre_SeqVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
+      hypre_ParILUDataZTemp(ilu_data) = NULL;
    }
    if (hypre_ParILUDataUExt(ilu_data))
    {
@@ -2017,14 +2029,15 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    }
 
    /* now build new comm_pkg for this communication */
-   comm_pkg_tmp = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm         (comm_pkg_tmp) = comm;
-   hypre_ParCSRCommPkgNumSends     (comm_pkg_tmp) = num_sends;
-   hypre_ParCSRCommPkgSendProcs    (comm_pkg_tmp) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_tmp) = send_disp_comm;
-   hypre_ParCSRCommPkgNumRecvs     (comm_pkg_tmp) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs    (comm_pkg_tmp) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_tmp) = recv_disp_comm;
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs,
+                                    hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                    recv_disp_comm,
+                                    num_sends,
+                                    hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                    send_disp_comm,
+                                    NULL,
+                                    &comm_pkg_tmp);
 
    /* communication */
    comm_handle_j = hypre_ParCSRCommHandleCreate(11, comm_pkg_tmp, send_buf_int, recv_buf_int);

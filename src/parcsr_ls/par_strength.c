@@ -1517,7 +1517,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1550,7 +1550,7 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
    hypre_MPI_Status        *status;
    hypre_MPI_Request       *requests;
    hypre_ParCSRCommPkg     *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
-   hypre_ParCSRCommPkg     *comm_pkg_S;
+   hypre_ParCSRCommPkg     *comm_pkg_S = NULL;
    hypre_ParCSRCommHandle  *comm_handle;
    hypre_CSRMatrix         *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_BigInt            *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
@@ -1741,7 +1741,6 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
       big_send_map_elmts_S = hypre_CTAlloc(HYPRE_BigInt, total_nz, HYPRE_MEMORY_HOST);
    }
 
-
    proc = 0;
    proc_cnt = 0;
    for (i = 0; i < num_sends_A; i++)
@@ -1754,14 +1753,12 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
       }
    }
 
-   comm_pkg_S = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm(comm_pkg_S) = comm;
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg_S) = num_recvs_S;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg_S) = recv_procs_S;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_S) = recv_vec_starts_S;
-   hypre_ParCSRCommPkgNumSends(comm_pkg_S) = num_sends_S;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg_S) = send_procs_S;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_S) = send_map_starts_S;
+   /* Create communication package for S */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs_S, recv_procs_S, recv_vec_starts_S,
+                                    num_sends_S, send_procs_S, send_map_starts_S,
+                                    send_map_elmts_S,
+                                    &comm_pkg_S);
 
    comm_handle = hypre_ParCSRCommHandleCreate(22, comm_pkg_S, col_map_offd_S,
                                               big_send_map_elmts_S);
@@ -1769,12 +1766,12 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
 
    first_row = hypre_ParCSRMatrixFirstRowIndex(A);
    if (first_row)
+   {
       for (i = 0; i < send_map_starts_S[num_sends_S]; i++)
       {
          send_map_elmts_S[i] = (HYPRE_Int)(big_send_map_elmts_S[i] - first_row);
       }
-
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg_S) = send_map_elmts_S;
+   }
 
    hypre_ParCSRMatrixCommPkg(S) = comm_pkg_S;
    hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
@@ -1807,7 +1804,7 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
 
    MPI_Comm             comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
-   hypre_ParCSRCommPkg *tmp_comm_pkg;
+   hypre_ParCSRCommPkg *tmp_comm_pkg = NULL;
    hypre_ParCSRCommHandle *comm_handle;
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
@@ -2067,13 +2064,16 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
          tmp_send_map_starts[i + 1] = j_cnt;
       }
 
-      tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
-      hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
-      hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-      hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-      hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-      hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = tmp_send_map_starts;
+      /* Create temporary communication package */
+      hypre_ParCSRCommPkgCreateAndFill(comm,
+                                       num_recvs,
+                                       hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                       tmp_recv_vec_starts,
+                                       num_sends,
+                                       hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                       tmp_send_map_starts,
+                                       NULL,
+                                       &tmp_comm_pkg);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
@@ -2090,15 +2090,15 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
 
       num_nonzeros = S_ext_i[recv_vec_starts[num_recvs]];
 
-      if (num_nonzeros) { S_ext_j = hypre_TAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST); }
+      if (num_nonzeros)
+      {
+         S_ext_j = hypre_TAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST);
+      }
 
-      tmp_recv_vec_starts[0] = 0;
       for (i = 0; i < num_recvs; i++)
       {
          tmp_recv_vec_starts[i + 1] = S_ext_i[recv_vec_starts[i + 1]];
       }
-
-      hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = tmp_recv_vec_starts;
 
       comm_handle = hypre_ParCSRCommHandleCreate(21, tmp_comm_pkg, S_int_j, S_ext_j);
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -3037,7 +3037,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(S) );
 
    if (exec == HYPRE_EXEC_DEVICE)
