@@ -68,13 +68,13 @@ Final COGMRES Relative Residual Norm = 8.225661e-09
 
 
 COGMRES Iterations = 93
-Final COGMRES Relative Residual Norm = 8.225661e-09
+Final COGMRES Relative Residual Norm = 8.225662e-09
 
 # Output file: solvers.out.16
 
 
 COGMRES Iterations = 93
-Final COGMRES Relative Residual Norm = 8.225661e-09
+Final COGMRES Relative Residual Norm = 8.225662e-09
 
 # Output file: solvers.out.17
 index 19 value -8.373863e-12
@@ -171,7 +171,7 @@ Final Relative Residual Norm = 9.839249e-09
 
 # Output file: solvers.out.116
 GMRES Iterations = 15
-Final GMRES Relative Residual Norm = 2.830234e-09
+Final GMRES Relative Residual Norm = 2.830235e-09
 
 # Output file: solvers.out.117
 GMRES Iterations = 15
