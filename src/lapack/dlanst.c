@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --
@@ -142,6 +143,7 @@ doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 /*     End of DLANST */
 
 } /* dlanst_ */
+#endif
 
 #ifdef __cplusplus
 }

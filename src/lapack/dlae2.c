@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlae2_(doublereal *a, doublereal *b, doublereal *c__,
 	doublereal *rt1, doublereal *rt2)
 {
@@ -122,6 +123,7 @@ extern "C" {
 /*     End of DLAE2 */
 
 } /* dlae2_ */
+#endif
 
 #ifdef __cplusplus
 }

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_NON_MP_FUNC
 /* Subroutine */ integer xerbla_(const char *srname, integer *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
@@ -47,6 +48,7 @@ extern "C" {
 
     return 0;
 } /* xerbla_ */
+#endif
 
 #ifdef __cplusplus
 }

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsymm_(const char *side,const char *uplo, integer *m, integer *n,
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *b,
 	integer *ldb, doublereal *beta, doublereal *c__, integer *ldc)
@@ -293,6 +294,7 @@ extern "C" {
     return 0;
 /*     End of DSYMM . */
 } /* dsymm_ */
+#endif
 #undef c___ref
 #undef b_ref
 #undef a_ref

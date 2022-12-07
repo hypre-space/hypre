@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsyev_(const char *jobz,const char *uplo, integer *n, doublereal *a,
 	 integer *lda, doublereal *w, doublereal *work, integer *lwork,
 	integer *info)
@@ -262,6 +263,7 @@ extern "C" {
 /*     End of DSYEV */
 
 } /* dsyev_ */
+#endif
 
 #undef a_ref
 

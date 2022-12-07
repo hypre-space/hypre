@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dorgtr_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
@@ -231,6 +232,7 @@ extern "C" {
 /*     End of DORGTR */
 
 } /* dorgtr_ */
+#endif
 
 #undef a_ref
 

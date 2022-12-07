@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dlamch_(const char *cmach)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --
@@ -133,7 +134,9 @@ nding
 /*     End of DLAMCH */
 
 } /* dlamch_ */
+#endif
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlamc1_(integer *beta, integer *t, logical *rnd, logical
 	*ieee1)
 {
@@ -344,7 +347,9 @@ L30:
 /*     End of DLAMC1 */
 
 } /* dlamc1_ */
+#endif
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlamc2_(integer *beta, integer *t, logical *rnd,
 	doublereal *eps, integer *emin, doublereal *rmin, integer *emax,
 	doublereal *rmax)
@@ -647,7 +652,9 @@ ing
 /*     End of DLAMC2 */
 
 } /* dlamc2_ */
+#endif
 
+#ifdef BUILD_MP_FUNC
 doublereal dlamc3_(doublereal *a, doublereal *b)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --
@@ -686,7 +693,9 @@ doublereal dlamc3_(doublereal *a, doublereal *b)
 /*     End of DLAMC3 */
 
 } /* dlamc3_ */
+#endif
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlamc4_(integer *emin, doublereal *start, integer *base)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --
@@ -775,7 +784,9 @@ L10:
 /*     End of DLAMC4 */
 
 } /* dlamc4_ */
+#endif
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlamc5_(integer *beta, integer *p, integer *emin,
 	logical *ieee, integer *emax, doublereal *rmax)
 {
@@ -948,6 +959,7 @@ it
 /*     End of DLAMC5 */
 
 } /* dlamc5_ */
+#endif
 
 #ifdef __cplusplus
 }

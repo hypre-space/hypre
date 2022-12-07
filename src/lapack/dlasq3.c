@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlasq3_(integer *i0, integer *n0, doublereal *z__,
 	integer *pp, doublereal *dmin__, doublereal *sigma, doublereal *desig,
 	 doublereal *qmax, integer *nfail, integer *iter, integer *ndiv,
@@ -319,6 +320,7 @@ L100:
 /*     End of DLASQ3 */
 
 } /* dlasq3_ */
+#endif
 
 #ifdef __cplusplus
 }

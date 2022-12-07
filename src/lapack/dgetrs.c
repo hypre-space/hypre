@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dgetrs_(const char *trans, integer *n, integer *nrhs,
 	doublereal *a, integer *lda, integer *ipiv, doublereal *b, integer *
 	ldb, integer *info)
@@ -163,6 +164,7 @@ extern "C" {
 /*     End of DGETRS */
 
 } /* dgetrs_ */
+#endif
 
 #ifdef __cplusplus
 }

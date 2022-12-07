@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsygst_(integer *itype,const char *uplo, integer *n,
 	doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *
 	info)
@@ -320,6 +321,7 @@ extern "C" {
 /*     End of DSYGST */
 
 } /* dsygst_ */
+#endif
 
 #undef b_ref
 #undef a_ref

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlasrt_(const char *id, integer *n, doublereal *d__, integer *
 	info)
 {
@@ -261,6 +262,7 @@ L110:
 /*     End of DLASRT */
 
 } /* dlasrt_ */
+#endif
 
 #undef stack_ref
 

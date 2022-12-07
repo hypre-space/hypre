@@ -12,7 +12,7 @@ extern "C" {
    You must link the resulting object file with the libraries:
 	-lf2c -lm   (in that order)
 */
-
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dbdsqr_(const char *uplo, integer *n, integer *ncvt, integer *
 	nru, integer *ncc, doublereal *d__, doublereal *e, doublereal *vt,
 	integer *ldvt, doublereal *u, integer *ldu, doublereal *c__, integer *
@@ -893,6 +893,7 @@ L220:
 /*     End of DBDSQR */
 
 } /* dbdsqr_ */
+#endif
 
 #undef vt_ref
 #undef u_ref

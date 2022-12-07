@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dpotrs_(char *uplo, integer *n, integer *nrhs,
 	doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *
 	info)
@@ -143,6 +144,7 @@ extern "C" {
 /*     End of DPOTRS */
 
 } /* dpotrs_ */
+#endif
 
 #ifdef __cplusplus
 }

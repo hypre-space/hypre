@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 integer idamax_(integer *n, doublereal *dx, integer *incx)
 {
 
@@ -82,7 +83,7 @@ L30:
     }
     return ret_val;
 } /* idamax_ */
-
+#endif
 #ifdef __cplusplus
 }
 #endif

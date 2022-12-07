@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlaswp_(integer *n, doublereal *a, integer *lda, integer
 	*k1, integer *k2, integer *ipiv, integer *incx)
 {
@@ -144,6 +145,7 @@ extern "C" {
 /*     End of DLASWP */
 
 } /* dlaswp_ */
+#endif
 
 #undef a_ref
 

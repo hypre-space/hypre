@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dpotf2_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, integer *info)
 {
@@ -200,6 +201,7 @@ L40:
 /*     End of DPOTF2 */
 
 } /* dpotf2_ */
+#endif
 
 #undef a_ref
 

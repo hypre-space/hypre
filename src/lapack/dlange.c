@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, integer
 	*lda, doublereal *work)
 {
@@ -178,6 +179,7 @@ doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, inte
 /*     End of DLANGE */
 
 } /* dlange_ */
+#endif
 
 #undef a_ref
 

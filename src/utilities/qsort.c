@@ -10,7 +10,7 @@
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 void hypre_swap( HYPRE_Int *v,
                  HYPRE_Int  i,
                  HYPRE_Int  j )
@@ -21,10 +21,12 @@ void hypre_swap( HYPRE_Int *v,
    v[i] = v[j];
    v[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_swap_c( HYPRE_Complex *v,
                    HYPRE_Int      i,
                    HYPRE_Int      j )
@@ -35,10 +37,11 @@ void hypre_swap_c( HYPRE_Complex *v,
    v[i] = v[j];
    v[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
+#ifdef BUILD_MP_FUNC
 void hypre_swap2( HYPRE_Int  *v,
                   HYPRE_Real *w,
                   HYPRE_Int   i,
@@ -54,10 +57,12 @@ void hypre_swap2( HYPRE_Int  *v,
    w[i] = w[j];
    w[j] = temp2;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_BigSwap2( HYPRE_BigInt *v,
                      HYPRE_Real   *w,
                      HYPRE_Int     i,
@@ -73,10 +78,12 @@ void hypre_BigSwap2( HYPRE_BigInt *v,
    w[i] = w[j];
    w[j] = temp2;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_swap2i( HYPRE_Int  *v,
                    HYPRE_Int  *w,
                    HYPRE_Int  i,
@@ -91,7 +98,9 @@ void hypre_swap2i( HYPRE_Int  *v,
    w[i] = w[j];
    w[j] = temp;
 }
+#endif
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigSwap2i( HYPRE_BigInt *v,
                       HYPRE_Int    *w,
                       HYPRE_Int     i,
@@ -107,6 +116,7 @@ void hypre_BigSwap2i( HYPRE_BigInt *v,
    w[i] = w[j];
    w[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -114,6 +124,7 @@ void hypre_BigSwap2i( HYPRE_BigInt *v,
 
 /* AB 11/04 */
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_swap3i( HYPRE_Int  *v,
                    HYPRE_Int  *w,
                    HYPRE_Int  *z,
@@ -133,9 +144,12 @@ void hypre_swap3i( HYPRE_Int  *v,
    z[j] = temp;
 }
 
+#endif
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_swap3_d( HYPRE_Real *v,
                     HYPRE_Int  *w,
                     HYPRE_Int  *z,
@@ -155,8 +169,10 @@ void hypre_swap3_d( HYPRE_Real *v,
    z[i] = z[j];
    z[j] = temp;
 }
+#endif
 
 /* swap (v[i], v[j]), (w[i], w[j]), and (z[v[i]], z[v[j]]) - DOK */
+#ifdef BUILD_MP_FUNC
 void hypre_swap3_d_perm( HYPRE_Int  *v,
                          HYPRE_Real *w,
                          HYPRE_Int  *z,
@@ -176,9 +192,11 @@ void hypre_swap3_d_perm( HYPRE_Int  *v,
    z[v[i]] = z[v[j]];
    z[v[j]] = temp;
 }
+#endif
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_BigSwap4_d( HYPRE_Real   *v,
                        HYPRE_BigInt *w,
                        HYPRE_Int    *z,
@@ -204,10 +222,12 @@ void hypre_BigSwap4_d( HYPRE_Real   *v,
    y[j] = temp;
 
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_swap_d( HYPRE_Real *v,
                    HYPRE_Int  i,
                    HYPRE_Int  j )
@@ -218,10 +238,12 @@ void hypre_swap_d( HYPRE_Real *v,
    v[i] = v[j];
    v[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_qsort0( HYPRE_Int *v,
                    HYPRE_Int  left,
                    HYPRE_Int  right )
@@ -245,10 +267,12 @@ void hypre_qsort0( HYPRE_Int *v,
    hypre_qsort0(v, left, last - 1);
    hypre_qsort0(v, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_qsort1( HYPRE_Int  *v,
                    HYPRE_Real *w,
                    HYPRE_Int   left,
@@ -273,10 +297,12 @@ void hypre_qsort1( HYPRE_Int  *v,
    hypre_qsort1(v, w, left, last - 1);
    hypre_qsort1(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 void hypre_BigQsort1( HYPRE_BigInt *v,
                       HYPRE_Real   *w,
                       HYPRE_Int     left,
@@ -301,10 +327,12 @@ void hypre_BigQsort1( HYPRE_BigInt *v,
    hypre_BigQsort1(v, w, left, last - 1);
    hypre_BigQsort1(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_qsort2i( HYPRE_Int *v,
                     HYPRE_Int *w,
                     HYPRE_Int  left,
@@ -329,10 +357,12 @@ void hypre_qsort2i( HYPRE_Int *v,
    hypre_qsort2i(v, w, left, last - 1);
    hypre_qsort2i(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigQsort2i( HYPRE_BigInt *v,
                        HYPRE_Int *w,
                        HYPRE_Int  left,
@@ -357,12 +387,14 @@ void hypre_BigQsort2i( HYPRE_BigInt *v,
    hypre_BigQsort2i(v, w, left, last - 1);
    hypre_BigQsort2i(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /*   sort on w (HYPRE_Real), move v (AB 11/04) */
 
+#ifdef BUILD_MP_FUNC
 void hypre_qsort2( HYPRE_Int  *v,
                    HYPRE_Real *w,
                    HYPRE_Int   left,
@@ -387,10 +419,12 @@ void hypre_qsort2( HYPRE_Int  *v,
    hypre_qsort2(v, w, left, last - 1);
    hypre_qsort2(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 /* qsort2 based on absolute value of entries in w. */
 void hypre_qsort2_abs( HYPRE_Int  *v,
                        HYPRE_Real *w,
@@ -406,7 +440,7 @@ void hypre_qsort2_abs( HYPRE_Int  *v,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(w[i]) > fabs(w[left]))
+      if (hypre_abs(w[i]) > hypre_abs(w[left]))
       {
          hypre_swap2(v, w, ++last, i);
       }
@@ -415,11 +449,13 @@ void hypre_qsort2_abs( HYPRE_Int  *v,
    hypre_qsort2_abs(v, w, left, last - 1);
    hypre_qsort2_abs(v, w, last + 1, right);
 }
+#endif
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /* sort on v, move w and z (AB 11/04) */
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_qsort3i( HYPRE_Int *v,
                     HYPRE_Int *w,
                     HYPRE_Int *z,
@@ -445,8 +481,10 @@ void hypre_qsort3i( HYPRE_Int *v,
    hypre_qsort3i(v, w, z, left, last - 1);
    hypre_qsort3i(v, w, z, last + 1, right);
 }
+#endif
 
 /* sort on v, move w and z DOK */
+#ifdef BUILD_MP_FUNC
 void hypre_qsort3ir( HYPRE_Int  *v,
                      HYPRE_Real *w,
                      HYPRE_Int  *z,
@@ -472,11 +510,13 @@ void hypre_qsort3ir( HYPRE_Int  *v,
    hypre_qsort3ir(v, w, z, left, last - 1);
    hypre_qsort3ir(v, w, z, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /* sort min to max based on real array v */
+#ifdef BUILD_MP_FUNC
 void hypre_qsort3( HYPRE_Real *v,
                    HYPRE_Int  *w,
                    HYPRE_Int  *z,
@@ -502,12 +542,14 @@ void hypre_qsort3( HYPRE_Real *v,
    hypre_qsort3(v, w, z, left, last - 1);
    hypre_qsort3(v, w, z, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /* sort min to max based on absolute value */
 
+#ifdef BUILD_MP_FUNC
 void hypre_qsort3_abs(HYPRE_Real *v,
                       HYPRE_Int *w,
                       HYPRE_Int *z,
@@ -524,7 +566,7 @@ void hypre_qsort3_abs(HYPRE_Real *v,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(v[i]) < fabs(v[left]))
+      if (hypre_abs(v[i]) < hypre_abs(v[left]))
       {
          hypre_swap3_d(v, w, z, ++last, i);
       }
@@ -533,12 +575,14 @@ void hypre_qsort3_abs(HYPRE_Real *v,
    hypre_qsort3_abs(v, w, z, left, last - 1);
    hypre_qsort3_abs(v, w, z, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /* sort min to max based on absolute value */
 
+#ifdef BUILD_MP_FUNC
 void hypre_BigQsort4_abs( HYPRE_Real   *v,
                           HYPRE_BigInt *w,
                           HYPRE_Int    *z,
@@ -556,7 +600,7 @@ void hypre_BigQsort4_abs( HYPRE_Real   *v,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(v[i]) < fabs(v[left]))
+      if (hypre_abs(v[i]) < hypre_abs(v[left]))
       {
          hypre_BigSwap4_d(v, w, z, y, ++last, i);
       }
@@ -565,11 +609,13 @@ void hypre_BigQsort4_abs( HYPRE_Real   *v,
    hypre_BigQsort4_abs(v, w, z, y, left, last - 1);
    hypre_BigQsort4_abs(v, w, z, y, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 /* sort min to max based on absolute value */
 
+#ifdef BUILD_MP_FUNC
 void hypre_qsort_abs( HYPRE_Real *w,
                       HYPRE_Int   left,
                       HYPRE_Int   right )
@@ -584,7 +630,7 @@ void hypre_qsort_abs( HYPRE_Real *w,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(w[i]) < fabs(w[left]))
+      if (hypre_abs(w[i]) < hypre_abs(w[left]))
       {
          hypre_swap_d(w, ++last, i);
       }
@@ -593,11 +639,13 @@ void hypre_qsort_abs( HYPRE_Real *w,
    hypre_qsort_abs(w, left, last - 1);
    hypre_qsort_abs(w, last + 1, right);
 }
+#endif
 
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigSwapbi( HYPRE_BigInt *v,
                       HYPRE_Int    *w,
                       HYPRE_Int     i,
@@ -613,10 +661,12 @@ void hypre_BigSwapbi( HYPRE_BigInt *v,
    w[i] = w[j];
    w[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigQsortbi( HYPRE_BigInt *v,
                        HYPRE_Int    *w,
                        HYPRE_Int     left,
@@ -641,10 +691,12 @@ void hypre_BigQsortbi( HYPRE_BigInt *v,
    hypre_BigQsortbi(v, w, left, last - 1);
    hypre_BigQsortbi(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigSwapLoc( HYPRE_BigInt *v,
                        HYPRE_Int    *w,
                        HYPRE_Int     i,
@@ -658,10 +710,12 @@ void hypre_BigSwapLoc( HYPRE_BigInt *v,
    w[i] = j;
    w[j] = i;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigQsortbLoc( HYPRE_BigInt *v,
                          HYPRE_Int    *w,
                          HYPRE_Int     left,
@@ -686,11 +740,13 @@ void hypre_BigQsortbLoc( HYPRE_BigInt *v,
    hypre_BigQsortbLoc(v, w, left, last - 1);
    hypre_BigQsortbLoc(v, w, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigSwapb2i( HYPRE_BigInt *v,
                        HYPRE_Int    *w,
                        HYPRE_Int    *z,
@@ -710,10 +766,12 @@ void hypre_BigSwapb2i( HYPRE_BigInt *v,
    z[i] = z[j];
    z[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigQsortb2i( HYPRE_BigInt *v,
                         HYPRE_Int    *w,
                         HYPRE_Int    *z,
@@ -739,10 +797,12 @@ void hypre_BigQsortb2i( HYPRE_BigInt *v,
    hypre_BigQsortb2i(v, w, z, left, last - 1);
    hypre_BigQsortb2i(v, w, z, last + 1, right);
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigSwap( HYPRE_BigInt *v,
                     HYPRE_Int     i,
                     HYPRE_Int     j )
@@ -753,10 +813,12 @@ void hypre_BigSwap( HYPRE_BigInt *v,
    v[i] = v[j];
    v[j] = temp;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_BigQsort0( HYPRE_BigInt *v,
                       HYPRE_Int     left,
                       HYPRE_Int     right )
@@ -780,7 +842,9 @@ void hypre_BigQsort0( HYPRE_BigInt *v,
    hypre_BigQsort0(v, left, last - 1);
    hypre_BigQsort0(v, last + 1, right);
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 // Recursive DFS search.
 static void hypre_search_row(HYPRE_Int            row,
                              const HYPRE_Int     *row_ptr,
@@ -807,8 +871,10 @@ static void hypre_search_row(HYPRE_Int            row,
       *order_ind += 1;
    }
 }
+#endif
 
 
+#ifdef BUILD_MP_FUNC
 // Find topological ordering on acyclic CSR matrix. That is, find ordering
 // of matrix to be triangular.
 //
@@ -837,8 +903,10 @@ void hypre_topo_sort( const HYPRE_Int     *row_ptr,
    }
    hypre_TFree(visited, HYPRE_MEMORY_HOST);
 }
+#endif
 
 
+#ifdef BUILD_MP_FUNC
 // Recursive DFS search.
 static void hypre_dense_search_row(HYPRE_Int            row,
                                    const HYPRE_Complex *L,
@@ -875,8 +943,10 @@ static void hypre_dense_search_row(HYPRE_Int            row,
       *order_ind += 1;
    }
 }
+#endif
 
 
+#ifdef BUILD_MP_FUNC
 // Find topological ordering of acyclic dense matrix in column major
 // format. That is, find ordering of matrix to be triangular.
 //
@@ -904,3 +974,4 @@ void hypre_dense_topo_sort(const HYPRE_Complex *L,
    }
    hypre_TFree(visited, HYPRE_MEMORY_HOST);
 }
+#endif

@@ -15,7 +15,7 @@
  * highest "NumberCut" values without completely sorting them.
  * Data is HYPRE_Real precision data.
  *--------------------------------------------------------------------------*/
-
+#ifdef BUILD_MP_FUNC
 HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
                                  HYPRE_Int list_length, HYPRE_Int NumberKept )
 {
@@ -41,11 +41,11 @@ HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
    for ( ; !done; )
    {
       mid = first;
-      abskey = fabs( values[ mid ]);
+      abskey = hypre_abs( values[ mid ]);
 
       for ( j = first + 1; j <= last; j ++)
       {
-         if ( fabs( values[ j ]) > abskey )
+         if ( hypre_abs( values[ j ]) > abskey )
          {
             mid ++;
             /* interchange values */
@@ -83,4 +83,5 @@ HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
 
    return ( ierr );
 }
+#endif
 

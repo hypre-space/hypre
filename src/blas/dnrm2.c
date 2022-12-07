@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 {
     /* Initialized data */
@@ -204,6 +205,7 @@ L200:
 L300:
     return ret_val;
 } /* dnrm2_ */
+#endif
 
 #ifdef __cplusplus
 }

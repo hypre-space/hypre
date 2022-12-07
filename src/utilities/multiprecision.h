@@ -60,30 +60,35 @@ typedef enum
 #ifdef BUILD_MP_FUNC
 #undef BUILD_MP_FUNC
 #endif
-#define UNDEFINED_MP_BUILD 1
+#define BUILD_NON_MP_FUNC 1
 #endif
 /*--------------------------------------------------------------------------
  * HYPRE multiprecision extensions
  *--------------------------------------------------------------------------*/
 /* Macro to generate typed functions */
+#if defined(BUILD_MP_FUNC)
 #if defined(HYPRE_SINGLE)
 //#define FUNC_SUFFIX flt
-#define HYPRE_TYPED_FUNC(a) CONCAT_(a, FLT_SUFFIX)
+#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
 #elif defined(HYPRE_LONG_DOUBLE)
 //#define FUNC_SUFFIX long_dbl
-#define HYPRE_TYPED_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
+#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
 #else /* HYPRE_DOUBLE */
 //#define FUNC_SUFFIX dbl
-#define HYPRE_TYPED_FUNC(a) CONCAT_(a, DBL_SUFFIX)
+#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
+#endif
+#else
+#define HYPRE_MULTIPRECISION_FUNC(a) a
 #endif
 
 /* Apply suffix to define typed function */
-//#define HYPRE_TYPED_FUNC(a) CONCAT_(a, FUNC_SUFFIX)
+//#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FUNC_SUFFIX)
 
 #else
 /* define no-op for typed function macro */
-#define HYPRE_TYPED_FUNC(a) a
+//#define HYPRE_MULTIPRECISION_FUNC(a) a
 #define BUILD_MP_FUNC 1
+#define BUILD_NON_MP_FUNC 1
 #endif
 
 /* Helper macros to generate multiprecision function declarations */

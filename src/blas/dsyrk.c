@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsyrk_(const char *uplo,const char *trans, integer *n, integer *k,
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *beta,
 	doublereal *c, integer *ldc)
@@ -358,7 +359,7 @@ extern "C" {
 /*     End of DSYRK . */
 
 } /* dsyrk_ */
-
+#endif
 #ifdef __cplusplus
 }
 #endif

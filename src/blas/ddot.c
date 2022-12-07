@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal ddot_(integer*n,doublereal* dx,integer* incx,doublereal* dy,integer* incy)
 {
     /* System generated locals */
@@ -96,6 +97,7 @@ L60:
     ret_val = dtemp;
     return ret_val;
 } /* ddot_ */
+#endif
 
 #ifdef __cplusplus
 }

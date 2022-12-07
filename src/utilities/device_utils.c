@@ -19,7 +19,7 @@
 /*--------------------------------------------------------------------
  * hypre_DeviceDataCreate
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_MP_FUNC
 hypre_DeviceData*
 hypre_DeviceDataCreate()
 {
@@ -81,11 +81,11 @@ hypre_DeviceDataCreate()
 
    return data;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_DeviceDataDestroy
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 void
 hypre_DeviceDataDestroy(hypre_DeviceData *data)
 {
@@ -158,11 +158,11 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_SyncCudaDevice
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 {
@@ -184,11 +184,12 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 #endif
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_ResetCudaDevice
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
 {
@@ -199,7 +200,7 @@ hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
 #endif
    return hypre_error_flag;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_SyncComputeStream_core
  *
@@ -211,7 +212,7 @@ hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
  *         3: return the current value of cuda_compute_stream_sync
  *         4: sync stream based on cuda_compute_stream_sync
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_SyncComputeStream_core(HYPRE_Int     action,
                              hypre_Handle *hypre_handle,
@@ -261,11 +262,11 @@ hypre_SyncComputeStream_core(HYPRE_Int     action,
 
    return hypre_error_flag;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_SetSyncCudaCompute
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_SetSyncCudaCompute(HYPRE_Int action)
 {
@@ -275,11 +276,11 @@ hypre_SetSyncCudaCompute(HYPRE_Int action)
 
    return hypre_error_flag;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_RestoreSyncCudaCompute
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_RestoreSyncCudaCompute()
 {
@@ -287,11 +288,12 @@ hypre_RestoreSyncCudaCompute()
 
    return hypre_error_flag;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_GetSyncCudaCompute
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
 {
@@ -299,11 +301,12 @@ hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
 
    return hypre_error_flag;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_SyncComputeStream
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_SyncComputeStream(hypre_Handle *hypre_handle)
 {
@@ -311,11 +314,13 @@ hypre_SyncComputeStream(hypre_Handle *hypre_handle)
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_ForceSyncComputeStream
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
 {
@@ -327,6 +332,7 @@ hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
 
    return hypre_error_flag;
 }
+#endif
 
 #endif // #if defined(HYPRE_USING_GPU)
 
@@ -340,6 +346,7 @@ hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
  * hypre_DeviceDataComputeStream
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 /* CUDA/HIP stream */
 #if defined(HYPRE_USING_CUDA)
 cudaStream_t
@@ -352,11 +359,13 @@ hypre_DeviceDataComputeStream(hypre_DeviceData *data)
 {
    return hypre_DeviceDataStream(data, hypre_DeviceDataComputeStreamNum(data));
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataStream
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 #if defined(HYPRE_USING_CUDA)
 cudaStream_t
 #elif defined(HYPRE_USING_HIP)
@@ -422,11 +431,13 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 
    return stream;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_GetDefaultDeviceBlockDimension
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 dim3
 hypre_GetDefaultDeviceBlockDimension()
 {
@@ -438,11 +449,12 @@ hypre_GetDefaultDeviceBlockDimension()
 
    return bDim;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypre_GetDefaultDeviceGridDimension
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 dim3
 hypre_GetDefaultDeviceGridDimension( HYPRE_Int   n,
                                      const char *granularity,
@@ -481,11 +493,12 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int   n,
 
    return gDim;
 }
-
+#endif
 /*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPY
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 __global__ void
 hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                        HYPRE_Complex *y)
@@ -496,6 +509,7 @@ hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
       y[i] += x[i] / a[i];
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPY
@@ -503,6 +517,7 @@ hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
  * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y)
 {
@@ -519,11 +534,13 @@ hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Comple
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPYMarked
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 __global__ void
 hypreGPUKernel_IVAXPYMarked( hypre_DeviceItem &item,
                              HYPRE_Int         n,
@@ -542,6 +559,7 @@ hypreGPUKernel_IVAXPYMarked( hypre_DeviceItem &item,
       }
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IVAXPYMarked
@@ -549,6 +567,7 @@ hypreGPUKernel_IVAXPYMarked( hypre_DeviceItem &item,
  * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IVAXPYMarked( HYPRE_Int      n,
                           HYPRE_Complex *a,
@@ -570,6 +589,7 @@ hypreDevice_IVAXPYMarked( HYPRE_Int      n,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_IVAMXPMY
@@ -624,6 +644,7 @@ hypreGPUKernel_IVAMXPMY( hypre_DeviceItem &item,
  * Note: does not work for row-wise multivectors
  *--------------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_IVAMXPMY( HYPRE_Int       m,
                       HYPRE_Int       n,
@@ -665,11 +686,13 @@ hypreDevice_IVAMXPMY( HYPRE_Int       m,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_CsrRowPtrsToIndices
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int*
 hypreDevice_CsrRowPtrsToIndices( HYPRE_Int  nrows,
                                  HYPRE_Int  nnz,
@@ -687,6 +710,7 @@ hypreDevice_CsrRowPtrsToIndices( HYPRE_Int  nrows,
 
    return d_row_ind;
 }
+#endif
 
 #if defined(HYPRE_USING_SYCL)
 
@@ -694,6 +718,7 @@ hypreDevice_CsrRowPtrsToIndices( HYPRE_Int  nrows,
  * hypreSYCLKernel_ScatterRowPtr
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void
 hypreSYCLKernel_ScatterRowPtr( hypre_DeviceItem &item,
                                HYPRE_Int         nrows,
@@ -712,6 +737,7 @@ hypreSYCLKernel_ScatterRowPtr( hypre_DeviceItem &item,
       }
    }
 }
+#endif
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -735,6 +761,7 @@ struct hypre_empty_row_functor
  * hypreDevice_CsrRowPtrsToIndices_v2
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
                                     HYPRE_Int  nnz,
@@ -769,11 +796,13 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_CsrRowIndicesToPtrs
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int*
 hypreDevice_CsrRowIndicesToPtrs( HYPRE_Int  nrows,
                                  HYPRE_Int  nnz,
@@ -785,11 +814,13 @@ hypreDevice_CsrRowIndicesToPtrs( HYPRE_Int  nrows,
 
    return d_row_ptr;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_CsrRowIndicesToPtrs_v2
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                                     HYPRE_Int  nnz,
@@ -817,6 +848,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_GetRowNnz
@@ -826,6 +858,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
  * d_rownnz can be the same as d_row_indices.
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 __global__ void
 hypreGPUKernel_GetRowNnz( hypre_DeviceItem &item,
                           HYPRE_Int         nrows,
@@ -854,6 +887,7 @@ hypreGPUKernel_GetRowNnz( hypre_DeviceItem &item,
          read_only_load(&d_offd_ia[i + 1]) - read_only_load(&d_offd_ia[i]);
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_GetRowNnz
@@ -861,6 +895,7 @@ hypreGPUKernel_GetRowNnz( hypre_DeviceItem &item,
  * Note: (d_row_indices == NULL) means d_row_indices = [0,1,...,nrows-1]
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_GetRowNnz( HYPRE_Int  nrows,
                        HYPRE_Int *d_row_indices,
@@ -882,11 +917,13 @@ hypreDevice_GetRowNnz( HYPRE_Int  nrows,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IntegerInclusiveScan
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntegerInclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
@@ -899,11 +936,13 @@ hypreDevice_IntegerInclusiveScan( HYPRE_Int  n,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_CopyParCSRRows
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 __global__ void
 hypreGPUKernel_CopyParCSRRows( hypre_DeviceItem  &item,
                                HYPRE_Int          nrows,
@@ -995,6 +1034,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_DeviceItem  &item,
       }
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_CopyParCSRRows
@@ -1010,6 +1050,7 @@ hypreGPUKernel_CopyParCSRRows( hypre_DeviceItem  &item,
  *    If nrows == 1 and d_ib == NULL, it means d_ib[0] = 0
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_CopyParCSRRows( HYPRE_Int      nrows,
                             HYPRE_Int     *d_row_indices,
@@ -1052,11 +1093,13 @@ hypreDevice_CopyParCSRRows( HYPRE_Int      nrows,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IntegerExclusiveScan
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
@@ -1074,6 +1117,7 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_StableSortByTupleKey
@@ -1084,7 +1128,6 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
  *      1, (a,b) < (a',b') iff a < a' or (a = a' and |b| > |b'|) [used in dropping small entries]
  *      2, (a,b) < (a',b') iff a < a' or (a = a' and (b == a or b < b') and b' != a') [used in putting diagonal first]
  *--------------------------------------------------------------------*/
-
 template <typename T1, typename T2, typename T3>
 HYPRE_Int
 hypreDevice_StableSortByTupleKey( HYPRE_Int N,
@@ -1147,20 +1190,22 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
    return hypre_error_flag;
 }
 
+#ifdef BUILD_NON_MP_FUNC
 template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
                                                     HYPRE_Int *keys1, HYPRE_Int *keys2,
                                                     HYPRE_Int *vals, HYPRE_Int opt);
+#endif
+#ifdef BUILD_MP_FUNC
 template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
                                                     HYPRE_Int *keys1, HYPRE_Real *keys2,
                                                     HYPRE_Int *vals, HYPRE_Int opt);
 template HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N,
                                                     HYPRE_Int *keys1, HYPRE_Int *keys2,
                                                     HYPRE_Complex *vals, HYPRE_Int opt);
-
+#endif
 /*--------------------------------------------------------------------
  * hypreDevice_ReduceByTupleKey
  *--------------------------------------------------------------------*/
-
 template <typename T1, typename T2, typename T3>
 HYPRE_Int
 hypreDevice_ReduceByTupleKey( HYPRE_Int N,
@@ -1205,7 +1250,7 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
 
    return new_end.second - vals_out;
 }
-
+#ifdef BUILD_MP_FUNC
 template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int      N,
                                                 HYPRE_Int     *keys1_in,
                                                 HYPRE_Int     *keys2_in,
@@ -1213,11 +1258,10 @@ template HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int      N,
                                                 HYPRE_Int     *keys1_out,
                                                 HYPRE_Int     *keys2_out,
                                                 HYPRE_Complex *vals_out);
-
+#endif
 /*--------------------------------------------------------------------
  * hypreGPUKernel_ScatterConstant
  *--------------------------------------------------------------------*/
-
 template <typename T>
 __global__ void
 hypreGPUKernel_ScatterConstant(hypre_DeviceItem &item,
@@ -1233,7 +1277,6 @@ hypreGPUKernel_ScatterConstant(hypre_DeviceItem &item,
       x[map[global_thread_id]] = v;
    }
 }
-
 /*--------------------------------------------------------------------
  * hypreDevice_ScatterConstant
  *
@@ -1241,7 +1284,6 @@ hypreGPUKernel_ScatterConstant(hypre_DeviceItem &item,
  * n is length of map
  * TODO: thrust?
  *--------------------------------------------------------------------*/
-
 template <typename T>
 HYPRE_Int
 hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
@@ -1259,16 +1301,19 @@ hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v)
 
    return hypre_error_flag;
 }
-
+#ifdef BUILD_NON_MP_FUNC
 template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Int     *x, HYPRE_Int n, HYPRE_Int *map,
                                                HYPRE_Int     v);
+#endif
+#ifdef BUILD_MP_FUNC
 template HYPRE_Int hypreDevice_ScatterConstant(HYPRE_Complex *x, HYPRE_Int n, HYPRE_Int *map,
                                                HYPRE_Complex v);
-
+#endif
 /*--------------------------------------------------------------------
  * hypreGPUKernel_ScatterAddTrivial
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 __global__ void
 hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item,
                                  HYPRE_Int         n,
@@ -1281,6 +1326,7 @@ hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item,
       x[map[i]] += y[i];
    }
 }
+#endif 
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_ScatterAdd
@@ -1288,6 +1334,7 @@ hypreGPUKernel_ScatterAddTrivial(hypre_DeviceItem &item,
  * x[map[i]] += y[i], same index cannot appear more than once in map
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 __global__ void
 hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item,
                           HYPRE_Int         n,
@@ -1302,6 +1349,7 @@ hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item,
       x[map[global_thread_id]] += y[global_thread_id];
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_GenScatterAdd
@@ -1316,6 +1364,7 @@ hypreGPUKernel_ScatterAdd(hypre_DeviceItem &item,
  *          [2 * sizeof(HYPRE_Int) + sizeof(HYPRE_Complex)] * ny
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_GenScatterAdd( HYPRE_Real  *x,
                            HYPRE_Int    ny,
@@ -1405,6 +1454,7 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_axpyn
@@ -1455,7 +1505,7 @@ hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
 /*--------------------------------------------------------------------
  * hypreDevice_ComplexAxpyn
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
                           size_t          n,
@@ -1465,11 +1515,12 @@ hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
 {
    return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IntAxpyn
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntAxpyn( HYPRE_Int *d_x,
                       size_t     n,
@@ -1479,11 +1530,13 @@ hypreDevice_IntAxpyn( HYPRE_Int *d_x,
 {
    return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_BigIntAxpyn
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
                          size_t        n,
@@ -1493,6 +1546,7 @@ hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
 {
    return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
 }
+#endif
 
 #if defined(HYPRE_USING_CURAND)
 
@@ -1500,6 +1554,7 @@ hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
  * hypre_DeviceDataCurandGenerator
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 curandGenerator_t
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
@@ -1518,11 +1573,12 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 
    return gen;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_CurandUniform_core
  *
- * T = float or hypre_double
+ * T = hypre_float or hypre_double
  *--------------------------------------------------------------------*/
 
 template <typename T>
@@ -1550,9 +1606,9 @@ hypre_CurandUniform_core( HYPRE_Int          n,
    {
       HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, n) );
    }
-   else if (sizeof(T) == sizeof(float))
+   else if (sizeof(T) == sizeof(hypre_float))
    {
-      HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
+      HYPRE_CURAND_CALL( curandGenerateUniform(gen, (hypre_float *) urand, n) );
    }
 
    return hypre_error_flag;
@@ -1565,6 +1621,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
  * hypre_DeviceDataCurandGenerator
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 rocrand_generator
 hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 {
@@ -1583,6 +1640,7 @@ hypre_DeviceDataCurandGenerator(hypre_DeviceData *data)
 
    return gen;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_CurandUniform_core
@@ -1615,9 +1673,9 @@ hypre_CurandUniform_core( HYPRE_Int          n,
    {
       HYPRE_ROCRAND_CALL( rocrand_generate_uniform_double(gen, (hypre_double *) urand, n) );
    }
-   else if (sizeof(T) == sizeof(float))
+   else if (sizeof(T) == sizeof(hypre_float))
    {
-      HYPRE_ROCRAND_CALL( rocrand_generate_uniform(gen, (float *) urand, n) );
+      HYPRE_ROCRAND_CALL( rocrand_generate_uniform(gen, (hypre_float *) urand, n) );
    }
 
    hypre_GpuProfilingPopRange();
@@ -1631,7 +1689,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 /*--------------------------------------------------------------------
  * hypre_CurandUniform_core
  *
- * T = float or hypre_double
+ * T = hypre_float or hypre_double
  *--------------------------------------------------------------------*/
 
 template <typename T>
@@ -1649,7 +1707,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
       return hypre_error_flag;
    }
 
-   static_assert(std::is_same_v<T, float> || std::is_same_v<T, hypre_double>,
+   static_assert(std::is_same_v<T, hypre_float> || std::is_same_v<T, hypre_double>,
                  "oneMKL: rng/uniform: T is not supported");
 
    oneapi::mkl::rng::default_engine engine(*hypre_HandleComputeStream(hypre_handle()), seed);
@@ -1666,6 +1724,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
  * hypre_CurandUniform
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypre_CurandUniform( HYPRE_Int          n,
                      HYPRE_Real        *urand,
@@ -1676,14 +1735,15 @@ hypre_CurandUniform( HYPRE_Int          n,
 {
    return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_CurandUniformSingle
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_CurandUniformSingle( HYPRE_Int          n,
-                           float             *urand,
+                           hypre_float             *urand,
                            HYPRE_Int          set_seed,
                            hypre_ulonglongint seed,
                            HYPRE_Int          set_offset,
@@ -1691,11 +1751,13 @@ hypre_CurandUniformSingle( HYPRE_Int          n,
 {
    return hypre_CurandUniform_core(n, urand, set_seed, seed, set_offset, offset);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_ResetDeviceRandGenerator
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
                                 hypre_ulonglongint offset )
@@ -1713,6 +1775,7 @@ hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed,
 
    return hypre_error_flag;
 }
+#endif
 
 #endif /* #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND) */
 
@@ -1760,7 +1823,7 @@ hypreDevice_Filln(T *d_x, size_t n, T v)
 /*--------------------------------------------------------------------
  * hypreDevice_ComplexFilln
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_ComplexFilln( HYPRE_Complex *d_x,
                           size_t         n,
@@ -1768,11 +1831,12 @@ hypreDevice_ComplexFilln( HYPRE_Complex *d_x,
 {
    return hypreDevice_Filln(d_x, n, v);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_CharFilln
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_CharFilln( char   *d_x,
                        size_t  n,
@@ -1780,11 +1844,12 @@ hypreDevice_CharFilln( char   *d_x,
 {
    return hypreDevice_Filln(d_x, n, v);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IntFilln
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntFilln( HYPRE_Int *d_x,
                       size_t     n,
@@ -1792,11 +1857,12 @@ hypreDevice_IntFilln( HYPRE_Int *d_x,
 {
    return hypreDevice_Filln(d_x, n, v);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_BigIntFilln
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_BigIntFilln( HYPRE_BigInt *d_x,
                          size_t        n,
@@ -1804,6 +1870,7 @@ hypreDevice_BigIntFilln( HYPRE_BigInt *d_x,
 {
    return hypreDevice_Filln(d_x, n, v);
 }
+#endif
 
 #endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
@@ -1828,6 +1895,7 @@ hypreDevice_BigIntFilln( HYPRE_BigInt *d_x,
  * a cubin version.
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 __global__ void
 hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
                                        hypre_int        *cuda_arch_compile )
@@ -1836,6 +1904,7 @@ hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
    cuda_arch_compile[0] = __CUDA_ARCH__;
 #endif
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_CudaCompileFlagCheck
@@ -1847,6 +1916,7 @@ hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
  * See commented out code below (and do not delete)
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 void hypre_CudaCompileFlagCheck()
 {
    // This is really only defined for CUDA and not for HIP
@@ -1891,17 +1961,20 @@ void hypre_CudaCompileFlagCheck()
 
 #endif // defined(HYPRE_USING_CUDA)
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_IntegerReduceSum
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntegerReduceSum( HYPRE_Int  n,
                               HYPRE_Int *d_i )
 {
    return HYPRE_THRUST_CALL(reduce, d_i, d_i + n);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_scalen
@@ -1952,6 +2025,7 @@ hypreDevice_Scalen( T *d_x, size_t n, T *d_y, T v )
  * hypreDevice_IntScalen
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntScalen( HYPRE_Int *d_x,
                        size_t     n,
@@ -1960,11 +2034,13 @@ hypreDevice_IntScalen( HYPRE_Int *d_x,
 {
    return hypreDevice_Scalen(d_x, n, d_y, v);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_ComplexScalen
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
                            size_t         n,
@@ -1973,6 +2049,7 @@ hypreDevice_ComplexScalen( HYPRE_Complex *d_x,
 {
    return hypreDevice_Scalen(d_x, n, d_y, v);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_StridedCopy
@@ -2028,6 +2105,7 @@ hypreDevice_StridedCopy( HYPRE_Int  size,
  * hypreDevice_IntStridedCopy
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_IntStridedCopy( HYPRE_Int  size,
                             HYPRE_Int  stride,
@@ -2036,6 +2114,7 @@ hypreDevice_IntStridedCopy( HYPRE_Int  size,
 {
    return hypreDevice_StridedCopy(size, stride, in, out);
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_CsrRowPtrsToIndicesWithRowNum
@@ -2069,24 +2148,27 @@ hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
 
    return hypre_error_flag;
 }
-
+#ifdef BUILD_NON_MP_FUNC
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int  nrows,
                                                               HYPRE_Int  nnz,
                                                               HYPRE_Int *d_row_ptr,
                                                               HYPRE_Int *d_row_num,
                                                               HYPRE_Int *d_row_ind );
+#endif
 #if defined(HYPRE_MIXEDINT)
+#ifdef BUILD_NON_MP_FUNC
 template HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum( HYPRE_Int     nrows,
                                                               HYPRE_Int     nnz,
                                                               HYPRE_Int    *d_row_ptr,
                                                               HYPRE_BigInt *d_row_num,
                                                               HYPRE_BigInt *d_row_ind );
 #endif
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_MP_FUNC
 __global__ void
 hypreGPUKernel_DiagScaleVector( hypre_DeviceItem &item,
                                 HYPRE_Int         n,
@@ -2110,6 +2192,7 @@ hypreGPUKernel_DiagScaleVector( hypre_DeviceItem &item,
       }
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_DiagScaleVector
@@ -2118,6 +2201,7 @@ hypreGPUKernel_DiagScaleVector( hypre_DeviceItem &item,
  * Note: Assume A_i[i] points to the ith diagonal entry of A
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_DiagScaleVector( HYPRE_Int       n,
                              HYPRE_Int      *A_i,
@@ -2139,11 +2223,13 @@ hypreDevice_DiagScaleVector( HYPRE_Int       n,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector2
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 __global__ void
 hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
                                  HYPRE_Int         n,
@@ -2163,6 +2249,7 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
       z[i] += beta * t;
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_DiagScaleVector2
@@ -2173,6 +2260,7 @@ hypreGPUKernel_DiagScaleVector2( hypre_DeviceItem &item,
  * Note: Assume A_i[i] points to the ith diagonal entry of A
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 hypreDevice_DiagScaleVector2( HYPRE_Int       n,
                               HYPRE_Int      *A_i,
@@ -2195,11 +2283,13 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       n,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_BigToSmallCopy
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 __global__ void
 hypreGPUKernel_BigToSmallCopy( hypre_DeviceItem                &item,
                                HYPRE_Int*          __restrict__ tgt,
@@ -2213,11 +2303,12 @@ hypreGPUKernel_BigToSmallCopy( hypre_DeviceItem                &item,
       tgt[i] = src[i];
    }
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_BigToSmallCopy
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
                             const HYPRE_BigInt *src,
@@ -2230,6 +2321,7 @@ hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypreDevice_StableSortTupleByTupleKey
@@ -2272,11 +2364,15 @@ hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N,
    return hypre_error_flag;
 }
 
+#ifdef BUILD_MP_FUNC
 template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_Int *keys1,
                                                          HYPRE_Int *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#endif
 #if defined(HYPRE_MIXEDINT)
+#ifdef BUILD_MP_FUNC
 template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigInt *keys1,
                                                          HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
+#endif
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
@@ -2293,6 +2389,7 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigI
  * Note: Only works for Single and Double precision.
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 cudaDataType
 hypre_HYPREComplexToCudaDataType()
 {
@@ -2317,6 +2414,7 @@ hypre_HYPREComplexToCudaDataType()
 #endif
 #endif // #if defined(HYPRE_COMPLEX)
 }
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_HYPREIntToCusparseIndexType
@@ -2324,6 +2422,7 @@ hypre_HYPREComplexToCudaDataType()
  * Determines the associated cusparseIndexType_t for HYPRE_Int
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 cusparseIndexType_t
 hypre_HYPREIntToCusparseIndexType()
 {
@@ -2343,6 +2442,7 @@ hypre_HYPREIntToCusparseIndexType()
    return CUSPARSE_INDEX_32I;
 #endif
 }
+#endif
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -2351,6 +2451,7 @@ hypre_HYPREIntToCusparseIndexType()
  * hypre_DeviceDataCublasHandle
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 cublasHandle_t
 hypre_DeviceDataCublasHandle(hypre_DeviceData *data)
 {
@@ -2370,12 +2471,15 @@ hypre_DeviceDataCublasHandle(hypre_DeviceData *data)
 }
 #endif
 
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE)
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataCusparseHandle
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 cusparseHandle_t
 hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 {
@@ -2393,6 +2497,8 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 
    return handle;
 }
+#endif
+
 #endif // defined(HYPRE_USING_CUSPARSE)
 
 
@@ -2402,6 +2508,7 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
  * hypre_DeviceDataCusparseHandle
  *--------------------------------------------------------------------*/
 
+#ifdef BUILD_NON_MP_FUNC
 rocsparse_handle
 hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 {
@@ -2419,6 +2526,8 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 
    return handle;
 }
+#endif
+
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
@@ -2432,7 +2541,7 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 /*--------------------------------------------------------------------
  * HYPRE_SetSYCLDevice
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 HYPRE_SetSYCLDevice(sycl::device user_device)
 {
@@ -2458,6 +2567,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
 
    return hypre_error_flag;
 }
+#endif
 
 #endif // #if defined(HYPRE_USING_SYCL)
 
@@ -2475,7 +2585,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
  * WM: note - sycl has no analogue to cudaSetDevice(),
  * so this has no effect on the sycl implementation.
  *--------------------------------------------------------------------*/
-
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int
 hypre_bind_device( HYPRE_Int myid,
                    HYPRE_Int nproc,
@@ -2514,3 +2624,4 @@ hypre_bind_device( HYPRE_Int myid,
 
    return hypre_error_flag;
 }
+#endif

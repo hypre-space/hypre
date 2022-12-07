@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsygv_(integer *itype, char *jobz, char *uplo, integer *
 	n, doublereal *a, integer *lda, doublereal *b, integer *ldb, 
 	doublereal *w, doublereal *work, integer *lwork, integer *info)
@@ -259,6 +260,7 @@ extern "C" {
 /*     End of DSYGV */
 
 } /* dsygv_ */
+#endif
 
 #ifdef __cplusplus
 }

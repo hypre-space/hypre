@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
 	integer *n2, integer *n3, integer *n4, ftnlen name_len, ftnlen
 	opts_len)
@@ -620,6 +621,7 @@ L1100:
 /*     End of ILAENV */
 
 } /* ilaenv_ */
+#endif
 
 #ifdef __cplusplus
 }

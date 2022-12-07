@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlarft_(const char *direct,const char *storev, integer *n, integer *
 	k, doublereal *v, integer *ldv, doublereal *tau, doublereal *t, 
 	integer *ldt)
@@ -258,6 +259,7 @@ extern "C" {
 /*     End of DLARFT */
 
 } /* dlarft_ */
+#endif
 
 #undef v_ref
 #undef t_ref

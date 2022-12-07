@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dgels_(char *trans, integer *m, integer *n, integer *
 	nrhs, doublereal *a, integer *lda, doublereal *b, integer *ldb,
 	doublereal *work, integer *lwork, integer *info)
@@ -475,6 +476,7 @@ L50:
 /*     End of DGELS */
 
 } /* dgels_ */
+#endif
 
 #undef b_ref
 

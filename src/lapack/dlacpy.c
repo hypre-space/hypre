@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlacpy_(const char *uplo, integer *m, integer *n, doublereal *
 	a, integer *lda, doublereal *b, integer *ldb)
 {
@@ -108,6 +109,7 @@ extern "C" {
 /*     End of DLACPY */
 
 } /* dlacpy_ */
+#endif
 
 #undef b_ref
 #undef a_ref

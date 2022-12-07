@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dorgqr_(integer *m, integer *n, integer *k, doublereal *
 	a, integer *lda, doublereal *tau, doublereal *work, integer *lwork,
 	integer *info)
@@ -266,6 +267,7 @@ extern "C" {
 /*     End of DORGQR */
 
 } /* dorgqr_ */
+#endif
 
 #undef a_ref
 

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlartg_(doublereal *f, doublereal *g, doublereal *cs,
 	doublereal *sn, doublereal *r__)
 {
@@ -165,6 +166,7 @@ L30:
 /*     End of DLARTG */
 
 } /* dlartg_ */
+#endif
 
 #ifdef __cplusplus
 }

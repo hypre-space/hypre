@@ -13,6 +13,7 @@ extern "C" {
 	-lf2c -lm   (in that order)
 */
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlasq2_(integer *n, doublereal *z__, integer *info)
 {
     /* System generated locals */
@@ -523,6 +524,7 @@ L150:
 /*     End of DLASQ2 */
 
 } /* dlasq2_ */
+#endif
 
 #ifdef __cplusplus
 }

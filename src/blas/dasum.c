@@ -12,6 +12,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dasum_(integer *n, doublereal *dx, integer *incx)
 {
 
@@ -86,7 +87,7 @@ L60:
     ret_val = dtemp;
     return ret_val;
 } /* dasum_ */
-
+#endif
 #ifdef __cplusplus
 }
 #endif

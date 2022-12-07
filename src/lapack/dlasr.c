@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlasr_(const char *side,const char *pivot,const char *direct, integer *m,
 	 integer *n, doublereal *c__, doublereal *s, doublereal *a, integer *
 	lda)
@@ -395,6 +396,7 @@ extern "C" {
 /*     End of DLASR */
 
 } /* dlasr_ */
+#endif
 
 #undef a_ref
 

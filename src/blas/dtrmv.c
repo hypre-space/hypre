@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dtrmv_(const char *uplo,const char *trans,const char *diag, integer *n,
 	doublereal *a, integer *lda, doublereal *x, integer *incx)
 {
@@ -281,7 +282,7 @@ extern "C" {
 /*     End of DTRMV . */
 } /* dtrmv_ */
 #undef a_ref
-
+#endif
 #ifdef __cplusplus
 }
 #endif

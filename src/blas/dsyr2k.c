@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsyr2k_(const char *uplo,const char *trans, integer *n, integer *k,
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *b,
 	integer *ldb, doublereal *beta, doublereal *c__, integer *ldc)
@@ -335,6 +336,7 @@ extern "C" {
     return 0;
 /*     End of DSYR2K. */
 } /* dsyr2k_ */
+#endif
 #undef c___ref
 #undef b_ref
 #undef a_ref

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dlapy2_(doublereal *x, doublereal *y)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --
@@ -55,6 +56,7 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
 /*     End of DLAPY2 */
 
 } /* dlapy2_ */
+#endif
 
 #ifdef __cplusplus
 }

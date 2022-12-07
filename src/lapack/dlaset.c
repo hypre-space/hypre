@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlaset_(const char *uplo, integer *m, integer *n, doublereal *
 	alpha, doublereal *beta, doublereal *a, integer *lda)
 {
@@ -134,6 +135,7 @@ extern "C" {
 /*     End of DLASET */
 
 } /* dlaset_ */
+#endif
 
 #undef a_ref
 

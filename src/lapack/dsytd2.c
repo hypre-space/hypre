@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsytd2_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tau, integer *info)
 {
@@ -283,6 +284,7 @@ extern "C" {
 /*     End of DSYTD2 */
 
 } /* dsytd2_ */
+#endif
 
 #undef a_ref
 

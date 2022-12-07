@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dormlq_(const char *side,const char *trans, integer *m, integer *n,
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *lwork, integer *info)
@@ -316,6 +317,7 @@ extern "C" {
 /*     End of DORMLQ */
 
 } /* dormlq_ */
+#endif
 
 #undef c___ref
 #undef a_ref

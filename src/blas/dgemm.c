@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dgemm_(const char *transa,const char *transb, integer *m, integer *
 	n, integer *k, doublereal *alpha, doublereal *a, integer *lda,
 	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer
@@ -375,6 +376,7 @@ extern "C" {
 /*     End of DGEMM . */
 
 } /* dgemm_ */
+#endif
 
 #ifdef __cplusplus
 }

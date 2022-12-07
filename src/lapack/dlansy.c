@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 doublereal dlansy_(const char *norm,const char *uplo, integer *n, doublereal *a, integer
 	*lda, doublereal *work)
 {
@@ -217,6 +218,7 @@ doublereal dlansy_(const char *norm,const char *uplo, integer *n, doublereal *a,
 /*     End of DLANSY */
 
 } /* dlansy_ */
+#endif
 
 #undef a_ref
 

@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer drot_(integer *n, doublereal *dx, integer *incx, 
 	doublereal *dy, integer *incy, doublereal *c, doublereal *s)
 {
@@ -77,6 +78,7 @@ L20:
     }
     return 0;
 } /* drot_ */
+#endif
 
 #ifdef __cplusplus
 }

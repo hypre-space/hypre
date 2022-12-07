@@ -20,6 +20,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 logical lsame_(const char *ca, const char *cb)
 {
     /* System generated locals */
@@ -122,7 +123,7 @@ logical lsame_(const char *ca, const char *cb)
 
     return ret_val;
 } /* lsame_ */
-
+#endif
 #ifdef __cplusplus
 }
 #endif

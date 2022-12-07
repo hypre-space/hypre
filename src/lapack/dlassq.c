@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlassq_(integer *n, doublereal *x, integer *incx,
 	doublereal *scale, doublereal *sumsq)
 {
@@ -97,6 +98,7 @@ extern "C" {
 /*     End of DLASSQ */
 
 } /* dlassq_ */
+#endif
 
 #ifdef __cplusplus
 }

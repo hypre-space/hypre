@@ -33,7 +33,7 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
-#define hypre_cabs(value)  fabs(value)
+#define hypre_cabs(value)  hypre_abs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
 #define hypre_csqrt(value) sqrt(value)
@@ -357,7 +357,7 @@ HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
-HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( hypre_float value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );

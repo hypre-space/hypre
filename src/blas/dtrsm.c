@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dtrsm_(const char *side,const char *uplo,const char *transa,const char *diag,
 	integer *m, integer *n, doublereal *alpha, doublereal *a, integer *
 	lda, doublereal *b, integer *ldb)
@@ -456,7 +457,7 @@ extern "C" {
 /*     End of DTRSM . */
 
 } /* dtrsm_ */
-
+#endif
 #ifdef __cplusplus
 }
 #endif

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlasv2_(doublereal *f, doublereal *g, doublereal *h__,
 	doublereal *ssmin, doublereal *ssmax, doublereal *snr, doublereal *
 	csr, doublereal *snl, doublereal *csl)
@@ -254,6 +255,7 @@ extern "C" {
 /*     End of DLASV2 */
 
 } /* dlasv2_ */
+#endif
 
 #ifdef __cplusplus
 }

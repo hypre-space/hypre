@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsteqr_(const char *compz, integer *n, doublereal *d__,
 	doublereal *e, doublereal *z__, integer *ldz, doublereal *work,
 	integer *info)
@@ -601,6 +602,7 @@ L190:
 /*     End of DSTEQR */
 
 } /* dsteqr_ */
+#endif
 
 #undef z___ref
 

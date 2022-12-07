@@ -9,6 +9,10 @@
 #include <CL/sycl.hpp>
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "utilities_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C++" {
 #endif

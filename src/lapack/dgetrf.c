@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dgetrf_(integer *m, integer *n, doublereal *a, integer *
 	lda, integer *ipiv, integer *info)
 {
@@ -198,6 +199,7 @@ extern "C" {
 /*     End of DGETRF */
 
 } /* dgetrf_ */
+#endif
 
 #undef a_ref
 

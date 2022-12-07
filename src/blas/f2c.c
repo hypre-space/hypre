@@ -19,7 +19,7 @@ extern "C" {
 #include "hypre_blas.h"
 	
 /* compare two strings */
-
+#ifdef BUILD_NON_MP_FUNC
 integer s_cmp(char *a0,const char *b0, ftnlen la, ftnlen lb)
 {
 REGISTER unsigned char *a, *aend, *b, *bend;
@@ -56,9 +56,9 @@ else
 	}
 return(0);
 }
-
+#endif
 /* assign strings:  a = b */
-
+#ifdef BUILD_NON_MP_FUNC
 integer s_copy(char *a,const char *b, ftnlen la, ftnlen lb)
 {
 REGISTER char *aend, *bend;
@@ -79,7 +79,8 @@ else
 	}
 return(0);
 }
-
+#endif
+#ifdef BUILD_NON_MP_FUNC
 integer s_cat(char *lp, char *rpp[], ftnlen rnp[], ftnlen *np, ftnlen ll)
 {
 ftnlen i, n, nc;
@@ -100,23 +101,26 @@ while(--ll >= 0)
 	*lp++ = ' ';
 return 0;
 }
-
+#endif
 #define log10e 0.43429448190325182765
 
 #undef abs
 #include "math.h"					 
+#ifdef BUILD_MP_FUNC
 doublereal d_lg10(doublereal *x)
 {
 return( log10e * log(*x) );
 }
-
+#endif
+#ifdef BUILD_MP_FUNC
 doublereal d_sign(doublereal *a, doublereal *b)
 {
 doublereal x;
 x = (*a >= 0 ? *a : - *a);
 return( *b >= 0 ? x : -x);
 }
-
+#endif
+#ifdef BUILD_MP_FUNC
 doublereal pow_di(doublereal *ap, integer *bp)
 {
 doublereal pow, x;
@@ -145,14 +149,15 @@ if(n != 0)
 	}
 return(pow);
 }
-
+#endif
 #undef abs
 #include "math.h"
+#ifdef BUILD_MP_FUNC
 doublereal pow_dd(doublereal *ap, doublereal *bp)
 {
 return(pow(*ap, *bp) );
 }
-
+#endif
 #ifdef __cplusplus
 }
 #endif

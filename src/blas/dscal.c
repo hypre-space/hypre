@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dscal_(integer *n, doublereal *da, doublereal *dx,
 	integer *incx)
 {
@@ -82,6 +83,7 @@ L40:
     }
     return 0;
 } /* dscal_ */
+#endif
 
 #ifdef __cplusplus
 }

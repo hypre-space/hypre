@@ -82,7 +82,6 @@ extern "C" {
 
     return 0;
 } /* xerbla_ */
-
 #ifdef __cplusplus
 }
 #endif

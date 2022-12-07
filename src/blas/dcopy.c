@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dcopy_(integer* n, doublereal* dx,integer* incx,doublereal* dy,integer* incy)
 {
     /* System generated locals */
@@ -92,7 +93,7 @@ L40:
     }
     return 0;
 } /* dcopy_ */
-
+#endif
 #ifdef __cplusplus
 }
 #endif

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsterf_(integer *n, doublereal *d__, doublereal *e,
 	integer *info)
 {
@@ -438,6 +439,7 @@ L180:
 /*     End of DSTERF */
 
 } /* dsterf_ */
+#endif
 
 #ifdef __cplusplus
 }

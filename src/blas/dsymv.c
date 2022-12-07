@@ -13,6 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dsymv_(const char *uplo, integer *n, doublereal *alpha,
 	doublereal *a, integer *lda, doublereal *x, integer *incx, doublereal
 	*beta, doublereal *y, integer *incy)
@@ -291,6 +292,7 @@ extern "C" {
 /*     End of DSYMV . */
 
 } /* dsymv_ */
+#endif
 
 #ifdef __cplusplus
 }

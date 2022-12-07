@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dger_(integer *m, integer *n, doublereal *alpha,
 	doublereal *x, integer *incx, doublereal *y, integer *incy,
 	doublereal *a, integer *lda)
@@ -146,6 +147,7 @@ extern "C" {
     return 0;
 /*     End of DGER  . */
 } /* dger_ */
+#endif
 #undef a_ref
 
 #ifdef __cplusplus

@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlabad_(doublereal *small, doublereal *large)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -60,6 +61,7 @@ extern "C" {
 /*     End of DLABAD */
 
 } /* dlabad_ */
+#endif
 
 #ifdef __cplusplus
 }

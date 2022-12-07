@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dtrtri_(const char *uplo, const char *diag, integer *n, doublereal *
 	a, integer *lda, integer *info)
 {
@@ -220,6 +221,7 @@ extern "C" {
 /*     End of DTRTRI */
 
 } /* dtrtri_ */
+#endif
 
 #undef a_ref
 

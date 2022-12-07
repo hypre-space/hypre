@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dgebrd_(integer *m, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tauq, doublereal *
 	taup, doublereal *work, integer *lwork, integer *info)
@@ -321,6 +322,7 @@ extern "C" {
 /*     End of DGEBRD */
 
 } /* dgebrd_ */
+#endif
 
 #undef a_ref
 

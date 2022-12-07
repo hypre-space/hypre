@@ -12,6 +12,7 @@
 #include "fortran_matrix.h"
 #include "_hypre_utilities.h"
 
+#ifdef BUILD_NON_MP_FUNC
 utilities_FortranMatrix*
 utilities_FortranMatrixCreate(void)
 {
@@ -29,7 +30,9 @@ utilities_FortranMatrixCreate(void)
 
    return mtx;
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixAllocateData( HYPRE_BigInt  h, HYPRE_BigInt w,
                                      utilities_FortranMatrix* mtx )
@@ -51,8 +54,10 @@ utilities_FortranMatrixAllocateData( HYPRE_BigInt  h, HYPRE_BigInt w,
    mtx->width = w;
    mtx->ownsValues = 1;
 }
+#endif
 
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixWrap( HYPRE_Real* v, HYPRE_BigInt gh, HYPRE_BigInt  h, HYPRE_BigInt w,
                              utilities_FortranMatrix* mtx )
@@ -74,8 +79,10 @@ utilities_FortranMatrixWrap( HYPRE_Real* v, HYPRE_BigInt gh, HYPRE_BigInt  h, HY
    mtx->width = w;
    mtx->ownsValues = 0;
 }
+#endif
 
 
+#ifdef BUILD_NON_MP_FUNC
 void
 utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx )
 {
@@ -92,7 +99,9 @@ utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx )
 
    hypre_TFree(mtx, HYPRE_MEMORY_HOST);
 }
+#endif
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_BigInt
 utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx )
 {
@@ -101,7 +110,9 @@ utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx )
 
    return mtx->globalHeight;
 }
+#endif
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_BigInt
 utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx )
 {
@@ -110,7 +121,9 @@ utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx )
 
    return mtx->height;
 }
+#endif
 
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_BigInt
 utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx )
 {
@@ -119,7 +132,9 @@ utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx )
 
    return mtx->width;
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Real*
 utilities_FortranMatrixValues( utilities_FortranMatrix* mtx )
 {
@@ -128,7 +143,9 @@ utilities_FortranMatrixValues( utilities_FortranMatrix* mtx )
 
    return mtx->value;
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixClear( utilities_FortranMatrix* mtx )
 {
@@ -152,7 +169,9 @@ utilities_FortranMatrixClear( utilities_FortranMatrix* mtx )
       p += jump;
    }
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx )
 {
@@ -183,8 +202,10 @@ utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx )
       p += jump;
    }
 }
+#endif
 
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx )
 {
@@ -207,7 +228,9 @@ utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx )
    }
 
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixTransposeSquare( utilities_FortranMatrix* mtx )
 {
@@ -241,7 +264,9 @@ utilities_FortranMatrixTransposeSquare( utilities_FortranMatrix* mtx )
       p += ++jump;
    }
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx )
 {
@@ -272,7 +297,9 @@ utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx )
       p += ++jump;
    }
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t,
                              utilities_FortranMatrix* dest )
@@ -310,7 +337,9 @@ utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t,
          *p = *q;
       }
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixIndexCopy( HYPRE_Int* index,
                                   utilities_FortranMatrix* src, HYPRE_Int t,
@@ -352,7 +381,9 @@ utilities_FortranMatrixIndexCopy( HYPRE_Int* index,
       }
    }
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixSetDiagonal( utilities_FortranMatrix* mtx,
                                     utilities_FortranMatrix* vec )
@@ -378,7 +409,9 @@ utilities_FortranMatrixSetDiagonal( utilities_FortranMatrix* mtx,
    }
 
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixGetDiagonal( utilities_FortranMatrix* mtx,
                                     utilities_FortranMatrix* vec )
@@ -404,7 +437,9 @@ utilities_FortranMatrixGetDiagonal( utilities_FortranMatrix* mtx,
    }
 
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixAdd( HYPRE_Real a,
                             utilities_FortranMatrix* mtxA,
@@ -486,7 +521,10 @@ utilities_FortranMatrixAdd( HYPRE_Real a,
       }
    }
 }
+#endif
 
+
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixDMultiply( utilities_FortranMatrix* vec,
                                   utilities_FortranMatrix* mtx )
@@ -515,7 +553,9 @@ utilities_FortranMatrixDMultiply( utilities_FortranMatrix* vec,
    }
 
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx,
                                   utilities_FortranMatrix* vec )
@@ -544,7 +584,9 @@ utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx,
    }
 
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA,
                                  utilities_FortranMatrix* mtxB, HYPRE_Int tB,
@@ -616,7 +658,10 @@ utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA,
          *pCij = s;
       }
 }
+#endif
 
+
+#ifdef BUILD_MP_FUNC
 HYPRE_Real
 utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx )
 {
@@ -647,7 +692,9 @@ utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx )
    norm = sqrt(norm);
    return norm;
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Real
 utilities_FortranMatrixValue( utilities_FortranMatrix* mtx,
                               HYPRE_BigInt i, HYPRE_BigInt j )
@@ -663,7 +710,9 @@ utilities_FortranMatrixValue( utilities_FortranMatrix* mtx,
    k = i - 1 + (j - 1) * mtx->globalHeight;
    return mtx->value[k];
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Real*
 utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx,
                                  HYPRE_BigInt i, HYPRE_BigInt j )
@@ -679,7 +728,9 @@ utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx,
    k = i - 1 + (j - 1) * mtx->globalHeight;
    return mtx->value + k;
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Real
 utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx )
 {
@@ -710,7 +761,9 @@ utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx )
 
    return maxVal;
 }
+#endif
 
+#ifdef BUILD_NON_MP_FUNC
 void
 utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
                                     HYPRE_BigInt iFrom, HYPRE_BigInt iTo,
@@ -736,7 +789,9 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
    block->value = mtx->value + iFrom - 1 + (jFrom - 1) * mtx->globalHeight;
    block->ownsValues = 0;
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 void
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u )
 {
@@ -792,7 +847,9 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u )
    hypre_TFree( diag, HYPRE_MEMORY_HOST);
 
 }
+#endif
 
+#ifdef BUILD_MP_FUNC
 HYPRE_Int
 utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName)
 {
@@ -828,4 +885,4 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName
    fclose(fp);
    return 0;
 }
-
+#endif

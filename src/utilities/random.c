@@ -50,6 +50,7 @@ static HYPRE_Int Seed = 13579;
  *
  * @param seed an HYPRE_Int containing the seed for the RNG.
  *--------------------------------------------------------------------------*/
+#ifdef BUILD_NON_MP_FUNC
 void hypre_SeedRand( HYPRE_Int seed )
 {
    /* RL: seed must be between 1 and 2^31-2 */
@@ -64,13 +65,14 @@ void hypre_SeedRand( HYPRE_Int seed )
 
    Seed = seed;
 }
-
+#endif
 /*--------------------------------------------------------------------------
  * Computes the next pseudo-random number in the sequence using the global
  * variable Seed.
  *
  * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
+#ifdef BUILD_NON_MP_FUNC
 HYPRE_Int hypre_RandI()
 {
    HYPRE_Int  low, high, test;
@@ -88,7 +90,7 @@ HYPRE_Int hypre_RandI()
 
    return Seed;
 }
-
+#endif
 /*--------------------------------------------------------------------------
  * Computes the next pseudo-random number in the sequence using the global
  * variable Seed.
@@ -96,8 +98,9 @@ HYPRE_Int hypre_RandI()
  * @return a HYPRE_Real containing the next number in the sequence divided by
  * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
+#ifdef BUILD_MP_FUNC
 HYPRE_Real hypre_Rand()
 {
    return ((HYPRE_Real)(hypre_RandI()) / (HYPRE_Real)m);
 }
-
+#endif

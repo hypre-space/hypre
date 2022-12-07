@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlarfg_(integer *n, doublereal *alpha, doublereal *x,
 	integer *incx, doublereal *tau)
 {
@@ -153,6 +154,7 @@ L10:
 /*     End of DLARFG */
 
 } /* dlarfg_ */
+#endif
 
 #ifdef __cplusplus
 }

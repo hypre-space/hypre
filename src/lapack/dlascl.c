@@ -8,6 +8,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dlascl_(const char *type__, integer *kl, integer *ku,
 	doublereal *cfrom, doublereal *cto, integer *m, integer *n,
 	doublereal *a, integer *lda, integer *info)
@@ -316,6 +317,7 @@ L10:
 /*     End of DLASCL */
 
 } /* dlascl_ */
+#endif
 
 #undef a_ref
 

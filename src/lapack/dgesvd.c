@@ -13,6 +13,7 @@ extern "C" {
 	-lf2c -lm   (in that order)
 */
 
+#ifdef BUILD_MP_FUNC
 /* Subroutine */ integer dgesvd_(char *jobu, char *jobvt, integer *m, integer *n,
 	doublereal *a, integer *lda, doublereal *s, doublereal *u, integer *
 	ldu, doublereal *vt, integer *ldvt, doublereal *work, integer *lwork,
@@ -4080,6 +4081,7 @@ extern "C" {
 /*     End of DGESVD */
 
 } /* dgesvd_ */
+#endif
 
 #undef vt_ref
 #undef u_ref
