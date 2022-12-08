@@ -1716,7 +1716,7 @@ then
 
    if test "$hypre_using_sycl" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, dpcpp)
+      AC_CHECK_PROGS(CUCC, icpx)
    fi
 fi
 
@@ -2470,13 +2470,15 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
         then
-           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+           dnl WM: remove the -g flag for debug mode because it currently causes errors on JLSE
+           SYCLFLAGS="-Wall ${SYCLFLAGS}"
         else
-           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
+           SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
         if test "x${HYPRE_SYCL_TARGET}" != "x"
@@ -2499,7 +2501,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
                                 [hypre_found_mkl=yes],
                                 AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
                ])
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])

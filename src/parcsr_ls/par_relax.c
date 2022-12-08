@@ -396,9 +396,10 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
-      v_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+      v_buf_data = hypre_CTAlloc(HYPRE_Complex,
+                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                  HYPRE_MEMORY_HOST);
-      v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+      v_ext_data = hypre_CTAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_HOST);
 
       status = hypre_CTAlloc(hypre_MPI_Status, num_recvs + num_sends, HYPRE_MEMORY_HOST);
       requests = hypre_CTAlloc(hypre_MPI_Request, num_recvs + num_sends, HYPRE_MEMORY_HOST);
@@ -423,7 +424,8 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                {
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
-               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
+                               comm, &requests[jr++]);
             }
          }
          hypre_MPI_Waitall(jr, requests, status);
@@ -438,7 +440,8 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
                vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
                vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
+                               comm, &requests[jr++]);
             }
             hypre_MPI_Waitall(jr, requests, status);
          }
@@ -525,9 +528,10 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
-      v_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+      v_buf_data = hypre_CTAlloc(HYPRE_Complex,
+                                 hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                  HYPRE_MEMORY_HOST);
-      v_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+      v_ext_data = hypre_CTAlloc(HYPRE_Complex, num_cols_offd, HYPRE_MEMORY_HOST);
 
       status  = hypre_CTAlloc(hypre_MPI_Status, num_recvs + num_sends, HYPRE_MEMORY_HOST);
       requests = hypre_CTAlloc(hypre_MPI_Request, num_recvs + num_sends, HYPRE_MEMORY_HOST);
@@ -571,7 +575,8 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                {
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
-               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
+                               comm, &requests[jr++]);
             }
          }
          hypre_MPI_Waitall(jr, requests, status);
@@ -586,7 +591,8 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
                vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
                vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_REAL, ip, 0, comm, &requests[jr++]);
+               hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
+                               comm, &requests[jr++]);
             }
             hypre_MPI_Waitall(jr, requests, status);
          }
