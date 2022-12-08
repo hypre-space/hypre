@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
+hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
                             HYPRE_Int               *CF_marker,
                             hypre_ParCSRMatrix      *S,
                             HYPRE_BigInt            *num_cpts_global,
@@ -23,9 +23,11 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                             HYPRE_Int                max_elmts,
                             hypre_ParCSRMatrix     **P_ptr)
 {
-   MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
+
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real        *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -354,18 +356,18 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,    HYPRE_MEMORY_DEVICE);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,  memory_location_P);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, memory_location_P);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location_P);
 
    P_diag_i[n_fine] = jj_counter;
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,    HYPRE_MEMORY_DEVICE);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,  memory_location_P);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, memory_location_P);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location_P);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -1886,10 +1888,11 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int             max_elmts,
                                    hypre_ParCSRMatrix  **P_ptr)
 {
-
-   MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
+
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -2141,18 +2144,18 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,    HYPRE_MEMORY_DEVICE);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_DEVICE);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,  memory_location_P);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, memory_location_P);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size, memory_location_P);
 
    P_diag_i[n_fine] = jj_counter;
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,    HYPRE_MEMORY_DEVICE);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_DEVICE);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_DEVICE);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1,  memory_location_P);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, memory_location_P);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size, memory_location_P);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -2597,7 +2600,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2635,7 +2638,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
       return 0;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(P) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -3865,6 +3868,8 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
+   HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
+
    hypre_CSRMatrix         *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real              *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               *A_diag_i    = hypre_CSRMatrixI(A_diag);
@@ -4120,15 +4125,15 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
    nnz_offd = cnt_offd;
 
    /*------------- allocate arrays */
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1, HYPRE_MEMORY_DEVICE);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, HYPRE_MEMORY_DEVICE);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1, memory_location_P);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag, memory_location_P);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag, memory_location_P);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1, HYPRE_MEMORY_DEVICE);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd, HYPRE_MEMORY_DEVICE);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine + 1, memory_location_P);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd, memory_location_P);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd, memory_location_P);
 
    /* redundant */
    P_diag_i[0] = 0;
@@ -4306,7 +4311,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

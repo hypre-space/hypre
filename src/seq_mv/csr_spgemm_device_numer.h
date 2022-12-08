@@ -268,7 +268,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                       &item,
    /* group id in the grid */
    volatile const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups() + group_id;
    /* lane id inside the group */
-   volatile const HYPRE_Int lane_id = get_group_lane_id();
+   volatile const HYPRE_Int lane_id = get_group_lane_id(item);
    /* shared memory hash table */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
@@ -293,7 +293,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                       &item,
 
       if (HAS_RIND)
       {
-         group_read<GROUP_SIZE>(rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, ii);
+         group_read<GROUP_SIZE>(item, rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, ii);
       }
       else
       {
@@ -305,7 +305,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                       &item,
 
       if (HAS_GHASH)
       {
-         group_read<GROUP_SIZE>(ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
+         group_read<GROUP_SIZE>(item, ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
                                 istart_g, iend_g);
 
          /* size of global hash table allocated for this row
@@ -337,15 +337,15 @@ hypre_spgemm_numeric( hypre_DeviceItem                       &item,
       HYPRE_Int istart_a = 0, iend_a = 0;
 
       /* load the start and end position of row ii of A */
-      group_read<GROUP_SIZE>(ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_a, iend_a);
+      group_read<GROUP_SIZE>(item, ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_a, iend_a);
 
       /* start/end position of row of C */
       HYPRE_Int istart_c = 0;
 #if defined(HYPRE_DEBUG)
       HYPRE_Int iend_c = 0;
-      group_read<GROUP_SIZE>(ic + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c, iend_c);
+      group_read<GROUP_SIZE>(item, ic + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c, iend_c);
 #else
-      group_read<GROUP_SIZE>(ic + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c);
+      group_read<GROUP_SIZE>(item, ic + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c);
 #endif
 
       /* work with two hash tables */
@@ -379,7 +379,7 @@ hypre_spgemm_numeric( hypre_DeviceItem                       &item,
 
       /* the first warp of the group copies results into the final C
        * if GROUP_SIZE < WARP_SIZE, the whole group copies */
-      if (get_warp_in_group_id<GROUP_SIZE>() == 0)
+      if (get_warp_in_group_id<GROUP_SIZE>(item) == 0)
       {
          jsum = hypre_spgemm_copy_from_hash_into_C_row<GROUP_SIZE, SHMEM_HASH_SIZE, HAS_GHASH, UNROLL_FACTOR>
                 (lane_id,
@@ -453,10 +453,10 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
    const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmBlockNumDim(hypre_handle())[1][BIN],
-                                           (m + bDim.z - 1) / bDim.z );
+                                           (HYPRE_Int) ((m + bDim.z - 1) / bDim.z) );
    dim3 gDim( num_blocks );
    // number of active groups
-   HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_groups = hypre_min((HYPRE_Int) (bDim.z * gDim.x), m);
 
    const char HASH_TYPE = HYPRE_SPGEMM_HASH_TYPE;
 
@@ -566,7 +566,7 @@ hypre_spgemm_copy_from_Cext_into_C( hypre_DeviceItem    &item,
    /* group id in the grid */
    const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups() + group_id;
    /* lane id inside the group */
-   const HYPRE_Int lane_id = get_group_lane_id();
+   const HYPRE_Int lane_id = get_group_lane_id(item);
 
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 
@@ -575,13 +575,13 @@ hypre_spgemm_copy_from_Cext_into_C( hypre_DeviceItem    &item,
       HYPRE_Int istart_c = 0, iend_c = 0, istart_x = 0;
 
       /* start/end position in C and X */
-      group_read<GROUP_SIZE>(ic + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c, iend_c);
+      group_read<GROUP_SIZE>(item, ic + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_c, iend_c);
 #if defined(HYPRE_DEBUG)
       HYPRE_Int iend_x = 0;
-      group_read<GROUP_SIZE>(ix + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_x, iend_x);
+      group_read<GROUP_SIZE>(item, ix + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_x, iend_x);
       hypre_device_assert(iend_c - istart_c <= iend_x - istart_x);
 #else
-      group_read<GROUP_SIZE>(ix + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_x);
+      group_read<GROUP_SIZE>(item, ix + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_x);
 #endif
       const HYPRE_Int p = istart_x - istart_c;
       for (HYPRE_Int k = istart_c + lane_id; k < iend_c; k += GROUP_SIZE)
@@ -708,4 +708,3 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 }
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
-

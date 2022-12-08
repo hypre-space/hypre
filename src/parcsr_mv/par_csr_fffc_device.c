@@ -5,19 +5,27 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+
+#if defined(HYPRE_USING_SYCL)
+namespace thrust = std;
+#endif
 
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
-//typedef thrust::tuple<HYPRE_Int, HYPRE_Int, HYPRe_Int> Tuple3;
 
 /* transform from local F/C index to global F/C index,
  * where F index "x" are saved as "-x-1"
  */
+#if defined(HYPRE_USING_SYCL)
+struct FFFC_functor
+#else
 struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
+#endif
 {
    HYPRE_BigInt CF_first[2];
 
@@ -40,7 +48,11 @@ struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
 
 /* this predicate selects A^s_{FF} */
 template<typename T>
+#if defined(HYPRE_USING_SYCL)
+struct FF_pred
+#else
 struct FF_pred : public thrust::unary_function<Tuple, bool>
+#endif
 {
    HYPRE_Int  option;
    HYPRE_Int *row_CF_marker;
@@ -74,7 +86,11 @@ struct FF_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{FC} */
 template<typename T>
+#if defined(HYPRE_USING_SYCL)
+struct FC_pred
+#else
 struct FC_pred : public thrust::unary_function<Tuple, bool>
+#endif
 {
    HYPRE_Int *row_CF_marker;
    T         *col_CF_marker;
@@ -97,7 +113,11 @@ struct FC_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{CF} */
 template<typename T>
+#if defined(HYPRE_USING_SYCL)
+struct CF_pred
+#else
 struct CF_pred : public thrust::unary_function<Tuple, bool>
+#endif
 {
    HYPRE_Int *row_CF_marker;
    T         *col_CF_marker;
@@ -120,7 +140,11 @@ struct CF_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{CC} */
 template<typename T>
+#if defined(HYPRE_USING_SYCL)
+struct CC_pred
+#else
 struct CC_pred : public thrust::unary_function<Tuple, bool>
+#endif
 {
    HYPRE_Int *row_CF_marker;
    T         *col_CF_marker;
@@ -142,7 +166,11 @@ struct CC_pred : public thrust::unary_function<Tuple, bool>
 };
 
 /* this predicate selects A^s_{C,:} */
+#if defined(HYPRE_USING_SYCL)
+struct CX_pred
+#else
 struct CX_pred : public thrust::unary_function<Tuple, bool>
+#endif
 {
    HYPRE_Int *row_CF_marker;
 
@@ -163,7 +191,11 @@ struct CX_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{:,C} */
 template<typename T>
+#if defined(HYPRE_USING_SYCL)
+struct XC_pred
+#else
 struct XC_pred : public thrust::unary_function<Tuple, bool>
+#endif
 {
    T         *col_CF_marker;
 
@@ -272,10 +304,17 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    if (option == 2)
    {
+#if defined(HYPRE_USING_SYCL)
+      nF2_local = HYPRE_ONEDPL_CALL( std::count,
+                                     CF_marker,
+                                     CF_marker + n_local,
+                                     -2 );
+#else
       nF2_local = HYPRE_THRUST_CALL( count,
                                      CF_marker,
                                      CF_marker + n_local,
                                      -2 );
+#endif
 
       HYPRE_BigInt nF2_local_big = nF2_local;
 
@@ -289,6 +328,26 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    }
 
    /* map from all points (i.e, F+C) to F/C indices */
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
+                      map2FC, /* F */
+                      HYPRE_Int(0) );
+
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
+                      itmp, /* C */
+                      HYPRE_Int(0) );
+
+   hypreSycl_scatter_if( itmp,
+                         itmp + n_local,
+                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                         CF_marker,
+                         map2FC,
+                         is_nonnegative<HYPRE_Int>() ); /* FC combined */
+#else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
                       thrust::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
@@ -307,17 +366,26 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::make_transform_iterator(CF_marker, is_nonnegative<HYPRE_Int>()),
                       map2FC ); /* FC combined */
+#endif
 
    hypre_TFree(itmp, HYPRE_MEMORY_DEVICE);
 
    if (option == 2)
    {
       map2F2 = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         oneapi::dpl::make_transform_iterator(CF_marker,           equal<HYPRE_Int>(-2)),
+                         oneapi::dpl::make_transform_iterator(CF_marker + n_local, equal<HYPRE_Int>(-2)),
+                         map2F2, /* F2 */
+                         HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+#else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_transform_iterator(CF_marker,           equal<HYPRE_Int>(-2)),
                          thrust::make_transform_iterator(CF_marker + n_local, equal<HYPRE_Int>(-2)),
                          map2F2, /* F2 */
                          HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+#endif
    }
 
    /* send_buf: global F/C indices. Note F-pts "x" are saved as "-x-1" */
@@ -326,12 +394,20 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
    FFFC_functor functor(F_first, C_first);
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
+                     oneapi::dpl::make_transform_iterator(
+                        oneapi::dpl::make_zip_iterator(map2FC, CF_marker), functor),
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                       thrust::make_transform_iterator(thrust::make_zip_iterator(thrust::make_tuple(map2FC, CF_marker)),
                                                       functor),
                       send_buf );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
@@ -343,8 +419,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
-
-   thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
    A_diag_ii = hypre_TAlloc(HYPRE_Int, A_diag_nnz,      HYPRE_MEMORY_DEVICE);
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
@@ -367,22 +441,50 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFF Diag */
       FF_pred<HYPRE_Int> AFF_pred_diag(option, CF_marker, CF_marker);
+#if defined(HYPRE_USING_SYCL)
+      AFF_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        AFF_pred_diag );
+#else
       AFF_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)) + A_diag_nnz,
                                         AFF_pred_diag );
+#endif
 
       AFF_diag_ii = hypre_TAlloc(HYPRE_Int,     AFF_diag_nnz, HYPRE_MEMORY_DEVICE);
       AFF_diag_j  = hypre_TAlloc(HYPRE_Int,     AFF_diag_nnz, HYPRE_MEMORY_DEVICE);
       AFF_diag_a  = hypre_TAlloc(HYPRE_Complex, AFF_diag_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(AFF_diag_ii, AFF_diag_j, AFF_diag_a)),
-                                   AFF_pred_diag );
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(AFF_diag_ii, AFF_diag_j, AFF_diag_a),
+                                        AFF_pred_diag );
+
+      hypre_assert( std::get<0>(new_end.base()) == AFF_diag_ii + AFF_diag_nnz );
+
+      hypreSycl_gather( AFF_diag_j,
+                        AFF_diag_j + AFF_diag_nnz,
+                        map2FC,
+                        AFF_diag_j );
+
+      hypreSycl_gather( AFF_diag_ii,
+                        AFF_diag_ii + AFF_diag_nnz,
+                        option == 1 ? map2FC : map2F2,
+                        AFF_diag_ii );
+
+#else
+      /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(AFF_diag_ii, AFF_diag_j, AFF_diag_a)),
+                                        AFF_pred_diag );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AFF_diag_ii + AFF_diag_nnz );
 
@@ -397,6 +499,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFF_diag_ii + AFF_diag_nnz,
                           option == 1 ? map2FC : map2F2,
                           AFF_diag_ii );
+#endif
 
       AFF_diag_i = hypreDevice_CsrRowIndicesToPtrs(option == 1 ? nF_local : nF2_local, AFF_diag_nnz,
                                                    AFF_diag_ii);
@@ -404,15 +507,36 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFF Offd */
       FF_pred<HYPRE_BigInt> AFF_pred_offd(option, CF_marker, recv_buf);
+#if defined(HYPRE_USING_SYCL)
+      AFF_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        AFF_pred_offd );
+#else
       AFF_offd_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)) + A_offd_nnz,
                                         AFF_pred_offd );
+#endif
 
       AFF_offd_ii = hypre_TAlloc(HYPRE_Int,     AFF_offd_nnz, HYPRE_MEMORY_DEVICE);
       AFF_offd_j  = hypre_TAlloc(HYPRE_Int,     AFF_offd_nnz, HYPRE_MEMORY_DEVICE);
       AFF_offd_a  = hypre_TAlloc(HYPRE_Complex, AFF_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                   oneapi::dpl::make_zip_iterator(AFF_offd_ii, AFF_offd_j, AFF_offd_a),
+                                   AFF_pred_offd );
+
+      hypre_assert( std::get<0>(new_end.base()) == AFF_offd_ii + AFF_offd_nnz );
+
+      hypreSycl_gather( AFF_offd_ii,
+                        AFF_offd_ii + AFF_offd_nnz,
+                        option == 1 ? map2FC : map2F2,
+                        AFF_offd_ii );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)) + A_offd_nnz,
@@ -427,6 +551,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFF_offd_ii + AFF_offd_nnz,
                           option == 1 ? map2FC : map2F2,
                           AFF_offd_ii );
+#endif
 
       AFF_offd_i = hypreDevice_CsrRowIndicesToPtrs(option == 1 ? nF_local : nF2_local, AFF_offd_nnz,
                                                    AFF_offd_ii);
@@ -436,6 +561,41 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       HYPRE_Int *tmp_j = hypre_TAlloc(HYPRE_Int, hypre_max(AFF_offd_nnz, num_cols_A_offd),
                                       HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_j, AFF_offd_j, HYPRE_Int, AFF_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_j,
+                         tmp_j + AFF_offd_nnz );
+      HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              tmp_j,
+                                              tmp_j + AFF_offd_nnz );
+      num_cols_AFF_offd = tmp_end - tmp_j;
+      HYPRE_ONEDPL_CALL( std::fill_n,
+                         offd_mark,
+                         num_cols_A_offd,
+                         0 );
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, 1);
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         offd_mark,
+                         offd_mark + num_cols_A_offd,
+                         tmp_j,
+                         0 );
+      hypreSycl_gather( AFF_offd_j,
+                        AFF_offd_j + AFF_offd_nnz,
+                        tmp_j,
+                        AFF_offd_j );
+      col_map_offd_AFF = hypre_TAlloc(HYPRE_BigInt, num_cols_AFF_offd, HYPRE_MEMORY_DEVICE);
+      HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
+                                                     recv_buf + num_cols_A_offd,
+                                                     offd_mark,
+                                                     col_map_offd_AFF,
+      [] (const auto & x) {return x;} );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         col_map_offd_AFF,
+                         col_map_offd_AFF + num_cols_AFF_offd,
+                         col_map_offd_AFF,
+      [] (auto const & x) { return -x - 1; } );
+      hypre_assert(tmp_end_big - col_map_offd_AFF == num_cols_AFF_offd);
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
                          tmp_j + AFF_offd_nnz );
@@ -462,6 +622,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      col_map_offd_AFF,
                                                      thrust::identity<HYPRE_Int>() );
       hypre_assert(tmp_end_big - col_map_offd_AFF == num_cols_AFF_offd);
+#endif
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
       AFF = hypre_ParCSRMatrixCreate(comm,
@@ -513,21 +674,47 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* AFC Diag */
       FC_pred<HYPRE_Int> AFC_pred_diag(CF_marker, CF_marker);
+#if defined(HYPRE_USING_SYCL)
+      AFC_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        AFC_pred_diag );
+#else
       AFC_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)) + A_diag_nnz,
                                         AFC_pred_diag );
+#endif
 
       AFC_diag_ii = hypre_TAlloc(HYPRE_Int,     AFC_diag_nnz, HYPRE_MEMORY_DEVICE);
       AFC_diag_j  = hypre_TAlloc(HYPRE_Int,     AFC_diag_nnz, HYPRE_MEMORY_DEVICE);
       AFC_diag_a  = hypre_TAlloc(HYPRE_Complex, AFC_diag_nnz, HYPRE_MEMORY_DEVICE);
 
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(AFC_diag_ii, AFC_diag_j, AFC_diag_a)),
-                                   AFC_pred_diag );
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a) + A_diag_nnz,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(AFC_diag_ii, AFC_diag_j, AFC_diag_a),
+                                        AFC_pred_diag );
+
+      hypre_assert( std::get<0>(new_end.base()) == AFC_diag_ii + AFC_diag_nnz );
+
+      hypreSycl_gather( AFC_diag_j,
+                        AFC_diag_j + AFC_diag_nnz,
+                        map2FC,
+                        AFC_diag_j );
+
+      hypreSycl_gather( AFC_diag_ii,
+                        AFC_diag_ii + AFC_diag_nnz,
+                        map2FC,
+                        AFC_diag_ii );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)) + A_diag_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(AFC_diag_ii, AFC_diag_j, AFC_diag_a)),
+                                        AFC_pred_diag );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AFC_diag_ii + AFC_diag_nnz );
 
@@ -542,21 +729,43 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFC_diag_ii + AFC_diag_nnz,
                           map2FC,
                           AFC_diag_ii );
+#endif
 
       AFC_diag_i = hypreDevice_CsrRowIndicesToPtrs(nF_local, AFC_diag_nnz, AFC_diag_ii);
       hypre_TFree(AFC_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* AFC Offd */
       FC_pred<HYPRE_BigInt> AFC_pred_offd(CF_marker, recv_buf);
+#if defined(HYPRE_USING_SYCL)
+      AFC_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        AFC_pred_offd );
+#else
       AFC_offd_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)) + A_offd_nnz,
                                         AFC_pred_offd );
+#endif
 
       AFC_offd_ii = hypre_TAlloc(HYPRE_Int,     AFC_offd_nnz, HYPRE_MEMORY_DEVICE);
       AFC_offd_j  = hypre_TAlloc(HYPRE_Int,     AFC_offd_nnz, HYPRE_MEMORY_DEVICE);
       AFC_offd_a  = hypre_TAlloc(HYPRE_Complex, AFC_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                   oneapi::dpl::make_zip_iterator(AFC_offd_ii, AFC_offd_j, AFC_offd_a),
+                                   AFC_pred_offd );
+
+      hypre_assert( std::get<0>(new_end.base()) == AFC_offd_ii + AFC_offd_nnz );
+
+      hypreSycl_gather( AFC_offd_ii,
+                        AFC_offd_ii + AFC_offd_nnz,
+                        map2FC,
+                        AFC_offd_ii );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)) + A_offd_nnz,
@@ -571,6 +780,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           AFC_offd_ii + AFC_offd_nnz,
                           map2FC,
                           AFC_offd_ii );
+#endif
 
       AFC_offd_i = hypreDevice_CsrRowIndicesToPtrs(nF_local, AFC_offd_nnz, AFC_offd_ii);
       hypre_TFree(AFC_offd_ii, HYPRE_MEMORY_DEVICE);
@@ -579,6 +789,35 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       HYPRE_Int *tmp_j = hypre_TAlloc(HYPRE_Int, hypre_max(AFC_offd_nnz, num_cols_A_offd),
                                       HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_j, AFC_offd_j, HYPRE_Int, AFC_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_j,
+                         tmp_j + AFC_offd_nnz );
+      HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              tmp_j,
+                                              tmp_j + AFC_offd_nnz );
+      num_cols_AFC_offd = tmp_end - tmp_j;
+      HYPRE_ONEDPL_CALL( std::fill_n,
+                         offd_mark,
+                         num_cols_A_offd,
+                         0 );
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, 1);
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         offd_mark,
+                         offd_mark + num_cols_A_offd,
+                         tmp_j,
+                         0);
+      hypreSycl_gather( AFC_offd_j,
+                        AFC_offd_j + AFC_offd_nnz,
+                        tmp_j,
+                        AFC_offd_j );
+      col_map_offd_AFC = hypre_TAlloc(HYPRE_BigInt, num_cols_AFC_offd, HYPRE_MEMORY_DEVICE);
+      HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
+                                                     recv_buf + num_cols_A_offd,
+                                                     offd_mark,
+                                                     col_map_offd_AFC,
+      [] (const auto & x) {return x;});
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
                          tmp_j + AFC_offd_nnz );
@@ -604,6 +843,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      offd_mark,
                                                      col_map_offd_AFC,
                                                      thrust::identity<HYPRE_Int>());
+#endif
       hypre_assert(tmp_end_big - col_map_offd_AFC == num_cols_AFC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -657,21 +897,47 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* ACF Diag */
       CF_pred<HYPRE_Int> ACF_pred_diag(CF_marker, CF_marker);
+#if defined(HYPRE_USING_SYCL)
+      ACF_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        ACF_pred_diag );
+#else
       ACF_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)) + A_diag_nnz,
                                         ACF_pred_diag );
+#endif
 
       ACF_diag_ii = hypre_TAlloc(HYPRE_Int,     ACF_diag_nnz, HYPRE_MEMORY_DEVICE);
       ACF_diag_j  = hypre_TAlloc(HYPRE_Int,     ACF_diag_nnz, HYPRE_MEMORY_DEVICE);
       ACF_diag_a  = hypre_TAlloc(HYPRE_Complex, ACF_diag_nnz, HYPRE_MEMORY_DEVICE);
 
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(ACF_diag_ii, ACF_diag_j, ACF_diag_a)),
-                                   ACF_pred_diag );
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j, A_diag_a) + A_diag_nnz,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(ACF_diag_ii, ACF_diag_j, ACF_diag_a),
+                                        ACF_pred_diag );
+
+      hypre_assert( std::get<0>(new_end.base()) == ACF_diag_ii + ACF_diag_nnz );
+
+      hypreSycl_gather( ACF_diag_j,
+                        ACF_diag_j + ACF_diag_nnz,
+                        map2FC,
+                        ACF_diag_j );
+
+      hypreSycl_gather( ACF_diag_ii,
+                        ACF_diag_ii + ACF_diag_nnz,
+                        map2FC,
+                        ACF_diag_ii );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j, A_diag_a)) + A_diag_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(ACF_diag_ii, ACF_diag_j, ACF_diag_a)),
+                                        ACF_pred_diag );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == ACF_diag_ii + ACF_diag_nnz );
 
@@ -686,21 +952,43 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACF_diag_ii + ACF_diag_nnz,
                           map2FC,
                           ACF_diag_ii );
+#endif
 
       ACF_diag_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACF_diag_nnz, ACF_diag_ii);
       hypre_TFree(ACF_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACF Offd */
       CF_pred<HYPRE_BigInt> ACF_pred_offd(CF_marker, recv_buf);
+#if defined(HYPRE_USING_SYCL)
+      ACF_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        ACF_pred_offd );
+#else
       ACF_offd_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)) + A_offd_nnz,
                                         ACF_pred_offd );
+#endif
 
       ACF_offd_ii = hypre_TAlloc(HYPRE_Int,     ACF_offd_nnz, HYPRE_MEMORY_DEVICE);
       ACF_offd_j  = hypre_TAlloc(HYPRE_Int,     ACF_offd_nnz, HYPRE_MEMORY_DEVICE);
       ACF_offd_a  = hypre_TAlloc(HYPRE_Complex, ACF_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                   oneapi::dpl::make_zip_iterator(ACF_offd_ii, ACF_offd_j, ACF_offd_a),
+                                   ACF_pred_offd );
+
+      hypre_assert( std::get<0>(new_end.base()) == ACF_offd_ii + ACF_offd_nnz );
+
+      hypreSycl_gather( ACF_offd_ii,
+                        ACF_offd_ii + ACF_offd_nnz,
+                        map2FC,
+                        ACF_offd_ii );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)) + A_offd_nnz,
@@ -715,6 +1003,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACF_offd_ii + ACF_offd_nnz,
                           map2FC,
                           ACF_offd_ii );
+#endif
 
       ACF_offd_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACF_offd_nnz, ACF_offd_ii);
       hypre_TFree(ACF_offd_ii, HYPRE_MEMORY_DEVICE);
@@ -723,6 +1012,40 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       HYPRE_Int *tmp_j = hypre_TAlloc(HYPRE_Int, hypre_max(ACF_offd_nnz, num_cols_A_offd),
                                       HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_j, ACF_offd_j, HYPRE_Int, ACF_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_j,
+                         tmp_j + ACF_offd_nnz );
+      HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              tmp_j,
+                                              tmp_j + ACF_offd_nnz );
+      num_cols_ACF_offd = tmp_end - tmp_j;
+      HYPRE_ONEDPL_CALL( std::fill_n,
+                         offd_mark,
+                         num_cols_A_offd,
+                         0 );
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, 1);
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         offd_mark,
+                         offd_mark + num_cols_A_offd,
+                         tmp_j,
+                         0);
+      hypreSycl_gather( ACF_offd_j,
+                        ACF_offd_j + ACF_offd_nnz,
+                        tmp_j,
+                        ACF_offd_j );
+      col_map_offd_ACF = hypre_TAlloc(HYPRE_BigInt, num_cols_ACF_offd, HYPRE_MEMORY_DEVICE);
+      HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
+                                                     recv_buf + num_cols_A_offd,
+                                                     offd_mark,
+                                                     col_map_offd_ACF,
+      [] (const auto & x) {return x;} );
+      HYPRE_ONEDPL_CALL( std::transform,
+                         col_map_offd_ACF,
+                         col_map_offd_ACF + num_cols_ACF_offd,
+                         col_map_offd_ACF,
+      [] (const auto & x) {return -x - 1;} );
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
                          tmp_j + ACF_offd_nnz );
@@ -748,6 +1071,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      offd_mark,
                                                      col_map_offd_ACF,
                                                      thrust::identity<HYPRE_Int>());
+#endif
       hypre_assert(tmp_end_big - col_map_offd_ACF == num_cols_ACF_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -801,22 +1125,48 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       /* ACC Diag */
       CC_pred<HYPRE_Int> ACC_pred_diag(CF_marker, CF_marker);
+#if defined(HYPRE_USING_SYCL)
+      ACC_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        ACC_pred_diag );
+#else
       ACC_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)) + A_diag_nnz,
                                         ACC_pred_diag );
+#endif
 
       ACC_diag_ii = hypre_TAlloc(HYPRE_Int,     ACC_diag_nnz, HYPRE_MEMORY_DEVICE);
       ACC_diag_j  = hypre_TAlloc(HYPRE_Int,     ACC_diag_nnz, HYPRE_MEMORY_DEVICE);
       ACC_diag_a  = hypre_TAlloc(HYPRE_Complex, ACC_diag_nnz, HYPRE_MEMORY_DEVICE);
 
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(ACC_diag_ii, ACC_diag_j, ACC_diag_a)),
-                                   ACC_pred_diag );
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(ACC_diag_ii, ACC_diag_j, ACC_diag_a),
+                                        ACC_pred_diag );
+
+      hypre_assert( std::get<0>(new_end.base()) == ACC_diag_ii + ACC_diag_nnz );
+
+      hypreSycl_gather( ACC_diag_j,
+                        ACC_diag_j + ACC_diag_nnz,
+                        map2FC,
+                        ACC_diag_j );
+
+      hypreSycl_gather( ACC_diag_ii,
+                        ACC_diag_ii + ACC_diag_nnz,
+                        map2FC,
+                        ACC_diag_ii );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(ACC_diag_ii, ACC_diag_j, ACC_diag_a)),
+                                        ACC_pred_diag );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == ACC_diag_ii + ACC_diag_nnz );
 
@@ -831,21 +1181,43 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACC_diag_ii + ACC_diag_nnz,
                           map2FC,
                           ACC_diag_ii );
+#endif
 
       ACC_diag_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACC_diag_nnz, ACC_diag_ii);
       hypre_TFree(ACC_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACC Offd */
       CC_pred<HYPRE_BigInt> ACC_pred_offd(CF_marker, recv_buf);
+#if defined(HYPRE_USING_SYCL)
+      ACC_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        ACC_pred_offd );
+#else
       ACC_offd_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)) + A_offd_nnz,
                                         ACC_pred_offd );
+#endif
 
       ACC_offd_ii = hypre_TAlloc(HYPRE_Int,     ACC_offd_nnz, HYPRE_MEMORY_DEVICE);
       ACC_offd_j  = hypre_TAlloc(HYPRE_Int,     ACC_offd_nnz, HYPRE_MEMORY_DEVICE);
       ACC_offd_a  = hypre_TAlloc(HYPRE_Complex, ACC_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                   oneapi::dpl::make_zip_iterator(ACC_offd_ii, ACC_offd_j, ACC_offd_a),
+                                   ACC_pred_offd );
+
+      hypre_assert( std::get<0>(new_end.base()) == ACC_offd_ii + ACC_offd_nnz );
+
+      hypreSycl_gather( ACC_offd_ii,
+                        ACC_offd_ii + ACC_offd_nnz,
+                        map2FC,
+                        ACC_offd_ii );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)) + A_offd_nnz,
@@ -860,6 +1232,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                           ACC_offd_ii + ACC_offd_nnz,
                           map2FC,
                           ACC_offd_ii );
+#endif
 
       ACC_offd_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACC_offd_nnz, ACC_offd_ii);
       hypre_TFree(ACC_offd_ii, HYPRE_MEMORY_DEVICE);
@@ -868,6 +1241,35 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       HYPRE_Int *tmp_j = hypre_TAlloc(HYPRE_Int, hypre_max(ACC_offd_nnz, num_cols_A_offd),
                                       HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_j, ACC_offd_j, HYPRE_Int, ACC_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_j,
+                         tmp_j + ACC_offd_nnz );
+      HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              tmp_j,
+                                              tmp_j + ACC_offd_nnz );
+      num_cols_ACC_offd = tmp_end - tmp_j;
+      HYPRE_ONEDPL_CALL( std::fill_n,
+                         offd_mark,
+                         num_cols_A_offd,
+                         0 );
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, 1);
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         offd_mark,
+                         offd_mark + num_cols_A_offd,
+                         tmp_j,
+                         0);
+      hypreSycl_gather( ACC_offd_j,
+                        ACC_offd_j + ACC_offd_nnz,
+                        tmp_j,
+                        ACC_offd_j );
+      col_map_offd_ACC = hypre_TAlloc(HYPRE_BigInt, num_cols_ACC_offd, HYPRE_MEMORY_DEVICE);
+      HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
+                                                     recv_buf + num_cols_A_offd,
+                                                     offd_mark,
+                                                     col_map_offd_ACC,
+      [] (const auto & x) {return x;} );
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
                          tmp_j + ACC_offd_nnz );
@@ -893,6 +1295,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                                      offd_mark,
                                                      col_map_offd_ACC,
                                                      thrust::identity<HYPRE_Int>());
+#endif
       hypre_assert(tmp_end_big - col_map_offd_ACC == num_cols_ACC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -942,6 +1345,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFCDevice
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker,
@@ -950,9 +1357,14 @@ hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
                                       hypre_ParCSRMatrix **AFC_ptr,
                                       hypre_ParCSRMatrix **AFF_ptr )
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr,
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    AFC_ptr, AFF_ptr,
                                                     NULL, NULL, 1);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFC3Device
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFC3Device( hypre_ParCSRMatrix  *A,
@@ -962,9 +1374,14 @@ hypre_ParCSRMatrixGenerateFFFC3Device( hypre_ParCSRMatrix  *A,
                                        hypre_ParCSRMatrix **AFC_ptr,
                                        hypre_ParCSRMatrix **AFF_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr,
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    AFC_ptr, AFF_ptr,
                                                     NULL, NULL, 2);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFCFDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix  *A,
@@ -974,10 +1391,14 @@ hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix  *A,
                                       hypre_ParCSRMatrix **ACF_ptr,
                                       hypre_ParCSRMatrix **AFF_ptr )
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, AFF_ptr,
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, AFF_ptr,
                                                     ACF_ptr, NULL, 1);
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCFDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix  *A,
@@ -986,9 +1407,14 @@ hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix  *A,
                                     hypre_ParCSRMatrix  *S,
                                     hypre_ParCSRMatrix **ACF_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, ACF_ptr,
-                                                    NULL, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    ACF_ptr, NULL, 1);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCCDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
@@ -997,9 +1423,14 @@ hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
                                     hypre_ParCSRMatrix  *S,
                                     hypre_ParCSRMatrix **ACC_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, NULL,
-                                                    ACC_ptr, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    NULL, ACC_ptr, 1);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerate1DCFDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
@@ -1076,6 +1507,27 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    itmp       = hypre_TAlloc(HYPRE_Int,    n_local,         HYPRE_MEMORY_DEVICE);
    recv_buf   = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   /* map from all points (i.e, F+C) to F/C indices */
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
+                      map2FC, /* F */
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                      oneapi::dpl::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
+                      itmp, /* C */
+                      HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
+
+   hypreSycl_scatter_if( itmp,
+                         itmp + n_local,
+                         oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                         CF_marker,
+                         map2FC, /* FC combined */
+                         is_nonnegative<HYPRE_Int>() );
+#else
    /* map from all points (i.e, F+C) to F/C indices */
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
@@ -1095,6 +1547,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::make_transform_iterator(CF_marker, is_nonnegative<HYPRE_Int>()),
                       map2FC ); /* FC combined */
+#endif
 
    hypre_TFree(itmp, HYPRE_MEMORY_DEVICE);
 
@@ -1104,12 +1557,20 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
    FFFC_functor functor(F_first, C_first);
+#if defined(HYPRE_USING_SYCL)
+   auto zip = oneapi::dpl::make_zip_iterator(map2FC, CF_marker);
+   hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                     hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
+                     oneapi::dpl::make_transform_iterator(zip, functor),
+                     send_buf );
+#else
    HYPRE_THRUST_CALL( gather,
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + num_elem_send,
                       thrust::make_transform_iterator(thrust::make_zip_iterator(thrust::make_tuple(map2FC, CF_marker)),
                                                       functor),
                       send_buf );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
@@ -1121,8 +1582,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    hypre_TFree(send_buf, HYPRE_MEMORY_DEVICE);
-
-   thrust::zip_iterator< thrust::tuple<HYPRE_Int*, HYPRE_Int*, HYPRE_Complex*> > new_end;
 
    A_diag_ii = hypre_TAlloc(HYPRE_Int, A_diag_nnz,      HYPRE_MEMORY_DEVICE);
    A_offd_ii = hypre_TAlloc(HYPRE_Int, A_offd_nnz,      HYPRE_MEMORY_DEVICE);
@@ -1145,22 +1604,43 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
       /* ACX Diag */
       CX_pred ACX_pred(CF_marker);
+#if defined(HYPRE_USING_SYCL)
+      ACX_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        ACX_pred );
+#else
       ACX_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)) + A_diag_nnz,
                                         ACX_pred );
+#endif
 
       ACX_diag_ii = hypre_TAlloc(HYPRE_Int,     ACX_diag_nnz, HYPRE_MEMORY_DEVICE);
       ACX_diag_j  = hypre_TAlloc(HYPRE_Int,     ACX_diag_nnz, HYPRE_MEMORY_DEVICE);
       ACX_diag_a  = hypre_TAlloc(HYPRE_Complex, ACX_diag_nnz, HYPRE_MEMORY_DEVICE);
 
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(ACX_diag_ii, ACX_diag_j, ACX_diag_a)),
-                                   ACX_pred );
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(ACX_diag_ii, ACX_diag_j, ACX_diag_a),
+                                        ACX_pred );
+
+      hypre_assert( std::get<0>(new_end.base()) == ACX_diag_ii + ACX_diag_nnz );
+
+      hypreSycl_gather( ACX_diag_ii,
+                        ACX_diag_ii + ACX_diag_nnz,
+                        map2FC,
+                        ACX_diag_ii );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(ACX_diag_ii, ACX_diag_j, ACX_diag_a)),
+                                        ACX_pred );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == ACX_diag_ii + ACX_diag_nnz );
 
@@ -1169,20 +1649,42 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                           ACX_diag_ii + ACX_diag_nnz,
                           map2FC,
                           ACX_diag_ii );
+#endif
 
       ACX_diag_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACX_diag_nnz, ACX_diag_ii);
       hypre_TFree(ACX_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* ACX Offd */
+#if defined(HYPRE_USING_SYCL)
+      ACX_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        ACX_pred );
+#else
       ACX_offd_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)) + A_offd_nnz,
                                         ACX_pred );
+#endif
 
       ACX_offd_ii = hypre_TAlloc(HYPRE_Int,     ACX_offd_nnz, HYPRE_MEMORY_DEVICE);
       ACX_offd_j  = hypre_TAlloc(HYPRE_Int,     ACX_offd_nnz, HYPRE_MEMORY_DEVICE);
       ACX_offd_a  = hypre_TAlloc(HYPRE_Complex, ACX_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                   oneapi::dpl::make_zip_iterator(ACX_offd_ii, ACX_offd_j, ACX_offd_a),
+                                   ACX_pred );
+
+      hypre_assert( std::get<0>(new_end.base()) == ACX_offd_ii + ACX_offd_nnz );
+
+      hypreSycl_gather( ACX_offd_ii,
+                        ACX_offd_ii + ACX_offd_nnz,
+                        map2FC,
+                        ACX_offd_ii );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)) + A_offd_nnz,
@@ -1197,6 +1699,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                           ACX_offd_ii + ACX_offd_nnz,
                           map2FC,
                           ACX_offd_ii );
+#endif
 
       ACX_offd_i = hypreDevice_CsrRowIndicesToPtrs(nC_local, ACX_offd_nnz, ACX_offd_ii);
       hypre_TFree(ACX_offd_ii, HYPRE_MEMORY_DEVICE);
@@ -1205,15 +1708,41 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int *tmp_j = hypre_TAlloc(HYPRE_Int, hypre_max(ACX_offd_nnz, num_cols_A_offd),
                                       HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_j, ACX_offd_j, HYPRE_Int, ACX_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_j,
+                         tmp_j + ACX_offd_nnz );
+      HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              tmp_j,
+                                              tmp_j + ACX_offd_nnz );
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
                          tmp_j + ACX_offd_nnz );
       HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( unique,
                                               tmp_j,
                                               tmp_j + ACX_offd_nnz );
+#endif
       num_cols_ACX_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_ACX_offd, tmp_j, 1);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         offd_mark,
+                         offd_mark + num_cols_A_offd,
+                         tmp_j,
+                         0 );
+      hypreSycl_gather( ACX_offd_j,
+                        ACX_offd_j + ACX_offd_nnz,
+                        tmp_j,
+                        ACX_offd_j );
+      col_map_offd_ACX = hypre_TAlloc(HYPRE_BigInt, num_cols_ACX_offd, HYPRE_MEMORY_DEVICE);
+      HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( col_map_offd_A,
+                                                     col_map_offd_A + num_cols_A_offd,
+                                                     offd_mark,
+                                                     col_map_offd_ACX,
+      [] (const auto & x) {return x;} );
+#else
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1230,6 +1759,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                                      offd_mark,
                                                      col_map_offd_ACX,
                                                      thrust::identity<HYPRE_Int>());
+#endif
       hypre_assert(tmp_end_big - col_map_offd_ACX == num_cols_ACX_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -1283,22 +1813,43 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
       /* AXC Diag */
       XC_pred<HYPRE_Int> AXC_pred_diag(CF_marker);
+#if defined(HYPRE_USING_SYCL)
+      AXC_diag_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j) + A_diag_nnz,
+                                        AXC_pred_diag );
+#else
       AXC_diag_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)) + A_diag_nnz,
                                         AXC_pred_diag );
+#endif
 
       AXC_diag_ii = hypre_TAlloc(HYPRE_Int,     AXC_diag_nnz, HYPRE_MEMORY_DEVICE);
       AXC_diag_j  = hypre_TAlloc(HYPRE_Int,     AXC_diag_nnz, HYPRE_MEMORY_DEVICE);
       AXC_diag_a  = hypre_TAlloc(HYPRE_Complex, AXC_diag_nnz, HYPRE_MEMORY_DEVICE);
 
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
-      new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(AXC_diag_ii, AXC_diag_j, AXC_diag_a)),
-                                   AXC_pred_diag );
+#if defined(HYPRE_USING_SYCL)
+      auto new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a),
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, A_diag_j, A_diag_a) + A_diag_nnz,
+                                        oneapi::dpl::make_zip_iterator(A_diag_ii, Soc_diag_j),
+                                        oneapi::dpl::make_zip_iterator(AXC_diag_ii, AXC_diag_j, AXC_diag_a),
+                                        AXC_pred_diag );
+
+      hypre_assert( std::get<0>(new_end.base()) == AXC_diag_ii + AXC_diag_nnz );
+
+      hypreSycl_gather( AXC_diag_j,
+                        AXC_diag_j + AXC_diag_nnz,
+                        map2FC,
+                        AXC_diag_j );
+#else
+      auto new_end = HYPRE_THRUST_CALL( copy_if,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, A_diag_j, A_diag_a)) + A_diag_nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_diag_ii, Soc_diag_j)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(AXC_diag_ii, AXC_diag_j, AXC_diag_a)),
+                                        AXC_pred_diag );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AXC_diag_ii + AXC_diag_nnz );
 
@@ -1307,21 +1858,38 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                           AXC_diag_j + AXC_diag_nnz,
                           map2FC,
                           AXC_diag_j );
+#endif
 
       AXC_diag_i = hypreDevice_CsrRowIndicesToPtrs(n_local, AXC_diag_nnz, AXC_diag_ii);
       hypre_TFree(AXC_diag_ii, HYPRE_MEMORY_DEVICE);
 
       /* AXC Offd */
       XC_pred<HYPRE_BigInt> AXC_pred_offd(recv_buf);
+#if defined(HYPRE_USING_SYCL)
+      AXC_offd_nnz = HYPRE_ONEDPL_CALL( std::count_if,
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                        oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j) + A_offd_nnz,
+                                        AXC_pred_offd );
+#else
       AXC_offd_nnz = HYPRE_THRUST_CALL( count_if,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)),
                                         thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j)) + A_offd_nnz,
                                         AXC_pred_offd );
+#endif
 
       AXC_offd_ii = hypre_TAlloc(HYPRE_Int,     AXC_offd_nnz, HYPRE_MEMORY_DEVICE);
       AXC_offd_j  = hypre_TAlloc(HYPRE_Int,     AXC_offd_nnz, HYPRE_MEMORY_DEVICE);
       AXC_offd_a  = hypre_TAlloc(HYPRE_Complex, AXC_offd_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      new_end = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a),
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j, A_offd_a) + A_offd_nnz,
+                                   oneapi::dpl::make_zip_iterator(A_offd_ii, Soc_offd_j),
+                                   oneapi::dpl::make_zip_iterator(AXC_offd_ii, AXC_offd_j, AXC_offd_a),
+                                   AXC_pred_offd );
+
+      hypre_assert( std::get<0>(new_end.base()) == AXC_offd_ii + AXC_offd_nnz );
+#else
       new_end = HYPRE_THRUST_CALL( copy_if,
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)),
                                    thrust::make_zip_iterator(thrust::make_tuple(A_offd_ii, Soc_offd_j, A_offd_a)) + A_offd_nnz,
@@ -1330,6 +1898,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                    AXC_pred_offd );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == AXC_offd_ii + AXC_offd_nnz );
+#endif
 
       AXC_offd_i = hypreDevice_CsrRowIndicesToPtrs(n_local, AXC_offd_nnz, AXC_offd_ii);
       hypre_TFree(AXC_offd_ii, HYPRE_MEMORY_DEVICE);
@@ -1338,15 +1907,41 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
       HYPRE_Int *tmp_j = hypre_TAlloc(HYPRE_Int, hypre_max(AXC_offd_nnz, num_cols_A_offd),
                                       HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_j, AXC_offd_j, HYPRE_Int, AXC_offd_nnz, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_j,
+                         tmp_j + AXC_offd_nnz );
+      HYPRE_Int *tmp_end = HYPRE_ONEDPL_CALL( std::unique,
+                                              tmp_j,
+                                              tmp_j + AXC_offd_nnz );
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_j,
                          tmp_j + AXC_offd_nnz );
       HYPRE_Int *tmp_end = HYPRE_THRUST_CALL( unique,
                                               tmp_j,
                                               tmp_j + AXC_offd_nnz );
+#endif
       num_cols_AXC_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_AXC_offd, tmp_j, 1);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
+                         offd_mark,
+                         offd_mark + num_cols_A_offd,
+                         tmp_j,
+                         0 );
+      hypreSycl_gather( AXC_offd_j,
+                        AXC_offd_j + AXC_offd_nnz,
+                        tmp_j,
+                        AXC_offd_j );
+      col_map_offd_AXC = hypre_TAlloc(HYPRE_BigInt, num_cols_AXC_offd, HYPRE_MEMORY_DEVICE);
+      HYPRE_BigInt *tmp_end_big = hypreSycl_copy_if( recv_buf,
+                                                     recv_buf + num_cols_A_offd,
+                                                     offd_mark,
+                                                     col_map_offd_AXC,
+      [] (const auto & x) {return x;} );
+#else
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1363,6 +1958,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                                                      offd_mark,
                                                      col_map_offd_AXC,
                                                      thrust::identity<HYPRE_Int>());
+#endif
       hypre_assert(tmp_end_big - col_map_offd_AXC == num_cols_AXC_offd);
       hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
 
@@ -1411,4 +2007,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

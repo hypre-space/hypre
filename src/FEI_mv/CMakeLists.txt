@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-
-project(HYPRE_FEI C CXX)
-
 include_directories(fei-hypre)
 
 # option(HYPRE_USING_SUPERLU "Use internal SuperLU routines" ON)
@@ -29,6 +26,3 @@ include_directories(fei-hypre)
 # endif()
 
 add_subdirectory(fei-hypre)
-set(FEI_LIBS ${FEI_LIBS} $<TARGET_OBJECTS:HYPRE_fei>)
-
-set(FEI_LIBS ${FEI_LIBS} PARENT_SCOPE)

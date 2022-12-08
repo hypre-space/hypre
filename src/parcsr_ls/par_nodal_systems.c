@@ -110,7 +110,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    HYPRE_Int           num_fun2;
    HYPRE_BigInt       *big_map_to_node = NULL;
    HYPRE_Int          *map_to_node;
-   HYPRE_Int          *map_to_map;
+   HYPRE_Int          *map_to_map = NULL;
    HYPRE_Int          *counter;
 
    HYPRE_Real sum;
@@ -404,17 +404,14 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    if (comm_pkg)
    {
-      comm_pkg_AN = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRCommPkgComm(comm_pkg_AN) = comm;
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      hypre_ParCSRCommPkgNumSends(comm_pkg_AN) = num_sends;
       num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-      hypre_ParCSRCommPkgNumRecvs(comm_pkg_AN) = num_recvs;
       send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
       send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
       send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
       recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
       recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+
       send_procs_AN = NULL;
       send_map_elmts_AN = NULL;
       if (num_sends)
@@ -454,11 +451,13 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          send_map_starts_AN[i + 1] = cnt;
       }
-      hypre_ParCSRCommPkgSendProcs(comm_pkg_AN) = send_procs_AN;
-      hypre_ParCSRCommPkgSendMapStarts(comm_pkg_AN) = send_map_starts_AN;
-      hypre_ParCSRCommPkgSendMapElmts(comm_pkg_AN) = send_map_elmts_AN;
-      hypre_ParCSRCommPkgRecvProcs(comm_pkg_AN) = recv_procs_AN;
-      hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_AN) = recv_vec_starts_AN;
+
+      /* Create communication package */
+      hypre_ParCSRCommPkgCreateAndFill(comm,
+                                       num_recvs, recv_procs_AN, recv_vec_starts_AN,
+                                       num_sends, send_procs_AN, send_map_starts_AN,
+                                       send_map_elmts_AN,
+                                       &comm_pkg_AN);
    }
    hypre_TFree(map_to_node, HYPRE_MEMORY_HOST);
 
@@ -481,8 +480,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          counter = hypre_CTAlloc(HYPRE_Int, num_cols_offd_AN, HYPRE_MEMORY_HOST);
       }
 
-      map_to_map = NULL;
-      col_map_offd_AN = NULL;
       map_to_map = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       col_map_offd_AN = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_AN, HYPRE_MEMORY_HOST);
       col_map_offd_AN[0] = big_map_to_node[0];
@@ -718,8 +715,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          break;
       }
-
-      hypre_TFree(map_to_map, HYPRE_MEMORY_HOST);
    }
 
    if (diag_option == 1 )
@@ -822,6 +817,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    *AN_ptr = AN;
 
    hypre_TFree(counter, HYPRE_MEMORY_HOST);
+   hypre_TFree(map_to_map, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

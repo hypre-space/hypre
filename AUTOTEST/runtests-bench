@@ -1,1 +1,1 @@
-TEST_bench/benchmark_?[^p]*.sh
+TEST_bench/*.sh

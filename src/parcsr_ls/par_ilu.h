@@ -40,6 +40,7 @@ typedef struct hypre_ParILUData_struct
    hypre_Vector            *Ftemp_upper;
    hypre_Vector            *Utemp_lower;
    HYPRE_Int               *A_diag_fake;//fake diagonal, pretend the diagonal matrix is empty
+   hypre_Vector            *Adiag_diag;
 #endif
    //general data
    HYPRE_Int            global_solver;
@@ -73,6 +74,10 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int            print_level;
    HYPRE_Int            max_iter;
 
+   HYPRE_Int            tri_solve;
+   HYPRE_Int            lower_jacobi_iters;
+   HYPRE_Int            upper_jacobi_iters;
+
    HYPRE_Int            ilu_type;
    HYPRE_Int            nLU;
    HYPRE_Int            nI;
@@ -85,6 +90,7 @@ typedef struct hypre_ParILUData_struct
    hypre_ParVector      *Ftemp;
    hypre_ParVector      *Xtemp;
    hypre_ParVector      *Ytemp;
+   hypre_Vector         *Ztemp;
    HYPRE_Real           *uext;
    HYPRE_Real           *fext;
 
@@ -130,6 +136,9 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           *sp_ilu_droptol;/* droptol array for ILUT */
    HYPRE_Int            sp_print_level;
    HYPRE_Int            sp_max_iter;/* max precond iter or max MR iteration */
+   HYPRE_Int            sp_tri_solve;
+   HYPRE_Int            sp_lower_jacobi_iters;
+   HYPRE_Int            sp_upper_jacobi_iters;
    HYPRE_Real           sp_tol;
 
    HYPRE_Int            test_opt;
@@ -162,6 +171,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataFTempUpper(ilu_data)                   ((ilu_data) -> Ftemp_upper)
 #define hypre_ParILUDataUTempLower(ilu_data)                   ((ilu_data) -> Utemp_lower)
 #define hypre_ParILUDataMatAFakeDiagonal(ilu_data)             ((ilu_data) -> A_diag_fake)
+#define hypre_ParILUDataADiagDiag(ilu_data)                    ((ilu_data) -> Adiag_diag)
 #endif
 
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
@@ -193,12 +203,16 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataLogging(ilu_data)                      ((ilu_data) -> logging)
 #define hypre_ParILUDataPrintLevel(ilu_data)                   ((ilu_data) -> print_level)
 #define hypre_ParILUDataMaxIter(ilu_data)                      ((ilu_data) -> max_iter)
+#define hypre_ParILUDataTriSolve(ilu_data)                     ((ilu_data) -> tri_solve)
+#define hypre_ParILUDataLowerJacobiIters(ilu_data)             ((ilu_data) -> lower_jacobi_iters)
+#define hypre_ParILUDataUpperJacobiIters(ilu_data)             ((ilu_data) -> upper_jacobi_iters)
 #define hypre_ParILUDataIluType(ilu_data)                      ((ilu_data) -> ilu_type)
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
 #define hypre_ParILUDataNI(ilu_data)                           ((ilu_data) -> nI)
 #define hypre_ParILUDataUEnd(ilu_data)                         ((ilu_data) -> u_end)
 #define hypre_ParILUDataXTemp(ilu_data)                        ((ilu_data) -> Xtemp)
 #define hypre_ParILUDataYTemp(ilu_data)                        ((ilu_data) -> Ytemp)
+#define hypre_ParILUDataZTemp(ilu_data)                        ((ilu_data) -> Ztemp)
 #define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
 #define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
 #define hypre_ParILUDataUExt(ilu_data)                         ((ilu_data) -> uext)
@@ -220,6 +234,9 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)       ((ilu_data) -> sp_ilu_droptol)
 #define hypre_ParILUDataSchurPrecondPrintLevel(ilu_data)       ((ilu_data) -> sp_print_level)
 #define hypre_ParILUDataSchurPrecondMaxIter(ilu_data)          ((ilu_data) -> sp_max_iter)
+#define hypre_ParILUDataSchurPrecondTriSolve(ilu_data)         ((ilu_data) -> sp_tri_solve)
+#define hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) ((ilu_data) -> sp_lower_jacobi_iters)
+#define hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) ((ilu_data) -> sp_upper_jacobi_iters)
 #define hypre_ParILUDataSchurPrecondTol(ilu_data)              ((ilu_data) -> sp_tol)
 
 #define hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           ((ilu_data) -> ss_nsh_setup_max_iter)
@@ -325,6 +342,23 @@ typedef struct hypre_ParNSHData_struct
 
 //#define DIVIDE_TOL 1e-32
 
+#ifdef HYPRE_USING_GPU
+HYPRE_Int hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
+                                     hypre_ParVector *f,  hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int n, hypre_ParVector *ftemp,
+                                     hypre_ParVector *utemp, hypre_Vector *xtemp_local,
+                                     hypre_Vector **Adiag_diag, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local,
+                                     hypre_Vector *work2_local,
+                                     hypre_Vector *inout_local, hypre_Vector *diag_diag, HYPRE_Int lower_jacobi_iters,
+                                     HYPRE_Int upper_jacobi_iters, HYPRE_Int my_id);
+HYPRE_Int hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local,
+                                    hypre_Vector *work_local,
+                                    hypre_Vector *output_local, HYPRE_Int lower_jacobi_iters);
+HYPRE_Int hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local,
+                                    hypre_Vector *work_local,
+                                    hypre_Vector *output_local, hypre_Vector *diag_diag, HYPRE_Int upper_jacobi_iters);
+#endif
+
 #ifdef HYPRE_USING_CUDA
 HYPRE_Int hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, cusparseMatDescr_t matL_des,
                                    cusparseMatDescr_t matU_des, csrsv2Info_t matL_info, csrsv2Info_t matU_info,
@@ -360,19 +394,19 @@ HYPRE_Int hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE
                                    cusparseSolvePolicy_t ilu_solve_policy, void **bufferp, csrsv2Info_t *matBL_infop,
                                    csrsv2Info_t *matBU_infop, csrsv2Info_t *matSL_infop, csrsv2Info_t *matSU_infop,
                                    hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
-                                   hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip);
+                                   hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve);
 HYPRE_Int hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
                                    HYPRE_Int *qperm, HYPRE_Int n, HYPRE_Int nLU, cusparseMatDescr_t matL_des,
                                    cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy, void **bufferp,
                                    csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop, csrsv2Info_t *matSL_infop,
                                    csrsv2Info_t *matSU_infop, hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
-                                   hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip);
+                                   hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve);
 HYPRE_Int hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                                    HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int n, HYPRE_Int nLU, cusparseMatDescr_t matL_des,
                                    cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy, void **bufferp,
                                    csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop, csrsv2Info_t *matSL_infop,
                                    csrsv2Info_t *matSU_infop, hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
-                                   hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip);
+                                   hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve);
 HYPRE_Int hypre_ParILURAPReorder(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm,
                                  hypre_ParCSRMatrix **A_pq);
 HYPRE_Int hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U,

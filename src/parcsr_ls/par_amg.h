@@ -142,6 +142,9 @@ typedef struct
    HYPRE_Int            ilu_max_row_nnz;
    HYPRE_Int            ilu_max_iter;
    HYPRE_Real           ilu_droptol;
+   HYPRE_Int            ilu_tri_solve;
+   HYPRE_Int            ilu_lower_jacobi_iters;
+   HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
 
    HYPRE_Int            fsai_max_steps;
@@ -158,6 +161,8 @@ typedef struct
    HYPRE_Real           cheby_fraction;
    hypre_Vector       **cheby_ds;
    HYPRE_Real         **cheby_coefs;
+
+   HYPRE_Real           cum_nnz_AP;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
@@ -388,6 +393,9 @@ typedef struct
 #define hypre_ParAMGDataILULevel(amg_data) ((amg_data)->ilu_lfil)
 #define hypre_ParAMGDataILUMaxRowNnz(amg_data) ((amg_data)->ilu_max_row_nnz)
 #define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
+#define hypre_ParAMGDataILUTriSolve(amg_data) ((amg_data)->ilu_tri_solve)
+#define hypre_ParAMGDataILULowerJacobiIters(amg_data) ((amg_data)->ilu_lower_jacobi_iters)
+#define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
@@ -404,6 +412,8 @@ typedef struct
 #define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
+
+#define hypre_ParAMGDataCumNnzAP(amg_data)   ((amg_data)->cum_nnz_AP)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

@@ -197,7 +197,7 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
    /* group id in the grid */
    volatile const HYPRE_Int grid_group_id = blockIdx.x * get_num_groups() + group_id;
    /* lane id inside the group */
-   volatile const HYPRE_Int lane_id = get_group_lane_id();
+   volatile const HYPRE_Int lane_id = get_group_lane_id(item);
    /* shared memory hash table */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
    extern __shared__ volatile HYPRE_Int shared_mem[];
@@ -219,7 +219,7 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
 
       if (HAS_RIND)
       {
-         group_read<GROUP_SIZE>(rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, ii);
+         group_read<GROUP_SIZE>(item, rind + i, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, ii);
       }
       else
       {
@@ -231,7 +231,7 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
 
       if (HAS_GHASH)
       {
-         group_read<GROUP_SIZE>(ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
+         group_read<GROUP_SIZE>(item, ig + grid_group_id, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M,
                                 istart_g, iend_g);
 
          /* size of global hash table allocated for this row
@@ -261,7 +261,7 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
       HYPRE_Int istart_a = 0, iend_a = 0;
 
       /* load the start and end position of row ii of A */
-      group_read<GROUP_SIZE>(ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_a, iend_a);
+      group_read<GROUP_SIZE>(item, ia + ii, GROUP_SIZE >= HYPRE_WARP_SIZE || i < M, istart_a, iend_a);
 
       /* work with two hash tables */
       HYPRE_Int jsum;
@@ -285,13 +285,13 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
        * use s_HashKeys as shared memory workspace */
       if (GROUP_SIZE <= HYPRE_WARP_SIZE)
       {
-         jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(jsum);
+         jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item, jsum);
       }
       else
       {
          group_sync<GROUP_SIZE>();
 
-         jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(jsum, s_HashKeys);
+         jsum = group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item, jsum, s_HashKeys);
       }
 
       /* if this row failed */
@@ -299,11 +299,13 @@ hypre_spgemm_symbolic( hypre_DeviceItem                   &item,
       {
          if (GROUP_SIZE <= HYPRE_WARP_SIZE)
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed);
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (hypre_int) failed);
          }
          else
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>((hypre_int) failed,
+            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (hypre_int) failed,
                                                                                           s_HashKeys);
          }
       }
@@ -351,10 +353,10 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    hypre_assert(bDim.x * bDim.y == GROUP_SIZE);
    // grid dimension (number of blocks)
    const HYPRE_Int num_blocks = hypre_min( hypre_HandleSpgemmBlockNumDim(hypre_handle())[0][BIN],
-                                           (m + bDim.z - 1) / bDim.z );
+                                           (HYPRE_Int) ((m + bDim.z - 1) / bDim.z) );
    dim3 gDim( num_blocks );
    // number of active groups
-   HYPRE_Int num_act_groups = hypre_min(bDim.z * gDim.x, m);
+   HYPRE_Int num_act_groups = hypre_min((HYPRE_Int) (bDim.z * gDim.x), m);
 
    const char HASH_TYPE = HYPRE_SPGEMM_HASH_TYPE;
    if (HASH_TYPE != 'L' && HASH_TYPE != 'Q' && HASH_TYPE != 'D')
@@ -507,4 +509,3 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 }
 
 #endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
-

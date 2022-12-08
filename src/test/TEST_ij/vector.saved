@@ -1,0 +1,120 @@
+# Output file: vector.out.A0
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A1
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A2
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A3
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A4
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A5
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A6
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A7
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A8
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A9
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.A10
+Vector/Multivector error = 0.000000e+00
+
+# Output file: vector.out.B0
+Iterations = 18
+Final Relative Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B1
+GMRES Iterations = 54
+Final GMRES Relative Residual Norm = 7.982372e-09
+
+# Output file: vector.out.B2
+Iterations = 202
+Final Relative Residual Norm = 9.657758e-09
+
+# Output file: vector.out.B3
+BiCGSTAB Iterations = 12
+Final BiCGSTAB Relative Residual Norm = 6.282586e-09
+
+# Output file: vector.out.B4
+LGMRES Iterations = 53
+Final LGMRES Relative Residual Norm = 8.975949e-09
+
+# Output file: vector.out.B5
+FlexGMRES Iterations = 54
+Final FlexGMRES Relative Residual Norm = 7.982372e-09
+
+# Output file: vector.out.B6
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B7
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B8
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B9
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B10
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B100
+Iterations = 18
+Final Relative Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B101
+GMRES Iterations = 54
+Final GMRES Relative Residual Norm = 7.982371e-09
+
+# Output file: vector.out.B102
+Iterations = 202
+Final Relative Residual Norm = 9.575020e-09
+
+# Output file: vector.out.B103
+BiCGSTAB Iterations = 12
+Final BiCGSTAB Relative Residual Norm = 6.282586e-09
+
+# Output file: vector.out.B104
+LGMRES Iterations = 53
+Final LGMRES Relative Residual Norm = 8.975947e-09
+
+# Output file: vector.out.B105
+FlexGMRES Iterations = 54
+Final FlexGMRES Relative Residual Norm = 7.982371e-09
+
+# Output file: vector.out.B106
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B107
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B108
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B109
+Iterations = 18
+Final Residual Norm = 3.923978e-09
+
+# Output file: vector.out.B110
+Iterations = 18
+Final Residual Norm = 3.923978e-09
