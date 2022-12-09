@@ -1020,7 +1020,7 @@ HYPRE_SStructVectorAddToBoxValues2(HYPRE_SStructVector  vector,
  **/
 HYPRE_Int
 HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
-                                   HYPRE_Int            part, 
+                                   HYPRE_Int            part,
                                    HYPRE_Int           *ilower,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Complex       *values);
@@ -1067,7 +1067,7 @@ HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
  */
 HYPRE_Int
 HYPRE_SStructVectorGetFEMBoxValues(HYPRE_SStructVector  vector,
-                                   HYPRE_Int            part, 
+                                   HYPRE_Int            part,
                                    HYPRE_Int           *ilower,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Complex       *values);
