@@ -742,10 +742,15 @@ HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt 
 HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_values,
                                      HYPRE_BigInt *indices, HYPRE_Complex *values);
 
-/*gen_fffc.c */
-HYPRE_Int hypre_ParCSRMatrixGenerateFFFC(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                         HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr,
-                                         hypre_ParCSRMatrix **A_FF_ptr ) ;
+/* gen_fffc.c */
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                              HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S,
+                                              hypre_ParCSRMatrix **A_FC_ptr,
+                                              hypre_ParCSRMatrix **A_FF_ptr ) ;
+HYPRE_Int hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                          HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S,
+                                          hypre_ParCSRMatrix **A_FC_ptr,
+                                          hypre_ParCSRMatrix **A_FF_ptr ) ;
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFC3(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                           HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr,
                                           hypre_ParCSRMatrix **A_FF_ptr ) ;
@@ -1215,7 +1220,6 @@ HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base,
                                          HYPRE_Complex *values);
-
 
 #ifdef __cplusplus
 }

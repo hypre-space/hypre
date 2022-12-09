@@ -5360,7 +5360,7 @@ done
 
    if test "$hypre_using_sycl" = "yes"
    then
-      for ac_prog in dpcpp
+      for ac_prog in icpx
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -9414,13 +9414,14 @@ $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
                 LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
         then
-           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+                      SYCLFLAGS="-Wall ${SYCLFLAGS}"
         else
-           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
+           SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
                 if test "x${HYPRE_SYCL_TARGET}" != "x"
         then
@@ -9453,7 +9454,7 @@ fi
 done
 
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
 
 fi
 
