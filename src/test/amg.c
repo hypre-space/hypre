@@ -40,6 +40,7 @@
 extern "C" {
 #endif
 
+HYPRE_Int BuildIJLaplacian7pt (HYPRE_Int argc , char *argv [], HYPRE_BigInt *size , HYPRE_IJMatrix *A_ptr );
 HYPRE_Int BuildIJLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_BigInt *size , HYPRE_IJMatrix *A_ptr );
 HYPRE_BigInt hypre_map27( HYPRE_BigInt  ix, HYPRE_BigInt  iy, HYPRE_BigInt  iz,
       HYPRE_Int  px, HYPRE_Int  py, HYPRE_Int  pz,
@@ -380,7 +381,14 @@ main( hypre_int argc,
    time_index = hypre_InitializeTiming("Spatial Operator");
    hypre_BeginTiming(time_index);
 
-   BuildIJLaplacian27pt(argc, argv, &system_size, &ij_A);
+   if (problem_id == 1)
+   {
+      BuildIJLaplacian27pt(argc, argv, &system_size, &ij_A);
+   }
+   else
+   {
+      BuildIJLaplacian7pt(argc, argv, &system_size, &ij_A);
+   }
 
    HYPRE_IJMatrixGetObject(ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
@@ -453,11 +461,11 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
-    * Problem 1: Solve one large problem with AMG-PCG
+    * Problem 2: Solve a 7pt 3D Laplace problem with AMG-PCG
     *-----------------------------------------------------------*/
 
 
-   if (problem_id == 1 )
+   if (problem_id == 2 )
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_MPI_Barrier(comm);
@@ -508,7 +516,7 @@ main( hypre_int argc,
 
       hypre_MPI_Barrier(comm);
       hypre_EndTiming(time_index);
-      hypre_GetTiming("Problem 1: AMG Setup Time", &wall_time, comm);
+      hypre_GetTiming("Problem 2: AMG Setup Time", &wall_time, comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
       fflush(NULL);
@@ -529,7 +537,7 @@ main( hypre_int argc,
  
       hypre_MPI_Barrier(comm);
       hypre_EndTiming(time_index);
-      hypre_GetTiming("Problem 1: AMG-PCG Solve Time", &wall_time, comm);
+      hypre_GetTiming("Problem 2: AMG-PCG Solve Time", &wall_time, comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
       fflush(NULL);
@@ -551,18 +559,17 @@ main( hypre_int argc,
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
          printf ("\nFOM_Solve: nnz_AP * Iterations / Solve Phase Time: %e\n\n", FOM2);
-         FOM1 += 3.0*FOM2;
-         FOM1 /= 4.0;
+         FOM1 = 0.5*(FOM1 + FOM2);
          printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
       }
  
    }
 
    /*-----------------------------------------------------------
-    * Problem 2: simulate time-dependent problem AMG-GMRES
+    * Problem 1: Solve a 27pt 3D diffusion problem with AMG-GMRES
     *-----------------------------------------------------------*/
 
-   if (problem_id == 2)
+   if (problem_id == 1)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_MPI_Barrier(comm);
@@ -590,7 +597,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
       if (relax_type > -1) HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
       HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
-      HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
       HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
       HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
       HYPRE_BoomerAMGSetCumNnzAP(pcg_precond, cum_nnz_AP);
@@ -614,7 +620,7 @@ main( hypre_int argc,
 
       hypre_MPI_Barrier(comm);
       hypre_EndTiming(time_index);
-      hypre_GetTiming("Problem 2: AMG Setup Time", &wall_time, comm);
+      hypre_GetTiming("Problem 1: AMG Setup Time", &wall_time, comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
       fflush(NULL);
@@ -634,7 +640,7 @@ main( hypre_int argc,
 
       hypre_MPI_Barrier(comm);
       hypre_EndTiming(time_index);
-      hypre_GetTiming("Problem 2: AMG-GMRES Solve Time", &wall_time, comm);
+      hypre_GetTiming("Problem 1: AMG-GMRES Solve Time", &wall_time, comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
       fflush(NULL);
@@ -654,8 +660,7 @@ main( hypre_int argc,
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
          printf ("\nFOM_Solve: nnz_AP * Iterations / Solve Phase Time: %e\n\n", FOM2);
-         FOM1 += 3.0*FOM2;
-         FOM1 /= 4.0;
+         FOM1 = 0.5*(FOM1+FOM2);
          printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
       }
    }
@@ -729,7 +734,6 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
    HYPRE_BigInt Cx, Cy, Cz;
    HYPRE_Int arg_index;
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
-   void               *object, *objectD;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -856,14 +860,14 @@ BuildIJLaplacian27pt( HYPRE_Int         argc,
     HYPRE_Int num_threads, my_thread;
     HYPRE_Int all_nnz=0;
     HYPRE_Int size, rest;
-    HYPRE_Int new_row_index;
+    HYPRE_BigInt new_row_index;
     num_threads = hypre_NumActiveThreads();
     my_thread = hypre_GetThreadNum();
     size = nz/num_threads;
     rest = nz - size*num_threads;
-    ix_start = nx*px;
+    ix_start = (HYPRE_BigInt)(nx*px);
     ix_end = ix_start+nx;
-    iy_start = ny*py;
+    iy_start = (HYPRE_BigInt)(ny*py);
     iy_end = iy_start+ny;
     if (my_thread < rest)
     {
@@ -2387,3 +2391,410 @@ hypre_map27( HYPRE_BigInt  ix,
    return global_index;
 }
 
+/*----------------------------------------------------------------------
+ * Build 7-point laplacian in 3D,
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildIJLaplacian7pt( HYPRE_Int         argc,
+                       char            *argv[],
+                       HYPRE_BigInt    *system_size_ptr,
+                       HYPRE_IJMatrix  *ij_A_ptr     )
+{
+   MPI_Comm            comm = hypre_MPI_COMM_WORLD;
+   HYPRE_Int           nx, ny, nz;
+   HYPRE_Int           P, Q, R;
+
+   HYPRE_IJMatrix  ij_A;
+
+   HYPRE_Int      num_procs, myid;
+   HYPRE_Int      px, py, pz;
+   HYPRE_Real    *value;
+   HYPRE_Int     *diag_i;
+   HYPRE_Int     *offd_i;
+   HYPRE_BigInt  *row_nums;
+   HYPRE_BigInt  *col_nums;
+   HYPRE_Int     *num_cols;
+   HYPRE_Complex *data;
+
+   HYPRE_BigInt row_index;
+   HYPRE_Int i;
+   HYPRE_Int local_size;
+   HYPRE_BigInt global_size;
+   HYPRE_Int first_local_row;
+   HYPRE_Int last_local_row;
+   HYPRE_Int first_local_col;
+   HYPRE_Int last_local_col;
+
+   HYPRE_Int nxy;
+   HYPRE_BigInt nx_global, ny_global, nz_global;
+   HYPRE_Int all_threads;
+   HYPRE_Int *nnz;
+   HYPRE_BigInt Cx, Cy, Cz;
+   HYPRE_Int arg_index;
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_size(comm, &num_procs );
+   hypre_MPI_Comm_rank(comm, &myid );
+   all_threads = hypre_NumThreads();
+   nnz = hypre_CTAlloc(HYPRE_Int, all_threads, memory_location);
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = num_procs;
+   Q  = 1;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      hypre_printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   nx_global = (HYPRE_BigInt)(P*nx);
+   ny_global = (HYPRE_BigInt)(Q*ny);
+   nz_global = (HYPRE_BigInt)(R*nz);
+   global_size = nx_global*ny_global*nz_global;
+   if (myid == 0)
+
+   {
+      hypre_printf("  Laplacian_7pt:\n");
+      hypre_printf("    (Nx, Ny, Nz) = (%b, %b, %b)\n", nx_global, ny_global, nz_global);
+      hypre_printf("    (Px, Py, Pz) = (%d, %d, %d)\n\n", P,  Q,  R);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute px,py,pz from P,Q,R and myid */
+   px = myid % P;
+   py = (( myid - px)/P) % Q;
+   pz = ( myid - px - P*py)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   value = hypre_CTAlloc(HYPRE_Real, 2, memory_location);
+
+   value[0] = 6.0;
+   if (nx == 1 || ny == 1 || nz == 1)
+      value[0] = 4.0;
+   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+      value[0] = 2.0;
+   value[1] = -1.;
+
+   local_size = nx*ny*nz;
+
+   row_index = (HYPRE_BigInt)(myid*local_size);
+   row_nums = hypre_CTAlloc(HYPRE_BigInt, local_size, memory_location);
+   num_cols = hypre_CTAlloc(HYPRE_Int, local_size, memory_location);
+
+   HYPRE_IJMatrixCreate( comm, row_index, (HYPRE_BigInt)(row_index+local_size-1),
+                               row_index, (HYPRE_BigInt)(row_index+local_size-1),
+                               &ij_A );
+
+   HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
+
+   nxy = nx*ny;
+
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_size, memory_location);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_size, memory_location);
+
+   Cx = (HYPRE_BigInt)(nx*(ny*nz-1));
+   Cy = (HYPRE_BigInt)(nxy*(P*nz-1));
+   Cz = (HYPRE_BigInt)(local_size*(P*Q-1));
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel
+#endif
+   {
+    HYPRE_BigInt ix, iy, iz;
+    HYPRE_Int cnt, o_cnt;
+    HYPRE_BigInt ix_start, ix_end;
+    HYPRE_BigInt iy_start, iy_end;
+    HYPRE_BigInt iz_start, iz_end;
+    HYPRE_Int num_threads, my_thread;
+    HYPRE_Int all_nnz=0;
+    HYPRE_Int size, rest;
+    HYPRE_BigInt new_row_index;
+    num_threads = hypre_NumActiveThreads();
+    my_thread = hypre_GetThreadNum();
+    size = nz/num_threads;
+    rest = nz - size*num_threads;
+    ix_start = (HYPRE_BigInt)(nx*px);
+    ix_end = ix_start+nx;
+    iy_start = (HYPRE_BigInt)(ny*py);
+    iy_end = iy_start+ny;
+    if (my_thread < rest)
+    {
+       iz_start = (HYPRE_BigInt)(nz*pz + my_thread*size+my_thread);
+       iz_end = (HYPRE_BigInt)(nz*pz + (my_thread+1)*size+my_thread+1);
+       cnt = (my_thread*size+my_thread)*nxy-1;
+    }
+    else
+    {
+       iz_start = (HYPRE_BigInt)(nz*pz + my_thread*size+rest);
+       iz_end = (HYPRE_BigInt)(nz*pz + (my_thread+1)*size+rest);
+       cnt = (my_thread*size+rest)*nxy-1;
+    }
+    o_cnt = cnt;
+
+    for (iz = iz_start;  iz < iz_end; iz++)
+    {
+      for (iy = iy_start;  iy < iy_end; iy++)
+      {
+         for (ix = ix_start; ix < ix_end; ix++)
+         {
+            cnt++;
+            o_cnt++;
+            diag_i[cnt]++;
+            if (iz > (HYPRE_BigInt)(nz*pz)) 
+            {
+               diag_i[cnt]++;
+            }
+            else
+            {
+               if (iz)
+	       {
+		  offd_i[o_cnt]++;
+               }
+            }
+            if (iy > (HYPRE_BigInt)(ny*py)) 
+            {
+               diag_i[cnt]++;
+            }
+            else
+            {
+               if (iy) 
+               {
+                  offd_i[o_cnt]++;
+               }
+            }
+            if (ix > (HYPRE_BigInt)(nx*px)) 
+               diag_i[cnt]++;
+            else
+            {
+               if (ix) 
+               {
+                  offd_i[o_cnt]++; 
+               }
+            }
+            if (ix+1 < (HYPRE_BigInt)(nx*(px+1))) 
+               diag_i[cnt]++;
+            else
+            {
+               if (ix+1 < nx_global) 
+               {
+                  offd_i[o_cnt]++; 
+               }
+            }
+            if (iy+1 < (HYPRE_BigInt)(ny*(py+1))) 
+            {
+               diag_i[cnt]++;
+            }
+            else
+            {
+               if (iy+1 < ny_global) 
+               {
+                  offd_i[o_cnt]++;
+               }
+            }
+            if (iz+1 < nz*(pz+1)) 
+            {
+               diag_i[cnt]++;
+            }
+            else
+            {
+               if (iz+1 < nz_global)
+	       {
+		  offd_i[o_cnt]++;
+               }
+            }
+            nnz[my_thread] += diag_i[cnt]+offd_i[o_cnt];
+            row_nums[cnt] = row_index+cnt;
+            num_cols[cnt] = diag_i[cnt]+offd_i[o_cnt];
+         }
+      }
+   }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+   if (my_thread == 0)
+   {
+      for (i=1; i< num_threads; i++)
+         nnz[i]+= nnz[i-1];
+
+      all_nnz = nnz[num_threads-1];
+      col_nums = hypre_CTAlloc(HYPRE_BigInt, all_nnz, memory_location);
+      data = hypre_CTAlloc(HYPRE_Complex, all_nnz, memory_location);
+
+      HYPRE_IJMatrixSetDiagOffdSizes( ij_A, diag_i, offd_i);
+   }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+   if (my_thread) 
+   {
+      cnt = nnz[my_thread-1];
+      new_row_index = row_index+(HYPRE_BigInt)((iz_start-nz*pz)*nxy);
+   }
+   else
+   {
+      cnt = 0;
+      new_row_index = row_index;
+   }
+   for (iz = iz_start;  iz < iz_end; iz++)
+   {
+      for (iy = iy_start;  iy < iy_end; iy++)
+      {
+         for (ix = ix_start; ix < ix_end; ix++)
+         {
+            col_nums[cnt] = new_row_index;
+            data[cnt++] = value[0];
+            if (iz > (HYPRE_BigInt)(nz*pz)) 
+            {
+      	       col_nums[cnt] = new_row_index-nxy;
+      	       data[cnt++] = value[1];
+            }
+            else if (iz)
+            {
+               col_nums[cnt] = hypre_map27(ix,iy,iz-1,px,py,pz-1,
+                                        Cx,Cy,Cz,nx,nxy);
+               data[cnt++] = value[1];
+
+            }
+            if (iy > (HYPRE_BigInt)(ny*py))
+            {
+   	       col_nums[cnt] = new_row_index-nx;
+   	       data[cnt++] = value[1];
+            }
+            else if (iy)
+            {
+               col_nums[cnt] = hypre_map27(ix,iy-1,iz,px,py-1,pz,
+                                     Cx,Cy,Cz,nx,nxy);
+               data[cnt++] = value[1];
+            }
+            if (ix > (HYPRE_BigInt)(nx*px)) 
+            {
+               col_nums[cnt] = new_row_index-1;
+               data[cnt++] = value[1];
+            }
+            else if (ix)
+            {
+               col_nums[cnt] = hypre_map27(ix-1,iy,iz,px-1,py,pz,
+                                     Cx,Cy,Cz,nx,nxy);
+               data[cnt++] = value[1];
+            }
+            if (ix+1 < (HYPRE_BigInt)(nx*(px+1))) 
+            {
+               col_nums[cnt] = new_row_index+1;
+               data[cnt++] = value[1];
+            }
+            else if (ix+1 < nx_global)
+            {
+               col_nums[cnt] = hypre_map27(ix+1,iy,iz,px+1,py,pz,
+                                     Cx,Cy,Cz,nx,nxy);
+               data[cnt++] = value[1];
+            }
+            if (iy+1 < (HYPRE_BigInt)(ny*(py+1))) 
+            {
+               col_nums[cnt] = new_row_index+nx;
+               data[cnt++] = value[1];
+            }
+            else if (iy+1 < ny_global)
+            {
+               col_nums[cnt] = hypre_map27(ix,iy+1,iz,px,py+1,pz,
+                                     Cx,Cy,Cz,nx,nxy);
+               data[cnt++] = value[1];
+            }
+            if (iz+1 < (HYPRE_BigInt)(nz*(pz+1))) 
+            {
+               col_nums[cnt] = new_row_index+nxy;
+               data[cnt++] = value[1];
+            }
+            else if (iz+1 < nz_global)
+            {
+               col_nums[cnt] = hypre_map27(ix,iy,iz+1,px,py,pz+1,
+                                     Cx,Cy,Cz,nx,nxy);
+               data[cnt++] = value[1];
+            }
+            new_row_index++;
+         }
+      }
+    }
+   } /*end parallel loop */
+
+   HYPRE_IJMatrixInitialize(ij_A);
+
+   HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+
+   HYPRE_IJMatrixSetValues(ij_A, local_size, num_cols, row_nums,
+			col_nums, data);
+
+   HYPRE_IJMatrixAssemble(ij_A);
+
+   hypre_TFree(diag_i, memory_location);
+   hypre_TFree(offd_i, memory_location);
+   hypre_TFree(num_cols, memory_location);
+   hypre_TFree(col_nums, memory_location);
+   hypre_TFree(row_nums, memory_location);
+   hypre_TFree(data, memory_location);
+   hypre_TFree(value, memory_location);
+   hypre_TFree(nnz, memory_location);
+
+   *system_size_ptr = global_size;
+   *ij_A_ptr = ij_A;
+
+   return (0);
+}
