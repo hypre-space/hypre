@@ -4096,7 +4096,11 @@ if test "${enable_cublas+set}" = set; then :
     *)   hypre_using_cublas=no ;;
  esac
 else
-  hypre_using_cublas=no
+  case "$hypre_using_cuda" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac
 
 fi
 

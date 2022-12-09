@@ -1218,7 +1218,11 @@ AS_HELP_STRING([--enable-cublas],
     no)  hypre_using_cublas=no ;;
     *)   hypre_using_cublas=no ;;
  esac],
-[hypre_using_cublas=no]
+[case "$hypre_using_cuda" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac]
 )
 
 AC_ARG_ENABLE(curand,
