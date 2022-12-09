@@ -1290,7 +1290,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    umatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_IJMatrixDestroyParCSR(umatrix);
    hypre_IJMatrixObject(umatrix) = (void*) parmatrix;
-   hypre_SStructMatrixParCSRMatrix(matrix) = (void*) parmatrix;
+   hypre_SStructMatrixParCSRMatrix(matrix) = (hypre_ParCSRMatrix*) parmatrix;
    hypre_IJMatrixAssembleFlag(umatrix) = 1;
 
    /* Assemble SStructMatrix */
