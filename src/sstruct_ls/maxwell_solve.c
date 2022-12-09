@@ -779,3 +779,4 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
    return hypre_error_flag;
 }
+

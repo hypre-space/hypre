@@ -1654,6 +1654,8 @@ HYPRE_Int hypre_BoomerAMGRelax0WeightedJacobi( hypre_ParCSRMatrix *A, hypre_ParV
                                                HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, hypre_ParVector *u,
                                                hypre_ParVector *Vtemp );
 
+HYPRE_Int hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega, HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp, HYPRE_Int direction, HYPRE_Int symm, HYPRE_Int skip_diag, HYPRE_Int force_seq );
+
 HYPRE_Int hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                             HYPRE_Int *cf_marker, HYPRE_Int relax_points, hypre_ParVector *u );
 
@@ -1753,7 +1755,8 @@ HYPRE_Int hypre_ParCSRRelax_Cheby ( hypre_ParCSRMatrix *A, hypre_ParVector *f, H
                                     HYPRE_Real min_eig, HYPRE_Real fraction, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
                                     hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r );
 HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                           HYPRE_Int *cf_marker, HYPRE_Real relax_weight, hypre_ParVector *u, hypre_ParVector *Vtemp );
+                                           HYPRE_Int *cf_marker, HYPRE_Real relax_weight, 
+                                           hypre_ParVector *u, hypre_ParVector *Vtemp );
 HYPRE_Int hypre_ParCSRRelax_CG ( HYPRE_Solver solver, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u, HYPRE_Int num_its );
 HYPRE_Int hypre_LINPACKcgtql1 ( HYPRE_Int *n, HYPRE_Real *d, HYPRE_Real *e, HYPRE_Int *ierr );
