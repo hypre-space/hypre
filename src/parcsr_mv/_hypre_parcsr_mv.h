@@ -246,6 +246,8 @@ typedef struct hypre_ParVector_struct
 
    /* Does the Vector create/destroy `data'? */
    HYPRE_Int             owns_data;
+   /* If the vector is all zeros */
+   HYPRE_Int             all_zeros;
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
@@ -263,6 +265,7 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorActualLocalSize(vector)  ((vector) -> actual_local_size)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
+#define hypre_ParVectorAllZeros(vector)         ((vector) -> all_zeros)
 #define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
@@ -1180,6 +1183,7 @@ HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int compo
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
 HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector, const char *file_name );
 HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v, HYPRE_Complex value );
+HYPRE_Int hypre_ParVectorSetZeros( hypre_ParVector *v );
 HYPRE_Int hypre_ParVectorSetRandomValues ( hypre_ParVector *v, HYPRE_Int seed );
 HYPRE_Int hypre_ParVectorCopy ( hypre_ParVector *x, hypre_ParVector *y );
 hypre_ParVector *hypre_ParVectorCloneShallow ( hypre_ParVector *x );

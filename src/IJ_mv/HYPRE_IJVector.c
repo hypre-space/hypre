@@ -412,6 +412,69 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorUpdateValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorUpdateValues( HYPRE_IJVector        vector,
+                            HYPRE_Int             nvalues,
+                            const HYPRE_BigInt   *indices,
+                            const HYPRE_Complex  *values,
+                            HYPRE_Int             action )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (nvalues == 0) { return hypre_error_flag; }
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (nvalues < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (!values)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         return ( hypre_IJVectorUpdateValuesDevice(vec, nvalues, indices, values, action) );
+      }
+      else
+#endif
+      {
+         if (action == 1)
+         {
+            return ( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+         }
+         else
+         {
+            return ( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
+         }
+      }
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorGetValues
  *--------------------------------------------------------------------------*/
 

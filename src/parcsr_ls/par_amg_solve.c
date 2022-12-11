@@ -243,6 +243,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
       else
       {
+         /* RL TODO: for now, force u's all-zero flag to be FALSE */
+         hypre_ParVectorAllZeros(u) = 0;
+
          hypre_BoomerAMGAdditiveCycle(amg_data);
       }
 

@@ -2113,3 +2113,26 @@ HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
                                       1, num_isolated_fpt,
                                       isolated_fpt_index) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCumNnzAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver  solver,
+                            HYPRE_Real    cum_nnz_AP )
+{
+   return( hypre_BoomerAMGSetCumNnzAP( (void *) solver, cum_nnz_AP ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetCumNnzAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
+                            HYPRE_Real   *cum_nnz_AP )
+{
+   return( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
+}
+
