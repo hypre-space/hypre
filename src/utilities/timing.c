@@ -406,13 +406,13 @@ hypre_PrintTiming( const char     *heading,
 
 HYPRE_Int
 hypre_GetTiming( const char     *heading,
-                 HYPRE_Real     *wall_time_ptr,
+                 hypre_double     *wall_time_ptr,
                  MPI_Comm        comm  )
 {
    HYPRE_Int  ierr = 0;
 
-   HYPRE_Real  local_wall_time;
-   HYPRE_Real  wall_time;
+   hypre_double  local_wall_time;
+   hypre_double  wall_time;
 
    HYPRE_Int     i;
    HYPRE_Int     myrank;

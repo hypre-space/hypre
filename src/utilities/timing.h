@@ -108,7 +108,7 @@ HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
 HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
-HYPRE_Int hypre_GetTiming( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming( const char *heading, hypre_double *wall_time_ptr, MPI_Comm comm );
 
 #endif
 
