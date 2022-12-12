@@ -80,6 +80,8 @@ HYPRE_Int HYPRE_VectorDestroy( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorInitialize( HYPRE_Vector vector );
 HYPRE_Int HYPRE_VectorPrint( HYPRE_Vector vector, char *file_name );
 HYPRE_Vector HYPRE_VectorRead( char *file_name );
+HYPRE_Int HYPRE_VectorGetData( HYPRE_Vector vector, HYPRE_Complex **data);
+HYPRE_Int HYPRE_VectorSetConstantValues( HYPRE_Vector  vector, HYPRE_Complex value);
 
 typedef enum HYPRE_TimerID
 {
