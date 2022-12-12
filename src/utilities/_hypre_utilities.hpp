@@ -94,7 +94,7 @@ using hypre_DeviceItem = void*;
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
-#define CUSPARSE_NEWSPMM_VERSION 11201
+#define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define THRUST_CALL_BLOCKING 1
 
@@ -2796,4 +2796,3 @@ struct hypre_cub_CachingDeviceAllocator
 #endif
 
 #endif
-
