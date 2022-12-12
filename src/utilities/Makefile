@@ -26,6 +26,7 @@ HEADERS =\
  general.h\
  int_array.h\
  memory.h\
+ memory_tracker.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
@@ -48,6 +49,7 @@ UTILITIES_FILES =\
  complex.c\
  error.c\
  hopscotch_hash.c\
+ memory_tracker.c\
  merge_sort.c\
  mmio.c\
  mpi_comm_f2c.c\
