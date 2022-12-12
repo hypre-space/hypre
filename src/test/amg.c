@@ -2830,6 +2830,11 @@ BuildIJLaplacian7pt( HYPRE_Int            argc,
    col_nums_d = hypre_TAlloc(HYPRE_BigInt, all_nnz, memory_location);
    data_d = hypre_TAlloc(HYPRE_Complex, all_nnz, memory_location);
 
+   hypre_TMemcpy(num_cols_d, num_cols, HYPRE_Int, local_size, memory_location, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(row_nums_d, row_nums, HYPRE_BigInt, local_size, memory_location, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(col_nums_d, col_nums, HYPRE_BigInt, all_nnz, memory_location, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(data_d, data, HYPRE_Complex, all_nnz, memory_location, HYPRE_MEMORY_HOST);
+
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
 
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
