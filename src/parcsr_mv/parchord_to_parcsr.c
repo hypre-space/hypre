@@ -108,8 +108,8 @@ void hypre_ParChordMatrix_RowStarts(
 
    /* Global number of columns */
    /*   hypre_MPI_Allreduce( &num_rdofs, global_num_cols, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm );*/
-   hypre_MPI_Allreduce( &min_rdof, &global_min_rdof, 1, HYPRE_MPI_INT, hypre_MPI_MIN, comm );
-   hypre_MPI_Allreduce( &max_rdof, &global_max_rdof, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm );
+   hypre_MPI_Allreduce( &min_rdof, &global_min_rdof, 1, HYPRE_MPI_BIG_INT, hypre_MPI_MIN, comm );
+   hypre_MPI_Allreduce( &max_rdof, &global_max_rdof, 1, HYPRE_MPI_BIG_INT, hypre_MPI_MAX, comm );
    *global_num_cols = global_max_rdof - global_min_rdof;
 }
 

@@ -134,6 +134,7 @@ hypre_BoomerAMGCreate()
    /* log info */
    HYPRE_Int    num_iterations;
    HYPRE_Int    cum_num_iterations;
+   HYPRE_Real   cum_nnz_AP;
 
    /* output params */
    HYPRE_Int    print_level;
@@ -263,6 +264,7 @@ hypre_BoomerAMGCreate()
    /* log info */
    num_iterations = 0;
    cum_num_iterations = 0;
+   cum_nnz_AP = -1.0;
 
    /* output params */
    print_level = 0;
@@ -508,6 +510,8 @@ hypre_BoomerAMGCreate()
    /* information for preserving indices as special fine grid points */
    hypre_ParAMGDataIsolatedFPointsMarker(amg_data) = NULL;
    hypre_ParAMGDataNumIsolatedFPoints(amg_data) = 0;
+
+   hypre_ParAMGDataCumNnzAP(amg_data) = cum_nnz_AP;
 
 #ifdef HYPRE_USING_DSUPERLU
    hypre_ParAMGDataDSLUThreshold(amg_data) = 0;
