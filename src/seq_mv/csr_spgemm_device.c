@@ -67,10 +67,13 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
-      hypreDevice_CSRSpGemmOnemklsparse(m, k, n,
-                                        hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a,
-                                        hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b,
-                                        hypre_CSRMatrixGPUMatHandle(C), &nnzC, &d_ic, &d_jc, &d_c);
+/* WM: todo - oneMKL sparse matmat is not currently reliable */
+      *C_ptr = hypre_CSRMatrixMultiplyHost(A, B);
+      return hypre_error_flag;
+      /* hypreDevice_CSRSpGemmOnemklsparse(m, k, n, */
+      /*                                   hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a, */
+      /*                                   hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b, */
+      /*                                   hypre_CSRMatrixGPUMatHandle(C), &nnzC, &d_ic, &d_jc, &d_c); */
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");
@@ -78,10 +81,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
    else
    {
-      /* WM: debug */
-      /* hypre_CSRMatrixPrint(A, "A"); */
-      /* hypre_CSRMatrixPrint(B, "B"); */
-
       d_a  = hypre_CSRMatrixPatternOnly(A) ? NULL : d_a;
       d_b  = hypre_CSRMatrixPatternOnly(B) ? NULL : d_b;
 
@@ -133,26 +132,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM] += hypre_MPI_Wtime();
 #endif
-
-   /* WM: debug - check results agains host implementation */
-   /* hypre_printf("WM: debug - check against host\n"); */
-   /* hypre_CSRMatrix *C_host = hypre_CSRMatrixMultiplyHost(A, B); */
-   /* hypre_CSRMatrix *error = hypre_CSRMatrixAddHost(1.0, C, -1.0, C_host); */
-   /* HYPRE_Real err_norm = hypre_CSRMatrixFnorm(error); */
-   /* hypre_printf("WM: debug - err_norm = %e\n", err_norm); */
-   /* if (err_norm) */
-   /* { */
-   /*    hypre_CSRMatrixPrint(C_host, "C_host"); */
-   /*    hypre_CSRMatrixPrint(C, "C_device"); */
-   /*    hypre_CSRMatrixPrint(C_host, "error"); */
-   /* } */
-   /* hypre_CSRMatrixDestroy(error); */
-   /* hypre_CSRMatrixDestroy(C_host); */
-   /* if (err_norm > 0.000001) */
-   /* { */
-   /*    hypre_MPI_Finalize(); */
-   /*    exit(1); */
-   /* } */
 
    return hypre_error_flag;
 }

@@ -67,7 +67,6 @@ hypre_spgemm_hash_insert_numer(
       {
          /* this slot was open or contained 'key', update value */
 #if defined(HYPRE_USING_SYCL)
-         /* WM: debug - just commenting out the atomic add below gets rid of the hang */
          auto atomic_val = sycl::atomic_ref <
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
@@ -323,7 +322,6 @@ template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_
 __global__ void
 hypre_spgemm_numeric( hypre_DeviceItem                 &item,
 #if defined(HYPRE_USING_SYCL)
-                      sycl::stream debug_stream,
                       char                             *shmem_ptr,
 #endif
                       const HYPRE_Int                   M,
@@ -636,7 +634,6 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const size_t shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * (sizeof(HYPRE_Int) + sizeof(
                                                                            HYPRE_Complex));
-   hypre_printf("WM: debug - shmem_bytes = %d\n", shmem_bytes);
 #else
    const size_t shmem_bytes = 0;
 #endif
@@ -652,43 +649,38 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    {
       if (ghash_size)
       {
-         /* WM: debug */
-         /* HYPRE_GPU_LAUNCH2 ( */
-         /*    (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, true>), */
-         /*    gDim, bDim, shmem_bytes, */
-         /*    m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j, */
-         /*    d_ghash_a ); */
+         HYPRE_GPU_LAUNCH2 (
+            (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, true>),
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j,
+            d_ghash_a );
       }
       else
       {
-         hypre_printf("WM: debug - launching kernel\n");
-         HYPRE_GPU_DEBUG_LAUNCH2 (
+         HYPRE_GPU_LAUNCH2 (
             (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, false, HASH_TYPE, false>),
             gDim, bDim, shmem_bytes,
             m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, NULL, d_ghash_i, d_ghash_j,
             d_ghash_a );
-         hypre_printf("WM: debug - finished kernel\n");
       }
    }
    else
    {
       if (ghash_size)
       {
-         /* WM: debug */
-         /* HYPRE_GPU_LAUNCH2 ( */
-         /*    (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, true>), */
-         /*    gDim, bDim, shmem_bytes, */
-         /*    m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j, */
-         /*    d_ghash_a ); */
+         HYPRE_GPU_LAUNCH2 (
+            (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, true>),
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j,
+            d_ghash_a );
       }
       else
       {
-         /* WM: debug */
-         /* HYPRE_GPU_LAUNCH2 ( */
-         /*    (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, false>), */
-         /*    gDim, bDim, shmem_bytes, */
-         /*    m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j, */
-         /*    d_ghash_a ); */
+         HYPRE_GPU_LAUNCH2 (
+            (hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, HAS_RIND, true, HASH_TYPE, false>),
+            gDim, bDim, shmem_bytes,
+            m, row_ind, d_ia, d_ja, d_a, d_ib, d_jb, d_b, d_ic, d_jc, d_c, d_rc, d_ghash_i, d_ghash_j,
+            d_ghash_a );
       }
    }
 

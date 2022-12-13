@@ -292,7 +292,6 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
         i += grid_num_groups)
 #endif
    {
-      /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
 #if defined(HYPRE_USING_SYCL)
       valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) &&
                   (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
@@ -493,7 +492,6 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const size_t shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE * sizeof(HYPRE_Int);
-   hypre_printf("WM: debug - shmem_bytes = %d\n", shmem_bytes);
 #else
    const size_t shmem_bytes = 0;
 #endif
