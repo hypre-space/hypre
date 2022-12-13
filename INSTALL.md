@@ -37,7 +37,7 @@ by running `make help`.
 
 When building HYPRE without the install target, the libraries and include files
 are copied into the directories, `src/hypre/lib` and `src/hypre/include`.
- 
+
 When building with the install target, the libraries and files are copied into
 the directories specified by the configure option, --prefix=/usr/apps.  If none
 were specified, the default directories are used, hypre/lib and hypre/include.
@@ -52,13 +52,13 @@ configuration options on different platforms.  It does not actually build the
 code, but generates input for other "native" build systems such as Make (Unix
 platforms) or Visual Studio (Windows).  Here are the basic steps:
 
-1. First, ensure that CMake version 2.8.8 or later is installed on the system.
+1. First, ensure that CMake version 3.13.0 or later is installed on the system.
 
 2. To build the library, run CMake on the top-level HYPRE source directory to
    generate files appropriate for the native build system.  To prevent writing
    over the Makefiles in HYPRE's configure/make system above, only out-of-source
-   builds are currently allowed with CMake.  Directories `src/cmbuild` and
-   `src/test/cmbuild` are provided in the release for convenience, but
+   builds are currently allowed with CMake. The directory `src/cmbuild`
+   is provided in the release for convenience, but
    alternative build directories may be created by the user:
 
    - Unix: From the `src/cmbuild` directory, type `cmake ..`.
