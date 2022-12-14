@@ -595,3 +595,24 @@ HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver, HYPRE_Real *res_norm
 {
    return hypre_MGRGetFinalRelativeResidualNorm(solver, res_norm);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRGetGridHierarchy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRGetGridHierarchy(HYPRE_Solver solver,
+                                HYPRE_Int *cgrid )
+{
+   return (hypre_MGRGetGridHierarchy ( (void *) solver, cgrid ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetTwoPointInterpOffsets
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetTwoPointInterpOffsets(HYPRE_Solver solver, HYPRE_Int cpt_lower, HYPRE_Int cpt_upper)
+{
+   return (hypre_MGRSetTwoPointInterpOffsets ( (void *) solver, cpt_lower, cpt_upper ));
+}

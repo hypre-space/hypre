@@ -145,6 +145,9 @@ typedef struct
    /* Data for Gaussian elimination F-relaxation */
    hypre_ParAMGData    **GSElimData;
 
+   /* offets to coarse interpolatory points for 2-point interpolation */
+   HYPRE_BigInt          interp_offsets[2];
+
 } hypre_ParMGRData;
 
 // F-relaxation struct for future refactoring of F-relaxation in MGR

@@ -157,6 +157,9 @@ hypre_MGRCreate()
 
    (mgr_data -> GSElimData) = NULL;
 
+   (mgr_data->interp_offsets)[0] = 0;
+   (mgr_data->interp_offsets)[1] = 0;
+
    return (void *) mgr_data;
 }
 
@@ -6293,6 +6296,109 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
       hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
    }
 */
+   return hypre_error_flag;
+}
+
+/* Get the coarse grid hierarchy. Assumes cgrid is preallocated to the size of the local matrix.
+ * Adapted from par_amg.c, and simplified by ignoring printing in block mode.
+ * We do a memcpy on the final grid hierarchy to avoid modifying user allocated data.
+*/
+HYPRE_Int
+hypre_MGRGetGridHierarchy( void       *data,
+                                 HYPRE_Int *cgrid )
+{
+   HYPRE_Int *ibuff = NULL;
+   HYPRE_Int *wbuff, *cbuff, *tmp;
+   HYPRE_Int local_size, lev_size, i, j, level, num_coarse_levels;
+   hypre_IntArray          *CF_marker_array;
+   hypre_IntArray          *CF_marker_array_host;
+   HYPRE_Int               *CF_marker;
+
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) data;
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (!cgrid)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }   
+   
+   {
+      hypre_ParCSRMatrix **A_array;
+      A_array = mgr_data -> A_array;
+      if (A_array == NULL)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid MGR data. MGR setup has not been called!!\n");
+         return hypre_error_flag;
+      }
+
+      // get local size and allocate some memory
+      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));
+      wbuff  = hypre_CTAlloc(HYPRE_Int, (2 * local_size), HYPRE_MEMORY_HOST);
+      cbuff  = wbuff + local_size;
+
+      /* First get coarse grid AMG solver hierarchy */
+      hypre_BoomerAMGGetGridHierarchy((void *)(mgr_data -> coarse_grid_solver), cbuff);
+
+      
+      num_coarse_levels = mgr_data -> num_coarse_levels;
+      for (level = (num_coarse_levels - 1); level >= 0; level--)
+      {
+         /* get the CF marker array on the host */
+         CF_marker_array = (mgr_data -> CF_marker_array)[level];
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array)) ==
+             hypre_MEMORY_DEVICE)
+         {
+            CF_marker_array_host = hypre_IntArrayCloneDeep_v2(CF_marker_array, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            CF_marker_array_host = CF_marker_array;
+         }
+         CF_marker = hypre_IntArrayData(CF_marker_array_host);
+         /* swap pointers */
+         tmp = wbuff;
+         wbuff = cbuff;
+         cbuff = tmp;
+
+         lev_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
+
+         for (i = 0, j = 0; i < lev_size; i++)
+         {
+            /* if a C-point */
+            cbuff[i] = 0;
+            if (CF_marker[i] > -1)
+            {
+               cbuff[i] = wbuff[j] + 1;
+               j++;
+            }
+         }
+         /* destroy copy host copy if necessary */
+         if (hypre_GetActualMemLocation(hypre_IntArrayMemoryLocation(CF_marker_array)) ==
+             hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayDestroy(CF_marker_array_host);
+         }
+      }
+   }
+   // copy hierarchy into user provided array
+   hypre_TMemcpy(cgrid, cbuff, HYPRE_Int, local_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   // free memory
+   hypre_TFree(ibuff, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/* set offets to coarse interpolatory points for 2-point interpolation */
+HYPRE_Int
+hypre_MGRSetTwoPointInterpOffsets(void *mgr_vdata, HYPRE_Int cpt_lower, HYPRE_Int cpt_upper)
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   mgr_data->interp_offsets[0] = cpt_lower;
+   mgr_data->interp_offsets[1] = cpt_upper;
    return hypre_error_flag;
 }
 

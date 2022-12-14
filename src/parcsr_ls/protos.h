@@ -1417,7 +1417,15 @@ HYPRE_Int hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A, HYPRE_
 HYPRE_Int hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A, HYPRE_Int *CF_marker,
                                             hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
                                             HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr);
-
+HYPRE_Int
+hypre_BoomerAMGBuildInterpTwoPntsHost( hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      HYPRE_BigInt        *num_cpts_global,
+                                      HYPRE_Int            num_functions,
+                                      HYPRE_Int           *dof_func,
+                                      HYPRE_Int           *interp_offsets,
+                                      HYPRE_Int            debug_flag,
+                                      hypre_ParCSRMatrix **P_ptr);
 /* par_jacobi_interp.c */
 void hypre_BoomerAMGJacobiInterp ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **P,
                                    hypre_ParCSRMatrix *S, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int *CF_marker,
@@ -2120,6 +2128,7 @@ HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A, hypre_Par
                                                 hypre_ParCSRMatrix *RT, HYPRE_Int bsize, HYPRE_Int ordering, HYPRE_Int method, HYPRE_Int Pmax,
                                                 HYPRE_Int *CF_marker, hypre_ParCSRMatrix **A_h_ptr);
 
+HYPRE_Int hypre_MGRPrintCoarseSystem(void *mgr_vdata, HYPRE_Int printflag);
 HYPRE_Int hypre_MGRWriteSolverParams(void *mgr_vdata);
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );
@@ -2154,6 +2163,7 @@ HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts);
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_MGRSetTwoPointInterpOffsets(void *mgr_vdata, HYPRE_Int cpt_lower, HYPRE_Int cpt_upper);
 #ifdef HYPRE_USING_DSUPERLU
 void *hypre_MGRDirectSolverCreate( void );
 HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f,
@@ -2166,6 +2176,7 @@ HYPRE_Int hypre_MGRDirectSolverDestroy( void *solver );
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *conv_factor );
+HYPRE_Int hypre_MGRGetGridHierarchy(void *data, HYPRE_Int *cgrid );
 
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );

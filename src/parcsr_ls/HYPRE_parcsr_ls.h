@@ -4260,6 +4260,25 @@ HYPRE_Int
 HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver,
                                         HYPRE_Real *res_norm );
 
+/**
+ * (Optional) Get the coarse grid hierarchy. Assumes input/ output array is
+ * preallocated to the size of the local matrix. On return, \e cgrid[i] returns
+ * the last grid level containing node \e i.
+ *
+ * @param solver [IN] solver or preconditioner
+ * @param cgrid [IN/ OUT] preallocated array. On return, contains grid hierarchy info.
+ **/
+HYPRE_Int HYPRE_MGRGetGridHierarchy(HYPRE_Solver solver,
+                                          HYPRE_Int *cgrid );
+
+/**
+ * (Optional) Set offets to coarse interpolatory points for 2-point interpolation  \e i.
+ *
+ * @param solver [IN] solver or preconditioner
+ * @param cpt_{lower / upper} [IN] Offets to C points for interpolation.
+ **/
+HYPRE_Int HYPRE_MGRSetTwoPointInterpOffsets(HYPRE_Solver solver, HYPRE_Int cpt_lower, HYPRE_Int cpt_upper);
+
 /**@}*/
 
 /*--------------------------------------------------------------------------

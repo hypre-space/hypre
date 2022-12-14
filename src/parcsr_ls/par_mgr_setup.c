@@ -1001,6 +1001,11 @@ hypre_MGRSetup( void               *mgr_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          //  if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
       }
+      else if(interp_type[lev] == 8)
+      {
+         hypre_BoomerAMGBuildInterpTwoPntsHost(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data, 
+                              mgr_data->interp_offsets, debug_flag, &P);    
+      }
       else
       {
          wall_time = time_getWallclockSeconds();
@@ -1156,7 +1161,14 @@ hypre_MGRSetup( void               *mgr_vdata,
 
             wall_time = time_getWallclockSeconds();
             //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
-            RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
+            if( interp_type[lev] == 8)
+            {
+               RAP_ptr = hypre_ParCSRMatrixRAPKT(P, A_array[lev], P, 1);            
+            }
+            else
+            {
+               RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
+            }
             //char fname[256];
             //sprintf(fname, "RAP_%d", lev);
             //hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
@@ -1247,7 +1259,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                                  &A_ff_ptr);
          }
 #endif         
-//hypre_ParCSRMatrixPrintIJ(A_ff_ptr, 0, 0, "IJ.out.A_ff_wells");
+
 #if defined(HYPRE_USING_CUDA)
          hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
          hypre_IntArrayInitialize(F_marker);
@@ -1403,7 +1415,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       if (Frelax_type[lev] == 9 ||
-          Frelax_type[lev] == 9 ||
+          Frelax_type[lev] == 99 ||
           Frelax_type[lev] == 199 )
       {
          use_GSElimSmoother = 1;
@@ -1968,6 +1980,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
    return hypre_error_flag;
 }
+
 #if 0
 /* Setup data for using GE Frelax */
 HYPRE_Int
