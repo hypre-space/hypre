@@ -173,9 +173,9 @@ hypre_using_um=no
 hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
-hypre_using_cusparse=yes
-hypre_using_cublas=yes
-hypre_using_curand=yes
+hypre_using_cusparse=no
+hypre_using_cublas=no
+hypre_using_curand=no
 hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
@@ -414,39 +414,6 @@ AS_HELP_STRING([--enable-unified-memory],
 [hypre_using_um=no]
 )
 
-AC_ARG_ENABLE(cuda-streams,
-AS_HELP_STRING([--enable-cuda-streams],
-               [Use CUDA streams (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_cuda_streams=yes ;;
-    no)  hypre_using_cuda_streams=no ;;
-    *)   hypre_using_cuda_streams=yes ;;
- esac],
-[hypre_using_cuda_streams=yes]
-)
-
-AC_ARG_ENABLE(cusparse,
-AS_HELP_STRING([--enable-cusparse],
-               [Use cuSPARSE (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_cusparse=yes ;;
-    no)  hypre_using_cusparse=no ;;
-    *)   hypre_using_cusparse=yes ;;
- esac],
-[hypre_using_cusparse=yes]
-)
-
-AC_ARG_ENABLE(cusolver,
-AS_HELP_STRING([--enable-cusolver],
-               [Use cuSOLVER (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_cusolver=yes ;;
-    no)  hypre_using_cusolver=no ;;
-    *)   hypre_using_cusolver=yes ;;
- esac],
-[hypre_using_cusolver=no]
-)
-
 AC_ARG_ENABLE(device-memory-pool,
 AS_HELP_STRING([--enable-device-memory-pool],
                [Use device pooling allocator (default is NO).]),
@@ -469,63 +436,6 @@ AS_HELP_STRING([--enable-device-malloc-async],
 [hypre_using_device_malloc_async=no]
 )
 
-AC_ARG_ENABLE(cublas,
-AS_HELP_STRING([--enable-cublas],
-               [Use cuBLAS (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_cublas=yes ;;
-    no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=yes ;;
- esac],
-[hypre_using_cublas=yes]
-)
-
-AC_ARG_ENABLE(curand,
-AS_HELP_STRING([--enable-curand],
-               [Use cuRAND (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_curand=yes ;;
-    no)  hypre_using_curand=no ;;
-    *)   hypre_using_curand=yes ;;
- esac],
-[hypre_using_curand=yes]
-)
-
-
-
-AC_ARG_ENABLE(rocsparse,
-AS_HELP_STRING([--enable-rocsparse],
-               [Use rocSPARSE (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_rocsparse=yes ;;
-    no)  hypre_using_rocsparse=no ;;
-    *)   hypre_using_rocsparse=yes ;;
- esac],
-[hypre_using_rocsparse=yes]
-)
-
-AC_ARG_ENABLE(rocblas,
-AS_HELP_STRING([--enable-rocblas],
-               [Use rocBLAS (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_rocblas=yes ;;
-    no)  hypre_using_rocblas=no ;;
-    *)   hypre_using_rocblas=no ;;
- esac],
-[hypre_using_rocblas=no]
-)
-
-AC_ARG_ENABLE(rocrand,
-AS_HELP_STRING([--enable-rocrand],
-               [Use rocRAND (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_rocrand=yes ;;
-    no)  hypre_using_rocrand=no ;;
-    *)   hypre_using_rocrand=yes ;;
- esac],
-[hypre_using_rocrand=yes]
-)
-
 AC_ARG_ENABLE(gpu-profiling,
 AS_HELP_STRING([--enable-gpu-profiling],
                [Use NVTX on CUDA, rocTX on HIP (default is NO).]),
@@ -546,39 +456,6 @@ AS_HELP_STRING([--enable-gpu-aware-mpi],
     *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-gpu-aware-mpi]) ;;
  esac],
 [hypre_gpu_mpi=no]
-)
-
-AC_ARG_ENABLE(onemklsparse,
-AS_HELP_STRING([--enable-onemklsparse],
-               [Use oneMKL sparse (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_onemklsparse=yes ;;
-    no)  hypre_using_onemklsparse=no ;;
-    *)   hypre_using_onemklsparse=yes ;;
- esac],
-[hypre_using_onemklsparse=yes]
-)
-
-AC_ARG_ENABLE(onemklblas,
-AS_HELP_STRING([--enable-onemklblas],
-               [Use oneMKL blas (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_onemklblas=yes ;;
-    no)  hypre_using_onemklblas=no ;;
-    *)   hypre_using_onemklblas=yes ;;
- esac],
-[hypre_using_onemklblas=yes]
-)
-
-AC_ARG_ENABLE(onemklrand,
-AS_HELP_STRING([--enable-onemklrand],
-               [Use oneMKL rand (default is YES).]),
-[case "${enableval}" in
-    yes) hypre_using_onemklrand=yes ;;
-    no)  hypre_using_onemklrand=no ;;
-    *)   hypre_using_onemklrand=yes ;;
- esac],
-[hypre_using_onemklrand=yes]
 )
 
 dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
@@ -1262,6 +1139,39 @@ AS_HELP_STRING([--with-hip],
 [hypre_using_hip=no]
 )
 
+AC_ARG_ENABLE(rocsparse,
+AS_HELP_STRING([--enable-rocsparse],
+               [Use rocSPARSE (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_rocsparse=yes ;;
+    no)  hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=yes ;;
+ esac],
+[hypre_using_rocsparse=yes]
+)
+
+AC_ARG_ENABLE(rocblas,
+AS_HELP_STRING([--enable-rocblas],
+               [Use rocBLAS (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_rocblas=yes ;;
+    no)  hypre_using_rocblas=no ;;
+    *)   hypre_using_rocblas=no ;;
+ esac],
+[hypre_using_rocblas=no]
+)
+
+AC_ARG_ENABLE(rocrand,
+AS_HELP_STRING([--enable-rocrand],
+               [Use rocRAND (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_rocrand=yes ;;
+    no)  hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=yes ;;
+ esac],
+[hypre_using_rocrand=yes]
+)
+
 dnl ***** SYCL
 AC_ARG_WITH(sycl,
 AS_HELP_STRING([--with-sycl],
@@ -1300,6 +1210,77 @@ AS_HELP_STRING([--with-gpu-arch=ARG],
 ]
 )
 
+AC_ARG_ENABLE(cublas,
+AS_HELP_STRING([--enable-cublas],
+               [Use cuBLAS (default is YES with CUDA, otherwise is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac],
+[case "$hypre_using_cuda" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac]
+)
+
+AC_ARG_ENABLE(curand,
+AS_HELP_STRING([--enable-curand],
+               [Use cuRAND (default is YES with CUDA, otherwise is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_curand=yes ;;
+    no)  hypre_using_curand=no ;;
+    *)   hypre_using_curand=no ;;
+ esac],
+[case "$hypre_using_cuda" in
+    yes) hypre_using_curand=yes ;;
+    no)  hypre_using_curand=no ;;
+    *)   hypre_using_curand=no ;;
+ esac]
+)
+
+AC_ARG_ENABLE(cuda-streams,
+AS_HELP_STRING([--enable-cuda-streams],
+               [Use CUDA streams (default is YES with CUDA, otherwise is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no  ;;
+    *)   hypre_using_cuda_streams=yes ;;
+ esac],
+[case "$hypre_using_cuda" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no  ;;
+    *)   hypre_using_cuda_streams=yes ;;
+ esac],
+)
+
+AC_ARG_ENABLE(cusparse,
+AS_HELP_STRING([--enable-cusparse],
+               [Use cuSPARSE (default is YES with CUDA, otherwise is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cusparse=yes ;;
+    no)  hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=no ;;
+ esac],
+[case "$hypre_using_cuda" in
+    yes) hypre_using_cusparse=yes ;;
+    no)  hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=no ;;
+ esac],
+)
+
+AC_ARG_ENABLE(cusolver,
+AS_HELP_STRING([--enable-cusolver],
+               [Use cuSOLVER (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_cusolver=yes ;;
+    no)  hypre_using_cusolver=no  ;;
+    *)   hypre_using_cusolver=no  ;;
+ esac],
+[hypre_using_cusolver=no]
+)
+
 dnl ***** SYCL options
 
 AC_ARG_WITH(sycl-target,
@@ -1331,6 +1312,39 @@ AS_HELP_STRING([--with-sycl-target-backend=ARG],
     fi
  fi
 ]
+)
+
+AC_ARG_ENABLE(onemklsparse,
+AS_HELP_STRING([--enable-onemklsparse],
+               [Use oneMKL sparse (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_onemklsparse=yes ;;
+    no)  hypre_using_onemklsparse=no ;;
+    *)   hypre_using_onemklsparse=yes ;;
+ esac],
+[hypre_using_onemklsparse=yes]
+)
+
+AC_ARG_ENABLE(onemklblas,
+AS_HELP_STRING([--enable-onemklblas],
+               [Use oneMKL blas (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_onemklblas=yes ;;
+    no)  hypre_using_onemklblas=no ;;
+    *)   hypre_using_onemklblas=yes ;;
+ esac],
+[hypre_using_onemklblas=yes]
+)
+
+AC_ARG_ENABLE(onemklrand,
+AS_HELP_STRING([--enable-onemklrand],
+               [Use oneMKL rand (default is YES).]),
+[case "${enableval}" in
+    yes) hypre_using_onemklrand=yes ;;
+    no)  hypre_using_onemklrand=no ;;
+    *)   hypre_using_onemklrand=yes ;;
+ esac],
+[hypre_using_onemklrand=yes]
 )
 
 dnl ***** RAJA
@@ -1716,7 +1730,7 @@ then
 
    if test "$hypre_using_sycl" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, dpcpp)
+      AC_CHECK_PROGS(CUCC, icpx)
    fi
 fi
 
@@ -2137,7 +2151,10 @@ then
    fi
 fi dnl hypre_using_um
 
-dnl CUDA
+dnl *********************************************************************
+dnl * Check for CUDA header
+dnl *********************************************************************
+
 if [test "$hypre_using_cuda" = "yes"]
 then
    AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
@@ -2150,6 +2167,94 @@ then
    if test "x$hypre_found_cuda" != "xyes"
    then
       AC_MSG_ERROR([unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for cuSPARSE header
+dnl *********************************************************************
+
+if [test "$hypre_using_cusparse" = "yes"]
+then
+   AC_CHECK_FILE([${HYPRE_CUDA_PATH}/include/cusparse.h], [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}])
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h],
+                    [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../../math_libs/include/cusparse.h],
+                    [hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cusparse.h ...])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for cuBLAS header
+dnl *********************************************************************
+
+if [test "$hypre_using_cublas" = "yes"]
+then
+   AC_CHECK_FILE([${HYPRE_CUDA_PATH}/include/cublas.h], [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}])
+
+   if test "x$hypre_found_cublas" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      AC_CHECK_FILE([${HYPRE_VENDOR_MATH_PATH}/include/cublas.h], [hypre_found_cublas=yes;])
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h],
+                    [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../../math_libs/include/cublas.h],
+                    [hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cublas.h ...])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for cuSOLVER header
+dnl *********************************************************************
+
+if [test "$hypre_using_cusolver" = "yes"]
+then
+   AC_CHECK_FILE([${HYPRE_CUDA_PATH}/include/cusolverDn.h], [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}])
+
+   if test "x$hypre_found_cusolver" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      AC_CHECK_FILE([${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h], [hypre_found_cusolver=yes;])
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h],
+                    [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      AC_CHECK_FILE([${HYPRE_CUDA_PATH}/../../math_libs/include/cusolverDn.h],
+                    [hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); AC_MSG_NOTICE([setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}])])
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      AC_MSG_ERROR([unable to find cusolverDn.h ...])
    fi
 fi
 
@@ -2311,6 +2416,11 @@ then
    HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
 
+   AS_IF([test x"$hypre_using_cusparse" == x"yes" || test x"$hypre_using_cublas" == x"yes" || test x"$hypre_using_cusolver" == x"yes"],
+         [AS_IF([test "x$HYPRE_CUDA_PATH" != "x$HYPRE_VENDOR_MATH_PATH"],
+          [HYPRE_CUDA_INCLUDE+=" -I${HYPRE_VENDOR_MATH_PATH}/include"
+           HYPRE_CUDA_LIBS+=" -L${HYPRE_VENDOR_MATH_PATH}/lib64"])])
+
    if test "$hypre_using_gpu_profiling" = "yes"
    then
       AC_DEFINE(HYPRE_USING_NVTX, 1, [Define to 1 if using NVIDIA Tools Extension (NVTX)])
@@ -2470,13 +2580,15 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
         then
-           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+           dnl WM: remove the -g flag for debug mode because it currently causes errors on JLSE
+           SYCLFLAGS="-Wall ${SYCLFLAGS}"
         else
-           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
+           SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
         if test "x${HYPRE_SYCL_TARGET}" != "x"
@@ -2499,7 +2611,7 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
                                 [hypre_found_mkl=yes],
                                 AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
                ])
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes"], [AC_DEFINE(HYPRE_USING_ONEMKLSPARSE, 1, [onemkl::SPARSE being used])])

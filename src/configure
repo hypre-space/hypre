@@ -782,21 +782,10 @@ enable_persistent
 enable_hopscotch
 enable_fortran
 enable_unified_memory
-enable_cuda_streams
-enable_cusparse
-enable_cusolver
 enable_device_memory_pool
 enable_device_malloc_async
-enable_cublas
-enable_curand
-enable_rocsparse
-enable_rocblas
-enable_rocrand
 enable_gpu_profiling
 enable_gpu_aware_mpi
-enable_onemklsparse
-enable_onemklblas
-enable_onemklrand
 with_cxxstandard
 with_LD
 with_LDFLAGS
@@ -840,11 +829,22 @@ with_mli
 with_MPI
 with_cuda
 with_hip
+enable_rocsparse
+enable_rocblas
+enable_rocrand
 with_sycl
 with_cuda_home
 with_gpu_arch
+enable_cublas
+enable_curand
+enable_cuda_streams
+enable_cusparse
+enable_cusolver
 with_sycl_target
 with_sycl_target_backend
+enable_onemklsparse
+enable_onemklblas
+enable_onemklrand
 with_raja
 with_raja_include
 with_raja_lib
@@ -1519,20 +1519,24 @@ Optional Features:
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
-  --enable-cuda-streams   Use CUDA streams (default is YES).
-  --enable-cusparse       Use cuSPARSE (default is YES).
-  --enable-cusolver       Use cuSOLVER (default is NO).
   --enable-device-memory-pool
                           Use device pooling allocator (default is NO).
   --enable-device-malloc-async
                           Use device async malloc (default is NO).
-  --enable-cublas         Use cuBLAS (default is YES).
-  --enable-curand         Use cuRAND (default is YES).
+  --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
+  --enable-gpu-aware-mpi  Use GPU memory aware MPI
   --enable-rocsparse      Use rocSPARSE (default is YES).
   --enable-rocblas        Use rocBLAS (default is NO).
   --enable-rocrand        Use rocRAND (default is YES).
-  --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
-  --enable-gpu-aware-mpi  Use GPU memory aware MPI
+  --enable-cublas         Use cuBLAS (default is YES with CUDA, otherwise is
+                          NO).
+  --enable-curand         Use cuRAND (default is YES with CUDA, otherwise is
+                          NO).
+  --enable-cuda-streams   Use CUDA streams (default is YES with CUDA,
+                          otherwise is NO).
+  --enable-cusparse       Use cuSPARSE (default is YES with CUDA, otherwise is
+                          NO).
+  --enable-cusolver       Use cuSOLVER (default is NO).
   --enable-onemklsparse   Use oneMKL sparse (default is YES).
   --enable-onemklblas     Use oneMKL blas (default is YES).
   --enable-onemklrand     Use oneMKL rand (default is YES).
@@ -2806,9 +2810,9 @@ hypre_using_um=no
 hypre_gpu_mpi=no
 hypre_using_gpu_profiling=no
 hypre_using_cuda_streams=no
-hypre_using_cusparse=yes
-hypre_using_cublas=yes
-hypre_using_curand=yes
+hypre_using_cusparse=no
+hypre_using_cublas=no
+hypre_using_curand=no
 hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
@@ -3141,45 +3145,6 @@ else
 fi
 
 
-# Check whether --enable-cuda-streams was given.
-if test "${enable_cuda_streams+set}" = set; then :
-  enableval=$enable_cuda_streams; case "${enableval}" in
-    yes) hypre_using_cuda_streams=yes ;;
-    no)  hypre_using_cuda_streams=no ;;
-    *)   hypre_using_cuda_streams=yes ;;
- esac
-else
-  hypre_using_cuda_streams=yes
-
-fi
-
-
-# Check whether --enable-cusparse was given.
-if test "${enable_cusparse+set}" = set; then :
-  enableval=$enable_cusparse; case "${enableval}" in
-    yes) hypre_using_cusparse=yes ;;
-    no)  hypre_using_cusparse=no ;;
-    *)   hypre_using_cusparse=yes ;;
- esac
-else
-  hypre_using_cusparse=yes
-
-fi
-
-
-# Check whether --enable-cusolver was given.
-if test "${enable_cusolver+set}" = set; then :
-  enableval=$enable_cusolver; case "${enableval}" in
-    yes) hypre_using_cusolver=yes ;;
-    no)  hypre_using_cusolver=no ;;
-    *)   hypre_using_cusolver=yes ;;
- esac
-else
-  hypre_using_cusolver=no
-
-fi
-
-
 # Check whether --enable-device-memory-pool was given.
 if test "${enable_device_memory_pool+set}" = set; then :
   enableval=$enable_device_memory_pool; case "${enableval}" in
@@ -3206,73 +3171,6 @@ else
 fi
 
 
-# Check whether --enable-cublas was given.
-if test "${enable_cublas+set}" = set; then :
-  enableval=$enable_cublas; case "${enableval}" in
-    yes) hypre_using_cublas=yes ;;
-    no)  hypre_using_cublas=no ;;
-    *)   hypre_using_cublas=yes ;;
- esac
-else
-  hypre_using_cublas=yes
-
-fi
-
-
-# Check whether --enable-curand was given.
-if test "${enable_curand+set}" = set; then :
-  enableval=$enable_curand; case "${enableval}" in
-    yes) hypre_using_curand=yes ;;
-    no)  hypre_using_curand=no ;;
-    *)   hypre_using_curand=yes ;;
- esac
-else
-  hypre_using_curand=yes
-
-fi
-
-
-
-
-# Check whether --enable-rocsparse was given.
-if test "${enable_rocsparse+set}" = set; then :
-  enableval=$enable_rocsparse; case "${enableval}" in
-    yes) hypre_using_rocsparse=yes ;;
-    no)  hypre_using_rocsparse=no ;;
-    *)   hypre_using_rocsparse=yes ;;
- esac
-else
-  hypre_using_rocsparse=yes
-
-fi
-
-
-# Check whether --enable-rocblas was given.
-if test "${enable_rocblas+set}" = set; then :
-  enableval=$enable_rocblas; case "${enableval}" in
-    yes) hypre_using_rocblas=yes ;;
-    no)  hypre_using_rocblas=no ;;
-    *)   hypre_using_rocblas=no ;;
- esac
-else
-  hypre_using_rocblas=no
-
-fi
-
-
-# Check whether --enable-rocrand was given.
-if test "${enable_rocrand+set}" = set; then :
-  enableval=$enable_rocrand; case "${enableval}" in
-    yes) hypre_using_rocrand=yes ;;
-    no)  hypre_using_rocrand=no ;;
-    *)   hypre_using_rocrand=yes ;;
- esac
-else
-  hypre_using_rocrand=yes
-
-fi
-
-
 # Check whether --enable-gpu-profiling was given.
 if test "${enable_gpu_profiling+set}" = set; then :
   enableval=$enable_gpu_profiling; case "${enableval}" in
@@ -3295,45 +3193,6 @@ if test "${enable_gpu_aware_mpi+set}" = set; then :
  esac
 else
   hypre_gpu_mpi=no
-
-fi
-
-
-# Check whether --enable-onemklsparse was given.
-if test "${enable_onemklsparse+set}" = set; then :
-  enableval=$enable_onemklsparse; case "${enableval}" in
-    yes) hypre_using_onemklsparse=yes ;;
-    no)  hypre_using_onemklsparse=no ;;
-    *)   hypre_using_onemklsparse=yes ;;
- esac
-else
-  hypre_using_onemklsparse=yes
-
-fi
-
-
-# Check whether --enable-onemklblas was given.
-if test "${enable_onemklblas+set}" = set; then :
-  enableval=$enable_onemklblas; case "${enableval}" in
-    yes) hypre_using_onemklblas=yes ;;
-    no)  hypre_using_onemklblas=no ;;
-    *)   hypre_using_onemklblas=yes ;;
- esac
-else
-  hypre_using_onemklblas=yes
-
-fi
-
-
-# Check whether --enable-onemklrand was given.
-if test "${enable_onemklrand+set}" = set; then :
-  enableval=$enable_onemklrand; case "${enableval}" in
-    yes) hypre_using_onemklrand=yes ;;
-    no)  hypre_using_onemklrand=no ;;
-    *)   hypre_using_onemklrand=yes ;;
- esac
-else
-  hypre_using_onemklrand=yes
 
 fi
 
@@ -4148,6 +4007,45 @@ else
 fi
 
 
+# Check whether --enable-rocsparse was given.
+if test "${enable_rocsparse+set}" = set; then :
+  enableval=$enable_rocsparse; case "${enableval}" in
+    yes) hypre_using_rocsparse=yes ;;
+    no)  hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=yes ;;
+ esac
+else
+  hypre_using_rocsparse=yes
+
+fi
+
+
+# Check whether --enable-rocblas was given.
+if test "${enable_rocblas+set}" = set; then :
+  enableval=$enable_rocblas; case "${enableval}" in
+    yes) hypre_using_rocblas=yes ;;
+    no)  hypre_using_rocblas=no ;;
+    *)   hypre_using_rocblas=no ;;
+ esac
+else
+  hypre_using_rocblas=no
+
+fi
+
+
+# Check whether --enable-rocrand was given.
+if test "${enable_rocrand+set}" = set; then :
+  enableval=$enable_rocrand; case "${enableval}" in
+    yes) hypre_using_rocrand=yes ;;
+    no)  hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=yes ;;
+ esac
+else
+  hypre_using_rocrand=yes
+
+fi
+
+
 
 # Check whether --with-sycl was given.
 if test "${with_sycl+set}" = set; then :
@@ -4190,6 +4088,85 @@ if test "${with_gpu_arch+set}" = set; then :
 fi
 
 
+# Check whether --enable-cublas was given.
+if test "${enable_cublas+set}" = set; then :
+  enableval=$enable_cublas; case "${enableval}" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac
+else
+  case "$hypre_using_cuda" in
+    yes) hypre_using_cublas=yes ;;
+    no)  hypre_using_cublas=no ;;
+    *)   hypre_using_cublas=no ;;
+ esac
+
+fi
+
+
+# Check whether --enable-curand was given.
+if test "${enable_curand+set}" = set; then :
+  enableval=$enable_curand; case "${enableval}" in
+    yes) hypre_using_curand=yes ;;
+    no)  hypre_using_curand=no ;;
+    *)   hypre_using_curand=no ;;
+ esac
+else
+  case "$hypre_using_cuda" in
+    yes) hypre_using_curand=yes ;;
+    no)  hypre_using_curand=no ;;
+    *)   hypre_using_curand=no ;;
+ esac
+
+fi
+
+
+# Check whether --enable-cuda-streams was given.
+if test "${enable_cuda_streams+set}" = set; then :
+  enableval=$enable_cuda_streams; case "${enableval}" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no  ;;
+    *)   hypre_using_cuda_streams=yes ;;
+ esac
+else
+  case "$hypre_using_cuda" in
+    yes) hypre_using_cuda_streams=yes ;;
+    no)  hypre_using_cuda_streams=no  ;;
+    *)   hypre_using_cuda_streams=yes ;;
+ esac
+fi
+
+
+# Check whether --enable-cusparse was given.
+if test "${enable_cusparse+set}" = set; then :
+  enableval=$enable_cusparse; case "${enableval}" in
+    yes) hypre_using_cusparse=yes ;;
+    no)  hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=no ;;
+ esac
+else
+  case "$hypre_using_cuda" in
+    yes) hypre_using_cusparse=yes ;;
+    no)  hypre_using_cusparse=no ;;
+    *)   hypre_using_cusparse=no ;;
+ esac
+fi
+
+
+# Check whether --enable-cusolver was given.
+if test "${enable_cusolver+set}" = set; then :
+  enableval=$enable_cusolver; case "${enableval}" in
+    yes) hypre_using_cusolver=yes ;;
+    no)  hypre_using_cusolver=no  ;;
+    *)   hypre_using_cusolver=no  ;;
+ esac
+else
+  hypre_using_cusolver=no
+
+fi
+
+
 
 
 # Check whether --with-sycl-target was given.
@@ -4219,6 +4196,45 @@ if test "${with_sycl_target_backend+set}" = set; then :
     fi
  fi
 
+
+fi
+
+
+# Check whether --enable-onemklsparse was given.
+if test "${enable_onemklsparse+set}" = set; then :
+  enableval=$enable_onemklsparse; case "${enableval}" in
+    yes) hypre_using_onemklsparse=yes ;;
+    no)  hypre_using_onemklsparse=no ;;
+    *)   hypre_using_onemklsparse=yes ;;
+ esac
+else
+  hypre_using_onemklsparse=yes
+
+fi
+
+
+# Check whether --enable-onemklblas was given.
+if test "${enable_onemklblas+set}" = set; then :
+  enableval=$enable_onemklblas; case "${enableval}" in
+    yes) hypre_using_onemklblas=yes ;;
+    no)  hypre_using_onemklblas=no ;;
+    *)   hypre_using_onemklblas=yes ;;
+ esac
+else
+  hypre_using_onemklblas=yes
+
+fi
+
+
+# Check whether --enable-onemklrand was given.
+if test "${enable_onemklrand+set}" = set; then :
+  enableval=$enable_onemklrand; case "${enableval}" in
+    yes) hypre_using_onemklrand=yes ;;
+    no)  hypre_using_onemklrand=no ;;
+    *)   hypre_using_onemklrand=yes ;;
+ esac
+else
+  hypre_using_onemklrand=yes
 
 fi
 
@@ -5360,7 +5376,7 @@ done
 
    if test "$hypre_using_sycl" = "yes"
    then
-      for ac_prog in dpcpp
+      for ac_prog in icpx
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8926,6 +8942,7 @@ then
       as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!" "$LINENO" 5
    fi
 fi
+
 if test "$hypre_using_cuda" = "yes"
 then
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
@@ -9103,6 +9120,305 @@ done
 fi
 
 
+if test "$hypre_using_cusparse" = "yes"
+then
+   as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/include/cusparse.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/include/cusparse.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/include/cusparse.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/include/cusparse.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}
+fi
+
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../math_libs/include/cusparse.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+fi
+
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../../math_libs/include/cusparse.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../../math_libs/include/cusparse.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../../math_libs/include/cusparse.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../../math_libs/include/cusparse.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusparse=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+fi
+
+   fi
+
+   if test "x$hypre_found_cusparse" != "xyes"
+   then
+      as_fn_error $? "unable to find cusparse.h ..." "$LINENO" 5
+   fi
+fi
+
+
+if test "$hypre_using_cublas" = "yes"
+then
+   as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}
+fi
+
+
+   if test "x$hypre_found_cublas" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_VENDOR_MATH_PATH}/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_VENDOR_MATH_PATH}/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_VENDOR_MATH_PATH}/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_VENDOR_MATH_PATH}/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes;
+fi
+
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../math_libs/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+fi
+
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../../math_libs/include/cublas.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../../math_libs/include/cublas.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../../math_libs/include/cublas.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../../math_libs/include/cublas.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cublas=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+fi
+
+   fi
+
+   if test "x$hypre_found_cublas" != "xyes"
+   then
+      as_fn_error $? "unable to find cublas.h ..." "$LINENO" 5
+   fi
+fi
+
+
+if test "$hypre_using_cusolver" = "yes"
+then
+   as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=${HYPRE_CUDA_PATH}
+fi
+
+
+   if test "x$hypre_found_cusolver" != "xyes" && test "x${HYPRE_VENDOR_MATH_PATH}" != "x"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_VENDOR_MATH_PATH}/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes;
+fi
+
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../math_libs/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../math_libs); { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+fi
+
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      as_ac_File=`$as_echo "ac_cv_file_${HYPRE_CUDA_PATH}/../../math_libs/include/cusolverDn.h" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${HYPRE_CUDA_PATH}/../../math_libs/include/cusolverDn.h" >&5
+$as_echo_n "checking for ${HYPRE_CUDA_PATH}/../../math_libs/include/cusolverDn.h... " >&6; }
+if eval \${$as_ac_File+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  test "$cross_compiling" = yes &&
+  as_fn_error $? "cannot check for file existence when cross compiling" "$LINENO" 5
+if test -r "${HYPRE_CUDA_PATH}/../../math_libs/include/cusolverDn.h"; then
+  eval "$as_ac_File=yes"
+else
+  eval "$as_ac_File=no"
+fi
+fi
+eval ac_res=\$$as_ac_File
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
+  hypre_found_cusolver=yes; HYPRE_VENDOR_MATH_PATH=$(readlink -f ${HYPRE_CUDA_PATH}/../../math_libs); { $as_echo "$as_me:${as_lineno-$LINENO}: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&5
+$as_echo "$as_me: setting vendor math path to ${HYPRE_VENDOR_MATH_PATH}" >&6;}
+fi
+
+   fi
+
+   if test "x$hypre_found_cusolver" != "xyes"
+   then
+      as_fn_error $? "unable to find cusolverDn.h ..." "$LINENO" 5
+   fi
+fi
+
+
 if  test x"$hypre_using_hip" == x"yes" ; then :
    if  test -n "$ROCM_PATH"; then :
    HYPRE_ROCM_PREFIX=$ROCM_PATH
@@ -9253,6 +9569,13 @@ $as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
          HYPRE_CUDA_INCLUDE='-I${HYPRE_CUDA_PATH}/include'
    HYPRE_CUDA_LIBS='-L${HYPRE_CUDA_PATH}/lib64 -lcudart'
+
+   if test x"$hypre_using_cusparse" == x"yes" || test x"$hypre_using_cublas" == x"yes" || test x"$hypre_using_cusolver" == x"yes"; then :
+  if test "x$HYPRE_CUDA_PATH" != "x$HYPRE_VENDOR_MATH_PATH"; then :
+  HYPRE_CUDA_INCLUDE+=" -I${HYPRE_VENDOR_MATH_PATH}/include"
+           HYPRE_CUDA_LIBS+=" -L${HYPRE_VENDOR_MATH_PATH}/lib64"
+fi
+fi
 
    if test "$hypre_using_gpu_profiling" = "yes"
    then
@@ -9414,13 +9737,14 @@ $as_echo "#define HYPRE_USING_SYCL 1" >>confdefs.h
                 LINK_CC=${CUCC}
         LINK_CXX=${CUCC}
 
-        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda -fsycl-device-code-split=per_kernel"
+        SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
         then
-           SYCLFLAGS="-Wall -g ${SYCLFLAGS}"
+                      SYCLFLAGS="-Wall ${SYCLFLAGS}"
         else
-           SYCLFLAGS="-g -O3 ${SYCLFLAGS}"
+           SYCLFLAGS="-O3 ${SYCLFLAGS}"
         fi
+        LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
                 if test "x${HYPRE_SYCL_TARGET}" != "x"
         then
@@ -9453,7 +9777,7 @@ fi
 done
 
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} ${MKLROOT}/lib/intel64/libmkl_sycl.a -Wl,-export-dynamic -Wl,--start-group ${MKLROOT}/lib/intel64/libmkl_intel_ilp64.a ${MKLROOT}/lib/intel64/libmkl_sequential.a ${MKLROOT}/lib/intel64/libmkl_core.a -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
-               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -I${MKLROOT}/include"
+               HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
 
 fi
 

@@ -54,19 +54,8 @@ hypre_ParCSRRelax( hypre_ParCSRMatrix *A,              /* matrix to relax with *
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
          /* !!! Note: relax_weight and omega flipped !!! */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-         HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-         if (exec == HYPRE_EXEC_DEVICE)
-         {
-            hypre_BoomerAMGRelaxHybridGaussSeidelDevice(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
-                                                        1,  1 /* symm */);
-         }
-         else
-#endif
-         {
-            hypre_BoomerAMGRelaxHybridGaussSeidel_core(A, f, NULL, 0, omega, relax_weight, l1_norms, u, v, z,
-                                                       1, 1 /* symm */, 0 /* skip diag */, 1, 0);
-         }
+         hypre_BoomerAMGRelaxHybridSOR(A, f, NULL, 0, omega,
+                                       relax_weight, l1_norms, u, v, z, 1, 1, 0, 1);
       }
       else if (relax_type == 3) /* Kaczmarz */
       {

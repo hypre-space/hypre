@@ -399,3 +399,57 @@ hypre_PrintTiming( const char     *heading,
 
    return ierr;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_GetTiming
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GetTiming( const char     *heading,
+                 HYPRE_Real     *wall_time_ptr,
+                 MPI_Comm        comm  )
+{
+   HYPRE_Int  ierr = 0;
+
+   HYPRE_Real  local_wall_time;
+   HYPRE_Real  wall_time;
+
+   HYPRE_Int     i;
+   HYPRE_Int     myrank;
+
+   if (hypre_global_timing == NULL)
+   {
+      return ierr;
+   }
+
+   hypre_MPI_Comm_rank(comm, &myrank );
+
+   /* print heading */
+   if (myrank == 0)
+   {
+      hypre_printf("=============================================\n");
+      hypre_printf("%s:\n", heading);
+      hypre_printf("=============================================\n");
+   }
+
+   for (i = 0; i < (hypre_global_timing -> size); i++)
+   {
+      if (hypre_TimingNumRegs(i) > 0)
+      {
+         local_wall_time = hypre_TimingWallTime(i);
+         hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
+                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
+
+         if (myrank == 0)
+         {
+            hypre_printf("%s:\n", hypre_TimingName(i));
+
+            /* print wall clock info */
+            hypre_printf("  wall clock time = %f seconds\n", wall_time);
+         }
+      }
+   }
+
+   *wall_time_ptr = wall_time;
+   return ierr;
+}
