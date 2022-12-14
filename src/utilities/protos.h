@@ -384,7 +384,19 @@ HYPRE_Int hypre_IntArrayCopy( hypre_IntArray *x, hypre_IntArray *y );
 hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x,
                                             HYPRE_MemoryLocation memory_location );
 hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
+HYPRE_Int hypre_IntArraySetConstantValuesHost( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
+HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
+                                   HYPRE_Int *num_values_ptr );
+HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
+                               HYPRE_Int *num_values_ptr );
+
+/* int_array_device.c */
+#if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
+HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
+                                      HYPRE_Int *num_values_ptr );
+#endif
 
 /* memory_tracker.c */
 #ifdef HYPRE_USING_MEMORY_TRACKER
