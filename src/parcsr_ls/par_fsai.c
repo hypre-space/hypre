@@ -13,7 +13,7 @@
  ******************************************************************************/
 
 void *
-hypre_FSAICreate()
+hypre_FSAICreate( void )
 {
    hypre_ParFSAIData    *fsai_data;
 

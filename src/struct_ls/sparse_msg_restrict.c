@@ -29,7 +29,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SparseMSGRestrictCreate( )
+hypre_SparseMSGRestrictCreate( void )
 {
    hypre_SparseMSGRestrictData *restrict_data;
 

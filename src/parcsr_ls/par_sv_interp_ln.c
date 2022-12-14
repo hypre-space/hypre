@@ -743,8 +743,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                if (num_smooth_vecs && (level == interp_vec_first_level))
                {
                   big_new_col = big_index +
-                               (big_index / (HYPRE_BigInt)num_functions) *
-                               (HYPRE_BigInt)num_smooth_vecs;
+                                (big_index / (HYPRE_BigInt)num_functions) *
+                                (HYPRE_BigInt)num_smooth_vecs;
                }
                else /* no adjustment */
                {

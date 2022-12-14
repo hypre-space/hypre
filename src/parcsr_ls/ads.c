@@ -33,7 +33,7 @@ __global__ void hypreGPUKernel_AMSComputePixyz_copy(hypre_DeviceItem &item, HYPR
  * Allocate the ADS solver structure.
  *--------------------------------------------------------------------------*/
 
-void * hypre_ADSCreate()
+void * hypre_ADSCreate(void)
 {
    hypre_ADSData *ads_data;
 
