@@ -2835,7 +2835,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby ( hypre_ParCSRMatrix *A, hypre_ParVector *f, H
                                     HYPRE_Real min_eig, HYPRE_Real fraction, HYPRE_Int order, HYPRE_Int scale, HYPRE_Int variant,
                                     hypre_ParVector *u, hypre_ParVector *v, hypre_ParVector *r );
 HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi ( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                           HYPRE_Int *cf_marker, HYPRE_Real relax_weight, 
+                                           HYPRE_Int *cf_marker, HYPRE_Real relax_weight,
                                            hypre_ParVector *u, hypre_ParVector *Vtemp );
 HYPRE_Int hypre_ParCSRRelax_CG ( HYPRE_Solver solver, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u, HYPRE_Int num_its );
