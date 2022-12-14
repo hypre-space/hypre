@@ -195,7 +195,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
 }
 
 HYPRE_Int
-hypre_FinalizeAllTimings()
+hypre_FinalizeAllTimings( void )
 {
    HYPRE_Int time_index, ierr = 0;
 
@@ -300,7 +300,7 @@ hypre_EndTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ClearTiming( )
+hypre_ClearTiming( void )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  i;

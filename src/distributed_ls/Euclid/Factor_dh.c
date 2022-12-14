@@ -21,7 +21,7 @@
 /* #include "io_dh.h" */
 
 /* suppress compiler complaints */
-void Factor_dh_junk()
+void Factor_dh_junk(void)
 {
 }
 
