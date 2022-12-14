@@ -188,9 +188,9 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
 
    // RL: TODO TAlloc?
    ssolver_solve   = (HYPRE_Int (***)(void)) hypre_MAlloc((sizeof(HYPRE_Int (**)(void)) * nparts),
-                                                      HYPRE_MEMORY_HOST);
+                                                          HYPRE_MEMORY_HOST);
    ssolver_destroy = (HYPRE_Int (***)(void)) hypre_MAlloc((sizeof(HYPRE_Int (**)(void)) * nparts),
-                                                      HYPRE_MEMORY_HOST);
+                                                          HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    hypre_MemoryTrackerInsert1("malloc", ssolver_solve, sizeof(HYPRE_Int (**)(void)) * nparts,
                               hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
@@ -216,7 +216,8 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
 #if defined(HYPRE_USING_MEMORY_TRACKER)
       hypre_MemoryTrackerInsert1("malloc", ssolver_solve[part], sizeof(HYPRE_Int (*)(void)) * nvars[part],
                                  hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
-      hypre_MemoryTrackerInsert1("malloc", ssolver_destroy[part], sizeof(HYPRE_Int (*)(void)) * nvars[part],
+      hypre_MemoryTrackerInsert1("malloc", ssolver_destroy[part],
+                                 sizeof(HYPRE_Int (*)(void)) * nvars[part],
                                  hypre_GetActualMemLocation(HYPRE_MEMORY_HOST), __FILE__, __func__, __LINE__);
 #endif
 
