@@ -109,7 +109,7 @@ void hypre_GpuProfilingPushRange(const char *name)
 #endif
 }
 
-void hypre_GpuProfilingPopRange()
+void hypre_GpuProfilingPopRange(void)
 {
 #if defined (HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRangeColor("StreamSync0", Red);

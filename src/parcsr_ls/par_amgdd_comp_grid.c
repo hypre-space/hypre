@@ -51,7 +51,7 @@ hypre_AMGDDCompGridLocalIndexBinarySearch( hypre_AMGDDCompGrid *compGrid,
    return -1;
 }
 
-hypre_AMGDDCompGridMatrix* hypre_AMGDDCompGridMatrixCreate()
+hypre_AMGDDCompGridMatrix* hypre_AMGDDCompGridMatrixCreate( void )
 {
    hypre_AMGDDCompGridMatrix *matrix = hypre_CTAlloc(hypre_AMGDDCompGridMatrix, 1, HYPRE_MEMORY_HOST);
 
@@ -250,7 +250,7 @@ hypre_AMGDDCompGridRealMatvec( HYPRE_Complex alpha,
    return hypre_error_flag;
 }
 
-hypre_AMGDDCompGridVector *hypre_AMGDDCompGridVectorCreate()
+hypre_AMGDDCompGridVector *hypre_AMGDDCompGridVectorCreate( void )
 {
    hypre_AMGDDCompGridVector *vector = hypre_CTAlloc(hypre_AMGDDCompGridVector, 1, HYPRE_MEMORY_HOST);
 
@@ -488,7 +488,7 @@ hypre_AMGDDCompGridVectorRealCopy( hypre_AMGDDCompGridVector *x,
    return hypre_error_flag;
 }
 
-hypre_AMGDDCompGrid *hypre_AMGDDCompGridCreate ()
+hypre_AMGDDCompGrid *hypre_AMGDDCompGridCreate ( void )
 {
    hypre_AMGDDCompGrid      *compGrid;
 

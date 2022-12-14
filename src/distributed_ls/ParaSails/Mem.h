@@ -33,7 +33,7 @@ typedef struct
 }
 Mem;
 
-Mem  *MemCreate();
+Mem  *MemCreate(void);
 void  MemDestroy(Mem *m);
 char *MemAlloc(Mem *m, HYPRE_Int size);
 void  MemStat(Mem *m, FILE *stream, char *msg);

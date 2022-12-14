@@ -114,34 +114,34 @@ typedef HYPRE_Int MPI_Comm;
  * HYPRE init/finalize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_Init();
-HYPRE_Int HYPRE_Finalize();
+HYPRE_Int HYPRE_Init(void);
+HYPRE_Int HYPRE_Finalize(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
 /* Return the current hypre error flag */
-HYPRE_Int HYPRE_GetError();
+HYPRE_Int HYPRE_GetError(void);
 
 /* Check if the given error flag contains the given error code */
 HYPRE_Int HYPRE_CheckError(HYPRE_Int hypre_ierr, HYPRE_Int hypre_error_code);
 
 /* Return the index of the argument (counting from 1) where
    argument error (HYPRE_ERROR_ARG) has occured */
-HYPRE_Int HYPRE_GetErrorArg();
+HYPRE_Int HYPRE_GetErrorArg(void);
 
 /* Describe the given error flag in the given string */
 void HYPRE_DescribeError(HYPRE_Int hypre_ierr, char *descr);
 
 /* Clears the hypre error flag */
-HYPRE_Int HYPRE_ClearAllErrors();
+HYPRE_Int HYPRE_ClearAllErrors(void);
 
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 
 /* Print GPU information */
-HYPRE_Int HYPRE_PrintDeviceInfo();
+HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
@@ -172,7 +172,7 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
  *--------------------------------------------------------------------------*/
 
 /*Checks whether the AP is on */
-HYPRE_Int HYPRE_AssumedPartitionCheck();
+HYPRE_Int HYPRE_AssumedPartitionCheck(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE memory location
