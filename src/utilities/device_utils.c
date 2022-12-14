@@ -800,8 +800,11 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                                     HYPRE_Int *d_row_ptr )
 {
 #if defined(HYPRE_USING_SYCL)
-   if (nnz <= 0 || nrows <= 0)
+   /* WM: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
+   /* Note that this is different from thrust's behavior, where lower_bound zeros out the row pointer when nnz = 0 */
+   if (nnz <= 0)
    {
+      hypre_Memset(d_row_ptr, 0, (nrows + 1) * sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
       return hypre_error_flag;
    }
    oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
@@ -895,7 +898,7 @@ hypreDevice_IntegerInclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL(oneapi::dpl::inclusive_scan, d_i, d_i + n, d_i);
+   HYPRE_ONEDPL_CALL(std::inclusive_scan, d_i, d_i + n, d_i);
 #else
    HYPRE_THRUST_CALL(inclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -1067,8 +1070,8 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
 #if defined(HYPRE_USING_SYCL)
    /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
    HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   /* HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, d_i, 0); */
-   HYPRE_ONEDPL_CALL(oneapi::dpl::exclusive_scan, d_i, d_i + n, tmp, 0);
+   /* HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0); */
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, tmp, 0);
    hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
 #else

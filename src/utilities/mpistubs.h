@@ -139,7 +139,7 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
-typedef void (hypre_MPI_User_function) ();
+typedef void (hypre_MPI_User_function) (void);
 
 typedef struct
 {

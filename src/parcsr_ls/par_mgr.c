@@ -44,7 +44,7 @@ void hypre_NoGPUSupport(char *option)
 
 /* Create */
 void *
-hypre_MGRCreate()
+hypre_MGRCreate(void)
 {
    hypre_ParMGRData  *mgr_data;
 
@@ -457,7 +457,7 @@ hypre_MGRDestroy( void *data )
 
 /* create data for Gaussian Elim. for F-relaxation */
 void *
-hypre_MGRCreateGSElimData()
+hypre_MGRCreateGSElimData( void )
 {
    hypre_ParAMGData  *gsdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
@@ -486,7 +486,7 @@ hypre_MGRDestroyGSElimData( void *data )
 
 /* Create data for V-cycle F-relaxtion */
 void *
-hypre_MGRCreateFrelaxVcycleData()
+hypre_MGRCreateFrelaxVcycleData( void )
 {
    hypre_ParAMGData  *vdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
@@ -1281,7 +1281,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
 
    if (method > 0)
    {
-      hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
+      hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, NULL, &A_FC, &A_FF);
       diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, memory_location_P);
       if (method == 1)
       {

@@ -223,7 +223,7 @@ hypre_ParKrylovCopyVector( void *x,
 HYPRE_Int
 hypre_ParKrylovClearVector( void *x )
 {
-   return ( hypre_ParVectorSetConstantValues( (hypre_ParVector *) x, 0.0 ) );
+   return ( hypre_ParVectorSetZeros( (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
