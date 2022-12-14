@@ -1403,7 +1403,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       if (Frelax_type[lev] == 9 ||
-          Frelax_type[lev] == 9 ||
+          Frelax_type[lev] == 99 ||
           Frelax_type[lev] == 199 )
       {
          use_GSElimSmoother = 1;
