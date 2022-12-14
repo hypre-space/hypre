@@ -32,7 +32,7 @@ typedef struct
  * functions for hypre_BlockTridiag
  *--------------------------------------------------------------------------*/
 
-void *hypre_BlockTridiagCreate();
+void *hypre_BlockTridiagCreate(void);
 HYPRE_Int  hypre_BlockTridiagDestroy(void *);
 HYPRE_Int  hypre_BlockTridiagSetup(void *, hypre_ParCSRMatrix *,
                                    hypre_ParVector *, hypre_ParVector *);
