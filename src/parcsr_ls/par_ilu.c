@@ -17,7 +17,7 @@
 
 /* Create */
 void *
-hypre_ILUCreate()
+hypre_ILUCreate( void )
 {
    hypre_ParILUData                       *ilu_data;
 
@@ -3737,7 +3737,7 @@ hypre_ParILURAPSchurGMRESMatvecDestroyH( void *matvec_data )
 
 /* Create */
 void *
-hypre_NSHCreate()
+hypre_NSHCreate( void )
 {
    hypre_ParNSHData  *nsh_data;
 
@@ -3842,7 +3842,7 @@ hypre_NSHDestroy( void *data )
 
 /* Print solver params */
 HYPRE_Int
-hypre_NSHWriteSolverParams(void *nsh_vdata)
+hypre_NSHWriteSolverParams( void *nsh_vdata )
 {
    hypre_ParNSHData  *nsh_data = (hypre_ParNSHData*) nsh_vdata;
    hypre_printf("Newton–Schulz–Hotelling Setup parameters: \n");

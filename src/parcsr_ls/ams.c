@@ -841,7 +841,7 @@ HYPRE_Int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, HYPRE_Real d)
  * Allocate the AMS solver structure.
  *--------------------------------------------------------------------------*/
 
-void * hypre_AMSCreate()
+void * hypre_AMSCreate(void)
 {
    hypre_AMSData *ams_data;
 

@@ -31,7 +31,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 }
 
-HYPRE_Int HYPRE_GetError()
+HYPRE_Int HYPRE_GetError(void)
 {
    return hypre_error_flag;
 }
@@ -69,12 +69,12 @@ void HYPRE_DescribeError(HYPRE_Int ierr, char *msg)
    }
 }
 
-HYPRE_Int HYPRE_GetErrorArg()
+HYPRE_Int HYPRE_GetErrorArg(void)
 {
    return (hypre_error_flag >> 3 & 31);
 }
 
-HYPRE_Int HYPRE_ClearAllErrors()
+HYPRE_Int HYPRE_ClearAllErrors(void)
 {
    hypre_error_flag = 0;
    return (hypre_error_flag != 0);

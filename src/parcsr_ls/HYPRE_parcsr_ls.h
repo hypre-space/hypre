@@ -162,7 +162,7 @@ HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP(HYPRE_Solver  solver,
                                      HYPRE_Real   *cum_nnz_AP);
 
 /*
- * Activates cumulative num of nonzeros for A and P operators. 
+ * Activates cumulative num of nonzeros for A and P operators.
  * Needs to be set to a positive number for activation.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP(HYPRE_Solver  solver,

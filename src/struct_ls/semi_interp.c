@@ -28,7 +28,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SemiInterpCreate( )
+hypre_SemiInterpCreate( void )
 {
    hypre_SemiInterpData *interp_data;
 
