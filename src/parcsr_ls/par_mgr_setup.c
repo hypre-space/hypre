@@ -1581,7 +1581,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
             // setup Gaussian Elim. in the F-relaxation step. Here, we apply GSElim at level 0
             // since we have a single matrix (and not an array of matrices).
-hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
+//hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
             hypre_GaussElimSetup(GSElimData[i], i, Frelax_type[i]);
          }
       }
