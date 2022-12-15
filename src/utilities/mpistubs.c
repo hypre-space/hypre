@@ -38,7 +38,7 @@ hypre_MPI_Init( hypre_int   *argc,
 }
 
 HYPRE_Int
-hypre_MPI_Finalize( )
+hypre_MPI_Finalize( void )
 {
    return (0);
 }
@@ -51,13 +51,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 }
 
 HYPRE_Real
-hypre_MPI_Wtime( )
+hypre_MPI_Wtime( void )
 {
    return (0.0);
 }
 
 HYPRE_Real
-hypre_MPI_Wtick( )
+hypre_MPI_Wtick( void )
 {
    return (0.0);
 }
@@ -767,7 +767,7 @@ hypre_MPI_Init( hypre_int   *argc,
 }
 
 HYPRE_Int
-hypre_MPI_Finalize( )
+hypre_MPI_Finalize( void )
 {
    return (HYPRE_Int) MPI_Finalize();
 }
@@ -780,13 +780,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 }
 
 HYPRE_Real
-hypre_MPI_Wtime( )
+hypre_MPI_Wtime( void )
 {
    return MPI_Wtime();
 }
 
 HYPRE_Real
-hypre_MPI_Wtick( )
+hypre_MPI_Wtick( void )
 {
    return MPI_Wtick();
 }

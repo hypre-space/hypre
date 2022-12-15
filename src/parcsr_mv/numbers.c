@@ -11,7 +11,7 @@
 
 #include "_hypre_parcsr_mv.h"
 
-hypre_NumbersNode * hypre_NumbersNewNode()
+hypre_NumbersNode * hypre_NumbersNewNode( void )
 /* makes a new node for a tree representing numbers */
 {
    HYPRE_Int i;

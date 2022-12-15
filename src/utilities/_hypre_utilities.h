@@ -135,6 +135,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #elif defined(HYPRE_USING_HIP)
 /* FIXME: Currently, asserts in device kernels in HIP do not behave well */
 #define hypre_device_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
+#elif defined(HYPRE_USING_SYCL)
+#define hypre_device_assert(EX) assert(EX)
 #endif
 #else /* #ifdef HYPRE_DEBUG */
 /* this is to silence compiler's unused variable warnings */
@@ -289,7 +291,7 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
-typedef void (hypre_MPI_User_function) ();
+typedef void (hypre_MPI_User_function) (void);
 
 typedef struct
 {
@@ -1017,9 +1019,9 @@ extern size_t hypre__target_dtoh_bytes;
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, const char *type1,
                            const char *type2);
 HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
-HYPRE_Int HYPRE_OMPOffloadOn();
-HYPRE_Int HYPRE_OMPOffloadOff();
-HYPRE_Int HYPRE_OMPOffloadStatPrint();
+HYPRE_Int HYPRE_OMPOffloadOn(void);
+HYPRE_Int HYPRE_OMPOffloadOff(void);
+HYPRE_Int HYPRE_OMPOffloadStatPrint(void);
 
 #endif /* HYPRE_USING_DEVICE_OPENMP */
 #endif /* HYPRE_OMP_DEVICE_H */
@@ -1101,6 +1103,7 @@ HYPRE_Real time_get_cpu_seconds_( void );
 #define hypre_EndTiming(i)
 #define hypre_PrintTiming(heading, comm)
 #define hypre_ClearTiming()
+#define hypre_GetTiming(heading, comm, time)
 
 /*--------------------------------------------------------------------------
  * With timing on
@@ -1157,12 +1160,13 @@ extern hypre_TimingType *hypre_global_timing;
 /* timing.c */
 HYPRE_Int hypre_InitializeTiming( const char *name );
 HYPRE_Int hypre_FinalizeTiming( HYPRE_Int time_index );
-HYPRE_Int hypre_FinalizeAllTimings();
+HYPRE_Int hypre_FinalizeAllTimings( void );
 HYPRE_Int hypre_IncFLOPCount( HYPRE_BigInt inc );
 HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
 HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
 
 #endif
 
@@ -1602,13 +1606,13 @@ HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #endif
 
 /* general.c */
-hypre_Handle* hypre_handle();
-hypre_Handle* hypre_HandleCreate();
+hypre_Handle* hypre_handle(void);
+hypre_Handle* hypre_HandleCreate(void);
 HYPRE_Int hypre_HandleDestroy(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_GetDevice(hypre_int *device_id);
 HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
-HYPRE_Int hypre_GetDeviceLastError();
+HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
@@ -1887,7 +1891,7 @@ HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
 HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
 
-HYPRE_Int hypre_CudaCompileFlagCheck();
+HYPRE_Int hypre_CudaCompileFlagCheck(void);
 
 HYPRE_Int hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y,
                                HYPRE_Complex *z, HYPRE_Complex *d);
@@ -1906,7 +1910,7 @@ HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 /* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_GpuProfilingPushRange(const char *name);
-void hypre_GpuProfilingPopRange();
+void hypre_GpuProfilingPopRange(void);
 
 /* utilities.c */
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
@@ -1914,7 +1918,7 @@ void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPR
 char *hypre_strcpy(char *destination, const char *source);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
-HYPRE_Int hypre_RestoreSyncCudaCompute();
+HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
@@ -1952,14 +1956,16 @@ HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
 
 /* int_array_device.c */
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
+#endif
 
 /* memory_tracker.c */
 #ifdef HYPRE_USING_MEMORY_TRACKER
-hypre_MemoryTracker* hypre_memory_tracker();
-hypre_MemoryTracker * hypre_MemoryTrackerCreate();
+hypre_MemoryTracker* hypre_memory_tracker(void);
+hypre_MemoryTracker * hypre_MemoryTrackerCreate(void);
 void hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker);
 void hypre_MemoryTrackerInsert1(const char *action, void *ptr, size_t nbytes,
                                 hypre_MemoryLocation memory_location, const char *filename,
@@ -3394,4 +3400,3 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
-
