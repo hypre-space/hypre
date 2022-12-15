@@ -929,12 +929,49 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildPFromWp
+ *
+ * Build prolongation matrix from the Nf x Nc matrix
+ *
+ * TODOs:
+ *   1) Remove debug_flag
+ *   2) Move this function to par_interp.c ?
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRBuildPFromWp( hypre_ParCSRMatrix   *A,
                        hypre_ParCSRMatrix   *Wp,
                        HYPRE_Int            *CF_marker,
                        HYPRE_Int            debug_flag,
                        hypre_ParCSRMatrix   **P_ptr)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_MGRBuildPFromWpDevice(A, Wp, CF_marker, P_ptr);
+   }
+   else
+#endif
+   {
+      hypre_MGRBuildPFromWpHost(A, Wp, CF_marker, debug_flag, P_ptr);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildPFromWpHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix   *A,
+                           hypre_ParCSRMatrix   *Wp,
+                           HYPRE_Int            *CF_marker,
+                           HYPRE_Int            debug_flag,
+                           hypre_ParCSRMatrix   **P_ptr)
 {
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);

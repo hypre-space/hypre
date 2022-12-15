@@ -11,8 +11,8 @@
  *
  *****************************************************************************/
 
+#include "seq_mv/seq_mv.h"
 #include "_hypre_parcsr_ls.h"
-#include "seq_mv/protos.h"
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
@@ -31,16 +31,84 @@ struct functor : public thrust::binary_function<T, T, T>
    }
 };
 
-void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows,
-                             HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker,
-                             HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i,
-                             HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data,
-                             HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j,
-                             HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i,
-                             HYPRE_Int *P_offd_i );
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildPFromWpDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
+                             hypre_ParCSRMatrix   *Wp,
+                             HYPRE_Int            *CF_marker,
+                             hypre_ParCSRMatrix  **P_ptr)
+{
+   /* Wp info */
+   hypre_CSRMatrix     *Wp_diag = hypre_ParCSRMatrixDiag(Wp);
+   hypre_CSRMatrix     *Wp_offd = hypre_ParCSRMatrixOffd(Wp);
+
+   /* Local variables */
+   hypre_ParCSRMatrix  *P;
+   hypre_CSRMatrix     *P_diag;
+   hypre_CSRMatrix     *P_offd;
+   HYPRE_Int            P_diag_nnz;
+
+   /* Set local variables */
+   P_diag_nnz = hypre_CSRMatrixNumNonzeros(Wp_diag) +
+                hypre_CSRMatrixNumCols(Wp_diag);
+
+   /* Create interpolation matrix */
+   P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixGlobalNumCols(Wp),
+                                hypre_ParCSRMatrixRowStarts(A),
+                                hypre_ParCSRMatrixColStarts(Wp),
+                                hypre_CSRMatrixNumCols(Wp_offd),
+                                P_diag_nnz,
+                                hypre_CSRMatrixNumNonzeros(Wp_offd));
+
+   /* Initialize interpolation matrix */
+   hypre_ParCSRMatrixInitialize_v2(P, HYPRE_MEMORY_DEVICE);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   P_diag = hypre_ParCSRMatrixDiag(P);
+   P_offd = hypre_ParCSRMatrixOffd(P);
+
+   /* Copy contents from W to P and set identity matrix for the mapping between coarse points */
+   hypreDevice_extendWtoP(hypre_ParCSRMatrixNumRows(A),
+                          hypre_ParCSRMatrixNumRows(Wp),
+                          hypre_CSRMatrixNumCols(Wp_diag),
+                          CF_marker,
+                          hypre_CSRMatrixNumNonzeros(Wp_diag),
+                          hypre_CSRMatrixI(Wp_diag),
+                          hypre_CSRMatrixJ(Wp_diag),
+                          hypre_CSRMatrixData(Wp_diag),
+                          hypre_CSRMatrixI(P_diag),
+                          hypre_CSRMatrixJ(P_diag),
+                          hypre_CSRMatrixData(P_diag),
+                          hypre_CSRMatrixI(Wp_offd),
+                          hypre_CSRMatrixI(P_offd));
+
+   /* Swap some pointers to avoid data copies */
+   hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(P))    = hypre_CSRMatrixJ(Wp_offd);
+   hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(P)) = hypre_CSRMatrixData(Wp_offd);
+   hypre_CSRMatrixJ(Wp_offd)    = NULL;
+   hypre_CSRMatrixData(Wp_offd) = NULL;
+   /* hypre_ParCSRMatrixDeviceColMapOffd(P)    = hypre_ParCSRMatrixDeviceColMapOffd(Wp); */
+   /* hypre_ParCSRMatrixColMapOffd(P)          = hypre_ParCSRMatrixColMapOffd(Wp); */
+   /* hypre_ParCSRMatrixDeviceColMapOffd(Wp)   = NULL; */
+   /* hypre_ParCSRMatrixColMapOffd(Wp)         = NULL; */
+
+   /* Create communication package */
+   hypre_MatvecCommPkgCreate(P);
+
+   /* Set output pointer to the interpolation matrix */
+   *P_ptr = P;
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildPDevice
+ *
+ * TODO: make use of hypre_MGRBuildPFromWpDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -149,7 +217,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   //hypre_NvtxPushRangeColor("Extend matrix", 4);
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_CSRMatrixNumCols(W_diag),
@@ -163,7 +230,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(W_offd),
                            P_offd_i );
-   //hypre_NvtxPopRange();
 
    // final P
    P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),

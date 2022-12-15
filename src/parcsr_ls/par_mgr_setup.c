@@ -981,11 +981,11 @@ hypre_MGRSetup( void               *mgr_vdata,
          wall_time = time_getWallclockSeconds() - wall_time;
          //  if (my_id == 0) { hypre_printf("Lev = %d, interp type = %d, proc = %d     BuildInterp: %f\n", lev, interp_type[lev], my_id, wall_time); }
       }
-      /*
+
       char fname[256];
       sprintf(fname, "P_lev_%d", lev);
       hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);
-      */
+
       /* Use block Jacobi F-relaxation with block Jacobi interpolation */
       if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
       {
