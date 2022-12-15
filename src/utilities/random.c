@@ -73,7 +73,7 @@ void hypre_SeedRand( HYPRE_Int seed )
  * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
 #ifdef BUILD_NON_MP_FUNC
-HYPRE_Int hypre_RandI()
+HYPRE_Int hypre_RandI(void )
 {
    HYPRE_Int  low, high, test;
    high = Seed / q;
@@ -99,7 +99,7 @@ HYPRE_Int hypre_RandI()
  * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
 #ifdef BUILD_MP_FUNC
-HYPRE_Real hypre_Rand()
+HYPRE_Real hypre_Rand( void )
 {
    return ((HYPRE_Real)(hypre_RandI()) / (HYPRE_Real)m);
 }
