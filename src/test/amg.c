@@ -1,4 +1,11 @@
-/*BHEADER**********************************************************************
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/******************************************************************************
  * Copyright (c) 2017,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by Ulrike Yang (yang11@llnl.gov) et al. CODE-LLNL-738-322.
@@ -13,7 +20,7 @@
  * or FITNESS FOR A PARTICULAR PURPOSE. See the terms and conditions of the
  * GNU General Public License for more details.
  *
- ***********************************************************************EHEADER*/
+ ******************************************************************************/
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
@@ -22,6 +29,7 @@
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -63,7 +71,6 @@ main( hypre_int argc,
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
    HYPRE_Int           debug_flag;
-   HYPRE_Int           i;
    HYPRE_Int           num_iterations;
    HYPRE_Int           max_iter = 1000;
    HYPRE_Int           mg_max_iter = 100;
@@ -488,7 +495,7 @@ main( hypre_int argc,
 
       if (myid == 0)
       {
-         printf ("\nFOM_Setup: nnz_AP / Setup Phase Time: %e\n\n", FOM1);
+         hypre_printf ("\nFOM_Setup: nnz_AP / Setup Phase Time: %e\n\n", FOM1);
       }
 
       time_index = hypre_InitializeTiming("PCG Solve");
@@ -521,9 +528,9 @@ main( hypre_int argc,
          hypre_printf("Iterations = %d\n", num_iterations);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
-         printf ("\nFOM_Solve: nnz_AP * iterations / Solve Phase Time: %e\n\n", FOM2);
+         hypre_printf ("\nFOM_Solve: nnz_AP * iterations / Solve Phase Time: %e\n\n", FOM2);
          FOM1 = 0.5 * (FOM1 + FOM2);
-         printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
+         hypre_printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
       }
 
    }
@@ -595,7 +602,7 @@ main( hypre_int argc,
 
       if (myid == 0)
       {
-         printf ("\nFOM_Setup: nnz_AP / Setup Phase Time: %e\n\n", FOM2);
+         hypre_printf ("\nFOM_Setup: nnz_AP / Setup Phase Time: %e\n\n", FOM2);
       }
 
       time_index = hypre_InitializeTiming("GMRES Solve");
@@ -625,9 +632,9 @@ main( hypre_int argc,
          hypre_printf("Iterations = %d\n", num_iterations);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
-         printf ("\nFOM_Solve: nnz_AP * iterations / Solve Phase Time: %e\n\n", FOM2);
+         hypre_printf ("\nFOM_Solve: nnz_AP * iterations / Solve Phase Time: %e\n\n", FOM2);
          FOM1 = 0.5 * (FOM1 + FOM2);
-         printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
+         hypre_printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
       }
    }
 
@@ -2463,10 +2470,6 @@ BuildIJLaplacian7pt( HYPRE_Int            argc,
    HYPRE_Int i;
    HYPRE_Int local_size;
    HYPRE_BigInt global_size;
-   HYPRE_Int first_local_row;
-   HYPRE_Int last_local_row;
-   HYPRE_Int first_local_col;
-   HYPRE_Int last_local_col;
 
    HYPRE_Int nxy;
    HYPRE_BigInt nx_global, ny_global, nz_global;
