@@ -58,8 +58,19 @@ do
   echo "PCG Solve"${solve_time}
 done > ${TNAME}.perf.out
 
+FILES2="
+ ${TNAME}.out.28\
+ ${TNAME}.out.29\
+"
+
+for i in $FILES2
+do
+  echo "# Output file: $i"
+  grep -A 2 "Iterations" $i
+done >> ${TNAME}.out
+
 # Make sure that the output file is reasonable
-RUNCOUNT=`echo $FILES | wc -w`
+RUNCOUNT=`echo $FILES $FILES2 | wc -w`
 OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2

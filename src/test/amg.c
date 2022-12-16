@@ -521,7 +521,7 @@ main( hypre_int argc,
          hypre_printf("Iterations = %d\n", num_iterations);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
-         printf ("\nFOM_Solve: nnz_AP * Iterations / Solve Phase Time: %e\n\n", FOM2);
+         printf ("\nFOM_Solve: nnz_AP * iterations / Solve Phase Time: %e\n\n", FOM2);
          FOM1 = 0.5 * (FOM1 + FOM2);
          printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
       }
@@ -625,7 +625,7 @@ main( hypre_int argc,
          hypre_printf("Iterations = %d\n", num_iterations);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
-         printf ("\nFOM_Solve: nnz_AP * Iterations / Solve Phase Time: %e\n\n", FOM2);
+         printf ("\nFOM_Solve: nnz_AP * iterations / Solve Phase Time: %e\n\n", FOM2);
          FOM1 = 0.5 * (FOM1 + FOM2);
          printf ("\n\nFigure of Merit (FOM_1): %e\n\n", FOM1);
       }

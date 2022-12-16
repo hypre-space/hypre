@@ -91,3 +91,7 @@ mpirun -np 4 ./ij -n 248 248 248 -P 2 2 1 -27pt -pmis -keepT 1 -rlx 18 -ns 2  -e
 mpirun -np 4 ./ij -n 256 256 256 -P 1 2 2 -27pt -pmis -keepT 1 -rlx 18 -ns 2  -exec_device -rap 0 -mod_rap2 1 -mm_vendor 0 -agg_nl 1 -agg_interp 9 -interptype 6 -mxrs 0.9  -Pmx 8 -solver 1 -benchmark 1 \
  >> benchmark_ij.out.27
 
+mpirun -np 4 ./amg -n 128 128 128 -P 2 2 1 -problem 1 >> benchmark_ij.out.28
+
+mpirun -np 4 ./amg -n 128 128 128 -P 2 2 1 -problem 2 >> benchmark_ij.out.29
+
