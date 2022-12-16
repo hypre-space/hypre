@@ -18,7 +18,7 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_BoomerAMGDDCreate()
+hypre_BoomerAMGDDCreate( void )
 {
    hypre_ParAMGDDData  *amgdd_data = hypre_CTAlloc(hypre_ParAMGDDData, 1, HYPRE_MEMORY_HOST);
 

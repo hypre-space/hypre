@@ -356,7 +356,7 @@ HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
@@ -372,8 +372,9 @@ HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
    HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int           s, i, d, vindex[3];
+   HYPRE_Int           s, i, d, vindex[HYPRE_MAXDIM];
 
+   /* Set one coefficient at a time */
    for (s = 0; s < fem_nsparse; s++)
    {
       i = fem_sparse_i[s];
@@ -410,7 +411,7 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
@@ -426,7 +427,7 @@ HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
    HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int           s, i, d, vindex[3];
+   HYPRE_Int           s, i, d, vindex[HYPRE_MAXDIM];
 
    for (s = 0; s < fem_nsparse; s++)
    {
@@ -613,6 +614,75 @@ HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix  matrix,
 
    hypre_BoxDestroy(set_box);
    hypre_BoxDestroy(value_box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values)
+{
+   HYPRE_Int             ndim            = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph   *graph           = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid    *grid            = hypre_SStructGraphGrid(graph);
+   HYPRE_MemoryLocation  memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+
+   HYPRE_Int             fem_nsparse     = hypre_SStructGraphFEMPNSparse(graph, part);
+   HYPRE_Int            *fem_sparse_i    = hypre_SStructGraphFEMPSparseI(graph, part);
+   HYPRE_Int            *fem_entries     = hypre_SStructGraphFEMPEntries(graph, part);
+   HYPRE_Int            *fem_vars        = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index          *fem_offsets     = hypre_SStructGridFEMPOffsets(grid, part);
+
+   HYPRE_Complex        *tvalues;
+   hypre_Box            *box;
+
+   HYPRE_Int             s, i, d, vilower[HYPRE_MAXDIM], viupper[HYPRE_MAXDIM];
+   HYPRE_Int             ei, vi, nelts;
+
+   /* Set one coefficient at a time */
+   box = hypre_BoxCreate(ndim);
+   hypre_BoxSetExtents(box, ilower, iupper);
+   nelts = hypre_BoxVolume(box);
+   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, memory_location);
+
+   for (s = 0; s < fem_nsparse; s++)
+   {
+      i = fem_sparse_i[s];
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vilower[d] = ilower[d] + hypre_IndexD(fem_offsets[i], d);
+         viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      {
+         hypreDevice_ComplexStridedCopy(nelts, fem_nsparse, values + s, tvalues);
+      }
+      else
+#endif
+      {
+         for (ei = 0, vi = s; ei < nelts; ei ++, vi += fem_nsparse)
+         {
+            tvalues[ei] = values[vi];
+         }
+      }
+
+      HYPRE_SStructMatrixAddToBoxValues(matrix, part, vilower, viupper,
+                                        fem_vars[i], 1, &fem_entries[s],
+                                        tvalues);
+   }
+
+   /* Free memory */
+   hypre_TFree(tvalues, memory_location);
+   hypre_BoxDestroy(box);
 
    return hypre_error_flag;
 }
@@ -1220,6 +1290,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    umatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_IJMatrixDestroyParCSR(umatrix);
    hypre_IJMatrixObject(umatrix) = (void*) parmatrix;
+   hypre_SStructMatrixParCSRMatrix(matrix) = (hypre_ParCSRMatrix*) parmatrix;
    hypre_IJMatrixAssembleFlag(umatrix) = 1;
 
    /* Assemble SStructMatrix */

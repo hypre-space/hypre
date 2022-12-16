@@ -776,6 +776,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
                                                            HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
+   HYPRE_IJMatrixGetObject(ijmatrix,
+                           (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
    return hypre_error_flag;
 }
@@ -1298,8 +1300,6 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
    HYPRE_IJMatrixAssemble(ijmatrix);
-   HYPRE_IJMatrixGetObject(
-      ijmatrix, (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
    return hypre_error_flag;
 }
@@ -1721,4 +1721,3 @@ hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix)
 
    return HYPRE_MEMORY_UNDEFINED;
 }
-

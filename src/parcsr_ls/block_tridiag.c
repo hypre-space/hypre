@@ -21,7 +21,7 @@
  * hypre_BlockTridiagCreate
  *--------------------------------------------------------------------------*/
 
-void *hypre_BlockTridiagCreate()
+void *hypre_BlockTridiagCreate(void)
 {
    hypre_BlockTridiagData *b_data;
    b_data = hypre_CTAlloc(hypre_BlockTridiagData,  1, HYPRE_MEMORY_HOST);

@@ -96,7 +96,7 @@ co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug"
+co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
 

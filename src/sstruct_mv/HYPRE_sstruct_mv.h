@@ -562,9 +562,11 @@ HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
 
 /**
  * Add finite element stiffness matrix coefficients index by index.  The layout
- * of the data in \e values is determined by the routines
- * \ref HYPRE_SStructGridSetFEMOrdering and
- * \ref HYPRE_SStructGraphSetFEMSparsity.
+ * of the data in \e values is determined by the routines \ref
+ * HYPRE_SStructGridSetFEMOrdering and \ref HYPRE_SStructGraphSetFEMSparsity.
+ *
+ * NOTE: For better efficiency, use \ref HYPRE_SStructMatrixAddFEMBoxValues to
+ * set coefficients a box at a time.
  **/
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
@@ -697,6 +699,20 @@ HYPRE_SStructMatrixAddToBoxValues2(HYPRE_SStructMatrix  matrix,
                                    HYPRE_Complex       *values);
 
 /**
+ * Add finite element stiffness matrix coefficients a box at a time.  The data
+ * in \e values is organized as an array of element matrices ordered as in \ref
+ * HYPRE_SStructMatrixSetBoxValues.  The layout of the data entries of each
+ * element matrix is determined by the routines \ref
+ * HYPRE_SStructGridSetFEMOrdering and \ref HYPRE_SStructGraphSetFEMSparsity.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 HYPRE_Int
@@ -736,6 +752,16 @@ HYPRE_SStructMatrixGetBoxValues2(HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int           *vilower,
                                  HYPRE_Int           *viupper,
                                  HYPRE_Complex       *values);
+
+/**
+ * Does this even make sense to implement?
+ */
+HYPRE_Int
+HYPRE_SStructMatrixGetFEMBoxValues(HYPRE_SStructMatrix  matrix,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The
@@ -872,6 +898,9 @@ HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
  * Add finite element vector coefficients index by index.  The layout of the
  * data in \e values is determined by the routine
  * \ref HYPRE_SStructGridSetFEMOrdering.
+ *
+ * NOTE: For better efficiency, use \ref HYPRE_SStructVectorAddFEMBoxValues to
+ * set coefficients a box at a time.
  **/
 HYPRE_Int
 HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
@@ -983,6 +1012,20 @@ HYPRE_SStructVectorAddToBoxValues2(HYPRE_SStructVector  vector,
                                    HYPRE_Complex       *values);
 
 /**
+ * Add finite element vector coefficients a box at a time.  The data in \e
+ * values is organized as an array of element vectors ordered as in \ref
+ * HYPRE_SStructVectorSetBoxValues.  The layout of the data entries of each
+ * element vector is determined by the routine \ref
+ * HYPRE_SStructGridSetFEMOrdering.
+ **/
+HYPRE_Int
+HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values);
+
+/**
  * Finalize the construction of the vector before using.
  **/
 HYPRE_Int
@@ -1018,6 +1061,16 @@ HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
                                  HYPRE_Int           *vilower,
                                  HYPRE_Int           *viupper,
                                  HYPRE_Complex       *values);
+
+/**
+ * Does this even make sense to implement?
+ */
+HYPRE_Int
+HYPRE_SStructVectorGetFEMBoxValues(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values);
 
 /**
  * Gather vector data so that efficient \c GetValues can be done.  This

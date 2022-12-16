@@ -13,7 +13,7 @@ hypre_MemoryTracker *_hypre_memory_tracker = NULL;
 
 /* accessor to the global ``_hypre_memory_tracker'' */
 hypre_MemoryTracker*
-hypre_memory_tracker()
+hypre_memory_tracker(void)
 {
    if (!_hypre_memory_tracker)
    {
@@ -31,7 +31,7 @@ hypre_Handle *_hypre_handle = NULL;
 
 /* accessor to the global ``_hypre_handle'' */
 hypre_Handle*
-hypre_handle()
+hypre_handle(void)
 {
    if (!_hypre_handle)
    {
@@ -42,7 +42,7 @@ hypre_handle()
 }
 
 hypre_Handle*
-hypre_HandleCreate()
+hypre_HandleCreate(void)
 {
    hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
@@ -247,7 +247,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
 }
 
 HYPRE_Int
-hypre_GetDeviceLastError()
+hypre_GetDeviceLastError(void)
 {
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
@@ -279,7 +279,7 @@ hypre_GetDeviceLastError()
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init()
+HYPRE_Init(void)
 {
 #ifdef HYPRE_USING_MEMORY_TRACKER
    if (!_hypre_memory_tracker)
@@ -375,7 +375,7 @@ HYPRE_Init()
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Finalize()
+HYPRE_Finalize(void)
 {
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
@@ -401,7 +401,7 @@ HYPRE_Finalize()
 }
 
 HYPRE_Int
-HYPRE_PrintDeviceInfo()
+HYPRE_PrintDeviceInfo(void)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_int dev;
