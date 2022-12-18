@@ -495,9 +495,10 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractBlockDiagDevice
  *
- * TODOs:
+ * TODOs (VPM):
  *   1) Allow other local solver choices. Design an interface for that.
  *   2) Extend to HYPRE_Real != double
+ *   3) Move this to par_csr_matop_device.c
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -692,6 +693,8 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixBlockDiagMatrixDevice
+ *
+ * TODO: Move this to par_csr_matop_device.c (VPM)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

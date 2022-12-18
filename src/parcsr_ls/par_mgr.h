@@ -26,8 +26,11 @@ typedef struct
    HYPRE_Int           **level_coarse_indexes;
 
    /* general data */
-   HYPRE_Int max_num_coarse_levels;
+   HYPRE_Int             max_num_coarse_levels;
    hypre_ParCSRMatrix  **A_array;
+   hypre_ParCSRMatrix  **B_array;    /* block diagonal inverse matrices */
+   hypre_ParCSRMatrix  **B_FF_array; /* block-FF diagonal inverse matrices */
+   hypre_ParCSRMatrix  **A_ff_array;
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix  **P_FF_array;
 #endif
@@ -41,7 +44,6 @@ typedef struct
    hypre_ParVector      *residual;
    HYPRE_Real           *rel_res_norms;
 
-   hypre_ParCSRMatrix  **A_ff_array;
    hypre_ParVector     **F_fine_array;
    hypre_ParVector     **U_fine_array;
    HYPRE_Solver        **aff_solver;
@@ -169,7 +171,6 @@ typedef struct
    HYPRE_Solver          frelax_solver;
 } hypre_MGRRelaxData;
 
-
 #define FMRK  -1
 #define CMRK  1
 #define UMRK  0
@@ -178,7 +179,14 @@ typedef struct
 #define FPT(i, bsize) (((i) % (bsize)) == FMRK)
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
-//#define SMALLREAL 1e-20
-//#define DIVIDE_TOL 1e-32
+/*--------------------------------------------------------------------------
+ * Acessor macros
+ *--------------------------------------------------------------------------*/
+
+/* TODO: add remaining acessor macros */
+#define hypre_ParMGRDataBArray(data)                ((data) -> B_array)
+#define hypre_ParMGRDataB(data, i)                  ((data) -> B_array[i])
+#define hypre_ParMGRDataBFFArray(data)              ((data) -> B_FF_array)
+#define hypre_ParMGRDataBFF(data, i)                ((data) -> B_FF_array[i])
 
 #endif
