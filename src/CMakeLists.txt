@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.26.0)
-set(HYPRE_NUMBER  22600)
-set(HYPRE_DATE    2022/10/14)
+set(HYPRE_VERSION 2.27.0)
+set(HYPRE_NUMBER  22700)
+set(HYPRE_DATE    2022/12/21)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
