@@ -65,23 +65,3 @@ HYPRE_VectorRead( char         *file_name )
    return ( (HYPRE_Vector) hypre_SeqVectorRead( file_name ) );
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_VectorGetData
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_VectorGetData( HYPRE_Vector    vector,
-                     HYPRE_Complex **data)
-{
-   return ( hypre_SeqVectorGetData( (hypre_Vector *) vector, data ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_VectorSetConstantValues
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_VectorSetConstantValues( HYPRE_Vector  vector,
-                               HYPRE_Complex value)
-{
-   return ( hypre_SeqVectorSetConstantValues( (hypre_Vector *) vector, value ) );
-}
-

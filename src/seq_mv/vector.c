@@ -159,19 +159,6 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorGetData
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SeqVectorGetData( hypre_Vector   *vector,
-                        HYPRE_Complex **data )
-{
-   *data = hypre_VectorData(vector);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * ReadVector
  *--------------------------------------------------------------------------*/
 
