@@ -7,6 +7,19 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.27.0 released 2022/12/21
+
+- New SStructMatrix and SStructVector AddFEMBoxValues() routines to set finite
+  element stiffness matrices a box at a time for better performance.
+- Added environment variable HYPRE_BRANCH_NAME.
+- Added HIP support to the MGR solver.
+- Added Jacobi iterative solver approach for ILU smoothing/preconditioning.
+- Various optimizations for IJ solvers
+- Various CMake build system updates
+- Various bug fixes
+
+#====================================
+
 Version 2.26.0 released 2022/10/14
 
 - Added a new feature of BoomerAMG (L1-Jacobi and Chebyshev smoothers) and
@@ -20,6 +33,7 @@ Version 2.26.0 released 2022/10/14
 - Optimized the performance of hypre's SpGEMM kernels on NVIDIA/AMD GPUs;
 - Various bug fixes
 
+#====================================
 
 Version 2.25.0 released 2022/06/15
 
