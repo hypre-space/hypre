@@ -67,13 +67,12 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
-/* WM: todo - oneMKL sparse matmat is not currently reliable */
-      *C_ptr = hypre_CSRMatrixMultiplyHost(A, B);
-      return hypre_error_flag;
-      /* hypreDevice_CSRSpGemmOnemklsparse(m, k, n, */
-      /*                                   hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a, */
-      /*                                   hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b, */
-      /*                                   hypre_CSRMatrixGPUMatHandle(C), &nnzC, &d_ic, &d_jc, &d_c); */
+      /* WM: todo - remove when oneMKL is fixed */
+      hypre_printf("WARNING: oneMKL sparse matmat may not give numerically correct results! Please set SpgemmUseVendor to 0\n");
+      hypreDevice_CSRSpGemmOnemklsparse(m, k, n,
+                                        hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a,
+                                        hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b,
+                                        hypre_CSRMatrixGPUMatHandle(C), &nnzC, &d_ic, &d_jc, &d_c);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "Attempting to use device sparse matrix library for SpGEMM without having compiled support for it!\n");

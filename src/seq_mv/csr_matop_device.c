@@ -189,10 +189,6 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
-/* WM: currently do not have a reliable device matmat routine for sycl */
-/* #if defined(HYPRE_USING_SYCL) */
-/*    return hypre_CSRMatrixMultiplyHost(A, B); */
-/* #endif */
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    hypre_CSRMatrix  *C;

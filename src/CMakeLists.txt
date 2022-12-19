@@ -357,8 +357,8 @@ if (HYPRE_WITH_SYCL)
   # WM: note that dpcpp is deprecated, but for now oneMKL looks for the dpcpp compiler to configure things appropriately for the sycl backend
   set(CMAKE_CXX_COMPILER "dpcpp")
 
-  # Set linker to icpx
-  set(CMAKE_LINKER "icpx")
+  # Set linker to dpcpp
+  set(CMAKE_LINKER "dpcpp")
   set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
   set(CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
   set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP " ")

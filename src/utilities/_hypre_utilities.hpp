@@ -244,7 +244,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #if defined(HYPRE_USING_SYCL)
 #define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
 {                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
    {                                                                                         \
      /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
@@ -262,7 +262,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 }
 #define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
 {                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
    {                                                                                         \
      /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
@@ -283,7 +283,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 }
 #define HYPRE_GPU_DEBUG_LAUNCH(kernel_name, gridsize, blocksize, ...)                        \
 {                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
    {                                                                                         \
      /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
@@ -302,7 +302,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 }
 #define HYPRE_GPU_DEBUG_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)           \
 {                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
    {                                                                                         \
      /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
@@ -2893,3 +2893,4 @@ struct hypre_cub_CachingDeviceAllocator
 #endif
 
 #endif
+
