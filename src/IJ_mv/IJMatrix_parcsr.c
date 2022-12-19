@@ -4139,7 +4139,9 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                else
                {
                   size = my_offproc_cnt[0];
-                  my_offproc_cnt = hypre_TReAlloc(my_offproc_cnt, HYPRE_Int, size + 200, HYPRE_MEMORY_HOST);
+                  my_offproc_cnt = hypre_TReAlloc(my_offproc_cnt, HYPRE_Int,
+                                                  size + 200, HYPRE_MEMORY_HOST);
+                  offproc_cnt[my_thread_num] = my_offproc_cnt;
                   my_offproc_cnt[0] += 200;
                   my_offproc_cnt[i] = ii;
                   my_offproc_cnt[i + 1] = indx;

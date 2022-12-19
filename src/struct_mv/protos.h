@@ -439,7 +439,7 @@ HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x, hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector, HYPRE_Complex values );
 HYPRE_Int hypre_StructVectorSetFunctionValues ( hypre_StructVector *vector,
-                                                HYPRE_Complex (*fcn )());
+                                                HYPRE_Complex (*fcn )( HYPRE_Int, HYPRE_Int, HYPRE_Int ));
 HYPRE_Int hypre_StructVectorClearGhostValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorClearBoundGhostValues ( hypre_StructVector *vector, HYPRE_Int force );
 HYPRE_Int hypre_StructVectorScaleValues ( hypre_StructVector *vector, HYPRE_Complex factor );
