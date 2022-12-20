@@ -7,7 +7,7 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
-Version 2.27.0 released 2022/12/21
+Version 2.27.0 released 2022/12/20
 
 - New SStructMatrix and SStructVector AddFEMBoxValues() routines to set finite
   element stiffness matrices a box at a time for better performance.
