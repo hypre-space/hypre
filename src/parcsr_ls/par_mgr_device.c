@@ -493,6 +493,41 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
+ * hypreGPUKernel_ComplexMatrixBatchedTranspose
+ *
+ * Transposes a group of dense matrices. Assigns one warp per block (batch).
+ * Naive implementation.
+ *
+ * TODOs (VPM):
+ *    1) Move to proper file.
+ *    2) Use template argument for other data types
+ *    3) Implement in-place transpose.
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
+                                              HYPRE_Int          num_blocks,
+                                              HYPRE_Int          block_size,
+                                              HYPRE_Complex     *A_data,
+                                              HYPRE_Complex     *B_data )
+{
+   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int   bs2  = block_size * block_size;
+   HYPRE_Int   bidx, lidx;
+
+   /* Grid-stride loop over block matrix rows */
+   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
+        bidx < num_blocks;
+        bidx += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE)
+   {
+      for (lidx = lane; lidx < bs2; lidx += HYPRE_WARP_SIZE)
+      {
+         B_data[bidx * bs2 + lidx] = A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) * block_size)];
+      }
+   } /* Grid-stride loop */
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractBlockDiagDevice
  *
  * TODOs (VPM):
@@ -675,12 +710,27 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       /* Free memory */
       hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
       hypre_TFree(tmpdiag_aop, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
       hypre_TFree(infos, HYPRE_MEMORY_DEVICE);
       hypre_TFree(pivots, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
       hypre_TFree(h_infos, HYPRE_MEMORY_HOST);
 #endif
+
+      /* Transpose data to row-major format */
+      {
+         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_blocks, "warp", bDim);
+
+         /* Memory copy */
+         hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexMatrixBatchedTranspose, gDim, bDim,
+                           num_blocks, blk_size, tmpdiag, B_diag_data );
+      }
+
+      /* Free memory */
+      hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
 
       HYPRE_ANNOTATE_REGION_END("%s", "InvertDiagSubBlocks");
    }
