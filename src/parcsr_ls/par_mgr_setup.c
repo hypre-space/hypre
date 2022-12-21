@@ -9,7 +9,7 @@
 #include "par_mgr.h"
 #include "par_amg.h"
 
-#define MGR_DEBUG_LEVEL 0 // 0: none | 1: dump matrices | 2: profile times
+#define MGR_DEBUG_LEVEL 1 // 0: none | 1: dump matrices | 2: profile times
 
 /* Setup MGR data */
 HYPRE_Int
@@ -926,6 +926,12 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* initialize level data matrix here */
    RAP_ptr = A;
 
+#if MGR_DEBUG_LEVEL == 1
+   hypre_sprintf(fname, "MGR-A_lvl_00.IJ.out");
+   hypre_ParPrintf(comm, "Dumping matrix to file: %s\n", fname);
+   hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
+#endif
+
    /* loop over levels of coarsening */
    for (lev = 0; lev < num_coarsening_levs; lev++)
    {
@@ -1008,8 +1014,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       CF_marker = hypre_IntArrayData(CF_marker_array[lev]);
 
 #if MGR_DEBUG_LEVEL == 1
-      hypre_sprintf(fname,"CF_marker_lvl_%d_new.%05d", lev, my_id);
-      fout = fopen(fname,"w");
+      hypre_sprintf(fname, "MGR-CF_marker_lvl_%02d.%05d", lev, my_id);
+      hypre_ParPrintf(comm, "Dumping matrix to file: %s\n", fname);
+      fout = fopen(fname, "w");
       for (i = 0; i < nloc; i++)
       {
          fprintf(fout, "%d %d\n", i, CF_marker[i]);
@@ -1038,7 +1045,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          interp_type[lev] = 2;
       }
-#if MGR_DEBUG_LEVEL == 1
+#if MGR_DEBUG_LEVEL == 2
       hypre_printf("MyID = %d, Lev = %d - Block jacobi size = %d\n",
                    my_id, lev, block_jacobi_bsize);
 #endif
@@ -1090,7 +1097,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
 #if MGR_DEBUG_LEVEL == 1
-      hypre_sprintf(fname, "P_lev_%d", lev);
+      hypre_sprintf(fname, "MGR-P_lvl_%02d.IJ.out", lev);
+      hypre_ParPrintf(comm, "Dumping matrix to file: %s\n", fname);
       hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);
 #endif
 
@@ -1287,17 +1295,10 @@ hypre_MGRSetup( void               *mgr_vdata,
             //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
             RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
 
-#if MGR_DEBUG_LEVEL == 1
-            hypre_sprintf(fname, "RAP_%d", lev);
-            hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
-
-#elif MGR_DEBUG_LEVEL == 2
+#if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0)
-            {
-               hypre_printf("Lev = %d, proc = %d - BuildCoarseGrid: %f\n",
+            hypre_ParPrintf(comm, "Lev = %d, proc = %d - BuildCoarseGrid: %f\n",
                             lev, my_id, wall_time);
-            }
 #endif
          }
       }
@@ -1316,6 +1317,12 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
 #endif
       }
+
+#if MGR_DEBUG_LEVEL == 1
+      hypre_sprintf(fname, "MGR-A_lvl_%02d.IJ.out", lev + 1);
+      hypre_ParPrintf(comm, "Dumping matrix to file: %s\n", fname);
+      hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
+#endif
 
       /* Free memory */
       hypre_ParCSRMatrixDestroy(A_FC);
@@ -1659,7 +1666,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* Always allocate l1_norms data, for now. Avoids looping over frelax_type -- DOK */
    //   if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
    //   {
-   l1_norms = hypre_TAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
+   l1_norms = hypre_CTAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
    (mgr_data -> l1_norms) = l1_norms;
    //   }
 
