@@ -992,11 +992,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds() - wall_time;
-      if (my_id == 0)
-      {
-         hypre_printf("Lev = %d, proc = %d - Global smoother setup: %f\n",
+      hypre_ParPrintf(comm, "Lev = %d, proc = %d - Global smoother setup: %f\n",
                       lev, my_id, wall_time);
-      }
 #endif
 
       /* Compute strength matrix for interpolation operator
@@ -1019,7 +1016,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       fout = fopen(fname, "w");
       for (i = 0; i < nloc; i++)
       {
-         fprintf(fout, "%d %d\n", i, CF_marker[i]);
+         hypre_fprintf(fout, "%d %d\n", i, CF_marker[i]);
       }
       fclose(fout);
 #endif
@@ -1089,11 +1086,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds() - wall_time;
-      if (my_id == 0)
-      {
-         hypre_printf("Lev = %d, interp type = %d, proc = %d - Build Wp: %f\n",
+      hypre_ParPrintf(comm, "Lev = %d, interp type = %d, proc = %d - Build Wp: %f\n",
                       lev, interp_type[lev], my_id, wall_time);
-      }
 #endif
 
 #if MGR_DEBUG_LEVEL == 1
@@ -1258,11 +1252,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0)
-            {
-               hypre_printf("Lev = %d, proc = %d - BuildCoarseGrid: %1.8f\n",
+            hypre_ParPrintf(comm, "Lev = %d, proc = %d - BuildCoarseGrid: %f\n",
                             lev, my_id, wall_time);
-            }
 #endif
          }
          else
@@ -1284,11 +1275,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds() - wall_time;
-            if (my_id == 0)
-            {
-               hypre_printf("Lev = %d, restrict type = %d, proc = %d - BuildRestrict: %f\n",
+            hypre_ParPrintf(comm, "Lev = %d, restrict type = %d, proc = %d - BuildRestrict: %f\n",
                             lev, restrict_type[lev], my_id, wall_time);
-            }
             wall_time = time_getWallclockSeconds();
 #endif
 
@@ -1428,10 +1416,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
 #if MGR_DEBUG_LEVEL == 2
          wall_time = time_getWallclockSeconds() - wall_time;
-         if (!myid)
-         {
-            hypre_printf("Lev = %d, proc = %d - SetupAFF: %f\n", lev, my_id, wall_time);
-         }
+         hypre_ParPrintf(comm, "Lev = %d, proc = %d - SetupAFF: %f\n", lev, my_id, wall_time);
 #endif
 
          /* TODO: refactor and port F_marker calculation to GPU (VPM) */
@@ -1589,11 +1574,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 #if MGR_DEBUG_LEVEL == 2
       wall_time_lev = time_getWallclockSeconds() - wall_time_lev;
-      if (!my_id)
-      {
-         hypre_printf("Lev = %d, proc = %d - Setup time: %f\n",
+      hypre_ParPrintf(comm, "Lev = %d, proc = %d - Setup time: %f\n",
                       lev, my_id, wall_time_lev);
-      }
 #endif
 
       /* check if last level */
@@ -1655,11 +1637,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 #if MGR_DEBUG_LEVEL == 2
    wall_time = time_getWallclockSeconds() - wall_time;
-   if (!my_id)
-   {
-      hypre_printf("Proc = %d - Coarse grid setup: %f\n",
-                   my_id, wall_time);
-   }
+   hypre_ParPrintf(comm, "Proc = %d - Coarse grid setup: %f\n", my_id, wall_time);
 #endif
 
    /* Setup smoother for fine grid */
@@ -2009,7 +1987,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
          hypre_BoomerAMGCreateSFromCFMarker(A_array_local[lev_local], strong_threshold, max_row_sum,
                                             hypre_IntArrayData(CF_marker_array[lev]),
                                             num_functions, dof_func_data, smrk_local, &S_local);
-         //hypre_ParCSRMatrixPrintIJ(S_local,0,0,"S_mat");
+         //hypre_ParCSRMatrixPrintIJ(S_local, 0, 0, "S_mat");
       }
       else if (lev_local > 0)
       {
@@ -2035,7 +2013,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
          coarse_size = coarse_pnts_global_lvl[1];
       }
       hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-      //hypre_printf("Coarse size = %d \n", coarse_size);
+
       if (coarse_size == 0) // stop coarsening
       {
          if (S_local) { hypre_ParCSRMatrixDestroy(S_local); }
