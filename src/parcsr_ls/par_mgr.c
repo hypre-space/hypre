@@ -3576,7 +3576,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    return hypre_error_flag;
 }
 
-/* Setup restriction operator */
+/* Setup restriction operator. TODO: Change R -> RT (VPM) */
 HYPRE_Int
 hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                         hypre_ParCSRMatrix    *A_FF,
