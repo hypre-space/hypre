@@ -1530,7 +1530,8 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre
 
 /* Wrapper for ILU0 with cusparse on a matrix, csr sort was done in this function */
 HYPRE_Int
-HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solve_policy)
+HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
+                              cusparseSolvePolicy_t  ilu_solve_policy)
 {
 
    /* data objects for A */
@@ -1552,8 +1553,10 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
    HYPRE_Int               matA_buffersize;
    void                    *matA_buffer         = NULL;
 
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
+
+   cusparseHandle_t    handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t  descr  = hypre_CSRMatrixGPUMatDescr(A);
+   cusparseStatus_t    status;
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
    hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
@@ -1577,7 +1580,16 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
                                                         matA_info, ilu_solve_policy, matA_buffer));
 
    /* 5-2. Check for zero pivot */
-   HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
+   status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
+   if (status == CUSPARSE_STATUS_ZERO_PIVOT)
+   {
+      char errmsg[1024];
+
+      hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after analysis\n",
+                    zero_pivot, zero_pivot);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      return hypre_error_flag;
+   }
 
    /* 6. Apply the factorization */
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
@@ -1585,7 +1597,16 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
                                                matA_info, ilu_solve_policy, matA_buffer));
 
    /* Check for zero pivot */
-   HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
+   status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
+   if (status == CUSPARSE_STATUS_ZERO_PIVOT)
+   {
+      char errmsg[1024];
+
+      hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after factorization\n",
+                    zero_pivot, zero_pivot);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      return hypre_error_flag;
+   }
 
    /* Done with factorization, finishing up */
    hypre_TFree(matA_buffer, HYPRE_MEMORY_DEVICE);
