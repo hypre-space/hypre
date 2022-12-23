@@ -3255,11 +3255,18 @@ HYPRE_Int hypre_MGRAddVectorP( hypre_IntArray *CF_marker, HYPRE_Int point_type, 
 HYPRE_Int hypre_MGRAddVectorR( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
                                hypre_ParVector *fromVector, HYPRE_Real b,
                                hypre_ParVector **toVector );
+HYPRE_Int hypre_MGRTruncateAcfCPRDevice( hypre_ParCSRMatrix  *A_CF,
+                                         hypre_ParCSRMatrix **A_CF_new_ptr );
+HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
+HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
+                                               hypre_ParCSRMatrix *Wp, HYPRE_Int method,
+                                               HYPRE_Complex threshold,
+                                               hypre_ParCSRMatrix **A_H_ptr );
 HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P,
                                                  hypre_ParCSRMatrix *RT, HYPRE_Int bsize,
                                                  HYPRE_Int ordering, HYPRE_Int method,
                                                  HYPRE_Int Pmax, HYPRE_Int *CF_marker,
-                                                 hypre_ParCSRMatrix **A_h_ptr );
+                                                 hypre_ParCSRMatrix **A_H_ptr );
 HYPRE_Int hypre_MGRWriteSolverParams( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );
@@ -3306,6 +3313,10 @@ HYPRE_Int hypre_MGRDirectSolverDestroy( void *solver );
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *conv_factor );
+
+/* par_mgr_coarsen.c */
+HYPRE_Int hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker,
+                                HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts );
 
 /* par_mgr_device.c */
 HYPRE_Int hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
