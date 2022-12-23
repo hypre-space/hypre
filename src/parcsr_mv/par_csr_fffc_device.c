@@ -1429,6 +1429,23 @@ hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCCCFDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixGenerateCCCFDevice( hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      HYPRE_BigInt        *cpts_starts,
+                                      hypre_ParCSRMatrix  *S,
+                                      hypre_ParCSRMatrix **ACF_ptr,
+                                      hypre_ParCSRMatrix **ACC_ptr)
+{
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    ACF_ptr, ACC_ptr, 1);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixGenerate1DCFDevice
  *--------------------------------------------------------------------------*/
 
