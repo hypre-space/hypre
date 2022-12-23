@@ -1328,6 +1328,12 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    HYPRE_Real      *elmt_tols_diag = NULL;
    HYPRE_Real      *elmt_tols_offd = NULL;
 
+   /* Exit if tolerance is zero */
+   if (tol < HYPRE_REAL_MIN)
+   {
+      return hypre_error_flag;
+   }
+
    if (col_map_offd_A == NULL)
    {
       col_map_offd_A = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
