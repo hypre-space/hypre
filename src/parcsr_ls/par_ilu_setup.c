@@ -1557,6 +1557,19 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    cusparseHandle_t    handle = hypre_HandleCusparseHandle(hypre_handle());
    cusparseMatDescr_t  descr  = hypre_CSRMatrixGPUMatDescr(A);
    cusparseStatus_t    status;
+   char                errmsg[1024];
+
+   /* Sanity checks */
+   if (n <= 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of rows!");
+      return hypre_error_flag;
+   }
+   else if (nnz_A <= 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of coefficients!");
+      return hypre_error_flag;
+   }
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
    hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
@@ -1583,8 +1596,6 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
    if (status == CUSPARSE_STATUS_ZERO_PIVOT)
    {
-      char errmsg[1024];
-
       hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after analysis\n",
                     zero_pivot, zero_pivot);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
@@ -1615,12 +1626,21 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    return hypre_error_flag;
 }
 
-/* Wrapper for ILU0 solve analysis phase with cusparse on a matrix */
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetupCusparseCSRILU0SetupSolve
+ *
+ * Wrapper for ILU0 solve analysis phase with cusparse on a matrix
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t matL_des,
-                                        cusparseMatDescr_t matU_des,
-                                        cusparseSolvePolicy_t ilu_solve_policy, csrsv2Info_t *matL_infop, csrsv2Info_t *matU_infop,
-                                        HYPRE_Int *buffer_sizep, void **bufferp)
+HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix       *A,
+                                        cusparseMatDescr_t     matL_des,
+                                        cusparseMatDescr_t     matU_des,
+                                        cusparseSolvePolicy_t  ilu_solve_policy,
+                                        csrsv2Info_t          *matL_infop,
+                                        csrsv2Info_t          *matU_infop,
+                                        HYPRE_Int             *buffer_sizep,
+                                        void                 **bufferp)
 {
    if (!A)
    {
@@ -1678,17 +1698,31 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
+   /* Sanity checks */
+   if (n <= 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of rows!");
+      return hypre_error_flag;
+   }
+   else if (nnz_A <= 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of coefficients!");
+      return hypre_error_flag;
+   }
+
    /* 1. Create info for ilu setup and solve */
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matL_info)));
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matU_info)));
 
    /* 2. Get working array size */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle,
+                                                        CUSPARSE_OPERATION_NON_TRANSPOSE, n,
                                                         nnz_A,
                                                         matL_des, A_data, A_i, A_j,
                                                         matL_info, &matL_buffersize));
 
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle,
+                                                        CUSPARSE_OPERATION_NON_TRANSPOSE, n,
                                                         nnz_A,
                                                         matU_des, A_data, A_i, A_j,
                                                         matU_info, &matU_buffersize));
