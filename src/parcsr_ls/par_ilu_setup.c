@@ -1535,29 +1535,26 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
 {
 
    /* data objects for A */
-   HYPRE_Int               n                    = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               m                    = hypre_CSRMatrixNumCols(A);
-
-   hypre_assert(n == m);
-
-   HYPRE_Real              *A_data              = hypre_CSRMatrixData(A);
-   HYPRE_Int               *A_i                 = hypre_CSRMatrixI(A);
-   HYPRE_Int               *A_j                 = hypre_CSRMatrixJ(A);
-   HYPRE_Int               nnz_A                = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int               n      = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int               m      = hypre_CSRMatrixNumCols(A);
+   HYPRE_Real             *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int              *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int              *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_Int               nnz_A  = hypre_CSRMatrixNumNonzeros(A);
 
    /* pointers to cusparse data */
-   csrilu02Info_t          matA_info            = NULL;
+   csrilu02Info_t          matA_info;
 
    /* variables and working arrays used during the ilu */
    HYPRE_Int               zero_pivot;
    HYPRE_Int               matA_buffersize;
-   void                    *matA_buffer         = NULL;
+   char                   *matA_buffer;
 
 
-   cusparseHandle_t    handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t  descr  = hypre_CSRMatrixGPUMatDescr(A);
-   cusparseStatus_t    status;
-   char                errmsg[1024];
+   cusparseHandle_t        handle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t      descr  = hypre_CSRMatrixGPUMatDescr(A);
+   cusparseStatus_t        status;
+   char                    errmsg[1024];
 
    /* Sanity checks */
    if (n <= 0)
@@ -1570,6 +1567,7 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of coefficients!");
       return hypre_error_flag;
    }
+   hypre_assert(n == m);
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
    hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
@@ -1583,14 +1581,14 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
                                                           matA_info, &matA_buffersize));
 
    /* 4. Create working array, since they won't be visited by host, allocate on device */
-   matA_buffer                                  = hypre_TAlloc(char, matA_buffersize,
-                                                               HYPRE_MEMORY_DEVICE);
+   matA_buffer = hypre_TAlloc(char, matA_buffersize, HYPRE_MEMORY_DEVICE);
 
    /* 5. Now perform the analysis */
    /* 5-1. Analysis */
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, n, nnz_A, descr,
                                                         A_data, A_i, A_j,
-                                                        matA_info, ilu_solve_policy, matA_buffer));
+                                                        matA_info, ilu_solve_policy,
+                                                        matA_buffer));
 
    /* 5-2. Check for zero pivot */
    status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
@@ -1605,14 +1603,13 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    /* 6. Apply the factorization */
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
                                                A_data, A_i, A_j,
-                                               matA_info, ilu_solve_policy, matA_buffer));
+                                               matA_info, ilu_solve_policy,
+                                               matA_buffer));
 
    /* Check for zero pivot */
    status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
    if (status == CUSPARSE_STATUS_ZERO_PIVOT)
    {
-      char errmsg[1024];
-
       hypre_sprintf(errmsg, "hypre_ILU: found zero pivot at A(%d, %d) after factorization\n",
                     zero_pivot, zero_pivot);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
