@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.26.0)
-set(HYPRE_NUMBER  22600)
-set(HYPRE_DATE    2022/10/14)
+set(HYPRE_VERSION 2.27.0)
+set(HYPRE_NUMBER  22700)
+set(HYPRE_DATE    2022/12/20)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -91,6 +91,7 @@ option(HYPRE_ENABLE_HYPRE_LAPACK     "Use internal LAPACK library" ON)
 option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
 option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
 option(HYPRE_WITH_MPI                "Compile with MPI" ON)
+option(HYPRE_WITH_GPU_AWARE_MPI      "Compile with device aware GPU support" OFF)
 option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
 option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
 option(HYPRE_WITH_SUPERLU            "Use TPL SuperLU" OFF)
@@ -353,6 +354,7 @@ if (HYPRE_WITH_SYCL)
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 
   # Set CXX compiler to dpcpp
+  # WM: note that dpcpp is deprecated, but for now oneMKL looks for the dpcpp compiler to configure things appropriately for the sycl backend
   set(CMAKE_CXX_COMPILER "dpcpp")
 
   # Set linker to dpcpp
@@ -385,7 +387,9 @@ if (HYPRE_WITH_SYCL)
 
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-device-code-split=per_kernel>")
+  add_link_options("-fsycl")
+  add_link_options("-fsycl-device-code-split=per_kernel")
+  add_link_options("-Wl,--no-relax")
 
   if (HYPRE_SYCL_TARGET)
     add_link_options("SHELL:-fsycl-targets=${HYPRE_SYCL_TARGET}")
@@ -556,9 +560,9 @@ if (HYPRE_USING_SYCL)
     set(MKL_LINK static)
     set(MKL_THREADING sequential)
     find_package(MKL CONFIG REQUIRED HINTS "$ENV{MKLROOT}/lib/cmake/mkl")
-    target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_COMPILE_OPTIONS>)
-    target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL_DPCPP,INTERFACE_INCLUDE_DIRECTORIES>)
-    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL_DPCPP>)
+    target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
+    target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
+    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL>)
   endif()
 endif()
 

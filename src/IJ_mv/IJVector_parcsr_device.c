@@ -74,7 +74,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
-                      std::less< std::tuple<HYPRE_BigInt, char, HYPRE_Complex> >() );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -183,7 +183,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
-                      std::less< std::tuple<HYPRE_BigInt, char, HYPRE_Complex> >() );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -232,6 +232,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    [] (const auto & x) {return x;},
    [] (const auto & x) {return 0.0;} );
 
+   /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
    auto new_end = oneapi::dpl::reduce_by_segment(
                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
                                                                                    hypre_handle())),
@@ -294,20 +295,20 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 }
 
 /*--------------------------------------------------------------------
- * hypreCUDAKernel_IJVectorAssemblePar
+ * hypreGPUKernel_IJVectorAssemblePar
  *
  * y[map[i]-offset] = x[i] or y[map[i]] += x[i] depending on SorA,
  * same index cannot appear more than once in map
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreCUDAKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
-                                     HYPRE_Int         n,
-                                     HYPRE_Complex    *x,
-                                     HYPRE_BigInt     *map,
-                                     HYPRE_BigInt      offset,
-                                     char             *SorA,
-                                     HYPRE_Complex    *y )
+hypreGPUKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
+                                    HYPRE_Int         n,
+                                    HYPRE_Complex    *x,
+                                    HYPRE_BigInt     *map,
+                                    HYPRE_BigInt      offset,
+                                    char             *SorA,
+                                    HYPRE_Complex    *y )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -609,7 +610,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJVectorAssemblePar, gDim, bDim,
                         new_nnz, new_data, new_i,
                         vec_start, new_sora,
                         data );
@@ -625,4 +626,84 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_IJVectorUpdateValues( hypre_DeviceItem    &item,
+                                      HYPRE_Int            n,
+                                      const HYPRE_Complex *x,
+                                      const HYPRE_BigInt  *indices,
+                                      HYPRE_BigInt         start,
+                                      HYPRE_BigInt         stop,
+                                      HYPRE_Int            action,
+                                      HYPRE_Complex       *y )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i >= n)
+   {
+      return;
+   }
+
+   HYPRE_Int j;
+
+   if (indices)
+   {
+      j = (HYPRE_Int) (read_only_load(&indices[i]) - start);
+   }
+   else
+   {
+      j = i;
+   }
+
+   if (j < 0 || j > (HYPRE_Int) (stop - start))
+   {
+      return;
+   }
+
+   if (action)
+   {
+      y[j] = x[i];
+   }
+   else
+   {
+      y[j] += x[i];
+   }
+}
+
+HYPRE_Int
+hypre_IJVectorUpdateValuesDevice( hypre_IJVector      *vector,
+                                  HYPRE_Int            num_values,
+                                  const HYPRE_BigInt  *indices,
+                                  const HYPRE_Complex *values,
+                                  HYPRE_Int            action)
+{
+   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt  vec_start = IJpartitioning[0];
+   HYPRE_BigInt  vec_stop  = IJpartitioning[1] - 1;
+
+   if (!indices)
+   {
+      num_values = vec_stop - vec_start + 1;
+   }
+
+   if (num_values <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   /* set/add to local vector */
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_values, "thread", bDim);
+
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorUpdateValues,
+                     gDim, bDim,
+                     num_values, values, indices,
+                     vec_start, vec_stop, action,
+                     hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+
+   return hypre_error_flag;
+}
+
 #endif
+

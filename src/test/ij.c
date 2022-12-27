@@ -280,6 +280,7 @@ main( hypre_int argc,
    HYPRE_Real   atol = 0.0;
    HYPRE_Real   max_row_sum = 1.;
    HYPRE_Int    converge_type = 0;
+   HYPRE_Int    precon_cycles = 1;
 
    HYPRE_Int  cheby_order = 2;
    HYPRE_Int  cheby_eig_est = 10;
@@ -1958,6 +1959,11 @@ main( hypre_int argc,
       {
          arg_index++;
          amgdd_num_ghost_layers = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-precon_cycles") == 0 )
+      {
+         arg_index++;
+         precon_cycles = atoi(argv[arg_index++]);
       }
       else
       {
@@ -4588,7 +4594,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -4774,7 +4780,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -5016,7 +5022,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
          HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
@@ -5367,7 +5373,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
             HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
             HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-            HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+            HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
             HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
             HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
             HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -5484,7 +5490,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
             HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
             HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-            HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+            HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
             HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
             HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
             HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -5793,7 +5799,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
             HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
             HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-            HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+            HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
             HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
             HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
             HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -5921,7 +5927,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
             HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
             HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-            HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+            HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
             HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
             HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
             HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -6275,7 +6281,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(amg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(amg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(amg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(amg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(amg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(amg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(amg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(amg_precond, num_sweeps);
@@ -6470,7 +6476,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -6816,7 +6822,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -7021,7 +7027,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -7214,7 +7220,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
          HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
@@ -7427,7 +7433,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -7675,7 +7681,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, 1);
          HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
          HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
@@ -7827,7 +7833,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -8031,7 +8037,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetTol(amg_solver, pc_tol);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
 
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
 
          HYPRE_BoomerAMGSetCycleType(amg_solver, 1);
          HYPRE_BoomerAMGSetNumSweeps(amg_solver, 1);
@@ -8176,7 +8182,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, precon_cycles);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetFCycle(pcg_precond, fcycle);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
@@ -8443,7 +8449,7 @@ main( hypre_int argc,
       }
       else
       {
-         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, precon_cycles);
          HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
       }

@@ -851,7 +851,7 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
       a_i = hypre_CSRBooleanMatrix_Get_I(A);
       a_j = hypre_CSRBooleanMatrix_Get_J(A);
    }
-   hypre_MPI_Bcast(global_data, 2, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(global_data, 2, HYPRE_MPI_BIG_INT, 0, comm);
    global_num_rows = global_data[0];
    global_num_cols = global_data[1];
 

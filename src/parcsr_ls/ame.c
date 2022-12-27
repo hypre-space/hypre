@@ -19,7 +19,7 @@
  * Allocate the AMS eigensolver structure.
  *--------------------------------------------------------------------------*/
 
-void * hypre_AMECreate()
+void * hypre_AMECreate(void)
 {
    hypre_AMEData *ame_data;
 
@@ -249,16 +249,16 @@ HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 __global__ void
-hypreCUDAKernel_GtEliminateBoundary( hypre_DeviceItem    &item,
-                                     HYPRE_Int      nrows,
-                                     HYPRE_Int     *Gt_diag_i,
-                                     HYPRE_Int     *Gt_diag_j,
-                                     HYPRE_Complex *Gt_diag_data,
-                                     HYPRE_Int     *Gt_offd_i,
-                                     HYPRE_Int     *Gt_offd_j,
-                                     HYPRE_Complex *Gt_offd_data,
-                                     HYPRE_Int     *edge_bc,
-                                     HYPRE_Int     *edge_bc_offd)
+hypreGPUKernel_GtEliminateBoundary( hypre_DeviceItem    &item,
+                                    HYPRE_Int      nrows,
+                                    HYPRE_Int     *Gt_diag_i,
+                                    HYPRE_Int     *Gt_diag_j,
+                                    HYPRE_Complex *Gt_diag_data,
+                                    HYPRE_Int     *Gt_offd_i,
+                                    HYPRE_Int     *Gt_offd_j,
+                                    HYPRE_Complex *Gt_offd_data,
+                                    HYPRE_Int     *edge_bc,
+                                    HYPRE_Int     *edge_bc_offd)
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -505,7 +505,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          {
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(nv, "warp", bDim);
-            HYPRE_GPU_LAUNCH( hypreCUDAKernel_GtEliminateBoundary, gDim, bDim,
+            HYPRE_GPU_LAUNCH( hypreGPUKernel_GtEliminateBoundary, gDim, bDim,
                               nv, GtdI, GtdJ, GtdA, GtoI, GtoJ, GtoA, edge_bc, offd_edge_bc );
          }
          else

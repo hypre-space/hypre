@@ -311,6 +311,14 @@ hypre_ParVectorSetConstantValues( hypre_ParVector *v,
    return hypre_SeqVectorSetConstantValues(v_local, value);
 }
 
+HYPRE_Int
+hypre_ParVectorSetZeros( hypre_ParVector *v )
+{
+   hypre_ParVectorAllZeros(v) = 1;
+
+   return hypre_ParVectorSetConstantValues(v, 0.0);
+}
+
 /*--------------------------------------------------------------------------
  * hypre_ParVectorSetRandomValues
  *--------------------------------------------------------------------------*/
@@ -535,7 +543,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       global_vecstride = hypre_VectorVectorStride(v);
    }
 
-   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_BIG_INT, 0, comm);
    hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
    hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
 
