@@ -14,7 +14,7 @@
 import sys, os
 
 # Alabaster
-import alabaster
+#import alabaster
 
 # Read the docs
 #import sphinx_rtd_theme
@@ -108,9 +108,10 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #html_theme = 'default'
+html_theme = 'classic'
 
 # Alabaster
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
 
 # Read the docs
 #html_theme = 'sphinx_rtd_theme'
@@ -120,12 +121,19 @@ html_theme = 'alabaster'
 # documentation.
 #html_theme_options = {}
 
-# Alabaster
+# Classic
 html_theme_options = {
-    'page_width': '1200px',
-    'sidebar_width': '300px',
-    'fixed_sidebar': 'true',
+    'body_min_width': '900px',
+    'sidebarwidth': '300px',
+    'stickysidebar': 'true',
 }
+
+## Alabaster
+#html_theme_options = {
+#    'page_width': '1200px',
+#    'sidebar_width': '300px',
+#    'fixed_sidebar': 'true',
+#}
 
 # Read the docs
 #html_theme_options = {
@@ -136,7 +144,7 @@ html_theme_options = {
 #html_theme_path = []
 
 # Alabaster
-html_theme_path = [alabaster.get_path()]
+#html_theme_path = [alabaster.get_path()]
 
 # Read the docs
 #html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
@@ -173,16 +181,25 @@ html_static_path = ['_static']
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 
-# Alabaster
+# Classic
 html_sidebars = {
     '**': [
-        'about.html',
-        'navigation.html',
+        'globaltoc.html',
         'relations.html',
         'searchbox.html',
-        'donate.html',
     ]
 }
+
+# Alabaster
+#html_sidebars = {
+#    '**': [
+#        'about.html',
+#        'navigation.html',
+#        'relations.html',
+#        'searchbox.html',
+#        'donate.html',
+#    ]
+#}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
