@@ -29,6 +29,14 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
          filename, line, ierr);
    }
 #endif
+
+#if defined(HYPRE_DEBUG)
+   if (hypre_error_flag != 0)
+   {
+      hypre_fprintf(stderr, "Error!! hypre_error_flag is non-positive!\n");
+      assert(0);
+   }
+#endif
 }
 
 HYPRE_Int HYPRE_GetError(void)
@@ -85,4 +93,3 @@ HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code)
    hypre_error_flag &= ~hypre_error_code;
    return (hypre_error_flag & hypre_error_code);
 }
-
