@@ -304,7 +304,9 @@ hypre_MGRSolve( void               *mgr_vdata,
 }
 
 HYPRE_Int
-hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVector *u )
+hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
+                        hypre_ParVector *f,
+                        hypre_ParVector *u )
 {
    hypre_ParAMGData   *Frelax_data = (hypre_ParAMGData*) Frelax_vdata;
 
@@ -534,9 +536,9 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
 }
 
 HYPRE_Int
-hypre_MGRCycle( void               *mgr_vdata,
-                hypre_ParVector    **F_array,
-                hypre_ParVector    **U_array )
+hypre_MGRCycle( void              *mgr_vdata,
+                hypre_ParVector  **F_array,
+                hypre_ParVector  **U_array )
 {
    MPI_Comm          comm;
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
@@ -656,53 +658,60 @@ hypre_MGRCycle( void               *mgr_vdata,
       /* F-relaxation */
       else if (cycle_type == 1)
       {
-         if (pre_smoothing)
+         /* Global pre smoothing sweeps */
+         if (pre_smoothing && (level_smooth_iters[level] > 0))
          {
-            if (level_smooth_iters[level] > 0)
+            //wall_time = time_getWallclockSeconds();
+            if (level_smooth_type[level] == 0 || level_smooth_type[level] == 1) //block Jacobi smoother
             {
-               //wall_time = time_getWallclockSeconds();
-               //if (lvl_smth_type == 0 || lvl_smth_type == 1) //block Jacobi smoother
-               if (level_smooth_type[level] == 0 || level_smooth_type[level] == 1) //block Jacobi smoother
+               HYPRE_Real *level_diaginv = (mgr_data -> level_diaginv)[level];
+               HYPRE_Int level_blk_size = (level == 0 ? block_size : block_num_coarse_indexes[level - 1]);
+               HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
+               HYPRE_Int n_block = nrows / level_blk_size;
+               HYPRE_Int left_size = nrows - n_block * level_blk_size;
+               for (i = 0; i < level_smooth_iters[level]; i++)
                {
-                  HYPRE_Real *level_diaginv = (mgr_data -> level_diaginv)[level];
-                  HYPRE_Int level_blk_size = (level == 0 ? block_size : block_num_coarse_indexes[level - 1]);
-                  HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-                  HYPRE_Int n_block = nrows / level_blk_size;
-                  HYPRE_Int left_size = nrows - n_block * level_blk_size;
-                  for (i = 0; i < level_smooth_iters[level]; i++)
-                  {
-                     hypre_MGRBlockRelaxSolve(A_array[level], F_array[level], U_array[level], level_blk_size, n_block,
-                                              left_size, level_smooth_type[level], level_diaginv, Vtemp);
-                  }
-               }
-               else if ((level_smooth_type[level] > 1) && (level_smooth_type[level] < 7))
-               {
-                  for (i = 0; i < level_smooth_iters[level]; i ++)
-                  {
-                     hypre_BoomerAMGRelax(A_array[level], F_array[level], NULL, level_smooth_type[level] - 1, 0, 1.0,
-                                          0.0, NULL, U_array[level], Vtemp, NULL);
-                  }
-               }
-               else if (level_smooth_type[level] == 8) //EUCLID ILU smoother
-               {
-                  for (i = 0; i < level_smooth_iters[level]; i++)
-                  {
-                     // compute residual
-                     hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level], U_array[level], beta, F_array[level],
-                                                        Vtemp);
-                     // solve
-                     HYPRE_EuclidSolve( (mgr_data -> level_smoother)[level], A_array[level], Vtemp, Utemp);
-                     // update solution
-                     hypre_ParVectorAxpy(beta, Utemp, U_array[level]);
-                  }
-               }
-               else if (level_smooth_type[level] == 16) // HYPRE ILU
-               {
-                  // solve
-                  HYPRE_ILUSolve((mgr_data -> level_smoother)[level], A_array[level], F_array[level], U_array[level]);
+                  hypre_MGRBlockRelaxSolve(A_array[level], F_array[level], U_array[level], level_blk_size, n_block,
+                                           left_size, level_smooth_type[level], level_diaginv, Vtemp);
                }
             }
-         }// end pre-smoothing
+            else if ((level_smooth_type[level] > 1) && (level_smooth_type[level] < 7))
+            {
+               for (i = 0; i < level_smooth_iters[level]; i ++)
+               {
+                  hypre_BoomerAMGRelax(A_array[level], F_array[level], NULL, level_smooth_type[level] - 1, 0, 1.0,
+                                       0.0, NULL, U_array[level], Vtemp, NULL);
+               }
+            }
+            else if (level_smooth_type[level] == 8) //EUCLID ILU smoother
+            {
+               for (i = 0; i < level_smooth_iters[level]; i++)
+               {
+                  // compute residual
+                  hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level], U_array[level], beta, F_array[level],
+                                                     Vtemp);
+                  // solve
+                  HYPRE_EuclidSolve( (mgr_data -> level_smoother)[level], A_array[level], Vtemp, Utemp);
+                  // update solution
+                  hypre_ParVectorAxpy(beta, Utemp, U_array[level]);
+               }
+            }
+            else if (level_smooth_type[level] == 16) // HYPRE ILU
+            {
+               // solve
+               HYPRE_ILUSolve((mgr_data -> level_smoother)[level], A_array[level], F_array[level], U_array[level]);
+            }
+            else if (level_smooth_type[fine_grid] == 18)
+            {
+               /* L1-Jacobi */
+               for (i = 0; i < level_smooth_iters[level]; i++)
+               {
+                  hypre_BoomerAMGRelax7Jacobi(A_array[fine_grid], F_array[fine_grid], NULL, 0,
+                                              1.0, hypre_VectorData(relax_l1_norms[fine_grid]),
+                                              U_array[fine_grid], Vtemp);
+               }
+            }
+         } // end pre-smoothing
 
          fine_grid = level;
          coarse_grid = level + 1;
@@ -970,55 +979,62 @@ hypre_MGRCycle( void               *mgr_vdata,
                                 &(U_array[fine_grid]));
          }
 
-         /* post smoothing sweeps */
-         if (post_smoothing)
+         /* Global post smoothing sweeps */
+         if (post_smoothing & (level_smooth_iters[fine_grid] > 0))
          {
-            if (level_smooth_iters[fine_grid] > 0)
+            //wall_time = time_getWallclockSeconds();
+            //if (lvl_smth_type == 0 || lvl_smth_type == 1) //block Jacobi smoother
+            if (level_smooth_type[fine_grid] == 0 || level_smooth_type[fine_grid] == 1) //block Jacobi smoother
             {
-               //wall_time = time_getWallclockSeconds();
-               //if (lvl_smth_type == 0 || lvl_smth_type == 1) //block Jacobi smoother
-               if (level_smooth_type[fine_grid] == 0 || level_smooth_type[fine_grid] == 1) //block Jacobi smoother
+               HYPRE_Real *level_diaginv = (mgr_data -> level_diaginv)[fine_grid];
+               HYPRE_Int level_blk_size = (fine_grid == 0 ? block_size : block_num_coarse_indexes[fine_grid - 1]);
+               HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
+               HYPRE_Int n_block = nrows / level_blk_size;
+               HYPRE_Int left_size = nrows - n_block * level_blk_size;
+               for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
-                  HYPRE_Real *level_diaginv = (mgr_data -> level_diaginv)[fine_grid];
-                  HYPRE_Int level_blk_size = (fine_grid == 0 ? block_size : block_num_coarse_indexes[fine_grid - 1]);
-                  HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
-                  HYPRE_Int n_block = nrows / level_blk_size;
-                  HYPRE_Int left_size = nrows - n_block * level_blk_size;
-                  for (i = 0; i < level_smooth_iters[fine_grid]; i++)
-                  {
-                     hypre_MGRBlockRelaxSolve(A_array[fine_grid], F_array[fine_grid], U_array[fine_grid], level_blk_size,
-                                              n_block,
-                                              left_size, level_smooth_type[fine_grid], level_diaginv, Vtemp);
-                  }
+                  hypre_MGRBlockRelaxSolve(A_array[fine_grid], F_array[fine_grid], U_array[fine_grid], level_blk_size,
+                                           n_block,
+                                           left_size, level_smooth_type[fine_grid], level_diaginv, Vtemp);
                }
-               else if ((level_smooth_type[fine_grid] > 1) && (level_smooth_type[fine_grid] < 7))
+            }
+            else if ((level_smooth_type[fine_grid] > 1) && (level_smooth_type[fine_grid] < 7))
+            {
+               for (i = 0; i < level_smooth_iters[level]; i ++)
                {
-                  for (i = 0; i < level_smooth_iters[level]; i ++)
-                  {
-                     hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], NULL, level_smooth_type[fine_grid] - 1,
-                                          0, 1.0,
-                                          0.0, NULL, U_array[fine_grid], Vtemp, NULL);
-                  }
+                  hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], NULL, level_smooth_type[fine_grid] - 1,
+                                       0, 1.0,
+                                       0.0, NULL, U_array[fine_grid], Vtemp, NULL);
                }
-               else if (level_smooth_type[fine_grid] == 8) //EUCLID ILU smoother
+            }
+            else if (level_smooth_type[fine_grid] == 8) //EUCLID ILU smoother
+            {
+               for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
-                  for (i = 0; i < level_smooth_iters[fine_grid]; i++)
-                  {
-                     // compute residual
-                     hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid], beta,
-                                                        F_array[fine_grid],
-                                                        Vtemp);
-                     // solve
-                     HYPRE_EuclidSolve( (mgr_data -> level_smoother)[fine_grid], A_array[fine_grid], Vtemp, Utemp);
-                     // update solution
-                     hypre_ParVectorAxpy(beta, Utemp, U_array[fine_grid]);
-                  }
-               }
-               else if (level_smooth_type[fine_grid] == 16) // HYPRE ILU
-               {
+                  // compute residual
+                  hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid], beta,
+                                                     F_array[fine_grid],
+                                                     Vtemp);
                   // solve
-                  HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid], A_array[fine_grid], F_array[fine_grid],
-                                 U_array[fine_grid]);
+                  HYPRE_EuclidSolve( (mgr_data -> level_smoother)[fine_grid], A_array[fine_grid], Vtemp, Utemp);
+                  // update solution
+                  hypre_ParVectorAxpy(beta, Utemp, U_array[fine_grid]);
+               }
+            }
+            else if (level_smooth_type[fine_grid] == 16) // HYPRE ILU
+            {
+               // solve
+               HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid], A_array[fine_grid], F_array[fine_grid],
+                              U_array[fine_grid]);
+            }
+            else if (level_smooth_type[fine_grid] == 18)
+            {
+               /* L1-Jacobi */
+               for (i = 0; i < level_smooth_iters[level]; i++)
+               {
+                  hypre_BoomerAMGRelax7Jacobi(A_array[fine_grid], F_array[fine_grid], NULL, 0,
+                                              1.0, hypre_VectorData(relax_l1_norms[fine_grid]),
+                                              U_array[fine_grid], Vtemp);
                }
             }
          }// end post-smoothing

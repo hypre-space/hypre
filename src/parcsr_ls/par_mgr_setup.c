@@ -521,7 +521,6 @@ hypre_MGRSetup( void               *mgr_vdata,
          if ((mgr_data -> l1_norms)[j])
          {
             hypre_SeqVectorDestroy((mgr_data -> l1_norms)[i]);
-            //hypre_TFree((mgr_data -> l1_norms)[j], HYPRE_MEMORY_HOST);
             (mgr_data -> l1_norms)[j] = NULL;
          }
       }
@@ -633,6 +632,10 @@ hypre_MGRSetup( void               *mgr_vdata,
    if (CF_marker_array == NULL)
    {
       CF_marker_array = hypre_CTAlloc(hypre_IntArray*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   if (l1_norms == NULL)
+   {
+      l1_norms = hypre_CTAlloc(hypre_Vector*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
 
    /* Set default for Frelax_method if not set already -- Supports deprecated function */
@@ -774,6 +777,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> P_array) = P_array;
    (mgr_data -> RT_array) = RT_array;
    (mgr_data -> CF_marker_array) = CF_marker_array;
+   (mgr_data -> l1_norms) = l1_norms;
 #if defined(HYPRE_USING_GPU)
    (mgr_data -> P_FF_array) = P_FF_array;
 #endif
@@ -942,7 +946,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
       /* Check if this is the last level */
-      last_level = ((lev == num_coarsening_levs - 1));
+      last_level = (lev == (num_coarsening_levs - 1));
 
       /* Set level's block size */
       level_blk_size = (lev == 0) ? block_size : block_num_coarse_indexes[lev - 1];
@@ -951,6 +955,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       A_array[lev] = RAP_ptr;
       nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
 
+      /* Setup global smoother */
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds();
 #endif
@@ -990,6 +995,16 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
             HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
+         }
+         else if (level_smooth_type[lev] == 18)
+         {
+            HYPRE_Real *l1_norm_data = NULL;
+
+            hypre_ParCSRComputeL1Norms(A_array[lev], 1, NULL, &l1_norm_data);
+            l1_norms[lev] = hypre_SeqVectorCreate(nloc);
+            hypre_VectorData(l1_norms[lev]) = l1_norm_data;
+            hypre_SeqVectorInitialize_v2(l1_norms[lev],
+                                         hypre_ParCSRMatrixMemoryLocation(A_array[lev]));
          }
       }
 #if MGR_DEBUG_LEVEL == 2
@@ -1652,18 +1667,13 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParPrintf(comm, "Proc = %d - Coarse grid setup: %f\n", my_id, wall_time);
 #endif
 
-   /* Setup smoother for fine grid */
-   /* Always allocate l1_norms data, for now. Avoids looping over frelax_type -- DOK */
-   //   if ( relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
-   //   {
-   l1_norms = hypre_CTAlloc(hypre_Vector*, num_c_levels, HYPRE_MEMORY_HOST);
-   (mgr_data -> l1_norms) = l1_norms;
-   //   }
-
+   /* Allocate l1_norms when necessary
+      TODO (VPM): move this block closer to global smoother setup */
    for (j = 0; j < num_c_levels; j++)
    {
       HYPRE_Int frelax_type = Frelax_type[j];
-      if ((mgr_data -> num_relax_sweeps)[j] > 0)
+
+      if (((mgr_data -> num_relax_sweeps)[j] > 0) && (l1_norms[j] == NULL))
       {
          HYPRE_Real *l1_norm_data = NULL;
          CF_marker = hypre_IntArrayData(CF_marker_array[j]);
