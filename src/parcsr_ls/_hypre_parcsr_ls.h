@@ -3258,8 +3258,9 @@ HYPRE_Int hypre_MGRAddVectorR( hypre_IntArray *CF_marker, HYPRE_Int point_type, 
 HYPRE_Int hypre_MGRTruncateAcfCPRDevice( hypre_ParCSRMatrix  *A_CF,
                                          hypre_ParCSRMatrix **A_CF_new_ptr );
 HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
-                                               hypre_ParCSRMatrix *Wp, HYPRE_Int method,
+HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
+                                               hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
+                                               HYPRE_Int blk_size, HYPRE_Int method,
                                                HYPRE_Complex threshold,
                                                hypre_ParCSRMatrix **A_H_ptr );
 HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P,

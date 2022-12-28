@@ -961,6 +961,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
       if (level_smooth_iters[lev] > 0)
       {
+         /* Change from ILU to L1-Jacobi when using GPUs. This is temporary! (VPM) */
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+         level_smooth_type[lev] = (level_smooth_type[lev] == 16) ? 18 : 16;
+#endif
+
          if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
@@ -1061,11 +1066,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-      if (interp_type[lev] == 12)
+      if ((interp_type[lev] == 12) ||
+          (mgr_coarse_grid_method[lev] != 0))
       {
          hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
                                         NULL, &A_FC, &A_FF);
-         A_ff_array[lev] = A_FF;
       }
 #endif
 
@@ -1145,10 +1150,10 @@ hypre_MGRSetup( void               *mgr_vdata,
             frelax_diaginv[lev] = diag_inv;
             blk_size[lev] = block_jacobi_bsize;
             hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
-
-            /* Set A_ff pointer */
-            A_ff_array[lev] = A_FF;
          }
+
+         /* Set A_ff pointer */
+         A_ff_array[lev] = A_FF;
 
          F_fine_array[lev + 1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
@@ -1253,11 +1258,15 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
             if (exec == HYPRE_EXEC_DEVICE)
             {
-               hypre_ParCSRMatrixGenerateCCCFDevice(RAP_ptr, CF_marker, coarse_pnts_global,
+               hypre_ParCSRMatrixGenerateCCCFDevice(RAP_ptr, CF_marker,
+                                                    coarse_pnts_global,
                                                     S, &A_CF, &A_CC);
 
-               hypre_MGRComputeNonGalerkinCGDevice(A_CF, A_CC, Wp, mgr_coarse_grid_method[lev],
-                                                   truncate_cg_threshold, &RAP_ptr);
+               hypre_MGRComputeNonGalerkinCGDevice(A_FF, A_FC, A_CF, A_CC,
+                                                   block_num_f_points,
+                                                   mgr_coarse_grid_method[lev],
+                                                   truncate_cg_threshold,
+                                                   &RAP_ptr);
 
                hypre_ParCSRMatrixDestroy(A_CC);
                hypre_ParCSRMatrixDestroy(A_CF);
@@ -1345,6 +1354,13 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Destroy temporary FF/FC/CF/CC splittings */
       hypre_ParCSRMatrixDestroy(A_FC);
       A_FC = NULL;
+
+      /* Destroy A_FF if it has not been saved on A_ff_array[lev] */
+      if (!A_ff_array[lev])
+      {
+         hypre_ParCSRMatrixDestroy(A_FF);
+         A_FF = NULL;
+      }
 
       if (Frelax_type[lev] == 2) // full AMG
       {
@@ -1617,8 +1633,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data->num_coarse_levels) = num_c_levels;
    (mgr_data->RAP) = RAP_ptr;
 
-   /* setup default coarse grid solver
-      default is BoomerAMG */
+   /* setup default coarsest grid solver (BoomerAMG) */
    if (use_default_cgrid_solver)
    {
       if (my_id == 0 && print_level > 0)
