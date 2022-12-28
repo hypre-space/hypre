@@ -1146,6 +1146,8 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix   *A,
 
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildBlockJacobiWp
+ *
+ * TODO: Move this to hypre_MGRBuildPBlockJacobi? (VPM)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2845,32 +2847,41 @@ HYPRE_Int
 hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
                         hypre_ParCSRMatrix **A_CF_new_ptr)
 {
-   HYPRE_Int i, j, jj;
-   HYPRE_Int jj_counter;
-   hypre_ParCSRMatrix *A_CF_new = NULL;
-   hypre_CSRMatrix *A_CF_new_diag = NULL;
+   /* Input matrix info */
+   MPI_Comm             comm           = hypre_ParCSRMatrixComm(A_CF);
+   HYPRE_BigInt         num_rows       = hypre_ParCSRMatrixGlobalNumRows(A_CF);
+   HYPRE_BigInt         num_cols       = hypre_ParCSRMatrixGlobalNumCols(A_CF);
 
-   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A_CF);
-   hypre_CSRMatrix *A_CF_diag = hypre_ParCSRMatrixDiag(A_CF);
+   hypre_CSRMatrix     *A_CF_diag      = hypre_ParCSRMatrixDiag(A_CF);
+   HYPRE_Int           *A_CF_diag_i    = hypre_CSRMatrixI(A_CF_diag);
+   HYPRE_Int           *A_CF_diag_j    = hypre_CSRMatrixJ(A_CF_diag);
+   HYPRE_Complex       *A_CF_diag_data = hypre_CSRMatrixData(A_CF_diag);
+   HYPRE_Int            num_rows_local = hypre_CSRMatrixNumRows(A_CF_diag);
 
-   HYPRE_Int *A_CF_diag_i = hypre_CSRMatrixI(A_CF_diag);
-   HYPRE_Int *A_CF_diag_j = hypre_CSRMatrixJ(A_CF_diag);
-   HYPRE_Complex *A_CF_diag_data = hypre_CSRMatrixData(A_CF_diag);
+   /* Output matrix info */
+   hypre_ParCSRMatrix  *A_CF_new;
+   hypre_CSRMatrix     *A_CF_diag_new;
+   HYPRE_Int           *A_CF_diag_i_new;
+   HYPRE_Int           *A_CF_diag_j_new;
+   HYPRE_Complex       *A_CF_diag_data_new;
+   HYPRE_Int            nnz_diag_new;
 
-   HYPRE_Int global_nrows = hypre_ParCSRMatrixGlobalNumRows(A_CF);
-   HYPRE_Int global_ncols = hypre_ParCSRMatrixGlobalNumCols(A_CF);
-   HYPRE_Int n_fpoints = global_ncols / global_nrows;
-   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_CF));
-   HYPRE_Int nnz_diag_new = 0;
+   /* Local variables */
+   HYPRE_Int            i, j, jj;
+   HYPRE_Int            jj_counter;
+   HYPRE_Int            blk_size = num_cols / num_rows;
 
-   // First pass: count the nnz of new A_CF
+   /* Sanity check */
+   hypre_assert(hypre_ParCSRMatrixMemoryLocation(A_CF) == HYPRE_MEMORY_HOST);
+
+   /* First pass: count the nnz of truncated (new) A_CF */
    jj_counter = 0;
-   for (i = 0; i < num_rows; i++)
+   for (i = 0; i < num_rows_local; i++)
    {
       for (j = A_CF_diag_i[i]; j < A_CF_diag_i[i + 1]; j++)
       {
          jj = A_CF_diag_j[j];
-         if (jj >= i * n_fpoints && jj < (i + 1)*n_fpoints)
+         if (jj >= i * blk_size && jj < (i + 1) * blk_size)
          {
             jj_counter++;
          }
@@ -2878,18 +2889,31 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
    }
    nnz_diag_new = jj_counter;
 
-   HYPRE_Int *A_CF_diag_i_new = hypre_CTAlloc(HYPRE_Int, num_rows + 1, memory_location);
-   HYPRE_Int *A_CF_diag_j_new = hypre_CTAlloc(HYPRE_Int, nnz_diag_new, memory_location);
-   HYPRE_Complex *A_CF_diag_data_new = hypre_CTAlloc(HYPRE_Complex, nnz_diag_new, memory_location);
+   /* Create truncated matrix */
+   A_CF_new = hypre_ParCSRMatrixCreate(comm,
+                                       num_rows,
+                                       num_cols,
+                                       hypre_ParCSRMatrixRowStarts(A_CF),
+                                       hypre_ParCSRMatrixColStarts(A_CF),
+                                       0,
+                                       nnz_diag_new,
+                                       0);
 
+   hypre_ParCSRMatrixInitialize_v2(A_CF_new, HYPRE_MEMORY_HOST);
+   A_CF_diag_new      = hypre_ParCSRMatrixDiag(A_CF_new);
+   A_CF_diag_i_new    = hypre_CSRMatrixI(A_CF_diag_new);
+   A_CF_diag_j_new    = hypre_CSRMatrixJ(A_CF_diag_new);
+   A_CF_diag_data_new = hypre_CSRMatrixData(A_CF_diag_new);
+
+   /* Second pass: fill entries of the truncated (new) A_CF */
    jj_counter = 0;
-   for (i = 0; i < num_rows; i++)
+   for (i = 0; i < num_rows_local; i++)
    {
       A_CF_diag_i_new[i] = jj_counter;
       for (j = A_CF_diag_i[i]; j < A_CF_diag_i[i + 1]; j++)
       {
          jj = A_CF_diag_j[j];
-         if (jj >= i * n_fpoints && jj < (i + 1)*n_fpoints)
+         if (jj >= i * blk_size && jj < (i + 1) * blk_size)
          {
             A_CF_diag_j_new[jj_counter] = jj;
             A_CF_diag_data_new[jj_counter] = A_CF_diag_data[j];
@@ -2897,25 +2921,9 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
          }
       }
    }
-   A_CF_diag_i_new[num_rows] = nnz_diag_new;
+   A_CF_diag_i_new[num_rows_local] = nnz_diag_new;
 
-   A_CF_new = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_CF),
-                                       hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                                       hypre_ParCSRMatrixGlobalNumCols(A_CF),
-                                       hypre_ParCSRMatrixRowStarts(A_CF),
-                                       hypre_ParCSRMatrixColStarts(A_CF),
-                                       0,
-                                       nnz_diag_new,
-                                       0);
-
-   A_CF_new_diag = hypre_ParCSRMatrixDiag(A_CF_new);
-   hypre_CSRMatrixData(A_CF_new_diag) = A_CF_diag_data_new;
-   hypre_CSRMatrixI(A_CF_new_diag) = A_CF_diag_i_new;
-   hypre_CSRMatrixJ(A_CF_new_diag) = A_CF_diag_j_new;
-
-   //hypre_ParCSRMatrixOwnsRowStarts(A_CF_new) = 0;
-   //hypre_ParCSRMatrixOwnsColStarts(A_CF_new) = 0;
-
+   /* Set output pointer */
    *A_CF_new_ptr = A_CF_new;
 
    return hypre_error_flag;
@@ -2931,12 +2939,15 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
  *   4: inv(A_FF) approximated by sparse approximate inverse
  *
  * TODO (VPM): Can we have a single function that works for host and device?
+ *             inv(A_FF)*A_FC might have been computed before. Reuse it!
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_CF,
+hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
+                                    hypre_ParCSRMatrix    *A_FC,
+                                    hypre_ParCSRMatrix    *A_CF,
                                     hypre_ParCSRMatrix    *A_CC,
-                                    hypre_ParCSRMatrix    *Wp,
+                                    HYPRE_Int              blk_size,
                                     HYPRE_Int              method,
                                     HYPRE_Complex          threshold,
                                     hypre_ParCSRMatrix   **A_H_ptr)
@@ -2945,10 +2956,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_CF,
    hypre_ParCSRMatrix   *A_H;
    hypre_ParCSRMatrix   *A_Hc;
    hypre_ParCSRMatrix   *A_CF_trunc;
+   hypre_ParCSRMatrix   *Wp;
    HYPRE_Complex         alpha = -1.0;
-
-   /* Sanity checks */
-   hypre_assert(Wp != NULL);
 
    /* Truncate A_CF according to the method */
    if (method == 2 || method == 3)
@@ -2960,10 +2969,40 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_CF,
       A_CF_trunc = A_CF;
    }
 
-   /* Compute A_Hc (the correction for A_H) */
-   if (method < 4)
+   /* Compute Wp */
+   if (method == 1 || method == 2)
    {
-      A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
+      hypre_Vector         *D_FF_inv;
+      HYPRE_Complex        *data;
+
+      /* Create vector to store A_FF's diagonal inverse  */
+      D_FF_inv = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_FF));
+      hypre_SeqVectorInitialize_v2(D_FF_inv, HYPRE_MEMORY_DEVICE);
+      data = hypre_VectorData(D_FF_inv);
+
+      /* Compute the inverse of A_FF and compute its inverse */
+      hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), data, 2);
+
+      /* Compute D_FF_inv*A_FC */
+      Wp = hypre_ParCSRMatrixClone(A_FC, 1);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixDiag(Wp), D_FF_inv, NULL);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixOffd(Wp), D_FF_inv, NULL);
+
+      /* Free memory */
+      hypre_SeqVectorDestroy(D_FF_inv);
+   }
+   else if (method == 3)
+   {
+      hypre_ParCSRMatrix  *B_FF_inv;
+
+      /* Compute the block diagonal inverse of A_FF */
+      hypre_ParCSRMatrixBlockDiagMatrixDevice(A_FF, blk_size, -1, NULL, 1, &B_FF_inv);
+
+      /* Compute Wp = A_FF_inv * A_FC */
+      Wp = hypre_ParCSRMatMat(B_FF_inv, A_FC);
+
+      /* Free memory */
+      hypre_ParCSRMatrixDestroy(B_FF_inv);
    }
    else
    {
@@ -2971,6 +3010,9 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_CF,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
       return hypre_error_flag;
    }
+
+   /* Compute A_Hc (the correction for A_H) */
+   A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
 
    /* Drop small entries from A_Hc */
    hypre_ParCSRMatrixDropSmallEntriesDevice(A_Hc, threshold, -1);
@@ -2980,8 +3022,9 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_CF,
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_Hc);
+   hypre_ParCSRMatrixDestroy(Wp);
 
-   /* Set output pointer */
+   /* Set output pointer to coarse grid matrix */
    *A_H_ptr = A_H;
 
    return hypre_error_flag;
@@ -3000,6 +3043,7 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_CF,
  *   4: inv(A_FF) approximated by sparse approximate inverse
  *
  * TODO (VPM): Can we have a single function that works for host and device?
+ *             RT is not being used.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3102,6 +3146,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       }
       else
       {
+         /* TODO (VPM): Shouldn't blk_inv_size = bsize for method == 3? Check with DOK */
          HYPRE_Int blk_inv_size = method == 2 ? bsize : 1;
          hypre_ParCSRMatrixBlockDiagMatrix(A_ff, blk_inv_size, -1, NULL, 1, &A_ff_inv);
          hypre_ParCSRMatrix *Wr = NULL;
