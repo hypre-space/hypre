@@ -6387,7 +6387,7 @@ hypre_MGRBuildAff( hypre_ParCSRMatrix   *A,
  * same as the 'point_type'
  *********************************************************************************/
 HYPRE_Int
-hypre_MGRAddVectorP ( hypre_IntArray *CF_marker,
+hypre_MGRAddVectorP ( hypre_IntArray  *CF_marker,
                       HYPRE_Int        point_type,
                       HYPRE_Real       a,
                       hypre_ParVector  *fromVector,
