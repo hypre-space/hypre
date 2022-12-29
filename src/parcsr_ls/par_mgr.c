@@ -3750,12 +3750,12 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                         HYPRE_Real             strong_threshold,
                         HYPRE_Real             max_row_sum,
                         HYPRE_Int              blk_size,
-                        hypre_ParCSRMatrix   **R,
+                        hypre_ParCSRMatrix   **R_ptr,
                         HYPRE_Int              restrict_type,
                         HYPRE_Int              numsweeps )
 {
    //   HYPRE_Int i;
-   hypre_ParCSRMatrix    *R_ptr = NULL;
+   hypre_ParCSRMatrix    *R = NULL;
    hypre_ParCSRMatrix    *AT = NULL;
    hypre_ParCSRMatrix    *A_FFT = NULL;
    hypre_ParCSRMatrix    *A_FCT = NULL;
@@ -3788,14 +3788,14 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R_ptr);
-         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_device");
+         hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, restrict_type, &R);
+         //hypre_ParCSRMatrixPrintIJ(R, 0, 0, "R_device");
       }
       else
 #endif
       {
-         hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
-         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
+         hypre_MGRBuildP(A, CF_marker, num_cpts_global, restrict_type, debug_flag, &R);
+         //hypre_ParCSRMatrixPrintIJ(R, 0, 0, "R_host");
       }
    }
    else if (restrict_type == 1 || restrict_type == 2)
@@ -3803,27 +3803,27 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R_ptr);
-         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_device");
+         hypre_MGRBuildPDevice(AT, CF_marker, num_cpts_global, restrict_type, &R);
+         //hypre_ParCSRMatrixPrintIJ(R, 0, 0, "R_device");
       }
       else
 #endif
       {
-         hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R_ptr);
-         //hypre_ParCSRMatrixPrintIJ(R_ptr, 0, 0, "R_host");
+         hypre_MGRBuildP(AT, CF_marker, num_cpts_global, restrict_type, debug_flag, &R);
+         //hypre_ParCSRMatrixPrintIJ(R, 0, 0, "R_host");
       }
    }
    else if (restrict_type == 3)
    {
       /* move diagonal to first entry */
       hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(AT));
-      hypre_MGRBuildInterpApproximateInverse(AT, CF_marker, num_cpts_global, debug_flag, &R_ptr);
-      hypre_BoomerAMGInterpTruncation(R_ptr, trunc_factor, max_elmts);
+      hypre_MGRBuildInterpApproximateInverse(AT, CF_marker, num_cpts_global, debug_flag, &R);
+      hypre_BoomerAMGInterpTruncation(R, trunc_factor, max_elmts);
    }
    else if (restrict_type == 12)
    {
       hypre_MGRBuildPBlockJacobi(AT, A_FFT, A_FCT, NULL, blk_size, CF_marker,
-                                 num_cpts_global, debug_flag, &R_ptr);
+                                 num_cpts_global, debug_flag, &R);
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
@@ -3836,7 +3836,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       HYPRE_Int *c_marker = NULL;
       HYPRE_Int *f_marker = NULL;
       HYPRE_Int i;
-      HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+      HYPRE_Int nrows = hypre_ParCSRMatrixNumRows(A);
 
       HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
@@ -3871,7 +3871,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
          Wr_transpose = hypre_ParCSRMatMat(blk_A_ff_inv_transpose, blk_A_cf_transpose);
 
          /* compute restriction operator R = [-Wr  I] (transposed for use with RAP) */
-         hypre_MGRBuildPFromWp(AT, Wr_transpose, CF_marker, debug_flag, &R_ptr);
+         hypre_MGRBuildPFromWp(AT, Wr_transpose, CF_marker, debug_flag, &R);
       }
       hypre_ParCSRMatrixDestroy(blk_A_cf);
       hypre_ParCSRMatrixDestroy(blk_A_cf_transpose);
@@ -3886,11 +3886,21 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 
       /* Classical modified interpolation */
       hypre_BoomerAMGBuildInterp(AT, CF_marker, ST, num_cpts_global, 1, NULL, debug_flag,
-                                 trunc_factor, max_elmts, &R_ptr);
+                                 trunc_factor, max_elmts, &R);
    }
 
-   /* set pointer to P */
-   *R = R_ptr;
+   /* Compute R^T so it can be used in the solve phase */
+   if (!hypre_ParCSRMatrixDiagT(R))
+   {
+      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixDiag(R), &hypre_ParCSRMatrixDiagT(R), 1);
+   }
+   if (!hypre_ParCSRMatrixOffdT(R))
+   {
+      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixOffd(R), &hypre_ParCSRMatrixOffdT(R), 1);
+   }
+
+   /* Set pointer to R */
+   *R_ptr = R;
 
    /* Free memory */
    if (restrict_type > 0)
