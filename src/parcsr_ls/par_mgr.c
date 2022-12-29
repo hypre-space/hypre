@@ -3023,6 +3023,10 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_Hc);
    hypre_ParCSRMatrixDestroy(Wp);
+   if (method == 2 || method == 3)
+   {
+      hypre_ParCSRMatrixDestroy(A_CF_trunc);
+   }
 
    /* Set output pointer to coarse grid matrix */
    *A_H_ptr = A_H;
