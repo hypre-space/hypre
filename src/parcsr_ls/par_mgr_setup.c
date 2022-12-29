@@ -135,6 +135,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
    HYPRE_Real truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
+   char        region_name[1024];
 
 #if MGR_DEBUG_LEVEL == 1
    char        fname[256];
@@ -147,6 +148,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("hypre_MGRSetup");
+   hypre_GpuProfilingPushRange("MGRSetup-Init");
    //  num_threads = hypre_NumThreads();
 
    block_size = (mgr_data -> block_size);
@@ -161,10 +164,11 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int setNonCpointToF = (mgr_data -> set_non_Cpoints_to_F);
    HYPRE_BigInt *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
    HYPRE_BigInt *idx_array = (mgr_data -> idx_array);
-   HYPRE_Int lvl_to_keep_cpoints = (mgr_data -> lvl_to_keep_cpoints) > (mgr_data ->
-                                                                        max_num_coarse_levels) ? (mgr_data -> max_num_coarse_levels) : (mgr_data -> lvl_to_keep_cpoints);
-
-   HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int lvl_to_keep_cpoints = ((mgr_data -> lvl_to_keep_cpoints) >
+                                    (mgr_data -> max_num_coarse_levels)) ?
+                                    (mgr_data -> max_num_coarse_levels) :
+                                    (mgr_data -> lvl_to_keep_cpoints);
+   HYPRE_Int    nloc   =  hypre_ParCSRMatrixNumRows(A);
    HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_BigInt iupper =  hypre_ParCSRMatrixLastRowIndex(A);
 
@@ -174,7 +178,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* Trivial case: simply solve the coarse level problem */
-   if ( block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
+   if (block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
    {
       if (my_id == 0 && print_level > 0)
       {
@@ -192,9 +196,8 @@ hypre_MGRSetup( void               *mgr_vdata,
          /* create and set default solver parameters here */
          /* create and initialize default_cg_solver */
          default_cg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
-         hypre_BoomerAMGSetMaxIter ( default_cg_solver, (mgr_data -> max_iter) );
-
-         hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
+         hypre_BoomerAMGSetMaxIter(default_cg_solver, (mgr_data -> max_iter));
+         hypre_BoomerAMGSetRelaxOrder(default_cg_solver, 1);
          hypre_BoomerAMGSetPrintLevel(default_cg_solver, 3);
 
          /* set setup and solve functions */
@@ -215,7 +218,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* setup coarse grid solver */
       cgrid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
       (mgr_data -> num_coarse_levels) = 0;
+
       HYPRE_ANNOTATE_FUNC_END;
+      hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
    }
@@ -227,7 +232,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 
    /* Initialize local indexes of coarse sets at different levels */
-   level_coarse_indexes = hypre_CTAlloc(HYPRE_Int*,  max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   level_coarse_indexes = hypre_CTAlloc(HYPRE_Int*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    for (i = 0; i < max_num_coarse_levels; i++)
    {
       level_coarse_indexes[i] = hypre_CTAlloc(HYPRE_Int, nloc, HYPRE_MEMORY_HOST);
@@ -319,11 +324,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       level_coarse_size[i] = final_coarse_size;
    }
 
-   // Set reserved coarse indexes to be kept to the coarsest level of the MGR solver
-   if ((mgr_data -> reserved_Cpoint_local_indexes) != NULL)
-   {
-      hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
-   }
+   /* Set reserved coarse indexes to be kept to the coarsest level of the MGR solver */
+   hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
 
    if (reserved_coarse_size > 0)
    {
@@ -937,10 +939,15 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParPrintf(comm, "Dumping matrix to file: %s\n", fname);
    hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
 #endif
+   hypre_GpuProfilingPopRange();
 
    /* loop over levels of coarsening */
    for (lev = 0; lev < num_coarsening_levs; lev++)
    {
+      hypre_sprintf(region_name, "%s-%d", "MGR_Level", lev);
+      hypre_GpuProfilingPushRange(region_name);
+      HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+
 #if MGR_DEBUG_LEVEL == 2
       wall_time_lev = time_getWallclockSeconds();
 #endif
@@ -953,12 +960,16 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* Initialize A_array */
       A_array[lev] = RAP_ptr;
-      nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
+      nloc = hypre_ParCSRMatrixNumRows(A_array[lev]);
 
       /* Setup global smoother */
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds();
 #endif
+
+      hypre_sprintf(region_name, "Global-Relax");
+      hypre_GpuProfilingPushRange(region_name);
+      HYPRE_ANNOTATE_REGION_BEGIN(region_name);
       if (level_smooth_iters[lev] > 0)
       {
          /* Change from ILU to L1-Jacobi when using GPUs. This is temporary! (VPM) */
@@ -1012,6 +1023,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                                          hypre_ParCSRMatrixMemoryLocation(A_array[lev]));
          }
       }
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END(region_name);
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds() - wall_time;
       hypre_ParPrintf(comm, "Lev = %d, proc = %d - Global smoother setup: %f\n",
@@ -1020,6 +1033,9 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* Compute strength matrix for interpolation operator
          use default parameters, to be modified later */
+      hypre_sprintf(region_name, "Coarsen");
+      hypre_GpuProfilingPushRange(region_name);
+      HYPRE_ANNOTATE_REGION_BEGIN(region_name);
       cflag = last_level || setNonCpointToF;
       if (interp_type[lev] == 3 || interp_type[lev] == 5 ||
           interp_type[lev] == 6 || interp_type[lev] == 7 || !cflag)
@@ -1046,6 +1062,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       /* Get global fine/coarse partitionings. TODO: generate dof_func */
       hypre_MGRCoarseParms(comm, nloc, CF_marker_array[lev],
                            coarse_pnts_global, row_starts_fpts);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END(region_name);
 
       /* Compute Petrov-Galerkin operators */
       num_interp_sweeps = (mgr_data -> num_interp_sweeps);
@@ -1079,6 +1097,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       wall_time = time_getWallclockSeconds();
 #endif
 
+      hypre_sprintf(region_name, "Interp");
+      hypre_GpuProfilingPushRange(region_name);
+      HYPRE_ANNOTATE_REGION_BEGIN(region_name);
       if (interp_type[lev] == 12)
       {
          if (mgr_coarse_grid_method[lev] != 0)
@@ -1100,7 +1121,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
-
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END(region_name);
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds() - wall_time;
       hypre_ParPrintf(comm, "Lev = %d, interp type = %d, proc = %d - Build Wp: %f\n",
@@ -1114,6 +1136,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
       /* Use block Jacobi F-relaxation with block Jacobi interpolation */
+      hypre_sprintf(region_name, "F-Relax");
+      hypre_GpuProfilingPushRange(region_name);
+      HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+
       if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
       {
          /* TODO: refactor the following block (VPM) */
@@ -1164,6 +1190,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                                   hypre_ParCSRMatrixRowStarts(A_FF));
          hypre_ParVectorInitialize(U_fine_array[lev + 1]);
       }
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END(region_name);
 
       P_array[lev] = P;
 
@@ -1186,8 +1214,11 @@ hypre_MGRSetup( void               *mgr_vdata,
          HYPRE_Int     gmres_switch = 64;
          HYPRE_Int     is_triangular = 0;
 
-         /* for AIR, need absolute value SOC */
+         hypre_sprintf(region_name, "Restrict");
+         hypre_GpuProfilingPushRange(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
+         /* for AIR, need absolute value SOC */
          hypre_BoomerAMGCreateSabs(A_array[lev], strong_threshold, 1.0, 1, NULL, &ST);
 
          /* !!! Ensure that CF_marker contains -1 or 1 !!! */
@@ -1214,10 +1245,15 @@ hypre_MGRSetup( void               *mgr_vdata,
                                               is_triangular, gmres_switch);
          }
          RT_array[lev] = RT;
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END(region_name);
 
          /* Use two matrix products to generate A_H */
          hypre_ParCSRMatrix *AP = NULL;
 
+         hypre_sprintf(region_name, "RAP");
+         hypre_GpuProfilingPushRange(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
          AP      = hypre_ParMatmul(A_array[lev], P_array[lev]);
          RAP_ptr = hypre_ParMatmul(RT, AP);
          if (num_procs > 1)
@@ -1227,6 +1263,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
          /* Delete AP */
          hypre_ParCSRMatrixDestroy(AP);
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END(region_name);
       }
       else
       {
@@ -1234,6 +1272,9 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             HYPRE_Int block_num_f_points = level_blk_size - block_num_coarse_indexes[lev];
 
+            hypre_sprintf(region_name, "Restrict");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN(region_name);
             if (block_num_f_points == 1 && restrict_type[lev] == 12)
             {
                restrict_type[lev] = 2;
@@ -1247,10 +1288,16 @@ hypre_MGRSetup( void               *mgr_vdata,
 
                RT_array[lev] = RT;
             }
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END(region_name);
 
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds();
 #endif
+
+            hypre_sprintf(region_name, "RAP");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
             if (exec == HYPRE_EXEC_DEVICE)
@@ -1285,6 +1332,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                hypre_ParCSRMatrixDestroy(Wp);
                Wp = NULL;
             }
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END(region_name);
 
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds() - wall_time;
@@ -1297,6 +1346,9 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds();
 #endif
+            hypre_sprintf(region_name, "Restrict");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN(region_name);
             if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
             {
                restrict_type[lev] = 2;
@@ -1308,6 +1360,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                                    block_jacobi_bsize, &RT, restrict_type[lev],
                                    num_restrict_sweeps);
             RT_array[lev] = RT;
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END(region_name);
 
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds() - wall_time;
@@ -1316,8 +1370,13 @@ hypre_MGRSetup( void               *mgr_vdata,
             wall_time = time_getWallclockSeconds();
 #endif
 
+            hypre_sprintf(region_name, "RAP");
+            hypre_GpuProfilingPushRange(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN(region_name);
             //hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
             RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
+            hypre_GpuProfilingPopRange();
+            HYPRE_ANNOTATE_REGION_END(region_name);
 
 #if MGR_DEBUG_LEVEL == 2
             wall_time = time_getWallclockSeconds() - wall_time;
@@ -1375,17 +1434,17 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
                {
-                  // F-solver is already set up, only need to store A_FF
+                  /* F-solver is already set up, only need to store A_FF */
                   A_ff_array[lev] = ((hypre_ParAMGData*) aff_solver[lev])->A_array[0];
                }
                else
                {
-                  if (my_id == 0)
-                  {
-                     printf("Error!!! F-relaxation solver has not been setup.\n");
-                     hypre_error(1);
-                     return hypre_error_flag;
-                  }
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                    "F-relaxation solver has not been setup\n");
+                  HYPRE_ANNOTATE_FUNC_END;
+                  hypre_GpuProfilingPopRange();
+
+                  return hypre_error_flag;
                }
             }
             else
@@ -1618,15 +1677,21 @@ hypre_MGRSetup( void               *mgr_vdata,
                       lev, my_id, wall_time_lev);
 #endif
 
+#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX) || defined (HYPRE_USING_CALIPER)
+      hypre_sprintf(region_name, "%s-%d", "MGR_Level", lev);
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_REGION_END(region_name);
+#endif
+
       /* check if last level */
       if (last_level)
       {
-         break;
+         num_c_levels = lev + 1;
+         lev = num_coarsening_levs;
       }
    }
 
    /* set pointer to last level matrix */
-   num_c_levels = lev + 1;
    (mgr_data->num_coarse_levels) = num_c_levels;
    (mgr_data->RAP) = RAP_ptr;
 
@@ -1815,6 +1880,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_END;
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -1862,6 +1928,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
    HYPRE_Int       measure_type = 0;
    HYPRE_Real      strong_threshold = 0.25;
    HYPRE_Real      max_row_sum = 0.9;
+   HYPRE_Int       coarsen_cut_factor = 0;
 
    HYPRE_Int       old_num_levels = hypre_ParAMGDataNumLevels(FrelaxVcycleData[lev]);
    hypre_IntArray       **CF_marker_array_local = (FrelaxVcycleData[lev] -> CF_marker_array);
@@ -1880,8 +1947,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-
-   local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   local_size = hypre_ParCSRMatrixNumRows(A);
 
    /* Free any local data not previously destroyed */
    if (A_array_local || P_array_local || CF_marker_array_local)
@@ -2035,7 +2101,6 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
       hypre_IntArrayInitialize(CF_marker_array_local[lev_local]);
       CF_marker_local = hypre_IntArrayData(CF_marker_array_local[lev_local]);
 
-      HYPRE_Int coarsen_cut_factor = 0;
       hypre_BoomerAMGCoarsenHMIS(S_local, A_array_local[lev_local], measure_type,
                                  coarsen_cut_factor, debug_flag,
                                  &(CF_marker_array_local[lev_local]));

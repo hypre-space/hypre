@@ -2829,12 +2829,18 @@ hypre_MGRTruncateAcfCPRDevice(hypre_ParCSRMatrix  *A_CF,
    hypre_ParCSRMatrix *hA_CF;
    hypre_ParCSRMatrix *A_CF_new;
 
+   hypre_GpuProfilingPushRange("MGRTruncateAcfCPR");
+
+   /* Clone matrix to host, truncate, and migrate result to device */
    hA_CF = hypre_ParCSRMatrixClone_v2(A_CF, 1, HYPRE_MEMORY_HOST);
    hypre_MGRTruncateAcfCPR(hA_CF, &A_CF_new);
    hypre_ParCSRMatrixMigrate(A_CF_new, HYPRE_MEMORY_DEVICE);
    hypre_ParCSRMatrixDestroy(hA_CF);
 
+   /* Set output pointer */
    *A_CF_new_ptr = A_CF_new;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -2959,6 +2965,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    hypre_ParCSRMatrix   *Wp;
    HYPRE_Complex         alpha = -1.0;
 
+   hypre_GpuProfilingPushRange("MGRComputeNonGalerkinCG");
+
    /* Truncate A_CF according to the method */
    if (method == 2 || method == 3)
    {
@@ -3008,6 +3016,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    {
       /* Use approximate inverse for ideal interploation */
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
+      hypre_GpuProfilingPopRange();
+
       return hypre_error_flag;
    }
 
@@ -3030,6 +3040,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
 
    /* Set output pointer to coarse grid matrix */
    *A_H_ptr = A_H;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

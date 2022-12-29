@@ -51,6 +51,8 @@ hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix     *P_offd;
    HYPRE_Int            P_diag_nnz;
 
+   hypre_GpuProfilingPushRange("MGRBuildPFromWp");
+
    /* Set local variables */
    P_diag_nnz = hypre_CSRMatrixNumNonzeros(Wp_diag) +
                 hypre_CSRMatrixNumCols(Wp_diag);
@@ -102,6 +104,8 @@ hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
    /* Set output pointer to the interpolation matrix */
    *P_ptr = P;
 
+   hypre_GpuProfilingPopRange();
+
    return hypre_error_flag;
 }
 
@@ -131,6 +135,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_GpuProfilingPushRange("MGRBuildP");
 
    nfpoints = HYPRE_THRUST_CALL(count,
                                 CF_marker,
@@ -287,6 +292,8 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(W_diag);
       hypre_CSRMatrixDestroy(W_offd);
    }
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -577,10 +584,14 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &myid);
 #endif
 
+   hypre_GpuProfilingPushRange("ParCSRMatrixExtractBlockDiag");
+
    /* Sanity check */
    if ((num_rows_A > 0) && (num_rows_A < blk_size))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Input matrix is smaller than block size.");
+      hypre_GpuProfilingPopRange();
+
       return hypre_error_flag;
    }
 
@@ -608,6 +619,8 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    if (num_points % blk_size)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO! num_points % blk_size != 0");
+      hypre_GpuProfilingPopRange();
+
       return hypre_error_flag;
    }
 
@@ -737,6 +750,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
    /* Free memory */
    hypre_TFree(blk_row_indices, HYPRE_MEMORY_DEVICE);
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
