@@ -1088,13 +1088,11 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("Relax7Jacobi");
-#endif
-
    HYPRE_Int       num_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_Vector    l1_norms_vec;
    hypre_ParVector l1_norms_parvec;
+
+   hypre_GpuProfilingPushRange("Relax7Jacobi");
 
    hypre_VectorNumVectors(&l1_norms_vec) = 1;
    hypre_VectorMultiVecStorageMethod(&l1_norms_vec) = 0;
@@ -1154,9 +1152,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    hypre_SyncComputeStream(hypre_handle());
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -1657,4 +1653,3 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
-
