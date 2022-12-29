@@ -9,7 +9,7 @@
 #include "par_mgr.h"
 #include "par_amg.h"
 
-#define MGR_DEBUG_LEVEL 1 // 0: none | 1: dump matrices | 2: profile times
+#define MGR_DEBUG_LEVEL 0 // 0: none | 1: dump matrices | 2: profile times
 
 /* Setup MGR data */
 HYPRE_Int
