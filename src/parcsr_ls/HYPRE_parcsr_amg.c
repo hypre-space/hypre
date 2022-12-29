@@ -2136,3 +2136,14 @@ HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
    return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetUseAuxStrengthMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetUseAuxStrengthMatrix(HYPRE_Solver   solver,
+                                  HYPRE_Int      use_aux_strength_mat)
+{
+   return (hypre_BoomerAMGSetUseAuxStrengthMatrix( (void *) solver,
+                                      use_aux_strength_mat) );
+}
