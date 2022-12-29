@@ -397,6 +397,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
+   hypre_GpuProfilingPushRange("SeqVectorCopy");
+
    size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
 
    hypre_TMemcpy( hypre_VectorData(y),
@@ -409,6 +411,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

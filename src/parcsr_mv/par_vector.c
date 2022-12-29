@@ -348,6 +348,7 @@ hypre_ParVectorCopy( hypre_ParVector *x,
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+
    return hypre_SeqVectorCopy(x_local, y_local);
 }
 
