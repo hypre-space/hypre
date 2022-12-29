@@ -1038,7 +1038,11 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
          else
          {
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+            if (restrict_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
+#else
             if (restrict_type[fine_grid] > 0)
+#endif
             {
                hypre_ParCSRMatrixMatvecT(fp_one, RT_array[fine_grid], Vtemp,
                                          fp_zero, F_array[coarse_grid]);
@@ -1085,7 +1089,11 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPushRange(region_name);
          HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+         if (interp_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
+#else
          if (interp_type[fine_grid] > 0)
+#endif
          {
             hypre_ParCSRMatrixMatvec(fp_one, P_array[fine_grid],
                                      U_array[coarse_grid],
