@@ -1120,11 +1120,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            if (!B_FF_array[lev])
-            {
-               hypre_ParCSRMatrixBlockDiagMatrixDevice(A_ff_array[lev], block_jacobi_bsize,
-                                                       0, NULL, 1, &B_FF_array[lev]);
-            }
+            hypre_ParCSRMatrixBlockDiagMatrixDevice(A_FF, block_jacobi_bsize,
+                                                    0, NULL, 1, &B_FF_array[lev]);
          }
          else
 #endif
