@@ -4236,10 +4236,49 @@ hypre_block_jacobi_solve( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* Computes a block Jacobi relaxation of matrix A, given the inverse of the diagonal blocks (of A) obtained
- * by calling hypre_MGRBlockRelaxSetup.
+/*--------------------------------------------------------------------------
+ * hypre_MGRBlockRelaxSolveDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBlockRelaxSolveDevice( hypre_ParCSRMatrix  *B,
+                                hypre_ParCSRMatrix  *A,
+                                hypre_ParVector     *f,
+                                hypre_ParVector     *u,
+                                hypre_ParVector     *Vtemp,
+                                HYPRE_Real           relax_weight )
+{
+   /* Copy f into temporary vector */
+   hypre_ParVectorCopy(f, Vtemp);
+
+   /* Perform Matvec: Vtemp = w * (f - Au) */
+   if (hypre_ParVectorAllZeros(u))
+   {
+#if defined(HYPRE_DEBUG)
+      hypre_assert(hypre_ParVectorInnerProd(u, u) == 0.0);
+#endif
+      hypre_ParVectorScale(relax_weight, Vtemp);
+   }
+   else
+   {
+      hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, Vtemp);
+   }
+
+   /* Update solution: u += B * Vtemp */
+   hypre_ParCSRMatrixMatvec(1.0, B, Vtemp, 1.0, u);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRBlockRelaxSolve
+ *
+ * Computes a block Jacobi relaxation of matrix A, given the inverse of the
+ * diagonal blocks (of A) obtained by calling hypre_MGRBlockRelaxSetup.
+ *
  * TODO: Adapt to relax on specific points based on CF_marker information
-*/
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A,
                           hypre_ParVector    *f,

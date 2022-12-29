@@ -127,7 +127,7 @@ hypre_MGRSolve( void               *mgr_vdata,
     *-----------------------------------------------------------------------*/
    if (print_level > 1 || logging > 1 || tol > 0.)
    {
-      if ( logging > 1 )
+      if (logging > 1)
       {
          hypre_ParVectorCopy(F_array[0], residual );
          if (tol > 0.0)
