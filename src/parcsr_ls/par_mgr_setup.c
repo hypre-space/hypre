@@ -972,11 +972,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       HYPRE_ANNOTATE_REGION_BEGIN(region_name);
       if (level_smooth_iters[lev] > 0)
       {
-         /* Change from ILU to L1-Jacobi when using GPUs. This is temporary! (VPM) */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-         level_smooth_type[lev] = (level_smooth_type[lev] == 16) ? 18 : 16;
-#endif
-
          if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
