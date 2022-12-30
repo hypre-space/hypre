@@ -311,6 +311,14 @@ hypre_ParVectorSetConstantValues( hypre_ParVector *v,
    return hypre_SeqVectorSetConstantValues(v_local, value);
 }
 
+HYPRE_Int
+hypre_ParVectorSetZeros( hypre_ParVector *v )
+{
+   hypre_ParVectorAllZeros(v) = 1;
+
+   return hypre_ParVectorSetConstantValues(v, 0.0);
+}
+
 /*--------------------------------------------------------------------------
  * hypre_ParVectorSetRandomValues
  *--------------------------------------------------------------------------*/
