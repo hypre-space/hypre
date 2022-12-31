@@ -1265,7 +1265,7 @@ hypre_ParILUCusparseExtractDiagonalCSR( hypre_ParCSRMatrix *A,
       for (i = 0; i < n; i++)
       {
          B_i[i] = current_idx;
-         for (j = A_diag_i[perm[i]] ; j < A_diag_i[perm[i] + 1] ; j ++)
+         for (j = A_diag_i[perm[i]]; j < A_diag_i[perm[i] + 1]; j++)
          {
             B_j[current_idx] = rqperm[A_diag_j[j]];
             B_data[current_idx++] = A_diag_data[j];
@@ -1921,7 +1921,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -2226,7 +2226,7 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -2529,7 +2529,7 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -4052,9 +4052,10 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
       {
          HYPRE_Int tmp = capacity_S;
          capacity_S = capacity_S * EXPAND_FACT + 1;
-         S_diag_j = hypre_TReAlloc_v2(S_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_S, HYPRE_MEMORY_DEVICE);
-         S_diag_data = hypre_TReAlloc_v2(S_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_S,
-                                         HYPRE_MEMORY_DEVICE);
+         S_diag_j = hypre_TReAlloc_v2(S_diag_j, HYPRE_Int, tmp, HYPRE_Int,
+                                      capacity_S, HYPRE_MEMORY_DEVICE);
+         S_diag_data = hypre_TReAlloc_v2(S_diag_data, HYPRE_Real, tmp, HYPRE_Real,
+                                         capacity_S, HYPRE_MEMORY_DEVICE);
       }
       /* remember S in under a new index system! */
       S_diag_j[ctrS] = ii - nLU;
@@ -4081,14 +4082,15 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
    hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+
    /* only form when total_rows > 0 */
-   if ( total_rows > 0 )
+   if (total_rows > 0)
    {
       /* now create S */
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -4610,11 +4612,11 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
          {
             HYPRE_Int tmp = capacity_L;
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            temp_L_diag_j = hypre_TReAlloc_v2(temp_L_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_L,
-                                              HYPRE_MEMORY_DEVICE);
+            temp_L_diag_j = hypre_TReAlloc_v2(temp_L_diag_j, HYPRE_Int, tmp, HYPRE_Int,
+                                              capacity_L, HYPRE_MEMORY_DEVICE);
          }
          /* now copy L data, reverse order */
-         for (j = 0; j < lenl; j ++)
+         for (j = 0; j < lenl; j++)
          {
             temp_L_diag_j[ctrL + j] = iL[nLU - j - 1];
          }
@@ -5048,7 +5050,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -5824,13 +5826,14 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          {
             HYPRE_Int tmp = capacity_L;
             capacity_L = capacity_L * EXPAND_FACT + 1;
-            L_diag_j = hypre_TReAlloc_v2(L_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_L, HYPRE_MEMORY_DEVICE);
-            L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_L,
-                                            HYPRE_MEMORY_DEVICE);
+            L_diag_j = hypre_TReAlloc_v2(L_diag_j, HYPRE_Int, tmp, HYPRE_Int,
+                                         capacity_L, HYPRE_MEMORY_DEVICE);
+            L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp, HYPRE_Real,
+                                            capacity_L, HYPRE_MEMORY_DEVICE);
          }
          ctrL += lenl;
          /* copy large data in */
-         for (j = L_diag_i[ii]; j < ctrL; j ++)
+         for (j = L_diag_i[ii]; j < ctrL; j++)
          {
             L_diag_j[j] = iL[kl];
             L_diag_data[j] = w[kl];
@@ -5894,7 +5897,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan( &big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -6807,7 +6810,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      hypre_MPI_Scan( &big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
    }
@@ -7279,7 +7282,7 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
    } /* end of main loop ii from nLU to n */
 
    /* external part matrix */
-   for (ii = n ; ii < total_rows ; ii ++)
+   for (ii = n; ii < total_rows; ii++)
    {
       i = ii - n;
       lenl = 0;
@@ -7900,11 +7903,12 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
     * 4: Finishing up and free
     */
    HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
-   hypre_MPI_Allreduce( &big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT,
+                       hypre_MPI_SUM, comm);
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      hypre_MPI_Scan( &big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
    }
@@ -8823,11 +8827,12 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
     * 3: Finishing up and free
     */
    HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
-   hypre_MPI_Allreduce( &big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT,
+                       hypre_MPI_SUM, comm);
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      hypre_MPI_Scan( &big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
    }

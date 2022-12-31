@@ -514,11 +514,12 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
    //   f_local = hypre_ParVectorLocalVector(f);
    //   f_data = hypre_VectorData(f_local);
    /* now update with L to solve */
-   for (i = 0 ; i < nLU ; i ++)
+   for (i = 0; i < nLU; i++)
    {
       utemp_data[qperm[i]] = ftemp_data[perm[i]];
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = L_diag_i[i];
+      k2 = L_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          utemp_data[qperm[i]] -= L_diag_data[j] * utemp_data[qperm[L_diag_j[j]]];
       }
@@ -527,10 +528,11 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
    /* 2nd need to compute g'i = gi - Ei*UBi^-1*xi
     * now put g'i into the f_temp lower
     */
-   for (i = nLU ; i < n ; i ++)
+   for (i = nLU; i < n; i++)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = L_diag_i[i];
+      k2 = L_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          col = L_diag_j[j];
          ftemp_data[perm[i]] -= L_diag_data[j] * utemp_data[qperm[col]];
@@ -553,7 +555,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
       x_data      = hypre_VectorData(x_local);
 
       /* set rhs value */
-      for (i = nLU ; i < n ; i ++)
+      for (i = nLU; i < n; i++)
       {
          rhs_data[i - nLU] = ftemp_data[perm[i]];
       }
@@ -562,7 +564,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
       HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)S, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
 
       /* copy value back to original */
-      for (i = nLU ; i < n ; i ++)
+      for (i = nLU; i < n; i++)
       {
          utemp_data[qperm[i]] = x_data[i - nLU];
       }
@@ -575,17 +577,18 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
     */
    if (nLU < n)
    {
-      for (i = 0 ; i < nLU ; i ++)
+      for (i = 0; i < nLU; i++)
       {
          ftemp_data[perm[i]] = utemp_data[qperm[i]];
-         k1 = u_end[i] ; k2 = U_diag_i[i + 1];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = u_end[i];
+         k2 = U_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
             ftemp_data[perm[i]] -= U_diag_data[j] * utemp_data[qperm[col]];
          }
       }
-      for (i = 0 ; i < nLU ; i ++)
+      for (i = 0; i < nLU; i++)
       {
          utemp_data[qperm[i]] = ftemp_data[perm[i]];
       }
@@ -593,10 +596,11 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
 
    /* 5th need to solve UBi*ui = zi */
    /* put result in u_temp upper */
-   for (i = nLU - 1 ; i >= 0 ; i --)
+   for (i = nLU - 1; i >= 0; i--)
    {
-      k1 = U_diag_i[i] ; k2 = u_end[i];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = U_diag_i[i];
+      k2 = u_end[i];
+      for (j = k1; j < k2; j++)
       {
          col = U_diag_j[j];
          utemp_data[qperm[i]] -= U_diag_data[j] * utemp_data[qperm[col]];
@@ -682,11 +686,12 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
    //   f_local = hypre_ParVectorLocalVector(f);
    //   f_data = hypre_VectorData(f_local);
    /* now update with L to solve */
-   for (i = 0 ; i < nLU ; i ++)
+   for (i = 0; i < nLU; i++)
    {
       utemp_data[perm[i]] = ftemp_data[perm[i]];
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = L_diag_i[i];
+      k2 = L_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
       }
@@ -695,10 +700,11 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
    /* 2nd need to compute g'i = gi - Ei*UBi^-1*xi
     * now put g'i into the f_temp lower
     */
-   for (i = nLU ; i < n ; i ++)
+   for (i = nLU; i < n; i++)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = L_diag_i[i];
+      k2 = L_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          col = L_diag_j[j];
          ftemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[col]];
@@ -721,7 +727,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
       x_data      = hypre_VectorData(x_local);
 
       /* set rhs value */
-      for (i = nLU ; i < n ; i ++)
+      for (i = nLU; i < n; i++)
       {
          rhs_data[i - nLU] = ftemp_data[perm[i]];
       }
@@ -732,7 +738,7 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
       hypre_NSHSolve(schur_solver, S, rhs, x);
 
       /* copy value back to original */
-      for (i = nLU ; i < n ; i ++)
+      for (i = nLU; i < n; i++)
       {
          utemp_data[perm[i]] = x_data[i - nLU];
       }
@@ -745,17 +751,18 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
     */
    if (nLU < n)
    {
-      for (i = 0 ; i < nLU ; i ++)
+      for (i = 0; i < nLU; i++)
       {
          ftemp_data[perm[i]] = utemp_data[perm[i]];
-         k1 = u_end[i] ; k2 = U_diag_i[i + 1];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = u_end[i];
+         k2 = U_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
             ftemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[col]];
          }
       }
-      for (i = 0 ; i < nLU ; i ++)
+      for (i = 0; i < nLU; i++)
       {
          utemp_data[perm[i]] = ftemp_data[perm[i]];
       }
@@ -763,10 +770,11 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
 
    /* 5th need to solve UBi*ui = zi */
    /* put result in u_temp upper */
-   for (i = nLU - 1 ; i >= 0 ; i --)
+   for (i = nLU - 1; i >= 0; i--)
    {
-      k1 = U_diag_i[i] ; k2 = u_end[i];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = U_diag_i[i];
+      k2 = u_end[i];
+      for (j = k1; j < k2; j++)
       {
          col = U_diag_j[j];
          utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[col]];
@@ -1073,7 +1081,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
    end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
 
    /* copy new index into send_buf */
-   for (i = begin ; i < end ; i ++)
+   for (i = begin; i < end; i++)
    {
       /* all we need is just send out data, we don't need to worry about the
        *    permutation of offd part, actually we don't need to worry about
@@ -1088,17 +1096,18 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* L solve - Forward solve */
-   for ( i = 0 ; i < n_total ; i ++)
+   for (i = 0; i < n_total; i++)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      if ( i < n )
+      k1 = L_diag_i[i];
+      k2 = L_diag_i[i + 1];
+      if (i < n)
       {
          /* diag part */
          utemp_data[perm[i]] = ftemp_data[perm[i]];
          for (j = k1; j < k2; j++)
          {
             col = L_diag_j[j];
-            if ( col < n )
+            if (col < n)
             {
                utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[col]];
             }
@@ -1131,17 +1140,18 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
    }
 
    /*-------------------- U solve - Backward substitution */
-   for ( i = n_total - 1; i >= 0; i-- )
+   for (i = n_total - 1; i >= 0; i--)
    {
       /* first update with the remaining (off-diagonal) entries of U */
-      k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
-      if ( i < n )
+      k1 = U_diag_i[i];
+      k2 = U_diag_i[i + 1];
+      if (i < n)
       {
          /* diag part */
          for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
-            if ( col < n )
+            if (col < n)
             {
                utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[col]];
             }
@@ -1161,7 +1171,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
          for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
-            if ( col < n )
+            if (col < n)
             {
                uext[idx] -= U_diag_data[j] * utemp_data[perm[col]];
             }
@@ -1205,7 +1215,7 @@ hypre_ILUSeqVectorPerm(void      *vectori,
       {
          HYPRE_Int *ivectori     = (HYPRE_Int *) vectori;
          HYPRE_Int *ivectoro     = (HYPRE_Int *) vectoro;
-         for (i = 0 ; i < size ; i ++)
+         for (i = 0; i < size; i++)
          {
             ivectoro[i] = ivectori[perm[i]];
          }
@@ -1215,7 +1225,7 @@ hypre_ILUSeqVectorPerm(void      *vectori,
       {
          HYPRE_Int *ivectori     = (HYPRE_Int *) vectori;
          HYPRE_Int *ivectoro     = (HYPRE_Int *) vectoro;
-         for (i = 0 ; i < size ; i ++)
+         for (i = 0; i < size; i++)
          {
             ivectoro[perm[i]] = ivectori[i];
          }
@@ -1225,7 +1235,7 @@ hypre_ILUSeqVectorPerm(void      *vectori,
       {
          HYPRE_Real *dvectori     = (HYPRE_Real *) vectori;
          HYPRE_Real *dvectoro     = (HYPRE_Real *) vectoro;
-         for (i = 0 ; i < size ; i ++)
+         for (i = 0; i < size; i++)
          {
             dvectoro[i] = dvectori[perm[i]];
          }
@@ -1235,7 +1245,7 @@ hypre_ILUSeqVectorPerm(void      *vectori,
       {
          HYPRE_Real *dvectori     = (HYPRE_Real *) vectori;
          HYPRE_Real *dvectoro     = (HYPRE_Real *) vectoro;
-         for (i = 0 ; i < size ; i ++)
+         for (i = 0; i < size ; i++)
          {
             dvectoro[perm[i]] = dvectori[i];
          }
@@ -2009,7 +2019,6 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
       rhs_data    = hypre_VectorData(rhs_local);
       x_local     = hypre_ParVectorLocalVector(x);
       x_data      = hypre_VectorData(x_local);
-
    }
 
    /* only support RAP with partial factorized W and Z */
@@ -2019,11 +2028,12 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
 
    /* A-smoothing f_temp = [UA \ LA \ (f_temp[perm])] */
    /* permuted L solve */
-   for (i = 0 ; i < n ; i ++)
+   for (i = 0; i < n; i++)
    {
       utemp_data[i] = ftemp_data[perm[i]];
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = L_diag_i[i];
+      k2 = L_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          col = L_diag_j[j];
          utemp_data[i] -= L_diag_data[j] * utemp_data[col];
@@ -2034,11 +2044,12 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
    {
       /* in this case, we don't have a Schur complement */
       /* U solve */
-      for (i = n - 1 ; i >= 0 ; i --)
+      for (i = n - 1; i >= 0; i--)
       {
          ftemp_data[perm[i]] = utemp_data[i];
-         k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = U_diag_i[i];
+         k2 = U_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
          {
             col = U_diag_j[j];
             ftemp_data[perm[i]] -= U_diag_data[j] * ftemp_data[perm[col]];
@@ -2052,11 +2063,12 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
    }
 
    /* U solve */
-   for (i = n - 1 ; i >= 0 ; i --)
+   for (i = n - 1; i >= 0; i--)
    {
       xtemp_data[perm[i]] = utemp_data[i];
-      k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
-      for (j = k1 ; j < k2 ; j ++)
+      k1 = U_diag_i[i];
+      k2 = U_diag_i[i + 1];
+      for (j = k1; j < k2; j++)
       {
          col = U_diag_j[j];
          xtemp_data[perm[i]] -= U_diag_data[j] * xtemp_data[perm[col]];
@@ -2072,14 +2084,15 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, xtemp, beta, ftemp, utemp);
 
    // R = [-L21 L\inv, I]
-   if ( m > 0)
+   if (m > 0)
    {
       /* first is L solve */
-      for (i = 0 ; i < nLU ; i ++)
+      for (i = 0; i < nLU; i++)
       {
          ytemp_data[i] = utemp_data[perm[i]];
-         k1 = mL_diag_i[i] ; k2 = mL_diag_i[i + 1];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = mL_diag_i[i];
+         k2 = mL_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
          {
             col = mL_diag_j[j];
             ytemp_data[i] -= mL_diag_data[j] * ytemp_data[col];
@@ -2087,11 +2100,12 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
       }
 
       /* apply -W * ytemp on this, and take care of the I part */
-      for (i = nLU ; i < n ; i ++)
+      for (i = nLU; i < n; i++)
       {
          rhs_data[i - nLU] = utemp_data[perm[i]];
-         k1 = mL_diag_i[i] ; k2 = u_end[i];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = mL_diag_i[i];
+         k2 = u_end[i];
+         for (j = k1; j < k2; j++)
          {
             col = mL_diag_j[j];
             rhs_data[i - nLU] -= mL_diag_data[j] * ytemp_data[col];
@@ -2101,7 +2115,10 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
 
    /* now the rhs is ready */
    hypre_SeqVectorSetConstantValues(x_local, 0.0);
-   HYPRE_GMRESSolve(schur_solver, (HYPRE_Matrix)schur_precond, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
+   HYPRE_GMRESSolve(schur_solver,
+                    (HYPRE_Matrix)schur_precond,
+                    (HYPRE_Vector)rhs,
+                    (HYPRE_Vector)x);
 
    if (m > 0)
    {
@@ -2138,22 +2155,25 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
        *     [  I          ]
        */
       /* matvec */
-      for (i = 0 ; i < nLU ; i ++)
+      for (i = 0 ; i < nLU; i++)
       {
          ytemp_data[i] = 0.0;
-         k1 = u_end[i] ; k2 = mU_diag_i[i + 1];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = u_end[i];
+         k2 = mU_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
          {
             col = mU_diag_j[j];
             ytemp_data[i] -= mU_diag_data[j] * x_data[col - nLU];
          }
       }
+
       /* U solve */
-      for (i = nLU - 1 ; i >= 0 ; i --)
+      for (i = nLU - 1; i >= 0; i--)
       {
          ftemp_data[perm[i]] = ytemp_data[i];
-         k1 = mU_diag_i[i] ; k2 = u_end[i];
-         for (j = k1 ; j < k2 ; j ++)
+         k1 = mU_diag_i[i];
+         k2 = u_end[i];
+         for (j = k1; j < k2; j++)
          {
             col = mU_diag_j[j];
             ftemp_data[perm[i]] -= mU_diag_data[j] * ftemp_data[perm[col]];
@@ -2162,7 +2182,7 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
       }
 
       /* update with I */
-      for (i = nLU ; i < n ; i ++)
+      for (i = nLU; i < n; i++)
       {
          ftemp_data[perm[i]] = x_data[i - nLU];
       }
