@@ -1300,6 +1300,8 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
+   hypre_GpuProfilingPushRange("ILUSolve");
+
    /* Initialize Utemp to zero.
     * This is necessary for correctness, when we use optimized
     * vector operations in the case where sizeof(L, D or U) < sizeof(A)
@@ -1309,25 +1311,49 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
 
    /* apply permutation */
-   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* L solve - Forward solve */
+   hypre_GpuProfilingPushRange("Forward");
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                    n, nnz, &beta, matL_des,
                                                    LU_data, LU_i, LU_j, matL_info,
-                                                   utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
+                                                   utemp_data, ftemp_data, ilu_solve_policy,
+                                                   ilu_solve_buffer));
+   hypre_GpuProfilingPopRange();
 
    /* U solve - Backward substitution */
+   hypre_GpuProfilingPushRange("Backward");
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                    n, nnz, &beta, matU_des,
                                                    LU_data, LU_i, LU_j, matU_info,
-                                                   ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
+                                                   ftemp_data, utemp_data, ilu_solve_policy,
+                                                   ilu_solve_buffer));
+   hypre_GpuProfilingPopRange();
 
-   /* apply reverse permutation */
-   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   /* Apply reverse permutation */
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
+
    /* Update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
 
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -2443,4 +2469,3 @@ hypre_NSHSolveInverse(hypre_ParCSRMatrix *A,
    hypre_ParVectorAxpy(beta, utemp, u);
    return hypre_error_flag;
 }
-

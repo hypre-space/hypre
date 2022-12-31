@@ -1757,36 +1757,34 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_
  * Currently only supports RCM reordering. Set to 0 for no reordering.
  */
 HYPRE_Int
-hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
-                      HYPRE_Int reordering_type)
+hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
+                      HYPRE_Int          **perm_ptr,
+                      HYPRE_Int           *nLU,
+                      HYPRE_Int            reordering_type)
 {
    /* get basic information of A */
-   HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_Int            num_rows = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int            i;
-   HYPRE_Int            *temp_perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int           *perm;
 
-   /* set perm array */
-   for ( i = 0 ; i < n ; i ++ )
+   if (reordering_type != 0)
    {
-      temp_perm[i] = i;
+      /* Set perm array */
+      perm = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+      for (i = 0 ; i < num_rows ; i++)
+      {
+         perm[i] = i;
+      }
+
+      hypre_ILULocalRCM(hypre_ParCSRMatrixDiag(A), 0, num_rows, &perm, &perm, 1);
+      hypre_TFree(*perm_ptr, HYPRE_MEMORY_DEVICE);
+
+      /* Set output pointers */
+      *perm_ptr = perm;
    }
-   switch (reordering_type)
-   {
-      case 0:
-         /* no RCM in this case */
-         break;
-      case 1:
-         /* RCM */
-         hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, n, &temp_perm, &temp_perm, 1);
-         break;
-      default:
-         /* RCM */
-         hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, n, &temp_perm, &temp_perm, 1);
-         break;
-   }
-   *nLU = n;
-   if ((*perm) != NULL) { hypre_TFree(*perm, HYPRE_MEMORY_DEVICE); }
-   *perm = temp_perm;
+
+   /* Set output pointers */
+   *nLU = num_rows;
 
    return hypre_error_flag;
 }

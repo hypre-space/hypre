@@ -1244,30 +1244,44 @@ hypre_ParILUCusparseExtractDiagonalCSR( hypre_ParCSRMatrix *A,
    HYPRE_Int            n              = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int            nnz_A_diag     = A_diag_i[n];
 
+   /* No schur complement makes everything easy :) */
+   hypre_CSRMatrix     *B              = NULL;
+   HYPRE_Int           *B_i            = hypre_CSRMatrixI(B);
+   HYPRE_Int           *B_j            = hypre_CSRMatrixJ(B);
+   HYPRE_Real          *B_data         = hypre_CSRMatrixData(B);
+
    HYPRE_Int            i, j, current_idx;
 
-   /* No schur complement makes everything easy :) */
-   hypre_CSRMatrix  *B              = NULL;
-   B                                = hypre_CSRMatrixCreate(n, n, nnz_A_diag);
-   hypre_CSRMatrixInitialize(B);
-   HYPRE_Int        *B_i            = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j            = hypre_CSRMatrixJ(B);
-   HYPRE_Real       *B_data         = hypre_CSRMatrixData(B);
-
-   /* Copy everything in with permutation */
-   current_idx = 0;
-   for ( i = 0; i < n; i++ )
+   if (perm && rqperm)
    {
-      B_i[i] = current_idx;
-      for (j = A_diag_i[perm[i]] ; j < A_diag_i[perm[i] + 1] ; j ++)
-      {
-         B_j[current_idx] = rqperm[A_diag_j[j]];
-         B_data[current_idx++] = A_diag_data[j];
-      }
-   }
-   B_i[n] = current_idx;
+      B = hypre_CSRMatrixCreate(n, n, nnz_A_diag);
+      hypre_CSRMatrixInitialize_v2(B, 0, hypre_CSRMatrixMemoryLocation(A_diag));
+      B_i    = hypre_CSRMatrixI(B);
+      B_j    = hypre_CSRMatrixJ(B);
+      B_data = hypre_CSRMatrixData(B);
 
-   hypre_assert(current_idx == nnz_A_diag);
+      /* Copy everything in with permutation */
+      current_idx = 0;
+      for (i = 0; i < n; i++)
+      {
+         B_i[i] = current_idx;
+         for (j = A_diag_i[perm[i]] ; j < A_diag_i[perm[i] + 1] ; j ++)
+         {
+            B_j[current_idx] = rqperm[A_diag_j[j]];
+            B_data[current_idx++] = A_diag_data[j];
+         }
+      }
+      B_i[n] = current_idx;
+
+      hypre_assert(current_idx == nnz_A_diag);
+   }
+   else
+   {
+      /* Copy matrix A into B when not using a permutation vector */
+      B = hypre_CSRMatrixClone_v2(A_diag, 1, hypre_CSRMatrixMemoryLocation(A_diag));
+   }
+
+   /* Set output pointer */
    *A_diagp = B;
 
    return hypre_error_flag;
@@ -1568,6 +1582,7 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
       return hypre_error_flag;
    }
    hypre_assert(n == m);
+   hypre_GpuProfilingPushRange("ILUSetup");
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
    hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
@@ -1585,10 +1600,12 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
 
    /* 5. Now perform the analysis */
    /* 5-1. Analysis */
+   hypre_GpuProfilingPushRange("Analysis");
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, n, nnz_A, descr,
                                                         A_data, A_i, A_j,
                                                         matA_info, ilu_solve_policy,
                                                         matA_buffer));
+   hypre_GpuProfilingPopRange();
 
    /* 5-2. Check for zero pivot */
    status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
@@ -1601,10 +1618,12 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    }
 
    /* 6. Apply the factorization */
+   hypre_GpuProfilingPushRange("Factorization");
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
                                                A_data, A_i, A_j,
                                                matA_info, ilu_solve_policy,
                                                matA_buffer));
+   hypre_GpuProfilingPopRange();
 
    /* Check for zero pivot */
    status = cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot);
@@ -1619,6 +1638,7 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    /* Done with factorization, finishing up */
    hypre_TFree(matA_buffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsrilu02Info(matA_info));
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -1834,19 +1854,22 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
    HYPRE_Int               S_offd_nnz;
    HYPRE_Int               S_offd_ncols;
 
-   /* set data slots */
-   A_offd                                       = hypre_ParCSRMatrixOffd(A);
-   A_offd_i                                     = hypre_CSRMatrixI(A_offd);
-   A_offd_j                                     = hypre_CSRMatrixJ(A_offd);
-   A_offd_data                                  = hypre_CSRMatrixData(A_offd);
+   /* Set data slots */
+   A_offd      = hypre_ParCSRMatrixOffd(A);
+   A_offd_i    = hypre_CSRMatrixI(A_offd);
+   A_offd_j    = hypre_CSRMatrixJ(A_offd);
+   A_offd_data = hypre_CSRMatrixData(A_offd);
 
-   /* unfortunately we need to build the reverse permutation array */
-   rperm                                        = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   rqperm                                       = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   for (i = 0; i < n; i++)
+   /* Build the reverse permutation array */
+   if (perm && qperm)
    {
-      rperm[perm[i]] = i;
-      rqperm[qperm[i]] = i;
+      rperm  = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+      rqperm = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+      for (i = 0; i < n; i++)
+      {
+         rperm[perm[i]] = i;
+         rqperm[qperm[i]] = i;
+      }
    }
 
    /* Only call ILU when we really have a matrix on this processor */
@@ -1965,7 +1988,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       }
       for (i = 0; i < m_e; i++)
       {
-         col = perm[i + nI];
+         col = (perm) ? perm[i + nI] : i + nI;
          k1 = A_offd_i[col];
          k2 = A_offd_i[col + 1];
          for (j = k1; j < k2; j++)
@@ -1997,7 +2020,10 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       /* copy new index into send_buf */
       for (i = begin; i < end; i++)
       {
-         send_buf[i - begin] = rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)] - nLU + col_starts[0];
+        send_buf[i - begin] = (rperm) ? rperm[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)] -
+                                        nLU + col_starts[0] :
+                                        hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i) -
+                                        nLU + col_starts[0];
       }
 
       /* main communication */
