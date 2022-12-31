@@ -1003,7 +1003,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_ILUCreate(&(level_smoother[lev]));
             HYPRE_ILUSetType(level_smoother[lev], 0);
             HYPRE_ILUSetLevelOfFill(level_smoother[lev], 0);
-            HYPRE_ILUSetLocalReordering(level_smoother[lev], 0);
+            HYPRE_ILUSetLocalReordering(level_smoother[lev], 1);
             HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
             HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
