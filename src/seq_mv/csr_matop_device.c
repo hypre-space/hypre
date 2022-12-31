@@ -2010,26 +2010,29 @@ hypre_SortCSRCusparse( HYPRE_Int           n,
                        HYPRE_Int           *d_ja_sorted,
                        HYPRE_Complex       *d_a_sorted )
 {
-   cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseHandle_t  cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
+   size_t            pBufferSizeInBytes = 0;
+   void             *pBuffer = NULL;
+   csru2csrInfo_t    sortInfoA;
 
-   size_t pBufferSizeInBytes = 0;
-   void *pBuffer = NULL;
+   hypre_GpuProfilingPushRange("SortCSRCusparse");
 
-   csru2csrInfo_t sortInfoA;
    HYPRE_CUSPARSE_CALL( cusparseCreateCsru2csrInfo(&sortInfoA) );
-
    HYPRE_CUSPARSE_CALL( hypre_cusparse_csru2csr_bufferSizeExt(cusparsehandle,
-                                                              n, m, nnzA, d_a_sorted, d_ia, d_ja_sorted,
+                                                              n, m, nnzA,
+                                                              d_a_sorted, d_ia, d_ja_sorted,
                                                               sortInfoA, &pBufferSizeInBytes) );
 
    pBuffer = hypre_TAlloc(char, pBufferSizeInBytes, HYPRE_MEMORY_DEVICE);
-
    HYPRE_CUSPARSE_CALL( hypre_cusparse_csru2csr(cusparsehandle,
-                                                n, m, nnzA, descrA, d_a_sorted, d_ia, d_ja_sorted,
+                                                n, m, nnzA, descrA,
+                                                d_a_sorted, d_ia, d_ja_sorted,
                                                 sortInfoA, pBuffer) );
 
    hypre_TFree(pBuffer, HYPRE_MEMORY_DEVICE);
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
+
+   hypre_GpuProfilingPopRange();
 }
 
 HYPRE_Int
@@ -2447,4 +2450,3 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
    }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }
-
