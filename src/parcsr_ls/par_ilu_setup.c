@@ -1252,6 +1252,8 @@ hypre_ParILUCusparseExtractDiagonalCSR( hypre_ParCSRMatrix *A,
 
    HYPRE_Int            i, j, current_idx;
 
+   hypre_GpuProfilingPushRange("ParILUCusparseExtractDiagonalCSR");
+
    if (perm && rqperm)
    {
       B = hypre_CSRMatrixCreate(n, n, nnz_A_diag);
@@ -1283,6 +1285,8 @@ hypre_ParILUCusparseExtractDiagonalCSR( hypre_ParCSRMatrix *A,
 
    /* Set output pointer */
    *A_diagp = B;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -1727,6 +1731,8 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix       *A,
       return hypre_error_flag;
    }
 
+   hypre_GpuProfilingPushRange("ILU0SolveAnalysis");
+
    /* 1. Create info for ilu setup and solve */
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matL_info)));
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matU_info)));
@@ -1745,17 +1751,20 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix       *A,
                                                         matU_info, &matU_buffersize));
 
    solve_buffersize = hypre_max( matL_buffersize, matU_buffersize );
+
    /* 3. Create working array, since they won't be visited by host, allocate on device */
    if (solve_buffersize > solve_oldbuffersize)
    {
       if (solve_buffer)
       {
-         solve_buffer                           = hypre_TReAlloc_v2(solve_buffer, char, solve_oldbuffersize,
-                                                                    char, solve_buffersize, HYPRE_MEMORY_DEVICE);
+         solve_buffer = hypre_TReAlloc_v2(solve_buffer,
+                                          char, solve_oldbuffersize,
+                                          char, solve_buffersize,
+                                          HYPRE_MEMORY_DEVICE);
       }
       else
       {
-         solve_buffer                           = hypre_TAlloc(char, solve_buffersize, HYPRE_MEMORY_DEVICE);
+         solve_buffer = hypre_TAlloc(char, solve_buffersize, HYPRE_MEMORY_DEVICE);
       }
    }
 
@@ -1776,6 +1785,8 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix       *A,
    *matU_infop    = matU_info;
    *buffer_sizep  = solve_buffersize;
    *bufferp       = solve_buffer;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

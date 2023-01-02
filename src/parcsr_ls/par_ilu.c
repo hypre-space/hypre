@@ -1637,11 +1637,11 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
          break;
       case 1:
          /* RCM */
-         hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
+         hypre_ILULocalRCM(hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
          break;
       default:
          /* RCM */
-         hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
+         hypre_ILULocalRCM(hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
          break;
    }
 
@@ -1649,10 +1649,10 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    *io_pperm = pperm;
    *io_qperm = qperm;
 
-   hypre_TFree( rpperm, HYPRE_MEMORY_HOST);
-   hypre_TFree( rqperm, HYPRE_MEMORY_HOST);
-   hypre_TFree( pperm_pre, HYPRE_MEMORY_HOST);
-   hypre_TFree( qperm_pre, HYPRE_MEMORY_HOST);
+   hypre_TFree(rpperm, HYPRE_MEMORY_HOST);
+   hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+   hypre_TFree(pperm_pre, HYPRE_MEMORY_HOST);
+   hypre_TFree(qperm_pre, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 
@@ -1769,6 +1769,8 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
    HYPRE_Int            i;
    HYPRE_Int           *perm;
 
+   hypre_GpuProfilingPushRange("ILUGetLocalPerm");
+
    if (reordering_type != 0)
    {
       /* Set perm array */
@@ -1787,6 +1789,8 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
 
    /* Set output pointers */
    *nLU = num_rows;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -2363,31 +2367,37 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
       /* don't do this if we are too small */
       return hypre_error_flag;
    }
+
    if (n != ncol || end > n || start < 0)
    {
       /* don't do this if the input has error */
       hypre_printf("Error input, abort RCM\n");
       return hypre_error_flag;
    }
+
+   /* create permutation array if we don't have one yet */
    if (!perm)
    {
-      /* create permutation array if we don't have one yet */
-      perm = hypre_TAlloc( HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+      perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
       for (i = 0; i < n; i++)
       {
          perm[i] = i;
       }
    }
+
+   /* Check for symmetric reordering, then point qperm to row reordering */
    if (!qperm)
    {
-      /* symmetric reordering, just point it to row reordering */
       qperm = perm;
    }
+
+   /* Compute reverse qperm ordering */
    rqperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
       rqperm[qperm[i]] = i;
    }
+
    /* 2: Build Graph
     * Build Graph for RCM ordering
     */
