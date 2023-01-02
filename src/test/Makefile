@@ -72,7 +72,6 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij.c\
- check_matmat.c\
  ij_assembly.c\
  sstruct.c\
  struct.c\
@@ -144,10 +143,6 @@ distclean: clean
 # C
 
 ij: ij.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-check_matmat: check_matmat.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

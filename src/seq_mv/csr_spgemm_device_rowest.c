@@ -55,7 +55,7 @@ void hypre_rownnz_naive_rowi( hypre_DeviceItem &item,
          if (type == 'L' || type == 'B')
          {
 #if defined(HYPRE_USING_SYCL)
-            row_nnz_max = sycl::max(row_nnz_max, rowB_end - rowB_start);
+            row_nnz_max = std::max(row_nnz_max, rowB_end - rowB_start);
 #else
             row_nnz_max = max(row_nnz_max, rowB_end - rowB_start);
 #endif
@@ -313,7 +313,7 @@ void hypre_cohen_rowest_kernel( hypre_DeviceItem &item,
             if (low)
             {
 #if defined(HYPRE_USING_SYCL)
-               len = sycl::max(low[i], len);
+               len = std::max(low[i], len);
 #else
                len = max(low[i], len);
 #endif

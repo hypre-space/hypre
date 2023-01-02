@@ -437,13 +437,11 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    }
    else
    {
-#if defined(HYPRE_USING_SYCL)
-      dim3 bDim(1, 1, 256);
+      dim3 bDim = hypre_dim3(256);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
+#if defined(HYPRE_USING_SYCL)
       size_t shmem_bytes = bDim.get(2) * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
 #else
-      dim3 bDim(256);
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
       size_t shmem_bytes = bDim.x * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
 #endif
       HYPRE_GPU_LAUNCH2( hypreGPUKernel_InterpTruncationPass1_v1,
