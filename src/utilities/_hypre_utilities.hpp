@@ -1455,7 +1455,6 @@ T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int d
 {
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_start = (lane_id / width) * width;
-   /* WM: todo - double check */
    hypre_int src_in_warp = lane_id - delta >= group_start ? lane_id - delta : lane_id;
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
@@ -1474,7 +1473,6 @@ T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int
 {
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_end = ((lane_id / width) + 1) * width - 1;
-   /* WM: todo - double check */
    hypre_int src_in_warp = lane_id + delta <= group_end ? lane_id + delta : lane_id;
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }

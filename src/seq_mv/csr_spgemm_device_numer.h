@@ -400,7 +400,6 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
         i += grid_num_groups)
 #endif
    {
-      /* WM: double check - I think I need to guard this with and extra subgroup any sync for sycl, since the whole block of threads is in the loop? */
 #if defined(HYPRE_USING_SYCL)
       valid_ptr = warp_any_sync(item, HYPRE_WARP_FULL_MASK, i < M) &&
                   (GROUP_SIZE >= HYPRE_WARP_SIZE || i < M);
