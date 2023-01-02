@@ -6287,12 +6287,12 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
    hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
    hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
-/*
-   if ((mgr_data -> fsolver_mode) >= 0)
-   {
-      hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
-   }
-*/
+   /*
+      if ((mgr_data -> fsolver_mode) >= 0)
+      {
+         hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
+      }
+   */
    return hypre_error_flag;
 }
 

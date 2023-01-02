@@ -715,7 +715,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             /* (single level) relaxation for A_ff */
             if (interp_type[level] == 12)
             {
-               // Block Jacobi               
+               // Block Jacobi
                HYPRE_Int nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_ff_array[fine_grid]));
                HYPRE_Int n_block = nrows / blk_size[fine_grid];
                HYPRE_Int left_size = nrows - n_block * blk_size[fine_grid];
@@ -726,7 +726,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   alpha = -1.0;
                   beta = 1.0;
                   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid], beta,
-                                               F_array[fine_grid], Vtemp);
+                                                     F_array[fine_grid], Vtemp);
 
                   // Restrict residual to F-points
                   hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0,
@@ -874,7 +874,8 @@ hypre_MGRCycle( void               *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
-         else if (Frelax_type[level] == 2 || Frelax_type[level] == 9 || Frelax_type[level] == 99 || Frelax_type[level] == 199)
+         else if (Frelax_type[level] == 2 || Frelax_type[level] == 9 || Frelax_type[level] == 99 ||
+                  Frelax_type[level] == 199)
          {
             // We need to first compute residual to ensure that
             // F-relaxation is reducing the global residual
@@ -889,13 +890,13 @@ hypre_MGRCycle( void               *mgr_vdata,
             hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, Vtemp, 0.0, &(F_fine_array[coarse_grid]));
 #endif
             hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
-            
-            if( Frelax_type[level] == 2)
+
+            if ( Frelax_type[level] == 2)
             {
                // Do F-relaxation using AMG
                fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid],
-                                   F_fine_array[coarse_grid],
-                                   U_fine_array[coarse_grid]);
+                                      F_fine_array[coarse_grid],
+                                      U_fine_array[coarse_grid]);
             }
             else
             {
@@ -911,7 +912,7 @@ hypre_MGRCycle( void               *mgr_vdata,
             hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0,
                                 &(U_array[fine_grid]));
 #endif
-         }       
+         }
          else
          {
             for (i = 0; i < nsweeps[level]; i++)
