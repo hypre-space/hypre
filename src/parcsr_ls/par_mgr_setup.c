@@ -1198,7 +1198,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                {
                   if (my_id == 0)
                   {
-                     printf("Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
+                     hypre_printf("Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
                      hypre_error(1);
                      return hypre_error_flag;
                   }
@@ -1228,7 +1228,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             if (my_id == 0)
             {
-               printf("Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
+               hypre_printf("Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
                Ignoring this call and using user prescribed Frelax_type %d instead.\n", Frelax_type[lev]);
             }          
          }                 
@@ -1569,7 +1569,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
             // setup Gaussian Elim. in the F-relaxation step. Here, we apply GSElim at level 0
             // since we have a single matrix (and not an array of matrices).
-hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
+            // hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
             hypre_GaussElimSetup(GSElimData[i], i, Frelax_type[i]);
          }
       }
