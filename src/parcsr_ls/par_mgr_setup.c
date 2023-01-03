@@ -103,10 +103,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Solver      default_cg_solver;
    HYPRE_Int (*cgrid_solver_setup)(void*, void*, void*, void*) =
-     (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_setup);
+      (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_setup);
 
    HYPRE_Int (*cgrid_solver_solve)(void*, void*, void*, void*) =
-     (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_solve);
+      (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_solve);
 
    HYPRE_Int    *level_smooth_type =  (mgr_data -> level_smooth_type);
    HYPRE_Int    *level_smooth_iters = (mgr_data -> level_smooth_iters);
@@ -166,8 +166,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_BigInt *idx_array = (mgr_data -> idx_array);
    HYPRE_Int lvl_to_keep_cpoints = ((mgr_data -> lvl_to_keep_cpoints) >
                                     (mgr_data -> max_num_coarse_levels)) ?
-                                    (mgr_data -> max_num_coarse_levels) :
-                                    (mgr_data -> lvl_to_keep_cpoints);
+                                   (mgr_data -> max_num_coarse_levels) :
+                                   (mgr_data -> lvl_to_keep_cpoints);
    HYPRE_Int    nloc   =  hypre_ParCSRMatrixNumRows(A);
    HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_BigInt iupper =  hypre_ParCSRMatrixLastRowIndex(A);
@@ -1651,8 +1651,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else
       {
-        /* Only check for vcycle smoother option.
-         * Currently leaves Frelax_type[lev] = 2 (full amg) option as is */
+         /* Only check for vcycle smoother option.
+          * Currently leaves Frelax_type[lev] = 2 (full amg) option as is */
          if (Frelax_type[lev] == 1)
          {
             Frelax_type[lev] = 0;
@@ -1736,8 +1736,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
    cgrid_solver_setup((mgr_data -> coarse_grid_solver),
-                       RAP_ptr, F_array[num_c_levels],
-                       U_array[num_c_levels]);
+                      RAP_ptr, F_array[num_c_levels],
+                      U_array[num_c_levels]);
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_REGION_END(region_name);

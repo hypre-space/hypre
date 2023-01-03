@@ -2112,43 +2112,44 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                                                    HYPRE_1D_BLOCK_SIZE / group_sizes[1],
                                                    HYPRE_1D_BLOCK_SIZE / group_sizes[2],
                                                    HYPRE_1D_BLOCK_SIZE / group_sizes[3],
-                                                   HYPRE_1D_BLOCK_SIZE / group_sizes[4] };
+                                                   HYPRE_1D_BLOCK_SIZE / group_sizes[4]
+                                                 };
       const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
 
       if (avg_rownnz >= lower_bounds[0])
       {
-        const dim3 gDim((num_rows + num_groups_per_block[0] - 1) / num_groups_per_block[0]);
-        HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[0]>,
-                          gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                          A_i, A_j, A_a, B_i, B_j, B_a );
+         const dim3 gDim((num_rows + num_groups_per_block[0] - 1) / num_groups_per_block[0]);
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[0]>,
+                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
+                           A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else if (avg_rownnz >= lower_bounds[1])
       {
-        const dim3 gDim((num_rows + num_groups_per_block[1] - 1) / num_groups_per_block[1]);
-        HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[1]>,
-                          gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                          A_i, A_j, A_a, B_i, B_j, B_a );
+         const dim3 gDim((num_rows + num_groups_per_block[1] - 1) / num_groups_per_block[1]);
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[1]>,
+                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
+                           A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else if (avg_rownnz >= lower_bounds[2])
       {
-        const dim3 gDim((num_rows + num_groups_per_block[2] - 1) / num_groups_per_block[2]);
-        HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[2]>,
-                          gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                          A_i, A_j, A_a, B_i, B_j, B_a );
+         const dim3 gDim((num_rows + num_groups_per_block[2] - 1) / num_groups_per_block[2]);
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[2]>,
+                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
+                           A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else if (avg_rownnz >= lower_bounds[3])
       {
-        const dim3 gDim((num_rows + num_groups_per_block[3] - 1) / num_groups_per_block[3]);
-        HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[3]>,
-                          gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                          A_i, A_j, A_a, B_i, B_j, B_a );
+         const dim3 gDim((num_rows + num_groups_per_block[3] - 1) / num_groups_per_block[3]);
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[3]>,
+                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
+                           A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else
       {
-        const dim3 gDim((num_rows + num_groups_per_block[4] - 1) / num_groups_per_block[4]);
-        HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[4]>,
-                          gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                          A_i, A_j, A_a, B_i, B_j, B_a );
+         const dim3 gDim((num_rows + num_groups_per_block[4] - 1) / num_groups_per_block[4]);
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[4]>,
+                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
+                           A_i, A_j, A_a, B_i, B_j, B_a );
       }
    }
 

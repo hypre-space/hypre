@@ -4589,9 +4589,9 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
    left_size        = num_points - whole_num_points;
    bstart           = bs2 * num_blocks;
 
-  /*-----------------------------------------------------------------
-   * Get all the diagonal sub-blocks
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Get all the diagonal sub-blocks
+    *-----------------------------------------------------------------*/
 
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "ExtractDiagSubBlocks");
    if (CF_marker == NULL)
@@ -4668,7 +4668,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
             }
             if (++cnt == whole_num_points)
             {
-                break;
+               break;
             }
          }
          else
@@ -4710,9 +4710,9 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
    }
    HYPRE_ANNOTATE_REGION_END("%s", "ExtractDiagSubBlocks");
 
-  /*-----------------------------------------------------------------
-   * Compute the inverses of all the diagonal sub-blocks
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Compute the inverses of all the diagonal sub-blocks
+    *-----------------------------------------------------------------*/
 
    if (diag_type == 1)
    {
@@ -4843,9 +4843,9 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
       return hypre_error_flag;
    }
 
-  /*-----------------------------------------------------------------
-   * Count the number of points matching point_type in CF_marker
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Count the number of points matching point_type in CF_marker
+    *-----------------------------------------------------------------*/
 
    if (CF_marker == NULL)
    {
@@ -4865,9 +4865,9 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
    num_left    = B_diag_num_rows - num_blocks * blk_size;
    B_diag_size = blk_size * (blk_size * num_blocks) + num_left * num_left;
 
-  /*-----------------------------------------------------------------
-   * Compute global number of rows and partitionings
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Compute global number of rows and partitionings
+    *-----------------------------------------------------------------*/
 
    if (CF_marker)
    {
@@ -4907,18 +4907,18 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
    B_diag_j    = hypre_CSRMatrixJ(B_diag);
    B_diag_data = hypre_CSRMatrixData(B_diag);
 
-  /*-----------------------------------------------------------------------
-   * Extract coefficients
-   *-----------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Extract coefficients
+    *-----------------------------------------------------------------------*/
 
    hypre_ParCSRMatrixExtractBlockDiagHost(A, blk_size, B_diag_num_rows,
                                           point_type, CF_marker,
                                           B_diag_size, diag_type,
                                           B_diag_data);
 
-  /*-----------------------------------------------------------------
-   * Set row/col indices of diagonal blocks
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Set row/col indices of diagonal blocks
+    *-----------------------------------------------------------------*/
 
    B_diag_i[B_diag_num_rows] = B_diag_size;
    for (i = 0; i < num_blocks; i++)
@@ -4937,9 +4937,9 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
       }
    }
 
-  /*-----------------------------------------------------------------
-   * Treat the remaining points
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Treat the remaining points
+    *-----------------------------------------------------------------*/
 
    //diag_local = &diag[num_blocks * nb2];
    for (k = 0; k < num_left; k++)

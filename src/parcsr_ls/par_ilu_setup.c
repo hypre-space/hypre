@@ -425,7 +425,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       }
    }
 
-  //   m = n - nLU;
+   //   m = n - nLU;
    /* factorization */
    switch (ilu_type)
    {
@@ -2112,11 +2112,11 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       /* copy new index into send_buf */
       for (i = 0; i < (end - begin); i++)
       {
-        send_buf[i] = (rperm_data) ?
-                      rperm_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin)] -
-                      nLU + col_starts[0] :
-                      hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin) -
-                      nLU + col_starts[0];
+         send_buf[i] = (rperm_data) ?
+                       rperm_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin)] -
+                       nLU + col_starts[0] :
+                       hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin) -
+                       nLU + col_starts[0];
       }
 
       /* main communication */

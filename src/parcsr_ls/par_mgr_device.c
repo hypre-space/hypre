@@ -529,7 +529,8 @@ hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
    {
       for (lidx = lane; lidx < bs2; lidx += HYPRE_WARP_SIZE)
       {
-         B_data[bidx * bs2 + lidx] = A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) * block_size)];
+         B_data[bidx * bs2 + lidx] = A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) *
+                                                          block_size)];
       }
    } /* Grid-stride loop */
 }
@@ -624,9 +625,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       return hypre_error_flag;
    }
 
-  /*-----------------------------------------------------------------
-   * Extract diagonal sub-blocks (pattern and coefficients)
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Extract diagonal sub-blocks (pattern and coefficients)
+    *-----------------------------------------------------------------*/
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
@@ -647,9 +648,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       }
    }
 
-  /*-----------------------------------------------------------------
-   * Invert diagonal sub-blocks
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Invert diagonal sub-blocks
+    *-----------------------------------------------------------------*/
 
    if (diag_type == 1)
    {
@@ -690,23 +691,23 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                             infos,
                                             num_blocks));
 #if defined (HYPRE_DEBUG)
-     hypre_TMemcpy(h_infos, infos, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     for (k = 0; k < num_rows; k++)
-     {
-        if (h_infos[k] != 0)
-        {
-           if (h_infos[k] < 0)
-           {
-              hypre_printf("[%d]: LU fact. failed at system %d, parameter %d ",
-                           myid, k, h_infos[k]);
-           }
-           else
-           {
-              hypre_printf("[%d]: Singular U(%d, %d) at system %d",
-                           myid, h_infos[k], h_infos[k], k);
-           }
-        }
-     }
+      hypre_TMemcpy(h_infos, infos, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (k = 0; k < num_rows; k++)
+      {
+         if (h_infos[k] != 0)
+         {
+            if (h_infos[k] < 0)
+            {
+               hypre_printf("[%d]: LU fact. failed at system %d, parameter %d ",
+                            myid, k, h_infos[k]);
+            }
+            else
+            {
+               hypre_printf("[%d]: Singular U(%d, %d) at system %d",
+                            myid, h_infos[k], h_infos[k], k);
+            }
+         }
+      }
 #endif
 
       /* Compute sub-blocks inverses */
@@ -798,9 +799,9 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
 
-  /*-----------------------------------------------------------------
-   * Count the number of points matching point_type in CF_marker
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Count the number of points matching point_type in CF_marker
+    *-----------------------------------------------------------------*/
 
    if (!CF_marker)
    {
@@ -816,9 +817,9 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
    num_blocks  = 1 + (B_diag_num_rows - 1) / blk_size;
    B_diag_size = blk_size * (blk_size * num_blocks);
 
-  /*-----------------------------------------------------------------
-   * Compute global number of rows and partitionings
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Compute global number of rows and partitionings
+    *-----------------------------------------------------------------*/
 
    if (CF_marker)
    {
@@ -858,9 +859,9 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
    B_diag_j    = hypre_CSRMatrixJ(B_diag);
    B_diag_data = hypre_CSRMatrixData(B_diag);
 
-  /*-----------------------------------------------------------------------
-   * Extract coefficients
-   *-----------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Extract coefficients
+    *-----------------------------------------------------------------------*/
 
    hypre_ParCSRMatrixExtractBlockDiagDevice(A, blk_size, B_diag_num_rows,
                                             point_type, CF_marker,

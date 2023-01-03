@@ -2485,8 +2485,8 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
          hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
          if (free_Aij)
          {
-           hypre_TFree(A_i, HYPRE_MEMORY_HOST);
-           hypre_TFree(A_i, HYPRE_MEMORY_HOST);
+            hypre_TFree(A_i, HYPRE_MEMORY_HOST);
+            hypre_TFree(A_i, HYPRE_MEMORY_HOST);
          }
          hypre_CSRMatrixDestroy(G);
 
@@ -2537,8 +2537,8 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
          hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
          if (free_Aij)
          {
-           hypre_TFree(A_i, HYPRE_MEMORY_HOST);
-           hypre_TFree(A_i, HYPRE_MEMORY_HOST);
+            hypre_TFree(A_i, HYPRE_MEMORY_HOST);
+            hypre_TFree(A_i, HYPRE_MEMORY_HOST);
          }
          hypre_CSRMatrixDestroy(G);
 

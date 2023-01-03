@@ -569,7 +569,7 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int              use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
    HYPRE_Solver           cg_solver = (mgr_data -> coarse_grid_solver);
    HYPRE_Int            (*coarse_grid_solver_solve)(void*, void*, void*, void*) =
-                         (mgr_data -> coarse_grid_solver_solve);
+      (mgr_data -> coarse_grid_solver_solve);
 
    hypre_IntArray       **CF_marker = (mgr_data -> CF_marker_array);
    HYPRE_Int             *nsweeps = (mgr_data -> num_relax_sweeps);
@@ -584,7 +584,7 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
    hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
    HYPRE_Int            (*fine_grid_solver_solve)(void*, void*, void*, void*) =
-                         (mgr_data -> fine_grid_solver_solve);
+      (mgr_data -> fine_grid_solver_solve);
    hypre_ParCSRMatrix   **A_ff_array = (mgr_data -> A_ff_array);
 
    HYPRE_Int              i, relax_points;
@@ -714,7 +714,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                {
                   HYPRE_Real *level_diaginv  = (mgr_data -> level_diaginv)[fine_grid];
                   HYPRE_Int   level_blk_size = (level == 0) ? block_size :
-                                                              block_num_coarse_indexes[level - 1];
+                                               block_num_coarse_indexes[level - 1];
                   HYPRE_Int   nrows          = hypre_ParCSRMatrixNumRows(A_array[fine_grid]);
                   HYPRE_Int   n_block        = nrows / level_blk_size;
                   HYPRE_Int   left_size      = nrows - n_block * level_blk_size;
@@ -1136,7 +1136,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                {
                   HYPRE_Real *level_diaginv  = (mgr_data -> level_diaginv)[fine_grid];
                   HYPRE_Int   level_blk_size = (fine_grid == 0) ? block_size :
-                                                block_num_coarse_indexes[fine_grid - 1];
+                                               block_num_coarse_indexes[fine_grid - 1];
                   HYPRE_Int   nrows          = hypre_ParCSRMatrixNumRows(A_array[fine_grid]);
                   HYPRE_Int   n_block        = nrows / level_blk_size;
                   HYPRE_Int   left_size      = nrows - n_block * level_blk_size;
