@@ -1731,10 +1731,16 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if MGR_DEBUG_LEVEL == 2
    wall_time = time_getWallclockSeconds();
 #endif
+   hypre_sprintf(region_name, "%s-%d", "MGR_Level", num_c_levels);
+   hypre_GpuProfilingPushRange(region_name);
+   HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+
    cgrid_solver_setup((mgr_data -> coarse_grid_solver),
                        RAP_ptr, F_array[num_c_levels],
                        U_array[num_c_levels]);
 
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_REGION_END(region_name);
 #if MGR_DEBUG_LEVEL == 2
    wall_time = time_getWallclockSeconds() - wall_time;
    hypre_ParPrintf(comm, "Proc = %d - Coarse grid setup: %f\n", my_id, wall_time);
