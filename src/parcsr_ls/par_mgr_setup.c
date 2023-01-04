@@ -1080,7 +1080,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-      if ((interp_type[lev] == 12) ||
+      if ((Frelax_type[lev] == 2)  ||
+          (interp_type[lev] == 12) ||
           (mgr_coarse_grid_method[lev] != 0))
       {
          hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
@@ -1403,16 +1404,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParCSRMatrixPrintIJ(RAP_ptr, 0, 0, fname);
 #endif
 
-      /* Destroy temporary FF/FC/CF/CC splittings */
+      /* Destroy temporary FC splitting */
       hypre_ParCSRMatrixDestroy(A_FC);
       A_FC = NULL;
-
-      /* Destroy A_FF if it has not been saved on A_ff_array[lev] */
-      if (!A_ff_array[lev])
-      {
-         hypre_ParCSRMatrixDestroy(A_FF);
-         A_FF = NULL;
-      }
 
       if (Frelax_type[lev] == 2) // full AMG
       {
@@ -1445,23 +1439,8 @@ hypre_MGRSetup( void               *mgr_vdata,
             }
             else
             {
-               /* Compute A_FF if necessary */
-               if (!A_ff_array[lev])
-               {
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-                  if (exec == HYPRE_EXEC_DEVICE)
-                  {
-                     hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker,
-                                                          coarse_pnts_global,
-                                                          NULL, NULL, &A_FF);
-                  }
-                  else
-#endif
-                  {
-                     hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
-                  }
-                  A_ff_array[lev] = A_FF;
-               }
+               /* Save A_FF splitting */
+               A_ff_array[lev] = A_FF;
 
                /* Setup F-solver */
                fgrid_solver_setup(aff_solver[lev],
@@ -1473,23 +1452,8 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          else // construct default AMG solver
          {
-            /* TODO: refactor the following block, it matches the one above (VPM) */
-            if (!A_ff_array[lev])
-            {
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-               if (exec == HYPRE_EXEC_DEVICE)
-               {
-                  hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker,
-                                                       coarse_pnts_global,
-                                                       NULL, NULL, &A_FF);
-               }
-               else
-#endif
-               {
-                  hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
-               }
-               A_ff_array[lev] = A_FF;
-            }
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
 
             /* Create BoomerAMG solver for A_FF */
             aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
@@ -1547,6 +1511,13 @@ hypre_MGRSetup( void               *mgr_vdata,
                                   hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
                                   hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
          hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+      }
+
+      /* Destroy A_FF if it has not been saved on A_ff_array[lev] */
+      if (!A_ff_array[lev])
+      {
+         hypre_ParCSRMatrixDestroy(A_FF);
+         A_FF = NULL;
       }
 
       /* TODO: move this to par_mgr_coarsen.c and port to GPUs (VPM) */
