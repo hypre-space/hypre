@@ -384,6 +384,8 @@ HYPRE_Int hypre_CSRMatrixSetPatternOnly( hypre_CSRMatrix *matrix, HYPRE_Int patt
 HYPRE_Int hypre_CSRMatrixSetRownnz ( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
 HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix, const char *file_name );
+HYPRE_Int hypre_CSRMatrixPrintIJ ( hypre_CSRMatrix *matrix, HYPRE_Int base_i,
+                                   HYPRE_Int base_j, char *filename );
 HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input, char *file_name );
 HYPRE_Int hypre_CSRMatrixPrintMM( hypre_CSRMatrix *matrix, HYPRE_Int basei, HYPRE_Int basej,
                                   HYPRE_Int trans, const char *file_name );
