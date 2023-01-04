@@ -1517,8 +1517,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       if (!A_ff_array[lev])
       {
          hypre_ParCSRMatrixDestroy(A_FF);
-         A_FF = NULL;
       }
+      A_FF = NULL;
 
       /* TODO: move this to par_mgr_coarsen.c and port to GPUs (VPM) */
       /* Update coarse level indexes for next levels */
