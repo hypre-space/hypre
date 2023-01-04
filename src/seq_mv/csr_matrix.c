@@ -647,7 +647,7 @@ hypre_CSRMatrixPrintIJ( hypre_CSRMatrix  *matrix,
       {
          jj = (matrix_bj) ? (matrix_bj[j] + base_j) : (matrix_j[j] + base_j);
 
-         if (patt_only)
+         if (!patt_only)
          {
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(file, "%b %b %.14e , %.14e\n", ii, jj,
