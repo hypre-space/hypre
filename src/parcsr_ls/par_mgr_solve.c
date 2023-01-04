@@ -766,10 +766,9 @@ hypre_MGRCycle( void              *mgr_vdata,
                /* L1-Jacobi */
                for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
-                  hypre_BoomerAMGRelax18WeightedL1Jacobi(A_array[fine_grid],
-                                                         F_array[fine_grid],
-                                                         NULL, 0, fp_one, l1_norms,
-                                                         U_array[fine_grid], Vtemp);
+                  hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
+                                       NULL, 18, 0, fp_one, fp_one, l1_norms,
+                                       U_array[fine_grid], Vtemp, Ztemp);
                }
             }
 
@@ -1186,10 +1185,9 @@ hypre_MGRCycle( void              *mgr_vdata,
                /* L1-Jacobi */
                for (i = 0; i < level_smooth_iters[level]; i++)
                {
-                  hypre_BoomerAMGRelax18WeightedL1Jacobi(A_array[fine_grid],
-                                                         F_array[fine_grid],
-                                                         NULL, 0, fp_one, l1_norms,
-                                                         U_array[fine_grid], Vtemp);
+                  hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
+                                       NULL, 18, 0, fp_one, fp_one, l1_norms,
+                                       U_array[fine_grid], Vtemp, Ztemp);
                }
             }
 
