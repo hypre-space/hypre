@@ -1960,6 +1960,20 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       /* Apply ILU factorization to the entile A_diag */
       HYPRE_ILUSetupCusparseCSRILU0(A_diag, ilu_solve_policy);
 
+#if defined(HYPRE_DEBUG)
+      /* Dump A_diag to file in case of error */
+      if (HYPRE_GetError())
+      {
+         char filename[256];
+
+         hypre_sprintf(filename, "A.IJ.%05d", my_id);
+         hypre_printf("[%d]: Failed to compute ILU factorization. Dumping A to %s...\n",
+                      my_id, filename);
+         hypre_CSRMatrixPrintIJ(A_diag, 0, 0, filename);
+      }
+      hypre_MPI_Barrier(comm);
+#endif
+
       /* | L \ U (B) L^{-1}F  |
        * | EU^{-1}   L \ U (S)|
        * Extract submatrix L_B U_B, L_S U_S, EU_B^{-1}, L_B^{-1}F
