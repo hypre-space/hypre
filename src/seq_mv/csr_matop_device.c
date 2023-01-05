@@ -2014,9 +2014,9 @@ hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
                                          HYPRE_Complex     *B_a )
 {
 #if defined (HYPRE_USING_SYCL)
-   HYPRE_Int  item_local_id = item.get_local_id(0);
-   HYPRE_Int  grid_ngroups  = item.get_group_range(0) * (HYPRE_SPMV_BLOCKDIM / K);
-   HYPRE_Int  grid_group_id = (item.get_group(0) * HYPRE_SPMV_BLOCKDIM + item_local_id) / K;
+   HYPRE_Int  item_local_id = item.get_local_id(2);
+   HYPRE_Int  grid_ngroups  = item.get_group_range(2) * (HYPRE_1D_BLOCK_SIZE / K);
+   HYPRE_Int  grid_group_id = (item.get_group(2) * HYPRE_1D_BLOCK_SIZE + item_local_id) / K;
    HYPRE_Int  group_lane    = item_local_id & (K - 1);
 #else
    HYPRE_Int  grid_ngroups  = gridDim.x * HYPRE_1D_BLOCK_SIZE / K;
@@ -2034,28 +2034,30 @@ hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
    {
       HYPRE_Int row = grid_group_id;
 
-      /* Subwarp reads the permutated row index */
+      /* Load data to sub-warps */
       if (group_lane == 0)
       {
          perm_row = read_only_load(&perm[row]);
+         pB = read_only_load(&B_i[row]);
       }
       perm_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, perm_row, 0, K);
+      pB = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pB, 0, K);
 
-      /* Subwarp reads row index bounds */
       if (group_lane < 2)
       {
          pA = read_only_load(&A_i[perm_row + group_lane]);
-         pB = read_only_load(&B_i[row + group_lane]);
       }
       qA = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pA, 1, K);
       pA = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pA, 0, K);
-      pB = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pB, 0, K);
 
       /* Build B_j and B_a */
-      for (j = group_lane; j < qA - pA; j += K)
+      if (row < num_rows)
       {
-         B_j[pB + j] = read_only_load(&rqperm[read_only_load(&A_j[pA + j])]);
-         B_a[pB + j] = read_only_load(&A_a[pA + j]);
+         for (j = group_lane; j < qA - pA; j += K)
+         {
+            B_j[pB + j] = read_only_load(&rqperm[read_only_load(&A_j[pA + j])]);
+            B_a[pB + j] = read_only_load(&A_a[pA + j]);
+         }
       }
    }
 }
