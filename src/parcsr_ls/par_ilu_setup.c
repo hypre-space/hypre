@@ -1612,7 +1612,6 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
    HYPRE_Int               matA_buffersize;
    char                   *matA_buffer;
 
-
    cusparseHandle_t        handle = hypre_HandleCusparseHandle(hypre_handle());
    cusparseMatDescr_t      descr  = hypre_CSRMatrixGPUMatDescr(A);
    cusparseStatus_t        status;
@@ -1966,9 +1965,14 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       {
          char filename[256];
 
+         hypre_printf("[%d]: Failed to compute ILU factorization. ", my_id);
+
          hypre_sprintf(filename, "A.IJ.%05d", my_id);
-         hypre_printf("[%d]: Failed to compute ILU factorization. Dumping A to %s...\n",
-                      my_id, filename);
+         hypre_printf("Dumping A to %s...\t", filename);
+         hypre_CSRMatrixPrintIJ(hypre_ParCSRMatrixDiag(A), 0, 0, filename);
+
+         hypre_sprintf(filename, "Aperm.IJ.%05d", my_id);
+         hypre_printf("Dumping Aperm to %s...\n", filename);
          hypre_CSRMatrixPrintIJ(A_diag, 0, 0, filename);
       }
       hypre_MPI_Barrier(comm);
