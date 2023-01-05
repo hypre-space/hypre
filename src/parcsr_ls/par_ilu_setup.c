@@ -1967,8 +1967,16 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
 
          hypre_printf("[%d]: Failed to compute ILU factorization. ", my_id);
 
+         hypre_sprintf(filename, "perm");
+         hypre_printf("Dumping perm to %s... ", filename);
+         hypre_IntArrayPrint(comm, perm, filename);
+
+         hypre_sprintf(filename, "rqperm");
+         hypre_printf("Dumping rqperm to %s... ", filename);
+         hypre_IntArrayPrint(comm, rqperm, filename);
+
          hypre_sprintf(filename, "A.IJ.%05d", my_id);
-         hypre_printf("Dumping A to %s...\t", filename);
+         hypre_printf("Dumping A to %s... ", filename);
          hypre_CSRMatrixPrintIJ(hypre_ParCSRMatrixDiag(A), 0, 0, filename);
 
          hypre_sprintf(filename, "Aperm.IJ.%05d", my_id);
