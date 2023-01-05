@@ -17,7 +17,7 @@ import sys, os
 #import alabaster
 
 # Read the docs
-#import sphinx_rtd_theme
+import sphinx_rtd_theme
 
 import subprocess
 
