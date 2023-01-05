@@ -3961,7 +3961,7 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
  * (Optional) Set the relaxation type for F-relaxation.
  * Currently supports the following flavors of relaxation types
  * as described in the \e BoomerAMGSetRelaxType:
- * \e relax_type 0, 3 - 8, 13, 14, 18. Also supports AMG (options 1 and 2) 
+ * \e relax_type 0, 3 - 8, 13, 14, 18. Also supports AMG (options 1 and 2)
  *    and direct solver variants (9, 99, 199). See HYPRE_MGRSetLevelFRelaxType for details.
  **/
 HYPRE_Int
