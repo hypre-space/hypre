@@ -169,6 +169,57 @@ hypre_IntArrayMigrate( hypre_IntArray      *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_IntArrayPrint
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayPrint( MPI_Comm        comm,
+                     hypre_IntArray *array,
+                     const char     *filename )
+{
+   HYPRE_Int             size            = hypre_IntArraySize(array);
+   HYPRE_MemoryLocation  memory_location = hypre_IntArrayMemoryLocation(array);
+
+   hypre_IntArray       *h_array;
+   HYPRE_Int            *data;
+
+   FILE                 *file;
+   HYPRE_Int             i, myid;
+   char                  new_filename[1024];
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Move data to host if needed*/
+   h_array = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+             hypre_IntArrayCloneDeep_v2(array, HYPRE_MEMORY_HOST) : array;
+   data = hypre_IntArrayData(h_array);
+
+   /* Open file */
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      return hypre_error_flag;
+   }
+
+   /* Print to file */
+   hypre_fprintf(file, "%d\n", size);
+   for (i = 0; i < size; i++)
+   {
+      hypre_fprintf(file, "%d %d\n", i, data[i]);
+   }
+   fclose(file);
+
+   /* Free memory */
+   if (h_array != array)
+   {
+      hypre_IntArrayDestroy(h_array);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_IntArraySetConstantValuesHost
  *--------------------------------------------------------------------------*/
 
