@@ -206,7 +206,7 @@ hypre_IntArrayPrint( MPI_Comm        comm,
    hypre_fprintf(file, "%d\n", size);
    for (i = 0; i < size; i++)
    {
-      hypre_fprintf(file, "%d %d\n", i, data[i]);
+      hypre_fprintf(file, "%d\n", data[i]);
    }
    fclose(file);
 
@@ -231,7 +231,7 @@ hypre_IntArrayRead( MPI_Comm         comm,
    hypre_IntArray       *array;
    HYPRE_Int             size;
    FILE                 *file;
-   HYPRE_Int             i, ii, myid;
+   HYPRE_Int             i, myid;
    char                  new_filename[1024];
 
    hypre_MPI_Comm_rank(comm, &myid);
@@ -254,7 +254,7 @@ hypre_IntArrayRead( MPI_Comm         comm,
    /* Read array values from file */
    for (i = 0; i < size; i++)
    {
-      hypre_fscanf(file, "%d %d\n", &ii, &hypre_IntArrayData(array)[i]);
+      hypre_fscanf(file, "%d\n", &hypre_IntArrayData(array)[i]);
    }
    fclose(file);
 
