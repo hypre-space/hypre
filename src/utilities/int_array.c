@@ -149,6 +149,8 @@ hypre_IntArrayPrint( MPI_Comm        comm,
 {
    HYPRE_Int             size = hypre_IntArraySize(array);
    HYPRE_MemoryLocation  memory_location = hypre_IntArrayMemoryLocation(array);
+
+   hypre_IntArray       *h_array;
    HYPRE_Int            *data;
 
    FILE                 *file;
@@ -157,17 +159,10 @@ hypre_IntArrayPrint( MPI_Comm        comm,
 
    hypre_MPI_Comm_rank(comm, &myid);
 
-   /* Move data to host */
-   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
-   {
-      data = hypre_IntArrayData(array);
-   }
-   else
-   {
-      data = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(data, hypre_IntArrayData(array), HYPRE_Int, size,
-                    HYPRE_MEMORY_HOST, memory_location);
-   }
+   /* Move data to host if needed*/
+   h_array = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+             hypre_IntArrayCloneDeep_v2(array, HYPRE_MEMORY_HOST) : array;
+   data = hypre_IntArrayData(h_array);
 
    /* Open file */
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
@@ -186,9 +181,9 @@ hypre_IntArrayPrint( MPI_Comm        comm,
    fclose(file);
 
    /* Free memory */
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   if (h_array != array)
    {
-      hypre_TFree(data, HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(h_array);
    }
 
    return hypre_error_flag;
