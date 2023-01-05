@@ -147,7 +147,7 @@ hypre_IntArrayPrint( MPI_Comm        comm,
                      hypre_IntArray *array,
                      const char     *filename )
 {
-   HYPRE_Int             size = hypre_IntArraySize(array);
+   HYPRE_Int             size            = hypre_IntArraySize(array);
    HYPRE_MemoryLocation  memory_location = hypre_IntArrayMemoryLocation(array);
 
    hypre_IntArray       *h_array;
