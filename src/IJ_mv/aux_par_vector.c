@@ -38,7 +38,7 @@ hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector_ptr)
    hypre_AuxParVectorMaxStackElmts(aux_vector)       = 0;
    hypre_AuxParVectorCurrentStackElmts(aux_vector)   = 0;
    hypre_AuxParVectorStackI(aux_vector)              = NULL;
-   hypre_AuxParVectorStackVoff(aux_vector)           = NULL;
+   hypre_AuxParVectorStackComp(aux_vector)           = NULL;
    hypre_AuxParVectorStackData(aux_vector)           = NULL;
    hypre_AuxParVectorStackSorA(aux_vector)           = NULL;
    hypre_AuxParVectorUsrOffProcElmts(aux_vector)     = -1;
@@ -67,7 +67,7 @@ hypre_AuxParVectorDestroy( hypre_AuxParVector *aux_vector )
       HYPRE_MemoryLocation  memory_location = hypre_AuxParVectorMemoryLocation(aux_vector);
 
       hypre_TFree(hypre_AuxParVectorStackI(aux_vector),    memory_location);
-      hypre_TFree(hypre_AuxParVectorStackVoff(aux_vector), memory_location);
+      hypre_TFree(hypre_AuxParVectorStackComp(aux_vector), memory_location);
       hypre_TFree(hypre_AuxParVectorStackData(aux_vector), memory_location);
       hypre_TFree(hypre_AuxParVectorStackSorA(aux_vector), memory_location);
 #endif

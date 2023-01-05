@@ -174,7 +174,7 @@ typedef struct
    HYPRE_Int            max_stack_elmts;      /* length of stash for SetValues and AddToValues*/
    HYPRE_Int            current_stack_elmts;  /* current no. of elements stored in stash */
    HYPRE_BigInt        *stack_i;              /* contains row indices */
-   HYPRE_BigInt        *stack_voff;           /* contains vector offsets for multivectors */
+   HYPRE_Int           *stack_comp;           /* contains component of the vector for multivectors */
    HYPRE_Complex       *stack_data;           /* contains corresponding data */
    char                *stack_sora;
    HYPRE_Int            usr_off_proc_elmts;   /* the num of off-proc elements usr guided */
@@ -198,7 +198,7 @@ typedef struct
 #define hypre_AuxParVectorMaxStackElmts(vector)        ((vector) -> max_stack_elmts)
 #define hypre_AuxParVectorCurrentStackElmts(vector)    ((vector) -> current_stack_elmts)
 #define hypre_AuxParVectorStackI(vector)               ((vector) -> stack_i)
-#define hypre_AuxParVectorStackVoff(vector)            ((vector) -> stack_voff)
+#define hypre_AuxParVectorStackComp(vector)            ((vector) -> stack_comp)
 #define hypre_AuxParVectorStackData(vector)            ((vector) -> stack_data)
 #define hypre_AuxParVectorStackSorA(vector)            ((vector) -> stack_sora)
 #define hypre_AuxParVectorUsrOffProcElmts(vector)      ((vector) -> usr_off_proc_elmts)
@@ -529,8 +529,13 @@ HYPRE_Int hypre_IJVectorGetValuesPar ( hypre_IJVector *vector, HYPRE_Int num_val
 HYPRE_Int hypre_IJVectorAssembleOffProcValsPar ( hypre_IJVector *vector,
                                                  HYPRE_Int max_off_proc_elmts, HYPRE_Int current_num_elmts, HYPRE_MemoryLocation memory_location,
                                                  HYPRE_BigInt *off_proc_i, HYPRE_Complex *off_proc_data );
+HYPRE_Int hypre_IJVectorAssembleOffProcValsParMultiVec ( hypre_IJVector *vector,
+																			HYPRE_Int max_off_proc_elmts, HYPRE_Int current_num_elmts, HYPRE_MemoryLocation memory_location,
+																			HYPRE_BigInt *off_proc_i, HYPRE_Int *off_proc_comp, HYPRE_Complex *off_proc_data );
 HYPRE_Int hypre_IJVectorSetAddValuesParDevice(hypre_IJVector *vector, HYPRE_Int num_values,
                                               const HYPRE_BigInt *indices, const HYPRE_Complex *values, const char *action);
+HYPRE_Int hypre_IJVectorSetAddValuesParMultiVecDevice(hypre_IJVector *vector, HYPRE_Int num_values,
+																		const HYPRE_BigInt *indices, const HYPRE_BigInt *components, const HYPRE_Complex *values, const char *action);
 HYPRE_Int hypre_IJVectorAssembleParDevice(hypre_IJVector *vector);
 
 HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int num_values,
