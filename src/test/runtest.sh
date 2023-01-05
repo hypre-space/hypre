@@ -319,8 +319,8 @@ function ExecuteJobs
             ;;
 
          *mpirun*)
-            RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` # remove 'mpirun'
-            RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`            # remove output redirect
+            RunCmd=`echo $InputLine| sed -e 's/^[[:space:]]*mpirun[[:space:]]*//'` # remove 'mpirun'
+            RunCmd=`echo $RunCmd | sed -e 's/[[:space:]]*>.*$//'`            # remove output redirect
             OutFile=`echo $InputLine | sed -e 's/^.*>//'`           # set output file
             OutFile=`echo $OutFile | sed -e 's/ //g'`               # remove extra space
             ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`  # set error file

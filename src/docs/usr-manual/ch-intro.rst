@@ -83,15 +83,16 @@ Getting More Information
 ==============================================================================
 
 This user's manual consists of chapters describing each conceptual interface, a
-chapter detailing the various linear solver options available, and detailed
-installation information.  In addition to this manual, a number of other
-information sources for hypre are available.
+chapter detailing the various linear solver options available, detailed
+installation information, and the API reference.  In addition to this manual, a
+number of other information sources for hypre are available.
 
-* **Reference Manual:** The reference manual comprehensively lists all of the
-  interface and solver functions available in hypre.  The reference manual is
-  ideal for determining the various options available for a particular solver or
-  for viewing the functions provided to describe a problem for a particular
-  interface.
+* **Reference Manual:** This is equivalent to Chapter :ref:`ch-API` in this user
+  manual, but it can also be built as a separate document.  The reference manual
+  comprehensively lists all of the interface and solver functions available in
+  hypre.  It is ideal for determining the various options available for a
+  particular solver or for viewing the functions provided to describe a problem
+  for a particular interface.
 
 * **Example Problems:** A suite of example problems is provided with the hypre
   installation.  These examples reside in the ``examples`` subdirectory and
@@ -213,7 +214,7 @@ algorithm (GMG) listed in the left-most box, for example, can only be used with
 the left-most conceptual interface.  On the other hand, the ILU algorithm in the
 right-most box may be used with any conceptual interface.  Matrix requirements
 for each solver and preconditioner are provided in Chapter :ref:`ch-Solvers` and
-in the hypre Reference Manual.  Your desired solver strategy may influence your
+in Chapter :ref:`ch-API`.  Your desired solver strategy may influence your
 choice of conceptual interface.  A typical user will select a single Krylov
 method and a single preconditioner to solve their system.
 
@@ -266,7 +267,7 @@ demonstrate the following general structure of the application calls to hypre:
 
 The subsequent chapters of this User's Manual provide the details needed to more
 fully understand the function of each conceptual interface and each solver.
-Remember that a comprehensive list of all available functions is provided in the
-hypre Reference Manual, and the provided example codes may prove helpful as
+Remember that a comprehensive list of all available functions is provided in
+Chapter :ref:`ch-API`, and the provided example codes may prove helpful as
 templates for your specific application.
 
