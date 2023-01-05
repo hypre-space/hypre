@@ -161,10 +161,12 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    hypre_SStructPGrid     *pgrid;
    HYPRE_Int               nvars;
    HYPRE_Int               part, var;
-   HYPRE_MemoryLocation    memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+   HYPRE_MemoryLocation    memory_location;
 
    if (matrix)
    {
+      memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+
       hypre_SStructMatrixRefCount(matrix) --;
       if (hypre_SStructMatrixRefCount(matrix) == 0)
       {
