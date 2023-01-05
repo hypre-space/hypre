@@ -139,6 +139,36 @@ hypre_IntArrayCloneDeep( hypre_IntArray *x )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_IntArrayMigrate
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayMigrate( hypre_IntArray      *v,
+                       HYPRE_MemoryLocation memory_location )
+{
+   HYPRE_Int            size                = hypre_IntArraySize(v);
+   HYPRE_Int           *v_data              = hypre_IntArrayData(v);
+   HYPRE_MemoryLocation old_memory_location = hypre_IntArrayMemoryLocation(v);
+
+   HYPRE_Int           *w_data;
+
+   /* Update v's memory location */
+   hypre_IntArrayMemoryLocation(v) = memory_location;
+
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(old_memory_location) )
+   {
+      w_data = hypre_TAlloc(HYPRE_Int, size, memory_location);
+      hypre_TMemcpy(w_data, v_data, HYPRE_Int, size,
+                    memory_location, old_memory_location);
+      hypre_TFree(v_data, old_memory_location);
+      hypre_IntArrayData(v) = w_data;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_IntArrayPrint
  *--------------------------------------------------------------------------*/
 
@@ -168,7 +198,7 @@ hypre_IntArrayPrint( MPI_Comm        comm,
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file\n");
       return hypre_error_flag;
    }
 
