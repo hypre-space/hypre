@@ -873,4 +873,116 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRComputeNonGalerkinCGDevice
+ *
+ * Available methods:
+ *   1: inv(A_FF) approximated by its (block) diagonal inverse
+ *   2: CPR-like approx. with inv(A_FF) approx. by its diagonal inverse
+ *   3: CPR-like approx. with inv(A_FF) approx. by its block diagonal inverse
+ *   4: inv(A_FF) approximated by sparse approximate inverse
+ *
+ * TODO (VPM): Can we have a single function that works for host and device?
+ *             inv(A_FF)*A_FC might have been computed before. Reuse it!
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
+                                    hypre_ParCSRMatrix    *A_FC,
+                                    hypre_ParCSRMatrix    *A_CF,
+                                    hypre_ParCSRMatrix    *A_CC,
+                                    HYPRE_Int              blk_size,
+                                    HYPRE_Int              method,
+                                    HYPRE_Complex          threshold,
+                                    hypre_ParCSRMatrix   **A_H_ptr)
+{
+   /* Local variables */
+   hypre_ParCSRMatrix   *A_H;
+   hypre_ParCSRMatrix   *A_Hc;
+   hypre_ParCSRMatrix   *A_CF_trunc;
+   hypre_ParCSRMatrix   *Wp;
+   HYPRE_Complex         alpha = -1.0;
+
+   hypre_GpuProfilingPushRange("MGRComputeNonGalerkinCG");
+
+   /* Truncate A_CF according to the method */
+   if (method == 2 || method == 3)
+   {
+      hypre_MGRTruncateAcfCPRDevice(A_CF, &A_CF_trunc);
+   }
+   else
+   {
+      A_CF_trunc = A_CF;
+   }
+
+   /* Compute Wp */
+   if (method == 1 || method == 2)
+   {
+      hypre_Vector         *D_FF_inv;
+      HYPRE_Complex        *data;
+
+      /* Create vector to store A_FF's diagonal inverse  */
+      D_FF_inv = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_FF));
+      hypre_SeqVectorInitialize_v2(D_FF_inv, HYPRE_MEMORY_DEVICE);
+      data = hypre_VectorData(D_FF_inv);
+
+      /* Compute the inverse of A_FF and compute its inverse */
+      hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), data, 2);
+
+      /* Compute D_FF_inv*A_FC */
+      Wp = hypre_ParCSRMatrixClone(A_FC, 1);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixDiag(Wp), D_FF_inv, NULL);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixOffd(Wp), D_FF_inv, NULL);
+
+      /* Free memory */
+      hypre_SeqVectorDestroy(D_FF_inv);
+   }
+   else if (method == 3)
+   {
+      hypre_ParCSRMatrix  *B_FF_inv;
+
+      /* Compute the block diagonal inverse of A_FF */
+      hypre_ParCSRMatrixBlockDiagMatrixDevice(A_FF, blk_size, -1, NULL, 1, &B_FF_inv);
+
+      /* Compute Wp = A_FF_inv * A_FC */
+      Wp = hypre_ParCSRMatMat(B_FF_inv, A_FC);
+
+      /* Free memory */
+      hypre_ParCSRMatrixDestroy(B_FF_inv);
+   }
+   else
+   {
+      /* Use approximate inverse for ideal interploation */
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
+      hypre_GpuProfilingPopRange();
+
+      return hypre_error_flag;
+   }
+
+   /* Compute A_Hc (the correction for A_H) */
+   A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
+
+   /* Drop small entries from A_Hc */
+   hypre_ParCSRMatrixDropSmallEntriesDevice(A_Hc, threshold, -1);
+
+   /* Coarse grid (Schur complement) computation */
+   hypre_ParCSRMatrixAdd(1.0, A_CC, alpha, A_Hc, &A_H);
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(A_Hc);
+   hypre_ParCSRMatrixDestroy(Wp);
+   if (method == 2 || method == 3)
+   {
+      hypre_ParCSRMatrixDestroy(A_CF_trunc);
+   }
+
+   /* Set output pointer to coarse grid matrix */
+   *A_H_ptr = A_H;
+
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
+}
+
 #endif
