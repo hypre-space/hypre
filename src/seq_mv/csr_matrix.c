@@ -1015,6 +1015,110 @@ hypre_CSRMatrixClone( hypre_CSRMatrix *A, HYPRE_Int copy_data )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPermuteHost
+ *
+ * See hypre_CSRMatrixPermute. TODO (VPM): OpenMP implementation
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixPermuteHost( hypre_CSRMatrix  *A,
+                            HYPRE_Int        *perm,
+                            HYPRE_Int        *rqperm,
+                            hypre_CSRMatrix **B_ptr )
+{
+   /* Input matrix */
+   HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         num_cols     = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
+   HYPRE_Complex    *A_a          = hypre_CSRMatrixData(A);
+
+   /* Local variables */
+   hypre_CSRMatrix  *B;
+   HYPRE_Int        *B_i;
+   HYPRE_Int        *B_j;
+   HYPRE_Complex    *B_a;
+
+   HYPRE_Int         i, j, k;
+
+   /* Create output matrix B */
+   B = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
+   hypre_CSRMatrixInitialize_v2(B, 0, hypre_CSRMatrixMemoryLocation(A));
+   B_i = hypre_CSRMatrixI(B);
+   B_j = hypre_CSRMatrixJ(B);
+   B_a = hypre_CSRMatrixData(B);
+
+   /* Build B = A(perm, qperm) */
+   k = 0;
+   for (i = 0; i < num_rows; i++)
+   {
+      B_i[i] = k;
+      for (j = A_i[perm[i]]; j < A_i[perm[i] + 1]; j++)
+      {
+         B_j[k] = rqperm[A_j[j]];
+         B_a[k++] = A_a[j];
+      }
+   }
+   B_i[num_rows] = k;
+   hypre_assert(k == num_nonzeros);
+
+   *B_ptr = B;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPermute
+ *
+ * Reorder a CSRMatrix according to a row-permutation array (perm) and
+ * reverse column-permutation array (rqperm).
+ *
+ * Notes:
+ *  1) This function does not move the diagonal to the first entry of a row
+ *  2) When perm == rqperm == NULL, B is a deep copy of A.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixPermute( hypre_CSRMatrix  *A,
+                        HYPRE_Int        *perm,
+                        HYPRE_Int        *rqperm,
+                        hypre_CSRMatrix **B_ptr )
+{
+   hypre_CSRMatrix    *B;
+
+   hypre_GpuProfilingPushRange("CSRMatrixReorder");
+
+   /* Special case: one of the permutation vectors are not provided, then B = A */
+   if (!perm || !rqperm)
+   {
+      *B_ptr = hypre_CSRMatrixClone(A, 1);
+      hypre_GpuProfilingPopRange();
+
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_CSRMatrixPermuteDevice(A, perm, rqperm, &B);
+   }
+   else
+#endif
+   {
+      hypre_CSRMatrixPermuteHost(A, perm, rqperm, &B);
+   }
+
+   hypre_GpuProfilingPopRange();
+
+   *B_ptr = B;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CSRMatrixUnion
  * Creates and returns a matrix whose elements are the union of those of A and B.
  * Data is not computed, only structural information is created.
@@ -1235,7 +1339,13 @@ hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
    return C;
 }
 
-static HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBoundary(hypre_CSRMatrix *A, HYPRE_Int idx)
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixGetLoadBalancedPartitionBoundary
+ *--------------------------------------------------------------------------*/
+
+static HYPRE_Int
+hypre_CSRMatrixGetLoadBalancedPartitionBoundary(hypre_CSRMatrix *A,
+                                                HYPRE_Int        idx)
 {
    HYPRE_Int num_nonzerosA = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int num_rowsA = hypre_CSRMatrixNumRows(A);
@@ -1259,25 +1369,39 @@ static HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBoundary(hypre_CSRMatrix
    }
 }
 
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin(hypre_CSRMatrix *A)
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixGetLoadBalancedPartitionBegin
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixGetLoadBalancedPartitionBegin(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum());
 }
 
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixGetLoadBalancedPartitionEnd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }
 
-HYPRE_Int
-hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location )
-{
-   HYPRE_Int      ierr = 0;
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPrefetch
+ *--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_CSRMatrixPrefetch( hypre_CSRMatrix      *A,
+                         HYPRE_MemoryLocation  memory_location )
+{
 #ifdef HYPRE_USING_UNIFIED_MEMORY
    if (hypre_CSRMatrixMemoryLocation(A) != HYPRE_MEMORY_DEVICE)
    {
-      return 1;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A is not at HYPRE_MEMORY_DEVICE");
+      return hypre_error_flag;
    }
 
    HYPRE_Complex *data = hypre_CSRMatrixData(A);
@@ -1291,11 +1415,17 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_locatio
    hypre_MemPrefetch(ja,   sizeof(HYPRE_Int)*nnzA,     memory_location);
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
-hypre_GpuMatData *
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_ONEMKLSPARSE)
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixGetGPUMatData
+ *--------------------------------------------------------------------------*/
+
+hypre_GpuMatData*
 hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
 {
    if (!matrix)
