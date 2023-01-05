@@ -220,6 +220,54 @@ hypre_IntArrayPrint( MPI_Comm        comm,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_IntArrayRead
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayRead( MPI_Comm         comm,
+                    const char      *filename,
+                    hypre_IntArray **array_ptr )
+{
+   hypre_IntArray       *array;
+   HYPRE_Int             size;
+   FILE                 *file;
+   HYPRE_Int             i, ii, myid;
+   char                  new_filename[1024];
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Open file */
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open input file\n");
+      return hypre_error_flag;
+   }
+
+   /* Read array size from file */
+   hypre_fscanf(file, "%d\n", &size);
+
+   /* Create IntArray on the host */
+   array = hypre_IntArrayCreate(size);
+   hypre_IntArrayInitialize_v2(array, HYPRE_MEMORY_HOST);
+
+   /* Read array values from file */
+   for (i = 0; i < size; i++)
+   {
+      hypre_fscanf(file, "%d %d\n", &ii, &hypre_IntArrayData(array)[i]);
+   }
+   fclose(file);
+
+   /* Migrate to final memory location */
+   hypre_IntArrayMigrate(array, hypre_HandleMemoryLocation(hypre_handle()));
+
+   /* Set output pointer */
+   *array_ptr = array;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_IntArraySetConstantValuesHost
  *--------------------------------------------------------------------------*/
 
