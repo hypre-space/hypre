@@ -11,15 +11,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import os
+import sys
+import subprocess
 
 # Alabaster
 #import alabaster
 
 # Read the docs
 import sphinx_rtd_theme
-
-import subprocess
 
 read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 
