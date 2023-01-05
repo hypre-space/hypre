@@ -11,7 +11,7 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the arcticus cluster ****
+   **** Only run this script on JLSE florentia nodes ****
 
    $0 [-h|-help] {src_dir}
 
@@ -43,7 +43,7 @@ rtol="0.0"
 atol="3e-15"
 
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
-save="arcticus"
+save="florentia"
 
 ##########
 ## SYCL ##

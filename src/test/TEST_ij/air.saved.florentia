@@ -1,26 +1,26 @@
 # Output file: air.out.20
-BoomerAMG Iterations = 25
-Final Relative Residual Norm = 5.155250e-09
+BoomerAMG Iterations = 24
+Final Relative Residual Norm = 9.396855e-09
 
 # Output file: air.out.21
-BoomerAMG Iterations = 18
-Final Relative Residual Norm = 7.877903e-09
+BoomerAMG Iterations = 17
+Final Relative Residual Norm = 6.285035e-09
 
 # Output file: air.out.22
 BoomerAMG Iterations = 15
-Final Relative Residual Norm = 4.754811e-09
+Final Relative Residual Norm = 5.393482e-09
 
 # Output file: air.out.23
 GMRES Iterations = 13
-Final GMRES Relative Residual Norm = 9.784955e-09
+Final GMRES Relative Residual Norm = 9.610146e-09
 
 # Output file: air.out.24
 GMRES Iterations = 11
-Final GMRES Relative Residual Norm = 5.167105e-09
+Final GMRES Relative Residual Norm = 5.649890e-09
 
 # Output file: air.out.25
 GMRES Iterations = 10
-Final GMRES Relative Residual Norm = 1.872670e-09
+Final GMRES Relative Residual Norm = 1.268650e-09
 
 # Output file: air.out.26
 BoomerAMG Iterations = 11
@@ -36,13 +36,13 @@ Final Relative Residual Norm = 6.850225e-09
 
 # Output file: air.out.29
 GMRES Iterations = 11
-Final GMRES Relative Residual Norm = 3.036968e-09
+Final GMRES Relative Residual Norm = 3.043554e-09
 
 # Output file: air.out.30
 GMRES Iterations = 10
-Final GMRES Relative Residual Norm = 2.523074e-09
+Final GMRES Relative Residual Norm = 2.449703e-09
 
 # Output file: air.out.31
 GMRES Iterations = 10
-Final GMRES Relative Residual Norm = 5.678115e-09
+Final GMRES Relative Residual Norm = 6.340993e-09
 
