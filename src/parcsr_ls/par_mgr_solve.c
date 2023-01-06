@@ -1157,8 +1157,9 @@ hypre_MGRCycle( void              *mgr_vdata,
                                        fp_zero, l1_norms, U_array[fine_grid], Vtemp, NULL);
                }
             }
-            else if (level_smooth_type[fine_grid] == 8) //EUCLID ILU smoother
+            else if (level_smooth_type[fine_grid] == 8)
             {
+               /* Euclid ILU */
                for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
                   /* Compute residual */
@@ -1173,9 +1174,9 @@ hypre_MGRCycle( void              *mgr_vdata,
                   hypre_ParVectorAxpy(fp_one, Utemp, U_array[fine_grid]);
                }
             }
-            else if (level_smooth_type[fine_grid] == 16) // HYPRE ILU
+            else if (level_smooth_type[fine_grid] == 16)
             {
-               // solve
+               /* HYPRE ILU */
                HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
                               A_array[fine_grid], F_array[fine_grid],
                               U_array[fine_grid]);

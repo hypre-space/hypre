@@ -56,8 +56,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int  logging = (mgr_data -> logging);
    HYPRE_Int  print_level = (mgr_data -> print_level);
    HYPRE_Int  relax_type = (mgr_data -> relax_type);
-   HYPRE_Int  relax_order = (mgr_data -> relax_order);
-
    HYPRE_Int  *interp_type = (mgr_data -> interp_type);
    HYPRE_Int  *restrict_type = (mgr_data -> restrict_type);
    HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
@@ -688,7 +686,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_GPU)
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         if (Frelax_type[i] == 0)
+         if (Frelax_type[i] == 0 && interp_type && interp_type[i] != 12)
          {
             Frelax_type[i] = 7;
          }
@@ -1740,18 +1738,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       TODO (VPM): move this block closer to global smoother setup */
    for (j = 0; j < num_c_levels; j++)
    {
-      HYPRE_Int frelax_type = Frelax_type[j];
-
       if (((mgr_data -> num_relax_sweeps)[j] > 0) && (l1_norms[j] == NULL))
       {
          /* Compute l1_norms according to relaxation type */
-         hypre_BoomerAMGRelaxComputeL1Norms(A_array[lev], level_smooth_type[lev],
+         hypre_BoomerAMGRelaxComputeL1Norms(A_array[j], Frelax_type[j],
                                             0, 0, NULL, &l1_norms_data);
          if (l1_norms_data)
          {
-            l1_norms[lev] = hypre_SeqVectorCreate(nloc);
-            hypre_VectorData(l1_norms[lev]) = l1_norms_data;
-            hypre_VectorMemoryLocation(l1_norms[lev]) = memory_location;
+            nloc = hypre_ParCSRMatrixNumRows(A_array[j]);
+            l1_norms[j] = hypre_SeqVectorCreate(nloc);
+            hypre_VectorData(l1_norms[j]) = l1_norms_data;
+            hypre_VectorMemoryLocation(l1_norms[j]) = memory_location;
          }
       }
    }
