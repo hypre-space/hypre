@@ -706,6 +706,9 @@ void   _hypre_Free(void *ptr, hypre_MemoryLocation location);
 HYPRE_ExecutionPolicy hypre_GetExecPolicy1(HYPRE_MemoryLocation location);
 HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
                                            HYPRE_MemoryLocation location2);
+HYPRE_ExecutionPolicy hypre_GetExecPolicy3(HYPRE_MemoryLocation location1,
+                                           HYPRE_MemoryLocation location2,
+                                           HYPRE_MemoryLocation location3);
 
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin,
@@ -737,7 +740,6 @@ typedef void (*GPUMfreeFunc)(void *);
 #endif
 
 #endif
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1868,6 +1870,8 @@ HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_I
                                HYPRE_Int a);
 HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
                                   HYPRE_BigInt *d_z, HYPRE_BigInt a);
+HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);

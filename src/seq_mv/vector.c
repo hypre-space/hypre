@@ -605,6 +605,67 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorAxpyzHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorAxpyzHost( HYPRE_Complex alpha,
+                          hypre_Vector *x,
+                          HYPRE_Complex beta,
+                          hypre_Vector *y,
+                          hypre_Vector *z )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Complex *z_data      = hypre_VectorData(z);
+
+   HYPRE_Int      num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+   HYPRE_Int      total_size  = size * num_vectors;
+   HYPRE_Int      i;
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < total_size; i++)
+   {
+      z_data[i] = alpha * x_data[i] + beta * y_data[i];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorAxpyz
+ *
+ * Computes z = a*x + b*y
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
+                      hypre_Vector *x,
+                      HYPRE_Complex beta,
+                      hypre_Vector *y,
+                      hypre_Vector *z )
+{
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy3( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y),
+                                                      hypre_VectorMemoryLocation(z) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SeqVectorAxpyzDevice(alpha, x, beta, y, z);
+   }
+   else
+#endif
+   {
+      hypre_SeqVectorAxpyzHost(alpha, x, beta, y, z);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorElmdivpyHost
  *
  * if marker != NULL: only for marker[i] == marker_val

@@ -165,12 +165,29 @@ HYPRE_ParVectorScale( HYPRE_Complex   value,
 /*--------------------------------------------------------------------------
  * HYPRE_ParVectorAxpy
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_ParVectorAxpy( HYPRE_Complex   alpha,
                      HYPRE_ParVector x,
                      HYPRE_ParVector y )
 {
    return hypre_ParVectorAxpy( alpha, (hypre_ParVector *)x, (hypre_ParVector *)y );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorAxpyz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorAxpyz( HYPRE_Complex   alpha,
+                      HYPRE_ParVector x,
+                      HYPRE_Complex   beta,
+                      HYPRE_ParVector y,
+                      HYPRE_ParVector z )
+{
+   return hypre_ParVectorAxpyz( alpha, (hypre_ParVector *)x,
+                                beta,  (hypre_ParVector *)y,
+                                (hypre_ParVector *)z );
 }
 
 /*--------------------------------------------------------------------------

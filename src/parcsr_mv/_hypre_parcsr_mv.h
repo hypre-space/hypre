@@ -739,6 +739,9 @@ HYPRE_Int HYPRE_ParVectorCopy ( HYPRE_ParVector x, HYPRE_ParVector y );
 HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value, HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha, HYPRE_ParVector x, HYPRE_ParVector y );
+HYPRE_Int HYPRE_ParVectorAxpyz ( HYPRE_Complex alpha, HYPRE_ParVector x,
+                                 HYPRE_Complex beta, HYPRE_ParVector y,
+                                 HYPRE_ParVector z );
 HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                     HYPRE_ParVector *vector );
@@ -1198,6 +1201,9 @@ hypre_ParVector *hypre_ParVectorCloneDeep_v2( hypre_ParVector *x,
 HYPRE_Int hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_ParVectorScale ( HYPRE_Complex alpha, hypre_ParVector *y );
 HYPRE_Int hypre_ParVectorAxpy ( HYPRE_Complex alpha, hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorAxpyz ( HYPRE_Complex alpha, hypre_ParVector *x,
+                                 HYPRE_Complex beta, hypre_ParVector *y,
+                                 hypre_ParVector *z );
 HYPRE_Int hypre_ParVectorMassAxpy ( HYPRE_Complex *alpha, hypre_ParVector **x, hypre_ParVector *y,
                                     HYPRE_Int k, HYPRE_Int unroll);
 HYPRE_Real hypre_ParVectorInnerProd ( hypre_ParVector *x, hypre_ParVector *y );
