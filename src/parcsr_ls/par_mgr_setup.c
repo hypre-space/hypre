@@ -983,6 +983,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       HYPRE_ANNOTATE_REGION_BEGIN(region_name);
       if (level_smooth_iters[lev] > 0)
       {
+         /* TODO (VPM): Change option types for block-Jacobi and block-GS to 30 and 31 and
+            make them accessible through hypre_BoomerAMGRelax? */
          if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
@@ -1004,6 +1006,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          else if (level_smooth_type[lev] == 8)
          {
+            /* TODO (VPM): Option 8 should be for hybrid L1 Symm. Gauss-Seidel */
             HYPRE_EuclidCreate(comm, &(level_smoother[lev]));
             HYPRE_EuclidSetLevel(level_smoother[lev], 0);
             HYPRE_EuclidSetBJ(level_smoother[lev], 1);
@@ -1011,6 +1014,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          else if (level_smooth_type[lev] == 16)
          {
+            /* TODO (VPM): Option 16 should be for Chebyshev */
             HYPRE_ILUCreate(&(level_smoother[lev]));
             HYPRE_ILUSetType(level_smoother[lev], 0);
             HYPRE_ILUSetLevelOfFill(level_smoother[lev], 0);
