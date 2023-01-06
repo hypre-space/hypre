@@ -44,6 +44,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_BigInt         coarse_pnts_global[2]; // TODO: Change to row_starts_cpts
    HYPRE_BigInt         row_starts_fpts[2];
    hypre_Vector       **l1_norms = NULL;
+   HYPRE_Real          *l1_norms_data;
 
    hypre_ParVector     *Ztemp;
    hypre_ParVector     *Vtemp;
@@ -973,6 +974,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       A_array[lev] = RAP_ptr;
       nloc = hypre_ParCSRMatrixNumRows(A_array[lev]);
 
+      /* Reset pointers */
+      l1_norms_data = NULL;
+
       /* Setup global smoother */
 #if MGR_DEBUG_LEVEL == 2
       wall_time = time_getWallclockSeconds();
@@ -1023,15 +1027,15 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
             HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
          }
-         else if (level_smooth_type[lev] == 18)
-         {
-            HYPRE_Real *l1_norm_data = NULL;
 
-            hypre_ParCSRComputeL1Norms(A_array[lev], 1, NULL, &l1_norm_data);
+         /* Compute l1_norms according to relaxation type */
+         hypre_BoomerAMGRelaxComputeL1Norms(A_array[lev], level_smooth_type[lev],
+                                            0, 0, NULL, &l1_norms_data);
+         if (l1_norms_data)
+         {
             l1_norms[lev] = hypre_SeqVectorCreate(nloc);
-            hypre_VectorData(l1_norms[lev]) = l1_norm_data;
-            hypre_SeqVectorInitialize_v2(l1_norms[lev],
-                                         hypre_ParCSRMatrixMemoryLocation(A_array[lev]));
+            hypre_VectorData(l1_norms[lev]) = l1_norms_data;
+            hypre_VectorMemoryLocation(l1_norms[lev]) = memory_location;
          }
       }
       hypre_GpuProfilingPopRange();
@@ -1740,37 +1744,14 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       if (((mgr_data -> num_relax_sweeps)[j] > 0) && (l1_norms[j] == NULL))
       {
-         HYPRE_Real *l1_norm_data = NULL;
-         CF_marker = hypre_IntArrayData(CF_marker_array[j]);
-
-         if (frelax_type == 8 || frelax_type == 13 || frelax_type == 14)
+         /* Compute l1_norms according to relaxation type */
+         hypre_BoomerAMGRelaxComputeL1Norms(A_array[lev], level_smooth_type[lev],
+                                            0, 0, NULL, &l1_norms_data);
+         if (l1_norms_data)
          {
-            if (relax_order)
-            {
-               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker, &l1_norm_data);
-            }
-            else
-            {
-               hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
-            }
-         }
-         else if (frelax_type == 18)
-         {
-            if (relax_order)
-            {
-               hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker, &l1_norm_data);
-            }
-            else
-            {
-               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
-            }
-         }
-
-         if (l1_norm_data)
-         {
-            l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
-            hypre_VectorData(l1_norms[j]) = l1_norm_data;
-            hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
+            l1_norms[lev] = hypre_SeqVectorCreate(nloc);
+            hypre_VectorData(l1_norms[lev]) = l1_norms_data;
+            hypre_VectorMemoryLocation(l1_norms[lev]) = memory_location;
          }
       }
    }
