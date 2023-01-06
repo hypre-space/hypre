@@ -6,3 +6,9 @@
 sphinx>=5.3.0
 breathe>=4.34.0
 sphinx-rtd-theme>=1.1.1
+docutils>=0.19
+jinja2>=3.1.2
+pygments>=2.13.0
+setuptools>=65.6.3
+
+
