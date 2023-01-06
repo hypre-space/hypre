@@ -1666,7 +1666,8 @@ hypre_BoomerAMGRelaxComputeL1Norms( hypre_ParCSRMatrix *A,
                                     hypre_IntArray     *CF_marker,
                                     HYPRE_Real        **l1_norms_data_ptr )
 {
-   HYPRE_Int *CF_marker_data;
+   HYPRE_Int     *CF_marker_data;
+   HYPRE_Real    *l1_norms_data = NULL;
 
    /* Relax according to F/C points ordering? */
    CF_marker_data = (relax_order && CF_marker) ? hypre_IntArrayData(CF_marker) : NULL;
@@ -1677,22 +1678,20 @@ hypre_BoomerAMGRelaxComputeL1Norms( hypre_ParCSRMatrix *A,
    if (relax_type == 18)
    {
       /* l1_norm = sum(|A_ij|)_j */
-      hypre_ParCSRComputeL1Norms(A, 1, CF_marker_data, l1_norms_data_ptr);
+      hypre_ParCSRComputeL1Norms(A, 1, CF_marker_data, &l1_norms_data);
    }
    else if (relax_type == 8 || relax_type == 13 || relax_type == 14)
    {
       /* l1_norm = sum(|D_ij| + 0.5*|A_offd_ij|)_j */
-      hypre_ParCSRComputeL1Norms(A, 4, CF_marker_data, l1_norms_data_ptr);
+      hypre_ParCSRComputeL1Norms(A, 4, CF_marker_data, &l1_norms_data);
    }
    else if (relax_type == 7 || relax_type == 11 || relax_type == 12)
    {
       /* l1_norm = |D_ii| */
-      hypre_ParCSRComputeL1Norms(A, 5, NULL, l1_norms_data_ptr);
+      hypre_ParCSRComputeL1Norms(A, 5, NULL, &l1_norms_data);
    }
-   else
-   {
-      *l1_norms_data_ptr = NULL;
-   }
+
+   *l1_norms_data_ptr = l1_norms_data;
 
    return hypre_error_flag;
 }
