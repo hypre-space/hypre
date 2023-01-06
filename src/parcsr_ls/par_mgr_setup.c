@@ -683,7 +683,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
 
-      /* In case of GPU runs and Jacobi relaxation, switch to GPU-supported Jacobi */
+      /* When running on the device and using Jacobi relaxation, switch to GPU-supported Jacobi */
 #if defined(HYPRE_USING_GPU)
       for (i = 0; i < max_num_coarse_levels; i++)
       {

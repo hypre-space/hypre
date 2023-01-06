@@ -998,8 +998,8 @@ hypre_MGRCycle( void              *mgr_vdata,
             for (i = 0; i < nsweeps[fine_grid]; i++)
             {
                hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
-                                    CF_marker_data, relax_type, relax_points,
-                                    relax_weight, omega, l1_norms,
+                                    CF_marker_data, Frelax_type[fine_grid],
+                                    relax_points, relax_weight, omega, l1_norms,
                                     U_array[fine_grid], Vtemp, Ztemp);
             }
          }
