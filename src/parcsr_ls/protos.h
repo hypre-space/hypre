@@ -1752,7 +1752,12 @@ HYPRE_Int hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypr
                                                      HYPRE_Real *A_diag_diag, hypre_ParVector *u,
                                                      hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
-/* par_realx_device.c */
+HYPRE_Int hypre_BoomerAMGRelaxComputeL1Norms( hypre_ParCSRMatrix *A, HYPRE_Int relax_type,
+                                              HYPRE_Int relax_order, HYPRE_Int coarsest_lvl,
+                                              hypre_IntArray *CF_marker,
+                                              HYPRE_Real **l1_norms_data_ptr );
+
+/* par_relax_device.c */
 HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                                        HYPRE_Int *cf_marker, HYPRE_Int relax_points,
                                                        HYPRE_Real relax_weight, HYPRE_Real omega,
