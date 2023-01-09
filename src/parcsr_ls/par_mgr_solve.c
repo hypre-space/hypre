@@ -646,9 +646,6 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPushRange(region_name);
          HYPRE_ANNOTATE_REGION_BEGIN(region_name);
 
-         /* Initialize solution to vector of zeros */
-         hypre_ParVectorSetZeros(U_array[level]);
-
          //wall_time = time_getWallclockSeconds();
          coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
          if (use_default_cgrid_solver)
