@@ -183,7 +183,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       else
       {
          /* rhs is zero, return a zero solution */
-         hypre_ParVectorSetConstantValues(U_array[0], fp_zero);
+         hypre_ParVectorSetZeros(U_array[0]);
          if (logging > 0)
          {
             rel_resnorm = fp_zero;
@@ -413,7 +413,7 @@ hypre_MGRFrelaxVcycle ( void            *Frelax_vdata,
          fine_grid   = level;
          coarse_grid = level + 1;
 
-         hypre_ParVectorSetConstantValues(U_array[coarse_grid], fp_zero);
+         hypre_ParVectorSetZeros(U_array[coarse_grid]);
 
          /* Avoid unnecessary copy using out-of-place version of SpMV */
          hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid], U_array[fine_grid],
@@ -808,7 +808,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                                          fp_zero, &(F_fine_array[coarse_grid]));
                   }
 
-                  hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], fp_zero);
+                  hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
                   if (exec == HYPRE_EXEC_DEVICE)
@@ -908,7 +908,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                else
                {
                   /* rhs is zero, return a zero solution */
-                  hypre_ParVectorSetConstantValues(U_array[0], fp_zero);
+                  hypre_ParVectorSetZeros(U_array[0]);
 
                   HYPRE_ANNOTATE_FUNC_END;
                   hypre_GpuProfilingPopRange();
@@ -975,7 +975,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
                                 fp_zero, &(F_fine_array[coarse_grid]));
 #endif
-            hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], fp_zero);
+            hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
             /* Do F-relaxation using AMG */
             fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
@@ -1056,7 +1056,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          HYPRE_ANNOTATE_REGION_END(region_name);
 
          /* Initialize coarse grid solution array */
-         hypre_ParVectorSetConstantValues(U_array[coarse_grid], fp_zero);
+         hypre_ParVectorSetZeros(U_array[coarse_grid]);
 
          ++level;
          if (level == num_coarse_levels)
