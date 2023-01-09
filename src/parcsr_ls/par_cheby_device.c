@@ -142,9 +142,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    HYPRE_Real *tmp_data;
 
    /* u = u + p(A)r */
-
-   if (order > 4) { order = 4; }
-   if (order < 1) { order = 1; }
+   order = (order > 4) ? 4 : ((order == 1) ? 1 : order);
 
    /* we are using the order of p(A) */
    cheby_order = order - 1;
@@ -156,7 +154,17 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    {
       /* get residual: r = f - A*u */
       hypre_ParVectorCopy(f, r);
-      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+
+      if (!hypre_ParVectorAllZeros(u))
+      {
+         hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
+      }
+      else
+      {
+#if defined(HYPRE_DEBUG)
+         hypre_assert(hypre_ParVectorInnerProd(u, u) == 0.0);
+#endif
+      }
 
       /* o = u; u = r .* coef */
       HYPRE_THRUST_CALL(
@@ -165,6 +173,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          thrust::make_zip_iterator(thrust::make_tuple(orig_u + num_rows, u_data + num_rows,
                                                       r_data + num_rows)),
          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+      hypre_ParVectorAllZeros(u) = 0;
 
       for (i = cheby_order - 1; i >= 0; i--)
       {
@@ -180,17 +189,24 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    }
    else /* scaling! */
    {
-
       /*grab 1/sqrt(diagonal) */
-
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
       /* get ds_data and get scaled residual: r = D^(-1/2)f -
        * D^(-1/2)A*u */
+      if (!hypre_ParVectorAllZeros(u))
+      {
+         hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
+      }
+      else
+      {
+#if defined(HYPRE_DEBUG)
+         hypre_assert(hypre_ParVectorInnerProd(u, u) == 0.0);
+#endif
+         hypre_ParVectorSetZeros(tmp_vec);
+      }
 
-      hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);
       /* r = ds .* (f + tmp) */
-
       /* TODO: It might be possible to merge this and the next call to:
        * r[j] = ds_data[j] * (f_data[j] + tmp_data[j]); o[j] = u[j]; u[j] = r[j] * coef */
       HYPRE_THRUST_CALL(for_each,
@@ -206,6 +222,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
                         thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
                         thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)) + num_rows,
                         save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+      hypre_ParVectorAllZeros(u) = 0;
 
       /* now do the other coefficients */
       for (i = cheby_order - 1; i >= 0; i--)
