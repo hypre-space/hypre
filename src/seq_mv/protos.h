@@ -351,8 +351,3 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #endif
 void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-HYPRE_Int
-hypre_CSRMatrixApplyRowColPermutation( hypre_CSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm, hypre_CSRMatrix **B );
-#endif
