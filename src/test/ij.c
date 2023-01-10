@@ -3788,7 +3788,7 @@ main( hypre_int argc,
       }
 
       /* Compute A = diag(ld) * A * diag(rd) */
-      hypre_ParCSRMatrixDiagScale(parcsr_A, par_ld, par_rd);
+      HYPRE_ParCSRMatrixDiagScale(parcsr_A, par_ld, par_rd);
 
       /* Print scaled matrix */
       if (print_system)

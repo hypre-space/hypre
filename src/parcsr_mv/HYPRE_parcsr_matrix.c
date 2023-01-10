@@ -408,3 +408,18 @@ HYPRE_ParCSRMatrixMatvecT( HYPRE_Complex      alpha,
                alpha, (hypre_ParCSRMatrix *) A,
                (hypre_ParVector *) x, beta, (hypre_ParVector *) y) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRMatrixDiagScale
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRMatrixDiagScale(HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector    ld,
+                            HYPRE_ParVector    rd )
+{
+   return ( hypre_ParCSRMatrixDiagScale(
+               (hypre_ParCSRMatrix *) A,
+               (hypre_ParVector *) ld,
+               (hypre_ParVector *) rd) );
+}
