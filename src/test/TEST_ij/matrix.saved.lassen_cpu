@@ -51,25 +51,25 @@ Iterations = 5
 Final Relative Residual Norm = 3.515462e-01
 
 # Output file: matrix.out.100
-GMRES Iterations = 17
-Final GMRES Relative Residual Norm = 8.952313e-10
+GMRES Iterations = 13
+Final GMRES Relative Residual Norm = 3.220009e-05
 
 # Output file: matrix.out.101
-GMRES Iterations = 16
-Final GMRES Relative Residual Norm = 6.603808e-09
+GMRES Iterations = 13
+Final GMRES Relative Residual Norm = 2.859721e-05
 
 # Output file: matrix.out.102
-GMRES Iterations = 17
-Final GMRES Relative Residual Norm = 1.018320e-09
+GMRES Iterations = 13
+Final GMRES Relative Residual Norm = 5.170316e-05
 
 # Output file: matrix.out.110
-GMRES Iterations = 96
-Final GMRES Relative Residual Norm = 6.155808e-09
+GMRES Iterations = 86
+Final GMRES Relative Residual Norm = 7.396445e-05
 
 # Output file: matrix.out.111
-GMRES Iterations = 97
-Final GMRES Relative Residual Norm = 3.566348e-09
+GMRES Iterations = 88
+Final GMRES Relative Residual Norm = 3.890098e-05
 
 # Output file: matrix.out.112
-GMRES Iterations = 96
-Final GMRES Relative Residual Norm = 4.590232e-09
+GMRES Iterations = 87
+Final GMRES Relative Residual Norm = 5.129560e-05
