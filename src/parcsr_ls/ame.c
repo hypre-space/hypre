@@ -19,7 +19,7 @@
  * Allocate the AMS eigensolver structure.
  *--------------------------------------------------------------------------*/
 
-void * hypre_AMECreate()
+void * hypre_AMECreate(void)
 {
    hypre_AMEData *ame_data;
 

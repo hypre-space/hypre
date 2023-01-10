@@ -1944,6 +1944,21 @@ hypreDevice_IntStridedCopy( HYPRE_Int  size,
 #endif
 
 /*--------------------------------------------------------------------
+ * hypreDevice_ComplexStridedCopy
+ *--------------------------------------------------------------------*/
+
+#ifdef BUILD_MP_FUNC
+HYPRE_Int
+hypreDevice_ComplexStridedCopy( HYPRE_Int      size,
+                                HYPRE_Int      stride,
+                                HYPRE_Complex *in,
+                                HYPRE_Complex *out )
+{
+   return hypreDevice_StridedCopy(size, stride, in, out);
+}
+#endif
+
+/*--------------------------------------------------------------------
  * hypreDevice_CsrRowPtrsToIndicesWithRowNum
  *
  * Input:  d_row_num, of size nrows, contains the rows indices that

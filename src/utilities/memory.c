@@ -64,7 +64,7 @@ hypre_OutOfMemory(size_t size)
 }
 
 static inline void
-hypre_WrongMemoryLocation()
+hypre_WrongMemoryLocation(void)
 {
    hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Unrecognized hypre_MemoryLocation\n");
    hypre_assert(0);
@@ -210,7 +210,7 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
    {
       /* WM: todo - the call below seems like it may occasionally result in an error: */
       /*     Native API returns: -997 (The plugin has emitted a backend specific error) */
-      /*     or a seg fault. On the other hand, removing this line can also cause the code 
+      /*     or a seg fault. On the other hand, removing this line can also cause the code
        *     to hang (or run excessively slow?). */
       /* HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() ); */
    }
