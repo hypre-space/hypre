@@ -6281,7 +6281,7 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
    hypre_CSRMatrix       *A_offd        = hypre_ParCSRMatrixOffd(par_A);
    HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   hypre_Vector          *ld            = hypre_ParVectorLocalVector(par_ld);
+   hypre_Vector          *ld            = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
    hypre_Vector          *rd            = hypre_ParVectorLocalVector(par_rd);
    HYPRE_Complex         *rd_data       = hypre_VectorData(rd);
 
