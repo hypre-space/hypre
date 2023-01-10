@@ -211,7 +211,7 @@ main( hypre_int argc,
    /* Specific tests */
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
-   HYPRE_Int           test_diagscal = 0;
+   HYPRE_Int           test_scaling = 0;
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
@@ -638,10 +638,10 @@ main( hypre_int argc,
          arg_index++;
          test_multivec = 1;
       }
-      else if ( strcmp(argv[arg_index], "-test_diagscal") == 0 )
+      else if ( strcmp(argv[arg_index], "-test_scaling") == 0 )
       {
          arg_index++;
-         test_diagscal = 1;
+         test_scaling = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -3737,83 +3737,77 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
-    * Test diagonal matrix scaling (A = diag(ld) * A * diag(rd))
+    * Test matrix scaling: B = diag(ld) * A * diag(rd)
     *-----------------------------------------------------------*/
 
-   if (test_diagscal)
+   if (test_scaling)
    {
-      HYPRE_IJVector   ij_ld;
-      HYPRE_IJVector   ij_rd;
-      HYPRE_ParVector  par_ld, par_rd;
-      HYPRE_Complex   *h_data;
+      HYPRE_IJVector   ij_ld  = NULL;
+      HYPRE_IJVector   ij_rd  = NULL;
+      HYPRE_ParVector  par_ld = NULL;
+      HYPRE_ParVector  par_rd = NULL;
       HYPRE_Complex   *d_data;
-
-      HYPRE_BigInt     bi;
-      HYPRE_BigInt     ilower = first_local_row;
-      HYPRE_BigInt     iupper = ilower + (HYPRE_BigInt) local_num_rows - 1;
+      HYPRE_Int        scaling_type;
 
       time_index = hypre_InitializeTiming("ParCSR scaling");
       hypre_BeginTiming(time_index);
 
-      HYPRE_ParCSRMatrixGetDims(parcsr_A, &M, &N);
-
       /* Allocate memory */
-      h_data = hypre_CTAlloc(HYPRE_Complex, local_num_rows, HYPRE_MEMORY_HOST);
-      d_data = hypre_CTAlloc(HYPRE_Complex, local_num_rows, memory_location);
+      d_data = hypre_TAlloc(HYPRE_Complex, local_num_rows, memory_location);
 
-      /* Set diag(ld)[i] = i (linear) */
-      for (bi = 0; bi < (HYPRE_BigInt) local_num_rows; bi++)
-      {
-         h_data[bi] = (HYPRE_Complex) (ilower + bi + 1);
-      }
+      /* Select scaling type:
+           left  OR right scaling: diag inverse (2)
+           left AND right scaling: diag inverse sqrt (3) */
+      scaling_type = (test_scaling == 1 || test_scaling == 2) ? 2 : 3;
 
-      hypre_TMemcpy(d_data, h_data,
-                    HYPRE_Complex, local_num_rows,
-                    memory_location, HYPRE_MEMORY_HOST);
+      /* Compute scaling vector */
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(parcsr_A), d_data, scaling_type);
 
       /* Create diagonal scaling matrix diag(ld) */
-      HYPRE_IJVectorCreate(comm, ilower, iupper, &ij_ld);
-      HYPRE_IJVectorSetObjectType(ij_ld, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize(ij_ld);
-      HYPRE_IJVectorSetValues(ij_ld, local_num_rows, NULL, d_data);
-      HYPRE_IJVectorAssemble(ij_ld);
-      HYPRE_IJVectorGetObject(ij_ld, &object);
-      par_ld = (HYPRE_ParVector) object;
-
-      /* Set diag(ld)[i] = i (linear) */
-      for (bi = 0; bi < (HYPRE_BigInt) local_num_rows; bi++)
+      if (test_scaling != 2)
       {
-         h_data[bi] = ((HYPRE_Complex) ((ilower + bi) * (ilower + bi) + 1)) /
-                       (HYPRE_Complex) M;
+         HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_ld);
+         HYPRE_IJVectorSetObjectType(ij_ld, HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(ij_ld);
+         HYPRE_IJVectorSetValues(ij_ld, local_num_rows, NULL, d_data);
+         HYPRE_IJVectorAssemble(ij_ld);
+         HYPRE_IJVectorGetObject(ij_ld, &object);
+         par_ld = (HYPRE_ParVector) object;
       }
 
-      hypre_TMemcpy(d_data, h_data,
-                    HYPRE_Complex, local_num_rows,
-                    memory_location, HYPRE_MEMORY_HOST);
-
       /* Create diagonal scaling matrix diag(rd) */
-      HYPRE_IJVectorCreate(comm, ilower, iupper, &ij_rd);
-      HYPRE_IJVectorSetObjectType(ij_rd, HYPRE_PARCSR);
-      HYPRE_IJVectorInitialize(ij_rd);
-      HYPRE_IJVectorSetValues(ij_rd, local_num_rows, NULL, d_data);
-      HYPRE_IJVectorAssemble(ij_rd);
-      HYPRE_IJVectorGetObject(ij_rd, &object);
-      par_rd = (HYPRE_ParVector) object;
+      if (test_scaling != 1)
+      {
+         HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_rd);
+         HYPRE_IJVectorSetObjectType(ij_rd, HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(ij_rd);
+         HYPRE_IJVectorSetValues(ij_rd, local_num_rows, NULL, d_data);
+         HYPRE_IJVectorAssemble(ij_rd);
+         HYPRE_IJVectorGetObject(ij_rd, &object);
+         par_rd = (HYPRE_ParVector) object;
+      }
 
       /* Compute A = diag(ld) * A * diag(rd) */
-      hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.A");
       hypre_ParCSRMatrixDiagScale(parcsr_A, par_ld, par_rd);
 
       /* Print scaled matrix */
-      hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.Ascal");
-      HYPRE_IJVectorPrint(ij_ld, "IJ.out.ld");
-      HYPRE_IJVectorPrint(ij_rd, "IJ.out.rd");
+      if (print_system)
+      {
+         hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.Ascal");
+         HYPRE_IJVectorPrint(ij_ld, "IJ.out.ld");
+         HYPRE_IJVectorPrint(ij_rd, "IJ.out.rd");
+      }
 
       /* Free memory */
-      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
       hypre_TFree(d_data, memory_location);
-      HYPRE_IJVectorDestroy(ij_rd);
-      HYPRE_IJVectorDestroy(ij_ld);
+      if (ij_rd)
+      {
+         HYPRE_IJVectorDestroy(ij_rd);
+      }
+      if (ij_ld)
+      {
+         HYPRE_IJVectorDestroy(ij_ld);
+      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("ParCSR scaling", hypre_MPI_COMM_WORLD);
