@@ -1293,11 +1293,22 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre
                                    hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp)
 {
    /* Get necessary slots */
+   HYPRE_Int            n              = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int            nnz_A_diag     = hypre_CSRMatrixNumNonzeros(A_diag);
+
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+   /* move the data back to the host */
+   HYPRE_Int            *A_diag_i = hypre_CTAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   HYPRE_Int            *A_diag_j = hypre_CTAlloc(HYPRE_Int, nnz_A_diag, HYPRE_MEMORY_HOST);
+   HYPRE_Real            *A_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_A_diag, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(A_diag_i,     hypre_CSRMatrixI(A_diag), HYPRE_Int, n+1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(A_diag_j,     hypre_CSRMatrixJ(A_diag), HYPRE_Int, nnz_A_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(A_diag_data,  hypre_CSRMatrixData(A_diag), HYPRE_Real, nnz_A_diag, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+#else
    HYPRE_Int           *A_diag_i       = hypre_CSRMatrixI(A_diag);
    HYPRE_Int           *A_diag_j       = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real          *A_diag_data    = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int            n              = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int            nnz_A_diag     = A_diag_i[n];
+#endif
 
    HYPRE_Int            i, j, row, col;
 
@@ -1525,6 +1536,12 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre
       *Fp                              = F;
    }
 
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+   hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(A_diag_data, HYPRE_MEMORY_HOST);
+#endif
+
    return hypre_error_flag;
 }
 
@@ -1708,6 +1725,7 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    return hypre_error_flag;
 }
 
+
 /* ILU(0) (GPU)
  * A = input matrix
  * perm = permutation array indicating ordering of rows. Perm could come from a
@@ -1791,11 +1809,26 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
    /* unfortunately we need to build the reverse permutation array */
    rperm                                        = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    rqperm                                       = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (n > 0)
+   {
+      HYPRE_THRUST_CALL( sequence,
+                         thrust::make_permutation_iterator(rperm, perm),
+                         thrust::make_permutation_iterator(rperm+n, perm+n),
+                         0 );
+      HYPRE_THRUST_CALL( sequence,
+                         thrust::make_permutation_iterator(rqperm, qperm),
+                         thrust::make_permutation_iterator(rqperm+n, qperm+n),
+                         0 );
+   }
+#else
+   // not sure if this works
    for (i = 0; i < n; i++)
    {
       rperm[perm[i]] = i;
       rqperm[qperm[i]] = i;
    }
+#endif
 
    /* Only call ILU when we really have a matrix on this processor */
    if (n > 0)
@@ -1803,7 +1836,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       /* Copy diagonal matrix into a new place with permutation
        * That is, A_diag = A_diag(perm,qperm);
        */
-      hypre_ParILUCusparseExtractDiagonalCSR(A, perm, rqperm, &A_diag);
+		hypre_CSRMatrixApplyRowColPermutation(hypre_ParCSRMatrixDiag(A), perm, rqperm, &A_diag);
 
       /* Apply ILU factorization to the entile A_diag */
       HYPRE_ILUSetupCusparseCSRILU0(A_diag, ilu_solve_policy);
