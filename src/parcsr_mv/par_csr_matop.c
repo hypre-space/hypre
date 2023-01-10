@@ -6365,7 +6365,10 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 #endif
 
    /* A_offd = diag(ld) * A_offd * diag(rd) */
-   hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
+   if (hypre_VectorSize(rdbuf))
+   {
+      hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
+   }
 
    /* Free memory */
    hypre_SeqVectorDestroy(rdbuf);
