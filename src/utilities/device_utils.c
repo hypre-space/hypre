@@ -490,7 +490,7 @@ hypre_dim3(HYPRE_Int x)
 #if defined(HYPRE_USING_SYCL)
    dim3 d(1, 1, x);
 #else
-   dim3 d(x, 1, 1);
+   dim3 d(x);
 #endif
    return d;
 }
@@ -501,7 +501,7 @@ hypre_dim3(HYPRE_Int x, HYPRE_Int y)
 #if defined(HYPRE_USING_SYCL)
    dim3 d(1, y, x);
 #else
-   dim3 d(x, y, 1);
+   dim3 d(x, y);
 #endif
    return d;
 }
