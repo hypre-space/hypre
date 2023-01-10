@@ -612,6 +612,7 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int              use_air = 0;
    HYPRE_Int              my_id;
    char                   region_name[1024];
+   char                   msg[1024];
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  exec;
 
@@ -660,7 +661,16 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
          }
 
-         // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
+         /* Error checking */
+         if (HYPRE_GetError())
+         {
+            hypre_sprintf(msg, "[%d]: Error from MGR's coarsest level solver (level %d)\n",
+                          my_id, level);
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+            HYPRE_ClearAllErrors();
+         }
+
+         /* DEBUG: print the coarse system indicated by mgr_data->print_coarse_system */
          if (mgr_data -> print_coarse_system)
          {
             hypre_ParCSRMatrixPrintIJ(RAP, 1, 1, "RAP_mat");
@@ -726,6 +736,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                                               level_diaginv, Vtemp);
                   }
                }
+               hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
             }
             else if ((level_smooth_type[fine_grid] > 1) &&
                      (level_smooth_type[fine_grid] < 7))
@@ -752,6 +763,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 
                   /* Update solution */
                   hypre_ParVectorAxpy(fp_one, Utemp, U_array[fine_grid]);
+                  hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
                }
             }
             else if (level_smooth_type[fine_grid] == 16) // HYPRE ILU
@@ -760,16 +772,27 @@ hypre_MGRCycle( void              *mgr_vdata,
                HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
                               A_array[fine_grid], F_array[fine_grid],
                               U_array[fine_grid]);
+               hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
             }
-            else if (level_smooth_type[fine_grid] == 18)
+            else
             {
-               /* L1-Jacobi */
+               /* Generic relaxation interface */
                for (i = 0; i < level_smooth_iters[fine_grid]; i++)
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
-                                       NULL, 18, 0, fp_one, fp_one, l1_norms,
+                                       NULL, level_smooth_type[fine_grid],
+                                       0, fp_one, fp_one, l1_norms,
                                        U_array[fine_grid], Vtemp, Ztemp);
                }
+            }
+
+            /* Error checking */
+            if (HYPRE_GetError())
+            {
+               hypre_sprintf(msg, "[%d]: Error from global pre-relaxation %d at level %d \n",
+                             my_id, level_smooth_type[fine_grid], fine_grid);
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+               HYPRE_ClearAllErrors();
             }
 
             hypre_GpuProfilingPopRange();
@@ -1003,6 +1026,16 @@ hypre_MGRCycle( void              *mgr_vdata,
                                     U_array[fine_grid], Vtemp, Ztemp);
             }
          }
+
+         /* Error checking */
+         if (HYPRE_GetError())
+         {
+            hypre_sprintf(msg, "[%d]: Error from F-relaxation %d at MGR level %d\n",
+                          my_id, Frelax_type[fine_grid], fine_grid);
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+            HYPRE_ClearAllErrors();
+         }
+
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END(region_name);
 
@@ -1181,15 +1214,25 @@ hypre_MGRCycle( void              *mgr_vdata,
                               A_array[fine_grid], F_array[fine_grid],
                               U_array[fine_grid]);
             }
-            else if (level_smooth_type[fine_grid] == 18)
+            else
             {
-               /* L1-Jacobi */
+               /* Generic relaxation interface */
                for (i = 0; i < level_smooth_iters[level]; i++)
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
-                                       NULL, 18, 0, fp_one, fp_one, l1_norms,
+                                       NULL, level_smooth_type[fine_grid], 0,
+                                       fp_one, fp_one, l1_norms,
                                        U_array[fine_grid], Vtemp, Ztemp);
                }
+            }
+
+            /* Error checking */
+            if (HYPRE_GetError())
+            {
+               hypre_sprintf(msg, "[%d]: Error from global post-relaxation %d at MGR level %d\n",
+                             my_id, level_smooth_type[fine_grid], fine_grid);
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+               HYPRE_ClearAllErrors();
             }
 
             hypre_GpuProfilingPopRange();
