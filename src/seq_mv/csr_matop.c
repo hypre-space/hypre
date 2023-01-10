@@ -2116,8 +2116,24 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
    }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                                      hypre_VectorMemoryLocation(ld) );
+   HYPRE_ExecutionPolicy exec;
+
+   if (ld && rd)
+   {
+      /* TODO (VPM): replace with GetExecPolicy3 */
+      exec = hypre_GetExecPolicy2(hypre_CSRMatrixMemoryLocation(A),
+                                  hypre_VectorMemoryLocation(ld));
+   }
+   else if (ld)
+   {
+      exec = hypre_GetExecPolicy2(hypre_CSRMatrixMemoryLocation(A),
+                                  hypre_VectorMemoryLocation(ld));
+   }
+   else
+   {
+      exec = hypre_GetExecPolicy2(hypre_CSRMatrixMemoryLocation(A),
+                                  hypre_VectorMemoryLocation(rd));
+   }
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
