@@ -686,9 +686,13 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_GPU)
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         if (Frelax_type[i] == 0 || (interp_type && interp_type[i] != 12))
+         if (Frelax_type[i] == 0 && interp_type && interp_type[i] != 12)
          {
             Frelax_type[i] = 7;
+            if (print_level)
+            {
+               hypre_ParPrintf(comm, "Changing F-relaxation type to 7 at MGR level %d\n", i);
+            }
          }
       }
 #endif
@@ -1035,6 +1039,11 @@ hypre_MGRSetup( void               *mgr_vdata,
                l1_norms[lev] = hypre_SeqVectorCreate(nloc);
                hypre_VectorData(l1_norms[lev]) = l1_norms_data;
                hypre_VectorMemoryLocation(l1_norms[lev]) = memory_location;
+
+               if (print_level)
+               {
+                  hypre_ParPrintf(comm, "Setting l1_norms for global relax at MGR level %d\n", i);
+               }
             }
          }
       }
