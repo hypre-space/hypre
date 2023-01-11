@@ -170,13 +170,8 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
    HYPRE_Int       size        = hypre_VectorSize(x);
    HYPRE_Int       total_size  = size * num_vectors;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypreDevice_ComplexAxpyzn(total_size, x_data, y_data, z_data, alpha, beta);
-
-#elif defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( std::transform,
-                      x_data, x_data + total_size, y_data, z_data,
-                      [alpha, beta](HYPRE_Complex x, HYPRE_Complex y) -> HYPRE_Complex { return alpha * x + beta * y; } );
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
