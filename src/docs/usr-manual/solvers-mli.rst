@@ -36,3 +36,19 @@ Note that parameters are set via ``HYPRE_LSI_MLISetParams``. A list of valid
 parameters that can be set using this routine can be found in the FEI section of
 the reference manual.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
