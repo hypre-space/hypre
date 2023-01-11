@@ -4163,6 +4163,8 @@ hypre_MGRBlockRelaxSolveDevice( hypre_ParCSRMatrix  *B,
                                 hypre_ParVector     *Vtemp,
                                 HYPRE_Real           relax_weight )
 {
+   hypre_GpuProfilingPushRange("BlockRelaxSolve");
+
    /* Copy f into temporary vector */
    hypre_ParVectorCopy(f, Vtemp);
 
@@ -4182,6 +4184,8 @@ hypre_MGRBlockRelaxSolveDevice( hypre_ParCSRMatrix  *B,
    /* Update solution: u += B * Vtemp */
    hypre_ParCSRMatrixMatvec(1.0, B, Vtemp, 1.0, u);
    hypre_ParVectorAllZeros(u) = 0;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
