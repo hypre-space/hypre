@@ -1197,9 +1197,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                   }
                   else
                   {
-                     if (my_id == 0)
+                     if (my_id == 0 && print_level > 1)
                      {
-                        hypre_printf("Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
+                        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
                         hypre_error(1);
                         return hypre_error_flag;
                      }
@@ -1227,10 +1227,10 @@ hypre_MGRSetup( void               *mgr_vdata,
             }
             else
             {
-               if (my_id == 0)
+               if (my_id == 0 && print_level > 1)
                {
-                  hypre_printf("Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
-  Ignoring this call and using user prescribed Frelax_type %d instead.\n",
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
+ Ignoring this call and using user prescribed Frelax_type %d instead.\n",
                                Frelax_type[lev]);
                }
             } 
