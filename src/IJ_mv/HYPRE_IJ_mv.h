@@ -21,11 +21,9 @@ extern "C" {
 /**
  * @defgroup IJSystemInterface IJ System Interface
  *
- * This interface represents a linear-algebraic conceptual view of a
- * linear system.  The 'I' and 'J' in the name are meant to be
- * mnemonic for the traditional matrix notation A(I,J).
- *
- * @memo A linear-algebraic conceptual interface
+ * A linear-algebraic conceptual interface. This interface represents a
+ * linear-algebraic conceptual view of a linear system.  The 'I' and 'J' in the
+ * name are meant to be mnemonic for the traditional matrix notation A(I,J).
  *
  * @{
  **/
