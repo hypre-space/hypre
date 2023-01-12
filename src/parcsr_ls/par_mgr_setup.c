@@ -1177,9 +1177,9 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
 #endif
       }
-    
+
       if (Frelax_type[lev] == 2 || Frelax_type[lev] == 9 || Frelax_type[lev] == 99 ||
-               Frelax_type[lev] == 199)
+          Frelax_type[lev] == 199)
       {
          // Check user-prescribed F-solver
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
@@ -1199,7 +1199,8 @@ hypre_MGRSetup( void               *mgr_vdata,
                   {
                      if (my_id == 0 && print_level > 1)
                      {
-                        hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
+                        hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                          "Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
                         hypre_error(1);
                         return hypre_error_flag;
                      }
@@ -1229,11 +1230,11 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                if (my_id == 0 && print_level > 1)
                {
-                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
+                  hypre_printf("Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
  Ignoring this call and using user prescribed Frelax_type %d instead.\n",
                                Frelax_type[lev]);
                }
-            } 
+            }
          }
          else
          {
@@ -1247,10 +1248,10 @@ hypre_MGRSetup( void               *mgr_vdata,
                hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
                                                     &A_ff_ptr);
             }
-#endif         
+#endif
             // set A_ff_array pointer
             A_ff_array[lev] = A_ff_ptr;
-      
+
             // If AMG for F-relaxation, do setup here.
             if (Frelax_type[lev] == 2)
             {
