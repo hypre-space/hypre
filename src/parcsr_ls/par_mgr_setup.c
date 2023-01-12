@@ -1201,7 +1201,6 @@ hypre_MGRSetup( void               *mgr_vdata,
                      {
                         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                           "Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
-                        hypre_error(1);
                         return hypre_error_flag;
                      }
                   }
