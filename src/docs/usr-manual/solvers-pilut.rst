@@ -45,3 +45,14 @@ Parameters:
   values of ``tol`` lead to more accurate preconditioners, but can also lead to
   increases in the time to calculate the preconditioner.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
