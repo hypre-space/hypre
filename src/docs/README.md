@@ -109,7 +109,6 @@ Breathe:
 
 - https://breathe.readthedocs.io/en/latest/index.html
 
-
 ## Some notes on customization
 
 After compilation, the CSS style files that control the HTML formatting will be
