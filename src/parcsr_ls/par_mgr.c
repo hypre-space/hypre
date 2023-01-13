@@ -309,7 +309,7 @@ hypre_MGRDestroy( void *data )
             hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[i]);
          }
       }
-      if (mgr_data -> fsolver_mode > 0)
+      if (mgr_data -> fsolver_mode != 0)
       {
          if ((mgr_data -> A_ff_array)[0])
          {
@@ -481,6 +481,7 @@ hypre_MGRDestroyGSElimData( void *data )
    if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
 
+   hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 

@@ -764,7 +764,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             A_ff_array[j] = NULL;
          }
       }
-      if (mgr_data -> fsolver_mode > 0)
+      if (mgr_data -> fsolver_mode != 0)
       {
          if (A_ff_array[0])
          {
