@@ -830,6 +830,12 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
       return hypre_error_flag;
    }
 
+   if (!hypre_VectorSize(x))
+   {
+     /* VPM: Do not throw an error message here since this can happen for idle processors */
+     return hypre_error_flag;
+   }
+
    if (!hypre_VectorData(x))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "x_data is not present!\n");
