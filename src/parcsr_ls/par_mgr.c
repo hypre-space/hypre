@@ -466,6 +466,7 @@ hypre_MGRCreateGSElimData( void )
    hypre_ParAMGDataAInv(gsdata) = NULL;
    hypre_ParAMGDataBVec(gsdata) = NULL;
    hypre_ParAMGDataCommInfo(gsdata) = NULL;
+   hypre_ParAMGDataNewComm(gsdata) = hypre_MPI_COMM_NULL;
 
    return (void *) gsdata;
 }
@@ -475,12 +476,18 @@ HYPRE_Int
 hypre_MGRDestroyGSElimData( void *data )
 {
    hypre_ParAMGData * gsdata = (hypre_ParAMGData*) data;
+   MPI_Comm new_comm = hypre_ParAMGDataNewComm(gsdata);
 
    if (hypre_ParAMGDataAMat(gsdata)) { hypre_TFree(hypre_ParAMGDataAMat(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataAInv(gsdata)) { hypre_TFree(hypre_ParAMGDataAInv(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
 
+   if (new_comm != hypre_MPI_COMM_NULL)
+   {
+      hypre_MPI_Comm_free (&new_comm);
+   }
+   
    hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
