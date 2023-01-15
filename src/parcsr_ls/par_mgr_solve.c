@@ -645,7 +645,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          /* call coarse grid solver here (default is BoomerAMG) */
          hypre_sprintf(region_name, "%s-%d", "MGR_Level", level);
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
          //wall_time = time_getWallclockSeconds();
          coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
@@ -681,6 +681,9 @@ hypre_MGRCycle( void              *mgr_vdata,
 
          /**** cycle up ***/
          cycle_type = 2;
+
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
       }
       /* Down cycle */
       else if (cycle_type == 1)
@@ -696,14 +699,14 @@ hypre_MGRCycle( void              *mgr_vdata,
 
          hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
          /* Global pre smoothing sweeps */
          if (pre_smoothing && (level_smooth_iters[fine_grid] > 0))
          {
             hypre_sprintf(region_name, "Global-Relax");
             hypre_GpuProfilingPushRange(region_name);
-            HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
             //wall_time = time_getWallclockSeconds();
             if ((level_smooth_type[fine_grid]) == 0 ||
@@ -796,7 +799,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
 
             hypre_GpuProfilingPopRange();
-            HYPRE_ANNOTATE_REGION_END(region_name);
+            HYPRE_ANNOTATE_REGION_END("%s", region_name);
          } // end pre-smoothing
 
          //wall_time = time_getWallclockSeconds();
@@ -804,7 +807,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          relax_points = -1;
          hypre_sprintf(region_name, "F-Relax");
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
          if (Frelax_type[fine_grid] == 0)
          {
@@ -1049,7 +1052,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
 
          hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END(region_name);
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
          //wall_time = time_getWallclockSeconds() - wall_time;
          //if (my_id == 0) hypre_printf("F-relaxation solve level %d: %f\n", coarse_grid, wall_time);
@@ -1057,13 +1060,13 @@ hypre_MGRCycle( void              *mgr_vdata,
          /* Update residual and compute coarse-grid rhs */
          hypre_sprintf(region_name, "Residual");
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
          hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid], U_array[fine_grid],
                                             fp_one, F_array[fine_grid], Vtemp);
 
          hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END(region_name);
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
          if ((restrict_type[fine_grid] == 4) ||
              (restrict_type[fine_grid] == 5))
@@ -1073,7 +1076,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 
          hypre_sprintf(region_name, "Restrict");
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
          if (use_air)
          {
             /* no transpose necessary for R */
@@ -1098,7 +1101,11 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
          }
          hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END(region_name);
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
+
+         hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
          /* Initialize coarse grid solution array */
          hypre_ParVectorSetZeros(U_array[coarse_grid]);
@@ -1125,13 +1132,13 @@ hypre_MGRCycle( void              *mgr_vdata,
 
          hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
          /* Interpolate */
          //wall_time = time_getWallclockSeconds();
          hypre_sprintf(region_name, "Prolongate");
          hypre_GpuProfilingPushRange(region_name);
-         HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          if (interp_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
@@ -1151,7 +1158,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
 
          hypre_GpuProfilingPopRange();
-         HYPRE_ANNOTATE_REGION_END(region_name);
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
          /* Global post smoothing sweeps */
          if (post_smoothing & (level_smooth_iters[fine_grid] > 0))
@@ -1159,7 +1166,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             //wall_time = time_getWallclockSeconds();
             hypre_sprintf(region_name, "Global-Relax");
             hypre_GpuProfilingPushRange(region_name);
-            HYPRE_ANNOTATE_REGION_BEGIN(region_name);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
             /* Block Jacobi smoother */
             if ((level_smooth_type[fine_grid] == 0) ||
@@ -1248,16 +1255,12 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
 
             hypre_GpuProfilingPopRange();
-            HYPRE_ANNOTATE_REGION_END(region_name);
+            HYPRE_ANNOTATE_REGION_END("%s", region_name);
          } // end post-smoothing
 
-         if (ierr != 0)
-         {
-            HYPRE_ANNOTATE_FUNC_END;
-            hypre_GpuProfilingPopRange();
-
-            return hypre_error_flag;
-         }
+         hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
+         hypre_GpuProfilingPopRange();
+         HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
          --level;
          //wall_time = time_getWallclockSeconds() - wall_time;
@@ -1267,10 +1270,6 @@ hypre_MGRCycle( void              *mgr_vdata,
       {
          Not_Finished = 0;
       }
-
-      hypre_sprintf(region_name, "%s-%d", "MGR_Level", level);
-      hypre_GpuProfilingPopRange();
-      HYPRE_ANNOTATE_REGION_END(region_name);
    }
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
