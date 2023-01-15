@@ -1654,7 +1654,9 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    return hypre_error_flag;
 }
 
-/*
+/*--------------------------------------------------------------------------
+ * hypre_ILUGetInteriorExteriorPerm
+ *
  * Get perm array from parcsr matrix based on diag and offdiag matrix
  * Just simply loop through the rows of offd of A, check for nonzero rows
  * Put interior nodes at the beginning
@@ -1663,63 +1665,72 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
  * nLU: number of interial nodes
  * reordering_type: Type of (additional) reordering for the interior nodes.
  * Currently only supports RCM reordering. Set to 0 for no reordering.
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
-                                 HYPRE_Int reordering_type)
+hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
+                                 HYPRE_Int           **perm,
+                                 HYPRE_Int            *nLU,
+                                 HYPRE_Int             reordering_type)
 {
    /* get basic information of A */
-   HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
-   HYPRE_Int            i, j, first, last, start, end;
-   HYPRE_Int            num_sends, send_map_start, send_map_end, col;
+   HYPRE_Int             n        = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix      *A_diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix      *A_offd   = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int            *A_offd_i;
-
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-   A_offd_i = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(A_offd_i,  hypre_CSRMatrixI(A_offd), HYPRE_Int, n + 1, HYPRE_MEMORY_HOST,
-                 HYPRE_MEMORY_DEVICE);
-#else
-   A_offd_i = hypre_CSRMatrixI(A_offd);
-#endif
-
-   first                = 0;
-   last                 = n - 1;
-
-   /* pure GPU without unified memory requires this buffer */
-   HYPRE_Int            *tperm_host = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   HYPRE_Int            *tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int            *marker = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-
-   /* first get col nonzero from com_pkg */
-   /* get comm_pkg, craete one if we not yet have one */
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+
+   HYPRE_Int           *A_offd_i;
+   HYPRE_Int            i, j, first, last, start, end;
+   HYPRE_Int            num_sends, send_map_start, send_map_end, col;
+
+   /* Local arrays */
+   HYPRE_Int            *tperm   = hypre_TAlloc(HYPRE_Int, n, memory_location);
+   HYPRE_Int            *h_tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int            *marker  = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+
+   /* Get comm_pkg, create one if not present */
    if (!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
-   /* now directly take adavantage of comm_pkg */
+   /* Set A_offd_i on the host */
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+   {
+      /* Move A_offd_i to host */
+      A_offd_i = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(A_offd_i,  hypre_CSRMatrixI(A_offd), HYPRE_Int, n + 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      A_offd_i = hypre_CSRMatrixI(A_offd);
+   }
+
+   /* Set initial interior/exterior pointers */
+   first = 0;
+   last  = n - 1;
+
+   /* now directly take advantage of comm_pkg */
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   for ( i = 0 ; i < num_sends ; i ++ )
+   for (i = 0; i < num_sends; i++)
    {
       send_map_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-      send_map_end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
-      for ( j = send_map_start ; j < send_map_end ; j ++)
+      send_map_end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
+      for (j = send_map_start; j < send_map_end; j++)
       {
          col = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
          if (marker[col] == 0)
          {
-            tperm_host[last--] = col;
+            h_tperm[last--] = col;
             marker[col] = -1;
          }
       }
    }
 
    /* now deal with the row */
-   for ( i = 0 ; i < n ; i ++)
+   for (i = 0; i < n; i++)
    {
       if (marker[i] == 0)
       {
@@ -1727,42 +1738,40 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_
          end = A_offd_i[i + 1];
          if (start == end)
          {
-            tperm_host[first++] = i;
+            h_tperm[first++] = i;
          }
          else
          {
-            tperm_host[last--] = i;
+            h_tperm[last--] = i;
          }
       }
    }
 
-   switch (reordering_type)
+   /* Apply RCM */
+   if (reordering_type != 0)
    {
-      case 0:
-         /* no RCM in this case */
-         break;
-      case 1:
-         /* RCM */
-         hypre_ILULocalRCM(A_diag, 0, first, &tperm_host, &tperm_host, 1);
-         break;
-      default:
-         /* RCM */
-         hypre_ILULocalRCM(A_diag, 0, first, &tperm_host, &tperm_host, 1);
-         break;
+      hypre_ILULocalRCM(A_diag, 0, first, &tperm_host, &tperm_host, 1);
    }
-   hypre_TMemcpy(tperm, tperm_host, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TFree(tperm_host, HYPRE_MEMORY_HOST);
 
-   /* set out values */
-   *nLU = first;
-   if ((*perm) != NULL) { hypre_TFree(*perm, HYPRE_MEMORY_DEVICE); }
-   *perm = tperm;
+   /* Move permutation vector to final memory location */
+   hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, HYPRE_MEMORY_HOST);
 
+   /* Free memory */
+   hypre_TFree(h_tperm, HYPRE_MEMORY_HOST);
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
+   if (A_offd_i != hypre_CSRMatrixI(A_offd))
+   {
+      hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
+   }
 
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
-#endif
+   /* Set output values */
+   if ((*perm) != NULL)
+   {
+      hypre_TFree(*perm, memory_location);
+   }
+   *perm = tperm;
+   *nLU = first;
+
    return hypre_error_flag;
 }
 
