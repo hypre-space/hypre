@@ -1303,9 +1303,6 @@ extern "C++"
 }
 #endif
 
-static char hypre__levelname[16];
-static char hypre__markname[1024];
-
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
 #define HYPRE_ANNOTATE_LOOP_BEGIN(id, str) CALI_MARK_LOOP_BEGIN(id, str)
@@ -1314,21 +1311,25 @@ static char hypre__markname[1024];
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
 #define HYPRE_ANNOTATE_REGION_BEGIN(...)\
 {\
+   char hypre__markname[1024];\
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_BEGIN(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_REGION_END(...)\
 {\
+   char hypre__markname[1024];\
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_END(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
+   char hypre__levelname[16];\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_BEGIN(hypre__levelname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)\
 {\
+   char hypre__levelname[16];\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_END(hypre__levelname);\
 }
@@ -1866,6 +1867,8 @@ HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex 
                                     HYPRE_Complex v);
 HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                    HYPRE_Complex *d_z, HYPRE_Complex a);
+HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
                                HYPRE_Int a);
 HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,

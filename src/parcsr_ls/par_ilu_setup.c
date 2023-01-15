@@ -1926,7 +1926,7 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   /* Build the reverse permutation array */
+   /* Build the inverse permutation arrays */
    if (perm_data && qperm_data)
    {
       /* Create arrays */
@@ -1941,9 +1941,9 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       hypre_IntArrayInitialize_v2(perm, memory_location);
       hypre_IntArrayInitialize_v2(qperm, memory_location);
 
-      /* Compute reverse permutation arrays */
-      hypre_IntArrayReverseMapping(perm, &rperm);
-      hypre_IntArrayReverseMapping(qperm, &rqperm);
+      /* Compute inverse permutation arrays */
+      hypre_IntArrayInverseMapping(perm, &rperm);
+      hypre_IntArrayInverseMapping(qperm, &rqperm);
 
       rqperm_data = hypre_IntArrayData(rqperm);
    }
