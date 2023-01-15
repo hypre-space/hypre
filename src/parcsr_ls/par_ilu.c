@@ -2345,45 +2345,65 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ILULocalRCM
+ *
+ * This function computes the RCM ordering of a sub matrix of
+ * sparse matrix B = A(perm,perm)
+ * For nonsymmetrix problem, is the RCM ordering of B + B'
+ * A: The input CSR matrix
+ * start:      the start position of the submatrix in B
+ * end:        the end position of the submatrix in B ( exclude end, [start,end) )
+ * permp:      pointer to the row permutation array such that B = A(perm, perm)
+ *             point to NULL if you want to work directly on A
+ *             on return, permp will point to the new permutation where
+ *             in [start, end) the matrix will reordered
+ * qpermp:     pointer to the col permutation array such that B = A(perm, perm)
+ *             point to NULL or equal to permp if you want symmetric order
+ *             on return, qpermp will point to the new permutation where
+ *             in [start, end) the matrix will reordered
+ * sym:        set to nonzero to work on A only(symmetric), otherwise A + A'.
+ *             WARNING: if you use non-symmetric reordering, that is,
+ *             different row and col reordering, the resulting A might be non-symmetric.
+ *             Be careful if you are using non-symmetric reordering
+ *
+ * TODO (VPM): Implement RCM computation on the device.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
-                   HYPRE_Int **permp, HYPRE_Int **qpermp, HYPRE_Int sym)
+hypre_ILULocalRCM(hypre_CSRMatrix *A,
+                  HYPRE_Int        start,
+                  HYPRE_Int        end,
+                  HYPRE_Int      **permp,
+                  HYPRE_Int      **qpermp,
+                  HYPRE_Int        sym)
 {
-   HYPRE_Int               i, j, row, col, r1, r2;
+   /* Input variables */
+   HYPRE_Int               num_nodes       = end - start;
+   HYPRE_Int               n               = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int               ncol            = hypre_CSRMatrixNumCols(A);
+   HYPRE_MemoryLocation    memory_location = hypre_CSRMatrixMemoryLocation(A);
+   HYPRE_Int               A_nnz           = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int              *A_i;
+   HYPRE_Int              *A_j;
 
-   HYPRE_Int               num_nodes      = end - start;
-   HYPRE_Int               n              = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               ncol           = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int               *A_i           = NULL;
-   HYPRE_Int               *A_j           = NULL;
-   hypre_CSRMatrix         *GT            = NULL;
-   hypre_CSRMatrix         *GGT           = NULL;
-   //    HYPRE_Int               *AAT_i         = NULL;
-   //    HYPRE_Int               *AAT_j         = NULL;
-   HYPRE_Int               A_nnz          = hypre_CSRMatrixNumNonzeros(A);
-   hypre_CSRMatrix         *G             = NULL;
-   HYPRE_Int               *G_i           = NULL;
-   HYPRE_Int               *G_j           = NULL;
-   HYPRE_Real              *G_data           = NULL;
-   HYPRE_Int               *G_perm        = NULL;
-   HYPRE_Int               G_nnz;
-   HYPRE_Int               G_capacity;
-   HYPRE_Int               *perm_temp     = NULL;
-   HYPRE_Int               *perm          = *permp;
-   HYPRE_Int               *qperm         = *qpermp;
-   HYPRE_Int               *rqperm        = NULL;
+   /* Local variables */
+   hypre_CSRMatrix         *GT        = NULL;
+   hypre_CSRMatrix         *GGT       = NULL;
+   hypre_CSRMatrix         *G         = NULL;
+   HYPRE_Int               *G_i       = NULL;
+   HYPRE_Int               *G_j       = NULL;
+   HYPRE_Real              *G_data    = NULL;
+   HYPRE_Int               *G_perm    = NULL;
+   HYPRE_Int               *perm_temp = NULL;
+   HYPRE_Int               *rqperm    = NULL;
+   HYPRE_Int               *d_perm    = NULL;
+   HYPRE_Int               *d_qperm   = NULL;
+   HYPRE_Int               *perm      = *permp;
+   HYPRE_Int               *qperm     = *qpermp;
 
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-   /* move the data back to the host */
-   A_i = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_HOST);
-   A_j = hypre_CTAlloc(HYPRE_Int, A_nnz, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(A_i,  hypre_CSRMatrixI(A), HYPRE_Int, n + 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(A_j,  hypre_CSRMatrixJ(A), HYPRE_Int, A_nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-#else
-   A_i           = hypre_CSRMatrixI(A);
-   A_j           = hypre_CSRMatrixJ(A);
-#endif
+   HYPRE_Int                i, j, row, col, r1, r2;
+   HYPRE_Int                G_nnz, G_capacity;
 
    /* 1: Preprosessing
     * Check error in input, set some parameters
@@ -2393,31 +2413,54 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
       /* don't do this if we are too small */
       return hypre_error_flag;
    }
+
    if (n != ncol || end > n || start < 0)
    {
       /* don't do this if the input has error */
       hypre_printf("Error input, abort RCM\n");
       return hypre_error_flag;
    }
+
+   /* create permutation array if we don't have one yet */
    if (!perm)
    {
-      /* create permutation array if we don't have one yet */
-      perm = hypre_TAlloc( HYPRE_Int, n, HYPRE_MEMORY_HOST);
-      for (i = 0 ; i < n ; i ++)
+      perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+      for (i = 0; i < n; i++)
       {
          perm[i] = i;
       }
    }
+
+   /* Check for symmetric reordering, then point qperm to row reordering */
    if (!qperm)
    {
-      /* symmetric reordering, just point it to row reordering */
       qperm = perm;
    }
+
+   /* Compute reverse qperm ordering */
    rqperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   for (i = 0 ; i < n ; i ++)
+   for (i = 0; i < n; i++)
    {
       rqperm[qperm[i]] = i;
    }
+
+   /* Set/Move A_i and A_j to host */
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+   {
+      A_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_HOST);
+      A_j = hypre_TAlloc(HYPRE_Int, A_nnz, HYPRE_MEMORY_HOST);
+
+      hypre_TMemcpy(A_i, hypre_CSRMatrixI(A), HYPRE_Int, n + 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(A_j, hypre_CSRMatrixJ(A), HYPRE_Int, A_nnz,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      A_i = hypre_CSRMatrixI(A);
+      A_j = hypre_CSRMatrixJ(A);
+   }
+
    /* 2: Build Graph
     * Build Graph for RCM ordering
     */
@@ -2426,13 +2469,14 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
    G_i = hypre_TAlloc(HYPRE_Int, num_nodes + 1, HYPRE_MEMORY_HOST);
    G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_HOST);
 
+   /* TODO (VPM): Extend hypre_CSRMatrixPermute to replace the block below */
    for (i = 0 ; i < num_nodes ; i ++)
    {
       G_i[i] = G_nnz;
       row = perm[i + start];
       r1 = A_i[row];
       r2 = A_i[row + 1];
-      for (j = r1 ; j < r2 ; j ++)
+      for (j = r1; j < r2; j ++)
       {
          col = rqperm[A_j[j]];
          if (col != row && col >= start && col < end)
@@ -2443,46 +2487,46 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
             {
                HYPRE_Int tmp = G_capacity;
                G_capacity = G_capacity * EXPAND_FACT + 1;
-               G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int, G_capacity, HYPRE_MEMORY_HOST);
+               G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int,
+                                       G_capacity, HYPRE_MEMORY_HOST);
             }
          }
       }
    }
    G_i[num_nodes] = G_nnz;
+
+   /* Free memory */
+   if (A_i != hypre_CSRMatrixI(A_diag))
+   {
+      hypre_TFree(A_i, HYPRE_MEMORY_HOST);
+   }
+   if (A_j != hypre_CSRMatrixJ(A_diag))
+   {
+      hypre_TFree(A_j, HYPRE_MEMORY_HOST);
+   }
+
+   /* Check if G has only diagonal (no need to do any kind of RCM) */
    if (G_nnz == 0)
    {
-      //G has only diagonal, no need to do any kind of RCM
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-      hypre_TFree(A_i, HYPRE_MEMORY_HOST);
-      hypre_TFree(A_j, HYPRE_MEMORY_HOST);
-#endif
       hypre_TFree(G_i, HYPRE_MEMORY_HOST);
       hypre_TFree(G_j, HYPRE_MEMORY_HOST);
       hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+
       *permp   = perm;
       *qpermp  = qperm;
+
       return hypre_error_flag;
    }
 
+   /* Create matrix G on the host */
    G = hypre_CSRMatrixCreate(num_nodes, num_nodes, G_nnz);
-   /* explicitly set this matrix to reside on the host */
    hypre_CSRMatrixMemoryLocation(G) = HYPRE_MEMORY_HOST;
-   hypre_CSRMatrixInitialize(G);
-   hypre_TMemcpy(hypre_CSRMatrixI(G),  G_i, HYPRE_Int, num_nodes + 1, HYPRE_MEMORY_HOST,
-                 HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(hypre_CSRMatrixJ(G),  G_j, HYPRE_Int, G_nnz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixI(G) = G_i;
+   hypre_CSRMatrixJ(G) = G_j;
 
-   /* Don't need these anymore */
-#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-   hypre_TFree(A_i, HYPRE_MEMORY_HOST);
-   hypre_TFree(A_j, HYPRE_MEMORY_HOST);
-#endif
-   hypre_TFree(G_i, HYPRE_MEMORY_HOST);
-   hypre_TFree(G_j, HYPRE_MEMORY_HOST);
-
+   /* Sum G with G' if G is nonsymmetric */
    if (!sym)
    {
-      /* now sum G with G' */
       hypre_CSRMatrixTranspose(G, &GT, 1);
       GGT = hypre_CSRMatrixAdd(1.0, G, 1.0, GT);
       hypre_CSRMatrixDestroy(G);
@@ -2491,12 +2535,9 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
       GGT = NULL;
    }
 
-   /* 3: Build Graph
-    * Build RCM
-    */
-   /* no need to be shared, but perm should be shared */
+   /* 3: Build RCM on the host */
    G_perm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-   hypre_ILULocalRCMOrder( G, G_perm);
+   hypre_ILULocalRCMOrder(G, G_perm);
 
    /* 4: Post processing
     * Free, set value, return
@@ -2504,35 +2545,56 @@ hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
 
    /* update to new index */
    perm_temp = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-   for ( i = 0 ; i < num_nodes ; i ++)
+   for (i = 0 ;i < num_nodes; i++)
    {
       perm_temp[i] = perm[i + start];
    }
-   for ( i = 0 ; i < num_nodes ; i ++)
+   for (i = 0 ;i < num_nodes; i++)
    {
       perm[i + start] = perm_temp[G_perm[i]];
    }
    if (perm != qperm)
    {
-      for ( i = 0 ; i < num_nodes ; i ++)
+      for (i = 0; i < num_nodes; i++)
       {
          perm_temp[i] = qperm[i + start];
       }
-      for ( i = 0 ; i < num_nodes ; i ++)
+      for (i = 0; i < num_nodes; i++)
       {
          qperm[i + start] = perm_temp[G_perm[i]];
       }
    }
+
+   /* Move to final device memory if needed */
+   if (memory_location == HYPRE_MEMORY_DEVICE)
+   {
+      d_perm  = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_DEVICE);
+      d_qperm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_DEVICE);
+
+      hypre_TMemcpy(d_perm, perm, HYPRE_Int, num_nodes,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(d_qperm, qperm, HYPRE_Int, num_nodes,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(perm, HYPRE_MEMORY_HOST);
+      hypre_TFree(qperm, HYPRE_MEMORY_HOST);
+
+      perm  = d_perm;
+      qperm = d_qperm;
+   }
+
+   /* Set output pointers */
    *permp   = perm;
    *qpermp  = qperm;
-   hypre_CSRMatrixDestroy(G);
 
+   /* Free memory */
+   hypre_CSRMatrixDestroy(G);
    hypre_TFree(G_perm, HYPRE_MEMORY_HOST);
    hypre_TFree(perm_temp, HYPRE_MEMORY_HOST);
    hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ILULocalRCMMindegree
