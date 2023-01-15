@@ -983,7 +983,10 @@ hypre_MGRCycle( void              *mgr_vdata,
             //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
-         else if (Frelax_type[fine_grid] == 2)
+         else if (Frelax_type[level] == 2  ||
+                  Frelax_type[level] == 9  ||
+                  Frelax_type[level] == 99 ||
+                  Frelax_type[level] == 199)
          {
             /* We need to first compute residual to ensure that
                F-relaxation is reducing the global residual */
@@ -1000,11 +1003,20 @@ hypre_MGRCycle( void              *mgr_vdata,
 #endif
             hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
-            /* Do F-relaxation using AMG */
-            fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
-                                   A_ff_array[fine_grid],
-                                   F_fine_array[coarse_grid],
-                                   U_fine_array[coarse_grid]);
+            if (Frelax_type[level] == 2)
+            {
+               /* Do F-relaxation using AMG */
+               fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
+                                      A_ff_array[fine_grid],
+                                      F_fine_array[coarse_grid],
+                                      U_fine_array[coarse_grid]);
+            }
+            else
+            {
+               /* Do F-relaxation using Gaussian Elimination */
+               hypre_GaussElimSolve((mgr_data -> GSElimData)[fine_grid],
+                                    level, Frelax_type[level]);
+            }
 
             /* Interpolate the solution back to the fine grid level */
 #if defined (HYPRE_USING_GPU)

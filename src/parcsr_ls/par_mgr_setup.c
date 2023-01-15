@@ -118,11 +118,12 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
 
    HYPRE_Int use_VcycleSmoother = 0;
-   //   HYPRE_Int use_GSElimSmoother = 0;
+   HYPRE_Int use_GSElimSmoother = 0;
    //   HYPRE_Int use_ComplexSmoother = 0;
    hypre_ParVector     *VcycleRelaxZtemp;
    hypre_ParVector     *VcycleRelaxVtemp;
    hypre_ParAMGData    **FrelaxVcycleData;
+   hypre_ParAMGData    **GSElimData;
    HYPRE_Int *Frelax_method = (mgr_data -> Frelax_method);
    HYPRE_Int *Frelax_num_functions = (mgr_data -> Frelax_num_functions);
 
@@ -135,6 +136,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
    HYPRE_Real truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
    char        region_name[1024];
+   char        msg[2048];
 
 #if MGR_DEBUG_LEVEL == 1
    char        fname[256];
@@ -170,8 +172,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int    nloc   =  hypre_ParCSRMatrixNumRows(A);
    HYPRE_BigInt ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_BigInt iupper =  hypre_ParCSRMatrixLastRowIndex(A);
-
-   //hypre_ParAMGData    **GSElimData;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -828,7 +828,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* TODO: Change to A_FF_array (VPM) */
    if (A_ff_array)
    {
-      for (j = 0; j < old_num_coarse_levels - 1; j++)
+      for (j = 1; j < old_num_coarse_levels; j++)
       {
          if (A_ff_array[j])
          {
@@ -836,9 +836,36 @@ hypre_MGRSetup( void               *mgr_vdata,
             A_ff_array[j] = NULL;
          }
       }
+      if (mgr_data -> fsolver_mode != 0)
+      {
+         if (A_ff_array[0])
+         {
+            hypre_ParCSRMatrixDestroy(A_ff_array[0]);
+            A_ff_array[0] = NULL;
+         }
+      }
       hypre_TFree(A_ff_array, HYPRE_MEMORY_HOST);
       A_ff_array = NULL;
    }
+
+   if (aff_solver)
+   {
+      for (j = 1; j < (old_num_coarse_levels); j++)
+      {
+         if (aff_solver[j])
+         {
+            hypre_BoomerAMGDestroy(aff_solver[j]);
+         }
+      }
+      if (mgr_data -> fsolver_mode == 2)
+      {
+         if (aff_solver[0])
+         {
+            hypre_BoomerAMGDestroy(aff_solver[0]);
+         }
+      }
+   }
+
    if ((mgr_data -> fine_grid_solver_setup) != NULL)
    {
       fgrid_solver_setup = (mgr_data -> fine_grid_solver_setup);
@@ -1108,8 +1135,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-      if ((Frelax_type[lev] == 2)  ||
-          (interp_type[lev] == 12) ||
+      if ((Frelax_type[lev] == 2)   ||
+          (Frelax_type[lev] == 9)   ||
+          (Frelax_type[lev] == 99)  ||
+          (Frelax_type[lev] == 199) ||
+          (interp_type[lev] == 12)  ||
           (mgr_coarse_grid_method[lev] != 0))
       {
          hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
@@ -1436,49 +1466,59 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParCSRMatrixDestroy(A_FC);
       A_FC = NULL;
 
-      if (Frelax_type[lev] == 2) // full AMG
+      /* User-prescribed F-solver */
+      if (Frelax_type[lev] == 2  ||
+          Frelax_type[lev] == 9  ||
+          Frelax_type[lev] == 99 ||
+          Frelax_type[lev] == 199)
       {
 #if MGR_DEBUG_LEVEL == 2
          wall_time = time_getWallclockSeconds();
 #endif
-         // user provided AMG solver
-         // only support AMG at the first level
-         // TODO: input check to avoid crashing
-
-         //*** This part needs some refactoring wrt use of fsolver_mode - DOK ***/
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
-            if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
+            if (Frelax_type[lev] == 2)
             {
-               if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
+               if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
                {
-                  /* F-solver is already set up, only need to store A_FF */
-                  A_ff_array[lev] = ((hypre_ParAMGData*) aff_solver[lev])->A_array[0];
-               }
-               else
-               {
-                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                    "F-relaxation solver has not been setup\n");
-                  HYPRE_ANNOTATE_FUNC_END;
-                  hypre_GpuProfilingPopRange();
+                  if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
+                  {
+                     /* F-solver is already set up, only need to store A_ff_ptr */
+                     A_ff_array[lev] = ((hypre_ParAMGData*) aff_solver[lev]) -> A_array[0];
+                  }
+                  else
+                  {
+                     hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                       "F-relaxation solver has not been setup\n");
+                     HYPRE_ANNOTATE_FUNC_END;
+                     hypre_GpuProfilingPopRange();
 
-                  return hypre_error_flag;
+                     return hypre_error_flag;
+                  }
+               }
+               else /* F-relaxation solver prescribed but not set up */
+               {
+                  /* Save A_FF splitting */
+                  A_ff_array[lev] = A_FF;
+
+                  /* Setup F-solver */
+                  fgrid_solver_setup(aff_solver[lev],
+                                     A_ff_array[lev],
+                                     F_fine_array[lev + 1],
+                                     U_fine_array[lev + 1]);
+                  (mgr_data -> fsolver_mode) = 1;
                }
             }
             else
             {
-               /* Save A_FF splitting */
-               A_ff_array[lev] = A_FF;
-
-               /* Setup F-solver */
-               fgrid_solver_setup(aff_solver[lev],
-                                  A_ff_array[lev],
-                                  F_fine_array[lev + 1],
-                                  U_fine_array[lev + 1]);
-               (mgr_data -> fsolver_mode) = 1;
+               hypre_sprintf(msg, "Warning!! User-prescribed F-solver for the first level\n\
+                             reduction (set in HYPRE_MGRSetFSolver()) only supports AMG\n\
+                             Ignoring this call and using user prescribed Frelax_type %d",
+                             Frelax_type[lev]);
+               hypre_error_w_msg(0, msg);
             }
          }
-         else // construct default AMG solver
+         else if (Frelax_type[lev] == 2) /* Construct default AMG solver */
          {
             /* Save A_FF splitting */
             A_ff_array[lev] = A_FF;
@@ -1504,6 +1544,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
             (mgr_data -> fsolver_mode) = 2;
          }
+
 #if MGR_DEBUG_LEVEL == 2
          wall_time = time_getWallclockSeconds() - wall_time;
          hypre_ParPrintf(comm, "Lev = %d, proc = %d - SetupAFF: %f\n", lev, my_id, wall_time);
@@ -1659,11 +1700,10 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       if (Frelax_type[lev] == 9 ||
-          Frelax_type[lev] == 9 ||
+          Frelax_type[lev] == 99 ||
           Frelax_type[lev] == 199 )
       {
-         // use_GSElimSmoother = 1;
-         // use_ComplexSmoother = 1;
+         use_GSElimSmoother = 1;
       }
 
 #if MGR_DEBUG_LEVEL == 2
@@ -1772,59 +1812,65 @@ hypre_MGRSetup( void               *mgr_vdata,
                                       HYPRE_MEMORY_HOST);
       (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;
 
-      if (use_VcycleSmoother)
+      /* Setup temporary storage - TODO (VPM): Use hypre_ParVectorInitialize_v2 */
+      VcycleRelaxVtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                               hypre_ParCSRMatrixGlobalNumRows(A),
+                                               hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(VcycleRelaxVtemp);
+      (mgr_data ->VcycleRelaxVtemp) = VcycleRelaxVtemp;
+
+      VcycleRelaxZtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                               hypre_ParCSRMatrixGlobalNumRows(A),
+                                               hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(VcycleRelaxZtemp);
+      (mgr_data -> VcycleRelaxZtemp) = VcycleRelaxZtemp;
+
+      /* loop over levels */
+      for (i = 0; i < (mgr_data->num_coarse_levels); i++)
       {
-         /* setup temporary storage */
-         VcycleRelaxVtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                                  hypre_ParCSRMatrixGlobalNumRows(A),
-                                                  hypre_ParCSRMatrixRowStarts(A));
-         hypre_ParVectorInitialize(VcycleRelaxVtemp);
-         (mgr_data ->VcycleRelaxVtemp) = VcycleRelaxVtemp;
-
-         VcycleRelaxZtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-                                                  hypre_ParCSRMatrixGlobalNumRows(A),
-                                                  hypre_ParCSRMatrixRowStarts(A));
-         hypre_ParVectorInitialize(VcycleRelaxZtemp);
-         (mgr_data -> VcycleRelaxZtemp) = VcycleRelaxZtemp;
-
-         /* loop over levels */
-         for (i = 0; i < (mgr_data->num_coarse_levels); i++)
+         if (Frelax_type[i] == 1)
          {
-            if (Frelax_type[i] == 1)
+            FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
+            if (Frelax_num_functions != NULL)
             {
-               FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
-               if (Frelax_num_functions != NULL)
-               {
-                  hypre_ParAMGDataNumFunctions(FrelaxVcycleData[i]) = Frelax_num_functions[i];
-               }
-               (FrelaxVcycleData[i] -> Vtemp) = VcycleRelaxVtemp;
-               (FrelaxVcycleData[i] -> Ztemp) = VcycleRelaxZtemp;
-
-               /* setup variables for the V-cycle in the F-relaxation step */
-               hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
+               hypre_ParAMGDataNumFunctions(FrelaxVcycleData[i]) = Frelax_num_functions[i];
             }
+            (FrelaxVcycleData[i] -> Vtemp) = VcycleRelaxVtemp;
+            (FrelaxVcycleData[i] -> Ztemp) = VcycleRelaxZtemp;
+
+            /* Setup variables for the V-cycle in the F-relaxation step */
+            hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
          }
       }
+   }
+   else if (use_GSElimSmoother)
+   {
+      /* Allocate memory and set pointer to (mgr_data -> GSElimData) */
+      GSElimData = hypre_CTAlloc(hypre_ParAMGData*, max_num_coarse_levels,
+                                 HYPRE_MEMORY_HOST);
+      (mgr_data -> GSElimData) = GSElimData;
 
-#if 0
-      else if (use_GSElimSmoother)
+      /* loop over levels */
+      for (i = 0; i < (mgr_data->num_coarse_levels); i++)
       {
-         /* loop over levels */
-         for (i = 0; i < (mgr_data->num_coarse_levels); i++)
+         if (Frelax_type[i] == 9 || Frelax_type[i] == 99 || Frelax_type[i] == 199)
          {
-            if (Frelax_type[i] == 9 || Frelax_type[i] == 99 || Frelax_type[i] == 199)
-            {
-               FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
-               (FrelaxVcycleData[i] -> A_Array) = A_Array;
-               (FrelaxVcycleData[i] -> F_Array) = F_Array;
-               (FrelaxVcycleData[i] -> U_Array) = U_Array;
+            GSElimData[i] = (hypre_ParAMGData*) hypre_MGRCreateGSElimData();
 
-               // setup variables for the V-cycle in the F-relaxation step //
-               //               hypre_MGRSetupFrelaxVcycleData(mgr_data, A_array[i], F_array[i], U_array[i], i);
-            }
+            // Set pointers to GSElimData. Here, all solvers point to the same array for
+            // A_ff_array, F_fine_array, and U_fine_array and will act on the appropriate
+            // components during setup and solve. We adjust {F/U}_fine_array to start at index 1
+            // by definition of {F/U}_fine_array.
+            (GSElimData[i] -> A_array) = A_ff_array;
+            (GSElimData[i] -> F_array) = &F_fine_array[1];
+            (GSElimData[i] -> U_array) = &U_fine_array[1];
+
+            // setup Gaussian Elim. in the F-relaxation step. Here, we apply GSElim at level 0
+            // since we have a single matrix (and not an array of matrices).
+            // hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
+            hypre_GaussElimSetup(GSElimData[i], i, Frelax_type[i]);
          }
       }
-#endif
    }
 
    if (logging > 1)

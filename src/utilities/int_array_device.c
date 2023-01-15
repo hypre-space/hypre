@@ -40,11 +40,11 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_IntArrayReverseMapping
+ * hypreGPUKernel_IntArrayInverseMapping
  *--------------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_IntArrayReverseMapping( hypre_DeviceItem  &item,
+hypreGPUKernel_IntArrayInverseMapping( hypre_DeviceItem  &item,
                                        HYPRE_Int          size,
                                        HYPRE_Int         *v_data,
                                        HYPRE_Int         *w_data )
@@ -58,11 +58,11 @@ hypreGPUKernel_IntArrayReverseMapping( hypre_DeviceItem  &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IntArrayReverseMappingDevice
+ * hypre_IntArrayInverseMappingDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IntArrayReverseMappingDevice( hypre_IntArray  *v,
+hypre_IntArrayInverseMappingDevice( hypre_IntArray  *v,
                                     hypre_IntArray  *w )
 {
    HYPRE_Int   size    = hypre_IntArraySize(v);
@@ -73,7 +73,7 @@ hypre_IntArrayReverseMappingDevice( hypre_IntArray  *v,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_IntArrayReverseMapping, gDim, bDim, size, v_data, w_data );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IntArrayInverseMapping, gDim, bDim, size, v_data, w_data );
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;

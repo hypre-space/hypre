@@ -198,7 +198,7 @@ hypre_IntArrayPrint( MPI_Comm        comm,
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file\n");
       return hypre_error_flag;
    }
 
@@ -206,7 +206,7 @@ hypre_IntArrayPrint( MPI_Comm        comm,
    hypre_fprintf(file, "%d\n", size);
    for (i = 0; i < size; i++)
    {
-      hypre_fprintf(file, "%d %d\n", i, data[i]);
+      hypre_fprintf(file, "%d\n", data[i]);
    }
    fclose(file);
 
@@ -215,6 +215,54 @@ hypre_IntArrayPrint( MPI_Comm        comm,
    {
       hypre_IntArrayDestroy(h_array);
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayRead
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayRead( MPI_Comm         comm,
+                    const char      *filename,
+                    hypre_IntArray **array_ptr )
+{
+   hypre_IntArray       *array;
+   HYPRE_Int             size;
+   FILE                 *file;
+   HYPRE_Int             i, myid;
+   char                  new_filename[1024];
+
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Open file */
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((file = fopen(new_filename, "r")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open input file\n");
+      return hypre_error_flag;
+   }
+
+   /* Read array size from file */
+   hypre_fscanf(file, "%d\n", &size);
+
+   /* Create IntArray on the host */
+   array = hypre_IntArrayCreate(size);
+   hypre_IntArrayInitialize_v2(array, HYPRE_MEMORY_HOST);
+
+   /* Read array values from file */
+   for (i = 0; i < size; i++)
+   {
+      hypre_fscanf(file, "%d\n", &hypre_IntArrayData(array)[i]);
+   }
+   fclose(file);
+
+   /* Migrate to final memory location */
+   hypre_IntArrayMigrate(array, hypre_HandleMemoryLocation(hypre_handle()));
+
+   /* Set output pointer */
+   *array_ptr = array;
 
    return hypre_error_flag;
 }
@@ -330,11 +378,11 @@ hypre_IntArrayCount( hypre_IntArray *v,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IntArrayReverseMappingHost
+ * hypre_IntArrayInverseMappingHost
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IntArrayReverseMappingHost( hypre_IntArray  *v,
+hypre_IntArrayInverseMappingHost( hypre_IntArray  *v,
                                   hypre_IntArray  *w )
 {
    HYPRE_Int   size    = hypre_IntArraySize(v);
@@ -355,13 +403,13 @@ hypre_IntArrayReverseMappingHost( hypre_IntArray  *v,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IntArrayReverseMapping
+ * hypre_IntArrayInverseMapping
  *
- * Compute the reverse mapping (w) given by the input array (v)
+ * Compute the reverse mapping (w) given an input array (v)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IntArrayReverseMapping( hypre_IntArray  *v,
+hypre_IntArrayInverseMapping( hypre_IntArray  *v,
                               hypre_IntArray **w_ptr )
 {
    HYPRE_Int             size = hypre_IntArraySize(v);
@@ -385,12 +433,12 @@ hypre_IntArrayReverseMapping( hypre_IntArray  *v,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_IntArrayReverseMappingDevice(v, w);
+      hypre_IntArrayInverseMappingDevice(v, w);
    }
    else
 #endif
    {
-      hypre_IntArrayReverseMappingHost(v, w);
+      hypre_IntArrayInverseMappingHost(v, w);
    }
 
    /* Set output pointer */
