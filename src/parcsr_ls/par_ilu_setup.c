@@ -1301,58 +1301,10 @@ hypre_ILUSetup( void               *ilu_vdata,
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
-/* Extract submatrix from diagonal part of A into a new CSRMatrix without sort rows
- * WARNING: We don't put diagonal to the first entry of each row since this function is now for cuSparse only
- * A = input matrix
- * perm = permutation array indicating ordering of rows. Perm could come from a
- *    CF_marker array or a reordering routine.
- * rqperm = reverse permutation array indicating ordering of columns
- * A_diagp = pointer to the output diagonal matrix.
- */
-HYPRE_Int
-hypre_ParILUCusparseExtractDiagonalCSR( hypre_ParCSRMatrix *A,
-                                        HYPRE_Int          *perm,
-                                        HYPRE_Int          *rqperm,
-                                        hypre_CSRMatrix   **A_diagp )
-{
-   /* Get necessary slots */
-   hypre_CSRMatrix     *A_diag         = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int           *A_diag_i       = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int           *A_diag_j       = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Real          *A_diag_data    = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int            n              = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int            nnz_A_diag     = A_diag_i[n];
-
-   HYPRE_Int            i, j, current_idx;
-
-   /* No schur complement makes everything easy :) */
-   hypre_CSRMatrix  *B              = NULL;
-   B                                = hypre_CSRMatrixCreate(n, n, nnz_A_diag);
-   hypre_CSRMatrixInitialize(B);
-   HYPRE_Int        *B_i            = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j            = hypre_CSRMatrixJ(B);
-   HYPRE_Real       *B_data         = hypre_CSRMatrixData(B);
-
-   /* Copy everything in with permutation */
-   current_idx = 0;
-   for ( i = 0; i < n; i++ )
-   {
-      B_i[i] = current_idx;
-      for (j = A_diag_i[perm[i]] ; j < A_diag_i[perm[i] + 1] ; j ++)
-      {
-         B_j[current_idx] = rqperm[A_diag_j[j]];
-         B_data[current_idx++] = A_diag_data[j];
-      }
-   }
-   B_i[n] = current_idx;
-
-   hypre_assert(current_idx == nnz_A_diag);
-   *A_diagp = B;
-
-   return hypre_error_flag;
-}
-
-/* Extract submatrix from diagonal part of A into a
+/*--------------------------------------------------------------------------
+ * hypre_ParILUCusparseILUExtractEBFC
+ *
+ * Extract submatrix from diagonal part of A into a
  * | B F |
  * | E C |
  * Struct in order to do ILU with cusparse.
@@ -1366,7 +1318,8 @@ hypre_ParILUCusparseExtractDiagonalCSR( hypre_ParCSRMatrix *A,
  * Cp = pointer to the output C matrix.
  * Ep = pointer to the output E matrix.
  * Fp = pointer to the output F matrix.
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
                                    HYPRE_Int          nLU,
