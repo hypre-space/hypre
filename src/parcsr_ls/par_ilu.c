@@ -1678,6 +1678,7 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix      *A_diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix      *A_offd   = hypre_ParCSRMatrixOffd(A);
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    HYPRE_Int           *A_offd_i;
    HYPRE_Int            i, j, first, last, start, end;
@@ -1750,7 +1751,7 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
    /* Apply RCM */
    if (reordering_type != 0)
    {
-      hypre_ILULocalRCM(A_diag, 0, first, &tperm_host, &tperm_host, 1);
+      hypre_ILULocalRCM(A_diag, 0, first, &h_tperm, &h_tperm, 1);
    }
 
    /* Move permutation vector to final memory location */
@@ -2496,11 +2497,11 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
    G_i[num_nodes] = G_nnz;
 
    /* Free memory */
-   if (A_i != hypre_CSRMatrixI(A_diag))
+   if (A_i != hypre_CSRMatrixI(A))
    {
       hypre_TFree(A_i, HYPRE_MEMORY_HOST);
    }
-   if (A_j != hypre_CSRMatrixJ(A_diag))
+   if (A_j != hypre_CSRMatrixJ(A))
    {
       hypre_TFree(A_j, HYPRE_MEMORY_HOST);
    }
