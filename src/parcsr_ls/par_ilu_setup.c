@@ -495,6 +495,12 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
          else
          {
+#if !defined(HYPRE_USING_UNIFIED_MEMORY)
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "GMRES+ILUK on the device requires unified memory!");
+            return hypre_error_flag;
+#endif
+
             /* BJ + cusparse_ilu0() */
             hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
                                      n, nLU, matL_des, matU_des,
@@ -512,6 +518,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 11:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "GMRES+ILUT on the device requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* BJ + cusparse_ilu0() */
          hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
                                   n, nLU, matL_des, matU_des,
