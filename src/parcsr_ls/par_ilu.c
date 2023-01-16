@@ -154,7 +154,19 @@ hypre_ILUCreate( void )
 HYPRE_Int
 hypre_ILUDestroy( void *data )
 {
-   hypre_ParILUData * ilu_data = (hypre_ParILUData*) data;
+   hypre_ParILUData      *ilu_data = (hypre_ParILUData*) data;
+   HYPRE_MemoryLocation   memory_location;
+
+   /* Get memory location from L factor */
+   if (hypre_ParILUDataMatL(ilu_data))
+   {
+      memory_location = hypre_ParCSRMatrixMemoryLocation(hypre_ParILUDataMatL(ilu_data));
+   }
+   else
+   {
+      /* Use default memory location */
+      HYPRE_GetMemoryLocation(&memory_location);
+   }
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    if (hypre_ParILUDataILUSolveBuffer(ilu_data))
@@ -336,6 +348,11 @@ hypre_ILUDestroy( void *data )
    }
 
    /* Factors */
+   if (hypre_ParILUDataMatD(ilu_data))
+   {
+      hypre_TFree(hypre_ParILUDataMatD(ilu_data), memory_location);
+      hypre_ParILUDataMatD(ilu_data) = NULL;
+   }
    if (hypre_ParILUDataMatL(ilu_data))
    {
       hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatL(ilu_data));
@@ -345,11 +362,6 @@ hypre_ILUDestroy( void *data )
    {
       hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatU(ilu_data));
       hypre_ParILUDataMatU(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatD(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataMatD(ilu_data), HYPRE_MEMORY_DEVICE);
-      hypre_ParILUDataMatD(ilu_data) = NULL;
    }
    if (hypre_ParILUDataMatLModified(ilu_data))
    {
@@ -363,7 +375,7 @@ hypre_ILUDestroy( void *data )
    }
    if (hypre_ParILUDataMatDModified(ilu_data))
    {
-      hypre_TFree(hypre_ParILUDataMatDModified(ilu_data), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParILUDataMatDModified(ilu_data), memory_location);
       hypre_ParILUDataMatDModified(ilu_data) = NULL;
    }
    if (hypre_ParILUDataMatS(ilu_data))
@@ -414,12 +426,12 @@ hypre_ILUDestroy( void *data )
    /* permutation array */
    if (hypre_ParILUDataPerm(ilu_data))
    {
-      hypre_TFree(hypre_ParILUDataPerm(ilu_data), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParILUDataPerm(ilu_data), memory_location);
       hypre_ParILUDataPerm(ilu_data) = NULL;
    }
    if (hypre_ParILUDataQPerm(ilu_data))
    {
-      hypre_TFree(hypre_ParILUDataQPerm(ilu_data), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_ParILUDataQPerm(ilu_data), memory_location);
       hypre_ParILUDataQPerm(ilu_data) = NULL;
    }
    /* droptol array */
