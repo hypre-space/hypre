@@ -439,6 +439,12 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
          else
          {
+#if !defined(HYPRE_USING_UNIFIED_MEMORY)
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ILUK on the device requires unified memory!");
+            return hypre_error_flag;
+#endif
+
             /* BJ + hypre_iluk(), setup the device solve */
             hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
                                      n, n, matL_des, matU_des,
@@ -456,6 +462,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 1:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ILUT on the device requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* BJ + hypre_ilut(), setup the device solve */
          hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
                                   n, n, matL_des, matU_des,
