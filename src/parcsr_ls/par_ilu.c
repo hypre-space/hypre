@@ -1472,16 +1472,16 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
       i = perm[ii];
       k1 = A_diag_i[i];
       k2 = A_diag_i[i + 1];
+
       /* find max|a| of that row and its index */
-      hypre_ILUMaxRabs(A_diag_data, A_diag_j, k1, k2, nLU, rperm, weight + ii, jcol + ii, &norm,
-                       jnnz + ii);
+      hypre_ILUMaxRabs(A_diag_data, A_diag_j, k1, k2, nLU, rperm,
+                       weight + ii, jcol + ii, &norm, jnnz + ii);
       weight[ii] /= norm;
       if (weight[ii] > max_value)
       {
          max_value = weight[ii];
       }
    }
-
    gtol = tol * max_value;
 
    /* second loop to pre select B */
@@ -1509,48 +1509,57 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
    return hypre_error_flag;
 }
 
-/* Get ddPQ version perm array for ParCSR
- * Greedy matching selection
- * ddPQ is a two-side permutation for diagonal dominance
- * A: the input matrix
- * pperm: row permutation
- * qperm: col permutation
- * nB: the size of B block
- * nI: number of interial nodes
- * tol: the dropping tolorance for ddPQ
- * reordering_type: Type of reordering for the interior nodes.
+/*--------------------------------------------------------------------------
+ * hypre_ILUGetInteriorExteriorPerm
+ *
+ * Get ddPQ version perm array for ParCSR matrices. ddPQ is a two-side
+ * permutation for diagonal dominance. Greedy matching selection
+ *
+ * Parameters:
+ *   A: the input matrix
+ *   pperm: row permutation (lives at memory_location_A)
+ *   qperm: col permutation (lives at memory_location_A)
+ *   nB: the size of B block
+ *   nI: number of interial nodes
+ *   tol: the dropping tolorance for ddPQ
+ *   reordering_type: Type of reordering for the interior nodes.
+ *
  * Currently only supports RCM reordering. Set to 0 for no reordering.
- */
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io_qperm,
-                     HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI, HYPRE_Int reordering_type)
+hypre_ILUGetPermddPQ(hypre_ParCSRMatrix   *A,
+                     HYPRE_Int           **io_pperm,
+                     HYPRE_Int           **io_qperm,
+                     HYPRE_Real            tol,
+                     HYPRE_Int            *nB,
+                     HYPRE_Int            *nI,
+                     HYPRE_Int             reordering_type)
 {
-   HYPRE_Int         i, nB_pre, irow, jcol, nLU;
-   HYPRE_Int         *pperm, *qperm;
-   HYPRE_Int         *rpperm, *rqperm, *pperm_pre, *qperm_pre;
-
    /* data objects for A */
-   hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int         *A_diag_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int         *A_diag_j = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Real        *A_diag_data = hypre_CSRMatrixData(A_diag);
+   hypre_CSRMatrix       *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int              n               = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_MemoryLocation   memory_location = hypre_CSRMatrixMemoryLocation(A_diag);
 
-   /* problem size */
-   HYPRE_Int         n = hypre_CSRMatrixNumRows(A_diag);
+   hypre_CSRMatrix       *h_A_diag;
+   HYPRE_Int             *A_diag_i;
+   HYPRE_Int             *A_diag_j;
+   HYPRE_Complex         *A_diag_data;
 
-   /* 1: Setup and create memory
-    */
+   /* Local variables */
+   HYPRE_Int              i, nB_pre, irow, jcol, nLU;
+   HYPRE_Int             *pperm, *qperm;
+   HYPRE_Int             *d_pperm, *d_qperm;
+   HYPRE_Int             *rpperm, *rqperm, *pperm_pre, *qperm_pre;
 
-   pperm             = NULL;
-   qperm             = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   rpperm            = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   rqperm            = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   /* 1: Setup and create memory */
+   pperm  = NULL;
+   qperm  = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   rpperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   rqperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
-   /* 2: Find interior nodes first
-    */
-   hypre_ILUGetInteriorExteriorPerm( A, &pperm, &nLU, 0);
-   *nI = nLU;
+   /* 2: Find interior nodes first */
+   hypre_ILUGetInteriorExteriorPerm(A, HYPRE_MEMORY_HOST, &pperm, &nLU, 0);
 
    /* 3: Pre selection on interial nodes
     * this pre selection puts external nodes to the last
@@ -1569,9 +1578,16 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    pperm_pre = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
    qperm_pre = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
 
+   /* Set/Move A_diag to host memory */
+   h_A_diag = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+               hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST) : A_diag;
+   A_diag_i = hypre_CSRMatrixI(h_A_diag);
+   A_diag_j = hypre_CSRMatrixJ(h_A_diag);
+   A_diag_data = hypre_CSRMatrixData(h_A_diag);
+
    /* pre selection */
-   hypre_ILUGetPermddPQPre(n, nLU, A_diag_i, A_diag_j, A_diag_data, tol, pperm, rpperm, pperm_pre,
-                           qperm_pre, &nB_pre);
+   hypre_ILUGetPermddPQPre(n, nLU, A_diag_i, A_diag_j, A_diag_data, tol,
+                           pperm, rpperm, pperm_pre, qperm_pre, &nB_pre);
 
    /* 4: Build B block
     * Greedy selection
@@ -1583,8 +1599,8 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
       rpperm[pperm[i]] = -1;
    }
 
-   hypre_TMemcpy( rqperm, rpperm, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   hypre_TMemcpy( qperm, pperm, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(rqperm, rpperm, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(qperm, pperm, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
    /* we sort from small to large, so we need to go from back to start
     * we only need nB_pre to start the loop, after that we could use it for size of B
@@ -1625,32 +1641,46 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
       }
    }
 
-   /* Finishing up and free
-    */
-
-   switch (reordering_type)
+   /* Apply RCM reordering */
+   if (reordering_type != 0)
    {
-      case 0:
-         /* no RCM in this case */
-         break;
-      case 1:
-         /* RCM */
-         hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
-         break;
-      default:
-         /* RCM */
-         hypre_ILULocalRCM( hypre_ParCSRMatrixDiag(A), 0, nLU, &pperm, &qperm, 0);
-         break;
+      hypre_ILULocalRCM(h_A_diag, 0, nLU, &pperm, &qperm, 0);
    }
 
+   /* Move to device memory if needed */
+   if (memory_location == HYPRE_MEMORY_DEVICE)
+   {
+      d_pperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+      d_qperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+
+      hypre_TMemcpy(d_pperm, pperm, HYPRE_Int, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(d_qperm, qperm, HYPRE_Int, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(pperm, HYPRE_MEMORY_HOST);
+      hypre_TFree(qperm, HYPRE_MEMORY_HOST);
+
+      pperm = d_pperm;
+      qperm = d_qperm;
+   }
+
+   /* Output pointers */
+   *nI = nLU;
    *nB = nLU;
    *io_pperm = pperm;
    *io_qperm = qperm;
 
-   hypre_TFree( rpperm, HYPRE_MEMORY_HOST);
-   hypre_TFree( rqperm, HYPRE_MEMORY_HOST);
-   hypre_TFree( pperm_pre, HYPRE_MEMORY_HOST);
-   hypre_TFree( qperm_pre, HYPRE_MEMORY_HOST);
+   /* Free memory */
+   if (h_A_diag != A_diag)
+   {
+      hypre_CSRMatrixDestroy(h_A_diag);
+   }
+   hypre_TFree(rpperm, HYPRE_MEMORY_HOST);
+   hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+   hypre_TFree(pperm_pre, HYPRE_MEMORY_HOST);
+   hypre_TFree(qperm_pre, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
@@ -1672,25 +1702,26 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
 
 HYPRE_Int
 hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
+                                 HYPRE_MemoryLocation  memory_location,
                                  HYPRE_Int           **perm,
                                  HYPRE_Int            *nLU,
                                  HYPRE_Int             reordering_type)
 {
    /* get basic information of A */
-   HYPRE_Int             n        = hypre_ParCSRMatrixNumRows(A);
-   hypre_CSRMatrix      *A_diag   = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix      *A_offd   = hypre_ParCSRMatrixOffd(A);
-   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_Int              n        = hypre_ParCSRMatrixNumRows(A);
+   hypre_CSRMatrix       *A_diag   = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix       *A_offd   = hypre_ParCSRMatrixOffd(A);
+   hypre_ParCSRCommPkg   *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   HYPRE_MemoryLocation   A_memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
-   HYPRE_Int           *A_offd_i;
-   HYPRE_Int            i, j, first, last, start, end;
-   HYPRE_Int            num_sends, send_map_start, send_map_end, col;
+   HYPRE_Int             *A_offd_i;
+   HYPRE_Int              i, j, first, last, start, end;
+   HYPRE_Int              num_sends, send_map_start, send_map_end, col;
 
    /* Local arrays */
-   HYPRE_Int            *tperm;
-   HYPRE_Int            *h_tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
-   HYPRE_Int            *marker  = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int             *tperm   = hypre_TAlloc(HYPRE_Int, n, memory_location);
+   HYPRE_Int             *h_tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int             *marker  = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
    /* Get comm_pkg, create one if not present */
    if (!comm_pkg)
@@ -1700,7 +1731,7 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
    }
 
    /* Set A_offd_i on the host */
-   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+   if (hypre_GetActualMemLocation(A_memory_location) == hypre_MEMORY_DEVICE)
    {
       /* Move A_offd_i to host */
       A_offd_i = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_HOST);
@@ -1753,14 +1784,15 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
 
    if (reordering_type != 0)
    {
-      /* Apply RCM */
-      tperm = h_tperm;
-      hypre_ILULocalRCM(A_diag, 0, first, &tperm, &tperm, 1);
+      /* Apply RCM. Note: h_tperm lives at A_memory_location at output */
+      hypre_ILULocalRCM(A_diag, 0, first, &h_tperm, &h_tperm, 1);
+
+      /* Move permutation vector to final memory location */
+      hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, A_memory_location);
    }
    else
    {
       /* Move permutation vector to final memory location */
-      tperm = hypre_TAlloc(HYPRE_Int, n, memory_location);
       hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, HYPRE_MEMORY_HOST);
    }
 
@@ -1800,7 +1832,7 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
 
 HYPRE_Int
 hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
-                      HYPRE_Int          **perm,
+                      HYPRE_Int          **perm_ptr,
                       HYPRE_Int           *nLU,
                       HYPRE_Int            reordering_type)
 {

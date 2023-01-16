@@ -16,7 +16,8 @@ hypre_ILUSetup( void               *ilu_vdata,
                 hypre_ParVector    *f,
                 hypre_ParVector    *u )
 {
-   MPI_Comm             comm                 = hypre_ParCSRMatrixComm(A);
+   MPI_Comm              comm                = hypre_ParCSRMatrixComm(A);
+   HYPRE_MemoryLocation  memory_location     = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParILUData     *ilu_data            = (hypre_ParILUData*) ilu_vdata;
    hypre_ParILUData     *schur_precond_ilu;
    hypre_ParNSHData     *schur_solver_nsh;
@@ -405,7 +406,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       {
          case 10: case 11: case 20: case 21: case 30: case 31: case 50:
             /* symmetric */
-            hypre_ILUGetInteriorExteriorPerm(matA, &perm, &nLU, reordering_type);
+            hypre_ILUGetInteriorExteriorPerm(matA, memory_location, &perm, &nLU, reordering_type);
             break;
 
          case 40: case 41:
