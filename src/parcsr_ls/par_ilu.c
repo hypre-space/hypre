@@ -1776,59 +1776,44 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
    return hypre_error_flag;
 }
 
-/*
- * Get the (local) ordering of the diag (local) matrix (no permutation). This is the permutation used for the block-jacobi case
- * A: parcsr matrix
- * perm: permutation array
- * nLU: number of interior nodes
- * reordering_type: Type of (additional) reordering for the nodes.
+/*--------------------------------------------------------------------------
+ * hypre_ILUGetLocalPerm
+ *
+ * Get the (local) ordering of the diag (local) matrix (no permutation).
+ * This is the permutation used for the block-jacobi case.
+ *
+ * Parameters:
+ *   A: parcsr matrix
+ *   perm: permutation array
+ *   nLU: number of interior nodes
+ *   reordering_type: Type of (additional) reordering for the nodes.
+ *
  * Currently only supports RCM reordering. Set to 0 for no reordering.
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
-                      HYPRE_Int reordering_type)
+hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
+                      HYPRE_Int          **perm,
+                      HYPRE_Int           *nLU,
+                      HYPRE_Int            reordering_type)
 {
    /* get basic information of A */
+   HYPRE_Int             num_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix      *A_diag = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
-   HYPRE_Int            i;
-   HYPRE_Int            *tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int            *tperm_host = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
-   /* set perm array */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (n > 0)
-   {
-      HYPRE_THRUST_CALL( sequence, tperm, tperm + n, 0 );
-   }
-   hypre_TMemcpy(tperm_host, tperm, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-#else
-   for ( i = 0 ; i < n ; i ++ )
-   {
-      tperm_host[i] = i;
-   }
-#endif
+   /* Local variables */
+   HYPRE_Int            *perm = NULL;
 
-   switch (reordering_type)
+   /* Compute local RCM ordering on the host */
+   if (reordering_type != 0)
    {
-      case 0:
-         /* no RCM in this case */
-         break;
-      case 1:
-         /* RCM */
-         hypre_ILULocalRCM(A_diag, 0, n, &tperm_host, &tperm_host, 1);
-         break;
-      default:
-         /* RCM */
-         hypre_ILULocalRCM(A_diag, 0, n, &tperm_host, &tperm_host, 1);
-         break;
+      hypre_ILULocalRCM(A_diag, 0, num_rows, &perm, &perm, 1);
    }
-   hypre_TMemcpy(tperm, tperm_host, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-   hypre_TFree(tperm_host, HYPRE_MEMORY_HOST);
 
-   *nLU = n;
-   if ((*perm) != NULL) { hypre_TFree(*perm, HYPRE_MEMORY_DEVICE); }
-   *perm = tperm;
+   /* Set output pointers */
+   *nLU = num_rows;
+   *perm_ptr = perm;
+
    return hypre_error_flag;
 }
 
@@ -2376,11 +2361,15 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
  * permp:      pointer to the row permutation array such that B = A(perm, perm)
  *             point to NULL if you want to work directly on A
  *             on return, permp will point to the new permutation where
- *             in [start, end) the matrix will reordered
+ *             in [start, end) the matrix will reordered. if *permp is not NULL,
+ *             we assume that it lives on the host memory at input. At output,
+ *             it lives in the same memory location as A.
  * qpermp:     pointer to the col permutation array such that B = A(perm, perm)
  *             point to NULL or equal to permp if you want symmetric order
  *             on return, qpermp will point to the new permutation where
- *             in [start, end) the matrix will reordered
+ *             in [start, end) the matrix will reordered. if *qpermp is not NULL,
+ *             we assume that it lives on the host memory at input. At output,
+ *             it lives in the same memory location as A.
  * sym:        set to nonzero to work on A only(symmetric), otherwise A + A'.
  *             WARNING: if you use non-symmetric reordering, that is,
  *             different row and col reordering, the resulting A might be non-symmetric.
@@ -2438,6 +2427,9 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
       hypre_printf("Error input, abort RCM\n");
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("ILULocalRCM");
 
    /* create permutation array if we don't have one yet */
    if (!perm)
@@ -2533,6 +2525,9 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
       *permp   = perm;
       *qpermp  = qperm;
 
+      hypre_GpuProfilingPopRange();
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
 
@@ -2584,7 +2579,7 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
       }
    }
 
-   /* Move to final device memory if needed */
+   /* Move to device memory if needed */
    if (memory_location == HYPRE_MEMORY_DEVICE)
    {
       d_perm  = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_DEVICE);
@@ -2603,14 +2598,17 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
    }
 
    /* Set output pointers */
-   *permp   = perm;
-   *qpermp  = qperm;
+   *permp  = perm;
+   *qpermp = qperm;
 
    /* Free memory */
    hypre_CSRMatrixDestroy(G);
    hypre_TFree(G_perm, HYPRE_MEMORY_HOST);
    hypre_TFree(perm_temp, HYPRE_MEMORY_HOST);
    hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

@@ -290,7 +290,6 @@ hypre_ILUSetup( void               *ilu_vdata,
       CF_marker_array = NULL;
    }
 
-
    /* clear old l1_norm data, if created */
    if (hypre_ParILUDataL1Norms(ilu_data))
    {
@@ -399,8 +398,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    F_array = f;
    U_array = u;
 
-   // create perm arary if necessary
-   if (perm == NULL)
+   /* Create perm array if necessary */
+   if (!perm)
    {
       switch (ilu_type)
       {
@@ -414,11 +413,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
 
-         case 0: case 1:
-            hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
-            break;
-
-         default:
+         case 0: case 1: default:
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
       }
