@@ -441,7 +441,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "ILUK on the device requires unified memory!");
+                              "ILUK on device runs requires unified memory!");
             return hypre_error_flag;
 #endif
 
@@ -464,7 +464,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "ILUT on the device requires unified memory!");
+                           "ILUT on device runs requires unified memory!");
          return hypre_error_flag;
 #endif
 
@@ -497,7 +497,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "GMRES+ILUK on the device requires unified memory!");
+                              "GMRES+ILUK on device runs requires unified memory!");
             return hypre_error_flag;
 #endif
 
@@ -520,7 +520,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
          hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "GMRES+ILUT on the device requires unified memory!");
+                           "GMRES+ILUT on device runs requires unified memory!");
          return hypre_error_flag;
 #endif
 
@@ -539,36 +539,72 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 20:
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "NSH+ILUK on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* Newton Schulz Hotelling + hypre_iluk() */
          hypre_ILUSetupILUK(matA, fill_level, perm, perm, nLU, nLU,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
       case 21:
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "NSH+ILUT on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* Newton Schulz Hotelling + hypre_ilut() */
          hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, nLU, nLU,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
       case 30:
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "RAS+ILUK on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* RAS + hypre_iluk() */
          hypre_ILUSetupILUKRAS(matA, fill_level, perm, nLU,
                                &matL, &matD, &matU);
          break;
 
       case 31:
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "RAS+ILUT on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* RAS + hypre_ilut() */
          hypre_ILUSetupILUTRAS(matA, max_row_elmts, droptol,
                                perm, nLU, &matL, &matD, &matU);
          break;
 
       case 40:
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ddPQ+GMRES+ILUK on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* ddPQ + GMRES + hypre_iluk() */
          hypre_ILUSetupILUK(matA, fill_level, perm, qperm, nLU, nI,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
       case 41:
+#if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ddPQ+GMRES+ILUT on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* ddPQ + GMRES + hypre_ilut() */
          hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, qperm, nLU, nI,
                             &matL, &matD, &matU, &matS, &u_end);
@@ -576,6 +612,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 50:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if !defined(HYPRE_USING_UNIFIED_MEMORY)
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "GMRES+ILU0-RAP on device runs requires unified memory!");
+         return hypre_error_flag;
+#endif
+
          /* RAP + hypre_modified_ilu0 */
          test_opt = hypre_ParILUDataTestOption(ilu_data);
          hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des,
