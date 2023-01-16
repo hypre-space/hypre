@@ -26,11 +26,9 @@ extern "C" {
 /**
  * @defgroup Eigensolvers Eigensolvers
  *
- * These eigensolvers support many of the matrix/vector storage schemes in
- * hypre.  They should be used in conjunction with the storage-specific
- * interfaces.
- *
- * @memo A basic interface for eigensolvers
+ * A basic interface for eigensolvers. These eigensolvers support many of the
+ * matrix/vector storage schemes in hypre.  They should be used in conjunction
+ * with the storage-specific interfaces.
  *
  * @{
  **/
