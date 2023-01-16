@@ -2144,10 +2144,13 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       A_offd_data = hypre_CSRMatrixData(A_offd);
 
       /* Move permutation arrays to host */
-      hypre_IntArrayMigrate(rperm, HYPRE_MEMORY_HOST);
-      hypre_IntArrayMigrate(perm, HYPRE_MEMORY_HOST);
-      rperm_data = hypre_IntArrayData(rperm);
-      perm_data  = hypre_IntArrayData(perm);
+      if (rperm && perm)
+      {
+         hypre_IntArrayMigrate(rperm, HYPRE_MEMORY_HOST);
+         hypre_IntArrayMigrate(perm, HYPRE_MEMORY_HOST);
+         rperm_data = hypre_IntArrayData(rperm);
+         perm_data  = hypre_IntArrayData(perm);
+      }
 
       /* simply use a loop to copy data from A_offd */
       S_offd_i[0] = 0;
@@ -2237,9 +2240,15 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
    *A_fake_diag_ip = A_fake_diag_i;
 
    /* Do not free perm_data/qperm_data */
-   hypre_IntArrayMigrate(perm, memory_location);
-   hypre_IntArrayData(perm)  = NULL;
-   hypre_IntArrayData(qperm) = NULL;
+   if (perm)
+   {
+      hypre_IntArrayMigrate(perm, memory_location);
+      hypre_IntArrayData(perm)  = NULL;
+   }
+   if (qperm)
+   {
+      hypre_IntArrayData(qperm) = NULL;
+   }
 
    /* Free memory */
    hypre_CSRMatrixDestroy(A_diag);
