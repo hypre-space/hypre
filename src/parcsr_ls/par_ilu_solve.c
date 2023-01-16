@@ -1282,7 +1282,7 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
    HYPRE_Real              *LU_data             = hypre_CSRMatrixData(matLU_d);
    HYPRE_Int               *LU_i                = hypre_CSRMatrixI(matLU_d);
    HYPRE_Int               *LU_j                = hypre_CSRMatrixJ(matLU_d);
-   HYPRE_Int               nnz                  = LU_i[n];
+   HYPRE_Int                nnz                 = hypre_CSRMatrixNumNonzeros(matLU_d);
 
    hypre_Vector            *utemp_local         = hypre_ParVectorLocalVector(utemp);
    HYPRE_Real              *utemp_data          = hypre_VectorData(utemp_local);
@@ -1290,8 +1290,8 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
    hypre_Vector            *ftemp_local         = hypre_ParVectorLocalVector(ftemp);
    HYPRE_Real              *ftemp_data          = hypre_VectorData(ftemp_local);
 
-   HYPRE_Real              alpha;
-   HYPRE_Real              beta;
+   HYPRE_Real               alpha;
+   HYPRE_Real               beta;
    //HYPRE_Int               i, j, k1, k2;
 
    /* begin */
@@ -2443,4 +2443,3 @@ hypre_NSHSolveInverse(hypre_ParCSRMatrix *A,
    hypre_ParVectorAxpy(beta, utemp, u);
    return hypre_error_flag;
 }
-

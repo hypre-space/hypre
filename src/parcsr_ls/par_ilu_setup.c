@@ -1346,10 +1346,10 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
       E = hypre_CSRMatrixCreate(0, 0, 0);
       F = hypre_CSRMatrixCreate(0, 0, 0);
 
-      hypre_CSRMatrixInitialize_v2(B, memory_location);
-      hypre_CSRMatrixInitialize_v2(C, memory_location);
-      hypre_CSRMatrixInitialize_v2(E, memory_location);
-      hypre_CSRMatrixInitialize_v2(F, memory_location);
+      hypre_CSRMatrixInitialize_v2(B, 0, memory_location);
+      hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
+      hypre_CSRMatrixInitialize_v2(E, 0, memory_location);
+      hypre_CSRMatrixInitialize_v2(F, 0, memory_location);
 
       hypre_CSRMatrixCopy(A_diag, B, 1);
    }
@@ -1361,10 +1361,10 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
       E = hypre_CSRMatrixCreate(0, 0, 0);
       F = hypre_CSRMatrixCreate(0, 0, 0);
 
-      hypre_CSRMatrixInitialize_v2(C, memory_location);
-      hypre_CSRMatrixInitialize_v2(B, memory_location);
-      hypre_CSRMatrixInitialize_v2(E, memory_location);
-      hypre_CSRMatrixInitialize_v2(F, memory_location);
+      hypre_CSRMatrixInitialize_v2(C, 0, memory_location);
+      hypre_CSRMatrixInitialize_v2(B, 0, memory_location);
+      hypre_CSRMatrixInitialize_v2(E, 0, memory_location);
+      hypre_CSRMatrixInitialize_v2(F, 0, memory_location);
 
       hypre_CSRMatrixCopy(A_diag, C, 1);
    }
@@ -1419,10 +1419,10 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
       F = hypre_CSRMatrixCreate(nLU, m, capacity_F);
 
       /* Initialize matrices on the host */
-      hypre_CSRMatrixInitialize_v2(B, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixInitialize_v2(C, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixInitialize_v2(E, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixInitialize_v2(F, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixInitialize_v2(B, 0, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixInitialize_v2(C, 0, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixInitialize_v2(E, 0, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixInitialize_v2(F, 0, HYPRE_MEMORY_HOST);
 
       /* Access pointers */
       B_i    = hypre_CSRMatrixI(B);
@@ -1692,7 +1692,7 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix       *A,
    HYPRE_Real              *A_data              = hypre_CSRMatrixData(A);
    HYPRE_Int               *A_i                 = hypre_CSRMatrixI(A);
    HYPRE_Int               *A_j                 = hypre_CSRMatrixJ(A);
-   HYPRE_Int               nnz_A                = A_i[n];
+   HYPRE_Int               nnz_A                = hypre_CSRMatrixNumNonzeros(A);
 
    /* pointers to cusparse data */
    csrsv2Info_t            matL_info            = *matL_infop;
@@ -2529,7 +2529,7 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
        */
       hypre_ParILURAPReorder( A, perm, rqperm, &Apq);
 
-      /* Apply ILU factorization to the entile A_diag */
+      /* Apply ILU factorization to the entire A_diag */
       hypre_ILUSetupILUT(Apq, lfil, tol, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
 
       if (uend)

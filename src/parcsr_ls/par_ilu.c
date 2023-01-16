@@ -2629,8 +2629,15 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
       hypre_TMemcpy(d_qperm, qperm, HYPRE_Int, num_nodes,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-      hypre_TFree(perm, HYPRE_MEMORY_HOST);
-      hypre_TFree(qperm, HYPRE_MEMORY_HOST);
+      if (perm == qperm)
+      {
+         hypre_TFree(perm, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         hypre_TFree(perm, HYPRE_MEMORY_HOST);
+         hypre_TFree(qperm, HYPRE_MEMORY_HOST);
+      }
 
       perm  = d_perm;
       qperm = d_qperm;
