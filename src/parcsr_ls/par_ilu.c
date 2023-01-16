@@ -1660,10 +1660,13 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
  * Get perm array from parcsr matrix based on diag and offdiag matrix
  * Just simply loop through the rows of offd of A, check for nonzero rows
  * Put interior nodes at the beginning
- * A: parcsr matrix
- * perm: permutation array
- * nLU: number of interial nodes
- * reordering_type: Type of (additional) reordering for the interior nodes.
+ *
+ * Parameters:
+ *   A: parcsr matrix
+ *   perm: permutation array
+ *   nLU: number of interial nodes
+ *   reordering_type: Type of (additional) reordering for the interior nodes.
+ *
  * Currently only supports RCM reordering. Set to 0 for no reordering.
  *--------------------------------------------------------------------------*/
 
@@ -1685,7 +1688,7 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
    HYPRE_Int            num_sends, send_map_start, send_map_end, col;
 
    /* Local arrays */
-   HYPRE_Int            *tperm   = hypre_TAlloc(HYPRE_Int, n, memory_location);
+   HYPRE_Int            *tperm;
    HYPRE_Int            *h_tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int            *marker  = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
@@ -1748,14 +1751,18 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
       }
    }
 
-   /* Apply RCM */
    if (reordering_type != 0)
    {
-      hypre_ILULocalRCM(A_diag, 0, first, &h_tperm, &h_tperm, 1);
+      /* Apply RCM */
+      tperm = h_tperm;
+      hypre_ILULocalRCM(A_diag, 0, first, &tperm, &tperm, 1);
    }
-
-   /* Move permutation vector to final memory location */
-   hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, HYPRE_MEMORY_HOST);
+   else
+   {
+      /* Move permutation vector to final memory location */
+      tperm = hypre_TAlloc(HYPRE_Int, n, memory_location);
+      hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, HYPRE_MEMORY_HOST);
+   }
 
    /* Free memory */
    hypre_TFree(h_tperm, HYPRE_MEMORY_HOST);
