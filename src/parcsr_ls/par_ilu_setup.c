@@ -77,15 +77,14 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matS                = hypre_ParILUDataMatS(ilu_data);
    //   hypre_ParCSRMatrix   *matM                = NULL;
    //   HYPRE_Int            nnzG;/* g stands for global */
-   HYPRE_Real           nnzS;/* total nnz in S */
-   HYPRE_Int            nnzS_offd;
-   HYPRE_Int            size_C/* total size of coarse grid */;
+   HYPRE_Real            nnzS;/* total nnz in S */
+   HYPRE_Int             nnzS_offd;
+   HYPRE_Int             size_C/* total size of coarse grid */;
 
-   HYPRE_Int            n                    = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int             n                   = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    //   HYPRE_Int            m;/* m = n-LU */
    /* reordering option */
-   HYPRE_Int            reordering_type = hypre_ParILUDataReorderingType(ilu_data);
-   HYPRE_Int            num_procs,  my_id;
+   HYPRE_Int             reordering_type     = hypre_ParILUDataReorderingType(ilu_data);
 
    hypre_ParVector      *Utemp               = NULL;
    hypre_ParVector      *Ftemp               = NULL;
@@ -102,19 +101,21 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Real           *rel_res_norms       = hypre_ParILUDataRelResNorms(ilu_data);
 
    /* might need for Schur Complement */
-   HYPRE_Int            *u_end               = NULL;
-   HYPRE_Solver         schur_solver         = NULL;
-   HYPRE_Solver         schur_precond        = NULL;
-   HYPRE_Solver         schur_precond_gotten = NULL;
+   HYPRE_Int            *u_end                = NULL;
+   HYPRE_Solver          schur_solver         = NULL;
+   HYPRE_Solver          schur_precond        = NULL;
+   HYPRE_Solver          schur_precond_gotten = NULL;
 
    /* Whether or not to use direct or iterative triangular solve */
-   HYPRE_Int            tri_solve      = hypre_ParILUDataTriSolve(ilu_data);
+   HYPRE_Int             tri_solve            = hypre_ParILUDataTriSolve(ilu_data);
 
    /* help to build external */
    hypre_ParCSRCommPkg  *comm_pkg;
-   HYPRE_Int            buffer_size;
-   HYPRE_Int            send_size;
-   HYPRE_Int            recv_size;
+   HYPRE_Int             buffer_size;
+   HYPRE_Int             send_size;
+   HYPRE_Int             recv_size;
+   HYPRE_Int             num_procs, my_id;
+   HYPRE_ExecutionPolicy exec;
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -123,6 +124,10 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+
+   /* Set execution policy */
+   exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                hypre_ParVectorMemoryLocation(f) );
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* create cuda and cusparse information when needed */
@@ -426,123 +431,145 @@ hypre_ILUSetup( void               *ilu_vdata,
    {
       case 0:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-         /* only apply the setup of ILU0 with cusparse */
-         if (fill_level == 0)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            /* BJ + cusparse_ilu0() */
-            hypre_ILUSetupILU0Device(matA, perm, perm,
-                                     n, n, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matBL_info, &matBU_info, &matSL_info,
-                                     &matSU_info, &matBLU_d, &matS, &matE_d,
-                                     &matF_d, &A_diag_fake, tri_solve);
-         }
-         else
-         {
+            /* only apply the setup of ILU0 with cusparse */
+            if (fill_level == 0)
+            {
+               /* BJ + cusparse_ilu0() */
+               hypre_ILUSetupILU0Device(matA, perm, perm,
+                                        n, n, matL_des, matU_des,
+                                        ilu_solve_policy, &ilu_solve_buffer,
+                                        &matBL_info, &matBU_info, &matSL_info,
+                                        &matSU_info, &matBLU_d, &matS, &matE_d,
+                                        &matF_d, &A_diag_fake, tri_solve);
+            }
+            else
+            {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "ILUK on device runs requires unified memory!");
-            return hypre_error_flag;
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                 "ILUK setup on device runs requires unified memory!");
+               return hypre_error_flag;
 #endif
 
-            /* BJ + hypre_iluk(), setup the device solve */
-            hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
-                                     n, n, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matBL_info, &matBU_info, &matSL_info,
-                                     &matSU_info, &matBLU_d, &matS, &matE_d,
-                                     &matF_d, &A_diag_fake, tri_solve);
+               /* BJ + hypre_iluk(), setup the device solve */
+               hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
+                                        n, n, matL_des, matU_des,
+                                        ilu_solve_policy, &ilu_solve_buffer,
+                                        &matBL_info, &matBU_info, &matSL_info,
+                                        &matSU_info, &matBLU_d, &matS, &matE_d,
+                                        &matF_d, &A_diag_fake, tri_solve);
+            }
          }
-#else
-         /* BJ + hypre_iluk() */
-         hypre_ILUSetupILUK(matA, fill_level, perm, perm, n, n,
-                            &matL, &matD, &matU, &matS, &u_end);
+         else
 #endif
+         {
+            /* BJ + hypre_iluk() */
+            hypre_ILUSetupILUK(matA, fill_level, perm, perm, n, n,
+                               &matL, &matD, &matU, &matS, &u_end);
+         }
          break;
 
       case 1:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "ILUT on device runs requires unified memory!");
-         return hypre_error_flag;
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ILUT setup on device runs requires unified memory!");
+            return hypre_error_flag;
 #endif
-
-         /* BJ + hypre_ilut(), setup the device solve */
-         hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
-                                  n, n, matL_des, matU_des,
-                                  ilu_solve_policy, &ilu_solve_buffer,
-                                  &matBL_info, &matBU_info, &matSL_info,
-                                  &matSU_info, &matBLU_d, &matS, &matE_d,
-                                  &matF_d, &A_diag_fake, tri_solve);
-#else
-         /* BJ + hypre_ilut() */
-         hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, n, n,
-                            &matL, &matD, &matU, &matS, &u_end);
+            /* BJ + hypre_ilut(), setup the device solve */
+            hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
+                                     n, n, matL_des, matU_des,
+                                     ilu_solve_policy, &ilu_solve_buffer,
+                                     &matBL_info, &matBU_info, &matSL_info,
+                                     &matSU_info, &matBLU_d, &matS, &matE_d,
+                                     &matF_d, &A_diag_fake, tri_solve);
+         }
+         else
 #endif
+         {
+            /* BJ + hypre_ilut() */
+            hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, n, n,
+                               &matL, &matD, &matU, &matS, &u_end);
+         }
          break;
 
       case 10:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-         if (fill_level == 0)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            /* BJ + cusparse_ilu0() - Only support ILU0 */
-            hypre_ILUSetupILU0Device(matA, perm, perm, n, nLU, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matBL_info, &matBU_info, &matSL_info,
-                                     &matSU_info, &matBLU_d, &matS, &matE_d,
-                                     &matF_d, &A_diag_fake, 1);
+            if (fill_level == 0)
+            {
+               /* BJ + cusparse_ilu0() - Only support ILU0 */
+               hypre_ILUSetupILU0Device(matA, perm, perm, n, nLU, matL_des, matU_des,
+                                        ilu_solve_policy, &ilu_solve_buffer,
+                                        &matBL_info, &matBU_info, &matSL_info,
+                                        &matSU_info, &matBLU_d, &matS, &matE_d,
+                                        &matF_d, &A_diag_fake, 1);
+            }
+            else
+            {
+#if !defined(HYPRE_USING_UNIFIED_MEMORY)
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                 "GMRES+ILUK setup on device runs requires unified memory!");
+               return hypre_error_flag;
+#endif
+
+               /* BJ + cusparse_ilu0() */
+               hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
+                                        n, nLU, matL_des, matU_des,
+                                        ilu_solve_policy, &ilu_solve_buffer,
+                                        &matBL_info, &matBU_info, &matSL_info,
+                                        &matSU_info, &matBLU_d, &matS, &matE_d,
+                                        &matF_d, &A_diag_fake, 1);
+            }
          }
          else
+#endif
+         {
+            /* GMRES + hypre_iluk() */
+            hypre_ILUSetupILUK(matA, fill_level, perm, perm, nLU, nLU,
+                               &matL, &matD, &matU, &matS, &u_end);
+         }
+         break;
+
+      case 11:
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "GMRES+ILUK on device runs requires unified memory!");
+                              "GMRES+ILUT setup on device runs requires unified memory!");
             return hypre_error_flag;
 #endif
 
             /* BJ + cusparse_ilu0() */
-            hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
+            hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
                                      n, nLU, matL_des, matU_des,
                                      ilu_solve_policy, &ilu_solve_buffer,
                                      &matBL_info, &matBU_info, &matSL_info,
                                      &matSU_info, &matBLU_d, &matS, &matE_d,
                                      &matF_d, &A_diag_fake, 1);
          }
-#else
-         /* GMRES + hypre_iluk() */
-         hypre_ILUSetupILUK(matA, fill_level, perm, perm, nLU, nLU,
-                            &matL, &matD, &matU, &matS, &u_end);
+         else
 #endif
-         break;
-
-      case 11:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-#if !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "GMRES+ILUT on device runs requires unified memory!");
-         return hypre_error_flag;
-#endif
-
-         /* BJ + cusparse_ilu0() */
-         hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
-                                  n, nLU, matL_des, matU_des,
-                                  ilu_solve_policy, &ilu_solve_buffer,
-                                  &matBL_info, &matBU_info, &matSL_info,
-                                  &matSU_info, &matBLU_d, &matS, &matE_d,
-                                  &matF_d, &A_diag_fake, 1);
-#else
-         /* GMRES + hypre_ilut() */
-         hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, nLU, nLU,
-                            &matL, &matD, &matU, &matS, &u_end);
-#endif
+         {
+            /* GMRES + hypre_ilut() */
+            hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, nLU, nLU,
+                               &matL, &matD, &matU, &matS, &u_end);
+         }
          break;
 
       case 20:
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "NSH+ILUK on device runs requires unified memory!");
-         return hypre_error_flag;
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "NSH+ILUK setup on device runs requires unified memory!");
+            return hypre_error_flag;
+         }
 #endif
 
          /* Newton Schulz Hotelling + hypre_iluk() */
@@ -552,9 +579,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 21:
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "NSH+ILUT on device runs requires unified memory!");
-         return hypre_error_flag;
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "NSH+ILUT setup on device runs requires unified memory!");
+            return hypre_error_flag;
+         }
 #endif
 
          /* Newton Schulz Hotelling + hypre_ilut() */
@@ -564,9 +594,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 30:
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "RAS+ILUK on device runs requires unified memory!");
-         return hypre_error_flag;
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "RAS+ILUK setup on device runs requires unified memory!");
+            return hypre_error_flag;
+         }
 #endif
 
          /* RAS + hypre_iluk() */
@@ -576,9 +609,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 31:
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "RAS+ILUT on device runs requires unified memory!");
-         return hypre_error_flag;
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "RAS+ILUT setup on device runs requires unified memory!");
+            return hypre_error_flag;
+         }
 #endif
 
          /* RAS + hypre_ilut() */
@@ -588,9 +624,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 40:
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "ddPQ+GMRES+ILUK on device runs requires unified memory!");
-         return hypre_error_flag;
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ddPQ+GMRES+ILUK setup on device runs requires unified memory!");
+            return hypre_error_flag;
+         }
 #endif
 
          /* ddPQ + GMRES + hypre_iluk() */
@@ -600,9 +639,12 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 41:
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "ddPQ+GMRES+ILUT on device runs requires unified memory!");
-         return hypre_error_flag;
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ddPQ+GMRES+ILUT setup on device runs requires unified memory!");
+            return hypre_error_flag;
+         }
 #endif
 
          /* ddPQ + GMRES + hypre_ilut() */
@@ -612,40 +654,50 @@ hypre_ILUSetup( void               *ilu_vdata,
 
       case 50:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                           "GMRES+ILU0-RAP on device runs requires unified memory!");
-         return hypre_error_flag;
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "GMRES+ILU0-RAP setup on device runs requires unified memory!");
+            return hypre_error_flag;
 #endif
 
-         /* RAP + hypre_modified_ilu0 */
-         test_opt = hypre_ParILUDataTestOption(ilu_data);
-         hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matAL_info, &matAU_info, &matBL_info,
-                                     &matBU_info, &matSL_info, &matSU_info,
-                                     &Aperm, &matS, &matALU_d, &matBLU_d,
-                                     &matSLU_d, &matE_d, &matF_d, test_opt);
-#else
-         /* RAP + hypre_modified_ilu0 */
-         hypre_ILUSetupRAPILU0(matA, perm, n, nLU, &matL, &matD, &matU,
-                               &matmL, &matmD, &matmU, &u_end);
+            /* RAP + hypre_modified_ilu0 */
+            test_opt = hypre_ParILUDataTestOption(ilu_data);
+            hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des,
+                                        ilu_solve_policy, &ilu_solve_buffer,
+                                        &matAL_info, &matAU_info, &matBL_info,
+                                        &matBU_info, &matSL_info, &matSU_info,
+                                        &Aperm, &matS, &matALU_d, &matBLU_d,
+                                        &matSLU_d, &matE_d, &matF_d, test_opt);
+         }
+         else
 #endif
+         {
+            /* RAP + hypre_modified_ilu0 */
+            hypre_ILUSetupRAPILU0(matA, perm, n, nLU, &matL, &matD, &matU,
+                                  &matmL, &matmD, &matmU, &u_end);
+         }
          break;
 
       default:
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-         /* BJ + cusparse_ilu0() */
-         hypre_ILUSetupILU0Device(matA, perm, perm, n, n, matL_des, matU_des,
-                                  ilu_solve_policy, &ilu_solve_buffer,
-                                  &matBL_info, &matBU_info, &matSL_info,
-                                  &matSU_info, &matBLU_d, &matS, &matE_d,
-                                  &matF_d, &A_diag_fake, tri_solve);
-#else
-         /* BJ + hypre_ilu0() */
-         hypre_ILUSetupILU0(matA, perm, perm, n, n, &matL,
-                            &matD, &matU, &matS, &u_end);
+         if (exec == HYPRE_EXEC_DEVICE)
+         {
+            /* BJ + cusparse_ilu0() */
+            hypre_ILUSetupILU0Device(matA, perm, perm, n, n, matL_des, matU_des,
+                                     ilu_solve_policy, &ilu_solve_buffer,
+                                     &matBL_info, &matBU_info, &matSL_info,
+                                     &matSU_info, &matBLU_d, &matS, &matE_d,
+                                     &matF_d, &A_diag_fake, tri_solve);
+         }
+         else
 #endif
+         {
+            /* BJ + hypre_ilu0() */
+            hypre_ILUSetupILU0(matA, perm, perm, n, n, &matL,
+                               &matD, &matU, &matS, &u_end);
+         }
          break;
    }
 
