@@ -62,8 +62,6 @@ HYPRE_Int HYPRE_ParCSRMatrixMatvec( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, H
                                     HYPRE_Complex beta, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixMatvecT( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
                                      HYPRE_Complex beta, HYPRE_ParVector y );
-HYPRE_Int HYPRE_ParCSRMatrixDiagScale( HYPRE_ParCSRMatrix A, HYPRE_ParVector ld,
-                                       HYPRE_ParVector rd );
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate( MPI_Comm comm, HYPRE_BigInt global_size,
