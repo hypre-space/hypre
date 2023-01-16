@@ -1789,15 +1789,20 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
 
       /* Move permutation vector to final memory location */
       hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, A_memory_location);
+
+      /* Free memory */
+      hypre_TFree(h_tperm, A_memory_location);
    }
    else
    {
       /* Move permutation vector to final memory location */
       hypre_TMemcpy(tperm, h_tperm, HYPRE_Int, n, memory_location, HYPRE_MEMORY_HOST);
+
+      /* Free memory */
+      hypre_TFree(h_tperm, HYPRE_MEMORY_HOST);
    }
 
    /* Free memory */
-   hypre_TFree(h_tperm, HYPRE_MEMORY_HOST);
    hypre_TFree(marker, HYPRE_MEMORY_HOST);
    if (A_offd_i != hypre_CSRMatrixI(A_offd))
    {
