@@ -2353,8 +2353,8 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
    HYPRE_Int            *A_offd_j        = hypre_CSRMatrixJ(A_offd);
    HYPRE_Int             A_offd_nnz      = hypre_CSRMatrixNumNonzeros(A_offd);
    HYPRE_Int             A_offd_num_cols = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_MemoryLocation  memory_location = hypre_CSRMatrixMemoryLocation(A_offd);
    HYPRE_BigInt         *col_map_offd    = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    HYPRE_Int            *h_A_offd_j;
 

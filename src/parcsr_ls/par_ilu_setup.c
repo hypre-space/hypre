@@ -2116,14 +2116,14 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
       S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
 
-      matS = hypre_ParCSRMatrixCreate( comm,
-                                       total_rows,
-                                       total_rows,
-                                       col_starts,
-                                       col_starts,
-                                       S_offd_ncols,
-                                       S_diag_nnz,
-                                       S_offd_nnz);
+      matS = hypre_ParCSRMatrixCreate(comm,
+                                      total_rows,
+                                      total_rows,
+                                      col_starts,
+                                      col_starts,
+                                      S_offd_ncols,
+                                      S_diag_nnz,
+                                      S_offd_nnz);
 
       /* first put diagonal data in */
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
@@ -2131,9 +2131,10 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
 
       /* now start to construct offdiag of S */
       S_offd = hypre_ParCSRMatrixOffd(matS);
-      S_offd_i = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_HOST);
-      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_HOST);
-      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixInitialize_v2(S_offd, 0, HYPRE_MEMORY_HOST);
+      S_offd_i = hypre_CSRMatrixI(S_offd);
+      S_offd_j = hypre_CSRMatrixJ(S_offd);
+      S_offd_data = hypre_CSRMatrixData(S_offd);
       S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
 
       /* Set/Move A_offd to host */
@@ -2493,9 +2494,10 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix       *A,
 
       /* now start to construct offdiag of S */
       S_offd = hypre_ParCSRMatrixOffd(matS);
-      S_offd_i = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_HOST);
-      S_offd_j = hypre_TAlloc(HYPRE_Int, S_offd_nnz, HYPRE_MEMORY_HOST);
-      S_offd_data = hypre_TAlloc(HYPRE_Real, S_offd_nnz, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixInitialize_v2(S_offd, 0, HYPRE_MEMORY_HOST);
+      S_offd_i = hypre_CSRMatrixI(S_offd);
+      S_offd_j = hypre_CSRMatrixJ(S_offd);
+      S_offd_data = hypre_CSRMatrixData(S_offd);
       S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
 
       /* Set/Move A_offd to host */
