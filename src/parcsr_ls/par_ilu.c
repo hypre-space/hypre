@@ -2431,7 +2431,7 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
  *             different row and col reordering, the resulting A might be non-symmetric.
  *             Be careful if you are using non-symmetric reordering
  *
- * TODO (VPM): Implement RCM computation on the device.
+ * TODO (VPM): Implement RCM computation on the device. Use IntArray for perm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2465,8 +2465,12 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
    HYPRE_Int               *perm      = *permp;
    HYPRE_Int               *qperm     = *qpermp;
 
+   HYPRE_Int                perm_is_qperm;
    HYPRE_Int                i, j, row, col, r1, r2;
    HYPRE_Int                G_nnz, G_capacity;
+
+   /* Set flag for computing row and column permutations (true) or only row permutation (false) */
+   perm_is_qperm = (perm == qperm) ? 1 : 0;
 
    /* 1: Preprosessing
     * Check error in input, set some parameters
@@ -2536,7 +2540,7 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
    G_j = hypre_TAlloc(HYPRE_Int, G_capacity, HYPRE_MEMORY_HOST);
 
    /* TODO (VPM): Extend hypre_CSRMatrixPermute to replace the block below */
-   for (i = 0 ; i < num_nodes ; i ++)
+   for (i = 0; i < num_nodes; i++)
    {
       G_i[i] = G_nnz;
       row = perm[i + start];
@@ -2571,93 +2575,77 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
       hypre_TFree(A_j, HYPRE_MEMORY_HOST);
    }
 
-   /* Check if G has only diagonal (no need to do any kind of RCM) */
-   if (G_nnz == 0)
-   {
-      hypre_TFree(G_i, HYPRE_MEMORY_HOST);
-      hypre_TFree(G_j, HYPRE_MEMORY_HOST);
-      hypre_TFree(rqperm, HYPRE_MEMORY_HOST);
-
-      *permp   = perm;
-      *qpermp  = qperm;
-
-      hypre_GpuProfilingPopRange();
-      HYPRE_ANNOTATE_FUNC_END;
-
-      return hypre_error_flag;
-   }
-
    /* Create matrix G on the host */
    G = hypre_CSRMatrixCreate(num_nodes, num_nodes, G_nnz);
    hypre_CSRMatrixMemoryLocation(G) = HYPRE_MEMORY_HOST;
    hypre_CSRMatrixI(G) = G_i;
    hypre_CSRMatrixJ(G) = G_j;
 
-   /* Sum G with G' if G is nonsymmetric */
-   if (!sym)
+   /* Check if G is not empty (no need to do any kind of RCM) */
+   if (G_nnz > 0)
    {
-      hypre_CSRMatrixData(G) = hypre_CTAlloc(HYPRE_Complex, G_nnz, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixTranspose(G, &GT, 1);
-      GGT = hypre_CSRMatrixAdd(1.0, G, 1.0, GT);
-      hypre_CSRMatrixDestroy(G);
-      hypre_CSRMatrixDestroy(GT);
-      G = GGT;
-      GGT = NULL;
-   }
-
-   /* 3: Build RCM on the host */
-   G_perm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-   hypre_ILULocalRCMOrder(G, G_perm);
-
-   /* 4: Post processing
-    * Free, set value, return
-    */
-
-   /* update to new index */
-   perm_temp = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
-   for (i = 0 ;i < num_nodes; i++)
-   {
-      perm_temp[i] = perm[i + start];
-   }
-   for (i = 0 ;i < num_nodes; i++)
-   {
-      perm[i + start] = perm_temp[G_perm[i]];
-   }
-   if (perm != qperm)
-   {
-      for (i = 0; i < num_nodes; i++)
+      /* Sum G with G' if G is nonsymmetric */
+      if (!sym)
       {
-         perm_temp[i] = qperm[i + start];
+         hypre_CSRMatrixData(G) = hypre_CTAlloc(HYPRE_Complex, G_nnz, HYPRE_MEMORY_HOST);
+         hypre_CSRMatrixTranspose(G, &GT, 1);
+         GGT = hypre_CSRMatrixAdd(1.0, G, 1.0, GT);
+         hypre_CSRMatrixDestroy(G);
+         hypre_CSRMatrixDestroy(GT);
+         G = GGT;
+         GGT = NULL;
       }
+
+      /* 3: Build RCM on the host */
+      G_perm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+      hypre_ILULocalRCMOrder(G, G_perm);
+
+      /* 4: Post processing
+       * Free, set value, return
+       */
+
+      /* update to new index */
+      perm_temp = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(perm_temp, &perm[start], HYPRE_Int, num_nodes,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_nodes; i++)
       {
-         qperm[i + start] = perm_temp[G_perm[i]];
+         perm[i + start] = perm_temp[G_perm[i]];
+      }
+
+      if (!perm_is_qperm)
+      {
+         hypre_TMemcpy(perm_temp, &qperm[start], HYPRE_Int, num_nodes,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         for (i = 0; i < num_nodes; i++)
+         {
+            qperm[i + start] = perm_temp[G_perm[i]];
+         }
       }
    }
 
    /* Move to device memory if needed */
    if (memory_location == HYPRE_MEMORY_DEVICE)
    {
-      d_perm  = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_DEVICE);
-      d_qperm = hypre_TAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_DEVICE);
-
-      hypre_TMemcpy(d_perm, perm, HYPRE_Int, num_nodes,
+      d_perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(d_perm, perm, HYPRE_Int, n,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(d_qperm, qperm, HYPRE_Int, num_nodes,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TFree(perm, HYPRE_MEMORY_HOST);
 
-      if (perm == qperm)
+      perm = d_perm;
+      if (perm_is_qperm)
       {
-         hypre_TFree(perm, HYPRE_MEMORY_HOST);
+         qperm = d_perm;
       }
       else
       {
-         hypre_TFree(perm, HYPRE_MEMORY_HOST);
+         d_qperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(d_qperm, qperm, HYPRE_Int, n,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
          hypre_TFree(qperm, HYPRE_MEMORY_HOST);
-      }
 
-      perm  = d_perm;
-      qperm = d_qperm;
+         qperm = d_qperm;
+      }
    }
 
    /* Set output pointers */
