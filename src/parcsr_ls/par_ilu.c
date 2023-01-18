@@ -2439,7 +2439,9 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
  *             different row and col reordering, the resulting A might be non-symmetric.
  *             Be careful if you are using non-symmetric reordering
  *
- * TODO (VPM): Implement RCM computation on the device. Use IntArray for perm
+ * TODO (VPM): Implement RCM computation on the device.
+ *             Use IntArray for perm.
+ *             Move this function and internal RCM calls to parcsr_mv.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
