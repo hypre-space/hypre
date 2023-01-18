@@ -1024,30 +1024,21 @@ HYPRE_Int
 hypre_CSRMatrixPermuteHost( hypre_CSRMatrix  *A,
                             HYPRE_Int        *perm,
                             HYPRE_Int        *rqperm,
-                            hypre_CSRMatrix **B_ptr )
+                            hypre_CSRMatrix  *B )
 {
-   /* Input matrix */
+   /* Input variables */
    HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         num_cols     = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_a          = hypre_CSRMatrixData(A);
+   HYPRE_Int        *B_i          = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j          = hypre_CSRMatrixJ(B);
+   HYPRE_Complex    *B_a          = hypre_CSRMatrixData(B);
 
    /* Local variables */
-   hypre_CSRMatrix  *B;
-   HYPRE_Int        *B_i;
-   HYPRE_Int        *B_j;
-   HYPRE_Complex    *B_a;
-
    HYPRE_Int         i, j, k;
-
-   /* Create output matrix B */
-   B = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
-   hypre_CSRMatrixInitialize_v2(B, 0, hypre_CSRMatrixMemoryLocation(A));
-   B_i = hypre_CSRMatrixI(B);
-   B_j = hypre_CSRMatrixJ(B);
-   B_a = hypre_CSRMatrixData(B);
 
    /* Build B = A(perm, qperm) */
    k = 0;
@@ -1063,8 +1054,6 @@ hypre_CSRMatrixPermuteHost( hypre_CSRMatrix  *A,
    B_i[num_rows] = k;
    hypre_assert(k == num_nonzeros);
 
-   *B_ptr = B;
-
    return hypre_error_flag;
 }
 
@@ -1077,6 +1066,8 @@ hypre_CSRMatrixPermuteHost( hypre_CSRMatrix  *A,
  * Notes:
  *  1) This function does not move the diagonal to the first entry of a row
  *  2) When perm == rqperm == NULL, B is a deep copy of A.
+ *
+ * TODO (VPM): add check for permutation arrays under HYPRE_DEBUG
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1098,21 +1089,26 @@ hypre_CSRMatrixPermute( hypre_CSRMatrix  *A,
       return hypre_error_flag;
    }
 
+   /* Create output matrix B */
+   B = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
+   hypre_CSRMatrixInitialize_v2(B, 0, hypre_CSRMatrixMemoryLocation(A));
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_CSRMatrixPermuteDevice(A, perm, rqperm, &B);
+      hypre_CSRMatrixPermuteDevice(A, perm, rqperm, B);
    }
    else
 #endif
    {
-      hypre_CSRMatrixPermuteHost(A, perm, rqperm, &B);
+      hypre_CSRMatrixPermuteHost(A, perm, rqperm, B);
    }
 
    hypre_GpuProfilingPopRange();
 
+   /* Set output pointer */
    *B_ptr = B;
 
    return hypre_error_flag;

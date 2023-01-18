@@ -357,7 +357,7 @@ HYPRE_Int hypre_CSRMatrixRemoveDiagonalDevice(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Real tol,
                                                  HYPRE_Real *elmt_tols);
 HYPRE_Int hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix *A, HYPRE_Int *perm,
-                                        HYPRE_Int *rqperm, hypre_CSRMatrix **B_ptr );
+                                        HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveDevice(char uplo, hypre_CSRMatrix *A,
                                                   HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
@@ -395,7 +395,7 @@ hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data 
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
                                           HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_CSRMatrixPermuteHost( hypre_CSRMatrix *A, HYPRE_Int *perm,
-                                      HYPRE_Int *rqperm, hypre_CSRMatrix **B_ptr );
+                                      HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixPermute( hypre_CSRMatrix *A, HYPRE_Int *perm,
                                   HYPRE_Int *rqperm, hypre_CSRMatrix **B_ptr );
 hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
