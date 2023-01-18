@@ -1732,7 +1732,7 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
 
    /* Local arrays */
    HYPRE_Int             *tperm   = hypre_TAlloc(HYPRE_Int, n, memory_location);
-   HYPRE_Int             *h_tperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   HYPRE_Int             *h_tperm = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    HYPRE_Int             *marker  = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
    /* Get comm_pkg, create one if not present */

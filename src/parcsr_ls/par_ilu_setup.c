@@ -876,7 +876,10 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ParVectorInitialize(x);
 
             /* setup solver */
-            HYPRE_GMRESSetup(schur_solver, (HYPRE_Matrix)matS, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
+            HYPRE_GMRESSetup(schur_solver,
+                             (HYPRE_Matrix)matS,
+                             (HYPRE_Vector)rhs,
+                             (HYPRE_Vector)x);
 
             /* update ilu_data */
             hypre_ParILUDataSchurSolver   (ilu_data) = schur_solver;
@@ -1982,6 +1985,8 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
    hypre_IntArray          *rperm         = NULL;
    hypre_IntArray          *qperm         = NULL;
    hypre_IntArray          *rqperm        = NULL;
+   hypre_IntArray          *h_perm        = NULL;
+   hypre_IntArray          *h_rperm       = NULL;
 
    /* Variables for matS */
    HYPRE_Int               m              = n - nLU;
@@ -2144,13 +2149,14 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
       A_offd_j    = hypre_CSRMatrixJ(h_A_offd);
       A_offd_data = hypre_CSRMatrixData(h_A_offd);
 
-      /* Move permutation arrays to host */
+      /* Clone permutation arrays on the host */
       if (rperm && perm)
       {
-         hypre_IntArrayMigrate(rperm, HYPRE_MEMORY_HOST);
-         hypre_IntArrayMigrate(perm, HYPRE_MEMORY_HOST);
-         rperm_data = hypre_IntArrayData(rperm);
+         h_perm  = hypre_IntArrayCloneDeep_v2(perm, HYPRE_MEMORY_HOST);
+         h_rperm = hypre_IntArrayCloneDeep_v2(rperm, HYPRE_MEMORY_HOST);
+
          perm_data  = hypre_IntArrayData(perm);
+         rperm_data = hypre_IntArrayData(rperm);
       }
 
       /* simply use a loop to copy data from A_offd */
@@ -2239,7 +2245,6 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
    /* Do not free perm_data/qperm_data */
    if (perm)
    {
-      hypre_IntArrayMigrate(perm, memory_location);
       hypre_IntArrayData(perm)  = NULL;
    }
    if (qperm)
@@ -2253,6 +2258,8 @@ hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
    hypre_IntArrayDestroy(qperm);
    hypre_IntArrayDestroy(rperm);
    hypre_IntArrayDestroy(rqperm);
+   hypre_IntArrayDestroy(h_perm);
+   hypre_IntArrayDestroy(h_rperm);
 
    return hypre_error_flag;
 }
@@ -2328,6 +2335,8 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix       *A,
    hypre_IntArray          *rperm               = NULL;
    hypre_IntArray          *qperm               = NULL;
    hypre_IntArray          *rqperm              = NULL;
+   hypre_IntArray          *h_perm              = NULL;
+   hypre_IntArray          *h_rperm             = NULL;
 
    /* variables for matS */
    HYPRE_Int               m                    = n - nLU;
@@ -2507,13 +2516,14 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix       *A,
       A_offd_j    = hypre_CSRMatrixJ(h_A_offd);
       A_offd_data = hypre_CSRMatrixData(h_A_offd);
 
-      /* Move permutation arrays to host */
+      /* Clone permutation arrays on the host */
       if (rperm && perm)
       {
-         hypre_IntArrayMigrate(rperm, HYPRE_MEMORY_HOST);
-         hypre_IntArrayMigrate(perm, HYPRE_MEMORY_HOST);
-         rperm_data = hypre_IntArrayData(rperm);
+         h_perm  = hypre_IntArrayCloneDeep_v2(perm, HYPRE_MEMORY_HOST);
+         h_rperm = hypre_IntArrayCloneDeep_v2(rperm, HYPRE_MEMORY_HOST);
+
          perm_data  = hypre_IntArrayData(perm);
+         rperm_data = hypre_IntArrayData(rperm);
       }
 
       /* simply use a loop to copy data from A_offd */
@@ -2602,7 +2612,6 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix       *A,
    /* Do not free perm_data/qperm_data */
    if (perm)
    {
-      hypre_IntArrayMigrate(perm, memory_location);
       hypre_IntArrayData(perm)  = NULL;
    }
    if (qperm)
@@ -2616,6 +2625,8 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix       *A,
    hypre_IntArrayDestroy(qperm);
    hypre_IntArrayDestroy(rperm);
    hypre_IntArrayDestroy(rqperm);
+   hypre_IntArrayDestroy(h_perm);
+   hypre_IntArrayDestroy(h_rperm);
 
    return hypre_error_flag;
 }
