@@ -2032,13 +2032,18 @@ hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
    for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < num_rows);
         grid_group_id += grid_ngroups)
    {
-      HYPRE_Int row = grid_group_id;
-
       /* Load data to sub-warps */
       if (group_lane == 0)
       {
-         perm_row = read_only_load(&perm[row]);
-         pB = read_only_load(&B_i[row]);
+         if (grid_group_id < num_rows)
+         {
+            perm_row = read_only_load(&perm[grid_group_id]);
+            pB = read_only_load(&B_i[grid_group_id]);
+         }
+         else
+         {
+            perm_row = pB = 0;
+         }
       }
       perm_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, perm_row, 0, K);
       pB = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pB, 0, K);
@@ -2051,7 +2056,7 @@ hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
       pA = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pA, 0, K);
 
       /* Build B_j and B_a */
-      if (row < num_rows)
+      if (grid_group_id < num_rows)
       {
          for (j = group_lane; j < qA - pA; j += K)
          {
@@ -2640,4 +2645,3 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
    }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }
-
