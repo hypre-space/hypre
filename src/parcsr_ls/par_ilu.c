@@ -157,299 +157,291 @@ hypre_ILUDestroy( void *data )
    hypre_ParILUData      *ilu_data = (hypre_ParILUData*) data;
    HYPRE_MemoryLocation   memory_location;
 
-   /* Get memory location from L factor */
-   if (hypre_ParILUDataMatL(ilu_data))
+   if (ilu_data)
    {
-      memory_location = hypre_ParCSRMatrixMemoryLocation(hypre_ParILUDataMatL(ilu_data));
-   }
-   else
-   {
-      /* Use default memory location */
-      HYPRE_GetMemoryLocation(&memory_location);
-   }
-
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-   if (hypre_ParILUDataILUSolveBuffer(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataILUSolveBuffer(ilu_data), HYPRE_MEMORY_DEVICE);
-      hypre_ParILUDataILUSolveBuffer(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatLMatrixDescription(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr(hypre_ParILUDataMatLMatrixDescription(ilu_data))) );
-      hypre_ParILUDataMatLMatrixDescription(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatUMatrixDescription(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr(hypre_ParILUDataMatUMatrixDescription(ilu_data))) );
-      hypre_ParILUDataMatUMatrixDescription(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatALILUSolveInfo(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
-      hypre_ParILUDataMatALILUSolveInfo(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatAUILUSolveInfo(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
-      hypre_ParILUDataMatAUILUSolveInfo(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatBLILUSolveInfo(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
-      hypre_ParILUDataMatBLILUSolveInfo(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatBUILUSolveInfo(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
-      hypre_ParILUDataMatBUILUSolveInfo(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatSLILUSolveInfo(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
-      hypre_ParILUDataMatSLILUSolveInfo(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatSUILUSolveInfo(ilu_data))
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
-      hypre_ParILUDataMatSUILUSolveInfo(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatAILUDevice(ilu_data))
-   {
-      hypre_CSRMatrixDestroy( hypre_ParILUDataMatAILUDevice(ilu_data) );
-      hypre_ParILUDataMatAILUDevice(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatBILUDevice(ilu_data))
-   {
-      hypre_CSRMatrixDestroy( hypre_ParILUDataMatBILUDevice(ilu_data) );
-      hypre_ParILUDataMatBILUDevice(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatSILUDevice(ilu_data))
-   {
-      hypre_CSRMatrixDestroy( hypre_ParILUDataMatSILUDevice(ilu_data) );
-      hypre_ParILUDataMatSILUDevice(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatEDevice(ilu_data))
-   {
-      hypre_CSRMatrixDestroy( hypre_ParILUDataMatEDevice(ilu_data) );
-      hypre_ParILUDataMatEDevice(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatFDevice(ilu_data))
-   {
-      hypre_CSRMatrixDestroy( hypre_ParILUDataMatFDevice(ilu_data) );
-      hypre_ParILUDataMatFDevice(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataAperm(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
-      hypre_ParILUDataAperm(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataR(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
-      hypre_ParILUDataR(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataP(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
-      hypre_ParILUDataP(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataFTempUpper(ilu_data))
-   {
-      hypre_SeqVectorDestroy( hypre_ParILUDataFTempUpper(ilu_data) );
-      hypre_ParILUDataFTempUpper(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataUTempLower(ilu_data))
-   {
-      hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
-      hypre_ParILUDataUTempLower(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatAFakeDiagonal(ilu_data))
-   {
-      hypre_TFree( hypre_ParILUDataMatAFakeDiagonal(ilu_data), HYPRE_MEMORY_DEVICE);
-      hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataADiagDiag(ilu_data))
-   {
-      hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
-      hypre_ParILUDataADiagDiag(ilu_data) = NULL;
-   }
-#endif
-
-   /* final residual vector */
-   if (hypre_ParILUDataResidual(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataResidual(ilu_data) );
-      hypre_ParILUDataResidual(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataRelResNorms(ilu_data))
-   {
-      hypre_TFree( hypre_ParILUDataRelResNorms(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataRelResNorms(ilu_data) = NULL;
-   }
-   /* temp vectors for solve phase */
-   if (hypre_ParILUDataUTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataUTemp(ilu_data) );
-      hypre_ParILUDataUTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataFTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataFTemp(ilu_data) );
-      hypre_ParILUDataFTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataXTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataXTemp(ilu_data) );
-      hypre_ParILUDataXTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataYTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataYTemp(ilu_data) );
-      hypre_ParILUDataYTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataZTemp(ilu_data))
-   {
-      hypre_SeqVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
-      hypre_ParILUDataZTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataUExt(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataUExt(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataFExt(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataFExt(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataRhs(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataRhs(ilu_data) );
-      hypre_ParILUDataRhs(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataX(ilu_data))
-   {
-      hypre_ParVectorDestroy( hypre_ParILUDataX(ilu_data) );
-      hypre_ParILUDataX(ilu_data) = NULL;
-   }
-   /* l1_norms */
-   if (hypre_ParILUDataL1Norms(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataL1Norms(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataL1Norms(ilu_data) = NULL;
-   }
-
-   /* u_end */
-   if (hypre_ParILUDataUEnd(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataUEnd(ilu_data) = NULL;
-   }
-
-   /* Factors */
-   if (hypre_ParILUDataMatD(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataMatD(ilu_data), memory_location);
-      hypre_ParILUDataMatD(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatL(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatL(ilu_data));
-      hypre_ParILUDataMatL(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatU(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatU(ilu_data));
-      hypre_ParILUDataMatU(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatLModified(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatLModified(ilu_data));
-      hypre_ParILUDataMatLModified(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatUModified(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatUModified(ilu_data));
-      hypre_ParILUDataMatUModified(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatDModified(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataMatDModified(ilu_data), memory_location);
-      hypre_ParILUDataMatDModified(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatS(ilu_data))
-   {
-      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatS(ilu_data));
-      hypre_ParILUDataMatS(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataSchurSolver(ilu_data))
-   {
-      switch (hypre_ParILUDataIluType(ilu_data))
+      /* Get memory location from L factor */
+      if (hypre_ParILUDataMatL(ilu_data))
       {
-         case 10: case 11: case 40: case 41: case 50:
-            HYPRE_ParCSRGMRESDestroy(hypre_ParILUDataSchurSolver(ilu_data)); //GMRES for Schur
-            break;
-         case 20: case 21:
-            hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));//NSH for Schur
-            break;
-         default:
-            break;
+         memory_location = hypre_ParCSRMatrixMemoryLocation(hypre_ParILUDataMatL(ilu_data));
       }
-      hypre_ParILUDataSchurSolver(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataSchurPrecond(ilu_data))
-   {
-      switch (hypre_ParILUDataIluType(ilu_data))
+      else
       {
-         case 10: case 11: case 40: case 41:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-            if (hypre_ParILUDataIluType(ilu_data) != 10 && hypre_ParILUDataIluType(ilu_data) != 11)
-            {
-#endif
-               HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-            }
-#endif
-            break;
-         default:
-            break;
+         /* Use default memory location */
+         HYPRE_GetMemoryLocation(&memory_location);
       }
-      hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
+
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+      if (hypre_ParILUDataILUSolveBuffer(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataILUSolveBuffer(ilu_data), HYPRE_MEMORY_DEVICE);
+         hypre_ParILUDataILUSolveBuffer(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatLMatrixDescription(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr(hypre_ParILUDataMatLMatrixDescription(ilu_data))) );
+         hypre_ParILUDataMatLMatrixDescription(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatUMatrixDescription(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr(hypre_ParILUDataMatUMatrixDescription(ilu_data))) );
+         hypre_ParILUDataMatUMatrixDescription(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatALILUSolveInfo(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
+         hypre_ParILUDataMatALILUSolveInfo(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatAUILUSolveInfo(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
+         hypre_ParILUDataMatAUILUSolveInfo(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatBLILUSolveInfo(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
+         hypre_ParILUDataMatBLILUSolveInfo(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatBUILUSolveInfo(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
+         hypre_ParILUDataMatBUILUSolveInfo(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatSLILUSolveInfo(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
+         hypre_ParILUDataMatSLILUSolveInfo(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatSUILUSolveInfo(ilu_data))
+      {
+         HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
+         hypre_ParILUDataMatSUILUSolveInfo(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatAILUDevice(ilu_data))
+      {
+         hypre_CSRMatrixDestroy( hypre_ParILUDataMatAILUDevice(ilu_data) );
+         hypre_ParILUDataMatAILUDevice(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatBILUDevice(ilu_data))
+      {
+         hypre_CSRMatrixDestroy( hypre_ParILUDataMatBILUDevice(ilu_data) );
+         hypre_ParILUDataMatBILUDevice(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatSILUDevice(ilu_data))
+      {
+         hypre_CSRMatrixDestroy( hypre_ParILUDataMatSILUDevice(ilu_data) );
+         hypre_ParILUDataMatSILUDevice(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatEDevice(ilu_data))
+      {
+         hypre_CSRMatrixDestroy( hypre_ParILUDataMatEDevice(ilu_data) );
+         hypre_ParILUDataMatEDevice(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatFDevice(ilu_data))
+      {
+         hypre_CSRMatrixDestroy( hypre_ParILUDataMatFDevice(ilu_data) );
+         hypre_ParILUDataMatFDevice(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataAperm(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
+         hypre_ParILUDataAperm(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataR(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
+         hypre_ParILUDataR(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataP(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
+         hypre_ParILUDataP(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataFTempUpper(ilu_data))
+      {
+         hypre_SeqVectorDestroy( hypre_ParILUDataFTempUpper(ilu_data) );
+         hypre_ParILUDataFTempUpper(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataUTempLower(ilu_data))
+      {
+         hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
+         hypre_ParILUDataUTempLower(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatAFakeDiagonal(ilu_data))
+      {
+         hypre_TFree( hypre_ParILUDataMatAFakeDiagonal(ilu_data), HYPRE_MEMORY_DEVICE);
+         hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataADiagDiag(ilu_data))
+      {
+         hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
+         hypre_ParILUDataADiagDiag(ilu_data) = NULL;
+      }
+#endif
+
+      /* final residual vector */
+      if (hypre_ParILUDataResidual(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataResidual(ilu_data) );
+         hypre_ParILUDataResidual(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataRelResNorms(ilu_data))
+      {
+         hypre_TFree( hypre_ParILUDataRelResNorms(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataRelResNorms(ilu_data) = NULL;
+      }
+      /* temp vectors for solve phase */
+      if (hypre_ParILUDataUTemp(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataUTemp(ilu_data) );
+         hypre_ParILUDataUTemp(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataFTemp(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataFTemp(ilu_data) );
+         hypre_ParILUDataFTemp(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataXTemp(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataXTemp(ilu_data) );
+         hypre_ParILUDataXTemp(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataYTemp(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataYTemp(ilu_data) );
+         hypre_ParILUDataYTemp(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataZTemp(ilu_data))
+      {
+         hypre_SeqVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
+         hypre_ParILUDataZTemp(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataUExt(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataUExt(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataFExt(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataFExt(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataRhs(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataRhs(ilu_data) );
+         hypre_ParILUDataRhs(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataX(ilu_data))
+      {
+         hypre_ParVectorDestroy( hypre_ParILUDataX(ilu_data) );
+         hypre_ParILUDataX(ilu_data) = NULL;
+      }
+      /* l1_norms */
+      if (hypre_ParILUDataL1Norms(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataL1Norms(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataL1Norms(ilu_data) = NULL;
+      }
+
+      /* u_end */
+      if (hypre_ParILUDataUEnd(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataUEnd(ilu_data) = NULL;
+      }
+
+      /* Factors */
+      if (hypre_ParILUDataMatD(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataMatD(ilu_data), memory_location);
+         hypre_ParILUDataMatD(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatL(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatL(ilu_data));
+         hypre_ParILUDataMatL(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatU(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatU(ilu_data));
+         hypre_ParILUDataMatU(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatLModified(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatLModified(ilu_data));
+         hypre_ParILUDataMatLModified(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatUModified(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatUModified(ilu_data));
+         hypre_ParILUDataMatUModified(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatDModified(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataMatDModified(ilu_data), memory_location);
+         hypre_ParILUDataMatDModified(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataMatS(ilu_data))
+      {
+         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatS(ilu_data));
+         hypre_ParILUDataMatS(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataSchurSolver(ilu_data))
+      {
+         switch (hypre_ParILUDataIluType(ilu_data))
+         {
+            case 10: case 11: case 40: case 41: case 50:
+               HYPRE_ParCSRGMRESDestroy(hypre_ParILUDataSchurSolver(ilu_data)); //GMRES for Schur
+               break;
+            case 20: case 21:
+               hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));//NSH for Schur
+               break;
+            default:
+               break;
+         }
+         hypre_ParILUDataSchurSolver(ilu_data) = NULL;
+      }
+      if (((hypre_ParILUData*) hypre_ParILUDataSchurPrecond(ilu_data) != ilu_data) &&
+          hypre_ParILUDataIluType(ilu_data) != 10 &&
+          hypre_ParILUDataIluType(ilu_data) != 11)
+      {
+         HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
+         hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
+      }
+      /* CF marker array */
+      if (hypre_ParILUDataCFMarkerArray(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataCFMarkerArray(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataCFMarkerArray(ilu_data) = NULL;
+      }
+      /* permutation array */
+      if (hypre_ParILUDataPerm(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataPerm(ilu_data), memory_location);
+         hypre_ParILUDataPerm(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataQPerm(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataQPerm(ilu_data), memory_location);
+         hypre_ParILUDataQPerm(ilu_data) = NULL;
+      }
+      /* droptol array */
+      if (hypre_ParILUDataDroptol(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataDroptol(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataDroptol(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataSchurPrecondIluDroptol(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataSchurPrecondIluDroptol(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = NULL;
+      }
+      if (hypre_ParILUDataSchurNSHDroptol(ilu_data))
+      {
+         hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
+         hypre_ParILUDataSchurNSHDroptol(ilu_data) = NULL;
+      }
    }
-   /* CF marker array */
-   if (hypre_ParILUDataCFMarkerArray(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataCFMarkerArray(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataCFMarkerArray(ilu_data) = NULL;
-   }
-   /* permutation array */
-   if (hypre_ParILUDataPerm(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataPerm(ilu_data), memory_location);
-      hypre_ParILUDataPerm(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataQPerm(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataQPerm(ilu_data), memory_location);
-      hypre_ParILUDataQPerm(ilu_data) = NULL;
-   }
-   /* droptol array */
-   if (hypre_ParILUDataDroptol(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataDroptol(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataDroptol(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataSchurPrecondIluDroptol(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataSchurPrecondIluDroptol(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataSchurNSHDroptol(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataSchurNSHDroptol(ilu_data) = NULL;
-   }
+
    /* ilu data */
    hypre_TFree(ilu_data, HYPRE_MEMORY_HOST);
 
@@ -3097,7 +3089,7 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
    HYPRE_Int         *A_diag_j                  = hypre_CSRMatrixJ(A_diag);
    HYPRE_Real        *A_diag_data               = hypre_CSRMatrixData(A_diag);
    HYPRE_Int         A_diag_n                   = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int         A_diag_nnz                 = A_diag_i[A_diag_n];
+   HYPRE_Int         A_diag_nnz                 = hypre_CSRMatrixNumNonzeros(A_diag);
    HYPRE_Int         *A_diag_fake_i             = hypre_ParILUDataMatAFakeDiagonal(ilu_data);
 
    cusparseMatDescr_t      matL_des             = hypre_ParILUDataMatLMatrixDescription(ilu_data);
@@ -3635,7 +3627,11 @@ hypre_ParILURAPSchurGMRESMatvecDestroy( void *matvec_data )
    return 0;
 }
 
-#else
+#endif /* if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE) */
+
+/*--------------------------------------------------------------------------
+ * hypre_ParILURAPSchurGMRESDummySetupH
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParILURAPSchurGMRESDummySetupH(void *a, void *b, void *c, void *d)
@@ -3645,7 +3641,7 @@ hypre_ParILURAPSchurGMRESDummySetupH(void *a, void *b, void *c, void *d)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParILUCusparseSchurGMRESDummySolve
+ * hypre_ParILURAPSchurGMRESSolveH
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3716,7 +3712,7 @@ hypre_ParILURAPSchurGMRESSolveH( void               *ilu_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParILUCusparseSchurGMRESCommInfo
+ * hypre_ParILURAPSchurGMRESCommInfoH
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3732,10 +3728,10 @@ hypre_ParILURAPSchurGMRESCommInfoH( void *ilu_vdata, HYPRE_Int *my_id, HYPRE_Int
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParILUCusparseSchurGMRESMatvecCreate
+ * hypre_ParILURAPSchurGMRESMatvecCreateH
  *--------------------------------------------------------------------------*/
 
-void *
+void*
 hypre_ParILURAPSchurGMRESMatvecCreateH( void   *ilu_vdata,
                                         void   *x )
 {
@@ -3746,7 +3742,7 @@ hypre_ParILURAPSchurGMRESMatvecCreateH( void   *ilu_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParILUCusparseSchurGMRESMatvec
+ * hypre_ParILURAPSchurGMRESMatvecH
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3875,7 +3871,7 @@ hypre_ParILURAPSchurGMRESMatvecH( void   *matvec_data,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParILUCusparseSchurGMRESMatvecDestroy
+ * hypre_ParILURAPSchurGMRESMatvecDestroyH
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -3883,8 +3879,6 @@ hypre_ParILURAPSchurGMRESMatvecDestroyH( void *matvec_data )
 {
    return 0;
 }
-
-#endif /* if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE) */
 
 /* NSH create and solve and help functions */
 
@@ -4314,6 +4308,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    HYPRE_Int      *A_j = hypre_CSRMatrixJ(A);
    HYPRE_Real     *A_data = hypre_CSRMatrixData(A);
    HYPRE_Real     nnzA = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
 
    /* new data */
    HYPRE_Int      *new_i;
@@ -4327,12 +4322,12 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    /* setup */
    capacity = nnzA * 0.3 + 1;
    ctrA = 0;
-   new_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
-   new_j = hypre_TAlloc(HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
-   new_data = hypre_TAlloc(HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
+   new_i = hypre_TAlloc(HYPRE_Int, n + 1, memory_location);
+   new_j = hypre_TAlloc(HYPRE_Int, capacity, memory_location);
+   new_data = hypre_TAlloc(HYPRE_Real, capacity, memory_location);
 
-   idx = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_DEVICE);
-   data = hypre_TAlloc(HYPRE_Real, m, HYPRE_MEMORY_DEVICE);
+   idx = hypre_TAlloc(HYPRE_Int, m, memory_location);
+   data = hypre_TAlloc(HYPRE_Real, m, memory_location);
 
    /* start of main loop */
    new_i[0] = 0;
@@ -4386,12 +4381,12 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          {
             HYPRE_Int tmp = capacity;
             capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
-            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
+            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, memory_location);
+            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, memory_location);
          }
-         hypre_TMemcpy( new_j + ctrA, idx, HYPRE_Int, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy( new_data + ctrA, data, HYPRE_Real, drop_len, HYPRE_MEMORY_DEVICE,
-                        HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy( new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
+         hypre_TMemcpy( new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
+                        memory_location);
          ctrA += drop_len;
          new_i[i + 1] = ctrA;
       }
@@ -4427,12 +4422,12 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          {
             HYPRE_Int tmp = capacity;
             capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, HYPRE_MEMORY_DEVICE);
-            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, HYPRE_MEMORY_DEVICE);
+            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, memory_location);
+            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, memory_location);
          }
-         hypre_TMemcpy( new_j + ctrA, idx, HYPRE_Int, drop_len, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-         hypre_TMemcpy( new_data + ctrA, data, HYPRE_Real, drop_len, HYPRE_MEMORY_DEVICE,
-                        HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy( new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
+         hypre_TMemcpy( new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
+                        memory_location);
          ctrA += drop_len;
          new_i[i + 1] = ctrA;
       }
@@ -4440,9 +4435,9 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    /* destory data if A own them */
    if (hypre_CSRMatrixOwnsData(A))
    {
-      hypre_TFree(A_i, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(A_j, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(A_i, memory_location);
+      hypre_TFree(A_j, memory_location);
+      hypre_TFree(A_data, memory_location);
    }
 
    hypre_CSRMatrixI(A) = new_i;
@@ -4451,8 +4446,8 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    hypre_CSRMatrixNumNonzeros(A) = ctrA;
    hypre_CSRMatrixOwnsData(A) = 1;
 
-   hypre_TFree(idx, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(data, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(idx, memory_location);
+   hypre_TFree(data, memory_location);
 
    return hypre_error_flag;
 }
@@ -4477,10 +4472,11 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    HYPRE_Int         i, k1, k2;
    HYPRE_Real        value, trace1, trace2, alpha, r_norm;
 
-   /* martix A */
+   /* matrix A */
    HYPRE_Int         *A_i = hypre_CSRMatrixI(matA);
    HYPRE_Int         *A_j = hypre_CSRMatrixJ(matA);
    HYPRE_Real        *A_data = hypre_CSRMatrixData(matA);
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(matA);
 
    /* complexity */
    HYPRE_Real        nnzA = hypre_CSRMatrixNumNonzeros(matA);
@@ -4512,14 +4508,14 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
 
    /* create initial guess and matrix I */
    matM = hypre_CSRMatrixCreate(n, n, n);
-   M_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
-   M_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   M_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   M_i = hypre_TAlloc(HYPRE_Int, n + 1, memory_location);
+   M_j = hypre_TAlloc(HYPRE_Int, n, memory_location);
+   M_data = hypre_TAlloc(HYPRE_Real, n, memory_location);
 
    matI = hypre_CSRMatrixCreate(n, n, n);
-   I_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
-   I_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   I_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_DEVICE);
+   I_i = hypre_TAlloc(HYPRE_Int, n + 1, memory_location);
+   I_j = hypre_TAlloc(HYPRE_Int, n, memory_location);
+   I_data = hypre_TAlloc(HYPRE_Real, n, memory_location);
 
    /* now loop to create initial guess */
    M_i[0] = 0;
@@ -4683,7 +4679,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    HYPRE_Real              norm, s_norm;
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int               myid;
-
+   HYPRE_MemoryLocation    memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_CSRMatrix         *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix         *M_diag = NULL;
@@ -4697,7 +4693,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
    /* setup */
    hypre_MPI_Comm_rank(comm, &myid);
 
-   M_offd_i = hypre_CTAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
+   M_offd_i = hypre_CTAlloc(HYPRE_Int, n + 1, memory_location);
 
    if (mr_col_version)
    {

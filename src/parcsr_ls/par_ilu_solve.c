@@ -1505,7 +1505,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
    HYPRE_Real        *SLU_data   = hypre_CSRMatrixData(matSLU_d);
    HYPRE_Int         m           = hypre_CSRMatrixNumRows(matSLU_d);
    HYPRE_Int         n           = nLU + m;
-   HYPRE_Int         SLU_nnz     = SLU_i[m];
+   HYPRE_Int         SLU_nnz     = hypre_CSRMatrixNumNonzeros(matSLU_d);
 
    hypre_Vector *ftemp_upper           = hypre_SeqVectorCreate(nLU);
    hypre_Vector *utemp_lower           = hypre_SeqVectorCreate(m);
@@ -1521,7 +1521,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
       BLU_i                      = hypre_CSRMatrixI(matBLU_d);
       BLU_j                      = hypre_CSRMatrixJ(matBLU_d);
       BLU_data                   = hypre_CSRMatrixData(matBLU_d);
-      BLU_nnz                    = BLU_i[nLU];
+      BLU_nnz                    = hypre_CSRMatrixNumNonzeros(matBLU_d);
    }
 
    /* begin */
