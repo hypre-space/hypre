@@ -1028,7 +1028,6 @@ hypre_CSRMatrixPermuteHost( hypre_CSRMatrix  *A,
 {
    /* Input variables */
    HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         num_cols     = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
@@ -1076,7 +1075,10 @@ hypre_CSRMatrixPermute( hypre_CSRMatrix  *A,
                         HYPRE_Int        *rqperm,
                         hypre_CSRMatrix **B_ptr )
 {
-   hypre_CSRMatrix    *B;
+   HYPRE_Int          num_rows     = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int          num_cols     = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int          num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   hypre_CSRMatrix   *B;
 
    hypre_GpuProfilingPushRange("CSRMatrixReorder");
 
