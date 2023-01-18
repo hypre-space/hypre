@@ -2003,7 +2003,6 @@ template <HYPRE_Int K>
 __global__ void
 hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
                                          HYPRE_Int          num_rows,
-                                         HYPRE_Int          num_nonzeros,
                                          HYPRE_Int         *perm,
                                          HYPRE_Int         *rqperm,
                                          HYPRE_Int         *A_i,
@@ -2032,13 +2031,18 @@ hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
    for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < num_rows);
         grid_group_id += grid_ngroups)
    {
-      HYPRE_Int row = grid_group_id;
-
       /* Load data to sub-warps */
       if (group_lane == 0)
       {
-         perm_row = read_only_load(&perm[row]);
-         pB = read_only_load(&B_i[row]);
+         if (grid_group_id < num_rows)
+         {
+            perm_row = read_only_load(&perm[grid_group_id]);
+            pB = read_only_load(&B_i[grid_group_id]);
+         }
+         else
+         {
+            perm_row = pB = 0;
+         }
       }
       perm_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, perm_row, 0, K);
       pB = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pB, 0, K);
@@ -2051,7 +2055,7 @@ hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
       pA = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pA, 0, K);
 
       /* Build B_j and B_a */
-      if (row < num_rows)
+      if (grid_group_id < num_rows)
       {
          for (j = group_lane; j < qA - pA; j += K)
          {
@@ -2072,7 +2076,7 @@ HYPRE_Int
 hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                               HYPRE_Int        *perm,
                               HYPRE_Int        *rqperm,
-                              hypre_CSRMatrix **B_ptr )
+                              hypre_CSRMatrix  *B )
 {
    /* Input matrix */
    HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
@@ -2081,19 +2085,9 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
    HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
    HYPRE_Complex    *A_a          = hypre_CSRMatrixData(A);
-
-   /* Local variables */
-   hypre_CSRMatrix  *B;
-   HYPRE_Int        *B_i;
-   HYPRE_Int        *B_j;
-   HYPRE_Complex    *B_a;
-
-   /* Create output matrix B */
-   B = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
-   hypre_CSRMatrixInitialize_v2(B, 0, hypre_CSRMatrixMemoryLocation(A));
-   B_i = hypre_CSRMatrixI(B);
-   B_j = hypre_CSRMatrixJ(B);
-   B_a = hypre_CSRMatrixData(B);
+   HYPRE_Int        *B_i          = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j          = hypre_CSRMatrixJ(B);
+   HYPRE_Complex    *B_a          = hypre_CSRMatrixData(B);
 
    /* Build B_i */
    {
@@ -2121,42 +2115,34 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
       if (avg_rownnz >= lower_bounds[0])
       {
          const dim3 gDim((num_rows + num_groups_per_block[0] - 1) / num_groups_per_block[0]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[0]>,
-                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                           A_i, A_j, A_a, B_i, B_j, B_a );
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[0]>, gDim, bDim,
+                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else if (avg_rownnz >= lower_bounds[1])
       {
          const dim3 gDim((num_rows + num_groups_per_block[1] - 1) / num_groups_per_block[1]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[1]>,
-                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                           A_i, A_j, A_a, B_i, B_j, B_a );
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[1]>, gDim, bDim,
+                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else if (avg_rownnz >= lower_bounds[2])
       {
          const dim3 gDim((num_rows + num_groups_per_block[2] - 1) / num_groups_per_block[2]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[2]>,
-                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                           A_i, A_j, A_a, B_i, B_j, B_a );
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[2]>, gDim, bDim,
+                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else if (avg_rownnz >= lower_bounds[3])
       {
          const dim3 gDim((num_rows + num_groups_per_block[3] - 1) / num_groups_per_block[3]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[3]>,
-                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                           A_i, A_j, A_a, B_i, B_j, B_a );
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[3]>, gDim, bDim,
+                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
       }
       else
       {
          const dim3 gDim((num_rows + num_groups_per_block[4] - 1) / num_groups_per_block[4]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[4]>,
-                           gDim, bDim, num_rows, num_nonzeros, perm, rqperm,
-                           A_i, A_j, A_a, B_i, B_j, B_a );
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[4]>, gDim, bDim,
+                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
       }
    }
-
-   /* Set output pointer */
-   *B_ptr = B;
 
    return hypre_error_flag;
 }
