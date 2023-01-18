@@ -2080,7 +2080,6 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
 {
    /* Input matrix */
    HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         num_cols     = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
