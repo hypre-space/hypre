@@ -1080,7 +1080,7 @@ hypre_CSRMatrixPermute( hypre_CSRMatrix  *A,
    HYPRE_Int          num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    hypre_CSRMatrix   *B;
 
-   hypre_GpuProfilingPushRange("CSRMatrixReorder");
+   hypre_GpuProfilingPushRange("CSRMatrixPermute");
 
    /* Special case: one of the permutation vectors are not provided, then B = A */
    if (!perm || !rqperm)
