@@ -1537,6 +1537,8 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
  *   reordering_type: Type of reordering for the interior nodes.
  *
  * Currently only supports RCM reordering. Set to 0 for no reordering.
+ *
+ * TODO (VPM): Change permutation arrays types to hypre_IntArray
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1561,8 +1563,9 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix   *A,
    /* Local variables */
    HYPRE_Int              i, nB_pre, irow, jcol, nLU;
    HYPRE_Int             *pperm, *qperm;
-   HYPRE_Int             *d_pperm, *d_qperm;
+   HYPRE_Int             *new_pperm, *new_qperm;
    HYPRE_Int             *rpperm, *rqperm, *pperm_pre, *qperm_pre;
+   HYPRE_MemoryLocation   memory_location_perm;
 
    /* 1: Setup and create memory */
    pperm  = NULL;
@@ -1657,24 +1660,29 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix   *A,
    if (reordering_type != 0)
    {
       hypre_ILULocalRCM(h_A_diag, 0, nLU, &pperm, &qperm, 0);
+      memory_location_perm = memory_location;
+   }
+   else
+   {
+      memory_location_perm = HYPRE_MEMORY_HOST;
    }
 
    /* Move to device memory if needed */
-   if (memory_location == HYPRE_MEMORY_DEVICE)
+   if (memory_location_perm != memory_location)
    {
-      d_pperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-      d_qperm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
+      new_pperm = hypre_TAlloc(HYPRE_Int, n, memory_location);
+      new_qperm = hypre_TAlloc(HYPRE_Int, n, memory_location);
 
-      hypre_TMemcpy(d_pperm, pperm, HYPRE_Int, n,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(d_qperm, qperm, HYPRE_Int, n,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(new_pperm, pperm, HYPRE_Int, n,
+                    memory_location, memory_location_perm);
+      hypre_TMemcpy(new_qperm, qperm, HYPRE_Int, n,
+                    memory_location, memory_location_perm);
 
-      hypre_TFree(pperm, HYPRE_MEMORY_HOST);
-      hypre_TFree(qperm, HYPRE_MEMORY_HOST);
+      hypre_TFree(pperm, memory_location_perm);
+      hypre_TFree(qperm, memory_location_perm);
 
-      pperm = d_pperm;
-      qperm = d_qperm;
+      pperm = new_pperm;
+      qperm = new_qperm;
    }
 
    /* Output pointers */
