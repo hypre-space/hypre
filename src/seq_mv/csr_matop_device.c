@@ -1904,73 +1904,6 @@ hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_GPU)
-
-HYPRE_Int
-hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
-                               hypre_CSRMatrix **AT_ptr,
-                               HYPRE_Int         data)
-{
-   hypre_GpuProfilingPushRange("CSRMatrixTranspose");
-
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
-   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   hypre_CSRMatrix  *C;
-
-
-   /* trivial case */
-   if (nnz_A == 0)
-   {
-      C_i =    hypre_CTAlloc(HYPRE_Int,     ncols_A + 1, HYPRE_MEMORY_DEVICE);
-      C_j =    hypre_CTAlloc(HYPRE_Int,     0,           HYPRE_MEMORY_DEVICE);
-      C_data = hypre_CTAlloc(HYPRE_Complex, 0,           HYPRE_MEMORY_DEVICE);
-   }
-   else
-   {
-      if ( !hypre_HandleSpTransUseVendor(hypre_handle()) )
-      {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-         hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
-#endif
-      }
-      else
-      {
-#if defined(HYPRE_USING_CUSPARSE)
-         hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
-                                        data);
-#elif defined(HYPRE_USING_ROCSPARSE)
-         hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
-                                         data);
-#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-         hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
-#endif
-      }
-   }
-
-   C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
-
-   *AT_ptr = C;
-
-   hypre_SyncComputeStream(hypre_handle());
-
-   hypre_GpuProfilingPopRange();
-
-   return hypre_error_flag;
-}
-
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_CSRMatrixRowPtrReorder
  *--------------------------------------------------------------------------*/
@@ -2142,6 +2075,73 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                            num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
       }
    }
+
+   return hypre_error_flag;
+}
+
+#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_GPU)
+
+HYPRE_Int
+hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
+                               hypre_CSRMatrix **AT_ptr,
+                               HYPRE_Int         data)
+{
+   hypre_GpuProfilingPushRange("CSRMatrixTranspose");
+
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
+   HYPRE_Int        *C_j;
+   hypre_CSRMatrix  *C;
+
+
+   /* trivial case */
+   if (nnz_A == 0)
+   {
+      C_i =    hypre_CTAlloc(HYPRE_Int,     ncols_A + 1, HYPRE_MEMORY_DEVICE);
+      C_j =    hypre_CTAlloc(HYPRE_Int,     0,           HYPRE_MEMORY_DEVICE);
+      C_data = hypre_CTAlloc(HYPRE_Complex, 0,           HYPRE_MEMORY_DEVICE);
+   }
+   else
+   {
+      if ( !hypre_HandleSpTransUseVendor(hypre_handle()) )
+      {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+         hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+#endif
+      }
+      else
+      {
+#if defined(HYPRE_USING_CUSPARSE)
+         hypreDevice_CSRSpTransCusparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                        data);
+#elif defined(HYPRE_USING_ROCSPARSE)
+         hypreDevice_CSRSpTransRocsparse(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data,
+                                         data);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+         hypreDevice_CSRSpTrans(nrows_A, ncols_A, nnz_A, A_i, A_j, A_data, &C_i, &C_j, &C_data, data);
+#endif
+      }
+   }
+
+   C = hypre_CSRMatrixCreate(ncols_A, nrows_A, nnz_A);
+   hypre_CSRMatrixI(C) = C_i;
+   hypre_CSRMatrixJ(C) = C_j;
+   hypre_CSRMatrixData(C) = C_data;
+   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+
+   *AT_ptr = C;
+
+   hypre_SyncComputeStream(hypre_handle());
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
