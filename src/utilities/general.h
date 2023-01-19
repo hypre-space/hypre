@@ -47,5 +47,17 @@ typedef double                 hypre_double;
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
+#include <HYPRE_config.h>
+
+#ifndef hypre_sqrt
+#if defined(HYPRE_SINGLE)
+#define hypre_sqrt sqrtf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_sqrt sqrtl
+#else
+#define hypre_sqrt sqrt
+#endif
+#endif
+
 #endif /* hypre_GENERAL_HEADER */
 

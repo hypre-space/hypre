@@ -55,7 +55,6 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
-#define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM
 #define MPI_MIN             hypre_MPI_MIN

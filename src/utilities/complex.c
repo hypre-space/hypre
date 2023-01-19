@@ -14,31 +14,31 @@
 HYPRE_Complex
 hypre_conj( HYPRE_Complex value )
 {
-   return conj(value);
+   return hypre_conjugate(value);
 }
 
 HYPRE_Real
 hypre_cabs( HYPRE_Complex value )
 {
-   return cabs(value);
+   return hypre_complex_abs(value);
 }
 
 HYPRE_Real
 hypre_creal( HYPRE_Complex value )
 {
-   return creal(value);
+   return hypre_complex_real(value);
 }
 
 HYPRE_Real
 hypre_cimag( HYPRE_Complex value )
 {
-   return cimag(value);
+   return hypre_complex_imag(value);
 }
 
 HYPRE_Complex
 hypre_csqrt( HYPRE_Complex value )
 {
-   return csqrt(value);
+   return hypre_complex_sqrt(value);
 }
 
 #endif

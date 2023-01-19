@@ -63,6 +63,18 @@ typedef double                 hypre_double;
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
+#include <HYPRE_config.h>
+
+#ifndef hypre_sqrt
+#if defined(HYPRE_SINGLE)
+#define hypre_sqrt sqrtf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_sqrt sqrtl
+#else
+#define hypre_sqrt sqrt
+#endif
+#endif
+
 #endif /* hypre_GENERAL_HEADER */
 
 /******************************************************************************
@@ -207,7 +219,6 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
-#define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM
 #define MPI_MIN             hypre_MPI_MIN
@@ -1599,10 +1610,10 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
-#define hypre_cabs(value)  fabs(value)
+#define hypre_cabs(value)  hypre_abs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
-#define hypre_csqrt(value) sqrt(value)
+#define hypre_csqrt(value) hypre_sqrt(value)
 #endif
 
 /* general.c */

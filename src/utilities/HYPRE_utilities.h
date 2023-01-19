@@ -83,9 +83,44 @@ typedef double HYPRE_Real;
 #endif
 
 #if defined(HYPRE_COMPLEX)
+/* support for float double and long double complex types */
+#if defined(HYPRE_SINGLE)
+typedef float _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_FLOAT_COMPLEX
+#ifdef HYPRE_SEQUENTIAL
+#define MPI_C_FLOAT_COMPLEX hypre_MPI_COMPLEX
+#endif
+/* wrappers to some general complex functions */
+#define hypre_complex_abs cabsf
+#define hypre_conjugate conjf
+#define hypre_complex_real crealf
+#define hypre_complex_imag cimagf
+#define hypre_complex_sqrt csqrtf
+#elif defined(HYPRE_LONG_DOUBLE)
+typedef long double _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_LONG_DOUBLE_COMPLEX
+#ifdef HYPRE_SEQUENTIAL
+#define MPI_C_LONG_DOUBLE_COMPLEX hypre_MPI_COMPLEX
+#endif
+/* wrappers to some general complex functions */
+#define hypre_complex_abs cabsl
+#define hypre_conjugate conjl
+#define hypre_complex_real creall
+#define hypre_complex_imag cimagl
+#define hypre_complex_sqrt csqrtl
+#else /* default */
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-
+#ifdef HYPRE_SEQUENTIAL
+#define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
+#endif
+/* wrappers to some general complex functions */
+#define hypre_complex_abs cabs
+#define hypre_conjugate conj
+#define hypre_complex_real creal
+#define hypre_complex_imag cimag
+#define hypre_complex_sqrt csqrt
+#endif
 #else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
