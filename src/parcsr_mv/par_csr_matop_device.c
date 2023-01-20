@@ -1851,10 +1851,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* A_offd = diag(ld) * A_offd * diag(rd) */
-   if (num_cols_offd)
-   {
-      hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
-   }
+   hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
 
    /*---------------------------------------------------------------------
     * Synchronize calls

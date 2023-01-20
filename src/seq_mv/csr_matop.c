@@ -2038,6 +2038,8 @@ hypre_CSRMatrixDiagScaleHost( hypre_CSRMatrix *A,
 
    HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
    HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
+   HYPRE_Int      lsize  = ld ? hypre_VectorSize(ld) : 0;
+   HYPRE_Int      rsize  = rd ? hypre_VectorSize(rd) : 0;
 
    HYPRE_Int      i, j;
    HYPRE_Complex  sl;
@@ -2088,7 +2090,11 @@ hypre_CSRMatrixDiagScaleHost( hypre_CSRMatrix *A,
    }
    else
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices are not set!\n");
+      /* Throw an error if the scaling factors should have a size different than zero */
+      if (lsize || rsize)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices are not set!\n");
+      }
    }
 
    return hypre_error_flag;
@@ -2106,12 +2112,21 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
                           hypre_Vector    *ld,
                           hypre_Vector    *rd)
 {
-   HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
-   HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
-
-   if (!ldata && !rdata)
+   /* Sanity checks */
+   if (ld && hypre_VectorSize(ld) && !hypre_VectorData(ld))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices coefficients are not set\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ld scaling coefficients are not set\n");
+      return hypre_error_flag;
+   }
+
+   if (rd && hypre_VectorSize(rd) && !hypre_VectorData(rd))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "rd scaling coefficients are not set\n");
+      return hypre_error_flag;
+   }
+
+   if (!rd && !ld)
+   {
       return hypre_error_flag;
    }
 

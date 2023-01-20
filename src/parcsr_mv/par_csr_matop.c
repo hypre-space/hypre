@@ -6365,13 +6365,13 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 #endif
 
    /* A_offd = diag(ld) * A_offd * diag(rd) */
-   if (hypre_VectorSize(rdbuf))
-   {
-      hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
-   }
+   hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
 
    /* Free memory */
    hypre_SeqVectorDestroy(rdbuf);
+#if !defined(HYPRE_USING_PERSISTENT_COMM)
+   hypre_TFree(send_rdbuf_data, HYPRE_MEMORY_HOST);
+#endif
 
    return hypre_error_flag;
 }
