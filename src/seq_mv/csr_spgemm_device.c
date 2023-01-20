@@ -67,8 +67,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
                                      hypre_CSRMatrixGPUMatDescr(B), nnzb, d_ib, d_jb, d_b,
                                      hypre_CSRMatrixGPUMatDescr(C), hypre_CSRMatrixGPUMatInfo(C), &nnzC, &d_ic, &d_jc, &d_c);
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
-      /* WM: todo - remove when oneMKL is fixed */
-      hypre_printf("WARNING: oneMKL sparse matmat may not give numerically correct results! Please set SpgemmUseVendor to 0\n");
       hypreDevice_CSRSpGemmOnemklsparse(m, k, n,
                                         hypre_CSRMatrixGPUMatHandle(A), nnza, d_ia, d_ja, d_a,
                                         hypre_CSRMatrixGPUMatHandle(B), nnzb, d_ib, d_jb, d_b,
@@ -130,6 +128,14 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM] += hypre_MPI_Wtime();
+#endif
+
+#if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_UNIFIED_MEMORY)
+   /* WM: sort the matrix to ensure deterministic output with the sycl backend */
+   if (nnzC > 0)
+   {
+      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::sort_matrix(*hypre_HandleComputeStream(hypre_handle()), hypre_CSRMatrixGPUMatHandle(C), {}).wait() );
+   }
 #endif
 
    return hypre_error_flag;

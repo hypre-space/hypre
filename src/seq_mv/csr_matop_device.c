@@ -763,7 +763,7 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
 
-   /* WM: better way to get around lack of constant iterator in DPL? */
+   /* WM: todo - better way to get around lack of constant iterator in DPL? */
    HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
