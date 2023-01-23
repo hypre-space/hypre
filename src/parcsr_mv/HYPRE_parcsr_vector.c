@@ -175,22 +175,6 @@ HYPRE_ParVectorAxpy( HYPRE_Complex   alpha,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParVectorAxpyz
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_ParVectorAxpyz( HYPRE_Complex   alpha,
-                      HYPRE_ParVector x,
-                      HYPRE_Complex   beta,
-                      HYPRE_ParVector y,
-                      HYPRE_ParVector z )
-{
-   return hypre_ParVectorAxpyz( alpha, (hypre_ParVector *)x,
-                                beta,  (hypre_ParVector *)y,
-                                (hypre_ParVector *)z );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
