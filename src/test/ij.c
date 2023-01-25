@@ -288,7 +288,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int  spmv_use_vendor = 1;
    HYPRE_Int  use_curand = 1;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_Int  spgemm_use_vendor = 0;
 #else
    HYPRE_Int  spgemm_use_vendor = 1;

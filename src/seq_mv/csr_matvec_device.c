@@ -478,10 +478,12 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
    sycl::queue *compute_queue = hypre_HandleComputeStream(hypre_handle());
    hypre_CSRMatrix *AT;
    oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
+   hypre_GPUMatDataSetCSRData(A);
 
    if (trans)
    {
       hypre_CSRMatrixTransposeDevice(A, &AT, 1);
+      hypre_GPUMatDataSetCSRData(AT);
       matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
    }
 

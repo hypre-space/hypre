@@ -12,6 +12,9 @@ case $1 in
       cat <<EOF
 
    **** Only run this script on JLSE florentia nodes ****
+   **** Last tested with modules:                    ****
+   ****     oneapi/eng-compiler/2022.10.15.006       ****
+   ****     intel_compute_runtime/release/pvc-prq-66 ****
 
    $0 [-h|-help] {src_dir}
 

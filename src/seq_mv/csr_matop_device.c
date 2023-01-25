@@ -93,13 +93,11 @@ hypre_GpuMatDataCreate()
 }
 
 void
-hypre_GPUMatDataSetCSRData( hypre_GpuMatData *data,
-                            hypre_CSRMatrix *matrix)
+hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 {
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
-   oneapi::mkl::sparse::matrix_handle_t mat_handle = hypre_GpuMatDataMatHandle(data);
-   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(mat_handle,
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(hypre_CSRMatrixGPUMatHandle(matrix),
                                                         hypre_CSRMatrixNumRows(matrix),
                                                         hypre_CSRMatrixNumCols(matrix),
                                                         oneapi::mkl::index_base::zero,

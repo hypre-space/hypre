@@ -45,7 +45,7 @@ Final Relative Residual Norm = 9.550472e-09
 
 # Output file: vector.out.B3
 BiCGSTAB Iterations = 12
-Final BiCGSTAB Relative Residual Norm = 6.282585e-09
+Final BiCGSTAB Relative Residual Norm = 6.282586e-09
 
 # Output file: vector.out.B4
 LGMRES Iterations = 53
@@ -89,7 +89,7 @@ Final Relative Residual Norm = 9.628834e-09
 
 # Output file: vector.out.B103
 BiCGSTAB Iterations = 12
-Final BiCGSTAB Relative Residual Norm = 6.282586e-09
+Final BiCGSTAB Relative Residual Norm = 6.282585e-09
 
 # Output file: vector.out.B104
 LGMRES Iterations = 53
