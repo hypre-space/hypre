@@ -414,7 +414,7 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #define HYPRE_MAGMA_CALL(call) do {                                                          \
    magma_int_t err = call;                                                                   \
    if (MAGMA_SUCCESS != err) {                                                               \
-      printf("MAGAMA ERROR (code = %d, %s) at %s:%d\n",                                      \
+      printf("MAGMA ERROR (code = %d, %s) at %s:%d\n",                                       \
             err, __FILE__, __LINE__);                                                        \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)

@@ -369,7 +369,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
 
          /* Find maximum coefficient in absolute value in the warp */
          warp_max_val = max_val;
-         #pragma unroll
+#pragma unroll
          for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
          {
             warp_max_val = max(warp_max_val, __shfl_xor_sync(0xFFFFFFFFU, warp_max_val, d));
@@ -500,7 +500,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 
          /* Find maximum coefficient in absolute value in the warp */
          warp_max_val = max_val;
-         #pragma unroll
+#pragma unroll
          for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
          {
             warp_max_val = max(warp_max_val, __shfl_xor_sync(0xFFFFFFFFU, warp_max_val, d));
@@ -963,12 +963,12 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
 #if defined(HYPRE_USING_MAGMA)
       HYPRE_MAGMA_CALL(magma_dpotrf_batched(uplo,
-                                 max_nnz_row,
-                                 mat_aop,
-                                 max_nnz_row,
-                                 info,
-                                 num_rows,
-                                 queue));
+                                            max_nnz_row,
+                                            mat_aop,
+                                            max_nnz_row,
+                                            info,
+                                            num_rows,
+                                            queue));
 #else
       HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                   uplo,
@@ -982,30 +982,30 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
-     hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
-                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     for (HYPRE_Int k = 0; k < num_rows; k++)
-     {
-        if (h_info[k] != 0)
-        {
-           hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
-                           "Cholesky factorization failed at system #%d, row %d\n",
-                           k, h_info[k]);
-        }
-     }
+      hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (HYPRE_Int k = 0; k < num_rows; k++)
+      {
+         if (h_info[k] != 0)
+         {
+            hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
+                            "Cholesky factorization failed at system #%d, row %d\n",
+                            k, h_info[k]);
+         }
+      }
 #endif
 
       hypre_GpuProfilingPushRange("Solve");
 #if defined(HYPRE_USING_MAGMA)
       HYPRE_MAGMA_CALL(magma_dpotrs_batched(uplo,
-                                 max_nnz_row,
-                                 1,
-                                 mat_aop,
-                                 max_nnz_row,
-                                 sol_aop,
-                                 max_nnz_row,
-                                 num_rows,
-                                 queue));
+                                            max_nnz_row,
+                                            1,
+                                            mat_aop,
+                                            max_nnz_row,
+                                            sol_aop,
+                                            max_nnz_row,
+                                            num_rows,
+                                            queue));
       magma_finalize();
 
 #else
@@ -1023,17 +1023,17 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
-     hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
-                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     for (HYPRE_Int k = 0; k < num_rows; k++)
-     {
-        if (h_info[k] != 0)
-        {
-           hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
-                           "Cholesky solution failed at system #%d with code %d\n",
-                           k, h_info[k]);
-        }
-     }
+      hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (HYPRE_Int k = 0; k < num_rows; k++)
+      {
+         if (h_info[k] != 0)
+         {
+            hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
+                            "Cholesky solution failed at system #%d with code %d\n",
+                            k, h_info[k]);
+         }
+      }
 #endif
 
 #if HYPRE_DEBUG

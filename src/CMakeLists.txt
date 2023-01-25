@@ -545,6 +545,7 @@ if (HYPRE_USING_MAGMA)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_INCLUDE_DIRS})
 endif (HYPRE_USING_MAGMA)
 
+# FIXME This has already been set, o.w. we wouldn't try looking for MAGMA!!
 if (MAGMA_FOUND)
   set(HYPRE_USING_MAGMA TRUE)
 endif ()
