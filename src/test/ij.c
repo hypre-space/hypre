@@ -201,14 +201,17 @@ main( hypre_int argc,
    HYPRE_Real         *values, val;
 
    HYPRE_Int           use_nonsymm_schwarz = 0;
-   HYPRE_Int           test_ij = 0;
-   HYPRE_Int           test_multivec = 0;
    HYPRE_Int           build_rbm = 0;
    HYPRE_Int           build_rbm_index = 0;
    HYPRE_Int           num_interp_vecs = 0;
    HYPRE_Int           interp_vec_variant = 0;
    HYPRE_Int           Q_max = 0;
    HYPRE_Real          Q_trunc = 0;
+
+   /* Specific tests */
+   HYPRE_Int           test_ij = 0;
+   HYPRE_Int           test_multivec = 0;
+   HYPRE_Int           test_scaling = 0;
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
@@ -634,6 +637,11 @@ main( hypre_int argc,
       {
          arg_index++;
          test_multivec = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-test_scaling") == 0 )
+      {
+         arg_index++;
+         test_scaling = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -3696,7 +3704,7 @@ main( hypre_int argc,
       HYPRE_Real       bf_dot_bf, e_dot_e;
       HYPRE_Int        num_rows_full = local_num_rows * num_components;
       HYPRE_BigInt     ilower = first_local_row * num_components;
-      HYPRE_BigInt     iupper = ilower + (HYPRE_BigInt) num_rows_full;
+      HYPRE_BigInt     iupper = ilower + (HYPRE_BigInt) num_rows_full - 1;
 
       /* Allocate memory */
       d_data_full = hypre_CTAlloc(HYPRE_Complex, num_rows_full, memory_location);
@@ -3726,6 +3734,85 @@ main( hypre_int argc,
       /* Free memory */
       hypre_TFree(d_data_full, memory_location);
       HYPRE_IJVectorDestroy(ij_bf);
+   }
+
+   /*-----------------------------------------------------------
+    * Test matrix scaling: B = diag(ld) * A * diag(rd)
+    *-----------------------------------------------------------*/
+
+   if (test_scaling)
+   {
+      HYPRE_IJVector   ij_ld  = NULL;
+      HYPRE_IJVector   ij_rd  = NULL;
+      HYPRE_ParVector  par_ld = NULL;
+      HYPRE_ParVector  par_rd = NULL;
+      HYPRE_Complex   *d_data;
+      HYPRE_Int        scaling_type;
+
+      time_index = hypre_InitializeTiming("ParCSR scaling");
+      hypre_BeginTiming(time_index);
+
+      /* Allocate memory */
+      d_data = hypre_TAlloc(HYPRE_Complex, local_num_rows, memory_location);
+
+      /* Select scaling type:
+           left  OR right scaling: diag inverse (2)
+           left AND right scaling: diag inverse sqrt (3) */
+      scaling_type = (test_scaling == 1 || test_scaling == 2) ? 2 : 3;
+
+      /* Compute scaling vector */
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(parcsr_A), d_data, scaling_type);
+
+      /* Create diagonal scaling matrix diag(ld) */
+      if (test_scaling != 2)
+      {
+         HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_ld);
+         HYPRE_IJVectorSetObjectType(ij_ld, HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(ij_ld);
+         HYPRE_IJVectorSetValues(ij_ld, local_num_rows, NULL, d_data);
+         HYPRE_IJVectorAssemble(ij_ld);
+         HYPRE_IJVectorGetObject(ij_ld, &object);
+         par_ld = (HYPRE_ParVector) object;
+      }
+
+      /* Create diagonal scaling matrix diag(rd) */
+      if (test_scaling != 1)
+      {
+         HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_rd);
+         HYPRE_IJVectorSetObjectType(ij_rd, HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(ij_rd);
+         HYPRE_IJVectorSetValues(ij_rd, local_num_rows, NULL, d_data);
+         HYPRE_IJVectorAssemble(ij_rd);
+         HYPRE_IJVectorGetObject(ij_rd, &object);
+         par_rd = (HYPRE_ParVector) object;
+      }
+
+      /* Compute A = diag(ld) * A * diag(rd) */
+      hypre_ParCSRMatrixDiagScale(parcsr_A, par_ld, par_rd);
+
+      /* Print scaled matrix */
+      if (print_system)
+      {
+         hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.Ascal");
+         HYPRE_IJVectorPrint(ij_ld, "IJ.out.ld");
+         HYPRE_IJVectorPrint(ij_rd, "IJ.out.rd");
+      }
+
+      /* Free memory */
+      hypre_TFree(d_data, memory_location);
+      if (ij_rd)
+      {
+         HYPRE_IJVectorDestroy(ij_rd);
+      }
+      if (ij_ld)
+      {
+         HYPRE_IJVectorDestroy(ij_ld);
+      }
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("ParCSR scaling", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
    }
 
    /*-----------------------------------------------------------

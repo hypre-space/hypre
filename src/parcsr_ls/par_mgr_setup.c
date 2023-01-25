@@ -764,7 +764,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             A_ff_array[j] = NULL;
          }
       }
-      if (mgr_data -> fsolver_mode > 0)
+      if (mgr_data -> fsolver_mode != 0)
       {
          if (A_ff_array[0])
          {
@@ -792,8 +792,6 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_BoomerAMGDestroy(aff_solver[0]);
          }
       }
-      hypre_TFree(aff_solver, HYPRE_MEMORY_HOST);
-      aff_solver = NULL;
    }
 
    if ((mgr_data -> fine_grid_solver_setup) != NULL)
@@ -1180,77 +1178,103 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
       }
 
-      // Check user-prescribed F-solver
-      if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
+      if (Frelax_type[lev] == 2 || Frelax_type[lev] == 9 || Frelax_type[lev] == 99 ||
+          Frelax_type[lev] == 199)
       {
-         if (Frelax_type[lev] == 2)
+         // Check user-prescribed F-solver
+         if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
-            // Check that solver is setup
-            if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
+            if (Frelax_type[lev] == 2)
             {
-               if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
+               // Check that solver is setup
+               if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
                {
-                  // F-solver is already set up, only need to store A_ff_ptr
-                  A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
-                  A_ff_array[lev] = A_ff_ptr;
-               }
-               else
-               {
-                  if (my_id == 0)
+                  if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
                   {
-                     hypre_printf("Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
-                     hypre_error(1);
-                     return hypre_error_flag;
+                     // F-solver is already set up, only need to store A_ff_ptr
+                     A_ff_ptr = ((hypre_ParAMGData*)aff_solver[lev])->A_array[0];
+                     A_ff_array[lev] = A_ff_ptr;
+                  }
+                  else
+                  {
+                     if (my_id == 0 && print_level > 1)
+                     {
+                        hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                                          "Error!!! Invalid AMG setup for user-prescribed F-relaxation.\n");
+                        return hypre_error_flag;
+                     }
                   }
                }
-            }
-            else // F-relaxation solver prescribed but not set up
-            {
-               // Compute A_ff and setup F-solver
-               if (exec == HYPRE_EXEC_HOST)
+               else // F-relaxation solver prescribed but not set up
                {
-                  hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
-               }
+                  // Compute A_ff and setup F-solver
+                  if (exec == HYPRE_EXEC_HOST)
+                  {
+                     hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
+                  }
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-               else
-               {
-                  hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
-                                                       &A_ff_ptr);
-               }
+                  else
+                  {
+                     hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
+                                                          &A_ff_ptr);
+                  }
 #endif
-               fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev + 1], U_fine_array[lev + 1]);
+                  fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev + 1], U_fine_array[lev + 1]);
 
-               A_ff_array[lev] = A_ff_ptr;
-               (mgr_data -> fsolver_mode) = 1;
+                  A_ff_array[lev] = A_ff_ptr;
+                  (mgr_data -> fsolver_mode) = 1;
+               }
             }
-         }
-         else // print warning.
-         {
-            if (my_id == 0)
+            else
             {
-               hypre_printf("Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
-               Ignoring this call and using user prescribed Frelax_type %d instead.\n",
-                            Frelax_type[lev]);
+               if (my_id == 0 && print_level > 1)
+               {
+                  hypre_printf("Warning!! User-prescribed F-solver for the first level reduction ( set in HYPRE_MGRSetFSolver() ) only supports AMG. \
+ Ignoring this call and using user prescribed Frelax_type %d instead.\n",
+                               Frelax_type[lev]);
+               }
             }
          }
-      }
-      // hypre defined F-solver (AMG and GE variants)
-      else if (Frelax_type[lev] == 2 || Frelax_type[lev] == 9 || Frelax_type[lev] == 99 ||
-               Frelax_type[lev] == 199)
-      {
-         if (exec == HYPRE_EXEC_HOST)
-         {
-            hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
-         }
-#if defined(HYPRE_USING_CUDA)
          else
          {
-            hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
-                                                 &A_ff_ptr);
-         }
+            if (exec == HYPRE_EXEC_HOST)
+            {
+               hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_ff_ptr);
+            }
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+            else
+            {
+               hypre_ParCSRMatrixGenerateFFFCDevice(A_array[lev], CF_marker, coarse_pnts_global, NULL, NULL,
+                                                    &A_ff_ptr);
+            }
 #endif
-         //hypre_ParCSRMatrixPrintIJ(A_ff_ptr, 0, 0, "IJ.out.A_ff_wells");
-#if defined(HYPRE_USING_CUDA)
+            // set A_ff_array pointer
+            A_ff_array[lev] = A_ff_ptr;
+
+            // If AMG for F-relaxation, do setup here.
+            if (Frelax_type[lev] == 2)
+            {
+               aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
+               hypre_BoomerAMGSetMaxIter(aff_solver[lev], (mgr_data -> num_relax_sweeps)[lev]);
+               hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
+               //hypre_BoomerAMGSetStrongThreshold(aff_solver[lev], 0.6);
+#if defined(HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+               hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
+               hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
+               hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
+#else
+               hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
+#endif
+               hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
+               // setup
+               fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev + 1], U_fine_array[lev + 1]);
+
+               // set fsolver mode
+               (mgr_data -> fsolver_mode) = 2;
+            }
+         }
+         // Construct U and F arrays for F-relaxation with A_FF and transfer operators
+#if defined(HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
          hypre_IntArrayInitialize(F_marker);
          hypre_IntArraySetConstantValues(F_marker, 0);
@@ -1278,30 +1302,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                   hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
                                   hypre_ParCSRMatrixRowStarts(A_ff_ptr));
          hypre_ParVectorInitialize(U_fine_array[lev + 1]);
-         A_ff_array[lev] = A_ff_ptr;
-
-         // set fsolver mode
-         (mgr_data -> fsolver_mode) = 2;
-
-         // If AMG for F-relaxation, do setup here.
-         if (Frelax_type[lev] == 2)
-         {
-            aff_solver[lev] = (HYPRE_Solver*) hypre_BoomerAMGCreate();
-            hypre_BoomerAMGSetMaxIter(aff_solver[lev], (mgr_data -> num_relax_sweeps)[lev]);
-            hypre_BoomerAMGSetTol(aff_solver[lev], 0.0);
-            //hypre_BoomerAMGSetStrongThreshold(aff_solver[lev], 0.6);
-#if defined(HYPRE_USING_CUDA)
-            hypre_BoomerAMGSetRelaxType(aff_solver[lev], 18);
-            hypre_BoomerAMGSetCoarsenType(aff_solver[lev], 8);
-            hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 3);
-#else
-            hypre_BoomerAMGSetRelaxOrder(aff_solver[lev], 1);
-#endif
-            hypre_BoomerAMGSetPrintLevel(aff_solver[lev], mgr_data -> frelax_print_level);
-            // setup
-            fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev + 1], U_fine_array[lev + 1]);
-         }
-      }
+      } // end (Frelax_type[lev] == 2 || Frelax_type[lev] == 9 || Frelax_type[lev] == 99 || Frelax_type[lev] == 199)
 
       /* Update coarse level indexes for next levels */
       if (lev < num_coarsening_levs - 1)
