@@ -130,14 +130,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM] += hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_DEBUG) && defined(HYPRE_USING_SYCL) && defined(HYPRE_USING_UNIFIED_MEMORY)
-   /* WM: sort the matrix to ensure deterministic output with the sycl backend */
-   if (nnzC > 0)
-   {
-      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::sort_matrix(*hypre_HandleComputeStream(hypre_handle()), hypre_CSRMatrixGPUMatHandle(C), {}).wait() );
-   }
-#endif
-
    return hypre_error_flag;
 }
 
