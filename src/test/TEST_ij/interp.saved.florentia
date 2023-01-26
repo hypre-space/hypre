@@ -34,7 +34,7 @@
                    cycle = 5.054218
 
 # Output file: interp.out.5
- Average Convergence Factor = 0.490011
+ Average Convergence Factor = 0.490030
 
      Complexity:    grid = 1.403556
                 operator = 2.558503
