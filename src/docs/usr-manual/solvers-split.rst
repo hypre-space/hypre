@@ -25,3 +25,26 @@ where :math:`\tilde{M}^{-1}` is a decoupled block-diagonal V(1,1) cycle, a
 separate cycle for each part and variable type. There are two V-cycle options,
 SMG and PFMG.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|

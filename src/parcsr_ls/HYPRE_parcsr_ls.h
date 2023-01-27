@@ -24,10 +24,8 @@ extern "C" {
 /**
  * @defgroup ParCSRSolvers ParCSR Solvers
  *
- * These solvers use matrix/vector storage schemes that are taylored
- * for general sparse matrix systems.
- *
- * @memo Linear solvers for sparse matrix systems
+ * Linear solvers for sparse matrix systems. These solvers use matrix/vector
+ * storage schemes that are taylored for general sparse matrix systems.
  *
  * @{
  **/
@@ -3961,7 +3959,8 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
  * (Optional) Set the relaxation type for F-relaxation.
  * Currently supports the following flavors of relaxation types
  * as described in the \e BoomerAMGSetRelaxType:
- * \e relax_type 0 - 8, 13, 14, 18, 19, 98.
+ * \e relax_type 0, 3 - 8, 13, 14, 18. Also supports AMG (options 1 and 2)
+ *    and direct solver variants (9, 99, 199). See HYPRE_MGRSetLevelFRelaxType for details.
  **/
 HYPRE_Int
 HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
@@ -3974,7 +3973,7 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
  *
- *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetFLevelRelaxType!!
+ *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetLevelFRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
@@ -3991,7 +3990,8 @@ HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
  *
  *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
- *    - 2 : AMG.
+ *    - 2 : AMG
+ *    - 9, 99, 199 : Gaussian Elimination variants (GE, GE with pivoting, direct inversion respectively)
  **/
 HYPRE_Int
 HYPRE_MGRSetLevelFRelaxType(HYPRE_Solver solver,

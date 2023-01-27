@@ -99,7 +99,7 @@ hypre_MGRCreate(void)
    //(mgr_data -> global_smoother) = NULL;
 
    (mgr_data -> use_default_cgrid_solver) = 1;
-   (mgr_data -> fsolver_mode) = -1; // set to -1 to avoid printing when not used
+   (mgr_data -> fsolver_mode) = -1; // user or hypre -prescribed F-solver
    (mgr_data -> omega) = 1.;
    (mgr_data -> max_iter) = 20;
    (mgr_data -> tol) = 1.0e-6;
@@ -309,7 +309,7 @@ hypre_MGRDestroy( void *data )
             hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[i]);
          }
       }
-      if (mgr_data -> fsolver_mode > 0)
+      if (mgr_data -> fsolver_mode != 0)
       {
          if ((mgr_data -> A_ff_array)[0])
          {
@@ -466,21 +466,29 @@ hypre_MGRCreateGSElimData( void )
    hypre_ParAMGDataAInv(gsdata) = NULL;
    hypre_ParAMGDataBVec(gsdata) = NULL;
    hypre_ParAMGDataCommInfo(gsdata) = NULL;
+   hypre_ParAMGDataNewComm(gsdata) = hypre_MPI_COMM_NULL;
 
    return (void *) gsdata;
 }
 
-/* Destroy data for V-cycle F-relaxation */
+/* Destroy data for Gaussian Elim. for F-relaxation */
 HYPRE_Int
 hypre_MGRDestroyGSElimData( void *data )
 {
    hypre_ParAMGData * gsdata = (hypre_ParAMGData*) data;
+   MPI_Comm new_comm = hypre_ParAMGDataNewComm(gsdata);
 
    if (hypre_ParAMGDataAMat(gsdata)) { hypre_TFree(hypre_ParAMGDataAMat(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataAInv(gsdata)) { hypre_TFree(hypre_ParAMGDataAInv(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
    if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
 
+   if (new_comm != hypre_MPI_COMM_NULL)
+   {
+      hypre_MPI_Comm_free (&new_comm);
+   }
+   
+   hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
 
@@ -4918,7 +4926,7 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
    return (hypre_error_flag);
 }
 #endif
-/* set coarse grid solver */
+/* set F-relaxation solver */
 HYPRE_Int
 hypre_MGRSetFSolver( void  *mgr_vdata,
                      HYPRE_Int  (*fine_grid_solver_solve)(void*, void*, void*, void*),
@@ -6287,10 +6295,12 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
    hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
    hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
-   if ((mgr_data -> fsolver_mode) >= 0)
-   {
-      hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
-   }
+   /*
+      if ((mgr_data -> fsolver_mode) >= 0)
+      {
+         hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
+      }
+   */
    return hypre_error_flag;
 }
 
