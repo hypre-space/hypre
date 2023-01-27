@@ -15,8 +15,8 @@ dnl   if it is not found. If ACTION-IF-FOUND is not specified,
 dnl   the default action will define HAVE_MPI.
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_CHECK_MPI],
-[AC_PREREQ([2.71])dnl
-AC_PREREQ([2.71]) dnl for AC_LANG_CASE
+[AC_PREREQ([2.69])dnl
+AC_PREREQ([2.69]) dnl for AC_LANG_CASE
 
 if test x = x"$MPILIBS"; then
   AC_LANG_CASE([C], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
@@ -94,7 +94,7 @@ dnl *
 dnl * Set compile FLAGS for optimization
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_OPTIMIZATION_FLAGS],
-[AC_PREREQ([2.71])dnl
+[AC_PREREQ([2.69])dnl
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
@@ -214,7 +214,7 @@ dnl *
 dnl * Set compile FLAGS for debug
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_DEBUG_FLAGS],
-[AC_PREREQ([2.71])dnl
+[AC_PREREQ([2.69])dnl
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
