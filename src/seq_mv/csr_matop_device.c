@@ -16,6 +16,8 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
+#define CSRMATRIX_PERMUTE_THRUST
+
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData*
 hypre_CsrsvDataCreate()
@@ -1904,6 +1906,7 @@ hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+#if !defined(CSRMATRIX_PERMUTE_THRUST)
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_CSRMatrixRowPtrReorder
  *--------------------------------------------------------------------------*/
@@ -2028,8 +2031,8 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
 
       HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixRowPtrReorder, gDim, bDim,
                         num_rows, perm, A_i, B_i);
-      hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
    }
+   hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
 
    /* Build B_j and B_a */
    {
@@ -2078,6 +2081,104 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
 
    return hypre_error_flag;
 }
+#else
+
+/*--------------------------------------------------------------------------
+ * adj_functor
+ *--------------------------------------------------------------------------*/
+
+struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+{
+   HYPRE_Int *ia_;
+
+   adj_functor(int *ia)
+   {
+      ia_ = ia;
+   }
+
+   __global__ HYPRE_Int operator()(HYPRE_Int i) const
+   {
+      return ia_[i + 1] - ia_[i];
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * bii_functor
+ *--------------------------------------------------------------------------*/
+
+struct bii_functor
+{
+   HYPRE_Int *p_, *ia_, *ib_, *rb_;
+
+   bii_functor(HYPRE_Int *p, HYPRE_Int *ia, HYPRE_Int *ib, HYPRE_Int *rb)
+   {
+      p_ = p;
+      ia_ = ia;
+      ib_ = ib;
+      rb_ = rb;
+   }
+
+   __global__ void operator()(HYPRE_Int i)
+   {
+      const HYPRE_Int r = rb_[i];
+      rb_[i] = ia_[p_[r]] + i - ib_[r];
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPermuteDevice
+ *
+ * See hypre_CSRMatrixPermute.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
+                              HYPRE_Int        *perm,
+                              HYPRE_Int        *rqperm,
+                              hypre_CSRMatrix  *B )
+{
+   /* Input matrix */
+   HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
+   HYPRE_Complex    *A_a          = hypre_CSRMatrixData(A);
+   HYPRE_Int        *B_i          = hypre_CSRMatrixI(B);
+   HYPRE_Int        *B_j          = hypre_CSRMatrixJ(B);
+   HYPRE_Complex    *B_a          = hypre_CSRMatrixData(B);
+
+   HYPRE_Int        *B_ii;
+
+   /* Build B_i */
+   HYPRE_THRUST_CALL(gather,
+                     perm,
+                     perm + num_rows,
+                     thrust::make_transform_iterator(thrust::make_counting_iterator(0), adj_functor(A_i)),
+                     B_i);
+   hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
+
+   /* Build B_ii (row indices array) */
+   B_ii = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
+   hypreDevice_CsrRowPtrsToIndices_v2(num_rows, num_nonzeros, B_i, B_ii);
+   HYPRE_THRUST_CALL(for_each,
+                     thrust::make_counting_iterator(0),
+                     thrust::make_counting_iterator(num_nonzeros),
+                     bii_functor(perm, A_i, B_i, B_ii));
+
+   /* Build B_j and B_a */
+   HYPRE_THRUST_CALL(gather,
+                     B_ii,
+                     B_ii + num_nonzeros,
+                     thrust::make_zip_iterator(thrust::make_tuple(
+                       thrust::make_permutation_iterator(rqperm, A_j), A_a)),
+                     thrust::make_zip_iterator(thrust::make_tuple(B_j, B_a)));
+
+   /* Free memory */
+   hypre_TFree(B_ii, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+#endif
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 
