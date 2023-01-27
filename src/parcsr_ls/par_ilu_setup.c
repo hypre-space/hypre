@@ -117,6 +117,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("hypre_ILUSetup");
 
    //num_threads = hypre_NumThreads();
 
@@ -1215,6 +1216,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParILUDataMaxIter(ilu_data), HYPRE_MEMORY_HOST);
    hypre_ParILUDataRelResNorms(ilu_data) = rel_res_norms;
+
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -1803,7 +1806,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       /* Copy diagonal matrix into a new place with permutation
        * That is, A_diag = A_diag(perm,qperm);
        */
-      hypre_ParILUCusparseExtractDiagonalCSR(A, perm, rqperm, &A_diag);
+      hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm, rqperm, &A_diag);
 
       /* Apply ILU factorization to the entile A_diag */
       HYPRE_ILUSetupCusparseCSRILU0(A_diag, ilu_solve_policy);
