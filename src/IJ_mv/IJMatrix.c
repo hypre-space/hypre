@@ -11,21 +11,14 @@
  *
  *****************************************************************************/
 
-#include "./_hypre_IJ_mv.h"
-
+#include "_hypre_IJ_mv.h"
 #include "../HYPRE.h"
 
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixGetRowPartitioning
+ *
+ * Returns a pointer to the row partitioning of an IJMatrix
  *--------------------------------------------------------------------------*/
-
-/**
-Returns a pointer to the row partitioning
-
-@return integer error code
-@param IJMatrix [IN]
-The ijmatrix to be pointed to.
-*/
 
 HYPRE_Int
 hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix,
@@ -55,15 +48,9 @@ hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix,
 
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixGetColPartitioning
+ *
+ * Returns a pointer to the column partitioning of an IJMatrix
  *--------------------------------------------------------------------------*/
-
-/**
-Returns a pointer to the column partitioning
-
-@return integer error code
-@param IJMatrix [IN]
-The ijmatrix to be pointed to.
-*/
 
 HYPRE_Int
 hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix,
@@ -90,6 +77,7 @@ hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix,
 
    return hypre_error_flag;
 }
+
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
@@ -114,8 +102,10 @@ hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IJMatrixRead: Read from file, HYPRE's IJ format or MM format
- * create IJMatrix on host memory
+ * hypre_IJMatrixRead
+ *
+ * Reads a matrix from file, HYPRE's IJ format or MM format. The resulting
+ * IJMatrix is stored on host memory.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -123,7 +113,7 @@ hypre_IJMatrixRead( const char     *filename,
                     MPI_Comm        comm,
                     HYPRE_Int       type,
                     HYPRE_IJMatrix *matrix_ptr,
-                    HYPRE_Int       is_mm       /* if is a Matrix-Market file */)
+                    HYPRE_Int       is_mm )
 {
    HYPRE_IJMatrix  matrix;
    HYPRE_BigInt    ilower, iupper, jlower, jupper;
@@ -252,3 +242,193 @@ hypre_IJMatrixRead( const char     *filename,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_IJMatrixReadBinary
+ *
+ * Reads a matrix from file stored in binary format. The resulting IJMatrix
+ * is stored on host memory.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJMatrixReadBinary( const char      *prefixname,
+                          MPI_Comm         comm,
+                          HYPRE_Int        type,
+                          HYPRE_IJMatrix  *matrix_ptr )
+{
+   HYPRE_IJMatrix  matrix;
+
+   HYPRE_BigInt    ilower, iupper, jlower, jupper;
+   HYPRE_BigInt    I, J;
+
+   size_t          count;
+   uint64_t        header[8];
+
+   /* Local buffers */
+   uint32_t             *i32rows = NULL;
+   uint64_t             *i64rows = NULL;
+   uint32_t             *i32cols = NULL;
+   uint64_t             *i64cols = NULL;
+   float                *f32vals = NULL;
+   hypre_double         *f64vals = NULL;
+
+   HYPRE_Int       myid;
+   char            filename[1024];
+   FILE           *fp;
+
+   /* Set filename */
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(filename, "%s.%05d.bin", prefixname, myid);
+
+   /* Open file */
+   if ((fp = fopen(filename, "rb")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open input file\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Read header (64 bytes) from file
+    *---------------------------------------------*/
+
+   count = 8;
+   if (fread(header, sizeof(uint64_t), count, fp) != count)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read header entries\n");
+      return EXIT_FAILURE;
+   }
+
+   /* Exit if trying to read from big-endian machine */
+   if ((*(char*)&header[7]) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
+      return hypre_error_flag;
+   }
+
+   /* Set variables */
+   ilower = (HYPRE_BigInt) header[3];
+   iupper = (HYPRE_BigInt) header[4];
+   jlower = (HYPRE_BigInt) header[5];
+   jupper = (HYPRE_BigInt) header[6];
+
+   /* Allocate memory for row/col buffers */
+   if (header[0] == sizeof(uint32_t))
+   {
+      i32rows = hypre_TAlloc(uint32_t, header[2], HYPRE_MEMORY_HOST);
+      i32cols = hypre_TAlloc(uint32_t, header[2], HYPRE_MEMORY_HOST);
+   }
+   else if (header[0] == sizeof(uint64_t))
+   {
+      i64rows = hypre_TAlloc(uint64_t, header[2], HYPRE_MEMORY_HOST);
+      i64cols = hypre_TAlloc(uint64_t, header[2], HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for row/column indices\n");
+      return hypre_error_flag;
+   }
+
+   /* Allocate memory for buffers */
+   if (header[1] == sizeof(float))
+   {
+      f32vals = hypre_TAlloc(float, header[2], HYPRE_MEMORY_HOST);
+   }
+   else if (header[1] == sizeof(hypre_double))
+   {
+      f64vals = hypre_TAlloc(hypre_double, header[2], HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for matrix coefficients\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Read row and column indices from file
+    *---------------------------------------------*/
+
+   count = (size_t) header[2];
+   if (i32rows)
+   {
+      if (fread(i32rows, sizeof(uint32_t), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all row indices\n");
+         return hypre_error_flag;
+      }
+
+      if (fread(i32cols, sizeof(uint32_t), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all column indices\n");
+         return hypre_error_flag;
+      }
+   }
+   else
+   {
+      if (fread(i64rows, sizeof(uint64_t), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all row indices\n");
+         return hypre_error_flag;
+      }
+
+      if (fread(i64cols, sizeof(uint64_t), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all column indices\n");
+         return hypre_error_flag;
+      }
+   }
+
+   /*---------------------------------------------
+    * Read matrix coefficients from file
+    *---------------------------------------------*/
+
+   if (f32vals)
+   {
+      if (fread(f32vals, sizeof(float), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients\n");
+         return hypre_error_flag;
+      }
+   }
+   else
+   {
+      if (fread(f64vals, sizeof(hypre_double), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients\n");
+         return hypre_error_flag;
+      }
+   }
+
+   /* Close file stream */
+   fclose(fp);
+
+   /*---------------------------------------------
+    * Build IJMatrix
+    *---------------------------------------------*/
+
+   HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
+   HYPRE_IJMatrixSetObjectType(matrix, type);
+   HYPRE_IJMatrixInitialize_v2(matrix, HYPRE_MEMORY_HOST);
+
+
+   if (i32rows && i32cols && f32vals)
+   {
+      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i32rows, i32cols, f32vals);
+   }
+   else if (i32rows && i32cols && f64vals)
+   {
+      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i32rows, i32cols, f64vals);
+   }
+   else if (i64rows && i64cols && f32vals)
+   {
+      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i64rows, i64cols, f32vals);
+   }
+   else
+   {
+      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i64rows, i64cols, f64vals);
+   }
+
+
+   HYPRE_IJMatrixAssemble(matrix);
+   *matrix_ptr = matrix;
+
+   return hypre_error_flag;
+}

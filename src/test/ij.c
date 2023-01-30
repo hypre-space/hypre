@@ -351,6 +351,7 @@ main( hypre_int argc,
    HYPRE_Real   agg_P12_trunc_factor  = 0; /* default value */
 
    HYPRE_Int    print_system = 0;
+   HYPRE_Int    print_system_binary = 0;
    HYPRE_Int    rel_change = 0;
    HYPRE_Int    second_time = 0;
    HYPRE_Int    benchmark = 0;
@@ -568,7 +569,13 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-fromfile") == 0 )
+      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = -2;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-fromfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -1;
@@ -1909,6 +1916,11 @@ main( hypre_int argc,
          arg_index++;
          print_system = 1;
       }
+      else if ( strcmp(argv[arg_index], "-printbin") == 0 )
+      {
+         arg_index++;
+         print_system_binary = 1;
+      }
       /* BM Oct 23, 2006 */
       else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
       {
@@ -2495,14 +2507,24 @@ main( hypre_int argc,
 
    time_index = hypre_InitializeTiming("Spatial Operator");
    hypre_BeginTiming(time_index);
-   if ( build_matrix_type == -1 )
+   if ( build_matrix_type == -2 )
+   {
+      ierr = HYPRE_IJMatrixReadBinary( argv[build_matrix_arg_index], comm,
+                                       HYPRE_PARCSR, &ij_A );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
+   }
+   else if ( build_matrix_type == -1 )
    {
       ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
                                  HYPRE_PARCSR, &ij_A );
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the system matrix!\n");
-         exit(1);
+         hypre_MPI_Abort(comm, 1);
       }
    }
    else if ( build_matrix_type == 0 )
@@ -3616,6 +3638,7 @@ main( hypre_int argc,
       else if (parcsr_A)
       {
          hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.A");
+         hypre_ParCSRMatrixPrintBinaryIJ(parcsr_A, 0, 0, "IJ.out.A");
       }
       else
       {
@@ -3649,6 +3672,18 @@ main( hypre_int argc,
          HYPRE_ParVectorPrint(b, "ParVec.out.b");
       }
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
+   }
+
+   if (print_system_binary)
+   {
+      if (ij_A)
+      {
+         HYPRE_IJMatrixPrintBinary(ij_A, "IJ.out.A");
+      }
+      else
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(parcsr_A, 0, 0, "IJ.out.A");
+      }
    }
 
    /*-----------------------------------------------------------

@@ -338,10 +338,16 @@ HYPRE_Int HYPRE_IJMatrixReadMM(const char     *filename,
                                HYPRE_IJMatrix *matrix);
 
 /**
- * Print the matrix to file.  This is mainly for debugging purposes.
+ * Print the matrix to file. This is mainly for debugging purposes.
  **/
 HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                               const char     *filename);
+
+/**
+ * Print the matrix to file in binary format. This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJMatrixPrintBinary(HYPRE_IJMatrix  matrix,
+                                    const char     *filename);
 
 /**@}*/
 

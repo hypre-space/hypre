@@ -447,6 +447,8 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRead ( MPI_Comm comm, const char *file_nam
 HYPRE_Int hypre_ParCSRMatrixPrint ( hypre_ParCSRMatrix *matrix, const char *file_name );
 HYPRE_Int hypre_ParCSRMatrixPrintIJ ( const hypre_ParCSRMatrix *matrix, const HYPRE_Int base_i,
                                       const HYPRE_Int base_j, const char *filename );
+HYPRE_Int hypre_ParCSRMatrixPrintBinaryIJ ( hypre_ParCSRMatrix *matrix, HYPRE_Int base_i,
+                                            HYPRE_Int base_j, const char *filename );
 HYPRE_Int hypre_ParCSRMatrixReadIJ ( MPI_Comm comm, const char *filename, HYPRE_Int *base_i_ptr,
                                      HYPRE_Int *base_j_ptr, hypre_ParCSRMatrix **matrix_ptr );
 HYPRE_Int hypre_ParCSRMatrixGetLocalRange ( hypre_ParCSRMatrix *matrix, HYPRE_BigInt *row_start,
