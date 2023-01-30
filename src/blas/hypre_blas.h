@@ -11,6 +11,8 @@
  * This header renames the functions in BLAS to avoid conflicts
  *--------------------------------------------------------------------------*/
 
+//#if defined (HYPRE_SINGLE)
+#define HYPRE_CONSTANT(x) x ## f
 /* blas */
 #define dasum_   hypre_dasum
 #define daxpy_   hypre_daxpy

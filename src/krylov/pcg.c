@@ -489,7 +489,7 @@ hypre_PCGSolve( void *pcg_vdata,
          i_prod_0 = gamma;
       }
 
-      if ( logging > 0 || print_level > 0 ) { norms[0] = sqrt(i_prod_0); }
+      if ( logging > 0 || print_level > 0 ) { norms[0] = hypre_sqrt(i_prod_0); }
    }
    if ( print_level > 1 && my_id == 0 )
    {
@@ -576,7 +576,7 @@ hypre_PCGSolve( void *pcg_vdata,
          {
             if (print_level > 1 && my_id == 0)
             {
-               hypre_printf("\n\n||r_old-r_new||/||b||: %e\n", sqrt(drob2));
+               hypre_printf("\n\n||r_old-r_new||/||b||: %e\n", hypre_sqrt(drob2));
             }
             break;
          }
@@ -598,7 +598,7 @@ hypre_PCGSolve( void *pcg_vdata,
          {
             if (print_level > 1 && my_id == 0)
             {
-               hypre_printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", sqrt(r2ob2));
+               hypre_printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", hypre_sqrt(r2ob2));
             }
             break;
          }
@@ -620,17 +620,17 @@ hypre_PCGSolve( void *pcg_vdata,
 #if 0
       if (two_norm)
          hypre_printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
-                      i, sqrt(i_prod), (bi_prod ? sqrt(i_prod / bi_prod) : 0));
+                      i, hypre_sqrt(i_prod), (bi_prod ? hypre_sqrt(i_prod / bi_prod) : 0));
       else
          hypre_printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
-                      i, sqrt(i_prod), (bi_prod ? sqrt(i_prod / bi_prod) : 0));
+                      i, hypre_sqrt(i_prod), (bi_prod ? hypre_sqrt(i_prod / bi_prod) : 0));
 #endif
 
       /* print norm info */
       if ( logging > 0 || print_level > 0 )
       {
-         norms[i]     = sqrt(i_prod);
-         rel_norms[i] = bi_prod ? sqrt(i_prod / bi_prod) : 0;
+         norms[i]     = hypre_sqrt(i_prod);
+         rel_norms[i] = bi_prod ? hypre_sqrt(i_prod / bi_prod) : 0;
       }
       if ( print_level > 1 && my_id == 0 )
       {
@@ -737,9 +737,9 @@ hypre_PCGSolve( void *pcg_vdata,
 
             break;
          }
-         cf_ave_1 = pow( i_prod / i_prod_0, 1.0 / (2.0 * i) );
+         cf_ave_1 = hypre_pow( i_prod / i_prod_0, 1.0 / (2.0 * i) );
 
-         weight   = fabs(cf_ave_1 - cf_ave_0);
+         weight   = hypre_abs(cf_ave_1 - cf_ave_0);
          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
          weight   = 1.0 - weight;
 #if 0
@@ -785,7 +785,7 @@ hypre_PCGSolve( void *pcg_vdata,
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
    {
-      (pcg_data -> rel_residual_norm) = sqrt(i_prod / bi_prod);
+      (pcg_data -> rel_residual_norm) = hypre_sqrt(i_prod / bi_prod);
    }
    else /* actually, we'll never get here... */
    {

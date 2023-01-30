@@ -1282,7 +1282,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_DeviceItem &item,
    }
    if (type == 2)
    {
-      row_norm_i = sqrt(row_norm_i);
+      row_norm_i = hypre_sqrt(row_norm_i);
    }
 
    /* set elmt_tols_diag */

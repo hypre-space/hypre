@@ -95,16 +95,16 @@ extern "C" {
     if (adf > ab) {
 /* Computing 2nd power */
 	d__1 = ab / adf;
-	rt = adf * sqrt(d__1 * d__1 + 1.);
+	rt = adf * hypre_sqrt(d__1 * d__1 + 1.);
     } else if (adf < ab) {
 /* Computing 2nd power */
 	d__1 = adf / ab;
-	rt = ab * sqrt(d__1 * d__1 + 1.);
+	rt = ab * hypre_sqrt(d__1 * d__1 + 1.);
     } else {
 
 /*        Includes case AB=ADF=0 */
 
-	rt = ab * sqrt(2.);
+	rt = ab * hypre_sqrt(2.);
     }
     if (sm < 0.) {
 	*rt1 = (sm - rt) * .5;
@@ -145,7 +145,7 @@ extern "C" {
     acs = abs(cs);
     if (acs > ab) {
 	ct = -tb / cs;
-	*sn1 = 1. / sqrt(ct * ct + 1.);
+	*sn1 = 1. / hypre_sqrt(ct * ct + 1.);
 	*cs1 = ct * *sn1;
     } else {
 	if (ab == 0.) {
@@ -153,7 +153,7 @@ extern "C" {
 	    *sn1 = 0.;
 	} else {
 	    tn = -cs / tb;
-	    *cs1 = 1. / sqrt(tn * tn + 1.);
+	    *cs1 = 1. / hypre_sqrt(tn * tn + 1.);
 	    *sn1 = tn * *cs1;
 	}
     }

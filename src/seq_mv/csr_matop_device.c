@@ -1187,8 +1187,8 @@ hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A,
 /* type 0: diag
  *      1: abs diag
  *      2: diag inverse
- *      3: diag inverse sqrt
- *      4: abs diag inverse sqrt
+ *      3: diag inverse hypre_sqrt
+ *      4: abs diag inverse hypre_sqrt
  */
 __global__ void
 hypreGPUKernel_CSRExtractDiag( hypre_DeviceItem    &item,
@@ -1238,11 +1238,11 @@ hypreGPUKernel_CSRExtractDiag( hypre_DeviceItem    &item,
          }
          else if (type == 3)
          {
-            d[row] = 1.0 / sqrt(aa[j]);
+            d[row] = 1.0 / hypre_sqrt(aa[j]);
          }
          else if (type == 4)
          {
-            d[row] = 1.0 / sqrt(fabs(aa[j]));
+            d[row] = 1.0 / hypre_sqrt(fabs(aa[j]));
          }
       }
 

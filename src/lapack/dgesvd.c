@@ -892,7 +892,7 @@ extern "C" {
 /*     Get machine constants */
 
     eps = dlamch_("P");
-    smlnum = sqrt(dlamch_("S")) / eps;
+    smlnum = hypre_sqrt(dlamch_("S")) / eps;
     bignum = 1. / smlnum;
 
 /*     Scale A if max element outside range [SMLNUM,BIGNUM] */

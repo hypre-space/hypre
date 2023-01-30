@@ -194,8 +194,8 @@ extern "C" {
     eps2 = d__1 * d__1;
     safmin = dlamch_("S");
     safmax = 1. / safmin;
-    ssfmax = sqrt(safmax) / 3.;
-    ssfmin = sqrt(safmin) / eps2;
+    ssfmax = hypre_sqrt(safmax) / 3.;
+    ssfmin = hypre_sqrt(safmin) / eps2;
 
 /*     Compute the eigenvalues and eigenvectors of the tridiagonal
        matrix. */
@@ -228,7 +228,7 @@ L10:
 	    if (tst == 0.) {
 		goto L30;
 	    }
-	    if (tst <= sqrt((d__1 = d__[m], abs(d__1))) * sqrt((d__2 = d__[m
+	    if (tst <= hypre_sqrt((d__1 = d__[m], abs(d__1))) * hypre_sqrt((d__2 = d__[m
 		    + 1], abs(d__2))) * eps) {
 		e[m] = 0.;
 		goto L30;

@@ -51,8 +51,8 @@ extern "C" {
 
 
     if (d_lg10(large) > 2e3) {
-	*small = sqrt(*small);
-	*large = sqrt(*large);
+	*small = hypre_sqrt(*small);
+	*large = hypre_sqrt(*large);
     }
 
     return 0;

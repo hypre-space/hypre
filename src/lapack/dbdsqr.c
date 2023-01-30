@@ -355,7 +355,7 @@ extern "C" {
 /* L40: */
 	}
 L50:
-	sminoa /= sqrt((doublereal) (*n));
+	sminoa /= hypre_sqrt((doublereal) (*n));
 /* Computing MAX */
 	d__1 = tol * sminoa, d__2 = *n * 6 * *n * unfl;
 	thresh = max(d__1,d__2);

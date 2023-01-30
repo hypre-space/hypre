@@ -165,9 +165,9 @@ extern "C" {
 	    t = (z__[1] - z__[3] + z__[2]) * .5;
 	    s = z__[3] * (z__[2] / t);
 	    if (s <= t) {
-		s = z__[3] * (z__[2] / (t * (sqrt(s / t + 1.) + 1.)));
+		s = z__[3] * (z__[2] / (t * (hypre_sqrt(s / t + 1.) + 1.)));
 	    } else {
-		s = z__[3] * (z__[2] / (t + sqrt(t) * sqrt(t + s)));
+		s = z__[3] * (z__[2] / (t + hypre_sqrt(t) * hypre_sqrt(t + s)));
 	    }
 	    t = z__[1] + (s + z__[2]);
 	    z__[3] *= z__[1] / t;
@@ -412,7 +412,7 @@ L100:
 /*        Put -(initial shift) into DMIN.
 
    Computing MAX */
-	d__1 = 0., d__2 = qmin - sqrt(qmin) * 2. * sqrt(emax);
+	d__1 = 0., d__2 = qmin - hypre_sqrt(qmin) * 2. * hypre_sqrt(emax);
 	dmin__ = -max(d__1,d__2);
 
 /*        Now I0:N0 is unreduced. PP = 0 for ping, PP = 1 for pong. */

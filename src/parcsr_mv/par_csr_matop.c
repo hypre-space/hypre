@@ -4580,7 +4580,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
 
          if (lwork_opt > dgetri_lwork)
          {
-            dgetri_lwork = lwork_opt;
+            dgetri_lwork = (HYPRE_Int)lwork_opt;
             dgetri_work = hypre_TReAlloc(dgetri_work, HYPRE_Complex, dgetri_lwork, HYPRE_MEMORY_HOST);
          }
 
@@ -4600,7 +4600,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
          }
       }
 
-      Fnorm = sqrt(Fnorm);
+      Fnorm = hypre_sqrt(Fnorm);
 
       for (i = 0; i < s; i++)
       {
@@ -5436,7 +5436,7 @@ hypre_ParCSRMatrixFnorm( hypre_ParCSRMatrix *A )
 
    hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
-   return sqrt(result);
+   return hypre_sqrt(result);
 }
 
 /*--------------------------------------------------------------------------
@@ -6124,7 +6124,7 @@ hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A,
 
       if (type == 2)
       {
-         row_nrm = sqrt(row_nrm);
+         row_nrm = hypre_sqrt(row_nrm);
       }
 
       /* drop small entries based on tol and row norm */

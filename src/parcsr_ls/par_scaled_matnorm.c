@@ -35,7 +35,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    HYPRE_BigInt           *row_starts = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int       num_rows = hypre_CSRMatrixNumRows(diag);
 
-   hypre_ParVector      *dinvsqrt;
+   hypre_ParVector      *dinvhypre_sqrt;
    HYPRE_Real     *dis_data;
    hypre_Vector         *dis_ext;
    HYPRE_Real     *dis_ext_data;
@@ -48,9 +48,9 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    HYPRE_Real *d_buf_data;
    HYPRE_Real  mat_norm, max_row_sum;
 
-   dinvsqrt = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
-   hypre_ParVectorInitialize(dinvsqrt);
-   dis_data = hypre_VectorData(hypre_ParVectorLocalVector(dinvsqrt));
+   dinvhypre_sqrt = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
+   hypre_ParVectorInitialize(dinvhypre_sqrt);
+   dis_data = hypre_VectorData(hypre_ParVectorLocalVector(dinvhypre_sqrt));
    dis_ext = hypre_SeqVectorCreate(num_cols_offd);
    hypre_SeqVectorInitialize(dis_ext);
    dis_ext_data = hypre_VectorData(dis_ext);
@@ -58,10 +58,10 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_SeqVectorInitialize(sum);
    sum_data = hypre_VectorData(sum);
 
-   /* generate dinvsqrt */
+   /* generate dinvhypre_sqrt */
    for (i = 0; i < num_rows; i++)
    {
-      dis_data[i] = 1.0 / sqrt(fabs(diag_data[diag_i[i]]));
+      dis_data[i] = 1.0 / hypre_sqrt(hypre_abs(diag_data[diag_i[i]]));
    }
 
    /*---------------------------------------------------------------------
@@ -94,7 +94,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    {
       for (j = diag_i[i]; j < diag_i[i + 1]; j++)
       {
-         sum_data[i] += fabs(diag_data[j]) * dis_data[i] * dis_data[diag_j[j]];
+         sum_data[i] += hypre_abs(diag_data[j]) * dis_data[i] * dis_data[diag_j[j]];
       }
    }
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -103,7 +103,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    {
       for (j = offd_i[i]; j < offd_i[i + 1]; j++)
       {
-         sum_data[i] += fabs(offd_data[j]) * dis_data[i] * dis_ext_data[offd_j[j]];
+         sum_data[i] += hypre_abs(offd_data[j]) * dis_data[i] * dis_ext_data[offd_j[j]];
       }
    }
 
@@ -118,7 +118,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
 
    hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
 
-   hypre_ParVectorDestroy(dinvsqrt);
+   hypre_ParVectorDestroy(dinvhypre_sqrt);
    hypre_SeqVectorDestroy(sum);
    hypre_SeqVectorDestroy(dis_ext);
    hypre_TFree(d_buf_data, HYPRE_MEMORY_HOST);

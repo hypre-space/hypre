@@ -1820,7 +1820,7 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
       sum += v * v;
    }
 
-   return sqrt(sum);
+   return hypre_sqrt(sum);
 }
 
 /*--------------------------------------------------------------------------
@@ -1910,8 +1910,8 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
  * type 0: diag
  *      1: abs diag
  *      2: diag inverse
- *      3: diag inverse sqrt
- *      4: abs diag inverse sqrt
+ *      3: diag inverse hypre_sqrt
+ *      4: abs diag inverse hypre_sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1947,11 +1947,11 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 3)
             {
-               d_i = 1.0 / (sqrt(A_data[j]));
+               d_i = 1.0 / (hypre_sqrt(A_data[j]));
             }
             else if (type == 4)
             {
-               d_i = 1.0 / (sqrt(hypre_cabs(A_data[j])));
+               d_i = 1.0 / (hypre_sqrt(hypre_cabs(A_data[j])));
             }
             break;
          }
@@ -1966,7 +1966,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
  * type 0: diag
  *      1: abs diag
  *      2: diag inverse
- *      3: diag inverse sqrt
+ *      3: diag inverse hypre_sqrt
  *--------------------------------------------------------------------------*/
 
 void

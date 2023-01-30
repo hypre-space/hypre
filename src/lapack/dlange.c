@@ -78,7 +78,7 @@ doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, inte
     integer a_dim1, a_offset, i__1, i__2;
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    /*doublereal sqrt(doublereal);*/
+    /*doublereal hypre_sqrt(doublereal);*/
     /* Local variables */
     integer i__, j;
     doublereal scale;
@@ -169,7 +169,7 @@ doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, inte
 	    dlassq_(m, &a_ref(1, j), &c__1, &scale, &sum);
 /* L90: */
 	}
-	value = scale * sqrt(sum);
+	value = scale * hypre_sqrt(sum);
     }
 
     ret_val = value;

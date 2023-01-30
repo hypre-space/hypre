@@ -67,7 +67,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
       diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, HYPRE_MEMORY_DEVICE);
       if (method == 1)
       {
-         // extract diag inverse sqrt
+         // extract diag inverse hypre_sqrt
          //        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
 
          // L1-Jacobi-type interpolation

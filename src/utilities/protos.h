@@ -33,10 +33,10 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
-#define hypre_cabs(value)  fabs(value)
+#define hypre_cabs(value)  hypre_abs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
-#define hypre_csqrt(value) sqrt(value)
+#define hypre_csqrt(value) hypre_sqrt(value)
 #endif
 
 /* general.c */

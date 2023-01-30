@@ -382,7 +382,7 @@ GenerateVarDifConv( MPI_Comm         comm,
 HYPRE_Real afun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
    HYPRE_Real value;
-   /* value = 1.0 + 1000.0*fabs(xx-yy); */
+   /* value = 1.0 + 1000.0*hypre_abs(xx-yy); */
    if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
        || (xx < 0.1 && yy < 0.1 && zz > 0.9)
        || (xx < 0.1 && yy > 0.9 && zz < 0.1)
@@ -413,7 +413,7 @@ HYPRE_Real afun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 HYPRE_Real bfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
    HYPRE_Real value;
-   /* value = 1.0 + 1000.0*fabs(xx-yy); */
+   /* value = 1.0 + 1000.0*hypre_abs(xx-yy); */
    if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
        || (xx < 0.1 && yy < 0.1 && zz > 0.9)
        || (xx < 0.1 && yy > 0.9 && zz < 0.1)
@@ -440,10 +440,10 @@ HYPRE_Real bfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    value = 1.0 - 2.0*xx;
    value = cos(pi*xx)*cos(pi*yy); */
    /* HYPRE_Real value;
-   value = 1.0 + 1000.0 * fabs(xx-yy);
+   value = 1.0 + 1000.0 * hypre_abs(xx-yy);
    HYPRE_Real value, x0, y0;
-   x0 = fabs(xx - 0.5);
-   y0 = fabs(yy - 0.5);
+   x0 = hypre_abs(xx - 0.5);
+   y0 = hypre_abs(yy - 0.5);
    if (y0 > x0) x0 = y0;
    if (x0 >= 0.125 && x0 <= 0.25)
       value = 1.0;
