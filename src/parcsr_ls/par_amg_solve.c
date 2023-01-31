@@ -112,7 +112,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    /* Update work vectors when solving for RHS vectors with multiple components */
    num_vectors = hypre_ParVectorNumVectors(F_array[0]);
-   if (num_vectors > hypre_ParVectorNumVectors(F_array[1]))
+   if (num_vectors != hypre_ParVectorNumVectors(F_array[1]))
    {
       size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[0]));
       hypre_ParVectorResize(Vtemp, num_vectors, size);
