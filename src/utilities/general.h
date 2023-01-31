@@ -14,6 +14,10 @@
 #ifndef hypre_GENERAL_HEADER
 #define hypre_GENERAL_HEADER
 
+/* #include <stdio.h> */
+/* #include <stdlib.h> */
+#include <stdint.h>
+
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int                    hypre_int;
 typedef long int               hypre_longint;

@@ -257,22 +257,24 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 {
    HYPRE_IJMatrix  matrix;
 
-   HYPRE_BigInt    ilower, iupper, jlower, jupper;
-   HYPRE_BigInt    I, J;
-
-   size_t          count;
-   uint64_t        header[8];
-
    /* Local buffers */
-   uint32_t             *i32rows = NULL;
-   uint64_t             *i64rows = NULL;
-   uint32_t             *i32cols = NULL;
-   uint64_t             *i64cols = NULL;
-   float                *f32vals = NULL;
-   hypre_double         *f64vals = NULL;
+   hypre_uint32   *i32buffer = NULL;
+   hypre_uint64   *i64buffer = NULL;
+   hypre_float    *f32buffer = NULL;
+   hypre_double   *f64buffer = NULL;
 
+   /* Matrix buffers */
+   HYPRE_Int       nrows;
+   HYPRE_BigInt   *rows;
+   HYPRE_BigInt   *cols;
+   HYPRE_Complex  *vals;
+
+   /* Local variables */
    HYPRE_Int       myid;
    char            filename[1024];
+   HYPRE_BigInt    ilower, iupper, jlower, jupper;
+   size_t          i, count;
+   hypre_uint64    header[8];
    FILE           *fp;
 
    /* Set filename */
@@ -291,7 +293,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
     *---------------------------------------------*/
 
    count = 8;
-   if (fread(header, sizeof(uint64_t), count, fp) != count)
+   if (fread(header, sizeof(hypre_uint64), count, fp) != count)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read header entries\n");
       return EXIT_FAILURE;
@@ -300,9 +302,17 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    /* Exit if trying to read from big-endian machine */
    if ((*(char*)&header[7]) == 0)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!");
       return hypre_error_flag;
    }
+
+   /* Check for integer overflow */
+   if (header[2] > HYPRE_INT_MAX)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected integer overflow!");
+      return hypre_error_flag;
+   }
+   nrows = (HYPRE_Int) header[2];
 
    /* Set variables */
    ilower = (HYPRE_BigInt) header[3];
@@ -311,94 +321,162 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    jupper = (HYPRE_BigInt) header[6];
 
    /* Allocate memory for row/col buffers */
-   if (header[0] == sizeof(uint32_t))
+   if (header[0] == sizeof(hypre_uint32))
    {
-      i32rows = hypre_TAlloc(uint32_t, header[2], HYPRE_MEMORY_HOST);
-      i32cols = hypre_TAlloc(uint32_t, header[2], HYPRE_MEMORY_HOST);
+      i32buffer = hypre_TAlloc(hypre_uint32, header[2], HYPRE_MEMORY_HOST);
    }
-   else if (header[0] == sizeof(uint64_t))
+   else if (header[0] == sizeof(hypre_uint64))
    {
-      i64rows = hypre_TAlloc(uint64_t, header[2], HYPRE_MEMORY_HOST);
-      i64cols = hypre_TAlloc(uint64_t, header[2], HYPRE_MEMORY_HOST);
+      i64buffer = hypre_TAlloc(hypre_uint64, header[2], HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for row/column indices\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for row/column indices");
       return hypre_error_flag;
    }
 
    /* Allocate memory for buffers */
-   if (header[1] == sizeof(float))
+   if (header[1] == sizeof(hypre_float))
    {
-      f32vals = hypre_TAlloc(float, header[2], HYPRE_MEMORY_HOST);
+      f32buffer = hypre_TAlloc(hypre_float, header[2], HYPRE_MEMORY_HOST);
    }
    else if (header[1] == sizeof(hypre_double))
    {
-      f64vals = hypre_TAlloc(hypre_double, header[2], HYPRE_MEMORY_HOST);
+      f64buffer = hypre_TAlloc(hypre_double, header[2], HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for matrix coefficients\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for matrix coefficients");
       return hypre_error_flag;
    }
 
    /*---------------------------------------------
-    * Read row and column indices from file
+    * Read indices from file
     *---------------------------------------------*/
 
    count = (size_t) header[2];
-   if (i32rows)
+   rows = hypre_TAlloc(HYPRE_BigInt, count, HYPRE_MEMORY_HOST);
+   if (i32buffer)
    {
-      if (fread(i32rows, sizeof(uint32_t), count, fp) != count)
+      if (fread(i32buffer, sizeof(hypre_uint32), count, fp) != count)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all row indices\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all row indices");
          return hypre_error_flag;
       }
 
-      if (fread(i32cols, sizeof(uint32_t), count, fp) != count)
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < count; i++)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all column indices\n");
-         return hypre_error_flag;
+         rows[i] = (HYPRE_BigInt) i32buffer[i];
       }
    }
    else
    {
-      if (fread(i64rows, sizeof(uint64_t), count, fp) != count)
+      if (fread(i64buffer, sizeof(hypre_uint64), count, fp) != count)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all row indices\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all row indices");
          return hypre_error_flag;
       }
 
-      if (fread(i64cols, sizeof(uint64_t), count, fp) != count)
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < count; i++)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all column indices\n");
-         return hypre_error_flag;
+         rows[i] = (HYPRE_BigInt) i64buffer[i];
       }
    }
+
+   /*---------------------------------------------
+    * Read column indices from file
+    *---------------------------------------------*/
+
+   count = (size_t) header[2];
+   cols = hypre_TAlloc(HYPRE_BigInt, count, HYPRE_MEMORY_HOST);
+   if (i32buffer)
+   {
+      if (fread(i32buffer, sizeof(hypre_uint32), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all column indices");
+         return hypre_error_flag;
+      }
+
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < count; i++)
+      {
+         cols[i] = (HYPRE_BigInt) i32buffer[i];
+      }
+   }
+   else
+   {
+      if (fread(i64buffer, sizeof(hypre_uint64), count, fp) != count)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all column indices");
+         return hypre_error_flag;
+      }
+
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < count; i++)
+      {
+         cols[i] = (HYPRE_BigInt) i64buffer[i];
+      }
+   }
+
+   /* Free integer buffers */
+   hypre_TFree(i32buffer, HYPRE_MEMORY_HOST);
+   hypre_TFree(i64buffer, HYPRE_MEMORY_HOST);
 
    /*---------------------------------------------
     * Read matrix coefficients from file
     *---------------------------------------------*/
 
-   if (f32vals)
+   count = (size_t) header[2];
+   vals = hypre_TAlloc(HYPRE_Complex, count, HYPRE_MEMORY_HOST);
+   if (f32buffer)
    {
-      if (fread(f32vals, sizeof(float), count, fp) != count)
+      if (fread(f32buffer, sizeof(hypre_float), count, fp) != count)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients");
          return hypre_error_flag;
+      }
+
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < count; i++)
+      {
+         vals[i] = (HYPRE_Complex) f32buffer[i];
       }
    }
    else
    {
-      if (fread(f64vals, sizeof(hypre_double), count, fp) != count)
+      if (fread(f64buffer, sizeof(hypre_double), count, fp) != count)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients");
          return hypre_error_flag;
+      }
+
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < count; i++)
+      {
+         vals[i] = (HYPRE_Complex) f64buffer[i];
       }
    }
 
    /* Close file stream */
    fclose(fp);
+
+   /* Free floating-point buffers */
+   hypre_TFree(f32buffer, HYPRE_MEMORY_HOST);
+   hypre_TFree(f64buffer, HYPRE_MEMORY_HOST);
 
    /*---------------------------------------------
     * Build IJMatrix
@@ -407,28 +485,16 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
    HYPRE_IJMatrixSetObjectType(matrix, type);
    HYPRE_IJMatrixInitialize_v2(matrix, HYPRE_MEMORY_HOST);
-
-
-   if (i32rows && i32cols && f32vals)
-   {
-      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i32rows, i32cols, f32vals);
-   }
-   else if (i32rows && i32cols && f64vals)
-   {
-      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i32rows, i32cols, f64vals);
-   }
-   else if (i64rows && i64cols && f32vals)
-   {
-      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i64rows, i64cols, f32vals);
-   }
-   else
-   {
-      HYPRE_IJMatrixSetValues(matrix, header[2], NULL, i64rows, i64cols, f64vals);
-   }
-
-
+   HYPRE_IJMatrixSetValues(matrix, nrows, NULL, rows, cols, vals);
    HYPRE_IJMatrixAssemble(matrix);
+
+   /* Set output pointer */
    *matrix_ptr = matrix;
+
+   /* Free memory */
+   hypre_TFree(rows, HYPRE_MEMORY_HOST);
+   hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

@@ -815,17 +815,17 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    HYPRE_Int             offd_nnz;
 
    /* Local buffers */
-   uint32_t             *i32buffer = NULL;
-   uint64_t             *i64buffer = NULL;
-   float                *f32buffer = NULL;
+   hypre_uint32         *i32buffer = NULL;
+   hypre_uint64         *i64buffer = NULL;
+   hypre_float          *f32buffer = NULL;
    hypre_double         *f64buffer = NULL;
 
    /* Local variables */
    char                  new_filename[255];
    FILE                 *fp;
-   uint64_t              header[8];
+   hypre_uint64          header[8];
    size_t                count;
-   const hypre_int       one = 1;
+   HYPRE_Int             one = 1;
    HYPRE_Int             myid, i, j, k;
    HYPRE_BigInt          bigI, bigJ;
    HYPRE_BigInt          ilower, iupper, jlower, jupper;
@@ -886,28 +886,28 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
     *---------------------------------------------*/
 
    count = 8;
-   header[0] = (uint64_t) sizeof(HYPRE_BigInt);
-   header[1] = (uint64_t) sizeof(HYPRE_Complex);
-   header[2] = (uint64_t) diag_nnz + offd_nnz;
-   header[3] = (uint64_t) ilower;
-   header[4] = (uint64_t) iupper;
-   header[5] = (uint64_t) jlower;
-   header[6] = (uint64_t) jupper;
-   header[7] = (uint64_t) 1;
-   if (fwrite((const void*) header, sizeof(uint64_t), count, fp) != count)
+   header[0] = (hypre_uint64) sizeof(HYPRE_BigInt);
+   header[1] = (hypre_uint64) sizeof(HYPRE_Complex);
+   header[2] = (hypre_uint64) diag_nnz + offd_nnz;
+   header[3] = (hypre_uint64) ilower;
+   header[4] = (hypre_uint64) iupper;
+   header[5] = (hypre_uint64) jlower;
+   header[6] = (hypre_uint64) jupper;
+   header[7] = (hypre_uint64) 1;
+   if (fwrite((const void*) header, sizeof(hypre_uint64), count, fp) != count)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all header entries\n");
       return hypre_error_flag;
    }
 
    /* Allocate memory for buffers */
-   if (sizeof(HYPRE_BigInt) == sizeof(uint32_t))
+   if (sizeof(HYPRE_BigInt) == sizeof(hypre_uint32))
    {
-      i32buffer = hypre_TAlloc(uint32_t, header[2], HYPRE_MEMORY_HOST);
+      i32buffer = hypre_TAlloc(hypre_uint32, header[2], HYPRE_MEMORY_HOST);
    }
-   else if (sizeof(HYPRE_BigInt) == sizeof(uint64_t))
+   else if (sizeof(HYPRE_BigInt) == sizeof(hypre_uint64))
    {
-      i64buffer = hypre_TAlloc(uint64_t, header[2], HYPRE_MEMORY_HOST);
+      i64buffer = hypre_TAlloc(hypre_uint64, header[2], HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -916,9 +916,9 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    }
 
    /* Allocate memory for buffers */
-   if (sizeof(HYPRE_Complex) == sizeof(float))
+   if (sizeof(HYPRE_Complex) == sizeof(hypre_float))
    {
-      f32buffer = hypre_TAlloc(float, header[2], HYPRE_MEMORY_HOST);
+      f32buffer = hypre_TAlloc(hypre_float, header[2], HYPRE_MEMORY_HOST);
    }
    else if (sizeof(HYPRE_Complex) == sizeof(hypre_double))
    {
@@ -942,11 +942,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
       {
          if (i32buffer)
          {
-            i32buffer[k++] = (uint32_t) bigI;
+            i32buffer[k++] = (hypre_uint32) bigI;
          }
          else
          {
-            i64buffer[k++] = (uint64_t) bigI;
+            i64buffer[k++] = (hypre_uint64) bigI;
          }
       }
    }
@@ -954,11 +954,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    /* Write buffer */
    if (i32buffer)
    {
-      count = fwrite((const void*) i32buffer, sizeof(uint32_t), k, fp);
+      count = fwrite((const void*) i32buffer, sizeof(hypre_uint32), k, fp);
    }
    else
    {
-      count = fwrite((const void*) i64buffer, sizeof(uint64_t), k, fp);
+      count = fwrite((const void*) i64buffer, sizeof(hypre_uint64), k, fp);
    }
 
    if (count != k)
@@ -979,11 +979,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
 
          if (i32buffer)
          {
-            i32buffer[k++] = (uint32_t) bigJ;
+            i32buffer[k++] = (hypre_uint32) bigJ;
          }
          else
          {
-            i64buffer[k++] = (uint64_t) bigJ;
+            i64buffer[k++] = (hypre_uint64) bigJ;
          }
       }
 
@@ -993,11 +993,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
 
          if (i32buffer)
          {
-            i32buffer[k++] = (uint32_t) bigJ;
+            i32buffer[k++] = (hypre_uint32) bigJ;
          }
          else
          {
-            i64buffer[k++] = (uint64_t) bigJ;
+            i64buffer[k++] = (hypre_uint64) bigJ;
          }
       }
    }
@@ -1005,11 +1005,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    /* Write buffer */
    if (i32buffer)
    {
-      count = fwrite((const void*) i32buffer, sizeof(uint32_t), k, fp);
+      count = fwrite((const void*) i32buffer, sizeof(hypre_uint32), k, fp);
    }
    else
    {
-      count = fwrite((const void*) i64buffer, sizeof(uint64_t), k, fp);
+      count = fwrite((const void*) i64buffer, sizeof(hypre_uint64), k, fp);
    }
 
    if (count != k)
@@ -1032,7 +1032,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
 
             if (f32buffer)
             {
-               f32buffer[k++] = (float) val;
+               f32buffer[k++] = (hypre_float) val;
             }
             else
             {
@@ -1046,7 +1046,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
 
             if (f32buffer)
             {
-               f32buffer[k++] = (float) val;
+               f32buffer[k++] = (hypre_float) val;
             }
             else
             {
@@ -1058,7 +1058,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
       /* Write buffer */
       if (f32buffer)
       {
-         count = fwrite((const void*) f32buffer, sizeof(float), k, fp);
+         count = fwrite((const void*) f32buffer, sizeof(hypre_float), k, fp);
       }
       else
       {

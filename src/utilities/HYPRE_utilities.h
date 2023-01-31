@@ -35,19 +35,34 @@ extern "C" {
 #if defined(HYPRE_BIGINT)
 typedef long long int HYPRE_BigInt;
 typedef long long int HYPRE_Int;
+
+#define HYPRE_BIG_INT_MAX INT64_MAX
+#define HYPRE_BIG_INT_MIN INT64_MIN
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
+#define HYPRE_INT_MAX INT64_MAX
+#define HYPRE_INT_MIN INT64_MIN
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
 
 #elif defined(HYPRE_MIXEDINT)
 typedef long long int HYPRE_BigInt;
 typedef int HYPRE_Int;
+
+#define HYPRE_BIG_INT_MAX INT64_MAX
+#define HYPRE_BIG_INT_MIN INT64_MIN
 #define HYPRE_MPI_BIG_INT MPI_LONG_LONG_INT
+#define HYPRE_INT_MAX INT32_MAX
+#define HYPRE_INT_MIN INT32_MIN
 #define HYPRE_MPI_INT MPI_INT
 
 #else /* default */
 typedef int HYPRE_BigInt;
 typedef int HYPRE_Int;
+
+#define HYPRE_BIG_INT_MAX INT32_MAX
+#define HYPRE_BIG_INT_MIN INT32_MIN
 #define HYPRE_MPI_BIG_INT MPI_INT
+#define HYPRE_INT_MAX INT32_MAX
+#define HYPRE_INT_MIN INT32_MIN
 #define HYPRE_MPI_INT MPI_INT
 #endif
 
