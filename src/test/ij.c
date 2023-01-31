@@ -8658,9 +8658,12 @@ final:
 
    HYPRE_ParVectorDestroy(x0_save);
 
-   if (test_ij || build_matrix_type == -1)
+   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2)
    {
-      if (ij_A) { HYPRE_IJMatrixDestroy(ij_A); }
+      if (ij_A)
+      {
+         HYPRE_IJMatrixDestroy(ij_A);
+      }
    }
    else
    {
