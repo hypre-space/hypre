@@ -349,6 +349,15 @@ HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
 HYPRE_Int HYPRE_IJMatrixPrintBinary(HYPRE_IJMatrix  matrix,
                                     const char     *filename);
 
+/**
+ * Read the matrix from file stored in binary format.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJMatrixReadBinary(const char     *filename,
+                                   MPI_Comm        comm,
+                                   HYPRE_Int       type,
+                                   HYPRE_IJMatrix *matrix_ptr);
+
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
