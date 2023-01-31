@@ -98,6 +98,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    block_mode       = hypre_ParAMGDataBlockMode(amg_data);
    A_block_array    = hypre_ParAMGDataABlockArray(amg_data);
    Vtemp            = hypre_ParAMGDataVtemp(amg_data);
+   num_vectors      = hypre_ParVectorNumVectors(f);
+   size             = hypre_VectorSize(hypre_ParVectorLocalVector(f));
 
    A_array[0] = A;
    F_array[0] = f;
@@ -111,19 +113,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    }
 
    /* Update work vectors when solving for RHS vectors with multiple components */
-   num_vectors = hypre_ParVectorNumVectors(F_array[0]);
-   if (num_vectors != hypre_ParVectorNumVectors(F_array[1]))
+   hypre_ParVectorResize(Vtemp, num_vectors, size);
+   for (j = 1; j < num_levels; j++)
    {
-      size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[0]));
-      hypre_ParVectorResize(Vtemp, num_vectors, size);
+      size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[j]));
 
-      for (j = 1; j < num_levels; j++)
-      {
-         size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[j]));
-
-         hypre_ParVectorResize(F_array[j], num_vectors, size);
-         hypre_ParVectorResize(U_array[j], num_vectors, size);
-      }
+      hypre_ParVectorResize(F_array[j], num_vectors, size);
+      hypre_ParVectorResize(U_array[j], num_vectors, size);
    }
 
    /*-----------------------------------------------------------------------
