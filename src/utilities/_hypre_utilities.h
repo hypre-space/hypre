@@ -145,6 +145,16 @@ typedef double                 hypre_double;
 #endif
 #endif
 
+#ifndef hypre_atan
+#if defined(HYPRE_SINGLE)
+#define hypre_atan atanf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_atan atanl
+#else
+#define hypre_atan atan
+#endif
+#endif
+
 #ifndef hypre_fmod
 #if defined(HYPRE_SINGLE)
 #define hypre_fmod fmodf

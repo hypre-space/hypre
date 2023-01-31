@@ -60,7 +60,7 @@ GenerateRotate7pt( MPI_Comm       comm,
    grid_size = nx * ny;
 
    value = hypre_CTAlloc(HYPRE_Real, 4, HYPRE_MEMORY_HOST);
-   pi = 4.0 * atan(1.0);
+   pi = 4.0 * hypre_atan(1.0);
    x = pi * alpha / 180.0;
    s = hypre_sin(x);
    c = hypre_cos(x);
