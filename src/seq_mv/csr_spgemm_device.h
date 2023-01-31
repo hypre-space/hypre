@@ -229,11 +229,7 @@ T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
       s_WarpData[warp_id] = out;
    }
 
-#if defined(HYPRE_USING_SYCL)
-   item.barrier();
-#else
-   __syncthreads();
-#endif
+   block_sync(item);
 
    if (get_warp_in_group_id<GROUP_SIZE>(item) == 0)
    {
@@ -241,11 +237,7 @@ T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
       out = warp_reduce_sum(item, a);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   item.barrier();
-#else
-   __syncthreads();
-#endif
+   block_sync(item);
 
    return out;
 }
@@ -298,19 +290,11 @@ void group_sync(hypre_DeviceItem &item)
 {
    if (GROUP_SIZE <= HYPRE_WARP_SIZE)
    {
-#if defined(HYPRE_USING_SYCL)
-      item.get_sub_group().barrier();
-#else
-      __syncwarp();
-#endif
+      warp_sync(item);
    }
    else
    {
-#if defined(HYPRE_USING_SYCL)
-      item.barrier();
-#else
-      __syncthreads();
-#endif
+      block_sync(item);
    }
 }
 

@@ -963,6 +963,20 @@ hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
 }
 #endif
 
+/* sync the thread block */
+static __device__ __forceinline__
+void block_sync(hypre_DeviceItem &item)
+{
+   __syncthreads();
+}
+
+/* sync the warp */
+static __device__ __forceinline__
+void warp_sync(hypre_DeviceItem &item)
+{
+   __syncwarp();
+}
+
 /* exclusive prefix scan */
 template <typename T>
 static __device__ __forceinline__
@@ -1371,6 +1385,20 @@ hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
    return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item) +
           hypre_gpu_get_warp_id<bdim>(item);
+}
+
+/* sync the thread block */
+static __device__ __forceinline__
+void block_sync(hypre_DeviceItem &item)
+{
+   item.barrier();
+}
+
+/* sync the warp */
+static __device__ __forceinline__
+void warp_sync(hypre_DeviceItem &item)
+{
+   item.get_sub_group().barrier();
 }
 
 /* exclusive prefix scan */
