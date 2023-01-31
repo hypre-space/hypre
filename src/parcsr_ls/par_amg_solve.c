@@ -51,6 +51,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int           j;
    HYPRE_Int           Solve_err_flag;
    HYPRE_Int           num_procs, my_id;
+   HYPRE_Int           size, num_vectors;
    HYPRE_Real          alpha = 1.0;
    HYPRE_Real          beta = -1.0;
    HYPRE_Real          cycle_op_count;
@@ -107,6 +108,22 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for RHS and LHS do not match!\n");
       return hypre_error_flag;
+   }
+
+   /* Update work vectors when solving for RHS vectors with multiple components */
+   num_vectors = hypre_ParVectorNumVectors(F_array[0]);
+   if (num_vectors > hypre_ParVectorNumVectors(F_array[1]))
+   {
+      size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[0]));
+      hypre_ParVectorResize(Vtemp, num_vectors, size);
+
+      for (j = 1; j < num_levels; j++)
+      {
+         size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[j]));
+
+         hypre_ParVectorResize(F_array[j], num_vectors, size);
+         hypre_ParVectorResize(U_array[j], num_vectors, size);
+      }
    }
 
    /*-----------------------------------------------------------------------
