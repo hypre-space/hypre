@@ -159,7 +159,48 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * ReadVector
+ * hypre_SeqVectorResize
+ *
+ * Resize a sequential vector by either changing its number of components
+ * or size.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorResize( hypre_Vector *vector,
+                       HYPRE_Int     num_vectors_in,
+                       HYPRE_Int     size_in )
+{
+   HYPRE_Int  method      = hypre_VectorMultiVecStorageMethod(vector);
+   HYPRE_Int  size        = hypre_VectorSize(vector);
+   HYPRE_Int  num_vectors = hypre_VectorNumVectors(vector);
+
+   /* Reallocate data array */
+   hypre_VectorData(vector) = hypre_TReAlloc_v2(hypre_VectorData(vector),
+                                                HYPRE_Complex,
+                                                size * num_vectors,
+                                                HYPRE_Complex,
+                                                size_in * num_vectors_in,
+                                                hypre_VectorMemoryLocation(vector));
+
+   /* Update vector info */
+   hypre_VectorSize(vector) = size_in;
+   hypre_VectorNumVectors(vector) = num_vectors_in;
+   if (method == 0)
+   {
+      hypre_VectorVectorStride(vector) = size;
+      hypre_VectorIndexStride(vector)  = 1;
+   }
+   else if (method == 1)
+   {
+      hypre_VectorVectorStride(vector) = 1;
+      hypre_VectorIndexStride(vector)  = num_vectors;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorRead
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
