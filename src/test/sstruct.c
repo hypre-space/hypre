@@ -323,7 +323,7 @@ SScanDblArray( char   *sdata_ptr,
    sdata_ptr += strspn(sdata_ptr, " \t\n[");
    for (i = 0; i < size; i++)
    {
-      array[i] = strtod(sdata_ptr, &sdata_ptr);
+      array[i] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
    }
    sdata_ptr += strcspn(sdata_ptr, "]") + 1;
 
@@ -700,7 +700,7 @@ ReadData( char         *filename,
                data.stencil_offsets[s][entry][i] = 0;
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+            data.stencil_values[s][entry] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "RhsSet:") == 0 )
          {
@@ -708,7 +708,7 @@ ReadData( char         *filename,
             {
                data.rhs_true = 1;
             }
-            data.rhs_value = strtod(sdata_ptr, &sdata_ptr);
+            data.rhs_value = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "FEMStencilCreate:") == 0 )
          {
@@ -847,7 +847,7 @@ ReadData( char         *filename,
             pdata.graph_entries[pdata.graph_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nboxes] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.graph_boxsizes[pdata.graph_nboxes] = 1;
             for (i = 0; i < 3; i++)
             {
@@ -921,7 +921,7 @@ ReadData( char         *filename,
             pdata.matset_entries[pdata.matset_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matset_values[pdata.matset_nboxes] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.matset_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -1030,7 +1030,7 @@ ReadData( char         *filename,
             pdata.rhsadd_vars[pdata.rhsadd_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.rhsadd_values[pdata.rhsadd_nboxes] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.rhsadd_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -2149,7 +2149,7 @@ SetCosineVector(HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * cos((i + j + k) / 10.0);
+            values[count] = scale * hypre_cos((i + j + k) / 10.0);
             count++;
          }
       }
@@ -2706,7 +2706,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
          arg_index++;
-         tol = atof(argv[arg_index++]);
+         tol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -2732,7 +2732,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
          arg_index++;
-         jacobi_weight = atof(argv[arg_index++]);
+         jacobi_weight = (HYPRE_Real)atof(argv[arg_index++]);
          usr_jacobi_weight = 1; /* flag user weight */
       }
       else if ( strcmp(argv[arg_index], "-jump") == 0 )
@@ -2753,12 +2753,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
          arg_index++;
-         cf_tol = atof(argv[arg_index++]);
+         cf_tol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-crtdim") == 0 )
       {
          arg_index++;
-         cycred_tdim = atof(argv[arg_index++]);
+         cycred_tdim = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cri") == 0 )
       {
@@ -2829,7 +2829,7 @@ main( hypre_int argc,
       {
          /* lobpcg: inner pcg iterations tolerance */
          arg_index++;
-         pcgTol = atof(argv[arg_index++]);
+         pcgTol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgmode") == 0 )
       {
@@ -6183,8 +6183,8 @@ main( hypre_int argc,
          hypre_StructMatvec(-1.0, sA, sxnew, 1.0, sb);
          rnorm = hypre_StructInnerProd(sb, sb);
       }
-      bnorm = sqrt(bnorm);
-      rnorm = sqrt(rnorm);
+      bnorm = hypre_sqrt(bnorm);
+      rnorm = hypre_sqrt(rnorm);
 
       if (myid == 0)
       {
