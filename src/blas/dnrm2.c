@@ -29,7 +29,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
     doublereal ret_val, d__1;
 
     /* Builtin functions */
-    /*doublereal hypre_sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
 
     /* Local variables */
      doublereal xmax;
@@ -186,7 +186,7 @@ L85:
 	i__ += *incx;
 /* L95: */
     }
-    ret_val = hypre_sqrt(sum);
+    ret_val = sqrt(sum);
     goto L300;
 
 L200:
@@ -200,7 +200,7 @@ L200:
 
 /*              compute square root and adjust for scaling. */
 
-    ret_val = xmax * hypre_sqrt(sum);
+    ret_val = xmax * sqrt(sum);
 L300:
     return ret_val;
 } /* dnrm2_ */

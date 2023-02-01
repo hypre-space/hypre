@@ -107,7 +107,7 @@ return 0;
 #include "math.h"					 
 doublereal d_lg10(doublereal *x)
 {
-return( log10e * hypre_log(*x) );
+return( log10e * log(*x) );
 }
 
 doublereal d_sign(doublereal *a, doublereal *b)
@@ -117,12 +117,12 @@ x = (*a >= 0 ? *a : - *a);
 return( *b >= 0 ? x : -x);
 }
 
-doublereal hypre_pow_di(doublereal *ap, integer *bp)
+doublereal pow_di(doublereal *ap, integer *bp)
 {
-doublereal hypre_pow, x;
+doublereal pow, x;
 integer n;
 
-hypre_pow = 1;
+pow = 1;
 x = *ap;
 n = *bp;
 
@@ -136,21 +136,21 @@ if(n != 0)
 	for( ; ; )
 		{
 		if(n & 01)
-			hypre_pow *= x;
+			pow *= x;
 		if(n >>= 1)
 			x *= x;
 		else
 			break;
 		}
 	}
-return(hypre_pow);
+return(pow);
 }
 
 #undef abs
 #include "math.h"
-doublereal hypre_pow_dd(doublereal *ap, doublereal *bp)
+doublereal pow_dd(doublereal *ap, doublereal *bp)
 {
-return(hypre_pow(*ap, *bp) );
+return(pow(*ap, *bp) );
 }
 
 #ifdef __cplusplus

@@ -1293,7 +1293,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
       diag = hypre_CTAlloc(HYPRE_Complex, nfpoints, memory_location_P);
       if (method == 1)
       {
-         // extract diag inverse hypre_sqrt
+         // extract diag inverse sqrt
          //        hypre_CSRMatrixExtractDiagonalHost(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
 
          // L1-Jacobi-type interpolation

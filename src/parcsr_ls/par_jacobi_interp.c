@@ -395,7 +395,7 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
 */
 
 /* The function hypre_BoomerAMGInterpTruncation in par_interp.c is
-   very similar.  It looks at hypre_abs(value) rather than separately
+   very similar.  It looks at fabs(value) rather than separately
    dealing with value<0 and value>0 as recommended by Klaus Stuben,
    thus as this function does.  In this function, only "marked" rows
    are affected.  Lastly, in hypre_BoomerAMGInterpTruncation, if any
