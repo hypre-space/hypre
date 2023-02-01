@@ -60,7 +60,7 @@ extern "C" {
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-//    doublereal log(doublereal), pow_di(doublereal *, integer *), hypre_sqrt(doublereal);
+//    doublereal log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
     doublereal pow_di(doublereal *, integer *);
     /* Local variables */
     integer i__;
@@ -113,7 +113,7 @@ L10:
 	    d__1 = f1;
 /* Computing 2nd power */
 	    d__2 = g1;
-	    *r__ = hypre_sqrt(d__1 * d__1 + d__2 * d__2);
+	    *r__ = sqrt(d__1 * d__1 + d__2 * d__2);
 	    *cs = f1 / *r__;
 	    *sn = g1 / *r__;
 	    i__1 = count;
@@ -137,7 +137,7 @@ L30:
 	    d__1 = f1;
 /* Computing 2nd power */
 	    d__2 = g1;
-	    *r__ = hypre_sqrt(d__1 * d__1 + d__2 * d__2);
+	    *r__ = sqrt(d__1 * d__1 + d__2 * d__2);
 	    *cs = f1 / *r__;
 	    *sn = g1 / *r__;
 	    i__1 = count;
@@ -150,7 +150,7 @@ L30:
 	    d__1 = f1;
 /* Computing 2nd power */
 	    d__2 = g1;
-	    *r__ = hypre_sqrt(d__1 * d__1 + d__2 * d__2);
+	    *r__ = sqrt(d__1 * d__1 + d__2 * d__2);
 	    *cs = f1 / *r__;
 	    *sn = g1 / *r__;
 	}

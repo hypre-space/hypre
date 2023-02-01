@@ -133,7 +133,7 @@ doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 	    sum *= 2;
 	}
 	dlassq_(n, &d__[1], &c__1, &scale, &sum);
-	anorm = scale * hypre_sqrt(sum);
+	anorm = scale * sqrt(sum);
     }
 
     ret_val = anorm;

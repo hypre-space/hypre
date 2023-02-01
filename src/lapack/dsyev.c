@@ -200,8 +200,8 @@ extern "C" {
     eps = dlamch_("Precision");
     smlnum = safmin / eps;
     bignum = 1. / smlnum;
-    rmin = hypre_sqrt(smlnum);
-    rmax = hypre_sqrt(bignum);
+    rmin = sqrt(smlnum);
+    rmax = sqrt(bignum);
 
 /*     Scale matrix to allowable range, if necessary. */
 

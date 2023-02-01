@@ -83,16 +83,16 @@ extern "C" {
     if (adf > ab) {
 /* Computing 2nd power */
 	d__1 = ab / adf;
-	rt = adf * hypre_sqrt(d__1 * d__1 + 1.);
+	rt = adf * sqrt(d__1 * d__1 + 1.);
     } else if (adf < ab) {
 /* Computing 2nd power */
 	d__1 = adf / ab;
-	rt = ab * hypre_sqrt(d__1 * d__1 + 1.);
+	rt = ab * sqrt(d__1 * d__1 + 1.);
     } else {
 
 /*        Includes case AB=ADF=0 */
 
-	rt = ab * hypre_sqrt(2.);
+	rt = ab * sqrt(2.);
     }
     if (sm < 0.) {
 	*rt1 = (sm - rt) * .5;

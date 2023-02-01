@@ -160,9 +160,9 @@ L40:
 	t = (z__[nn - 7] - z__[nn - 3] + z__[nn - 5]) * .5;
 	s = z__[nn - 3] * (z__[nn - 5] / t);
 	if (s <= t) {
-	    s = z__[nn - 3] * (z__[nn - 5] / (t * (hypre_sqrt(s / t + 1.) + 1.)));
+	    s = z__[nn - 3] * (z__[nn - 5] / (t * (sqrt(s / t + 1.) + 1.)));
 	} else {
-	    s = z__[nn - 3] * (z__[nn - 5] / (t + hypre_sqrt(t) * hypre_sqrt(t + s)));
+	    s = z__[nn - 3] * (z__[nn - 5] / (t + sqrt(t) * sqrt(t + s)));
 	}
 	t = z__[nn - 7] + (s + z__[nn - 5]);
 	z__[nn - 3] *= z__[nn - 7] / t;

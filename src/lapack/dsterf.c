@@ -117,8 +117,8 @@ extern "C" {
     eps2 = d__1 * d__1;
     safmin = dlamch_("S");
     safmax = 1. / safmin;
-    ssfmax = hypre_sqrt(safmax) / 3.;
-    ssfmin = hypre_sqrt(safmin) / eps2;
+    ssfmax = sqrt(safmax) / 3.;
+    ssfmin = sqrt(safmin) / eps2;
 
 /*     Compute the eigenvalues of the tridiagonal matrix. */
 
@@ -141,8 +141,8 @@ L10:
     }
     i__1 = *n - 1;
     for (m = l1; m <= i__1; ++m) {
-	if ((d__3 = e[m], abs(d__3)) <= hypre_sqrt((d__1 = d__[m], abs(d__1))) *
-		hypre_sqrt((d__2 = d__[m + 1], abs(d__2))) * eps) {
+	if ((d__3 = e[m], abs(d__3)) <= sqrt((d__1 = d__[m], abs(d__1))) *
+		sqrt((d__2 = d__[m + 1], abs(d__2))) * eps) {
 	    e[m] = 0.;
 	    goto L30;
 	}
@@ -230,7 +230,7 @@ L70:
           eigenvalues. */
 
 	if (m == l + 1) {
-	    rte = hypre_sqrt(e[l]);
+	    rte = sqrt(e[l]);
 	    dlae2_(&d__[l], &rte, &d__[l + 1], &rt1, &rt2);
 	    d__[l] = rt1;
 	    d__[l + 1] = rt2;
@@ -249,7 +249,7 @@ L70:
 
 /*        Form shift. */
 
-	rte = hypre_sqrt(e[l]);
+	rte = sqrt(e[l]);
 	sigma = (d__[l + 1] - p) / (rte * 2.);
 	r__ = dlapy2_(&sigma, &c_b32);
 	sigma = p - rte / (sigma + d_sign(&r__, &sigma));
@@ -328,7 +328,7 @@ L120:
           eigenvalues. */
 
 	if (m == l - 1) {
-	    rte = hypre_sqrt(e[l - 1]);
+	    rte = sqrt(e[l - 1]);
 	    dlae2_(&d__[l], &rte, &d__[l - 1], &rt1, &rt2);
 	    d__[l] = rt1;
 	    d__[l - 1] = rt2;
@@ -347,7 +347,7 @@ L120:
 
 /*        Form shift. */
 
-	rte = hypre_sqrt(e[l - 1]);
+	rte = sqrt(e[l - 1]);
 	sigma = (d__[l - 1] - p) / (rte * 2.);
 	r__ = dlapy2_(&sigma, &c_b32);
 	sigma = p - rte / (sigma + d_sign(&r__, &sigma));

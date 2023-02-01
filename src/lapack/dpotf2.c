@@ -79,7 +79,7 @@ extern "C" {
     integer a_dim1, a_offset, i__1, i__2, i__3;
     doublereal d__1;
     /* Builtin functions */
-    /*doublereal hypre_sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
     /* Local variables */
     extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *,
 	    integer *);
@@ -138,7 +138,7 @@ extern "C" {
 		a_ref(j, j) = ajj;
 		goto L30;
 	    }
-	    ajj = hypre_sqrt(ajj);
+	    ajj = sqrt(ajj);
 	    a_ref(j, j) = ajj;
 
 /*           Compute elements J+1:N of row J. */
@@ -171,7 +171,7 @@ extern "C" {
 		a_ref(j, j) = ajj;
 		goto L30;
 	    }
-	    ajj = hypre_sqrt(ajj);
+	    ajj = sqrt(ajj);
 	    a_ref(j, j) = ajj;
 
 /*           Compute elements J+1:N of column J. */

@@ -83,7 +83,7 @@ extern "C" {
 	} else {
 /* Computing 2nd power */
 	    d__1 = min(fhmx,ga) / max(fhmx,ga);
-	    *ssmax = max(fhmx,ga) * hypre_sqrt(d__1 * d__1 + 1.);
+	    *ssmax = max(fhmx,ga) * sqrt(d__1 * d__1 + 1.);
 	}
     } else {
 	if (ga < fhmx) {
@@ -92,7 +92,7 @@ extern "C" {
 /* Computing 2nd power */
 	    d__1 = ga / fhmx;
 	    au = d__1 * d__1;
-	    c__ = 2. / (hypre_sqrt(as * as + au) + hypre_sqrt(at * at + au));
+	    c__ = 2. / (sqrt(as * as + au) + sqrt(at * at + au));
 	    *ssmin = fhmn * c__;
 	    *ssmax = fhmx / c__;
 	} else {
@@ -112,7 +112,7 @@ extern "C" {
 		d__1 = as * au;
 /* Computing 2nd power */
 		d__2 = at * au;
-		c__ = 1. / (hypre_sqrt(d__1 * d__1 + 1.) + hypre_sqrt(d__2 * d__2 + 1.));
+		c__ = 1. / (sqrt(d__1 * d__1 + 1.) + sqrt(d__2 * d__2 + 1.));
 		*ssmin = fhmn * c__ * au;
 		*ssmin += *ssmin;
 		*ssmax = ga / (c__ + c__);

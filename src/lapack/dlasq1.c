@@ -157,7 +157,7 @@ extern "C" {
 
     eps = dlamch_("Precision");
     safmin = dlamch_("Safe minimum");
-    scale = hypre_sqrt(eps / safmin);
+    scale = sqrt(eps / safmin);
     dcopy_(n, &d__[1], &c__1, &work[1], &c__2);
     i__1 = *n - 1;
     dcopy_(&i__1, &e[1], &c__1, &work[2], &c__2);
@@ -182,7 +182,7 @@ extern "C" {
     if (*info == 0) {
 	i__1 = *n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    d__[i__] = hypre_sqrt(work[i__]);
+	    d__[i__] = sqrt(work[i__]);
 /* L40: */
 	}
 	dlascl_("G", &c__0, &c__0, &scale, &sigmx, n, &c__1, &d__[1], n, &

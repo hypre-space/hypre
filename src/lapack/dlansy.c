@@ -86,7 +86,7 @@ doublereal dlansy_(const char *norm,const char *uplo, integer *n, doublereal *a,
     integer a_dim1, a_offset, i__1, i__2;
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    /*doublereal hypre_sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
     /* Local variables */
      doublereal absa;
      integer i__, j;
@@ -208,7 +208,7 @@ doublereal dlansy_(const char *norm,const char *uplo, integer *n, doublereal *a,
 	sum *= 2;
 	i__1 = *lda + 1;
 	dlassq_(n, &a[a_offset], &i__1, &scale, &sum);
-	value = scale * hypre_sqrt(sum);
+	value = scale * sqrt(sum);
     }
 
     ret_val = value;

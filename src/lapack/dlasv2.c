@@ -186,14 +186,14 @@ extern "C" {
 
 	    mm = m * m;
 	    tt = t * t;
-	    s = hypre_sqrt(tt + mm);
+	    s = sqrt(tt + mm);
 
 /*           Note that 1 .le. S .le. 1 + 1/macheps */
 
 	    if (l == 0.) {
 		r__ = abs(m);
 	    } else {
-		r__ = hypre_sqrt(l * l + mm);
+		r__ = sqrt(l * l + mm);
 	    }
 
 /*           Note that 0 .le. R .le. 1 + 1/macheps */
@@ -216,7 +216,7 @@ extern "C" {
 	    } else {
 		t = (m / (s + t) + m / (r__ + l)) * (a + 1.);
 	    }
-	    l = hypre_sqrt(t * t + 4.);
+	    l = sqrt(t * t + 4.);
 	    crt = 2. / l;
 	    srt = t / l;
 	    clt = (crt + srt * m) / a;

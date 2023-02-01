@@ -1910,8 +1910,8 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
  * type 0: diag
  *      1: abs diag
  *      2: diag inverse
- *      3: diag inverse hypre_sqrt
- *      4: abs diag inverse hypre_sqrt
+ *      3: diag inverse sqrt
+ *      4: abs diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void
@@ -1966,7 +1966,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
  * type 0: diag
  *      1: abs diag
  *      2: diag inverse
- *      3: diag inverse hypre_sqrt
+ *      3: diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 void

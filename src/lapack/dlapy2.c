@@ -19,7 +19,7 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
     Purpose
     =======
 
-    DLAPY2 returns hypre_sqrt(x**2+y**2), taking care not to cause unnecessary
+    DLAPY2 returns sqrt(x**2+y**2), taking care not to cause unnecessary
     overflow.
 
     Arguments
@@ -33,7 +33,7 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
     /* System generated locals */
     doublereal ret_val, d__1;
     /* Builtin functions */
-    /*doublereal hypre_sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
     /* Local variables */
     doublereal xabs, yabs, w, z__;
 
@@ -48,7 +48,7 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
     } else {
 /* Computing 2nd power */
 	d__1 = z__ / w;
-	ret_val = w * hypre_sqrt(d__1 * d__1 + 1.);
+	ret_val = w * sqrt(d__1 * d__1 + 1.);
     }
     return ret_val;
 
