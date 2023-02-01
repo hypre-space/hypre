@@ -646,9 +646,8 @@ hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
                       hypre_Vector *z )
 {
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy3( hypre_VectorMemoryLocation(x),
-                                                      hypre_VectorMemoryLocation(y),
-                                                      hypre_VectorMemoryLocation(z) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y));
    if (exec == HYPRE_EXEC_DEVICE)
    {
       hypre_SeqVectorAxpyzDevice(alpha, x, beta, y, z);
