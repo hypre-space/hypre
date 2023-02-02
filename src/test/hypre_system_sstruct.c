@@ -2530,7 +2530,7 @@ hypre_DriveSystemSStructCreate(
     *-----------------------------------------------------------*/
 
    values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),
-                         HYPRE_MEMORY_SHARED);
+                         HYPRE_MEMORY_HOST);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3184,7 +3184,7 @@ hypre_DriveSystemSStructCreate(
     * Finalize things
     *-----------------------------------------------------------*/
 
-   hypre_TFree(values, HYPRE_MEMORY_SHARED);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    HYPRE_SStructGridDestroy(grid);
    for (s = 0; s < data.nstencils; s++)

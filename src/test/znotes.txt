@@ -1,0 +1,50 @@
+
+TO DO:
+
+* Update solver capabilities in hypre_drive.c with updates in sstruct.c, etc.
+
+* Maybe re-engineer the argv/argc stuff to create separate command-line strings
+  instead.  This would allow us to move away from the requirement of spaces on
+  either side of the brackets '{' and '}' (by either explicitly inserting spaces
+  where they are needed, or parsing the strings differently).
+
+* The help is still long and difficult to follow.  Think of alternative ideas.
+
+* What about unit testing (for example, testing all Set/Get routines) and
+  running with/without the solver defaults?
+
+* Write some documentation on how the driver is organized and how new
+  capabilities should be added.
+
+* Update the regression tests.
+
+
+NOTE: Keep the other drivers around to allow a more gradual transition to hypre_drive.
+
+
+DONE * See 'RDF TODO' in hypre_drive.c to move krylov method logic to main()
+DONE * Implement Krylov Solvers in hypre_solver.c (take code from hypre_solver_sstruct.c)
+DONE * Implement hypre_solver_sstruct.c and other files
+
+#============================================
+# Current run lines:
+
+# SysPFMG
+mpirun -np 1 hypre_drive -system sstruct { -in TEST_sstruct/sstruct.in.cube -r 5 5 5 }\
+ -solver sstruct { -tol 1e-9 -syspfmg { -relax 2 -v 2 2 } }
+
+# GMRES preconditioned by SysPFMG
+mpirun -np 1 hypre_drive -system sstruct { -in TEST_sstruct/sstruct.in.cube -r 5 5 5 }\
+ -solver sstruct { -tol 1e-9 -gmres { -kdim 10 } -syspfmg { -relax 2 -v 2 2 } }
+
+# GMRES preconditioned by diagonal
+mpirun -np 1 hypre_drive -system sstruct { -in TEST_sstruct/sstruct.in.cube -r 5 5 5 }\
+ -solver sstruct { -tol 1e-9 -gmres { } -diag { } }
+
+#============================================
+# Previous run line:
+
+mpirun -np 1 hypre_drive -system sstruct { -in TEST_sstruct/sstruct.in.cube -r 5 5 5 }\
+ -solver sstruct { -gmres -tol 1e-9 -syspfmg { -relax 2 -v 2 2 } }
+
+
