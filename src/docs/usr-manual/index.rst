@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -8,8 +8,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to hypre's documentation!
-=================================
+Documentation for hypre
+=======================
 
 .. include:: ../copyright.txt
 

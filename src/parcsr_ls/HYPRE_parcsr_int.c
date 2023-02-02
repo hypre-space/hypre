@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -11,122 +11,145 @@
 #include "temp_multivector.h"
 
 HYPRE_Int
-hypre_ParSetRandomValues( void* v, HYPRE_Int seed ) {
+hypre_ParSetRandomValues( void* v, HYPRE_Int seed )
+{
 
-  HYPRE_ParVectorSetRandomValues( (HYPRE_ParVector)v, seed );
-  return 0;
+   HYPRE_ParVectorSetRandomValues( (HYPRE_ParVector)v, seed );
+   return 0;
 }
 
 HYPRE_Int
-hypre_ParPrintVector( void* v, const char* file ) {
+hypre_ParPrintVector( void* v, const char* file )
+{
 
-  return hypre_ParVectorPrint( (hypre_ParVector*)v, file );
+   return hypre_ParVectorPrint( (hypre_ParVector*)v, file );
 }
 
 void*
-hypre_ParReadVector( MPI_Comm comm, const char* file ) {
+hypre_ParReadVector( MPI_Comm comm, const char* file )
+{
 
-  return (void*)hypre_ParVectorRead( comm, file );
+   return (void*)hypre_ParVectorRead( comm, file );
 }
 
 HYPRE_Int hypre_ParVectorSize(void * x)
 {
-  return 0;
+   return 0;
 }
 
 HYPRE_Int
-HYPRE_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
+HYPRE_ParCSRMultiVectorPrint( void* x_, const char* fileName )
+{
 
-  HYPRE_Int i, ierr;
-  mv_TempMultiVector* x;
-  char fullName[128];
+   HYPRE_Int i, ierr;
+   mv_TempMultiVector* x;
+   char fullName[128];
 
-  x = (mv_TempMultiVector*)x_;
-  hypre_assert( x != NULL );
+   x = (mv_TempMultiVector*)x_;
+   hypre_assert( x != NULL );
 
-  ierr = 0;
-  for ( i = 0; i < x->numVectors; i++ ) {
-    hypre_sprintf( fullName, "%s.%d", fileName, i );
-    ierr = ierr ||
-      hypre_ParPrintVector( x->vector[i], fullName );
-  }
-  return ierr;
+   ierr = 0;
+   for ( i = 0; i < x->numVectors; i++ )
+   {
+      hypre_sprintf( fullName, "%s.%d", fileName, i );
+      ierr = ierr ||
+             hypre_ParPrintVector( x->vector[i], fullName );
+   }
+   return ierr;
 }
 
 void*
-HYPRE_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
+HYPRE_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName )
+{
 
-  HYPRE_Int i, n, id;
-  FILE* fp;
-  char fullName[128];
-  mv_TempMultiVector* x;
-  mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
+   HYPRE_Int i, n, id;
+   FILE* fp;
+   char fullName[128];
+   mv_TempMultiVector* x;
+   mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
 
-  hypre_MPI_Comm_rank( comm, &id );
+   hypre_MPI_Comm_rank( comm, &id );
 
-  n = 0;
-  do {
-    hypre_sprintf( fullName, "%s.%d.%d", fileName, n, id );
-    if ( (fp = fopen(fullName, "r")) ) {
-	  n++;
-      fclose( fp );
-	}
-  } while ( fp );
+   n = 0;
+   do
+   {
+      hypre_sprintf( fullName, "%s.%d.%d", fileName, n, id );
+      if ( (fp = fopen(fullName, "r")) )
+      {
+         n++;
+         fclose( fp );
+      }
+   }
+   while ( fp );
 
-  if ( n == 0 )
-    return NULL;
+   if ( n == 0 )
+   {
+      return NULL;
+   }
 
-  x = hypre_TAlloc(mv_TempMultiVector, 1, HYPRE_MEMORY_HOST);
-  hypre_assert( x != NULL );
+   x = hypre_TAlloc(mv_TempMultiVector, 1, HYPRE_MEMORY_HOST);
+   hypre_assert( x != NULL );
 
-  x->interpreter = ii;
+   x->interpreter = ii;
 
-  x->numVectors = n;
+   x->numVectors = n;
 
-  x->vector = hypre_CTAlloc(void*,  n, HYPRE_MEMORY_HOST);
-  hypre_assert( x->vector != NULL );
+   x->vector = hypre_CTAlloc(void*,  n, HYPRE_MEMORY_HOST);
+   hypre_assert( x->vector != NULL );
 
-  x->ownsVectors = 1;
+   x->ownsVectors = 1;
 
-  for ( i = 0; i < n; i++ ) {
-    hypre_sprintf( fullName, "%s.%d", fileName, i );
-    x->vector[i] = hypre_ParReadVector( comm, fullName );
-  }
+   for ( i = 0; i < n; i++ )
+   {
+      hypre_sprintf( fullName, "%s.%d", fileName, i );
+      x->vector[i] = hypre_ParReadVector( comm, fullName );
+   }
 
-  x->mask = NULL;
-  x->ownsMask = 0;
+   x->mask = NULL;
+   x->ownsMask = 0;
 
-  return x;
+   return x;
 }
 
 HYPRE_Int
-aux_maskCount( HYPRE_Int n, HYPRE_Int* mask ) {
+aux_maskCount( HYPRE_Int n, HYPRE_Int* mask )
+{
 
-  HYPRE_Int i, m;
+   HYPRE_Int i, m;
 
-  if ( mask == NULL )
-    return n;
+   if ( mask == NULL )
+   {
+      return n;
+   }
 
-  for ( i = m = 0; i < n; i++ )
-    if ( mask[i] )
-      m++;
+   for ( i = m = 0; i < n; i++ )
+      if ( mask[i] )
+      {
+         m++;
+      }
 
-  return m;
+   return m;
 }
 
 void
-aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
+aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index )
+{
 
-  HYPRE_Int i, j;
+   HYPRE_Int i, j;
 
-  if ( mask != NULL ) {
-    for ( i = 0, j = 0; i < n; i++ )
-      if ( mask[i] )
-	index[j++] = i + 1;
-  }
-  else
-    for ( i = 0; i < n; i++ )
-      index[i] = i + 1;
+   if ( mask != NULL )
+   {
+      for ( i = 0, j = 0; i < n; i++ )
+         if ( mask[i] )
+         {
+            index[j++] = i + 1;
+         }
+   }
+   else
+      for ( i = 0; i < n; i++ )
+      {
+         index[i] = i + 1;
+      }
 
 }
 
@@ -142,56 +165,56 @@ aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 HYPRE_Int
 HYPRE_TempParCSRSetupInterpreter( mv_InterfaceInterpreter *i )
 {
-  /* Vector part */
+   /* Vector part */
 
-  i->CreateVector = hypre_ParKrylovCreateVector;
-  i->DestroyVector = hypre_ParKrylovDestroyVector;
-  i->InnerProd = hypre_ParKrylovInnerProd;
-  i->CopyVector = hypre_ParKrylovCopyVector;
-  i->ClearVector = hypre_ParKrylovClearVector;
-  i->SetRandomValues = hypre_ParSetRandomValues;
-  i->ScaleVector = hypre_ParKrylovScaleVector;
-  i->Axpy = hypre_ParKrylovAxpy;
+   i->CreateVector = hypre_ParKrylovCreateVector;
+   i->DestroyVector = hypre_ParKrylovDestroyVector;
+   i->InnerProd = hypre_ParKrylovInnerProd;
+   i->CopyVector = hypre_ParKrylovCopyVector;
+   i->ClearVector = hypre_ParKrylovClearVector;
+   i->SetRandomValues = hypre_ParSetRandomValues;
+   i->ScaleVector = hypre_ParKrylovScaleVector;
+   i->Axpy = hypre_ParKrylovAxpy;
 
-  /* Multivector part */
+   /* Multivector part */
 
-  i->CreateMultiVector = mv_TempMultiVectorCreateFromSampleVector;
-  i->CopyCreateMultiVector = mv_TempMultiVectorCreateCopy;
-  i->DestroyMultiVector = mv_TempMultiVectorDestroy;
+   i->CreateMultiVector = mv_TempMultiVectorCreateFromSampleVector;
+   i->CopyCreateMultiVector = mv_TempMultiVectorCreateCopy;
+   i->DestroyMultiVector = mv_TempMultiVectorDestroy;
 
-  i->Width = mv_TempMultiVectorWidth;
-  i->Height = mv_TempMultiVectorHeight;
-  i->SetMask = mv_TempMultiVectorSetMask;
-  i->CopyMultiVector = mv_TempMultiVectorCopy;
-  i->ClearMultiVector = mv_TempMultiVectorClear;
-  i->SetRandomVectors = mv_TempMultiVectorSetRandom;
-  i->MultiInnerProd = mv_TempMultiVectorByMultiVector;
-  i->MultiInnerProdDiag = mv_TempMultiVectorByMultiVectorDiag;
-  i->MultiVecMat = mv_TempMultiVectorByMatrix;
-  i->MultiVecMatDiag = mv_TempMultiVectorByDiagonal;
-  i->MultiAxpy = mv_TempMultiVectorAxpy;
-  i->MultiXapy = mv_TempMultiVectorXapy;
-  i->Eval = mv_TempMultiVectorEval;
+   i->Width = mv_TempMultiVectorWidth;
+   i->Height = mv_TempMultiVectorHeight;
+   i->SetMask = mv_TempMultiVectorSetMask;
+   i->CopyMultiVector = mv_TempMultiVectorCopy;
+   i->ClearMultiVector = mv_TempMultiVectorClear;
+   i->SetRandomVectors = mv_TempMultiVectorSetRandom;
+   i->MultiInnerProd = mv_TempMultiVectorByMultiVector;
+   i->MultiInnerProdDiag = mv_TempMultiVectorByMultiVectorDiag;
+   i->MultiVecMat = mv_TempMultiVectorByMatrix;
+   i->MultiVecMatDiag = mv_TempMultiVectorByDiagonal;
+   i->MultiAxpy = mv_TempMultiVectorAxpy;
+   i->MultiXapy = mv_TempMultiVectorXapy;
+   i->Eval = mv_TempMultiVectorEval;
 
-  return 0;
+   return 0;
 }
 
 HYPRE_Int
 HYPRE_ParCSRSetupInterpreter( mv_InterfaceInterpreter *i )
 {
-  return HYPRE_TempParCSRSetupInterpreter( i );
+   return HYPRE_TempParCSRSetupInterpreter( i );
 }
 
 HYPRE_Int
 HYPRE_ParCSRSetupMatvec(HYPRE_MatvecFunctions * mv)
 {
-  mv->MatvecCreate = hypre_ParKrylovMatvecCreate;
-  mv->Matvec = hypre_ParKrylovMatvec;
-  mv->MatvecDestroy = hypre_ParKrylovMatvecDestroy;
+   mv->MatvecCreate = hypre_ParKrylovMatvecCreate;
+   mv->Matvec = hypre_ParKrylovMatvec;
+   mv->MatvecDestroy = hypre_ParKrylovMatvecDestroy;
 
-  mv->MatMultiVecCreate = NULL;
-  mv->MatMultiVec = NULL;
-  mv->MatMultiVecDestroy = NULL;
+   mv->MatMultiVecCreate = NULL;
+   mv->MatMultiVec = NULL;
+   mv->MatMultiVecDestroy = NULL;
 
-  return 0;
+   return 0;
 }

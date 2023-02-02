@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -32,6 +32,7 @@
 
 /* SStruct linear solvers headers */
 #include "HYPRE_sstruct_ls.h"
+#include "ex.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -64,12 +65,15 @@ int main (int argc, char *argv[])
    /* Initialize HYPRE */
    HYPRE_Init();
 
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
+
    if (num_procs != 2)
    {
-      if (myid ==0) printf("Must run with 2 processors!\n");
+      if (myid == 0) { printf("Must run with 2 processors!\n"); }
       MPI_Finalize();
 
-      return(0);
+      return (0);
    }
 
    /* Parse command line */
@@ -164,8 +168,10 @@ int main (int argc, char *argv[])
          int nvars = 1;
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* Now the grid is ready to use */
@@ -181,7 +187,7 @@ int main (int argc, char *argv[])
          relative offset (in the index space). */
       {
          int entry;
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
          int var = 0;
 
          /* Assign numerical values to the offsets so that we can
@@ -189,7 +195,9 @@ int main (int argc, char *argv[])
             variable for which we are assigning this stencil - we are
             just using one variable in this example so it is the first one (0) */
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil, entry, offsets[entry], var);
+         }
       }
    }
 
@@ -220,7 +228,7 @@ int main (int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      int i,j;
+      int i, j;
       int part = 0;
       int var = 0;
 
@@ -255,24 +263,31 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
-            double values[30];
+            /* double values[30]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(30 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
                                               these correspond to the offsets
                                               defined above */
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
-                  values[i+j] = -1.0;
+               {
+                  values[i + j] = -1.0;
+               }
             }
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, nentries,
                                             stencil_indices, values);
+
+            free(values);
          }
 
          /* Set the matrix coefficients for some set of stencil entries
@@ -283,22 +298,29 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-            double values[60];
+            /* double values[60]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(60 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
-                  values[i+j] = -1.0;
+               {
+                  values[i + j] = -1.0;
+               }
             }
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, nentries,
                                             stencil_indices, values);
+
+            free(values);
          }
       }
       else if (myid == 1)
@@ -311,22 +333,29 @@ int main (int argc, char *argv[])
 
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
-            double values[80];
+            /* double values[80]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(80 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
-                  values[i+j] = -1.0;
+               {
+                  values[i + j] = -1.0;
+               }
             }
 
             HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                             var, nentries,
                                             stencil_indices, values);
+
+            free(values);
          }
       }
 
@@ -335,10 +364,13 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          int maxnvalues = 6;
-         double values[6];
+         /* double values[6]; OK to use constant-length array for CPUs */
+         double *values = (double *) malloc(6 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          {
             /* Values below our first AND second box */
@@ -400,13 +432,19 @@ int main (int argc, char *argv[])
                                             var, 1,
                                             stencil_indices, values);
          }
+
+         free(values);
       }
       else if (myid == 1)
       {
          int maxnvalues = 4;
-         double values[4];
+         /* double values[4]; OK to use constant-length array for CPUs */
+         double *values = (double *) malloc(4 * sizeof(double));
+
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          {
             /* Values below our box */
@@ -443,6 +481,8 @@ int main (int argc, char *argv[])
                                             var, 1,
                                             stencil_indices, values);
          }
+
+         free(values);
       }
 
       /* This is a collective call finalizing the matrix assembly.
@@ -481,15 +521,22 @@ int main (int argc, char *argv[])
             int iupper[2] = {-1, 2};
 
             int nvalues = 6;  /* 6 grid points */
-            double values[6];
+            /* double values[6]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(6 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+
+            free(values);
          }
 
          /* Set the vector coefficients over the gridpoints in my second box */
@@ -498,15 +545,22 @@ int main (int argc, char *argv[])
             int iupper[2] = { 2, 4};
 
             int nvalues = 12; /* 12 grid points */
-            double values[12];
+            /* double values[12]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(12 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+
+            free(values);
          }
       }
       else if (myid == 1)
@@ -517,15 +571,22 @@ int main (int argc, char *argv[])
             int iupper[2] = { 6, 4};
 
             int nvalues = 16; /* 16 grid points */
-            double values[16];
+            /* double values[16]; OK to use constant-length array for CPUs */
+            double *values = (double *) malloc(16 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+
+            free(values);
          }
       }
 
@@ -568,7 +629,7 @@ int main (int argc, char *argv[])
 
       /* Set preconditioner and solve */
       HYPRE_StructPCGSetPrecond(solver, HYPRE_StructSMGSolve,
-                           HYPRE_StructSMGSetup, precond);
+                                HYPRE_StructSMGSetup, precond);
       HYPRE_StructPCGSetup(solver, sA, sb, sx);
       HYPRE_StructPCGSolve(solver, sA, sb, sx);
    }

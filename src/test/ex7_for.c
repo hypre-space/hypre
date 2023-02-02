@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -52,9 +52,9 @@
 #include "HYPRE_sstruct_ls.h"
 
 #ifdef M_PI
-  #define PI M_PI
+#define PI M_PI
 #else
-  #define PI 3.14159265358979
+#define PI 3.14159265358979
 #endif
 
 /* Macro to evaluate a function F in the grid point (i,j) */
@@ -77,17 +77,25 @@ HYPRE_Real K(HYPRE_Real x, HYPRE_Real y)
       case 0:
          return 1.0;
       case 1:
-         return x*x+exp(y);
+         return x * x + exp(y);
       case 2:
-         if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25))
+         if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25))
+         {
             return 100.0;
+         }
          else
+         {
             return 1.0;
+         }
       case 3:
-         if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)) < 0.0625)
+         if (((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5)) < 0.0625)
+         {
             return 10.0;
+         }
          else
+         {
             return 1.0;
+         }
       default:
          return 1.0;
    }
@@ -153,9 +161,9 @@ HYPRE_Real U0(HYPRE_Real x, HYPRE_Real y)
       case 0:
          return 0.0;
       case 1:
-         return (x+y)/100;
+         return (x + y) / 100;
       case 2:
-         return (sin(5*PI*x)+sin(5*PI*y))/1000;
+         return (sin(5 * PI * x) + sin(5 * PI * y)) / 1000;
       default:
          return 0.0;
    }
@@ -171,17 +179,25 @@ HYPRE_Real F(HYPRE_Real x, HYPRE_Real y)
       case 1:
          return 0.0;
       case 2:
-         return 2*PI*PI*sin(PI*x)*sin(PI*y);
+         return 2 * PI * PI * sin(PI * x) * sin(PI * y);
       case 3:
-         if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25))
+         if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25))
+         {
             return -1.0;
+         }
          else
+         {
             return 1.0;
+         }
       case 4:
-         if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)) < 0.0625)
+         if (((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5)) < 0.0625)
+         {
             return -1.0;
+         }
          else
+         {
             return 1.0;
+         }
       default:
          return 1.0;
    }
@@ -403,23 +419,25 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    /* Convection produces non-symmetric matrices */
    if (optionB && sym)
+   {
       optionB = 0;
+   }
 
    /* Figure out the processor grid (N x N).  The local
       problem size is indicated by n (n x n). pi and pj
       indicate position in the processor grid. */
    N  = sqrt(num_procs);
-   h  = 1.0 / (N*n-1);
-   h2 = h*h;
+   h  = 1.0 / (N * n - 1);
+   h2 = h * h;
    pj = myid / N;
-   pi = myid - pj*N;
+   pi = myid - pj * N;
 
    /* Define the nodes owned by the current processor (each processor's
       piece of the global grid) */
-   ilower[0] = pi*n;
-   ilower[1] = pj*n;
-   iupper[0] = ilower[0] + n-1;
-   iupper[1] = ilower[1] + n-1;
+   ilower[0] = pi * n;
+   ilower[1] = pj * n;
+   iupper[0] = ilower[0] + n - 1;
+   iupper[1] = ilower[1] + n - 1;
 
    /* 1. Set up a 2D grid */
    {
@@ -453,7 +471,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #endif
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructGridSetVariables(&grid, &i, &nvars, &vartypes[0]);
 #else
@@ -478,7 +496,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       if (sym == 0)
       {
          /* Define the geometry of the stencil */
-         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
          /* Create an empty 2D, 5-pt stencil object */
 #ifdef HYPRE_FORTRAN
@@ -498,7 +516,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else /* Symmetric storage */
       {
          /* Define the geometry of the stencil */
-         HYPRE_Int offsets[3][2] = {{0,0}, {1,0}, {0,1}};
+         HYPRE_Int offsets[3][2] = {{0, 0}, {1, 0}, {0, 1}};
 
          /* Create an empty 2D, 3-pt stencil object */
 #ifdef HYPRE_FORTRAN
@@ -590,12 +608,14 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_SStructVectorInitialize(x);
 #endif
 
-      values = hypre_CTAlloc(HYPRE_Real, (n*n), HYPRE_MEMORY_HOST);
+      values = hypre_CTAlloc(HYPRE_Real, (n * n), HYPRE_MEMORY_HOST);
 
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
          for (i = 0; i < n; i++, k++)
-            values[k] = h2 * Eval(F,i,j);
+         {
+            values[k] = h2 * Eval(F, i, j);
+         }
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructVectorSetBoxValues(&b, &part, &ilower[0], &iupper[0], &var, &values[0]);
 #else
@@ -603,15 +623,17 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
       /* Set x = 0 */
-      for (i = 0; i < (n*n); i ++)
+      for (i = 0; i < (n * n); i ++)
+      {
          values[i] = 0.0;
+      }
 #ifdef HYPRE_FORTRAN
       HYPRE_SStructVectorSetBoxValues(&x, &part, &ilower[0], &iupper[0], &var, &values[0]);
 #else
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 #endif
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 
       /* Assembling is postponed since the vectors will be further modified */
    }
@@ -661,25 +683,25 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                                       to the offsets */
          HYPRE_Real *values;
 
-         values = hypre_CTAlloc(HYPRE_Real, 5*(n*n), HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc(HYPRE_Real, 5 * (n * n), HYPRE_MEMORY_HOST);
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
-            for (i = 0; i < n; i++, k+=5)
+            for (i = 0; i < n; i++, k += 5)
             {
-               values[k+1] = - Eval(K,i-0.5,j) - Eval(B1,i-0.5,j);
+               values[k + 1] = - Eval(K, i - 0.5, j) - Eval(B1, i - 0.5, j);
 
-               values[k+2] = - Eval(K,i+0.5,j) + Eval(B1,i+0.5,j);
+               values[k + 2] = - Eval(K, i + 0.5, j) + Eval(B1, i + 0.5, j);
 
-               values[k+3] = - Eval(K,i,j-0.5) - Eval(B2,i,j-0.5);
+               values[k + 3] = - Eval(K, i, j - 0.5) - Eval(B2, i, j - 0.5);
 
-               values[k+4] = - Eval(K,i,j+0.5) + Eval(B2,i,j+0.5);
+               values[k + 4] = - Eval(K, i, j + 0.5) + Eval(B2, i, j + 0.5);
 
-               values[k] = h2 * Eval(C,i,j)
-                  + Eval(K ,i-0.5,j) + Eval(K ,i+0.5,j)
-                  + Eval(K ,i,j-0.5) + Eval(K ,i,j+0.5)
-                  - Eval(B1,i-0.5,j) + Eval(B1,i+0.5,j)
-                  - Eval(B2,i,j-0.5) + Eval(B2,i,j+0.5);
+               values[k] = h2 * Eval(C, i, j)
+                           + Eval(K, i - 0.5, j) + Eval(K, i + 0.5, j)
+                           + Eval(K, i, j - 0.5) + Eval(K, i, j + 0.5)
+                           - Eval(B1, i - 0.5, j) + Eval(B1, i + 0.5, j)
+                           - Eval(B2, i, j - 0.5) + Eval(B2, i, j + 0.5);
             }
 
 #ifdef HYPRE_FORTRAN
@@ -692,24 +714,24 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                          stencil_indices, values);
 #endif
 
-         free(values);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
       }
       else /* Symmetric storage */
       {
          HYPRE_Int stencil_indices[3] = {0, 1, 2};
          HYPRE_Real *values;
 
-         values = hypre_CTAlloc(HYPRE_Real, 3*(n*n), HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc(HYPRE_Real, 3 * (n * n), HYPRE_MEMORY_HOST);
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
-            for (i = 0; i < n; i++, k+=3)
+            for (i = 0; i < n; i++, k += 3)
             {
-               values[k+1] = - Eval(K,i+0.5,j);
-               values[k+2] = - Eval(K,i,j+0.5);
-               values[k] = h2 * Eval(C,i,j)
-                  + Eval(K,i+0.5,j) + Eval(K,i,j+0.5)
-                  + Eval(K,i-0.5,j) + Eval(K,i,j-0.5);
+               values[k + 1] = - Eval(K, i + 0.5, j);
+               values[k + 2] = - Eval(K, i, j + 0.5);
+               values[k] = h2 * Eval(C, i, j)
+                           + Eval(K, i + 0.5, j) + Eval(K, i, j + 0.5)
+                           + Eval(K, i - 0.5, j) + Eval(K, i, j - 0.5);
             }
 
 #ifdef HYPRE_FORTRAN
@@ -722,7 +744,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                          stencil_indices, values);
 #endif
 
-         free(values);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -743,29 +765,35 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Int var = 0;
 
       if (sym == 0)
+      {
          nentries = 5;
+      }
       else
+      {
          nentries = 3;
+      }
 
-      values  = hypre_CTAlloc(HYPRE_Real, nentries*n, HYPRE_MEMORY_HOST);
+      values  = hypre_CTAlloc(HYPRE_Real, nentries * n, HYPRE_MEMORY_HOST);
       bvalues = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
          we have I x_b = u_0; */
-      for (i = 0; i < nentries*n; i += nentries)
+      for (i = 0; i < nentries * n; i += nentries)
       {
          values[i] = 1.0;
          for (j = 1; j < nentries; j++)
-            values[i+j] = 0.0;
+         {
+            values[i + j] = 0.0;
+         }
       }
 
       /* Processors at y = 0 */
       if (pj == 0)
       {
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          /* Modify the matrix */
@@ -781,7 +809,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (i = 0; i < n; i++)
-            bvalues[i] = bcEval(U0,i,0);
+         {
+            bvalues[i] = bcEval(U0, i, 0);
+         }
 
 #ifdef HYPRE_FORTRAN
          HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0],
@@ -793,12 +823,12 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
 
       /* Processors at y = 1 */
-      if (pj == N-1)
+      if (pj == N - 1)
       {
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n + n-1;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n + n - 1;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          /* Modify the matrix */
@@ -814,10 +844,12 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (i = 0; i < n; i++)
-            bvalues[i] = bcEval(U0,i,0);
+         {
+            bvalues[i] = bcEval(U0, i, 0);
+         }
 
 #ifdef HYPRE_FORTRAN
-         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0], 
+         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0],
                                          &bc_iupper[0], &var, &bvalues[0]);
 #else
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
@@ -827,11 +859,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Processors at x = 0 */
       if (pi == 0)
       {
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          /* Modify the matrix */
 #ifdef HYPRE_FORTRAN
@@ -846,10 +878,12 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (j = 0; j < n; j++)
-            bvalues[j] = bcEval(U0,0,j);
+         {
+            bvalues[j] = bcEval(U0, 0, j);
+         }
 
 #ifdef HYPRE_FORTRAN
-         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0], 
+         HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0],
                                          &bc_iupper[0], &var, &bvalues[0]);
 #else
          HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper,
@@ -858,13 +892,13 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
 
       /* Processors at x = 1 */
-      if (pi == N-1)
+      if (pi == N - 1)
       {
-         bc_ilower[0] = pi*n + n-1;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n + n - 1;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          /* Modify the matrix */
 #ifdef HYPRE_FORTRAN
@@ -879,7 +913,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Put the boundary conditions in b */
          for (j = 0; j < n; j++)
-            bvalues[j] = bcEval(U0,0,j);
+         {
+            bvalues[j] = bcEval(U0, 0, j);
+         }
 
 #ifdef HYPRE_FORTRAN
          HYPRE_SStructVectorSetBoxValues(&b, &part, &bc_ilower[0], &bc_iupper[0],
@@ -902,17 +938,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Processors at y = 0, neighbors of boundary nodes */
       if (pj == 0)
       {
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n + 1;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n + 1;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          stencil_indices[0] = 3;
 
          /* Modify the matrix */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = 0.0;
+         }
 
          if (sym == 0)
 #ifdef HYPRE_FORTRAN
@@ -927,13 +965,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
-            bvalues[i] = bcEval(U0,i,-1) * (bcEval(K,i,-0.5)+bcEval(B2,i,-0.5));
+         {
+            bvalues[i] = bcEval(U0, i, -1) * (bcEval(K, i, -0.5) + bcEval(B2, i, -0.5));
+         }
 
          if (pi == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
-         if (pi == N-1)
-            bvalues[n-1] = 0.0;
+         if (pi == N - 1)
+         {
+            bvalues[n - 1] = 0.0;
+         }
 
          /* Note the use of AddToBoxValues (because we have already set values
             at these nodes) */
@@ -949,17 +993,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Processors at x = 0, neighbors of boundary nodes */
       if (pi == 0)
       {
-         bc_ilower[0] = pi*n + 1;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n + 1;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          stencil_indices[0] = 1;
 
          /* Modify the matrix */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = 0.0;
+         }
 
          if (sym == 0)
 #ifdef HYPRE_FORTRAN
@@ -974,13 +1020,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
-            bvalues[j] = bcEval(U0,-1,j) * (bcEval(K,-0.5,j)+bcEval(B1,-0.5,j));
+         {
+            bvalues[j] = bcEval(U0, -1, j) * (bcEval(K, -0.5, j) + bcEval(B1, -0.5, j));
+         }
 
          if (pj == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
-         if (pj == N-1)
-            bvalues[n-1] = 0.0;
+         if (pj == N - 1)
+         {
+            bvalues[n - 1] = 0.0;
+         }
 
 #ifdef HYPRE_FORTRAN
          HYPRE_SStructVectorAddToBoxValues(&b, &part, &bc_ilower[0], &bc_iupper[0],
@@ -991,25 +1043,31 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
 
       /* Processors at y = 1, neighbors of boundary nodes */
-      if (pj == N-1)
+      if (pj == N - 1)
       {
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n + (n-1) -1;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n + (n - 1) - 1;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          if (sym == 0)
+         {
             stencil_indices[0] = 4;
+         }
          else
+         {
             stencil_indices[0] = 2;
+         }
 
          /* Modify the matrix */
          for (i = 0; i < n; i++)
+         {
             bvalues[i] = 0.0;
+         }
 
 #ifdef HYPRE_FORTRAN
-         HYPRE_SStructMatrixSetBoxValues(&A, &part, &bc_ilower[0], &bc_iupper[0], 
+         HYPRE_SStructMatrixSetBoxValues(&A, &part, &bc_ilower[0], &bc_iupper[0],
                                          &var, &one,
                                          &stencil_indices[0], &bvalues[0]);
 #else
@@ -1019,13 +1077,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
-            bvalues[i] = bcEval(U0,i,1) * (bcEval(K,i,0.5)+bcEval(B2,i,0.5));
+         {
+            bvalues[i] = bcEval(U0, i, 1) * (bcEval(K, i, 0.5) + bcEval(B2, i, 0.5));
+         }
 
          if (pi == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
-         if (pi == N-1)
-            bvalues[n-1] = 0.0;
+         if (pi == N - 1)
+         {
+            bvalues[n - 1] = 0.0;
+         }
 
 #ifdef HYPRE_FORTRAN
          HYPRE_SStructVectorAddToBoxValues(&b, &part, &bc_ilower[0], &bc_iupper[0],
@@ -1037,22 +1101,28 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
 
       /* Processors at x = 1, neighbors of boundary nodes */
-      if (pi == N-1)
+      if (pi == N - 1)
       {
-         bc_ilower[0] = pi*n + (n-1) - 1;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n + (n - 1) - 1;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          if (sym == 0)
+         {
             stencil_indices[0] = 2;
+         }
          else
+         {
             stencil_indices[0] = 1;
+         }
 
          /* Modify the matrix */
          for (j = 0; j < n; j++)
+         {
             bvalues[j] = 0.0;
+         }
 
 #ifdef HYPRE_FORTRAN
          HYPRE_SStructMatrixSetBoxValues(&A, &part, &bc_ilower[0], &bc_iupper[0],
@@ -1066,13 +1136,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
-            bvalues[j] = bcEval(U0,1,j) * (bcEval(K,0.5,j)+bcEval(B1,0.5,j));
+         {
+            bvalues[j] = bcEval(U0, 1, j) * (bcEval(K, 0.5, j) + bcEval(B1, 0.5, j));
+         }
 
          if (pj == 0)
+         {
             bvalues[0] = 0.0;
+         }
 
-         if (pj == N-1)
-            bvalues[n-1] = 0.0;
+         if (pj == N - 1)
+         {
+            bvalues[n - 1] = 0.0;
+         }
 
 #ifdef HYPRE_FORTRAN
          HYPRE_SStructVectorAddToBoxValues(&b, &part, &bc_ilower[0], &bc_iupper[0],
@@ -1082,8 +1158,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      free(values);
-      free(bvalues);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
+      hypre_TFree(bvalues, HYPRE_MEMORY_HOST);
    }
 
    /* Finalize the vector and matrix assembly */

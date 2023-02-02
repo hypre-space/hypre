@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -33,7 +33,7 @@ HYPRE_StructMatrixCreate( MPI_Comm             comm,
 HYPRE_Int
 HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixDestroy(matrix) );
+   return ( hypre_StructMatrixDestroy(matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -217,7 +217,7 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Complex     *values )
 {
    return hypre_StructMatrixSetConstantValues(
-      matrix, num_stencil_indices, stencil_indices, values, 0 );
+             matrix, num_stencil_indices, stencil_indices, values, 0 );
 }
 
 /*--------------------------------------------------------------------------
@@ -311,7 +311,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Complex     *values )
 {
    return hypre_StructMatrixSetConstantValues(
-      matrix, num_stencil_indices, stencil_indices, values, 1 );
+             matrix, num_stencil_indices, stencil_indices, values, 1 );
 }
 
 /*--------------------------------------------------------------------------
@@ -320,7 +320,7 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
 HYPRE_Int
 HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixAssemble(matrix) );
+   return ( hypre_StructMatrixAssemble(matrix) );
 }
 
 /*--------------------------------------------------------------------------
@@ -372,8 +372,8 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int  HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
-                                           HYPRE_Int           nentries,
-                                           HYPRE_Int          *entries )
+                                                 HYPRE_Int           nentries,
+                                                 HYPRE_Int          *entries )
 {
    return hypre_StructMatrixSetConstantEntries( matrix, nentries, entries );
 }
@@ -387,6 +387,26 @@ HYPRE_StructMatrixPrint( const char         *filename,
                          HYPRE_Int           all )
 {
    return ( hypre_StructMatrixPrint(filename, matrix, all) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixRead( MPI_Comm             comm,
+                        const char          *filename,
+                        HYPRE_Int           *num_ghost,
+                        HYPRE_StructMatrix  *matrix )
+{
+   if (!matrix)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   *matrix = (HYPRE_StructMatrix) hypre_StructMatrixRead(comm, filename, num_ghost);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -410,5 +430,5 @@ HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
 HYPRE_Int
 HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
-   return( hypre_StructMatrixClearBoundary(matrix) );
+   return ( hypre_StructMatrixClearBoundary(matrix) );
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -26,11 +26,9 @@ extern "C" {
 /**
  * @defgroup Eigensolvers Eigensolvers
  *
- * These eigensolvers support many of the matrix/vector storage schemes in
- * hypre.  They should be used in conjunction with the storage-specific
- * interfaces.
- *
- * @memo A basic interface for eigensolvers
+ * A basic interface for eigensolvers. These eigensolvers support many of the
+ * matrix/vector storage schemes in hypre.  They should be used in conjunction
+ * with the storage-specific interfaces.
  *
  * @{
  **/
@@ -46,29 +44,29 @@ extern "C" {
 
 #ifndef HYPRE_SOLVER_STRUCT
 #define HYPRE_SOLVER_STRUCT
-   struct hypre_Solver_struct;
+struct hypre_Solver_struct;
 /**
  * The solver object.
  **/
-   typedef struct hypre_Solver_struct *HYPRE_Solver;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
 #endif
 
 #ifndef HYPRE_MATRIX_STRUCT
 #define HYPRE_MATRIX_STRUCT
-   struct hypre_Matrix_struct;
+struct hypre_Matrix_struct;
 /**
  * The matrix object.
  **/
-   typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
 #endif
 
 #ifndef HYPRE_VECTOR_STRUCT
 #define HYPRE_VECTOR_STRUCT
-   struct hypre_Vector_struct;
+struct hypre_Vector_struct;
 /**
  * The vector object.
  **/
-   typedef struct hypre_Vector_struct *HYPRE_Vector;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
 #endif
 
 /**@}*/

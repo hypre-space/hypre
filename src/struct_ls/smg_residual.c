@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -32,7 +32,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGResidualCreate( )
+hypre_SMGResidualCreate( void )
 {
    hypre_SMGResidualData *residual_data;
 
@@ -102,8 +102,8 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    (residual_data -> flops) =
       (hypre_StructMatrixGlobalSize(A) + hypre_StructVectorGlobalSize(x)) /
       (HYPRE_BigInt)(hypre_IndexX(base_stride) *
-       hypre_IndexY(base_stride) *
-       hypre_IndexZ(base_stride)  );
+                     hypre_IndexY(base_stride) *
+                     hypre_IndexZ(base_stride)  );
 
    return hypre_error_flag;
 }
@@ -161,7 +161,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {
@@ -234,7 +234,7 @@ hypre_SMGResidual( void               *residual_vdata,
             {
                Ap = hypre_StructMatrixBoxData(A, i, si);
                xp = hypre_StructVectorBoxData(x, i);
-//RL:PTROFFSET
+               //RL:PTROFFSET
                HYPRE_Int xp_off = hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
                hypre_BoxGetStrideSize(compute_box, base_stride,
@@ -246,7 +246,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
                {
-                  rp[ri] -= Ap[Ai] * xp[xi+xp_off];
+                  rp[ri] -= Ap[Ai] * xp[xi + xp_off];
                }
                hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR

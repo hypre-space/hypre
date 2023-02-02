@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -8,7 +8,7 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#include "../../utilities/hypre_general.h"
+#include "../../utilities/general.h"
 #include "../../utilities/fortran.h"
 
 /*
@@ -101,7 +101,7 @@
 * Utility Macros
 **********************************************************************/
 /* MPI and Cray native timers. Note MPI uses doubles while Cray uses longs */
-#if MACHINE_IS_CRAY
+#if defined(MACHINE_IS_CRAY) && MACHINE_IS_CRAY
 # define cleartimer(tmr) (tmr = 0)
 # define starttimer(tmr) (tmr -= rtclock())
 # define stoptimer(tmr)  (tmr += rtclock())

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -20,26 +20,26 @@
 
 HYPRE_Int
 hypre_BoomerAMGSolve( void               *amg_vdata,
-                   hypre_ParCSRMatrix *A,
-                   hypre_ParVector    *f,
-                   hypre_ParVector    *u         )
+                      hypre_ParCSRMatrix *A,
+                      hypre_ParVector    *f,
+                      hypre_ParVector    *u         )
 {
-   MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
-
-   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParAMGData    *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
-
-   HYPRE_Int      amg_print_level;
-   HYPRE_Int      amg_logging;
-   HYPRE_Int      cycle_count;
-   HYPRE_Int      num_levels;
-   /* HYPRE_Int      num_unknowns; */
-   HYPRE_Int    converge_type;
-   HYPRE_Real   tol;
-
-   HYPRE_Int block_mode;
-
+   HYPRE_Int            amg_print_level;
+   HYPRE_Int            amg_logging;
+   HYPRE_Int            cycle_count;
+   HYPRE_Int            num_levels;
+   HYPRE_Int            converge_type;
+   HYPRE_Int            block_mode;
+   HYPRE_Int            additive;
+   HYPRE_Int            mult_additive;
+   HYPRE_Int            simple;
+   HYPRE_Int            min_iter;
+   HYPRE_Int            max_iter;
+   HYPRE_Real           tol;
 
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
@@ -47,48 +47,41 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    hypre_ParCSRBlockMatrix **A_block_array;
 
-
    /*  Local variables  */
+   HYPRE_Int           j;
+   HYPRE_Int           Solve_err_flag;
+   HYPRE_Int           num_procs, my_id;
+   HYPRE_Real          alpha = 1.0;
+   HYPRE_Real          beta = -1.0;
+   HYPRE_Real          cycle_op_count;
+   HYPRE_Real          total_coeffs;
+   HYPRE_Real          total_variables;
+   HYPRE_Real         *num_coeffs;
+   HYPRE_Real         *num_variables;
+   HYPRE_Real          cycle_cmplxty = 0.0;
+   HYPRE_Real          operat_cmplxty;
+   HYPRE_Real          grid_cmplxty;
+   HYPRE_Real          conv_factor = 0.0;
+   HYPRE_Real          resid_nrm = 1.0;
+   HYPRE_Real          resid_nrm_init = 0.0;
+   HYPRE_Real          relative_resid;
+   HYPRE_Real          rhs_norm = 0.0;
+   HYPRE_Real          old_resid;
+   HYPRE_Real          ieee_check = 0.;
 
-   HYPRE_Int      j;
-   HYPRE_Int      Solve_err_flag;
-   HYPRE_Int      min_iter;
-   HYPRE_Int      max_iter;
-   HYPRE_Int      num_procs, my_id;
-   HYPRE_Int      additive;
-   HYPRE_Int      mult_additive;
-   HYPRE_Int      simple;
-
-   HYPRE_Real   alpha = 1.0;
-   HYPRE_Real   beta = -1.0;
-   HYPRE_Real   cycle_op_count;
-   HYPRE_Real   total_coeffs;
-   HYPRE_Real   total_variables;
-   HYPRE_Real  *num_coeffs;
-   HYPRE_Real  *num_variables;
-   HYPRE_Real   cycle_cmplxty = 0.0;
-   HYPRE_Real   operat_cmplxty;
-   HYPRE_Real   grid_cmplxty;
-   HYPRE_Real   conv_factor = 0.0;
-   HYPRE_Real   resid_nrm = 1.0;
-   HYPRE_Real   resid_nrm_init = 0.0;
-   HYPRE_Real   relative_resid;
-   HYPRE_Real   rhs_norm = 0.0;
-   HYPRE_Real   old_resid;
-   HYPRE_Real   ieee_check = 0.;
-
-   hypre_ParVector  *Vtemp;
-   hypre_ParVector  *Residual;
+   hypre_ParVector    *Vtemp;
+   hypre_ParVector    *Residual;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    amg_print_level  = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
-   if ( amg_logging > 1 )
+   if (amg_logging > 1)
+   {
       Residual = hypre_ParAMGDataResidual(amg_data);
-   /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
+   }
    num_levels       = hypre_ParAMGDataNumLevels(amg_data);
    A_array          = hypre_ParAMGDataAArray(amg_data);
    F_array          = hypre_ParAMGDataFArray(amg_data);
@@ -101,24 +94,20 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    additive         = hypre_ParAMGDataAdditive(amg_data);
    simple           = hypre_ParAMGDataSimple(amg_data);
    mult_additive    = hypre_ParAMGDataMultAdditive(amg_data);
+   block_mode       = hypre_ParAMGDataBlockMode(amg_data);
+   A_block_array    = hypre_ParAMGDataABlockArray(amg_data);
+   Vtemp            = hypre_ParAMGDataVtemp(amg_data);
 
    A_array[0] = A;
    F_array[0] = f;
    U_array[0] = u;
 
-   block_mode = hypre_ParAMGDataBlockMode(amg_data);
-
-   A_block_array = hypre_ParAMGDataABlockArray(amg_data);
-
-
-   /*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-        hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-        hypre_ParCSRMatrixRowStarts(A_array[0]));
-        hypre_ParVectorInitialize(Vtemp);
-        hypre_ParVectorSetPartitioningOwner(Vtemp,0);
-        hypre_ParAMGDataVtemp(amg_data) = Vtemp;
-        */
-   Vtemp = hypre_ParAMGDataVtemp(amg_data);
+   /* Verify that the number of vectors held by f and u match */
+   if (hypre_ParVectorNumVectors(f) != hypre_ParVectorNumVectors(u))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for RHS and LHS do not match!\n");
+      return hypre_error_flag;
+   }
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -146,7 +135,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (my_id == 0 && amg_print_level > 1 && tol > 0.)
+   {
       hypre_printf("\n\nAMG SOLUTION INFO:\n");
+   }
 
 
    /*-----------------------------------------------------------------------
@@ -160,7 +151,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          hypre_ParVectorCopy(F_array[0], Residual );
          if (tol > 0)
          {
-            hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
+            hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual);
          }
          resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
       }
@@ -178,7 +169,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          and notify users when they supply bad input. */
       if (resid_nrm != 0.)
       {
-         ieee_check = resid_nrm/resid_nrm; /* INF -> NaN conversion */
+         ieee_check = resid_nrm / resid_nrm; /* INF -> NaN conversion */
       }
 
       if (ieee_check != ieee_check)
@@ -233,7 +224,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
       hypre_printf("    Initial    %e                 %e\n", resid_nrm_init,
-            relative_resid);
+                   relative_resid);
    }
 
    /*-----------------------------------------------------------------------
@@ -252,6 +243,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
       else
       {
+         /* RL TODO: for now, force u's all-zero flag to be FALSE */
+         hypre_ParVectorAllZeros(u) = 0;
+
          hypre_BoomerAMGAdditiveCycle(amg_data);
       }
 
@@ -312,7 +306,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       if (my_id == 0 && amg_print_level > 1)
       {
          hypre_printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
-               resid_nrm, conv_factor, relative_resid);
+                      resid_nrm, conv_factor, relative_resid);
       }
    }
 
@@ -327,9 +321,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (cycle_count > 0 && resid_nrm_init)
-      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(HYPRE_Real) cycle_count));
+   {
+      conv_factor = pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
+   }
    else
+   {
       conv_factor = 1.;
+   }
 
    if (amg_print_level > 1)
    {
@@ -359,7 +357,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
 
 
-      for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
+      for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
       {
          total_coeffs += num_coeffs[j];
          total_variables += num_variables[j];
@@ -368,7 +366,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
       if (num_variables[0])
+      {
          grid_cmplxty = total_variables / num_variables[0];
+      }
       if (num_coeffs[0])
       {
          operat_cmplxty = total_coeffs / num_coeffs[0];
@@ -381,13 +381,13 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          {
             hypre_printf("\n\n==============================================");
             hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+            hypre_printf("      within the allowed %d V-cycles\n", max_iter);
             hypre_printf("==============================================");
          }
-         hypre_printf("\n\n Average Convergence Factor = %f",conv_factor);
-         hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-         hypre_printf("                operator = %f\n",operat_cmplxty);
-         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
+         hypre_printf("\n\n Average Convergence Factor = %f", conv_factor);
+         hypre_printf("\n\n     Complexity:    grid = %f\n", grid_cmplxty);
+         hypre_printf("                operator = %f\n", operat_cmplxty);
+         hypre_printf("                   cycle = %f\n\n\n\n", cycle_cmplxty);
       }
 
       hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);

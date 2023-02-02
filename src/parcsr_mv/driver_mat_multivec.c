@@ -1,16 +1,16 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface: matvec with multivectors
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -32,7 +32,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int          num_vectors;
    HYPRE_BigInt         global_num_rows, global_num_cols;
    HYPRE_BigInt         first_index;
-   HYPRE_Int            i, j, ierr=0;
+   HYPRE_Int            i, j, ierr = 0;
    HYPRE_Complex        *data, *data2;
    HYPRE_BigInt         *row_starts, *col_starts;
    char         file_name[80];
@@ -43,80 +43,80 @@ main( HYPRE_Int   argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
 
    hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
- 
-   if (my_id == 0) 
+
+   if (my_id == 0)
    {
-        matrix = hypre_CSRMatrixRead("input");
-        hypre_printf(" read input\n");
+      matrix = hypre_CSRMatrixRead("input");
+      hypre_printf(" read input\n");
    }
    row_starts = NULL;
-   col_starts = NULL; 
-   par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, matrix, 
-                row_starts, col_starts);
+   col_starts = NULL;
+   par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, matrix,
+                                              row_starts, col_starts);
    hypre_printf(" converted\n");
 
    matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);
 
-   hypre_sprintf(file_name,"matrix1.%d",my_id);
+   hypre_sprintf(file_name, "matrix1.%d", my_id);
 
-   if (matrix1) hypre_CSRMatrixPrint(matrix1, file_name);
+   if (matrix1) { hypre_CSRMatrixPrint(matrix1, file_name); }
 
-   hypre_ParCSRMatrixPrint(par_matrix,"matrix");
-   hypre_ParCSRMatrixPrintIJ(par_matrix,0,0,"matrixIJ");
+   hypre_ParCSRMatrixPrint(par_matrix, "matrix");
+   hypre_ParCSRMatrixPrintIJ(par_matrix, 0, 0, "matrixIJ");
 
-   par_matrix = hypre_ParCSRMatrixRead(hypre_MPI_COMM_WORLD,"matrix");
+   par_matrix = hypre_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "matrix");
 
    global_num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    hypre_printf(" global_num_cols %d\n", global_num_cols);
    global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
- 
+
    col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
    first_index = col_starts[my_id];
-   local_size = col_starts[my_id+1] - first_index;
+   local_size = col_starts[my_id + 1] - first_index;
 
    num_vectors = 3;
 
    x = hypre_ParMultiVectorCreate( hypre_MPI_COMM_WORLD, global_num_cols,
-                                         col_starts, num_vectors );
-   hypre_ParVectorSetPartitioningOwner(x,0);
+                                   col_starts, num_vectors );
    hypre_ParVectorInitialize(x);
    x_local = hypre_ParVectorLocalVector(x);
    data = hypre_VectorData(x_local);
    vecstride_x = hypre_VectorVectorStride(x_local);
    idxstride_x = hypre_VectorIndexStride(x_local);
-   for ( j=0; j<num_vectors; ++j )
-      for (i=0; i < local_size; i++)
-         data[i*idxstride_x + j*vecstride_x] = (HYPRE_Int)first_index+i+1 + 100*j;
+   for ( j = 0; j < num_vectors; ++j )
+      for (i = 0; i < local_size; i++)
+      {
+         data[i * idxstride_x + j * vecstride_x] = (HYPRE_Int)first_index + i + 1 + 100 * j;
+      }
 
    x2 = hypre_ParMultiVectorCreate( hypre_MPI_COMM_WORLD, global_num_cols,
                                     col_starts, num_vectors );
-   hypre_ParVectorSetPartitioningOwner(x2,0);
    hypre_ParVectorInitialize(x2);
-   hypre_ParVectorSetConstantValues(x2,2.0);
+   hypre_ParVectorSetConstantValues(x2, 2.0);
 
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
    first_index = row_starts[my_id];
-   local_size = (HYPRE_Int)(row_starts[my_id+1] - first_index);
+   local_size = (HYPRE_Int)(row_starts[my_id + 1] - first_index);
    y = hypre_ParMultiVectorCreate( hypre_MPI_COMM_WORLD, global_num_rows,
                                    row_starts, num_vectors );
-   hypre_ParVectorSetPartitioningOwner(y,0);
    hypre_ParVectorInitialize(y);
    y_local = hypre_ParVectorLocalVector(y);
 
    y2 = hypre_ParMultiVectorCreate( hypre_MPI_COMM_WORLD, global_num_rows,
                                     row_starts, num_vectors );
-   hypre_ParVectorSetPartitioningOwner(y2,0);
    hypre_ParVectorInitialize(y2);
    y2_local = hypre_ParVectorLocalVector(y2);
    data2 = hypre_VectorData(y2_local);
    vecstride_y = hypre_VectorVectorStride(y2_local);
    idxstride_y = hypre_VectorIndexStride(y2_local);
- 
-   for ( j=0; j<num_vectors; ++j )
-      for (i=0; i < local_size; i++)
-         data2[i*idxstride_y+j*vecstride_y] = (HYPRE_Int)first_index+i+1 + 100*j;
 
-   hypre_ParVectorSetConstantValues(y,1.0);
+   for ( j = 0; j < num_vectors; ++j )
+      for (i = 0; i < local_size; i++)
+      {
+         data2[i * idxstride_y + j * vecstride_y] = (HYPRE_Int)first_index + i + 1 + 100 * j;
+      }
+
+   hypre_ParVectorSetConstantValues(y, 1.0);
    hypre_printf(" initialized vectors, first_index=%i\n", first_index);
 
    hypre_ParVectorPrint(x, "vectorx");
@@ -132,19 +132,18 @@ main( HYPRE_Int   argc,
    ierr = hypre_ParCSRMatrixMatvecT ( 1.0, par_matrix, y2, 1.0, x2);
    hypre_printf(" did matvecT %d\n", ierr);
 
-   hypre_ParVectorPrint(x2, "transp"); 
+   hypre_ParVectorPrint(x2, "transp");
 
    hypre_ParCSRMatrixDestroy(par_matrix);
    hypre_ParVectorDestroy(x);
    hypre_ParVectorDestroy(x2);
    hypre_ParVectorDestroy(y);
    hypre_ParVectorDestroy(y2);
-   if (my_id == 0) hypre_CSRMatrixDestroy(matrix);
-   if (matrix1) hypre_CSRMatrixDestroy(matrix1);
+   if (my_id == 0) { hypre_CSRMatrixDestroy(matrix); }
+   if (matrix1) { hypre_CSRMatrixDestroy(matrix1); }
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return 0;
 }
-

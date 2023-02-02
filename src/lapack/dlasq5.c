@@ -8,64 +8,64 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_lapack.h"
 
-/* Subroutine */ integer dlasq5_(integer *i0, integer *n0, doublereal *z__, 
-	integer *pp, doublereal *tau, doublereal *dmin__, doublereal *dmin1, 
+/* Subroutine */ integer dlasq5_(integer *i0, integer *n0, doublereal *z__,
+	integer *pp, doublereal *tau, doublereal *dmin__, doublereal *dmin1,
 	doublereal *dmin2, doublereal *dn, doublereal *dnm1, doublereal *dnm2,
 	 logical *ieee)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       May 17, 2000   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       May 17, 2000
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLASQ5 computes one dqds transform in ping-pong form, one   
-    version for IEEE machines another for non IEEE machines.   
+    DLASQ5 computes one dqds transform in ping-pong form, one
+    version for IEEE machines another for non IEEE machines.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    I0    (input) INTEGER   
-          First index.   
+    I0    (input) INTEGER
+          First index.
 
-    N0    (input) INTEGER   
-          Last index.   
+    N0    (input) INTEGER
+          Last index.
 
-    Z     (input) DOUBLE PRECISION array, dimension ( 4*N )   
-          Z holds the qd array. EMIN is stored in Z(4*N0) to avoid   
-          an extra argument.   
+    Z     (input) DOUBLE PRECISION array, dimension ( 4*N )
+          Z holds the qd array. EMIN is stored in Z(4*N0) to avoid
+          an extra argument.
 
-    PP    (input) INTEGER   
-          PP=0 for ping, PP=1 for pong.   
+    PP    (input) INTEGER
+          PP=0 for ping, PP=1 for pong.
 
-    TAU   (input) DOUBLE PRECISION   
-          This is the shift.   
+    TAU   (input) DOUBLE PRECISION
+          This is the shift.
 
-    DMIN  (output) DOUBLE PRECISION   
-          Minimum value of d.   
+    DMIN  (output) DOUBLE PRECISION
+          Minimum value of d.
 
-    DMIN1 (output) DOUBLE PRECISION   
-          Minimum value of d, excluding D( N0 ).   
+    DMIN1 (output) DOUBLE PRECISION
+          Minimum value of d, excluding D( N0 ).
 
-    DMIN2 (output) DOUBLE PRECISION   
-          Minimum value of d, excluding D( N0 ) and D( N0-1 ).   
+    DMIN2 (output) DOUBLE PRECISION
+          Minimum value of d, excluding D( N0 ) and D( N0-1 ).
 
-    DN    (output) DOUBLE PRECISION   
-          d(N0), the last value of d.   
+    DN    (output) DOUBLE PRECISION
+          d(N0), the last value of d.
 
-    DNM1  (output) DOUBLE PRECISION   
-          d(N0-1).   
+    DNM1  (output) DOUBLE PRECISION
+          d(N0-1).
 
-    DNM2  (output) DOUBLE PRECISION   
-          d(N0-2).   
+    DNM2  (output) DOUBLE PRECISION
+          d(N0-2).
 
-    IEEE  (input) LOGICAL   
-          Flag for IEEE or non IEEE arithmetic.   
+    IEEE  (input) LOGICAL
+          Flag for IEEE or non IEEE arithmetic.
 
-    =====================================================================   
+    =====================================================================
 
 
        Parameter adjustments */
@@ -73,8 +73,8 @@ extern "C" {
     integer i__1;
     doublereal d__1, d__2;
     /* Local variables */
-    static doublereal emin, temp, d__;
-    static integer j4, j4p2;
+    doublereal emin, temp, d__;
+    integer j4, j4p2;
 
     --z__;
 

@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -31,3 +31,21 @@ The LOBPCG code is available for system interfaces: Struct, SStruct, and IJ.  It
 is also used in the Auxiliary-space Maxwell Eigensolver (AME).  The LOBPCG setup
 is similar to the setup for PCG.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|

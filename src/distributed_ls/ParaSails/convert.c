@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -87,10 +87,10 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
         for (j=0; j<counts[i]; j++)
             hypre_fprintf(outfile, "%d %d %.15e\n", i, *ind++, *val++);
 
-    free(counts);
-    free(pointers);
-    free(ind);
-    free(val);
+    hypre_TFree(counts, HYPRE_MEMORY_HOST);
+    hypre_TFree(pointers, HYPRE_MEMORY_HOST);
+    hypre_TFree(ind, HYPRE_MEMORY_HOST);
+    hypre_TFree(val, HYPRE_MEMORY_HOST);
 
     return 0;
 }
@@ -103,7 +103,7 @@ main(HYPRE_Int argc, char *argv[])
 
     ret = convert(infile, outfile);
     if (ret)
-	hypre_printf("Conversion failed\n");
+       hypre_printf("Conversion failed\n");
 
     fclose(infile);
     fclose(outfile);

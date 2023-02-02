@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -36,11 +36,11 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    switch (hypre_StructStencilNDim(stencil))
    {
       case 2:
-         RAP = hypre_SMG2CreateRAPOp(R ,A, PT, coarse_grid);
+         RAP = hypre_SMG2CreateRAPOp(R, A, PT, coarse_grid);
          break;
 
       case 3:
-         RAP = hypre_SMG3CreateRAPOp(R ,A, PT, coarse_grid);
+         RAP = hypre_SMG3CreateRAPOp(R, A, PT, coarse_grid);
          break;
    }
 #endif
@@ -50,13 +50,13 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    {
       case 2:
          cdir = 1;
-         RAP = hypre_SemiCreateRAPOp(R ,A, PT, coarse_grid, cdir,
+         RAP = hypre_SemiCreateRAPOp(R, A, PT, coarse_grid, cdir,
                                      P_stored_as_transpose);
          break;
 
       case 3:
          cdir = 2;
-         RAP = hypre_SemiCreateRAPOp(R ,A, PT, coarse_grid, cdir,
+         RAP = hypre_SemiCreateRAPOp(R, A, PT, coarse_grid, cdir,
                                      P_stored_as_transpose);
          break;
    }
@@ -85,7 +85,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    hypre_StructStencil   *stencil;
    hypre_StructMatrix    *Ac_tmp;
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_MemoryLocation data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
    HYPRE_MemoryLocation data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
    if (data_location_A != data_location_Ac)
@@ -119,7 +119,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
          /*--------------------------------------------------------------------
           *    For non-symmetric A, set upper triangular coefficients as well
           *--------------------------------------------------------------------*/
-         if(!hypre_StructMatrixSymmetric(A))
+         if (!hypre_StructMatrixSymmetric(A))
          {
             hypre_SMG2BuildRAPNoSym(A, PT, R, Ac_tmp, cindex, cstride);
             /*-----------------------------------------------------------------
@@ -147,7 +147,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
          /*--------------------------------------------------------------------
           *    For non-symmetric A, set upper triangular coefficients as well
           *--------------------------------------------------------------------*/
-         if(!hypre_StructMatrixSymmetric(A))
+         if (!hypre_StructMatrixSymmetric(A))
          {
             hypre_SMG3BuildRAPNoSym(A, PT, R, Ac_tmp, cindex, cstride);
             /*-----------------------------------------------------------------
@@ -189,11 +189,12 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    hypre_StructMatrixAssemble(Ac_tmp);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (data_location_A != data_location_Ac)
    {
 
-     hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixData(Ac_tmp), HYPRE_Complex,
+                    hypre_StructMatrixDataSize(Ac_tmp), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       hypre_SetDeviceOff();
       hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_Ac;
       hypre_StructMatrixAssemble(Ac);

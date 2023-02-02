@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -22,13 +22,13 @@ extern "C" {
 #endif
 
 HYPRE_Int hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex, hypre_ParCSRMatrix*,
-                                  hypre_ParMultiVector*,
-                                  HYPRE_Complex, hypre_ParMultiVector*);
+                                        hypre_ParMultiVector*,
+                                        HYPRE_Complex, hypre_ParMultiVector*);
 
 
 HYPRE_Int hypre_ParCSRMatrixMatMultiVecT(HYPRE_Complex, hypre_ParCSRMatrix*,
-                                  hypre_ParMultiVector*,
-                                  HYPRE_Complex, hypre_ParMultiVector*);
+                                         hypre_ParMultiVector*,
+                                         HYPRE_Complex, hypre_ParMultiVector*);
 
 #ifdef __cplusplus
 }

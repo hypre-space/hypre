@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -32,14 +32,14 @@
   Note: If FACE_iedge == EDGE_iedge the input should describe a 2D problem.
 */
 HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix * Aee,
-                                hypre_ParCSRMatrix * ELEM_iedge,
-                                hypre_ParCSRMatrix * FACE_iedge,
-                                hypre_ParCSRMatrix * EDGE_iedge,
-                                hypre_ParCSRMatrix * ELEM_FACE,
-                                hypre_ParCSRMatrix * ELEM_EDGE,
-                                HYPRE_Int            num_OffProcRows,
-                                hypre_MaxwellOffProcRow ** OffProcRows,
-                                hypre_IJMatrix     * edge_EDGE);
+                                      hypre_ParCSRMatrix * ELEM_iedge,
+                                      hypre_ParCSRMatrix * FACE_iedge,
+                                      hypre_ParCSRMatrix * EDGE_iedge,
+                                      hypre_ParCSRMatrix * ELEM_FACE,
+                                      hypre_ParCSRMatrix * ELEM_EDGE,
+                                      HYPRE_Int            num_OffProcRows,
+                                      hypre_MaxwellOffProcRow ** OffProcRows,
+                                      hypre_IJMatrix     * edge_EDGE);
 
 /*
   Function: hypre_HarmonicExtension
@@ -54,9 +54,9 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix * Aee,
   according to the arrays idof and bdof. The only output parameter is Pi.
 */
 HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
-                             hypre_CSRMatrix *P,
-                             HYPRE_Int num_DOF, HYPRE_BigInt *DOF,
-                             HYPRE_Int num_idof, HYPRE_BigInt *idof,
-                             HYPRE_Int num_bdof, HYPRE_BigInt *bdof);
+                                   hypre_CSRMatrix *P,
+                                   HYPRE_Int num_DOF, HYPRE_BigInt *DOF,
+                                   HYPRE_Int num_idof, HYPRE_BigInt *idof,
+                                   HYPRE_Int num_bdof, HYPRE_BigInt *bdof);
 
 #endif

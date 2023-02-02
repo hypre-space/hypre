@@ -1,12 +1,12 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
 /******************************************************************************
- * 
+ *
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
@@ -172,7 +172,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    hypre_ForBoxI(i, boxes)
    {
       cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-      hypre_BoxArraySetSize(cbox_array, 2*ndim);
+      hypre_BoxArraySetSize(cbox_array, 2 * ndim);
 
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), rembox);
       cbox_array_size = 0;
@@ -288,7 +288,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
-   hypre_ComputePkgIndtBoxes(compute_pkg) = 
+   hypre_ComputePkgIndtBoxes(compute_pkg) =
       hypre_ComputeInfoIndtBoxes(compute_info);
    hypre_ComputePkgDeptBoxes(compute_pkg) =
       hypre_ComputeInfoDeptBoxes(compute_info);

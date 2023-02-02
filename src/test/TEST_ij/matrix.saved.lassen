@@ -1,0 +1,75 @@
+# Output file: matrix.out.0
+BoomerAMG Iterations = 23
+Final Relative Residual Norm = 8.600534e-09
+
+# Output file: matrix.out.1
+BoomerAMG Iterations = 23
+Final Relative Residual Norm = 8.600534e-09
+
+# Output file: matrix.out.2
+BoomerAMG Iterations = 23
+Final Relative Residual Norm = 8.600534e-09
+
+# Output file: matrix.out.3
+BoomerAMG Iterations = 1
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: matrix.out.4
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.5
+Iterations = 5
+Final Relative Residual Norm = 4.233149e-01
+
+# Output file: matrix.out.6
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.7
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.8
+Iterations = 5
+Final Relative Residual Norm = 4.233149e-01
+
+# Output file: matrix.out.9
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.10
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.11
+BoomerAMG Iterations = 14
+Final Relative Residual Norm = 3.055519e-09
+
+# Output file: matrix.out.12
+Iterations = 5
+Final Relative Residual Norm = 3.515462e-01
+
+# Output file: matrix.out.100
+GMRES Iterations = 79
+Final GMRES Relative Residual Norm = 9.996735e-03
+
+# Output file: matrix.out.101
+GMRES Iterations = 79
+Final GMRES Relative Residual Norm = 7.176706e-03
+
+# Output file: matrix.out.102
+GMRES Iterations = 74
+Final GMRES Relative Residual Norm = 7.155117e-03
+
+# Output file: matrix.out.110
+GMRES Iterations = 13
+Final GMRES Relative Residual Norm = 8.997992e-01
+
+# Output file: matrix.out.111
+GMRES Iterations = 35
+Final GMRES Relative Residual Norm = 8.909955e-01
+
+# Output file: matrix.out.112
+GMRES Iterations = 6
+Final GMRES Relative Residual Norm = 8.963555e-01

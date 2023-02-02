@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,8 +21,8 @@ extern "C" {
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
-   void 	        *send_data;
-   void 	        *recv_data;
+   void          *send_data;
+   void          *recv_data;
    HYPRE_Int                  num_requests;
    hypre_MPI_Request          *requests;
 
@@ -31,7 +31,7 @@ typedef struct
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ParCSRCommMultiHandle
  *--------------------------------------------------------------------------*/
- 
+
 #define hypre_ParCSRCommMultiHandleCommPkg(comm_handle)     (comm_handle -> comm_pkg)
 #define hypre_ParCSRCommMultiHandleSendData(comm_handle)    (comm_handle -> send_data)
 #define hypre_ParCSRCommMultiHandleRecvData(comm_handle)    (comm_handle -> recv_data)
@@ -40,11 +40,11 @@ typedef struct
 #define hypre_ParCSRCommMultiHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
 hypre_ParCSRCommMultiHandle *
-hypre_ParCSRCommMultiHandleCreate ( HYPRE_Int 	          job,
-			            hypre_ParCSRCommPkg   *comm_pkg,
-                                    void                  *send_data, 
-                                    void                  *recv_data, 
-				    HYPRE_Int                   nvecs       );
+hypre_ParCSRCommMultiHandleCreate ( HYPRE_Int             job,
+                                    hypre_ParCSRCommPkg   *comm_pkg,
+                                    void                  *send_data,
+                                    void                  *recv_data,
+                                    HYPRE_Int                   nvecs       );
 
 
 HYPRE_Int
@@ -54,4 +54,4 @@ hypre_ParCSRCommMultiHandleDestroy(hypre_ParCSRCommMultiHandle *comm_handle);
 }
 #endif
 
-#endif /* HYPRE_PAR_CSR_MULTICOMMUNICATION_HEADER */ 
+#endif /* HYPRE_PAR_CSR_MULTICOMMUNICATION_HEADER */

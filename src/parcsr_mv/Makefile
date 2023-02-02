@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -45,16 +45,19 @@ FILES =\
  par_csr_communication.c\
  par_csr_matop.c\
  par_csr_matrix.c\
+ par_csr_matvec.c\
  par_csr_matop_marked.c\
  par_csr_triplemat.c\
+ par_make_system.c\
  par_vector.c\
- par_make_system.c
+ par_vector_batched.c
 
 CUFILES =\
- par_csr_matvec.c\
+ par_csr_matvec_device.c\
  par_csr_fffc_device.c\
  par_csr_matop_device.c\
- par_csr_triplemat_device.c
+ par_csr_triplemat_device.c\
+ par_vector_device.c
 
 EXTRA_FILES =\
  parchord_to_parcsr.c
@@ -116,7 +119,7 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -f driver driver_matvec driver_matmul
 	rm -rf pchdir tca.map *inslog*
 
@@ -134,7 +137,7 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 libHYPRE_parcsr_mv.so libHYPRE_parcsr_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
 

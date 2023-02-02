@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -31,6 +31,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
+#include "ex.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -52,181 +53,183 @@
 void ComputeFEMQ3 (double S[16][16], double F[16], double h)
 {
    int i, j;
-   double s = 1.0/33600;
-   double h2_64 = h*h/64;
+   double s = 1.0 / 33600;
+   double h2_64 = h * h / 64;
 
-   S[ 0][ 0] = 18944*s;
-   S[ 0][ 1] = -4770*s;
-   S[ 0][ 2] = 792*s;
-   S[ 0][ 3] = 574*s;
-   S[ 0][ 4] = -4770*s;
-   S[ 0][ 5] = -18711*s;
-   S[ 0][ 6] = 6075*s;
-   S[ 0][ 7] = -2439*s;
-   S[ 0][ 8] = 792*s;
-   S[ 0][ 9] = 6075*s;
-   S[ 0][10] = -1944*s;
-   S[ 0][11] = 747*s;
-   S[ 0][12] = 574*s;
-   S[ 0][13] = -2439*s;
-   S[ 0][14] = 747*s;
-   S[ 0][15] = -247*s;
+   S[ 0][ 0] = 18944 * s;
+   S[ 0][ 1] = -4770 * s;
+   S[ 0][ 2] = 792 * s;
+   S[ 0][ 3] = 574 * s;
+   S[ 0][ 4] = -4770 * s;
+   S[ 0][ 5] = -18711 * s;
+   S[ 0][ 6] = 6075 * s;
+   S[ 0][ 7] = -2439 * s;
+   S[ 0][ 8] = 792 * s;
+   S[ 0][ 9] = 6075 * s;
+   S[ 0][10] = -1944 * s;
+   S[ 0][11] = 747 * s;
+   S[ 0][12] = 574 * s;
+   S[ 0][13] = -2439 * s;
+   S[ 0][14] = 747 * s;
+   S[ 0][15] = -247 * s;
 
-   S[ 1][ 1] = 75600*s;
-   S[ 1][ 2] = -25002*s;
-   S[ 1][ 3] = 792*s;
-   S[ 1][ 4] = -18711*s;
-   S[ 1][ 5] = -39852*s;
-   S[ 1][ 6] = -7047*s;
-   S[ 1][ 7] = 6075*s;
-   S[ 1][ 8] = 6075*s;
-   S[ 1][ 9] = 9720*s;
-   S[ 1][10] = 3159*s;
-   S[ 1][11] = -1944*s;
-   S[ 1][12] = -2439*s;
-   S[ 1][13] = -108*s;
-   S[ 1][14] = -2295*s;
-   S[ 1][15] = 747*s;
+   S[ 1][ 1] = 75600 * s;
+   S[ 1][ 2] = -25002 * s;
+   S[ 1][ 3] = 792 * s;
+   S[ 1][ 4] = -18711 * s;
+   S[ 1][ 5] = -39852 * s;
+   S[ 1][ 6] = -7047 * s;
+   S[ 1][ 7] = 6075 * s;
+   S[ 1][ 8] = 6075 * s;
+   S[ 1][ 9] = 9720 * s;
+   S[ 1][10] = 3159 * s;
+   S[ 1][11] = -1944 * s;
+   S[ 1][12] = -2439 * s;
+   S[ 1][13] = -108 * s;
+   S[ 1][14] = -2295 * s;
+   S[ 1][15] = 747 * s;
 
-   S[ 2][ 2] = 75600*s;
-   S[ 2][ 3] = -4770*s;
-   S[ 2][ 4] = 6075*s;
-   S[ 2][ 5] = -7047*s;
-   S[ 2][ 6] = -39852*s;
-   S[ 2][ 7] = -18711*s;
-   S[ 2][ 8] = -1944*s;
-   S[ 2][ 9] = 3159*s;
-   S[ 2][10] = 9720*s;
-   S[ 2][11] = 6075*s;
-   S[ 2][12] = 747*s;
-   S[ 2][13] = -2295*s;
-   S[ 2][14] = -108*s;
-   S[ 2][15] = -2439*s;
+   S[ 2][ 2] = 75600 * s;
+   S[ 2][ 3] = -4770 * s;
+   S[ 2][ 4] = 6075 * s;
+   S[ 2][ 5] = -7047 * s;
+   S[ 2][ 6] = -39852 * s;
+   S[ 2][ 7] = -18711 * s;
+   S[ 2][ 8] = -1944 * s;
+   S[ 2][ 9] = 3159 * s;
+   S[ 2][10] = 9720 * s;
+   S[ 2][11] = 6075 * s;
+   S[ 2][12] = 747 * s;
+   S[ 2][13] = -2295 * s;
+   S[ 2][14] = -108 * s;
+   S[ 2][15] = -2439 * s;
 
-   S[ 3][ 3] = 18944*s;
-   S[ 3][ 4] = -2439*s;
-   S[ 3][ 5] = 6075*s;
-   S[ 3][ 6] = -18711*s;
-   S[ 3][ 7] = -4770*s;
-   S[ 3][ 8] = 747*s;
-   S[ 3][ 9] = -1944*s;
-   S[ 3][10] = 6075*s;
-   S[ 3][11] = 792*s;
-   S[ 3][12] = -247*s;
-   S[ 3][13] = 747*s;
-   S[ 3][14] = -2439*s;
-   S[ 3][15] = 574*s;
+   S[ 3][ 3] = 18944 * s;
+   S[ 3][ 4] = -2439 * s;
+   S[ 3][ 5] = 6075 * s;
+   S[ 3][ 6] = -18711 * s;
+   S[ 3][ 7] = -4770 * s;
+   S[ 3][ 8] = 747 * s;
+   S[ 3][ 9] = -1944 * s;
+   S[ 3][10] = 6075 * s;
+   S[ 3][11] = 792 * s;
+   S[ 3][12] = -247 * s;
+   S[ 3][13] = 747 * s;
+   S[ 3][14] = -2439 * s;
+   S[ 3][15] = 574 * s;
 
-   S[ 4][ 4] = 75600*s;
-   S[ 4][ 5] = -39852*s;
-   S[ 4][ 6] = 9720*s;
-   S[ 4][ 7] = -108*s;
-   S[ 4][ 8] = -25002*s;
-   S[ 4][ 9] = -7047*s;
-   S[ 4][10] = 3159*s;
-   S[ 4][11] = -2295*s;
-   S[ 4][12] = 792*s;
-   S[ 4][13] = 6075*s;
-   S[ 4][14] = -1944*s;
-   S[ 4][15] = 747*s;
+   S[ 4][ 4] = 75600 * s;
+   S[ 4][ 5] = -39852 * s;
+   S[ 4][ 6] = 9720 * s;
+   S[ 4][ 7] = -108 * s;
+   S[ 4][ 8] = -25002 * s;
+   S[ 4][ 9] = -7047 * s;
+   S[ 4][10] = 3159 * s;
+   S[ 4][11] = -2295 * s;
+   S[ 4][12] = 792 * s;
+   S[ 4][13] = 6075 * s;
+   S[ 4][14] = -1944 * s;
+   S[ 4][15] = 747 * s;
 
-   S[ 5][ 5] = 279936*s;
-   S[ 5][ 6] = -113724*s;
-   S[ 5][ 7] = 9720*s;
-   S[ 5][ 8] = -7047*s;
-   S[ 5][ 9] = -113724*s;
-   S[ 5][10] = 24057*s;
-   S[ 5][11] = 3159*s;
-   S[ 5][12] = 6075*s;
-   S[ 5][13] = 9720*s;
-   S[ 5][14] = 3159*s;
-   S[ 5][15] = -1944*s;
+   S[ 5][ 5] = 279936 * s;
+   S[ 5][ 6] = -113724 * s;
+   S[ 5][ 7] = 9720 * s;
+   S[ 5][ 8] = -7047 * s;
+   S[ 5][ 9] = -113724 * s;
+   S[ 5][10] = 24057 * s;
+   S[ 5][11] = 3159 * s;
+   S[ 5][12] = 6075 * s;
+   S[ 5][13] = 9720 * s;
+   S[ 5][14] = 3159 * s;
+   S[ 5][15] = -1944 * s;
 
-   S[ 6][ 6] = 279936*s;
-   S[ 6][ 7] = -39852*s;
-   S[ 6][ 8] = 3159*s;
-   S[ 6][ 9] = 24057*s;
-   S[ 6][10] = -113724*s;
-   S[ 6][11] = -7047*s;
-   S[ 6][12] = -1944*s;
-   S[ 6][13] = 3159*s;
-   S[ 6][14] = 9720*s;
-   S[ 6][15] = 6075*s;
+   S[ 6][ 6] = 279936 * s;
+   S[ 6][ 7] = -39852 * s;
+   S[ 6][ 8] = 3159 * s;
+   S[ 6][ 9] = 24057 * s;
+   S[ 6][10] = -113724 * s;
+   S[ 6][11] = -7047 * s;
+   S[ 6][12] = -1944 * s;
+   S[ 6][13] = 3159 * s;
+   S[ 6][14] = 9720 * s;
+   S[ 6][15] = 6075 * s;
 
-   S[ 7][ 7] = 75600*s;
-   S[ 7][ 8] = -2295*s;
-   S[ 7][ 9] = 3159*s;
-   S[ 7][10] = -7047*s;
-   S[ 7][11] = -25002*s;
-   S[ 7][12] = 747*s;
-   S[ 7][13] = -1944*s;
-   S[ 7][14] = 6075*s;
-   S[ 7][15] = 792*s;
+   S[ 7][ 7] = 75600 * s;
+   S[ 7][ 8] = -2295 * s;
+   S[ 7][ 9] = 3159 * s;
+   S[ 7][10] = -7047 * s;
+   S[ 7][11] = -25002 * s;
+   S[ 7][12] = 747 * s;
+   S[ 7][13] = -1944 * s;
+   S[ 7][14] = 6075 * s;
+   S[ 7][15] = 792 * s;
 
-   S[ 8][ 8] = 75600*s;
-   S[ 8][ 9] = -39852*s;
-   S[ 8][10] = 9720*s;
-   S[ 8][11] = -108*s;
-   S[ 8][12] = -4770*s;
-   S[ 8][13] = -18711*s;
-   S[ 8][14] = 6075*s;
-   S[ 8][15] = -2439*s;
+   S[ 8][ 8] = 75600 * s;
+   S[ 8][ 9] = -39852 * s;
+   S[ 8][10] = 9720 * s;
+   S[ 8][11] = -108 * s;
+   S[ 8][12] = -4770 * s;
+   S[ 8][13] = -18711 * s;
+   S[ 8][14] = 6075 * s;
+   S[ 8][15] = -2439 * s;
 
-   S[ 9][ 9] = 279936*s;
-   S[ 9][10] = -113724*s;
-   S[ 9][11] = 9720*s;
-   S[ 9][12] = -18711*s;
-   S[ 9][13] = -39852*s;
-   S[ 9][14] = -7047*s;
-   S[ 9][15] = 6075*s;
+   S[ 9][ 9] = 279936 * s;
+   S[ 9][10] = -113724 * s;
+   S[ 9][11] = 9720 * s;
+   S[ 9][12] = -18711 * s;
+   S[ 9][13] = -39852 * s;
+   S[ 9][14] = -7047 * s;
+   S[ 9][15] = 6075 * s;
 
-   S[10][10] = 279936*s;
-   S[10][11] = -39852*s;
-   S[10][12] = 6075*s;
-   S[10][13] = -7047*s;
-   S[10][14] = -39852*s;
-   S[10][15] = -18711*s;
+   S[10][10] = 279936 * s;
+   S[10][11] = -39852 * s;
+   S[10][12] = 6075 * s;
+   S[10][13] = -7047 * s;
+   S[10][14] = -39852 * s;
+   S[10][15] = -18711 * s;
 
-   S[11][11] = 75600*s;
-   S[11][12] = -2439*s;
-   S[11][13] = 6075*s;
-   S[11][14] = -18711*s;
-   S[11][15] = -4770*s;
+   S[11][11] = 75600 * s;
+   S[11][12] = -2439 * s;
+   S[11][13] = 6075 * s;
+   S[11][14] = -18711 * s;
+   S[11][15] = -4770 * s;
 
-   S[12][12] = 18944*s;
-   S[12][13] = -4770*s;
-   S[12][14] = 792*s;
-   S[12][15] = 574*s;
+   S[12][12] = 18944 * s;
+   S[12][13] = -4770 * s;
+   S[12][14] = 792 * s;
+   S[12][15] = 574 * s;
 
-   S[13][13] = 75600*s;
-   S[13][14] = -25002*s;
-   S[13][15] = 792*s;
+   S[13][13] = 75600 * s;
+   S[13][14] = -25002 * s;
+   S[13][15] = 792 * s;
 
-   S[14][14] = 75600*s;
-   S[14][15] = -4770*s;
+   S[14][14] = 75600 * s;
+   S[14][15] = -4770 * s;
 
-   S[15][15] = 18944*s;
+   S[15][15] = 18944 * s;
 
    /* The stiffness matrix is symmetric */
    for (i = 1; i < 16; i++)
       for (j = 0; j < i; j++)
+      {
          S[i][j] = S[j][i];
+      }
 
    F[ 0] = h2_64;
-   F[ 1] = 3*h2_64;
-   F[ 2] = 3*h2_64;
+   F[ 1] = 3 * h2_64;
+   F[ 2] = 3 * h2_64;
    F[ 3] = h2_64;
-   F[ 4] = 3*h2_64;
-   F[ 5] = 9*h2_64;
-   F[ 6] = 9*h2_64;
-   F[ 7] = 3*h2_64;
-   F[ 8] = 3*h2_64;
-   F[ 9] = 9*h2_64;
-   F[10] = 9*h2_64;
-   F[11] = 3*h2_64;
+   F[ 4] = 3 * h2_64;
+   F[ 5] = 9 * h2_64;
+   F[ 6] = 9 * h2_64;
+   F[ 7] = 3 * h2_64;
+   F[ 8] = 3 * h2_64;
+   F[ 9] = 9 * h2_64;
+   F[10] = 9 * h2_64;
+   F[11] = 3 * h2_64;
    F[12] = h2_64;
-   F[13] = 3*h2_64;
-   F[14] = 3*h2_64;
+   F[13] = 3 * h2_64;
+   F[14] = 3 * h2_64;
    F[15] = h2_64;
 }
 
@@ -253,6 +256,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set default parameters */
    n = 10;
@@ -305,19 +311,19 @@ int main (int argc, char *argv[])
 
    /* Figure out the processor grid (N x N).  The local problem size is n^2,
       while pi and pj indicate the position in the processor grid. */
-   N  = pow(num_procs,1.0/2.0) + 0.5;
-   if (num_procs != N*N)
+   N  = pow(num_procs, 1.0 / 2.0) + 0.5;
+   if (num_procs != N * N)
    {
       if (myid == 0)
       {
-         printf("Can't run on %d processors, try %d.\n", num_procs, N*N);
+         printf("Can't run on %d processors, try %d.\n", num_procs, N * N);
       }
       MPI_Finalize();
       exit(1);
    }
-   h  = 1.0 / (N*n);
+   h  = 1.0 / (N * n);
    pj = myid / N;
-   pi = myid - pj*N;
+   pi = myid - pj * N;
 
    /* 1. Set up the grid.  For simplicity we use only one part to represent the
          unit square. */
@@ -331,8 +337,8 @@ int main (int argc, char *argv[])
       /* Set the extents of the grid - each processor sets its grid boxes. */
       {
          int part = 0;
-         int ilower[2] = {1 + pi*n, 1 + pj*n};
-         int iupper[2] = {n + pi*n, n + pj*n};
+         int ilower[2] = {1 + pi * n, 1 + pj * n};
+         int iupper[2] = {n + pi * n, n + pj * n};
 
          HYPRE_SStructGridSetExtents(grid, part, ilower, iupper);
       }
@@ -352,7 +358,8 @@ int main (int argc, char *argv[])
                                           HYPRE_SSTRUCT_VARIABLE_CELL,
                                           HYPRE_SSTRUCT_VARIABLE_CELL,
                                           HYPRE_SSTRUCT_VARIABLE_CELL,
-                                          HYPRE_SSTRUCT_VARIABLE_CELL};
+                                          HYPRE_SSTRUCT_VARIABLE_CELL
+                                         };
          for (i = 0; i < nparts; i++)
          {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vars);
@@ -378,10 +385,11 @@ int main (int argc, char *argv[])
       */
       {
          int part = 0;
-         int ordering[48] = { 0,-1,-1,   3, 0,-1,   4, 0,-1,   0,+1,-1,
-                              1,-1, 0,   5, 0, 0,   6, 0, 0,   1,+1, 0,
-                              2,-1, 0,   7, 0, 0,   8, 0, 0,   2,+1, 0,
-                              0,-1,+1,   3, 0,+1,   4, 0,+1,   0,+1,+1  };
+         int ordering[48] = { 0, -1, -1,    3,  0, -1,    4,  0, -1,    0, +1, -1,
+                              1, -1,  0,    5,  0,  0,    6,  0,  0,    1, +1,  0,
+                              2, -1,  0,    7,  0,  0,    8,  0,  0,    2, +1,  0,
+                              0, -1, +1,    3,  0, +1,    4,  0, +1,    0, +1, +1
+                            };
 
          HYPRE_SStructGridSetFEMOrdering(grid, part, ordering);
       }
@@ -442,8 +450,8 @@ int main (int argc, char *argv[])
          {
             for (i = 1; i <= n; i++)
             {
-               index[0] = i + pi*n;
-               index[1] = j + pj*n;
+               index[0] = i + pi * n;
+               index[1] = j + pj * n;
 
                /* Compute the FEM matrix and rhs */
                ComputeFEMQ3(S, F, h);
@@ -452,16 +460,19 @@ int main (int argc, char *argv[])
                {
                   int ii, jj, bdy, dd;
                   int set_bc[4] = {0, 0, 0, 0};
-                  int bc_dofs[4][4] = {{ 0,  4,  8, 12},  /* x = 0 boundary */
-                                       { 0,  1,  2,  3},  /* y = 0 boundary */
-                                       { 3,  7, 11, 15},  /* x = 1 boundary */
-                                       {12, 13, 14, 15}}; /* y = 1 boundary */
+                  int bc_dofs[4][4] =
+                  {
+                     { 0,  4,  8, 12},  /* x = 0 boundary */
+                     { 0,  1,  2,  3},  /* y = 0 boundary */
+                     { 3,  7, 11, 15},  /* x = 1 boundary */
+                     {12, 13, 14, 15}   /* y = 1 boundary */
+                  };
 
                   /* Determine the boundary conditions to be set */
-                  if (index[0] == 1)   set_bc[0] = 1;  /* x = 0 boundary */
-                  if (index[1] == 1)   set_bc[1] = 1;  /* y = 0 boundary */
-                  if (index[0] == N*n) set_bc[2] = 1;  /* x = 1 boundary */
-                  if (index[1] == N*n) set_bc[3] = 1;  /* y = 1 boundary */
+                  if (index[0] == 1)   { set_bc[0] = 1; } /* x = 0 boundary */
+                  if (index[1] == 1)   { set_bc[1] = 1; } /* y = 0 boundary */
+                  if (index[0] == N * n) { set_bc[2] = 1; } /* x = 1 boundary */
+                  if (index[1] == N * n) { set_bc[3] = 1; } /* y = 1 boundary */
 
                   /* Modify the FEM matrix and rhs on each boundary by setting
                      rows and columns of S to the identity and F to zero */
@@ -503,7 +514,7 @@ int main (int argc, char *argv[])
    {
       int part = 0;
       int var, nvars = 9;
-      int nvalues = (n+1)*(n+1);
+      int nvalues = (n + 1) * (n + 1);
       double *values;
 
       values = (double*) calloc(nvalues, sizeof(double));
@@ -520,10 +531,10 @@ int main (int argc, char *argv[])
          cell center, ilower needs to be adjusted. */
       for (var = 0; var < nvars; var++)
       {
-         int ilower[2] = {1 + pi*n, 1 + pj*n};
-         int iupper[2] = {n + pi*n, n + pj*n};
+         int ilower[2] = {1 + pi * n, 1 + pj * n};
+         int iupper[2] = {n + pi * n, n + pj * n};
 
-         switch(var)
+         switch (var)
          {
             case 0: /* NODE */
                ilower[0]--;
@@ -595,7 +606,7 @@ int main (int argc, char *argv[])
 
          int part = 0;
          int i, j, k, index[2];
-         int nvalues = n*n*16;
+         int nvalues = n * n * 16;
          double X[16], *values;
 
          /* GLVis-to-hypre local renumbering */
@@ -608,8 +619,8 @@ int main (int argc, char *argv[])
          {
             for (i = 1; i <= n; i++)
             {
-               index[0] = i + pi*n;
-               index[1] = j + pj*n;
+               index[0] = i + pi * n;
+               index[1] = j + pj * n;
 
                /* Get local element solution values X */
                HYPRE_SStructVectorGetFEMValues(x, part, index, X);
@@ -639,7 +650,9 @@ int main (int argc, char *argv[])
 
          /* Save solution with replicated shared data */
          for (i = 0; i < nvalues; i++)
+         {
             fprintf(file, "%.14e\n", values[i]);
+         }
 
          fflush(file);
          fclose(file);
@@ -647,7 +660,7 @@ int main (int argc, char *argv[])
 
          /* Save local finite element mesh */
          GLVis_PrintLocalSquareMesh("vis/ex16.mesh", n, n, h,
-                                    pi*h*n, pj*h*n, myid);
+                                    pi * h * n, pj * h * n, myid);
 
          /* Additional visualization data */
          GLVis_PrintData("vis/ex16.data", myid, num_procs);

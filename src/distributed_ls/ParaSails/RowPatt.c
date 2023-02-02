@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -75,10 +75,10 @@ RowPatt *RowPattCreate(HYPRE_Int maxlen)
 
 void RowPattDestroy(RowPatt *p)
 {
-    free(p->ind);
-    free(p->mark);
-    free(p->buffer);
-    free(p);
+    hypre_TFree(p->ind,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->mark,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->buffer,HYPRE_MEMORY_HOST);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -164,7 +164,7 @@ void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 
     if (len > p->buflen)
     {
-	free(p->buffer);
+	hypre_TFree(p->buffer,HYPRE_MEMORY_HOST);
 	p->buflen = len + 100;
 	p->buffer = hypre_TAlloc(HYPRE_Int, p->buflen , HYPRE_MEMORY_HOST);
     }
@@ -192,7 +192,7 @@ void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp)
 
     if (len > p->buflen)
     {
-	free(p->buffer);
+	hypre_TFree(p->buffer,HYPRE_MEMORY_HOST);
 	p->buflen = len + 100;
 	p->buffer = hypre_TAlloc(HYPRE_Int, p->buflen , HYPRE_MEMORY_HOST);
     }

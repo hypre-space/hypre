@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -22,7 +22,7 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <memory.h>
+//#include <memory.h>
 #include "Common.h"
 #include "Numbering.h"
 #include "OrderStat.h"
@@ -40,72 +40,72 @@
 
 Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 {
-    Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
-    HYPRE_Int row, i, len, *ind;
-    HYPRE_Real *val;
-    HYPRE_Int num_external = 0;
+   Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
+   HYPRE_Int row, i, len, *ind;
+   HYPRE_Real *val;
+   HYPRE_Int num_external = 0;
 
-    numb->size    = size;
-    numb->beg_row = mat->beg_row;
-    numb->end_row = mat->end_row;
-    numb->num_loc = mat->end_row - mat->beg_row + 1;
-    numb->num_ind = mat->end_row - mat->beg_row + 1;
+   numb->size    = size;
+   numb->beg_row = mat->beg_row;
+   numb->end_row = mat->end_row;
+   numb->num_loc = mat->end_row - mat->beg_row + 1;
+   numb->num_ind = mat->end_row - mat->beg_row + 1;
 
-    numb->local_to_global = hypre_TAlloc(HYPRE_Int, (numb->num_loc+size) , HYPRE_MEMORY_HOST);
-    numb->hash            = HashCreate(2*size+1);
+   numb->local_to_global = hypre_TAlloc(HYPRE_Int, (numb->num_loc+size) , HYPRE_MEMORY_HOST);
+   numb->hash            = HashCreate(2*size+1);
 
-    /* Set up the local part of local_to_global */
-    for (i=0; i<numb->num_loc; i++)
-        numb->local_to_global[i] = mat->beg_row + i;
+   /* Set up the local part of local_to_global */
+   for (i=0; i<numb->num_loc; i++)
+      numb->local_to_global[i] = mat->beg_row + i;
 
-    /* Fill local_to_global array */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
-    {
-        MatrixGetRow(mat, row, &len, &ind, &val);
+   /* Fill local_to_global array */
+   for (row=0; row<=mat->end_row - mat->beg_row; row++)
+   {
+      MatrixGetRow(mat, row, &len, &ind, &val);
 
-        for (i=0; i<len; i++)
-        {
-            /* Only interested in external indices */
-	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
+      for (i=0; i<len; i++)
+      {
+         /* Only interested in external indices */
+         if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
+         {
+            if (HashLookup(numb->hash, ind[i]) == HASH_NOTFOUND)
             {
-		if (HashLookup(numb->hash, ind[i]) == HASH_NOTFOUND)
-		{
-                    if (num_external >= numb->size)
-		    {
-		        Hash *newHash;
+               if (num_external >= numb->size)
+               {
+                  Hash *newHash;
 
-		        /* allocate more space for numbering */
-		        numb->size *= 2;
-		        numb->local_to_global = (HYPRE_Int *)
-			    hypre_TReAlloc(numb->local_to_global,HYPRE_Int,
-			    (numb->num_loc+numb->size), HYPRE_MEMORY_HOST);
-                        newHash = HashCreate(2*numb->size+1);
-		        HashRehash(numb->hash, newHash);
-		        HashDestroy(numb->hash);
-		        numb->hash = newHash;
-		    }
+                  /* allocate more space for numbering */
+                  numb->size *= 2;
+                  numb->local_to_global = (HYPRE_Int *)
+                     hypre_TReAlloc(numb->local_to_global,HYPRE_Int,
+                           (numb->num_loc+numb->size), HYPRE_MEMORY_HOST);
+                  newHash = HashCreate(2*numb->size+1);
+                  HashRehash(numb->hash, newHash);
+                  HashDestroy(numb->hash);
+                  numb->hash = newHash;
+               }
 
-                    HashInsert(numb->hash, ind[i], num_external);
-                    numb->local_to_global[numb->num_loc+num_external] = ind[i];
-		    num_external++;
-		}
+               HashInsert(numb->hash, ind[i], num_external);
+               numb->local_to_global[numb->num_loc+num_external] = ind[i];
+               num_external++;
             }
-        }
-    }
+         }
+      }
+   }
 
-    /* Sort the indices */
-    hypre_shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
+   /* Sort the indices */
+   hypre_shell_sort(num_external, &numb->local_to_global[numb->num_loc]);
 
-    /* Redo the hash table for the sorted indices */
-    HashReset(numb->hash);
+   /* Redo the hash table for the sorted indices */
+   HashReset(numb->hash);
 
-    for (i=0; i<num_external; i++)
-        HashInsert(numb->hash,
-	    numb->local_to_global[i+numb->num_loc], i+numb->num_loc);
+   for (i=0; i<num_external; i++)
+      HashInsert(numb->hash,
+            numb->local_to_global[i+numb->num_loc], i+numb->num_loc);
 
-    numb->num_ind += num_external;
+   numb->num_ind += num_external;
 
-    return numb;
+   return numb;
 }
 
 /*--------------------------------------------------------------------------
@@ -115,23 +115,23 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 
 Numbering *NumberingCreateCopy(Numbering *orig)
 {
-    Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
+   Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
 
-    numb->size    = orig->size;
-    numb->beg_row = orig->beg_row;
-    numb->end_row = orig->end_row;
-    numb->num_loc = orig->num_loc;
-    numb->num_ind = orig->num_ind;
+   numb->size    = orig->size;
+   numb->beg_row = orig->beg_row;
+   numb->end_row = orig->end_row;
+   numb->num_loc = orig->num_loc;
+   numb->num_ind = orig->num_ind;
 
-    numb->local_to_global =
-        hypre_TAlloc(HYPRE_Int, (numb->num_loc+numb->size) , HYPRE_MEMORY_HOST);
-    hypre_TMemcpy(numb->local_to_global,  orig->local_to_global,
-				  HYPRE_Int, numb->num_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   numb->local_to_global =
+      hypre_TAlloc(HYPRE_Int, (numb->num_loc+numb->size) , HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(numb->local_to_global,  orig->local_to_global,
+         HYPRE_Int, numb->num_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
-    numb->hash = HashCreate(2*numb->size+1);
-    HashRehash(orig->hash, numb->hash);
+   numb->hash = HashCreate(2*numb->size+1);
+   HashRehash(orig->hash, numb->hash);
 
-    return numb;
+   return numb;
 }
 
 /*--------------------------------------------------------------------------
@@ -140,10 +140,10 @@ Numbering *NumberingCreateCopy(Numbering *orig)
 
 void NumberingDestroy(Numbering *numb)
 {
-    free(numb->local_to_global);
-    HashDestroy(numb->hash);
+   hypre_TFree(numb->local_to_global,HYPRE_MEMORY_HOST);
+   HashDestroy(numb->hash);
 
-    free(numb);
+   hypre_TFree(numb,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -153,10 +153,10 @@ void NumberingDestroy(Numbering *numb)
 
 void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_Int *local, HYPRE_Int *global)
 {
-    HYPRE_Int i;
+   HYPRE_Int i;
 
-    for (i=0; i<len; i++)
-        global[i] = numb->local_to_global[local[i]];
+   for (i=0; i<len; i++)
+      global[i] = numb->local_to_global[local[i]];
 }
 
 /*--------------------------------------------------------------------------
@@ -167,47 +167,49 @@ void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_Int *local, HY
 
 void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, HYPRE_Int *local)
 {
-    HYPRE_Int i, l;
+   HYPRE_Int i, l;
 
-    for (i=0; i<len; i++)
-    {
-        if (global[i] < numb->beg_row || global[i] > numb->end_row)
-        {
-	    l = HashLookup(numb->hash, global[i]);
+   for (i=0; i<len; i++)
+   {
+      if (global[i] < numb->beg_row || global[i] > numb->end_row)
+      {
+         l = HashLookup(numb->hash, global[i]);
 
-	    if (l == HASH_NOTFOUND)
-	    {
-                if (numb->num_ind >= numb->num_loc + numb->size)
-		{
-		    Hash *newHash;
+         if (l == HASH_NOTFOUND)
+         {
+            if (numb->num_ind >= numb->num_loc + numb->size)
+            {
+               Hash *newHash;
 
-		    /* allocate more space for numbering */
-		    numb->size *= 2;
+               /* allocate more space for numbering */
+               numb->size *= 2;
 #ifdef PARASAILS_DEBUG
-		    hypre_printf("Numbering resize %d\n", numb->size);
+               hypre_printf("Numbering resize %d\n", numb->size);
 #endif
-		    numb->local_to_global = (HYPRE_Int *)
-			realloc(numb->local_to_global,
-			(numb->num_loc+numb->size)*sizeof(HYPRE_Int));
-                    newHash = HashCreate(2*numb->size+1);
-		    HashRehash(numb->hash, newHash);
-		    HashDestroy(numb->hash);
-		    numb->hash = newHash;
-		}
+               numb->local_to_global = hypre_TReAlloc(numb->local_to_global,
+                                                      HYPRE_Int,
+                                                      numb->num_loc + numb->size,
+                                                      HYPRE_MEMORY_HOST);
 
-		HashInsert(numb->hash, global[i], numb->num_ind);
-		numb->local_to_global[numb->num_ind] = global[i];
-		local[i] = numb->num_ind;
-		numb->num_ind++;
-	    }
-	    else
-	    {
-	        local[i] = l;
-	    }
-        }
-        else
-        {
-            local[i] = global[i] - numb->beg_row;
-        }
-    }
+               newHash = HashCreate(2*numb->size+1);
+               HashRehash(numb->hash, newHash);
+               HashDestroy(numb->hash);
+               numb->hash = newHash;
+            }
+
+            HashInsert(numb->hash, global[i], numb->num_ind);
+            numb->local_to_global[numb->num_ind] = global[i];
+            local[i] = numb->num_ind;
+            numb->num_ind++;
+         }
+         else
+         {
+            local[i] = l;
+         }
+      }
+      else
+      {
+         local[i] = global[i] - numb->beg_row;
+      }
+   }
 }

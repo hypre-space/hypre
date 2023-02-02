@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -46,7 +46,7 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
    HYPRE_Int  major, minor, patch, single;
    HYPRE_Int  nums[3], i, j;
    char      *ptr = (char *) HYPRE_RELEASE_VERSION;
-   
+
    /* get major/minor/patch numbers */
    for (i = 0; i < 3; i++)
    {
@@ -65,9 +65,7 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
    minor = nums[1];
    patch = nums[2];
 
-   /* Compute a single, unique, sortable number representation of the release.
-    * This assumes 2 digits for each subnumber, so 2.14.0 becomes 21400. */
-   single = major*10000 + minor*100 + patch;
+   single = (HYPRE_Int) HYPRE_RELEASE_NUMBER;
 
    if (major_ptr)   {*major_ptr   = major;}
    if (minor_ptr)   {*minor_ptr   = minor;}

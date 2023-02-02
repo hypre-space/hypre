@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -32,7 +32,7 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
    (sys_pfmg_data -> dxyz)[2]          = 0.0;
    (sys_pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
    (sys_pfmg_data -> jacobi_weight)    = 0.0;
-   (sys_pfmg_data -> usr_jacobi_weight)= 0;
+   (sys_pfmg_data -> usr_jacobi_weight) = 0;
    (sys_pfmg_data -> num_pre_relax)    = 1;
    (sys_pfmg_data -> num_post_relax)   = 1;
    (sys_pfmg_data -> skip_relax)       = 1;
@@ -79,7 +79,7 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
          hypre_TFree(sys_pfmg_data -> matvec_data_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> interp_data_l, HYPRE_MEMORY_HOST);
- 
+
          hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[0]);
          /*hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[0]);*/
          hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[0]);
@@ -87,15 +87,15 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
          hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[0]);
          for (l = 0; l < ((sys_pfmg_data -> num_levels) - 1); l++)
          {
-            hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[l+1]);
-            hypre_SStructPGridDestroy(sys_pfmg_data -> P_grid_l[l+1]);
-            hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[l+1]);
+            hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[l + 1]);
+            hypre_SStructPGridDestroy(sys_pfmg_data -> P_grid_l[l + 1]);
+            hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[l + 1]);
             hypre_SStructPMatrixDestroy(sys_pfmg_data -> P_l[l]);
-            hypre_SStructPVectorDestroy(sys_pfmg_data -> b_l[l+1]);
-            hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[l+1]);
-            hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[l+1]);
+            hypre_SStructPVectorDestroy(sys_pfmg_data -> b_l[l + 1]);
+            hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[l + 1]);
+            hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[l + 1]);
          }
-          hypre_TFree(sys_pfmg_data -> data, HYPRE_MEMORY_HOST);
+         hypre_TFree(sys_pfmg_data -> data, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> active_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> grid_l, HYPRE_MEMORY_HOST);
@@ -107,7 +107,7 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
          hypre_TFree(sys_pfmg_data -> x_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> tx_l, HYPRE_MEMORY_HOST);
       }
- 
+
       hypre_FinalizeTiming(sys_pfmg_data -> time_index);
       hypre_TFree(sys_pfmg_data, HYPRE_MEMORY_HOST);
    }
@@ -123,9 +123,9 @@ hypre_SysPFMGSetTol( void   *sys_pfmg_vdata,
                      HYPRE_Real  tol       )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> tol) = tol;
- 
+
    return hypre_error_flag;
 }
 
@@ -137,9 +137,9 @@ hypre_SysPFMGSetMaxIter( void *sys_pfmg_vdata,
                          HYPRE_Int   max_iter  )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> max_iter) = max_iter;
- 
+
    return hypre_error_flag;
 }
 
@@ -151,23 +151,23 @@ hypre_SysPFMGSetRelChange( void *sys_pfmg_vdata,
                            HYPRE_Int   rel_change  )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> rel_change) = rel_change;
- 
+
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SysPFMGSetZeroGuess( void *sys_pfmg_vdata,
                            HYPRE_Int   zero_guess )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> zero_guess) = zero_guess;
- 
+
    return hypre_error_flag;
 }
 
@@ -179,9 +179,9 @@ hypre_SysPFMGSetRelaxType( void *sys_pfmg_vdata,
                            HYPRE_Int   relax_type )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> relax_type) = relax_type;
- 
+
    return hypre_error_flag;
 }
 
@@ -192,9 +192,9 @@ hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
                               HYPRE_Real weight )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
-                                                                                                                                     
+
    (sys_pfmg_data -> jacobi_weight)    = weight;
-   (sys_pfmg_data -> usr_jacobi_weight)= 1;
+   (sys_pfmg_data -> usr_jacobi_weight) = 1;
 
    return hypre_error_flag;
 }
@@ -207,9 +207,9 @@ hypre_SysPFMGSetNumPreRelax( void *sys_pfmg_vdata,
                              HYPRE_Int   num_pre_relax )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> num_pre_relax) = num_pre_relax;
- 
+
    return hypre_error_flag;
 }
 
@@ -221,9 +221,9 @@ hypre_SysPFMGSetNumPostRelax( void *sys_pfmg_vdata,
                               HYPRE_Int   num_post_relax )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> num_post_relax) = num_post_relax;
- 
+
    return hypre_error_flag;
 }
 
@@ -235,9 +235,9 @@ hypre_SysPFMGSetSkipRelax( void *sys_pfmg_vdata,
                            HYPRE_Int  skip_relax )
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> skip_relax) = skip_relax;
- 
+
    return hypre_error_flag;
 }
 
@@ -253,7 +253,7 @@ hypre_SysPFMGSetDxyz( void   *sys_pfmg_vdata,
    (sys_pfmg_data -> dxyz[0]) = dxyz[0];
    (sys_pfmg_data -> dxyz[1]) = dxyz[1];
    (sys_pfmg_data -> dxyz[2]) = dxyz[2];
- 
+
    return hypre_error_flag;
 }
 
@@ -265,9 +265,9 @@ hypre_SysPFMGSetLogging( void *sys_pfmg_vdata,
                          HYPRE_Int   logging)
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> logging) = logging;
- 
+
    return hypre_error_flag;
 }
 
@@ -279,9 +279,9 @@ hypre_SysPFMGSetPrintLevel( void *sys_pfmg_vdata,
                             HYPRE_Int   print_level)
 {
    hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
- 
+
    (sys_pfmg_data -> print_level) = print_level;
- 
+
    return hypre_error_flag;
 }
 
@@ -322,13 +322,13 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
          {
             for (i = 0; i < num_iterations; i++)
             {
-               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+               hypre_printf("Residual norm[%d] = %e   ", i, norms[i]);
+               hypre_printf("Relative residual norm[%d] = %e\n", i, rel_norms[i]);
             }
          }
       }
    }
-  
+
    return hypre_error_flag;
 }
 
@@ -345,7 +345,7 @@ hypre_SysPFMGGetFinalRelativeResidualNorm( void   *sys_pfmg_vdata,
    HYPRE_Int          num_iterations  = (sys_pfmg_data -> num_iterations);
    HYPRE_Int          logging         = (sys_pfmg_data -> logging);
    HYPRE_Real        *rel_norms       = (sys_pfmg_data -> rel_norms);
-            
+
    if (logging > 0)
    {
       if (max_iter == 0)
@@ -354,14 +354,14 @@ hypre_SysPFMGGetFinalRelativeResidualNorm( void   *sys_pfmg_vdata,
       }
       else if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {
          *relative_residual_norm = rel_norms[num_iterations];
       }
    }
-   
+
    return hypre_error_flag;
 }
 

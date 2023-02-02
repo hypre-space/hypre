@@ -1,5 +1,5 @@
 @echo off
-rem Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+rem Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 rem HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 rem
 rem SPDX-License-Identifier: (Apache-2.0 OR MIT)

@@ -1,0 +1,84 @@
+# Output file: gpu.out.1
+   11    5.329671e-05    0.179526    1.256215e-05
+   12    7.308483e-06    0.137128    1.722626e-06
+   13    7.411552e-07    0.101410    1.746920e-07
+
+
+# Output file: gpu.out.2
+    1    3.503257e-02    0.004729    4.728807e-03
+    2    1.386843e-04    0.003959    1.872005e-05
+    3    8.429961e-07    0.006079    1.137903e-07
+
+
+# Output file: gpu.out.3
+
+
+Iterations = 5
+Final Relative Residual Norm = 9.21374e-08
+
+# Output file: gpu.out.4
+
+
+Iterations = 6
+Final Relative Residual Norm = 5.961443e-08
+
+# Output file: gpu.out.5
+
+
+Iterations = 6
+Final Relative Residual Norm = 8.921046e-08
+
+# Output file: gpu.out.5f
+
+ 
+ Iterations =  6
+ Final Relative Residual Norm =   8.92104626E-08
+ 
+# Output file: gpu.out.6
+    1    3.503257e-02    0.004729    4.728807e-03
+    2    1.386843e-04    0.003959    1.872005e-05
+    3    8.429961e-07    0.006079    1.137903e-07
+
+
+# Output file: gpu.out.7
+
+
+Iterations = 6
+Final Relative Residual Norm = 5.961443e-08
+
+# Output file: gpu.out.8
+    7    1.315332e-04    0.128961    2.233203e-05
+    8    1.350294e-05    0.102658    2.292562e-06
+    9    4.148659e-06    0.307241    7.043691e-07
+
+
+# Output file: gpu.out.9
+
+
+Iterations = 9
+Final Relative Residual Norm = 6.57147e-07
+
+# Output file: gpu.out.12
+    2    3.255341e-03    0.014358    5.745609e-04
+    3    6.649011e-05    0.020425    1.173537e-05
+    4    1.544291e-06    0.023226    2.725642e-07
+
+
+# Output file: gpu.out.12f
+    2    3.255341e-03    0.014358    5.745609e-04
+    3    6.649011e-05    0.020425    1.173537e-05
+    4    1.544291e-06    0.023226    2.725642e-07
+
+
+# Output file: gpu.out.13
+
+
+Iterations = 11
+Final Relative Residual Norm = 9.59155e-07
+
+# Output file: gpu.out.14
+
+
+Iterations = 11
+Final Relative Residual Norm = 9.59155e-07
+

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -44,8 +44,8 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
    num_requests = num_sends + num_recvs;
    requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
 
-   hypre_MPI_Comm_size(comm,&num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    j = 0;
 
@@ -56,19 +56,19 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
          for (i = 0; i < num_recvs; i++)
          {
             ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
-            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
+            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
             vec_len =
-               (hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start)*bnnz;
-            hypre_MPI_Irecv(&d_recv_data[vec_start*bnnz], vec_len,
+               (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start) * bnnz;
+            hypre_MPI_Irecv(&d_recv_data[vec_start * bnnz], vec_len,
                             HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          for (i = 0; i < num_sends; i++)
          {
             vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             vec_len =
-               (hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1)-vec_start)*bnnz;
+               (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start) * bnnz;
             ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
-            hypre_MPI_Isend(&d_send_data[vec_start*bnnz], vec_len,
+            hypre_MPI_Isend(&d_send_data[vec_start * bnnz], vec_len,
                             HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          break;
@@ -80,18 +80,18 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
          {
             vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             vec_len =
-               (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1) - vec_start)*bnnz;
+               (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start) * bnnz;
             ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
-            hypre_MPI_Irecv(&d_recv_data[vec_start*bnnz], vec_len,
+            hypre_MPI_Irecv(&d_recv_data[vec_start * bnnz], vec_len,
                             HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          for (i = 0; i < num_recvs; i++)
          {
             ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
-            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
+            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
             vec_len =
-               (hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start)*bnnz;
-            hypre_MPI_Isend(&d_send_data[vec_start*bnnz], vec_len,
+               (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start) * bnnz;
+            hypre_MPI_Isend(&d_send_data[vec_start * bnnz], vec_len,
                             HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          break;
@@ -121,7 +121,7 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle)
 {
    hypre_MPI_Status          *status0;
 
-   if ( comm_handle==NULL ) return hypre_error_flag;
+   if ( comm_handle == NULL ) { return hypre_error_flag; }
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
@@ -183,8 +183,8 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
    apart->row_end_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
 
    /* now we want to reconcile our actual partition with the assumed partition */
-   hypre_LocateAssummedPartition(comm, col_start, col_end,
-                                 0, global_num_cols, apart, myid);
+   hypre_LocateAssumedPartition(comm, col_start, col_end,
+                                0, global_num_cols, apart, myid);
 
    /* this partition will be saved in the matrix data structure until the matrix
     * is destroyed */
@@ -205,7 +205,7 @@ hypre_ParCSRBlockMatrixDestroyAssumedPartition( hypre_ParCSRBlockMatrix *matrix 
 
    apart = hypre_ParCSRMatrixAssumedPartition(matrix);
 
-   if(apart->storage_length > 0)
+   if (apart->storage_length > 0)
    {
       hypre_TFree(apart->proc_list, HYPRE_MEMORY_HOST);
       hypre_TFree(apart->row_start_list, HYPRE_MEMORY_HOST);

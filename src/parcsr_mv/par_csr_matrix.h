@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -30,6 +30,7 @@ typedef struct hypre_ParCSRMatrix_struct
 
    HYPRE_BigInt          global_num_rows;
    HYPRE_BigInt          global_num_cols;
+   HYPRE_BigInt          global_num_rownnz;
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -44,25 +45,18 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt         *col_map_offd;
    HYPRE_BigInt         *device_col_map_offd;
    /* maps columns of offd to global columns */
-   HYPRE_BigInt         *row_starts;
-   /* array of length num_procs+1, row_starts[i] contains the
-      global number of the first row on proc i,
-      first_row_index = row_starts[my_id],
-      row_starts[num_procs] = global_num_rows */
-   HYPRE_BigInt         *col_starts;
-   /* array of length num_procs+1, col_starts[i] contains the
-      global number of the first column of diag on proc i,
-      first_col_diag = col_starts[my_id],
-      col_starts[num_procs] = global_num_cols */
+   HYPRE_BigInt          row_starts[2];
+   /* row_starts[0] is start of local rows
+      row_starts[1] is start of next processor's rows */
+   HYPRE_BigInt          col_starts[2];
+   /* col_starts[0] is start of local columns
+      col_starts[1] is start of next processor's columns */
 
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
 
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
-   /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
-   HYPRE_Int             owns_row_starts;
-   HYPRE_Int             owns_col_starts;
 
    HYPRE_BigInt          num_nonzeros;
    HYPRE_Real            d_num_nonzeros;
@@ -72,9 +66,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *rowvalues;
    HYPRE_Int             getrowactive;
 
-   hypre_IJAssumedPart  *assumed_partition; /* only populated if
-                                              no_global_partition option is used
-                                              (compile-time option)*/
+   hypre_IJAssumedPart  *assumed_partition;
    HYPRE_Int             owns_assumed_partition;
    /* Array to store ordering of local diagonal block to relax. In particular,
    used for triangulr matrices that are not ordered to be triangular. */
@@ -85,7 +77,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *bdiaginv;
    hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
    HYPRE_Int            *soc_diag_j;
    HYPRE_Int            *soc_offd_j;
@@ -100,6 +92,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixComm(matrix)                   ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixGlobalNumRownnz(matrix)        ((matrix) -> global_num_rownnz)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
@@ -115,8 +108,6 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixCommPkg(matrix)                ((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixCommPkgT(matrix)               ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)               ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixOwnsRowStarts(matrix)          ((matrix) -> owns_row_starts)
-#define hypre_ParCSRMatrixOwnsColStarts(matrix)          ((matrix) -> owns_col_starts)
 #define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
 #define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)             ((matrix) -> rowindices)
@@ -125,7 +116,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixAssumedPartition(matrix)       ((matrix) -> assumed_partition)
 #define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
 #define hypre_ParCSRMatrixProcOrdering(matrix)           ((matrix) -> proc_ordering)
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 #define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
 #define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
 #endif
@@ -136,15 +127,35 @@ typedef struct hypre_ParCSRMatrix_struct
 static inline HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 {
-   HYPRE_MemoryLocation memory_diag = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matrix));
-   HYPRE_MemoryLocation memory_offd = hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matrix));
+   if (!matrix) { return HYPRE_MEMORY_UNDEFINED; }
 
-   if (memory_diag != memory_offd)
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
+   HYPRE_MemoryLocation memory_diag = diag ? hypre_CSRMatrixMemoryLocation(
+                                         diag) : HYPRE_MEMORY_UNDEFINED;
+   HYPRE_MemoryLocation memory_offd = offd ? hypre_CSRMatrixMemoryLocation(
+                                         offd) : HYPRE_MEMORY_UNDEFINED;
+
+   if (diag && offd)
    {
-      hypre_printf("Warning: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag, memory_offd);
-      hypre_assert(0);
+      if (memory_diag != memory_offd)
+      {
+         char err_msg[1024];
+         hypre_sprintf(err_msg, "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag,
+                       memory_offd);
+         hypre_error_w_msg(HYPRE_ERROR_MEMORY, err_msg);
+         hypre_assert(0);
+
+         return HYPRE_MEMORY_UNDEFINED;
+      }
+
+      return memory_diag;
    }
-   return memory_diag;
+
+   if (diag) { return memory_diag; }
+   if (offd) { return memory_offd; }
+
+   return HYPRE_MEMORY_UNDEFINED;
 }
 
 /*--------------------------------------------------------------------------
@@ -205,4 +216,3 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
-

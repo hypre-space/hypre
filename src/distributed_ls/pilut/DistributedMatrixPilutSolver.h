@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -9,7 +9,6 @@
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
 #include "HYPRE_config.h"
-#include "hypre_general.h"
 #include "_hypre_utilities.h"
 /*
 #ifdef HYPRE_DEBUG
@@ -45,6 +44,8 @@ HYPRE_Int _maxnz;
 HYPRE_Int *_map;			        /* Map used for marking rows in the set */
 
 HYPRE_Int *_vrowdist;
+
+HYPRE_Int logging; /* if 0, turn off all printings */
 
 /* Buffers for point to point communication */
 HYPRE_Int _pilu_recv[MAX_NPES];
@@ -85,7 +86,7 @@ HYPRE_Int Ul_timer;
 #define jr (globals->_jr)
 #define jw (globals->_jw)
 #define lastjr (globals->_lastjr)
-#define lr (globals->_lr)
+#define hypre_lr (globals->_lr)
 #define lastlr (globals->_lastlr)
 #define w (globals->_w)
 #define firstrow (globals->_firstrow)

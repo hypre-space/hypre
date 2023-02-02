@@ -115,35 +115,35 @@ extern "C" {
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static doublereal c_b16 = 1.;
+     integer c__1 = 1;
+     integer c_n1 = -1;
+     doublereal c_b16 = 1.;
     
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     /* Local variables */
-    static integer neig;
+     integer neig;
     extern logical lsame_(const char *,const char *);
     extern /* Subroutine */ integer dtrmm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
-    static char trans[1];
+     char trans[1];
     extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
-    static logical upper;
+     logical upper;
     extern /* Subroutine */ integer dsyev_(const char *,const char *, integer *, doublereal *
 	    , integer *, doublereal *, doublereal *, integer *, integer *);
-    static logical wantz;
-    static integer nb;
+     logical wantz;
+     integer nb;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ integer dpotrf_(const char *, integer *, doublereal *, 
 	    integer *, integer *), dsygst_(integer *,const char *, integer 
 	    *, doublereal *, integer *, doublereal *, integer *, integer *);
-    static integer lwkopt;
-    static logical lquery;
+     integer lwkopt;
+     logical lquery;
 
 
     a_dim1 = *lda;

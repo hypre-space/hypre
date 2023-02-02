@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -170,7 +170,7 @@ int MH_ExchBdry(double *vec, void *obj)
          dbuf[j] = vec[tempList[j]];
       }
       MH_Send((void*) dbuf, leng, dest, msgid, comm);
-      if ( dbuf != NULL ) free( dbuf );
+      hypre_TFree(dbuf , HYPRE_MEMORY_HOST);
    }
    offset = nRows;
    for ( i = 0; i < recvProcCnt; i++ )
@@ -180,7 +180,8 @@ int MH_ExchBdry(double *vec, void *obj)
       MH_Wait((void*) &(vec[offset]), leng, &src, &msgid, comm, &request[i]);
       offset += recvLeng[i];
    }
-   if ( recvProcCnt > 0 ) free ( request );
+   if ( recvProcCnt > 0 )
+      hypre_TFree(request , HYPRE_MEMORY_HOST);
    return 1;
 #endif
 }
@@ -269,7 +270,8 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
       MH_Wait((void*) &((*outvec)[offset]), leng, &src, &msgid, comm, &request[i]);
       offset += sendLeng[i];
    }
-   if ( sendProcCnt > 0 ) free ( request );
+   if ( sendProcCnt > 0 )
+      hypre_TFree(request, HYPRE_MEMORY_HOST);
    return 1;
 #endif
 }
@@ -312,7 +314,7 @@ int MH_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
        }
        ap[i] = sum;
     }
-    if ( dbuf != NULL ) free( dbuf );
+    hypre_TFree(dbuf, HYPRE_MEMORY_HOST);
     return 1;
 }
 
@@ -407,25 +409,25 @@ int HYPRE_LSI_MLDestroy( HYPRE_Solver solver )
     if ( link->ml_ag  != NULL ) ML_Aggregate_Destroy( &(link->ml_ag) );
     if ( link->ml_amg != NULL ) ML_AMG_Destroy( &(link->ml_amg) );
     ML_Destroy( &(link->ml_ptr) );
-    if ( link->contxt->partition != NULL ) free( link->contxt->partition );
+    hypre_TFree(link->contxt->partition, HYPRE_MEMORY_HOST);
     if ( link->contxt->Amat != NULL )
     {
        Amat = (MH_Matrix *) link->contxt->Amat;
-       if ( Amat->sendProc != NULL ) free (Amat->sendProc);
-       if ( Amat->sendLeng != NULL ) free (Amat->sendLeng);
+       hypre_TFree(Amat->sendProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->sendLeng, HYPRE_MEMORY_HOST);
        if ( Amat->sendList != NULL )
        {
           for (i = 0; i < Amat->sendProcCnt; i++ )
-             if (Amat->sendList[i] != NULL) free (Amat->sendList[i]);
-          free (Amat->sendList);
+             hypre_TFree(Amat->sendList[i], HYPRE_MEMORY_HOST);
+          hypre_TFree(Amat->sendList, HYPRE_MEMORY_HOST);
        }
-       if ( Amat->recvProc != NULL ) free (Amat->recvProc);
-       if ( Amat->recvLeng != NULL ) free (Amat->recvLeng);
-       if ( Amat->map      != NULL ) free (Amat->map);
-       free( Amat );
+       hypre_TFree(Amat->recvProc, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->recvLeng, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat->map, HYPRE_MEMORY_HOST);
+       hypre_TFree(Amat, HYPRE_MEMORY_HOST);
     }
-    if ( link->contxt != NULL ) free( link->contxt );
-    free( link );
+    hypre_TFree(link->contxt, HYPRE_MEMORY_HOST);
+    hypre_TFree(link, HYPRE_MEMORY_HOST);
 
     return 0;
 #else
@@ -1079,8 +1081,8 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     rowptr[0] = 0;
     for ( i = 1; i <= localEqns; i++ )
        rowptr[i] = rowptr[i-1] + diagSize[i-1] + offdiagSize[i-1];
-    free( diagSize );
-    free( offdiagSize );
+    hypre_TFree(diagSize, HYPRE_MEMORY_HOST);
+    hypre_TFree(offdiagSize, HYPRE_MEMORY_HOST);
 
     /* -------------------------------------------------------- */
     /* put the matrix data in the CSR matrix                    */
@@ -1188,7 +1190,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for ( i = 0; i < recvProcCnt; i++ ) tempCnt[recvProc[i]] = 1;
        MPI_Allreduce(tempCnt, sendLeng, nprocs, MPI_INT, MPI_SUM, comm );
        sendProcCnt = sendLeng[my_id];
-       free( sendLeng );
+       hypre_TFree(sendLeng, HYPRE_MEMORY_HOST);
        if ( sendProcCnt > 0 )
        {
           sendLeng = hypre_TAlloc(int,  sendProcCnt , HYPRE_MEMORY_HOST);
@@ -1264,7 +1266,8 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        {
           MPI_Wait( &Request[i], &status );
        }
-       if ( sendProcCnt > 0 ) free( Request );
+       if ( sendProcCnt > 0 )
+          hypre_TFree(Request, HYPRE_MEMORY_HOST);
 
        /* ----------------------------------------------------- */
        /* convert the send list from global to local numbers    */
@@ -1300,7 +1303,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* clean up                                              */
        /* ----------------------------------------------------- */
 
-       free( tempCnt );
+       hypre_TFree(tempCnt, HYPRE_MEMORY_HOST);
     }
     return 0;
 #else

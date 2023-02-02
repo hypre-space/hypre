@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -19,7 +19,7 @@
 
 HYPRE_Int
 HYPRE_ParVectorCreate( MPI_Comm         comm,
-                       HYPRE_BigInt     global_size, 
+                       HYPRE_BigInt     global_size,
                        HYPRE_BigInt    *partitioning,
                        HYPRE_ParVector *vector )
 {
@@ -29,7 +29,7 @@ HYPRE_ParVectorCreate( MPI_Comm         comm,
       return hypre_error_flag;
    }
    *vector = (HYPRE_ParVector)
-      hypre_ParVectorCreate(comm, global_size, partitioning) ;
+             hypre_ParVectorCreate(comm, global_size, partitioning) ;
    return hypre_error_flag;
 }
 
@@ -39,7 +39,7 @@ HYPRE_ParVectorCreate( MPI_Comm         comm,
 
 HYPRE_Int
 HYPRE_ParMultiVectorCreate( MPI_Comm         comm,
-                            HYPRE_BigInt     global_size, 
+                            HYPRE_BigInt     global_size,
                             HYPRE_BigInt    *partitioning,
                             HYPRE_Int        number_vectors,
                             HYPRE_ParVector *vector )
@@ -50,7 +50,7 @@ HYPRE_ParMultiVectorCreate( MPI_Comm         comm,
       return hypre_error_flag;
    }
    *vector = (HYPRE_ParVector)
-      hypre_ParMultiVectorCreate( comm, global_size, partitioning, number_vectors );
+             hypre_ParMultiVectorCreate( comm, global_size, partitioning, number_vectors );
    return hypre_error_flag;
 }
 
@@ -58,7 +58,7 @@ HYPRE_ParMultiVectorCreate( MPI_Comm         comm,
  * HYPRE_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParVectorDestroy( HYPRE_ParVector vector )
 {
    return ( hypre_ParVectorDestroy( (hypre_ParVector *) vector ) );
@@ -68,7 +68,7 @@ HYPRE_ParVectorDestroy( HYPRE_ParVector vector )
  * HYPRE_ParVectorInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
 {
    return ( hypre_ParVectorInitialize( (hypre_ParVector *) vector ) );
@@ -80,7 +80,7 @@ HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
 
 HYPRE_Int
 HYPRE_ParVectorRead( MPI_Comm         comm,
-                     const char      *file_name, 
+                     const char      *file_name,
                      HYPRE_ParVector *vector)
 {
    if (!vector)
@@ -182,19 +182,19 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
                           HYPRE_ParVector y,
                           HYPRE_Real     *prod)
 {
-   if (!x) 
+   if (!x)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
-   if (!y) 
+   if (!y)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   *prod = hypre_ParVectorInnerProd( (hypre_ParVector *) x, 
+   *prod = hypre_ParVectorInnerProd( (hypre_ParVector *) x,
                                      (hypre_ParVector *) y) ;
    return hypre_error_flag;
 }
@@ -215,7 +215,7 @@ HYPRE_VectorToParVector( MPI_Comm         comm,
       return hypre_error_flag;
    }
    *vector = (HYPRE_ParVector)
-      hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
+             hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
    return hypre_error_flag;
 }
 
@@ -237,16 +237,16 @@ HYPRE_ParVectorGetValues( HYPRE_ParVector vector,
       return hypre_error_flag;
    }
    if (num_values < 0)
-   { 
+   {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
    if (!values)
-   { 
+   {
       hypre_error_in_arg(4);
       return hypre_error_flag;
    }
 
-   hypre_ParVectorGetValues(par_vector, num_values, indices, values);      
+   hypre_ParVectorGetValues(par_vector, num_values, indices, values);
    return hypre_error_flag;
 }

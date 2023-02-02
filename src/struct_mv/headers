@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -51,25 +51,8 @@ cat protos.h               >> $INTERNAL_HEADER
 #===========================================================================
 # BoxLoops
 #===========================================================================
-
-cat >> $INTERNAL_HEADER <<@
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-@
-
-cat boxloop_omp_device.h          >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-
-#elif !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && !defined(HYPRE_USING_CUDA)
-@
-
-cat boxloop_host.h                >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-
-#endif
-@
+cat boxloop_omp_device.h   >> $INTERNAL_HEADER
+cat boxloop_host.h         >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
@@ -114,31 +97,10 @@ extern "C++" {
 # BoxLoops
 #===========================================================================
 
-cat >> $INTERNAL_HEADER <<@
-
-#if defined(HYPRE_USING_RAJA)
-@
-
-cat boxloop_raja.h                >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-
-#elif defined(HYPRE_USING_KOKKOS)
-@
-
-cat boxloop_kokkos.h              >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-
-#elif defined(HYPRE_USING_CUDA)
-@
-
-cat boxloop_cuda.h                >> $INTERNAL_HEADER
-
-cat >> $INTERNAL_HEADER <<@
-
-#endif
-@
+cat boxloop_raja.h         >> $INTERNAL_HEADER
+cat boxloop_kokkos.h       >> $INTERNAL_HEADER
+cat boxloop_cuda.h         >> $INTERNAL_HEADER
+cat boxloop_sycl.h         >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

@@ -12,114 +12,114 @@ extern "C" {
 	 integer *n, doublereal *c__, doublereal *s, doublereal *a, integer *
 	lda)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLASR   performs the transformation   
+    DLASR   performs the transformation
 
-       A := P*A,   when SIDE = 'L' or 'l'  (  Left-hand side )   
+       A := P*A,   when SIDE = 'L' or 'l'  (  Left-hand side )
 
-       A := A*P',  when SIDE = 'R' or 'r'  ( Right-hand side )   
+       A := A*P',  when SIDE = 'R' or 'r'  ( Right-hand side )
 
-    where A is an m by n real matrix and P is an orthogonal matrix,   
-    consisting of a sequence of plane rotations determined by the   
-    parameters PIVOT and DIRECT as follows ( z = m when SIDE = 'L' or 'l'   
-    and z = n when SIDE = 'R' or 'r' ):   
+    where A is an m by n real matrix and P is an orthogonal matrix,
+    consisting of a sequence of plane rotations determined by the
+    parameters PIVOT and DIRECT as follows ( z = m when SIDE = 'L' or 'l'
+    and z = n when SIDE = 'R' or 'r' ):
 
-    When  DIRECT = 'F' or 'f'  ( Forward sequence ) then   
+    When  DIRECT = 'F' or 'f'  ( Forward sequence ) then
 
-       P = P( z - 1 )*...*P( 2 )*P( 1 ),   
+       P = P( z - 1 )*...*P( 2 )*P( 1 ),
 
-    and when DIRECT = 'B' or 'b'  ( Backward sequence ) then   
+    and when DIRECT = 'B' or 'b'  ( Backward sequence ) then
 
-       P = P( 1 )*P( 2 )*...*P( z - 1 ),   
+       P = P( 1 )*P( 2 )*...*P( z - 1 ),
 
-    where  P( k ) is a plane rotation matrix for the following planes:   
+    where  P( k ) is a plane rotation matrix for the following planes:
 
-       when  PIVOT = 'V' or 'v'  ( Variable pivot ),   
-          the plane ( k, k + 1 )   
+       when  PIVOT = 'V' or 'v'  ( Variable pivot ),
+          the plane ( k, k + 1 )
 
-       when  PIVOT = 'T' or 't'  ( Top pivot ),   
-          the plane ( 1, k + 1 )   
+       when  PIVOT = 'T' or 't'  ( Top pivot ),
+          the plane ( 1, k + 1 )
 
-       when  PIVOT = 'B' or 'b'  ( Bottom pivot ),   
-          the plane ( k, z )   
+       when  PIVOT = 'B' or 'b'  ( Bottom pivot ),
+          the plane ( k, z )
 
-    c( k ) and s( k )  must contain the  cosine and sine that define the   
-    matrix  P( k ).  The two by two plane rotation part of the matrix   
-    P( k ), R( k ), is assumed to be of the form   
+    c( k ) and s( k )  must contain the  cosine and sine that define the
+    matrix  P( k ).  The two by two plane rotation part of the matrix
+    P( k ), R( k ), is assumed to be of the form
 
-       R( k ) = (  c( k )  s( k ) ).   
-                ( -s( k )  c( k ) )   
+       R( k ) = (  c( k )  s( k ) ).
+                ( -s( k )  c( k ) )
 
-    This version vectorises across rows of the array A when SIDE = 'L'.   
+    This version vectorises across rows of the array A when SIDE = 'L'.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    SIDE    (input) CHARACTER*1   
-            Specifies whether the plane rotation matrix P is applied to   
-            A on the left or the right.   
-            = 'L':  Left, compute A := P*A   
-            = 'R':  Right, compute A:= A*P'   
+    SIDE    (input) CHARACTER*1
+            Specifies whether the plane rotation matrix P is applied to
+            A on the left or the right.
+            = 'L':  Left, compute A := P*A
+            = 'R':  Right, compute A:= A*P'
 
-    DIRECT  (input) CHARACTER*1   
-            Specifies whether P is a forward or backward sequence of   
-            plane rotations.   
-            = 'F':  Forward, P = P( z - 1 )*...*P( 2 )*P( 1 )   
-            = 'B':  Backward, P = P( 1 )*P( 2 )*...*P( z - 1 )   
+    DIRECT  (input) CHARACTER*1
+            Specifies whether P is a forward or backward sequence of
+            plane rotations.
+            = 'F':  Forward, P = P( z - 1 )*...*P( 2 )*P( 1 )
+            = 'B':  Backward, P = P( 1 )*P( 2 )*...*P( z - 1 )
 
-    PIVOT   (input) CHARACTER*1   
-            Specifies the plane for which P(k) is a plane rotation   
-            matrix.   
-            = 'V':  Variable pivot, the plane (k,k+1)   
-            = 'T':  Top pivot, the plane (1,k+1)   
-            = 'B':  Bottom pivot, the plane (k,z)   
+    PIVOT   (input) CHARACTER*1
+            Specifies the plane for which P(k) is a plane rotation
+            matrix.
+            = 'V':  Variable pivot, the plane (k,k+1)
+            = 'T':  Top pivot, the plane (1,k+1)
+            = 'B':  Bottom pivot, the plane (k,z)
 
-    M       (input) INTEGER   
-            The number of rows of the matrix A.  If m <= 1, an immediate   
-            return is effected.   
+    M       (input) INTEGER
+            The number of rows of the matrix A.  If m <= 1, an immediate
+            return is effected.
 
-    N       (input) INTEGER   
-            The number of columns of the matrix A.  If n <= 1, an   
-            immediate return is effected.   
+    N       (input) INTEGER
+            The number of columns of the matrix A.  If n <= 1, an
+            immediate return is effected.
 
-    C, S    (input) DOUBLE PRECISION arrays, dimension   
-                    (M-1) if SIDE = 'L'   
-                    (N-1) if SIDE = 'R'   
-            c(k) and s(k) contain the cosine and sine that define the   
-            matrix P(k).  The two by two plane rotation part of the   
-            matrix P(k), R(k), is assumed to be of the form   
-            R( k ) = (  c( k )  s( k ) ).   
-                     ( -s( k )  c( k ) )   
+    C, S    (input) DOUBLE PRECISION arrays, dimension
+                    (M-1) if SIDE = 'L'
+                    (N-1) if SIDE = 'R'
+            c(k) and s(k) contain the cosine and sine that define the
+            matrix P(k).  The two by two plane rotation part of the
+            matrix P(k), R(k), is assumed to be of the form
+            R( k ) = (  c( k )  s( k ) ).
+                     ( -s( k )  c( k ) )
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)   
-            The m by n matrix A.  On exit, A is overwritten by P*A if   
-            SIDE = 'R' or by A*P' if SIDE = 'L'.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA,N)
+            The m by n matrix A.  On exit, A is overwritten by P*A if
+            SIDE = 'R' or by A*P' if SIDE = 'L'.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,M).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,M).
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input parameters   
+       Test the input parameters
 
        Parameter adjustments */
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2;
     /* Local variables */
-    static integer info;
-    static doublereal temp;
-    static integer i__, j;
+    integer info;
+    doublereal temp;
+    integer i__, j;
     extern logical lsame_(const char *,const char *);
-    static doublereal ctemp, stemp;
+    doublereal ctemp, stemp;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
@@ -133,10 +133,10 @@ extern "C" {
     info = 0;
     if (! (lsame_(side, "L") || lsame_(side, "R"))) {
 	info = 1;
-    } else if (! (lsame_(pivot, "V") || lsame_(pivot, 
+    } else if (! (lsame_(pivot, "V") || lsame_(pivot,
 	    "T") || lsame_(pivot, "B"))) {
 	info = 2;
-    } else if (! (lsame_(direct, "F") || lsame_(direct, 
+    } else if (! (lsame_(direct, "F") || lsame_(direct,
 	    "B"))) {
 	info = 3;
     } else if (*m < 0) {
@@ -172,7 +172,7 @@ extern "C" {
 			    temp = a_ref(j + 1, i__);
 			    a_ref(j + 1, i__) = ctemp * temp - stemp * a_ref(
 				    j, i__);
-			    a_ref(j, i__) = stemp * temp + ctemp * a_ref(j, 
+			    a_ref(j, i__) = stemp * temp + ctemp * a_ref(j,
 				    i__);
 /* L10: */
 			}
@@ -189,7 +189,7 @@ extern "C" {
 			    temp = a_ref(j + 1, i__);
 			    a_ref(j + 1, i__) = ctemp * temp - stemp * a_ref(
 				    j, i__);
-			    a_ref(j, i__) = stemp * temp + ctemp * a_ref(j, 
+			    a_ref(j, i__) = stemp * temp + ctemp * a_ref(j,
 				    i__);
 /* L30: */
 			}
@@ -207,9 +207,9 @@ extern "C" {
 			i__2 = *n;
 			for (i__ = 1; i__ <= i__2; ++i__) {
 			    temp = a_ref(j, i__);
-			    a_ref(j, i__) = ctemp * temp - stemp * a_ref(1, 
+			    a_ref(j, i__) = ctemp * temp - stemp * a_ref(1,
 				    i__);
-			    a_ref(1, i__) = stemp * temp + ctemp * a_ref(1, 
+			    a_ref(1, i__) = stemp * temp + ctemp * a_ref(1,
 				    i__);
 /* L50: */
 			}
@@ -224,9 +224,9 @@ extern "C" {
 			i__1 = *n;
 			for (i__ = 1; i__ <= i__1; ++i__) {
 			    temp = a_ref(j, i__);
-			    a_ref(j, i__) = ctemp * temp - stemp * a_ref(1, 
+			    a_ref(j, i__) = ctemp * temp - stemp * a_ref(1,
 				    i__);
-			    a_ref(1, i__) = stemp * temp + ctemp * a_ref(1, 
+			    a_ref(1, i__) = stemp * temp + ctemp * a_ref(1,
 				    i__);
 /* L70: */
 			}
@@ -244,9 +244,9 @@ extern "C" {
 			i__2 = *n;
 			for (i__ = 1; i__ <= i__2; ++i__) {
 			    temp = a_ref(j, i__);
-			    a_ref(j, i__) = stemp * a_ref(*m, i__) + ctemp * 
+			    a_ref(j, i__) = stemp * a_ref(*m, i__) + ctemp *
 				    temp;
-			    a_ref(*m, i__) = ctemp * a_ref(*m, i__) - stemp * 
+			    a_ref(*m, i__) = ctemp * a_ref(*m, i__) - stemp *
 				    temp;
 /* L90: */
 			}
@@ -261,9 +261,9 @@ extern "C" {
 			i__1 = *n;
 			for (i__ = 1; i__ <= i__1; ++i__) {
 			    temp = a_ref(j, i__);
-			    a_ref(j, i__) = stemp * a_ref(*m, i__) + ctemp * 
+			    a_ref(j, i__) = stemp * a_ref(*m, i__) + ctemp *
 				    temp;
-			    a_ref(*m, i__) = ctemp * a_ref(*m, i__) - stemp * 
+			    a_ref(*m, i__) = ctemp * a_ref(*m, i__) - stemp *
 				    temp;
 /* L110: */
 			}
@@ -288,7 +288,7 @@ extern "C" {
 			    temp = a_ref(i__, j + 1);
 			    a_ref(i__, j + 1) = ctemp * temp - stemp * a_ref(
 				    i__, j);
-			    a_ref(i__, j) = stemp * temp + ctemp * a_ref(i__, 
+			    a_ref(i__, j) = stemp * temp + ctemp * a_ref(i__,
 				    j);
 /* L130: */
 			}
@@ -305,7 +305,7 @@ extern "C" {
 			    temp = a_ref(i__, j + 1);
 			    a_ref(i__, j + 1) = ctemp * temp - stemp * a_ref(
 				    i__, j);
-			    a_ref(i__, j) = stemp * temp + ctemp * a_ref(i__, 
+			    a_ref(i__, j) = stemp * temp + ctemp * a_ref(i__,
 				    j);
 /* L150: */
 			}
@@ -323,9 +323,9 @@ extern "C" {
 			i__2 = *m;
 			for (i__ = 1; i__ <= i__2; ++i__) {
 			    temp = a_ref(i__, j);
-			    a_ref(i__, j) = ctemp * temp - stemp * a_ref(i__, 
+			    a_ref(i__, j) = ctemp * temp - stemp * a_ref(i__,
 				    1);
-			    a_ref(i__, 1) = stemp * temp + ctemp * a_ref(i__, 
+			    a_ref(i__, 1) = stemp * temp + ctemp * a_ref(i__,
 				    1);
 /* L170: */
 			}
@@ -340,9 +340,9 @@ extern "C" {
 			i__1 = *m;
 			for (i__ = 1; i__ <= i__1; ++i__) {
 			    temp = a_ref(i__, j);
-			    a_ref(i__, j) = ctemp * temp - stemp * a_ref(i__, 
+			    a_ref(i__, j) = ctemp * temp - stemp * a_ref(i__,
 				    1);
-			    a_ref(i__, 1) = stemp * temp + ctemp * a_ref(i__, 
+			    a_ref(i__, 1) = stemp * temp + ctemp * a_ref(i__,
 				    1);
 /* L190: */
 			}
@@ -360,9 +360,9 @@ extern "C" {
 			i__2 = *m;
 			for (i__ = 1; i__ <= i__2; ++i__) {
 			    temp = a_ref(i__, j);
-			    a_ref(i__, j) = stemp * a_ref(i__, *n) + ctemp * 
+			    a_ref(i__, j) = stemp * a_ref(i__, *n) + ctemp *
 				    temp;
-			    a_ref(i__, *n) = ctemp * a_ref(i__, *n) - stemp * 
+			    a_ref(i__, *n) = ctemp * a_ref(i__, *n) - stemp *
 				    temp;
 /* L210: */
 			}
@@ -377,9 +377,9 @@ extern "C" {
 			i__1 = *m;
 			for (i__ = 1; i__ <= i__1; ++i__) {
 			    temp = a_ref(i__, j);
-			    a_ref(i__, j) = stemp * a_ref(i__, *n) + ctemp * 
+			    a_ref(i__, j) = stemp * a_ref(i__, *n) + ctemp *
 				    temp;
-			    a_ref(i__, *n) = ctemp * a_ref(i__, *n) - stemp * 
+			    a_ref(i__, *n) = ctemp * a_ref(i__, *n) - stemp *
 				    temp;
 /* L230: */
 			}

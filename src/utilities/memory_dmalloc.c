@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -15,7 +15,7 @@
 
 #ifdef HYPRE_MEMORY_DMALLOC
 
-#include "hypre_memory.h"
+#include "memory.h"
 #include <dmalloc.h>
 
 char dmalloc_logpath_memory[256];
@@ -63,9 +63,13 @@ hypre_MAllocDML( HYPRE_Int   size,
    char *ptr;
 
    if (size > 0)
+   {
       ptr = _malloc_leap(file, line, size);
+   }
    else
+   {
       ptr = NULL;
+   }
 
    return ptr;
 }
@@ -81,7 +85,7 @@ hypre_CAllocDML( HYPRE_Int   count,
                  HYPRE_Int   line    )
 {
    char *ptr;
-   HYPRE_Int   size = count*elt_size;
+   HYPRE_Int   size = count * elt_size;
 
    if (size > 0)
    {

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -246,8 +246,8 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    hypre_StructVectorSetBoxValues(svector, set_box, value_box, values, action, -1, 0);
 
    /* TODO: Why need DeviceSync? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL(cudaDeviceSynchronize());
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
@@ -341,7 +341,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
 
    hypre_Index            varoffset;
-   HYPRE_Int              num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int              num_ghost[2 * HYPRE_MAXDIM];
    hypre_StructGrid      *sgrid;
    HYPRE_Int              var, d;
 
@@ -359,7 +359,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
          hypre_SStructVariableGetOffset(vartypes[var], ndim, varoffset);
          for (d = 0; d < ndim; d++)
          {
-            num_ghost[2*d]   = num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
+            num_ghost[2 * d]   = num_ghost[2 * d + 1] = hypre_IndexD(varoffset, d);
          }
 
          hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
@@ -642,7 +642,7 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
             {
-               pardata[pari+bi] = yp[yi];
+               pardata[pari + bi] = yp[yi];
             }
             hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
@@ -728,7 +728,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
                {
-                  yp[yi] = pardata[pari+bi];
+                  yp[yi] = pardata[pari + bi];
                }
                hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
@@ -764,7 +764,7 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
    pdatasize = 0;
    pdataindices = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
 
-   for (var =0; var < nvars; var++)
+   for (var = 0; var < nvars; var++)
    {
       svector = hypre_SStructPVectorSVector(pvector, var);
       hypre_StructVectorInitializeShell(svector);
@@ -778,7 +778,7 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
     * for this part                                                  */
 
    hypre_SStructPVectorDataIndices(pvector) = pdataindices;
-   hypre_SStructPVectorDataSize(pvector) = pdatasize+nucvars ;
+   hypre_SStructPVectorDataSize(pvector) = pdatasize + nucvars ;
 
    hypre_SStructPVectorAccumulated(pvector) = 0;
 
@@ -822,24 +822,53 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
 HYPRE_Int
 hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
 {
-   HYPRE_Int              nparts= hypre_SStructVectorNParts(vector);
+   HYPRE_Int              nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructPVector  *pvector;
    hypre_StructVector    *svector;
 
    HYPRE_Int    part;
    HYPRE_Int    nvars, var;
 
-   for (part= 0; part< nparts; part++)
+   for (part = 0; part < nparts; part++)
    {
-      pvector= hypre_SStructVectorPVector(vector, part);
+      pvector = hypre_SStructVectorPVector(vector, part);
       nvars  = hypre_SStructPVectorNVars(pvector);
 
-      for (var= 0; var< nvars; var++)
+      for (var = 0; var < nvars; var++)
       {
-         svector= hypre_SStructPVectorSVector(pvector, var);
+         svector = hypre_SStructPVectorSVector(pvector, var);
          hypre_StructVectorClearGhostValues(svector);
       }
    }
 
    return hypre_error_flag;
 }
+
+HYPRE_MemoryLocation
+hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector)
+{
+   HYPRE_Int type = hypre_SStructVectorObjectType(vector);
+
+   if (type == HYPRE_SSTRUCT)
+   {
+      hypre_ParVector *parvector;
+      hypre_SStructVectorConvert(vector, &parvector);
+      return hypre_ParVectorMemoryLocation(parvector);
+   }
+
+   void *object;
+   HYPRE_SStructVectorGetObject(vector, &object);
+
+   if (type == HYPRE_PARCSR)
+   {
+      return hypre_ParVectorMemoryLocation((hypre_ParVector *) object);
+   }
+
+   if (type == HYPRE_STRUCT)
+   {
+      return hypre_StructVectorMemoryLocation((hypre_StructVector *) object);
+   }
+
+   return HYPRE_MEMORY_UNDEFINED;
+}
+

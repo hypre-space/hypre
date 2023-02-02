@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -18,18 +18,19 @@ interfaces:
    -----------  ----------------------------------
    Solvers      Struct   SStruct    FEI      IJ
    ===========  =======  =======  =======  =======
-   Jacobi          X        X                  
-   SMG             X        X                  
-   PFMG            X        X                  
-   Split                    X                  
-   SysPFMG                  X                  
-   FAC                      X                  
-   Maxwell                  X                  
+   Jacobi          X        X
+   SMG             X        X
+   PFMG            X        X
+   Split                    X
+   SysPFMG                  X
+   FAC                      X
+   Maxwell                  X
    BoomerAMG                X        X        X
    AMS                      X        X        X
    ADS                      X        X        X
    MLI                      X        X        X
    MGR                                        X
+   FSAI                                       X
    ParaSails                X        X        X
    hypre-ILU                                  X
    Euclid                   X        X        X
@@ -75,8 +76,8 @@ side. We comment later on considerations for other usage patterns.
    parameters depend on the problem to be solved. We give recommendations in the
    individual sections on how to choose these parameters.  Note that in hypre,
    convergence criteria can be chosen after the preconditioner/solver has been
-   setup.  For a complete set of all available parameters see the Reference
-   Manual.
+   setup.  For a complete set of all available parameters see Chapter
+   :ref:`ch-API`.
 
 #. **Pass the preconditioner to the solver.** For solvers that are not
    preconditioned, this step is omitted.  The preconditioner is passed through
@@ -115,10 +116,10 @@ following routines, where ``A`` is the matrix, ``b`` the right hand side and
 ``x`` the solution vector of the linear system to be solved:
 
 .. code-block:: c
-   
+
    /* Create Solver */
-   int HYPRE_SOLVERCreate(MPI_COMM_WORLD, &solver); 
-   
+   int HYPRE_SOLVERCreate(MPI_COMM_WORLD, &solver);
+
    /* Set certain parameters if desired */
    HYPRE_SOLVERSetTol(solver, 1.e-8);
    ...
@@ -136,7 +137,7 @@ In the following sections, we will give brief descriptions of the available
 hypre solvers with some suggestions on how to choose the parameters as well as
 references for users who are interested in a more detailed description and
 analysis of the solvers.  A complete list of all routines that are available can
-be found in the reference manual.
+be found in Chapter :ref:`ch-API`.
 
 
 .. toctree::
@@ -152,10 +153,10 @@ be found in the reference manual.
    solvers-ads
    solvers-mli
    solvers-mgr
+   solvers-fsai
    solvers-parasails
-   solvers-hypre-ilu   
+   solvers-hypre-ilu
    solvers-euclid
    solvers-pilut
    solvers-lobpcg
    solvers-fei
-

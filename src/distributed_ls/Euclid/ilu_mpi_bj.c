@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -72,13 +72,13 @@ if (ctx->F->rp == NULL) {
   tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) {
     marker[i] = -1;
-    work[i] = 0.0; 
+    work[i] = 0.0;
   }
 
   /*---------- main loop ----------*/
 
   /* global numbers of first and last locally owned rows,
-     with respect to A 
+     with respect to A
    */
   first_row = sg->beg_row[myid_dh];
   last_row  = first_row + sg->row_count[myid_dh];
@@ -90,15 +90,15 @@ if (ctx->F->rp == NULL) {
     EuclidGetRow(ctx->A, globalRow, &len, &CVAL, &AVAL); CHECK_V_ERROR;
 
     /* compute scaling value for row(i) */
-    if (ctx->isScaled) { 
-      compute_scaling_private(i, len, AVAL, ctx); CHECK_V_ERROR; 
+    if (ctx->isScaled) {
+      compute_scaling_private(i, len, AVAL, ctx); CHECK_V_ERROR;
     }
 
     /* Compute symbolic factor for row(i);
        this also performs sparsification
      */
     count = symbolic_row_private(i, first_row, last_row,
-                                 list, marker, tmpFill, 
+                                 list, marker, tmpFill,
                                  len, CVAL, AVAL,
                                  o2n_col, ctx); CHECK_V_ERROR;
 
@@ -114,7 +114,7 @@ if (ctx->F->rp == NULL) {
     /* Copy factored symbolic row to permanent storage */
     col = list[m];
     while (count--) {
-      cval[idx] = col;  
+      cval[idx] = col;
       fill[idx] = tmpFill[col];
       ++idx;
       col = list[col];
@@ -124,13 +124,13 @@ if (ctx->F->rp == NULL) {
     rp[i+1] = idx;
 
     /* Insert pointer to diagonal */
-    temp = rp[i]; 
-    while (cval[temp] != i) ++temp; 
+    temp = rp[i];
+    while (cval[temp] != i) ++temp;
     diag[i] = temp;
 
     /* compute numeric factor for current row */
      numeric_row_private(i, first_row, last_row,
-                          len, CVAL, AVAL, 
+                          len, CVAL, AVAL,
                           work, o2n_col, ctx); CHECK_V_ERROR
     EuclidRestoreRow(ctx->A, globalRow, &len, &CVAL, &AVAL); CHECK_V_ERROR;
 
@@ -138,10 +138,10 @@ if (ctx->F->rp == NULL) {
        and re-zero work vector
      */
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      col = cval[j];  
-      aval[j] = work[col];  
+      col = cval[j];
+      aval[j] = work[col];
       work[col] = 0.0;
-    } 
+    }
 
     /* check for zero diagonal */
     if (! aval[diag[i]]) {
@@ -159,9 +159,9 @@ if (ctx->F->rp == NULL) {
 
 
 
-/* Computes ILU(K) factor of a single row; returns fill 
-   count for the row.  Explicitly inserts diag if not already 
-   present.  On return, all column indices are local 
+/* Computes ILU(K) factor of a single row; returns fill
+   count for the row.  Explicitly inserts diag if not already
+   present.  On return, all column indices are local
    (i.e, referenced to 0).
 */
 #undef __FUNC__
@@ -173,16 +173,16 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int 
 {
   START_FUNC_DH
   HYPRE_Int level = ctx->level, m = ctx->F->m;
-  HYPRE_Int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
+  HYPRE_Int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp;
   HYPRE_Int *fill = ctx->F->fill;
   HYPRE_Int count = 0;
   HYPRE_Int j, node, tmp, col, head;
   HYPRE_Int fill1, fill2;
-  float val;
+  HYPRE_Real val;
   HYPRE_Real thresh = ctx->sparseTolA;
   REAL_DH scale;
 
-  scale = ctx->scale[localRow]; 
+  scale = ctx->scale[localRow];
   ctx->stats[NZA_STATS] += (HYPRE_Real)len;
 
   /* Insert col indices in linked list, and values in work vector.
@@ -192,7 +192,7 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int 
   list[m] = m;
   for (j=0; j<len; ++j) {
     tmp = m;
-    col = *CVAL++; 
+    col = *CVAL++;
     val = *AVAL++;
 
     /* throw out nonlocal columns */
@@ -277,15 +277,15 @@ HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int e
   HYPRE_Real  val;
   REAL_DH *aval = ctx->F->aval, scale;
 
-  scale = ctx->scale[localRow]; 
+  scale = ctx->scale[localRow];
 
   /* zero work vector */
-  /* note: indices in col[] are already permuted, and are 
+  /* note: indices in col[] are already permuted, and are
            local (zero-based)
    */
-  for (j=rp[localRow]; j<rp[localRow+1]; ++j) { 
-    col = cval[j];  
-    work[col] = 0.0; 
+  for (j=rp[localRow]; j<rp[localRow+1]; ++j) {
+    col = cval[j];
+    work[col] = 0.0;
   }
 
   /* init work vector with values from A */

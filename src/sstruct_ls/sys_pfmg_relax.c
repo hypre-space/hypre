@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -39,7 +39,7 @@ hypre_SysPFMGRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_SysPFMGRelaxDestroy( void *sys_pfmg_relax_vdata )
 {
-	hypre_SysPFMGRelaxData *sys_pfmg_relax_data = (hypre_SysPFMGRelaxData *)sys_pfmg_relax_vdata;
+   hypre_SysPFMGRelaxData *sys_pfmg_relax_data = (hypre_SysPFMGRelaxData *)sys_pfmg_relax_vdata;
 
    if (sys_pfmg_relax_data)
    {
@@ -102,7 +102,7 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
 
    (sys_pfmg_relax_data -> relax_type) = relax_type;
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 0: /* Jacobi */
       {
@@ -155,7 +155,7 @@ hypre_SysPFMGRelaxSetJacobiWeight(void  *sys_pfmg_relax_vdata,
                                   HYPRE_Real weight)
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = (hypre_SysPFMGRelaxData *)sys_pfmg_relax_vdata;
-                                                                                                                                     
+
    (sys_pfmg_relax_data -> jacobi_weight)    = weight;
 
    return hypre_error_flag;
@@ -171,7 +171,7 @@ hypre_SysPFMGRelaxSetPreRelax( void  *sys_pfmg_relax_vdata )
    void                   *relax_data = (sys_pfmg_relax_data -> relax_data);
    HYPRE_Int               relax_type = (sys_pfmg_relax_data -> relax_type);
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */
@@ -198,7 +198,7 @@ hypre_SysPFMGRelaxSetPostRelax( void  *sys_pfmg_relax_vdata )
    void                   *relax_data = (sys_pfmg_relax_data -> relax_data);
    HYPRE_Int               relax_type = (sys_pfmg_relax_data -> relax_type);
 
-   switch(relax_type)
+   switch (relax_type)
    {
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */

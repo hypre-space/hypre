@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -33,6 +33,7 @@
 #include <fstream>
 #include "_hypre_utilities.h"
 #include "LLNL_FEI_Impl.h"
+#include "ex.h"
 
 using namespace std;
 
@@ -58,8 +59,11 @@ int main(int argc, char *argv[])
    /* Initialize HYPRE */
    HYPRE_Init();
 
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
+
    // Set default parameters
-   n = 4*nprocs;
+   n = 4 * nprocs;
    solverID = 2;
    vis = 0;
 
@@ -101,7 +105,7 @@ int main(int argc, char *argv[])
          printf("\n");
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
-         printf("  -n <n>              : problem size per processor (default: %d)\n", 4*nprocs);
+         printf("  -n <n>              : problem size per processor (default: %d)\n", 4 * nprocs);
          printf("  -solver <ID>        : solver ID\n");
          printf("                        0 - DS-PCG\n");
          printf("                        1 - ParaSails-PCG\n");
@@ -128,7 +132,7 @@ int main(int argc, char *argv[])
    // are numbered globally starting from the lower left corner and moving
    // row-wise to the upper right corner.
    m = n / nprocs;
-   offset = mypid*(m*(n+1));
+   offset = mypid * (m * (n + 1));
 
    h = 1.0 / n; // mesh size
 
@@ -160,7 +164,7 @@ int main(int argc, char *argv[])
    // have to describe the number of elements in the block (nElems) as
    // well as the fields (unknowns) per element.
    int elemBlkID = 0;
-   int nElems = m*n;
+   int nElems = m * n;
    int elemNNodes = 4; // number of (shared) nodes per element
    int *nodeNFields = new int[elemNNodes]; // fields per node
    int **nodeFieldIDs = new int*[elemNNodes]; // node-fields IDs
@@ -184,84 +188,98 @@ int main(int argc, char *argv[])
    for (i = 0; i < m; i++)
       for (j = 0; j < n; j++)
       {
-         elemConn[i*n+j] = new int[elemNNodes]; // element with coordinates (i,j)
-         elemConn[i*n+j][0] = offset + i*(n+1)+j;     // node in the lower left
-         elemConn[i*n+j][1] = elemConn[i*n+j][0]+1;   // node in the lower right
-         elemConn[i*n+j][2] = elemConn[i*n+j][1]+n+1; // node in the upper right
-         elemConn[i*n+j][3] = elemConn[i*n+j][2]-1;   // node in the upper left
+         elemConn[i * n + j] = new int[elemNNodes]; // element with coordinates (i,j)
+         elemConn[i * n + j][0] = offset + i * (n + 1) + j; // node in the lower left
+         elemConn[i * n + j][1] = elemConn[i * n + j][0] + 1; // node in the lower right
+         elemConn[i * n + j][2] = elemConn[i * n + j][1] + n + 1; // node in the upper right
+         elemConn[i * n + j][3] = elemConn[i * n + j][2] - 1; // node in the upper left
       }
 
    // Pass the element topology information to the FEI
    for (i = 0; i < nElems; i++)
+   {
       feiPtr->initElem(elemBlkID, i, elemConn[i]);
+   }
 
    // List the global indexes of nodes that are shared between processors
    int nShared, *SharedIDs, *SharedLengs, **SharedProcs;
    if (mypid == 0)
    {
       // Nodes in the top row are shared
-      nShared = n+1;
+      nShared = n + 1;
       SharedIDs = new int[nShared];
       for (i = 0; i < nShared; i++)
-         SharedIDs[i] = offset + m*(n+1) + i;
+      {
+         SharedIDs[i] = offset + m * (n + 1) + i;
+      }
       SharedLengs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedLengs[i] = 2;
+      }
       SharedProcs = new int*[nShared];
       for (i = 0; i < nShared; i++)
       {
          SharedProcs[i] = new int[SharedLengs[i]];
          SharedProcs[i][0] = mypid;
-         SharedProcs[i][1] = mypid+1;
+         SharedProcs[i][1] = mypid + 1;
       }
    }
-   else if (mypid == nprocs-1)
+   else if (mypid == nprocs - 1)
    {
       // Nodes in the bottom row are shared
-      nShared = n+1;
+      nShared = n + 1;
       SharedIDs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedIDs[i] = offset + i;
+      }
       SharedLengs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedLengs[i] = 2;
+      }
       SharedProcs = new int*[nShared];
       for (i = 0; i < nShared; i++)
       {
          SharedProcs[i] = new int[SharedLengs[i]];
-         SharedProcs[i][0] = mypid-1;
+         SharedProcs[i][0] = mypid - 1;
          SharedProcs[i][1] = mypid;
       }
    }
    else
    {
       // Nodes in the top and bottom rows are shared
-      nShared = 2*(n+1);
+      nShared = 2 * (n + 1);
       SharedIDs = new int[nShared];
-      for (i = 0; i < n+1; i++)
+      for (i = 0; i < n + 1; i++)
       {
          SharedIDs[i] = offset + i;
-         SharedIDs[n+1+i] = offset + m*(n+1) + i;
+         SharedIDs[n + 1 + i] = offset + m * (n + 1) + i;
       }
       SharedLengs = new int[nShared];
       for (i = 0; i < nShared; i++)
+      {
          SharedLengs[i] = 2;
+      }
       SharedProcs = new int*[nShared];
-      for (i = 0; i < n+1; i++)
+      for (i = 0; i < n + 1; i++)
       {
          SharedProcs[i] = new int[SharedLengs[i]];
-         SharedProcs[i][0] = mypid-1;
+         SharedProcs[i][0] = mypid - 1;
          SharedProcs[i][1] = mypid;
 
-         SharedProcs[n+1+i] = new int[SharedLengs[n+1+i]];
-         SharedProcs[n+1+i][0] = mypid;
-         SharedProcs[n+1+i][1] = mypid+1;
+         SharedProcs[n + 1 + i] = new int[SharedLengs[n + 1 + i]];
+         SharedProcs[n + 1 + i][0] = mypid;
+         SharedProcs[n + 1 + i][1] = mypid + 1;
       }
    }
 
    // Pass the shared nodes information to the FEI
    if (nprocs != 1 && nShared > 0)
+   {
       feiPtr->initSharedNodes(nShared, SharedIDs, SharedLengs, SharedProcs);
+   }
 
    // Finish the FEI initialization phase
    feiPtr->initComplete();
@@ -274,38 +292,42 @@ int main(int argc, char *argv[])
    if (mypid == 0)
    {
       // Nodes in the bottom row and left and right columns
-      nBCs = n+1 + 2*m;
+      nBCs = n + 1 + 2 * m;
       BCEqn = new int[nBCs];
-      for (i = 0; i < n+1; i++)
+      for (i = 0; i < n + 1; i++)
+      {
          BCEqn[i] = offset + i;
+      }
       for (i = 0; i < m; i++)
       {
-         BCEqn[n+1+2*i] = offset + (i+1)*(n+1);
-         BCEqn[n+2+2*i] = offset + (i+1)*(n+1)+n;
+         BCEqn[n + 1 + 2 * i] = offset + (i + 1) * (n + 1);
+         BCEqn[n + 2 + 2 * i] = offset + (i + 1) * (n + 1) + n;
       }
    }
-   else if (mypid == nprocs-1)
+   else if (mypid == nprocs - 1)
    {
       // Nodes in the top row and left and right columns
-      nBCs = n+1 + 2*m;
+      nBCs = n + 1 + 2 * m;
       BCEqn = new int[nBCs];
-      for (i = 0; i < n+1; i++)
-         BCEqn[i] = offset + m*(n+1) + i;
+      for (i = 0; i < n + 1; i++)
+      {
+         BCEqn[i] = offset + m * (n + 1) + i;
+      }
       for (i = 0; i < m; i++)
       {
-         BCEqn[n+1+2*i] = offset + i*(n+1);
-         BCEqn[n+2+2*i] = offset + i*(n+1)+n;
+         BCEqn[n + 1 + 2 * i] = offset + i * (n + 1);
+         BCEqn[n + 2 + 2 * i] = offset + i * (n + 1) + n;
       }
    }
    else
    {
       // Nodes in the left and right columns
-      nBCs = 2*(m+1);
+      nBCs = 2 * (m + 1);
       BCEqn = new int[nBCs];
-      for (i = 0; i < m+1; i++)
+      for (i = 0; i < m + 1; i++)
       {
-         BCEqn[2*i]   = offset + i*(n+1);
-         BCEqn[2*i+1] = offset + i*(n+1)+n;
+         BCEqn[2 * i]   = offset + i * (n + 1);
+         BCEqn[2 * i + 1] = offset + i * (n + 1) + n;
       }
    }
 
@@ -332,32 +354,38 @@ int main(int argc, char *argv[])
       for (j = 0; j < n; j++)
       {
          // Element with coordinates (i,j)
-         elemStiff[i*n+j] = new double*[elemNNodes];
+         elemStiff[i * n + j] = new double*[elemNNodes];
          for (k = 0; k < elemNNodes; k++)
-            elemStiff[i*n+j][k] = new double[elemNNodes];
+         {
+            elemStiff[i * n + j][k] = new double[elemNNodes];
+         }
 
          // Stiffness matrix for the reference square
          //                3 +---+ 2
          //                  |   |
          //                0 +---+ 1
 
-         double **A = elemStiff[i*n+j];
+         double **A = elemStiff[i * n + j];
 
          for (k = 0; k < 4; k++)
-            A[k][k] = 2/3.;
+         {
+            A[k][k] = 2 / 3.;
+         }
 
-         A[0][1] = A[1][0] = -1/6.;
-         A[0][2] = A[2][0] = -1/3.;
-         A[0][3] = A[3][0] = -1/6.;
-         A[1][2] = A[2][1] = -1/6.;
-         A[1][3] = A[3][1] = -1/3.;
-         A[2][3] = A[3][2] = -1/6.;
+         A[0][1] = A[1][0] = -1 / 6.;
+         A[0][2] = A[2][0] = -1 / 3.;
+         A[0][3] = A[3][0] = -1 / 6.;
+         A[1][2] = A[2][1] = -1 / 6.;
+         A[1][3] = A[3][1] = -1 / 3.;
+         A[2][3] = A[3][2] = -1 / 6.;
       }
 
    // Specify element load vectors
-   double *elemLoad = new double[nElems*elemNNodes];
-   for (i = 0; i < nElems*elemNNodes; i++)
-      elemLoad[i] = h*h/4;
+   double *elemLoad = new double[nElems * elemNNodes];
+   for (i = 0; i < nElems * elemNNodes; i++)
+   {
+      elemLoad[i] = h * h / 4;
+   }
 
    // Assemble the matrix. The elemFormat parameter describes
    // the storage (symmetric/non-symmetric, row/column-wise)
@@ -365,17 +393,17 @@ int main(int argc, char *argv[])
    int elemFormat = 0;
    for (i = 0; i < nElems; i++)
       feiPtr->sumInElem(elemBlkID, i, elemConn[i], elemStiff[i],
-                        &(elemLoad[i*elemNNodes]), elemFormat);
+                        &(elemLoad[i * elemNNodes]), elemFormat);
 
    // Finish the FEI load phase
    feiPtr->loadComplete();
 
    // Clean up
-   for (i = 0; i < nElems; i++) delete [] elemConn[i];
+   for (i = 0; i < nElems; i++) { delete [] elemConn[i]; }
    delete [] elemConn;
    for (i = 0; i < nElems; i++)
    {
-      for (j = 0; j < elemNNodes; j++) delete [] elemStiff[i][j];
+      for (j = 0; j < elemNNodes; j++) { delete [] elemStiff[i][j]; }
       delete [] elemStiff[i];
    }
    delete [] elemStiff;
@@ -396,12 +424,12 @@ int main(int argc, char *argv[])
    {
       delete [] SharedIDs;
       delete [] SharedLengs;
-      for (i = 0; i < nShared; i++) delete [] SharedProcs[i];
+      for (i = 0; i < nShared; i++) { delete [] SharedProcs[i]; }
       delete [] SharedProcs;
    }
 
    delete [] nodeNFields;
-   for (i = 0; i < elemNNodes; i++) delete [] nodeFieldIDs[i];
+   for (i = 0; i < elemNNodes; i++) { delete [] nodeFieldIDs[i]; }
    delete [] nodeFieldIDs;
 
    delete [] fieldSizes;
@@ -412,10 +440,12 @@ int main(int argc, char *argv[])
       int nParams = 19;
       char **paramStrings = new char*[nParams];
       for (i = 0; i < nParams; i++)
+      {
          paramStrings[i] = new char[100];
+      }
 
       strcpy(paramStrings[0], "outputLevel 2");
-      switch(solverID)
+      switch (solverID)
       {
          case 0:
             strcpy(paramStrings[1], "solver cg");
@@ -475,7 +505,9 @@ int main(int argc, char *argv[])
       feiPtr->parameters(nParams, paramStrings);
 
       for (i = 0; i < nParams; i++)
+      {
          delete [] paramStrings[i];
+      }
       delete [] paramStrings;
    }
 
@@ -504,7 +536,9 @@ int main(int argc, char *argv[])
 
       // Find the location of the ith local node
       for (i = 0; i < numNodes; i++)
-         solnOffsets[nodeIDList[i]-offset] = i;
+      {
+         solnOffsets[nodeIDList[i] - offset] = i;
+      }
 
       // Save the ordered nodal values to a file
       char sol_out[20];
@@ -515,10 +549,12 @@ int main(int argc, char *argv[])
           << "VDim: 1\n"
           << "Ordering: 0\n\n";
       for (i = 0; i < numNodes; i++)
+      {
          sol << solnValues[solnOffsets[i]] << endl;
+      }
 
       // Save local finite element mesh
-      GLVis_PrintLocalSquareMesh("vis/ex10.mesh", n, m, h, 0, mypid*h*m, mypid);
+      GLVis_PrintLocalSquareMesh("vis/ex10.mesh", n, m, h, 0, mypid * h * m, mypid);
 
       // additional visualization data
       if (mypid == 0)

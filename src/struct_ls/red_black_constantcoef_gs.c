@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -52,7 +52,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Real            *xp;
 
    /* constant coefficient */
-   HYPRE_Int              constant_coeff= hypre_StructMatrixConstantCoefficient(A);
+   HYPRE_Int              constant_coeff = hypre_StructMatrixConstantCoefficient(A);
    HYPRE_Real             App0, App1, App2, App3, App4, App5, AApd;
 
    hypre_IndexRef         start;
@@ -125,7 +125,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    {
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -187,17 +187,17 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                if (constant_coeff == 1)
                {
-                  Ai= hypre_CCBoxIndexRank(A_dbox, start);
-                  AApd= 1.0/Ap[Ai];
+                  Ai = hypre_CCBoxIndexRank(A_dbox, start);
+                  AApd = 1.0 / Ap[Ai];
 
                   hypre_RedBlackLoopInit();
 
 #define DEVICE_VAR is_device_ptr(xp,bp)
-                  hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-                                                      bstart,bni,bnj,bi,
-                                                      xstart,xni,xnj,xi);
+                  hypre_RedBlackConstantcoefLoopBegin(ni, nj, nk, redblack,
+                                                      bstart, bni, bnj, bi,
+                                                      xstart, xni, xnj, xi);
                   {
-                     xp[xi] = bp[bi]*AApd;
+                     xp[xi] = bp[bi] * AApd;
                   }
                   hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
@@ -211,10 +211,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                   hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
-                  hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                          Astart,Ani,Anj,Ai,
-                                          bstart,bni,bnj,bi,
-                                          xstart,xni,xnj,xi);
+                  hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                          Astart, Ani, Anj, Ai,
+                                          bstart, bni, bnj, bi,
+                                          xstart, xni, xnj, xi);
                   {
                      xp[xi] = bp[bi] / Ap[Ai];
                   }
@@ -234,11 +234,11 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
     * Do regular iterations
     *----------------------------------------------------------*/
 
-   while (iter < 2*max_iter)
+   while (iter < 2 * max_iter)
    {
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -288,10 +288,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                ni = hypre_IndexX(loop_size);
                nj = hypre_IndexY(loop_size);
                nk = hypre_IndexZ(loop_size);
-               bni= hypre_BoxSizeX(b_dbox);
-               xni= hypre_BoxSizeX(x_dbox);
-               bnj= hypre_BoxSizeY(b_dbox);
-               xnj= hypre_BoxSizeY(x_dbox);
+               bni = hypre_BoxSizeX(b_dbox);
+               xni = hypre_BoxSizeX(x_dbox);
+               bnj = hypre_BoxSizeY(b_dbox);
+               xnj = hypre_BoxSizeY(x_dbox);
                Ai = hypre_CCBoxIndexRank(A_dbox, start);
                if (ndim < 3)
                {
@@ -302,61 +302,61 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   }
                }
 
-               switch(stencil_size)
+               switch (stencil_size)
                {
                   case 7:
                      App = hypre_StructMatrixBoxData(A, i, offd[5]);
-                     App5= App[Ai];
+                     App5 = App[Ai];
                      App = hypre_StructMatrixBoxData(A, i, offd[4]);
-                     App4= App[Ai];
+                     App4 = App[Ai];
                      xoff5 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[5]]);
+                                x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[4]]);
+                                x_dbox, stencil_shape[offd[4]]);
 
                   case 5:
                      App = hypre_StructMatrixBoxData(A, i, offd[3]);
-                     App3= App[Ai];
+                     App3 = App[Ai];
                      App = hypre_StructMatrixBoxData(A, i, offd[2]);
-                     App2= App[Ai];
+                     App2 = App[Ai];
                      xoff3 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[3]]);
+                                x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[2]]);
+                                x_dbox, stencil_shape[offd[2]]);
 
                   case 3:
                      App = hypre_StructMatrixBoxData(A, i, offd[1]);
-                     App1= App[Ai];
+                     App1 = App[Ai];
                      App = hypre_StructMatrixBoxData(A, i, offd[0]);
-                     App0= App[Ai];
+                     App0 = App[Ai];
                      xoff1 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[1]]);
+                                x_dbox, stencil_shape[offd[1]]);
                      xoff0 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[0]]);
+                                x_dbox, stencil_shape[offd[0]]);
                      break;
                }
 
                if (constant_coeff == 1)
                {
-                  AApd = 1/Ap[Ai];
+                  AApd = 1 / Ap[Ai];
 
-                  switch(stencil_size)
+                  switch (stencil_size)
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp)
-                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-                                                            bstart,bni,bnj,bi,
-                                                            xstart,xni,xnj,xi);
+                        hypre_RedBlackConstantcoefLoopBegin(ni, nj, nk, redblack,
+                                                            bstart, bni, bnj, bi,
+                                                            xstart, xni, xnj, xi);
                         {
                            xp[xi] =
                               (bp[bi] -
-                               App0*xp[xi + xoff0] -
-                               App1*xp[xi + xoff1] -
-                               App2*xp[xi + xoff2] -
-                               App3*xp[xi + xoff3] -
-                               App4*xp[xi + xoff4] -
-                               App5*xp[xi + xoff5])*AApd;
+                               App0 * xp[xi + xoff0] -
+                               App1 * xp[xi + xoff1] -
+                               App2 * xp[xi + xoff2] -
+                               App3 * xp[xi + xoff3] -
+                               App4 * xp[xi + xoff4] -
+                               App5 * xp[xi + xoff5]) * AApd;
                         }
                         hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
@@ -366,16 +366,16 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      case 5:
                         hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp)
-                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-                                                            bstart,bni,bnj,bi,
-                                                            xstart,xni,xnj,xi);
+                        hypre_RedBlackConstantcoefLoopBegin(ni, nj, nk, redblack,
+                                                            bstart, bni, bnj, bi,
+                                                            xstart, xni, xnj, xi);
                         {
                            xp[xi] =
                               (bp[bi] -
-                               App0*xp[xi + xoff0] -
-                               App1*xp[xi + xoff1] -
-                               App2*xp[xi + xoff2] -
-                               App3*xp[xi + xoff3])*AApd;
+                               App0 * xp[xi + xoff0] -
+                               App1 * xp[xi + xoff1] -
+                               App2 * xp[xi + xoff2] -
+                               App3 * xp[xi + xoff3]) * AApd;
                         }
                         hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
@@ -384,14 +384,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      case 3:
                         hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp)
-                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-                                                            bstart,bni,bnj,bi,
-                                                            xstart,xni,xnj,xi);
+                        hypre_RedBlackConstantcoefLoopBegin(ni, nj, nk, redblack,
+                                                            bstart, bni, bnj, bi,
+                                                            xstart, xni, xnj, xi);
                         {
                            xp[xi] =
                               (bp[bi] -
-                               App0*xp[xi + xoff0] -
-                               App1*xp[xi + xoff1])*AApd;
+                               App0 * xp[xi + xoff0] -
+                               App1 * xp[xi + xoff1]) * AApd;
                         }
                         hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
@@ -406,24 +406,24 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Ani = hypre_BoxSizeX(A_dbox);
                   Anj = hypre_BoxSizeY(A_dbox);
 
-                  switch(stencil_size)
+                  switch (stencil_size)
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
-                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                                Astart,Ani,Anj,Ai,
-                                                bstart,bni,bnj,bi,
-                                                xstart,xni,xnj,xi);
+                        hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                                Astart, Ani, Anj, Ai,
+                                                bstart, bni, bnj, bi,
+                                                xstart, xni, xnj, xi);
                         {
                            xp[xi] =
                               (bp[bi] -
-                               App0*xp[xi + xoff0] -
-                               App1*xp[xi + xoff1] -
-                               App2*xp[xi + xoff2] -
-                               App3*xp[xi + xoff3] -
-                               App4*xp[xi + xoff4] -
-                               App5*xp[xi + xoff5]) / Ap[Ai];
+                               App0 * xp[xi + xoff0] -
+                               App1 * xp[xi + xoff1] -
+                               App2 * xp[xi + xoff2] -
+                               App3 * xp[xi + xoff3] -
+                               App4 * xp[xi + xoff4] -
+                               App5 * xp[xi + xoff5]) / Ap[Ai];
                         }
                         hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
@@ -432,17 +432,17 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      case 5:
                         hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
-                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                                Astart,Ani,Anj,Ai,
-                                                bstart,bni,bnj,bi,
-                                                xstart,xni,xnj,xi);
+                        hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                                Astart, Ani, Anj, Ai,
+                                                bstart, bni, bnj, bi,
+                                                xstart, xni, xnj, xi);
                         {
                            xp[xi] =
                               (bp[bi] -
-                               App0*xp[xi + xoff0] -
-                               App1*xp[xi + xoff1] -
-                               App2*xp[xi + xoff2] -
-                               App3*xp[xi + xoff3]) / Ap[Ai];
+                               App0 * xp[xi + xoff0] -
+                               App1 * xp[xi + xoff1] -
+                               App2 * xp[xi + xoff2] -
+                               App3 * xp[xi + xoff3]) / Ap[Ai];
                         }
                         hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
@@ -451,15 +451,15 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                      case 3:
                         hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
-                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                                Astart,Ani,Anj,Ai,
-                                                bstart,bni,bnj,bi,
-                                                xstart,xni,xnj,xi);
+                        hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                                Astart, Ani, Anj, Ai,
+                                                bstart, bni, bnj, bi,
+                                                xstart, xni, xnj, xi);
                         {
                            xp[xi] =
                               (bp[bi] -
-                               App0*xp[xi + xoff0] -
-                               App1*xp[xi + xoff1]) / Ap[Ai];
+                               App0 * xp[xi + xoff0] -
+                               App1 * xp[xi + xoff1]) / Ap[Ai];
                         }
                         hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR

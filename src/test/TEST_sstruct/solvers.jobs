@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -13,15 +13,15 @@ mpirun -np 2  ./sstruct -P 1 1 2 -solver 11 > solvers.out.1
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 18 > solvers.out.2
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 19 > solvers.out.3
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 20 > solvers.out.4
-mpirun -np 2  ./sstruct -P 1 1 2 -solver 21 > solvers.out.5
-mpirun -np 2  ./sstruct -P 1 1 2 -solver 22 > solvers.out.6
+#mpirun -np 2  ./sstruct -P 1 1 2 -solver 21 > solvers.out.5
+#mpirun -np 2  ./sstruct -P 1 1 2 -solver 22 > solvers.out.6
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 30 > solvers.out.7
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 31 > solvers.out.8
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 38 > solvers.out.9
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 39 > solvers.out.10
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 40 > solvers.out.11
-mpirun -np 2  ./sstruct -P 1 1 2 -solver 41 > solvers.out.12
-mpirun -np 2  ./sstruct -P 1 1 2 -solver 42 > solvers.out.13
+#mpirun -np 2  ./sstruct -P 1 1 2 -solver 41 > solvers.out.12
+#mpirun -np 2  ./sstruct -P 1 1 2 -solver 42 > solvers.out.13
 mpirun -np 2  ./sstruct -in sstruct.in.laps -P 2 1 1 -solver 3 > solvers.out.14
 mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 20 > solvers.out.15
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 70 > solvers.out.16

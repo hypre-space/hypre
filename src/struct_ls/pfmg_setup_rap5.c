@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -75,9 +75,9 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Storage for 5 elements (c,w,e,n,s)
              *--------------------------------------------------------------*/
-            if (i*j == 0)
+            if (i * j == 0)
             {
-               hypre_SetIndex3(index_temp,i,j,0);
+               hypre_SetIndex3(index_temp, i, j, 0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
                stencil_rank++;
             }
@@ -108,9 +108,9 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Store 3 elements in (c,w,s)
              *--------------------------------------------------------------*/
-            if( i*j == 0 )
+            if ( i * j == 0 )
             {
-               hypre_SetIndex3(index_temp,i,j,0);
+               hypre_SetIndex3(index_temp, i, j, 0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
                stencil_rank++;
             }
@@ -209,7 +209,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
    hypre_assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient );
-   if ( constant_coefficient==0 )
+   if ( constant_coefficient == 0 )
    {
       hypre_assert( hypre_StructMatrixConstantCoefficient(R) == 0 );
       hypre_assert( hypre_StructMatrixConstantCoefficient(P) == 0 );
@@ -248,11 +248,11 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
        * pa is pointer for weight for f-point above c-point
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex3(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp, 0, -1, 0);
       MapIndex(index_temp, cdir, index);
       pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-      hypre_SetIndex3(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp, 0, 1, 0);
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
       //RL PTROFFSET
@@ -268,23 +268,23 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
        * a_ca is pointer for above coefficient
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex3(index_temp,0,0,0);
+      hypre_SetIndex3(index_temp, 0, 0, 0);
       MapIndex(index_temp, cdir, index);
       a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex3(index_temp,-1,0,0);
+      hypre_SetIndex3(index_temp, -1, 0, 0);
       MapIndex(index_temp, cdir, index);
       a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex3(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp, 1, 0, 0);
       MapIndex(index_temp, cdir, index);
       a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex3(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp, 0, -1, 0);
       MapIndex(index_temp, cdir, index);
       a_cb = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex3(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp, 0, 1, 0);
       MapIndex(index_temp, cdir, index);
       a_ca = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -293,23 +293,23 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
        * rap_cc is pointer for center coefficient (etc.)
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex3(index_temp,0,0,0);
+      hypre_SetIndex3(index_temp, 0, 0, 0);
       MapIndex(index_temp, cdir, index);
       rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex3(index_temp,-1,0,0);
+      hypre_SetIndex3(index_temp, -1, 0, 0);
       MapIndex(index_temp, cdir, index);
       rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex3(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp, 1, 0, 0);
       MapIndex(index_temp, cdir, index);
       rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex3(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp, 0, -1, 0);
       MapIndex(index_temp, cdir, index);
       rap_cb = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex3(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp, 0, 1, 0);
       MapIndex(index_temp, cdir, index);
       rap_ca = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -321,18 +321,18 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
        * Offsets are used in refering to data associated with other points.
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex3(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp, 0, 1, 0);
       MapIndex(index_temp, cdir, index);
 
-      OffsetP = hypre_BoxOffsetDistance(P_dbox,index);
-      OffsetA = hypre_BoxOffsetDistance(A_dbox,index);
+      OffsetP = hypre_BoxOffsetDistance(P_dbox, index);
+      OffsetA = hypre_BoxOffsetDistance(A_dbox, index);
 
       /*--------------------------------------------------------------
        * Loop for symmetric 5-point fine grid operator; produces a
        * symmetric 5-point coarse grid operator.
        *--------------------------------------------------------------*/
 
-      if ( constant_coefficient==0 )
+      if ( constant_coefficient == 0 )
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
@@ -342,7 +342,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
          {
-            HYPRE_Int iAm1,iAp1,iPm1,iPp1;
+            HYPRE_Int iAm1, iAp1, iPm1, iPp1;
             HYPRE_Real  west, east;
 
             iAm1 = iA - OffsetA;
@@ -352,7 +352,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             iPp1 = iP + OffsetP;
 
             rap_cb[iAc] = a_cb[iA] * pa[iPm1];
-            rap_ca[iAc] = a_ca[iA] * pb[iPp1-pbOffset];
+            rap_ca[iAc] = a_ca[iA] * pb[iPp1 - pbOffset];
 
             west  = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
             east  = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
@@ -360,40 +360,40 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             /*-----------------------------------------------------
              * Prevent non-zero entries reaching off grid
              *-----------------------------------------------------*/
-            if(a_cw[iA] == 0.0) west = 0.0;
-            if(a_ce[iA] == 0.0) east = 0.0;
+            if (a_cw[iA] == 0.0) { west = 0.0; }
+            if (a_ce[iA] == 0.0) { east = 0.0; }
 
             rap_cw[iAc] = west;
             rap_ce[iAc] = east;
 
             rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
-               + a_cb[iA] * pb[iP-pbOffset] + a_ca[iA] * pa[iP]
-               - west - east;
+                          + a_cb[iA] * pb[iP - pbOffset] + a_ca[iA] * pa[iP]
+                          - west - east;
          }
          hypre_BoxLoop3End(iP, iA, iAc);
 #undef DEVICE_VAR
       }
 
-      else if ( constant_coefficient==1 )
+      else if ( constant_coefficient == 1 )
       {
          rap_cb[0] = rap_ca[0] = a_cb[0] * pa[0];
 
-         rap_cw[0] = rap_ce[0] = 2.0*a_cw[0];
+         rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
 
-         rap_cc[0] = a_cc[0] - 2.0*( a_cw[0] - rap_cb[0] );
+         rap_cc[0] = a_cc[0] - 2.0 * ( a_cw[0] - rap_cb[0] );
       }
 
-      else if ( constant_coefficient==2 )
+      else if ( constant_coefficient == 2 )
       {
          /* NOTE: This does not reduce to either of the above operators unless
           * the row sum is zero and the interpolation weights are 1/2 */
 
-         rap_cb[0] = rap_ca[0] = 0.5*a_cb[0];
+         rap_cb[0] = rap_ca[0] = 0.5 * a_cb[0];
 
-         rap_cw[0] = rap_ce[0] = 2.0*a_cw[0];
+         rap_cw[0] = rap_ce[0] = 2.0 * a_cw[0];
 
-         center_int = 3.0*a_cb[0];
-         center_bdy = 0.5*a_cb[0] + (a_cw[0] + a_cb[0]);
+         center_int = 3.0 * a_cb[0];
+         center_bdy = 0.5 * a_cb[0] + (a_cw[0] + a_cb[0]);
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
@@ -402,7 +402,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
          {
-            rap_cc[iAc] = 2.0*a_cc[iA] + center_int;
+            rap_cc[iAc] = 2.0 * a_cc[iA] + center_int;
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -435,7 +435,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
             {
-               rap_cc[iAc] -= 0.5*a_cc[iA] + center_bdy;
+               rap_cc[iAc] -= 0.5 * a_cc[iA] + center_bdy;
             }
             hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR

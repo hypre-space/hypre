@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -43,8 +43,8 @@ hypre_FacSetup2( void                 *fac_vdata,
 
    hypre_SStructGraph     *graph;
    hypre_SStructGrid      *grid;
-   hypre_SStructPGrid     *pgrid; 
-   hypre_StructGrid       *sgrid; 
+   hypre_SStructPGrid     *pgrid;
+   hypre_StructGrid       *sgrid;
    hypre_BoxArray         *sgrid_boxes;
    hypre_Box              *sgrid_box;
    hypre_SStructStencil   *stencils;
@@ -57,7 +57,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    hypre_SStructUVEntry  **Uventries;
    HYPRE_Int               nUventries;
    HYPRE_Int              *iUventries;
-   hypre_SStructUVEntry   *Uventry; 
+   hypre_SStructUVEntry   *Uventry;
    hypre_SStructUEntry    *Uentry;
    hypre_Index             index, to_index, stride;
    HYPRE_Int               var, to_var, to_part, level_part, level_topart;
@@ -84,13 +84,13 @@ hypre_FacSetup2( void                 *fac_vdata,
 
 
    /* coarsest grid solver */
-   HYPRE_Int               csolver_type       =(fac_data-> csolver_type);
-   HYPRE_SStructSolver     crse_solver=NULL;
-   HYPRE_SStructSolver     crse_precond=NULL;
-   
+   HYPRE_Int               csolver_type       = (fac_data-> csolver_type);
+   HYPRE_SStructSolver     crse_solver = NULL;
+   HYPRE_SStructSolver     crse_precond = NULL;
+
    HYPRE_Int               max_level        =  hypre_FACDataMaxLevels(fac_data);
    HYPRE_Int               relax_type       =  fac_data -> relax_type;
-   HYPRE_Int               usr_jacobi_weight=  fac_data -> usr_jacobi_weight;
+   HYPRE_Int               usr_jacobi_weight =  fac_data -> usr_jacobi_weight;
    HYPRE_Real              jacobi_weight    =  fac_data -> jacobi_weight;
    HYPRE_Int              *levels;
    HYPRE_Int              *part_to_level;
@@ -102,14 +102,14 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int              *stencil_vars;
    HYPRE_Real             *values;
    HYPRE_Real             *A_smatrix_value;
- 
+
    HYPRE_Int              *nrows;
    HYPRE_Int             **ncols;
    HYPRE_BigInt          **rows;
    HYPRE_BigInt          **cols;
    HYPRE_Int              *cnt;
    HYPRE_Real             *vals;
-   
+
    HYPRE_BigInt           *level_rows;
    HYPRE_BigInt           *level_cols;
    HYPRE_Int               level_cnt;
@@ -120,22 +120,22 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int               max_cycles;
 
    HYPRE_Int               ierr = 0;
-/*hypre_SStructMatrix *nested_A;
+   /*hypre_SStructMatrix *nested_A;
 
-  nested_A= hypre_TAlloc(hypre_SStructMatrix ,  1, HYPRE_MEMORY_HOST);
-  nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
+     nested_A= hypre_TAlloc(hypre_SStructMatrix ,  1, HYPRE_MEMORY_HOST);
+     nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
 
    /* generate the composite operator with the computed coarse-grid operators */
    hypre_AMR_RAP(A_in, rfactors, &A_rap);
-   (fac_data -> A_rap)= A_rap;
+   (fac_data -> A_rap) = A_rap;
 
    comm = hypre_SStructMatrixComm(A_rap);
    ndim = hypre_SStructMatrixNDim(A_rap);
-   npart= hypre_SStructMatrixNParts(A_rap);
-   graph= hypre_SStructMatrixGraph(A_rap);
+   npart = hypre_SStructMatrixNParts(A_rap);
+   graph = hypre_SStructMatrixGraph(A_rap);
    grid = hypre_SStructGraphGrid(graph);
    ij_A = hypre_SStructMatrixIJMatrix(A_rap);
-   matrix_type= hypre_SStructMatrixObjectType(A_rap);
+   matrix_type = hypre_SStructMatrixObjectType(A_rap);
 
    /*--------------------------------------------------------------------------
     * logging arrays.
@@ -144,7 +144,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    {
       max_cycles = (fac_data -> max_cycles);
       (fac_data -> norms)    = hypre_TAlloc(HYPRE_Real,  max_cycles, HYPRE_MEMORY_HOST);
-      (fac_data -> rel_norms)= hypre_TAlloc(HYPRE_Real,  max_cycles, HYPRE_MEMORY_HOST);
+      (fac_data -> rel_norms) = hypre_TAlloc(HYPRE_Real,  max_cycles, HYPRE_MEMORY_HOST);
    }
 
    /*--------------------------------------------------------------------------
@@ -152,52 +152,52 @@ hypre_FacSetup2( void                 *fac_vdata,
     *--------------------------------------------------------------------------*/
    levels        = hypre_CTAlloc(HYPRE_Int,  npart, HYPRE_MEMORY_HOST);
    part_to_level = hypre_CTAlloc(HYPRE_Int,  npart, HYPRE_MEMORY_HOST);
-   refine_factors= hypre_CTAlloc(hypre_Index,  npart, HYPRE_MEMORY_HOST);
-   for (part= 0; part< npart; part++)
+   refine_factors = hypre_CTAlloc(hypre_Index,  npart, HYPRE_MEMORY_HOST);
+   for (part = 0; part < npart; part++)
    {
       part_to_level[part]  = plevels[part];
-      levels[plevels[part]]= part;
-      for (i= 0; i< ndim; i++)
+      levels[plevels[part]] = part;
+      for (i = 0; i < ndim; i++)
       {
-         refine_factors[plevels[part]][i]= rfactors[part][i];
+         refine_factors[plevels[part]][i] = rfactors[part][i];
       }
-      for (i= ndim; i< 3; i++)
+      for (i = ndim; i < 3; i++)
       {
-         refine_factors[plevels[part]][i]= 1;
+         refine_factors[plevels[part]][i] = 1;
       }
    }
    (fac_data -> level_to_part) = levels;
    (fac_data -> part_to_level) = part_to_level;
-   (fac_data -> refine_factors)= refine_factors;
-   
+   (fac_data -> refine_factors) = refine_factors;
+
    /*--------------------------------------------------------------------------
-    * Create the level SStructGrids using the original composite grid. 
+    * Create the level SStructGrids using the original composite grid.
     *--------------------------------------------------------------------------*/
-   grid_level= hypre_TAlloc(hypre_SStructGrid *,  max_level+1, HYPRE_MEMORY_HOST);
-   for (level= max_level; level >= 0; level--)
+   grid_level = hypre_TAlloc(hypre_SStructGrid *,  max_level + 1, HYPRE_MEMORY_HOST);
+   for (level = max_level; level >= 0; level--)
    {
       HYPRE_SStructGridCreate(comm, ndim, nparts_level, &grid_level[level]);
    }
 
-   for (level= max_level; level >= 0; level--)
+   for (level = max_level; level >= 0; level--)
    {
       /*--------------------------------------------------------------------------
-       * Create the fine part of the finest level SStructGrids using the original 
+       * Create the fine part of the finest level SStructGrids using the original
        * composite grid.
        *--------------------------------------------------------------------------*/
       if (level == max_level)
       {
          pgrid = hypre_SStructGridPGrid(grid, levels[level]);
-         iboxarray= hypre_SStructPGridCellIBoxArray(pgrid);
+         iboxarray = hypre_SStructPGridCellIBoxArray(pgrid);
          for (box = 0; box < hypre_BoxArraySize(iboxarray); box++)
          {
             HYPRE_SStructGridSetExtents(grid_level[level], part_fine,
-                                        hypre_BoxIMin( hypre_BoxArrayBox(iboxarray,box) ),
-                                        hypre_BoxIMax( hypre_BoxArrayBox(iboxarray,box) ));
+                                        hypre_BoxIMin( hypre_BoxArrayBox(iboxarray, box) ),
+                                        hypre_BoxIMax( hypre_BoxArrayBox(iboxarray, box) ));
          }
 
-         HYPRE_SStructGridSetVariables( grid_level[level], part_fine, 
-                                        hypre_SStructPGridNVars(pgrid), 
+         HYPRE_SStructGridSetVariables( grid_level[level], part_fine,
+                                        hypre_SStructPGridNVars(pgrid),
                                         hypre_SStructPGridVarTypes(pgrid) );
 
          /*-----------------------------------------------------------------------
@@ -208,8 +208,8 @@ hypre_FacSetup2( void                 *fac_vdata,
             for (box = 0; box < hypre_BoxArraySize(iboxarray); box++)
             {
                HYPRE_SStructGridSetExtents(grid_level[level], part_crse,
-                                           hypre_BoxIMin( hypre_BoxArrayBox(iboxarray,box) ),
-                                           hypre_BoxIMax( hypre_BoxArrayBox(iboxarray,box) ));
+                                           hypre_BoxIMin( hypre_BoxArrayBox(iboxarray, box) ),
+                                           hypre_BoxIMax( hypre_BoxArrayBox(iboxarray, box) ));
             }
 
             HYPRE_SStructGridSetVariables( grid_level[level], part_crse,
@@ -219,45 +219,45 @@ hypre_FacSetup2( void                 *fac_vdata,
       }
 
       /*--------------------------------------------------------------------------
-       * Create the coarse part of level SStructGrids using the original composite 
+       * Create the coarse part of level SStructGrids using the original composite
        * grid, the coarsest part SStructGrid, and the fine part if level < max_level.
        *--------------------------------------------------------------------------*/
       if (level > 0)
       {
-         pgrid = hypre_SStructGridPGrid(grid, levels[level-1]);
-         iboxarray= hypre_SStructPGridCellIBoxArray(pgrid);
+         pgrid = hypre_SStructGridPGrid(grid, levels[level - 1]);
+         iboxarray = hypre_SStructPGridCellIBoxArray(pgrid);
          for (box = 0; box < hypre_BoxArraySize(iboxarray); box++)
          {
             HYPRE_SStructGridSetExtents(grid_level[level], part_crse,
-                                        hypre_BoxIMin( hypre_BoxArrayBox(iboxarray,box) ),
-                                        hypre_BoxIMax( hypre_BoxArrayBox(iboxarray,box) ));
+                                        hypre_BoxIMin( hypre_BoxArrayBox(iboxarray, box) ),
+                                        hypre_BoxIMax( hypre_BoxArrayBox(iboxarray, box) ));
 
-            HYPRE_SStructGridSetExtents(grid_level[level-1], part_fine,
-                                        hypre_BoxIMin( hypre_BoxArrayBox(iboxarray,box) ),
-                                        hypre_BoxIMax( hypre_BoxArrayBox(iboxarray,box) ));
+            HYPRE_SStructGridSetExtents(grid_level[level - 1], part_fine,
+                                        hypre_BoxIMin( hypre_BoxArrayBox(iboxarray, box) ),
+                                        hypre_BoxIMax( hypre_BoxArrayBox(iboxarray, box) ));
 
-              
+
             if (level == 1)
             {
-               HYPRE_SStructGridSetExtents(grid_level[level-1], part_crse,
-                                           hypre_BoxIMin( hypre_BoxArrayBox(iboxarray,box) ),
-                                           hypre_BoxIMax( hypre_BoxArrayBox(iboxarray,box) ));
+               HYPRE_SStructGridSetExtents(grid_level[level - 1], part_crse,
+                                           hypre_BoxIMin( hypre_BoxArrayBox(iboxarray, box) ),
+                                           hypre_BoxIMax( hypre_BoxArrayBox(iboxarray, box) ));
             }
          }
 
-         HYPRE_SStructGridSetVariables( grid_level[level], part_crse, 
-                                        hypre_SStructPGridNVars(pgrid), 
+         HYPRE_SStructGridSetVariables( grid_level[level], part_crse,
+                                        hypre_SStructPGridNVars(pgrid),
                                         hypre_SStructPGridVarTypes(pgrid) );
 
-         HYPRE_SStructGridSetVariables( grid_level[level-1], part_fine, 
-                                        hypre_SStructPGridNVars(pgrid), 
+         HYPRE_SStructGridSetVariables( grid_level[level - 1], part_fine,
+                                        hypre_SStructPGridNVars(pgrid),
                                         hypre_SStructPGridVarTypes(pgrid) );
 
          /* coarsest SStructGrid */
          if (level == 1)
          {
-            HYPRE_SStructGridSetVariables( grid_level[level-1], part_crse, 
-                                           hypre_SStructPGridNVars(pgrid), 
+            HYPRE_SStructGridSetVariables( grid_level[level - 1], part_crse,
+                                           hypre_SStructPGridNVars(pgrid),
                                            hypre_SStructPGridVarTypes(pgrid) );
          }
       }
@@ -265,19 +265,19 @@ hypre_FacSetup2( void                 *fac_vdata,
       HYPRE_SStructGridAssemble(grid_level[level]);
    }
 
-   (fac_data -> grid_level)= grid_level;
+   (fac_data -> grid_level) = grid_level;
 
    /*-----------------------------------------------------------
     * Set up the graph. Create only the structured components
     * first.
     *-----------------------------------------------------------*/
-   graph_level= hypre_TAlloc(hypre_SStructGraph *,  max_level+1, HYPRE_MEMORY_HOST);
-   for (level= max_level; level >= 0; level--)
+   graph_level = hypre_TAlloc(hypre_SStructGraph *,  max_level + 1, HYPRE_MEMORY_HOST);
+   for (level = max_level; level >= 0; level--)
    {
       HYPRE_SStructGraphCreate(comm, grid_level[level], &graph_level[level]);
    }
 
-   for (level= max_level; level >= 0; level--)
+   for (level = max_level; level >= 0; level--)
    {
       /*-----------------------------------------------------------------------
        * Create the fine part of the finest level structured graph connection.
@@ -288,7 +288,7 @@ hypre_FacSetup2( void                 *fac_vdata,
          nvars = hypre_SStructPGridNVars(pgrid);
          for (var1 = 0; var1 < nvars; var1++)
          {
-            stencils= hypre_SStructGraphStencil(graph, levels[level], var1);
+            stencils = hypre_SStructGraphStencil(graph, levels[level], var1);
             HYPRE_SStructGraphSetStencil(graph_level[level], part_fine, var1, stencils);
 
             if (level == 0)
@@ -304,18 +304,18 @@ hypre_FacSetup2( void                 *fac_vdata,
        *--------------------------------------------------------------------------*/
       if (level > 0)
       {
-         pgrid = hypre_SStructGridPGrid(grid, levels[level-1]);
+         pgrid = hypre_SStructGridPGrid(grid, levels[level - 1]);
          nvars = hypre_SStructPGridNVars(pgrid);
 
          for (var1 = 0; var1 < nvars; var1++)
          {
-            stencils= hypre_SStructGraphStencil(graph, levels[level-1], var1);
+            stencils = hypre_SStructGraphStencil(graph, levels[level - 1], var1);
             HYPRE_SStructGraphSetStencil(graph_level[level], part_crse, var1, stencils );
-            HYPRE_SStructGraphSetStencil(graph_level[level-1], part_fine, var1, stencils );
+            HYPRE_SStructGraphSetStencil(graph_level[level - 1], part_fine, var1, stencils );
 
             if (level == 1)
             {
-               HYPRE_SStructGraphSetStencil(graph_level[level-1], part_crse, var1, stencils );
+               HYPRE_SStructGraphSetStencil(graph_level[level - 1], part_crse, var1, stencils );
             }
 
          }
@@ -331,23 +331,23 @@ hypre_FacSetup2( void                 *fac_vdata,
     * CONNECTIONS.
     *-----------------------------------------------------------*/
    Uventries =  hypre_SStructGraphUVEntries(graph);
-   nUventries=  hypre_SStructGraphNUVEntries(graph);
-   iUventries=  hypre_SStructGraphIUVEntries(graph);
+   nUventries =  hypre_SStructGraphNUVEntries(graph);
+   iUventries =  hypre_SStructGraphIUVEntries(graph);
 
-   nrows     =  hypre_CTAlloc(HYPRE_Int,  max_level+1, HYPRE_MEMORY_HOST);
-   for (i= 0; i< nUventries; i++)
+   nrows     =  hypre_CTAlloc(HYPRE_Int,  max_level + 1, HYPRE_MEMORY_HOST);
+   for (i = 0; i < nUventries; i++)
    {
-      Uventry=  Uventries[iUventries[i]];
+      Uventry =  Uventries[iUventries[i]];
 
       part     =  hypre_SStructUVEntryPart(Uventry);
       hypre_CopyIndex(hypre_SStructUVEntryIndex(Uventry), index);
       var      =  hypre_SStructUVEntryVar(Uventry);
-      nUentries=  hypre_SStructUVEntryNUEntries(Uventry);
+      nUentries =  hypre_SStructUVEntryNUEntries(Uventry);
 
-      for (k= 0; k< nUentries; k++)
+      for (k = 0; k < nUentries; k++)
       {
          Uentry  =  hypre_SStructUVEntryUEntry(Uventry, k);
-    
+
          to_part =  hypre_SStructUEntryToPart(Uentry);
          hypre_CopyIndex(hypre_SStructUEntryToIndex(Uentry), to_index);
          to_var  =  hypre_SStructUEntryToVar(Uentry);
@@ -371,25 +371,25 @@ hypre_FacSetup2( void                 *fac_vdata,
       }
    }
 
-   for (level= 0; level <= max_level; level++)
+   for (level = 0; level <= max_level; level++)
    {
       HYPRE_SStructGraphAssemble(graph_level[level]);
    }
 
-   (fac_data -> graph_level)= graph_level;
+   (fac_data -> graph_level) = graph_level;
 
    /*---------------------------------------------------------------
     * Create the level SStruct_Vectors, and temporary global
-    * sstuct_vector. 
+    * sstuct_vector.
     *---------------------------------------------------------------*/
-   b_level= hypre_TAlloc(hypre_SStructVector *,  max_level+1, HYPRE_MEMORY_HOST);
-   x_level= hypre_TAlloc(hypre_SStructVector *,  max_level+1, HYPRE_MEMORY_HOST);
-   r_level= hypre_TAlloc(hypre_SStructVector *,  max_level+1, HYPRE_MEMORY_HOST);
-   e_level= hypre_TAlloc(hypre_SStructVector *,  max_level+1, HYPRE_MEMORY_HOST);
+   b_level = hypre_TAlloc(hypre_SStructVector *,  max_level + 1, HYPRE_MEMORY_HOST);
+   x_level = hypre_TAlloc(hypre_SStructVector *,  max_level + 1, HYPRE_MEMORY_HOST);
+   r_level = hypre_TAlloc(hypre_SStructVector *,  max_level + 1, HYPRE_MEMORY_HOST);
+   e_level = hypre_TAlloc(hypre_SStructVector *,  max_level + 1, HYPRE_MEMORY_HOST);
 
-   tx_level= hypre_TAlloc(hypre_SStructPVector *,  max_level+1, HYPRE_MEMORY_HOST);
+   tx_level = hypre_TAlloc(hypre_SStructPVector *,  max_level + 1, HYPRE_MEMORY_HOST);
 
-   for (level= 0; level<= max_level; level++)
+   for (level = 0; level <= max_level; level++)
    {
       HYPRE_SStructVectorCreate(comm, grid_level[level], &b_level[level]);
       HYPRE_SStructVectorInitialize(b_level[level]);
@@ -425,67 +425,67 @@ hypre_FacSetup2( void                 *fac_vdata,
    (fac_data -> x_level) = x_level;
    (fac_data -> r_level) = r_level;
    (fac_data -> e_level) = e_level;
-   (fac_data -> tx_level)= tx_level;
+   (fac_data -> tx_level) = tx_level;
    (fac_data -> tx)      = tx;
 
    /*-----------------------------------------------------------
-    * Set up the level composite sstruct_matrices. 
+    * Set up the level composite sstruct_matrices.
     *-----------------------------------------------------------*/
 
-   A_level= hypre_TAlloc(hypre_SStructMatrix *,  max_level+1, HYPRE_MEMORY_HOST);
+   A_level = hypre_TAlloc(hypre_SStructMatrix *,  max_level + 1, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(stride, 1, 1, 1);
-   for (level= 0; level <= max_level; level++)
+   for (level = 0; level <= max_level; level++)
    {
       HYPRE_SStructMatrixCreate(comm, graph_level[level], &A_level[level]);
       HYPRE_SStructMatrixInitialize(A_level[level]);
 
-      max_box_volume= 0;
+      max_box_volume = 0;
       pgrid = hypre_SStructGridPGrid(grid, levels[level]);
       nvars = hypre_SStructPGridNVars(pgrid);
 
       for (var1 = 0; var1 < nvars; var1++)
       {
-         sgrid= hypre_SStructPGridSGrid(pgrid, var1);
-         sgrid_boxes= hypre_StructGridBoxes(sgrid);
+         sgrid = hypre_SStructPGridSGrid(pgrid, var1);
+         sgrid_boxes = hypre_StructGridBoxes(sgrid);
 
          hypre_ForBoxI(i, sgrid_boxes)
          {
             sgrid_box = hypre_BoxArrayBox(sgrid_boxes, i);
-            box_volume= hypre_BoxVolume(sgrid_box);
+            box_volume = hypre_BoxVolume(sgrid_box);
 
-            max_box_volume= hypre_max(max_box_volume, box_volume);
+            max_box_volume = hypre_max(max_box_volume, box_volume);
          }
       }
 
       values   = hypre_TAlloc(HYPRE_Real,  max_box_volume, HYPRE_MEMORY_HOST);
-      A_pmatrix= hypre_SStructMatrixPMatrix(A_rap, levels[level]);
+      A_pmatrix = hypre_SStructMatrixPMatrix(A_rap, levels[level]);
 
       /*-----------------------------------------------------------
        * extract stencil values for all fine levels.
        *-----------------------------------------------------------*/
       for (var1 = 0; var1 < nvars; var1++)
       {
-         sgrid= hypre_SStructPGridSGrid(pgrid, var1);
-         sgrid_boxes= hypre_StructGridBoxes(sgrid);
+         sgrid = hypre_SStructPGridSGrid(pgrid, var1);
+         sgrid_boxes = hypre_StructGridBoxes(sgrid);
 
-         stencils= hypre_SStructGraphStencil(graph, levels[level], var1);
-         stencil_size= hypre_SStructStencilSize(stencils);
-         stencil_vars= hypre_SStructStencilVars(stencils);
+         stencils = hypre_SStructGraphStencil(graph, levels[level], var1);
+         stencil_size = hypre_SStructStencilSize(stencils);
+         stencil_vars = hypre_SStructStencilVars(stencils);
 
          for (i = 0; i < stencil_size; i++)
          {
-            var2= stencil_vars[i];
-            A_smatrix= hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
+            var2 = stencil_vars[i];
+            A_smatrix = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
             hypre_CopyIndex(hypre_SStructStencilEntry(stencils, i), stencil_shape_i);
 
             hypre_ForBoxI(j, sgrid_boxes)
             {
-               sgrid_box=  hypre_BoxArrayBox(sgrid_boxes, j);
-               box_start=  hypre_BoxIMin(sgrid_box);
+               sgrid_box =  hypre_BoxArrayBox(sgrid_boxes, j);
+               box_start =  hypre_BoxIMin(sgrid_box);
                box_end  =  hypre_BoxIMax(sgrid_box);
 
-               A_smatrix_dbox=  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_smatrix), j);
-               A_smatrix_value= 
+               A_smatrix_dbox =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_smatrix), j);
+               A_smatrix_value =
                   hypre_StructMatrixExtractPointerByIndex(A_smatrix, j, stencil_shape_i);
 
                hypre_BoxGetSize(sgrid_box, loop_size);
@@ -495,70 +495,70 @@ hypre_FacSetup2( void                 *fac_vdata,
                                    sgrid_box, box_start, stride, k,
                                    A_smatrix_dbox, box_start, stride, iA);
                {
-                  values[k]= A_smatrix_value[iA];
+                  values[k] = A_smatrix_value[iA];
                }
                hypre_BoxLoop2End(k, iA);
 #undef DEVICE_VAR
 
                HYPRE_SStructMatrixSetBoxValues(A_level[level], part_fine, box_start, box_end,
                                                var1, 1, &i, values);
-            }   /* hypre_ForBoxI */ 
+            }   /* hypre_ForBoxI */
          }      /* for i */
       }         /* for var1 */
       hypre_TFree(values, HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------------
-       *  Extract the coarse part 
+       *  Extract the coarse part
        *-----------------------------------------------------------*/
       if (level > 0)
       {
-         max_box_volume= 0;
-         pgrid = hypre_SStructGridPGrid(grid, levels[level-1]);
+         max_box_volume = 0;
+         pgrid = hypre_SStructGridPGrid(grid, levels[level - 1]);
          nvars = hypre_SStructPGridNVars(pgrid);
 
          for (var1 = 0; var1 < nvars; var1++)
          {
             sgrid      = hypre_SStructPGridSGrid( pgrid, var1 );
-            sgrid_boxes= hypre_StructGridBoxes(sgrid);
+            sgrid_boxes = hypre_StructGridBoxes(sgrid);
 
             hypre_ForBoxI( i, sgrid_boxes )
             {
                sgrid_box = hypre_BoxArrayBox(sgrid_boxes, i);
-               box_volume= hypre_BoxVolume(sgrid_box);
+               box_volume = hypre_BoxVolume(sgrid_box);
 
-               max_box_volume= hypre_max(max_box_volume, box_volume );
+               max_box_volume = hypre_max(max_box_volume, box_volume );
             }
          }
 
          values   = hypre_TAlloc(HYPRE_Real,  max_box_volume, HYPRE_MEMORY_HOST);
-         A_pmatrix= hypre_SStructMatrixPMatrix(A_rap, levels[level-1]);
+         A_pmatrix = hypre_SStructMatrixPMatrix(A_rap, levels[level - 1]);
 
          /*-----------------------------------------------------------
-          * extract stencil values 
+          * extract stencil values
           *-----------------------------------------------------------*/
          for (var1 = 0; var1 < nvars; var1++)
          {
             sgrid      = hypre_SStructPGridSGrid(pgrid, var1);
-            sgrid_boxes= hypre_StructGridBoxes(sgrid);
+            sgrid_boxes = hypre_StructGridBoxes(sgrid);
 
-            stencils= hypre_SStructGraphStencil(graph, levels[level-1], var1);
-            stencil_size= hypre_SStructStencilSize(stencils);
-            stencil_vars= hypre_SStructStencilVars(stencils);
+            stencils = hypre_SStructGraphStencil(graph, levels[level - 1], var1);
+            stencil_size = hypre_SStructStencilSize(stencils);
+            stencil_vars = hypre_SStructStencilVars(stencils);
 
             for (i = 0; i < stencil_size; i++)
             {
-               var2= stencil_vars[i];
-               A_smatrix= hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
+               var2 = stencil_vars[i];
+               A_smatrix = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
                hypre_CopyIndex(hypre_SStructStencilEntry(stencils, i), stencil_shape_i);
 
                hypre_ForBoxI( j, sgrid_boxes )
                {
-                  sgrid_box=  hypre_BoxArrayBox(sgrid_boxes, j);
-                  box_start=  hypre_BoxIMin(sgrid_box);
+                  sgrid_box =  hypre_BoxArrayBox(sgrid_boxes, j);
+                  box_start =  hypre_BoxIMin(sgrid_box);
                   box_end  =  hypre_BoxIMax(sgrid_box);
 
-                  A_smatrix_dbox=  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_smatrix), j);
-                  A_smatrix_value= 
+                  A_smatrix_dbox =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_smatrix), j);
+                  A_smatrix_value =
                      hypre_StructMatrixExtractPointerByIndex(A_smatrix, j, stencil_shape_i);
 
                   hypre_BoxGetSize(sgrid_box, loop_size);
@@ -568,14 +568,14 @@ hypre_FacSetup2( void                 *fac_vdata,
                                       sgrid_box, box_start, stride, k,
                                       A_smatrix_dbox, box_start, stride, iA);
                   {
-                     values[k]= A_smatrix_value[iA];
+                     values[k] = A_smatrix_value[iA];
                   }
                   hypre_BoxLoop2End(k, iA);
 #undef DEVICE_VAR
 
                   HYPRE_SStructMatrixSetBoxValues(A_level[level], part_crse, box_start, box_end,
                                                   var1, 1, &i, values);
-               }  /* hypre_ForBoxI */ 
+               }  /* hypre_ForBoxI */
             }     /* for i */
          }        /* for var1 */
          hypre_TFree(values, HYPRE_MEMORY_HOST);
@@ -589,32 +589,32 @@ hypre_FacSetup2( void                 *fac_vdata,
     *-----------------------------------------------------------*/
 
    Uventries =  hypre_SStructGraphUVEntries(graph);
-   nUventries=  hypre_SStructGraphNUVEntries(graph);
-   iUventries=  hypre_SStructGraphIUVEntries(graph);
+   nUventries =  hypre_SStructGraphNUVEntries(graph);
+   iUventries =  hypre_SStructGraphIUVEntries(graph);
 
    /*-----------------------------------------------------------
     * Allocate memory for arguments of HYPRE_IJMatrixGetValues.
     *-----------------------------------------------------------*/
-   ncols =  hypre_TAlloc(HYPRE_Int *,  max_level+1, HYPRE_MEMORY_HOST);
-   rows  =  hypre_TAlloc(HYPRE_BigInt *,  max_level+1, HYPRE_MEMORY_HOST);
-   cols  =  hypre_TAlloc(HYPRE_BigInt *,  max_level+1, HYPRE_MEMORY_HOST);
-   cnt   =  hypre_CTAlloc(HYPRE_Int,  max_level+1, HYPRE_MEMORY_HOST);
+   ncols =  hypre_TAlloc(HYPRE_Int *,  max_level + 1, HYPRE_MEMORY_HOST);
+   rows  =  hypre_TAlloc(HYPRE_BigInt *,  max_level + 1, HYPRE_MEMORY_HOST);
+   cols  =  hypre_TAlloc(HYPRE_BigInt *,  max_level + 1, HYPRE_MEMORY_HOST);
+   cnt   =  hypre_CTAlloc(HYPRE_Int,  max_level + 1, HYPRE_MEMORY_HOST);
 
-   ncols[0]= NULL;
+   ncols[0] = NULL;
    rows[0] = NULL;
    cols[0] = NULL;
-   for (level= 1; level<= max_level; level++)
+   for (level = 1; level <= max_level; level++)
    {
-      ncols[level]= hypre_TAlloc(HYPRE_Int,  nrows[level], HYPRE_MEMORY_HOST);
-      for (i=0; i< nrows[level]; i++)
+      ncols[level] = hypre_TAlloc(HYPRE_Int,  nrows[level], HYPRE_MEMORY_HOST);
+      for (i = 0; i < nrows[level]; i++)
       {
-         ncols[level][i]= 1;
+         ncols[level][i] = 1;
       }
       rows[level] = hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
       cols[level] = hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
    }
-   
-   for (i= 0; i< nUventries; i++)
+
+   for (i = 0; i < nUventries; i++)
    {
       Uventry  =  Uventries[iUventries[i]];
 
@@ -626,30 +626,30 @@ hypre_FacSetup2( void                 *fac_vdata,
       hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &row_coord,
                                             matrix_type);
 
-      nUentries=  hypre_SStructUVEntryNUEntries(Uventry);
-      for (k= 0; k< nUentries; k++)
+      nUentries =  hypre_SStructUVEntryNUEntries(Uventry);
+      for (k = 0; k < nUentries; k++)
       {
          to_part =  hypre_SStructUVEntryToPart(Uventry, k);
          to_rank =  hypre_SStructUVEntryToRank(Uventry, k);
-         
+
          /*-----------------------------------------------------------
           *  store the row & col indices in the correct level.
           *-----------------------------------------------------------*/
          level   = hypre_max( part_to_level[part], part_to_level[to_part] );
-         rows[level][ cnt[level] ]= row_coord;
-         cols[level][ cnt[level]++ ]= to_rank;
+         rows[level][ cnt[level] ] = row_coord;
+         cols[level][ cnt[level]++ ] = to_rank;
       }
    }
    hypre_TFree(cnt, HYPRE_MEMORY_HOST);
 
-   for (level= 1; level<= max_level; level++)
+   for (level = 1; level <= max_level; level++)
    {
-  
-      vals      = hypre_CTAlloc(HYPRE_Real,  nrows[level], HYPRE_MEMORY_HOST);
-      level_rows= hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
-      level_cols= hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
 
-      HYPRE_IJMatrixGetValues(ij_A, nrows[level], ncols[level], rows[level], 
+      vals      = hypre_CTAlloc(HYPRE_Real,  nrows[level], HYPRE_MEMORY_HOST);
+      level_rows = hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
+      level_cols = hypre_TAlloc(HYPRE_BigInt,  nrows[level], HYPRE_MEMORY_HOST);
+
+      HYPRE_IJMatrixGetValues(ij_A, nrows[level], ncols[level], rows[level],
                               cols[level], vals);
 
       Uventries =  hypre_SStructGraphUVEntries(graph_level[level]);
@@ -657,42 +657,42 @@ hypre_FacSetup2( void                 *fac_vdata,
        * Find the rows & cols of the level ij_matrices where the
        * extracted data must be placed. Note that because the
        * order in which the HYPRE_SStructGraphAddEntries in the
-       * graph_level's is the same order in which rows[level] & 
+       * graph_level's is the same order in which rows[level] &
        * cols[level] were formed, the coefficients in val are
        * in the correct order.
        *-----------------------------------------------------------*/
 
-      level_cnt= 0;
-      for (i= 0; i< hypre_SStructGraphNUVEntries(graph_level[level]); i++)
+      level_cnt = 0;
+      for (i = 0; i < hypre_SStructGraphNUVEntries(graph_level[level]); i++)
       {
          j      =  hypre_SStructGraphIUVEntry(graph_level[level], i);
-         Uventry=  Uventries[j];
+         Uventry =  Uventries[j];
 
          part     =  hypre_SStructUVEntryPart(Uventry);
          hypre_CopyIndex(hypre_SStructUVEntryIndex(Uventry), index);
          var      =  hypre_SStructUVEntryVar(Uventry);
-   
+
          hypre_SStructGridFindBoxManEntry(grid_level[level], part, index, var, &boxman_entry);
          hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &row_coord, matrix_type);
 
-         nUentries=  hypre_SStructUVEntryNUEntries(Uventry);
-         for (k= 0; k< nUentries; k++)
+         nUentries =  hypre_SStructUVEntryNUEntries(Uventry);
+         for (k = 0; k < nUentries; k++)
          {
             to_rank =  hypre_SStructUVEntryToRank(Uventry, k);
-         
+
             level_rows[level_cnt]  = row_coord;
-            level_cols[level_cnt++]= to_rank;
+            level_cols[level_cnt++] = to_rank;
          }
       }
-    
+
       /*-----------------------------------------------------------
        * Place the extracted ij coefficients into the level ij
        * matrices.
        *-----------------------------------------------------------*/
       HYPRE_IJMatrixSetValues( hypre_SStructMatrixIJMatrix(A_level[level]),
-                               nrows[level], ncols[level], (const HYPRE_BigInt *) level_rows, 
+                               nrows[level], ncols[level], (const HYPRE_BigInt *) level_rows,
                                (const HYPRE_BigInt *) level_cols, (const HYPRE_Real *) vals );
-      
+
       hypre_TFree(ncols[level], HYPRE_MEMORY_HOST);
       hypre_TFree(rows[level], HYPRE_MEMORY_HOST);
       hypre_TFree(cols[level], HYPRE_MEMORY_HOST);
@@ -706,30 +706,30 @@ hypre_FacSetup2( void                 *fac_vdata,
    hypre_TFree(rows, HYPRE_MEMORY_HOST);
    hypre_TFree(cols, HYPRE_MEMORY_HOST);
    hypre_TFree(nrows, HYPRE_MEMORY_HOST);
- 
+
    /*---------------------------------------------------------------
     * Construct the fine grid (part 1) SStruct_PMatrix for all
     * levels except for max_level. This involves coarsening the
-    * finer level SStruct_Matrix. Coarsening involves interpolation, 
+    * finer level SStruct_Matrix. Coarsening involves interpolation,
     * matvec, and restriction (to obtain the "row-sum").
     *---------------------------------------------------------------*/
-   matvec_data_level  = hypre_TAlloc(void *,  max_level+1, HYPRE_MEMORY_HOST);
-   pmatvec_data_level = hypre_TAlloc(void *,  max_level+1, HYPRE_MEMORY_HOST);
-   interp_data_level  = hypre_TAlloc(void *,  max_level+1, HYPRE_MEMORY_HOST);
-   restrict_data_level= hypre_TAlloc(void *,  max_level+1, HYPRE_MEMORY_HOST);
-   for (level= 0; level<= max_level; level++)
+   matvec_data_level  = hypre_TAlloc(void *,  max_level + 1, HYPRE_MEMORY_HOST);
+   pmatvec_data_level = hypre_TAlloc(void *,  max_level + 1, HYPRE_MEMORY_HOST);
+   interp_data_level  = hypre_TAlloc(void *,  max_level + 1, HYPRE_MEMORY_HOST);
+   restrict_data_level = hypre_TAlloc(void *,  max_level + 1, HYPRE_MEMORY_HOST);
+   for (level = 0; level <= max_level; level++)
    {
       if (level < max_level)
       {
          hypre_FacSemiInterpCreate2(&interp_data_level[level]);
          hypre_FacSemiInterpSetup2(interp_data_level[level],
-                                   x_level[level+1], 
+                                   x_level[level + 1],
                                    hypre_SStructVectorPVector(x_level[level], part_fine),
-                                   refine_factors[level+1]);
+                                   refine_factors[level + 1]);
       }
       else
       {
-         interp_data_level[level]= NULL;
+         interp_data_level[level] = NULL;
       }
 
       if (level > 0)
@@ -738,18 +738,18 @@ hypre_FacSetup2( void                 *fac_vdata,
 
          hypre_FacSemiRestrictSetup2(restrict_data_level[level],
                                      x_level[level], part_crse, part_fine,
-                                     hypre_SStructVectorPVector(x_level[level-1], part_fine),
+                                     hypre_SStructVectorPVector(x_level[level - 1], part_fine),
                                      refine_factors[level]);
       }
       else
       {
-         restrict_data_level[level]= NULL;
+         restrict_data_level[level] = NULL;
       }
    }
 
-   for (level= max_level; level> 0; level--)
+   for (level = max_level; level > 0; level--)
    {
-      
+
       /*  hypre_FacZeroCFSten(hypre_SStructMatrixPMatrix(A_level[level], part_fine),
           hypre_SStructMatrixPMatrix(A_level[level], part_crse),
           grid_level[level],
@@ -765,7 +765,7 @@ hypre_FacSetup2( void                 *fac_vdata,
 
       HYPRE_SStructMatrixAssemble(A_level[level]);
       /*------------------------------------------------------------
-       * create data structures that are needed for coarsening 
+       * create data structures that are needed for coarsening
        -------------------------------------------------------------*/
       hypre_SStructMatvecCreate(&matvec_data_level[level]);
       hypre_SStructMatvecSetup(matvec_data_level[level],
@@ -774,50 +774,50 @@ hypre_FacSetup2( void                 *fac_vdata,
 
       hypre_SStructPMatvecCreate(&pmatvec_data_level[level]);
       hypre_SStructPMatvecSetup(pmatvec_data_level[level],
-                                hypre_SStructMatrixPMatrix(A_level[level],part_fine),
-                                hypre_SStructVectorPVector(x_level[level],part_fine));
-   } 
+                                hypre_SStructMatrixPMatrix(A_level[level], part_fine),
+                                hypre_SStructVectorPVector(x_level[level], part_fine));
+   }
 
    /*---------------------------------------------------------------
     * To avoid memory leaks, we cannot reference the coarsest level
     * SStructPMatrix. We need only copy the stuctured coefs.
     *---------------------------------------------------------------*/
-   pgrid= hypre_SStructGridPGrid(grid_level[0], part_fine);
-   nvars= hypre_SStructPGridNVars(pgrid);
-   A_pmatrix= hypre_SStructMatrixPMatrix(A_level[0], part_fine);
+   pgrid = hypre_SStructGridPGrid(grid_level[0], part_fine);
+   nvars = hypre_SStructPGridNVars(pgrid);
+   A_pmatrix = hypre_SStructMatrixPMatrix(A_level[0], part_fine);
    for (var1 = 0; var1 < nvars; var1++)
    {
-      sgrid= hypre_SStructPGridSGrid(pgrid, var1);
-      sgrid_boxes= hypre_StructGridBoxes(sgrid);
+      sgrid = hypre_SStructPGridSGrid(pgrid, var1);
+      sgrid_boxes = hypre_StructGridBoxes(sgrid);
 
-      max_box_volume= 0;
+      max_box_volume = 0;
       hypre_ForBoxI(i, sgrid_boxes)
       {
          sgrid_box = hypre_BoxArrayBox(sgrid_boxes, i);
-         box_volume= hypre_BoxVolume(sgrid_box);
+         box_volume = hypre_BoxVolume(sgrid_box);
 
-         max_box_volume= hypre_max(max_box_volume, box_volume);
+         max_box_volume = hypre_max(max_box_volume, box_volume);
       }
 
       values   = hypre_TAlloc(HYPRE_Real,  max_box_volume, HYPRE_MEMORY_HOST);
-   
-      stencils= hypre_SStructGraphStencil(graph_level[0], part_fine, var1);
-      stencil_size= hypre_SStructStencilSize(stencils);
-      stencil_vars= hypre_SStructStencilVars(stencils);
+
+      stencils = hypre_SStructGraphStencil(graph_level[0], part_fine, var1);
+      stencil_size = hypre_SStructStencilSize(stencils);
+      stencil_vars = hypre_SStructStencilVars(stencils);
 
       for (i = 0; i < stencil_size; i++)
       {
-         var2= stencil_vars[i];
-         A_smatrix= hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
+         var2 = stencil_vars[i];
+         A_smatrix = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var2);
          hypre_CopyIndex(hypre_SStructStencilEntry(stencils, i), stencil_shape_i);
          hypre_ForBoxI(j, sgrid_boxes)
          {
-            sgrid_box=  hypre_BoxArrayBox(sgrid_boxes, j);
-            box_start=  hypre_BoxIMin(sgrid_box);
+            sgrid_box =  hypre_BoxArrayBox(sgrid_boxes, j);
+            box_start =  hypre_BoxIMin(sgrid_box);
             box_end  =  hypre_BoxIMax(sgrid_box);
 
-            A_smatrix_dbox=  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_smatrix), j);
-            A_smatrix_value=
+            A_smatrix_dbox =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_smatrix), j);
+            A_smatrix_value =
                hypre_StructMatrixExtractPointerByIndex(A_smatrix, j, stencil_shape_i);
 
             hypre_BoxGetSize(sgrid_box, loop_size);
@@ -827,7 +827,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                                 sgrid_box, box_start, stride, k,
                                 A_smatrix_dbox, box_start, stride, iA);
             {
-               values[k]= A_smatrix_value[iA];
+               values[k] = A_smatrix_value[iA];
             }
             hypre_BoxLoop2End(k, iA);
 #undef DEVICE_VAR
@@ -836,7 +836,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                                             var1, 1, &i, values);
          }   /* hypre_ForBoxI */
       }      /* for i */
-      
+
       hypre_TFree(values, HYPRE_MEMORY_HOST);
    }         /* for var1 */
 
@@ -849,9 +849,9 @@ hypre_FacSetup2( void                 *fac_vdata,
 
    hypre_SStructPMatvecCreate(&pmatvec_data_level[0]);
    hypre_SStructPMatvecSetup(pmatvec_data_level[0],
-                             hypre_SStructMatrixPMatrix(A_level[0],part_fine),
-                             hypre_SStructVectorPVector(x_level[0],part_fine));
-   
+                             hypre_SStructMatrixPMatrix(A_level[0], part_fine),
+                             hypre_SStructVectorPVector(x_level[0], part_fine));
+
    hypre_SStructMatvecCreate(&matvec_data);
    hypre_SStructMatvecSetup(matvec_data, A_rap, x);
 
@@ -867,11 +867,11 @@ hypre_FacSetup2( void                 *fac_vdata,
    /*---------------------------------------------------------------
     * Create the fine patch relax_data structure.
     *---------------------------------------------------------------*/
-   relax_data_level   = hypre_TAlloc(void *,  max_level+1, HYPRE_MEMORY_HOST);
-   
-   for (level= 0; level<= max_level; level++)
+   relax_data_level   = hypre_TAlloc(void *,  max_level + 1, HYPRE_MEMORY_HOST);
+
+   for (level = 0; level <= max_level; level++)
    {
-      relax_data_level[level]=  hypre_SysPFMGRelaxCreate(comm);
+      relax_data_level[level] =  hypre_SysPFMGRelaxCreate(comm);
       hypre_SysPFMGRelaxSetTol(relax_data_level[level], 0.0);
       hypre_SysPFMGRelaxSetType(relax_data_level[level], relax_type);
       if (usr_jacobi_weight)
@@ -879,14 +879,14 @@ hypre_FacSetup2( void                 *fac_vdata,
          hypre_SysPFMGRelaxSetJacobiWeight(relax_data_level[level], jacobi_weight);
       }
       hypre_SysPFMGRelaxSetTempVec(relax_data_level[level], tx_level[level]);
-      hypre_SysPFMGRelaxSetup(relax_data_level[level], 
+      hypre_SysPFMGRelaxSetup(relax_data_level[level],
                               hypre_SStructMatrixPMatrix(A_level[level], part_fine),
                               hypre_SStructVectorPVector(b_level[level], part_fine),
                               hypre_SStructVectorPVector(x_level[level], part_fine));
    }
    (fac_data -> relax_data_level)    = relax_data_level;
-  
-   
+
+
    /*---------------------------------------------------------------
     * Create the coarsest composite level preconditioned solver.
     *  csolver_type=   1      multigrid-pcg
@@ -898,7 +898,7 @@ hypre_FacSetup2( void                 *fac_vdata,
       HYPRE_PCGSetMaxIter((HYPRE_Solver) crse_solver, 1);
       HYPRE_PCGSetTol((HYPRE_Solver) crse_solver, 1.0e-6);
       HYPRE_PCGSetTwoNorm((HYPRE_Solver) crse_solver, 1);
- 
+
       /* use SysPFMG solver as preconditioner */
       HYPRE_SStructSysPFMGCreate(comm, &crse_precond);
       HYPRE_SStructSysPFMGSetMaxIter(crse_precond, 1);
@@ -917,7 +917,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                           (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                           (HYPRE_Solver) crse_precond);
 
-      HYPRE_PCGSetup((HYPRE_Solver) crse_solver, 
+      HYPRE_PCGSetup((HYPRE_Solver) crse_solver,
                      (HYPRE_Matrix) A_level[0],
                      (HYPRE_Vector) b_level[0],
                      (HYPRE_Vector) x_level[0]);
@@ -925,7 +925,7 @@ hypre_FacSetup2( void                 *fac_vdata,
 
    else if (csolver_type == 2)
    {
-      crse_precond= NULL;
+      crse_precond = NULL;
 
       HYPRE_SStructSysPFMGCreate(comm, &crse_solver);
       HYPRE_SStructSysPFMGSetMaxIter(crse_solver, 1);

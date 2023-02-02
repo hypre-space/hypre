@@ -56,11 +56,23 @@
 /* Define to 1 if using long long int for HYPRE_Int and HYPRE_BigInt */
 #undef HYPRE_BIGINT
 
+/* Feature branch string */
+#undef HYPRE_BRANCH_NAME
+
 /* Define to 1 if using complex values */
 #undef HYPRE_COMPLEX
 
 /* Define to 1 if in debug mode */
 #undef HYPRE_DEBUG
+
+/* Main development branch? */
+#undef HYPRE_DEVELOP_BRANCH
+
+/* Develop branch commit number */
+#undef HYPRE_DEVELOP_NUMBER
+
+/* Develop branch string */
+#undef HYPRE_DEVELOP_STRING
 
 /* Define to 1 if using OpenMP on device [target alloc version] */
 #undef HYPRE_DEVICE_OPENMP_ALLOC
@@ -109,9 +121,6 @@
 /* Define to 1 if using long long int for HYPRE_BigInt */
 #undef HYPRE_MIXEDINT
 
-/* No global partitioning being used */
-#undef HYPRE_NO_GLOBAL_PARTITION
-
 /* Print HYPRE errors */
 #undef HYPRE_PRINT_ERRORS
 
@@ -124,10 +133,13 @@
 /* Release name */
 #undef HYPRE_RELEASE_NAME
 
+/* Release number */
+#undef HYPRE_RELEASE_NUMBER
+
 /* Time of release */
 #undef HYPRE_RELEASE_TIME
 
-/* Version number */
+/* Release version */
 #undef HYPRE_RELEASE_VERSION
 
 /* Define to 1 for RS6000 platforms */
@@ -142,6 +154,9 @@
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
 
+/* Define to 1 if want to use host in hypre tests */
+#undef HYPRE_TEST_USING_HOST
+
 /* Using HYPRE timing routines */
 #undef HYPRE_TIMING
 
@@ -151,26 +166,32 @@
 /* Define to 1 if using cuBLAS */
 #undef HYPRE_USING_CUBLAS
 
-/* Define to 1 if using CUB */
-#undef HYPRE_USING_CUB_ALLOCATOR
-
 /* Define to 1 if executing on device with CUDA */
 #undef HYPRE_USING_CUDA
 
-/* Define to 1 if using CUDA streams */
+/* Define to 1 if using streams */
 #undef HYPRE_USING_CUDA_STREAMS
 
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
+/* Define to 1 if using cuSolver */
+#undef HYPRE_USING_CUSOLVER
+
 /* Define to 1 if using cuSPARSE */
 #undef HYPRE_USING_CUSPARSE
+
+/* Define to 1 if using device async malloc */
+#undef HYPRE_USING_DEVICE_MALLOC_ASYNC
 
 /* Define to 1 if using device memory without UM */
 #undef HYPRE_USING_DEVICE_MEMORY
 
 /* Define to 1 if executing on device with OpenMP */
 #undef HYPRE_USING_DEVICE_OPENMP
+
+/* Define to 1 if using device pooling allocator */
+#undef HYPRE_USING_DEVICE_POOL
 
 /* Define to 1 if using DSuperLU */
 #undef HYPRE_USING_DSUPERLU
@@ -180,6 +201,12 @@
 
 /* Using ESSL for Lapack */
 #undef HYPRE_USING_ESSL
+
+/* Define to 1 if executing on GPU device */
+#undef HYPRE_USING_GPU
+
+/* HIP being used */
+#undef HYPRE_USING_HIP
 
 /* Define to 1 if using host memory only */
 #undef HYPRE_USING_HOST_MEMORY
@@ -193,11 +220,23 @@
 /* Define to 1 if executing on host/device with KOKKOS */
 #undef HYPRE_USING_KOKKOS
 
+/* Define to 1 if want to track memory operations in hypre */
+#undef HYPRE_USING_MEMORY_TRACKER
+
 /* Define to 1 if Node Aware MPI library is used */
 #undef HYPRE_USING_NODE_AWARE_MPI
 
-/* NVTX being used */
+/* Define to 1 if using NVIDIA Tools Extension (NVTX) */
 #undef HYPRE_USING_NVTX
+
+/* onemkl::BLAS being used */
+#undef HYPRE_USING_ONEMKLBLAS
+
+/* onemkl::rng being used */
+#undef HYPRE_USING_ONEMKLRAND
+
+/* onemkl::SPARSE being used */
+#undef HYPRE_USING_ONEMKLSPARSE
 
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
@@ -207,6 +246,36 @@
 
 /* Define to 1 if executing on host/device with RAJA */
 #undef HYPRE_USING_RAJA
+
+/* rocBLAS being used */
+#undef HYPRE_USING_ROCBLAS
+
+/* rocRAND being used */
+#undef HYPRE_USING_ROCRAND
+
+/* rocSPARSE being used */
+#undef HYPRE_USING_ROCSPARSE
+
+/* Define to 1 if using AMD rocTX profiling */
+#undef HYPRE_USING_ROCTX
+
+/* SYCL being used */
+#undef HYPRE_USING_SYCL
+
+/* Define to 1 if using UMPIRE */
+#undef HYPRE_USING_UMPIRE
+
+/* Define to 1 if using UMPIRE for device memory */
+#undef HYPRE_USING_UMPIRE_DEVICE
+
+/* Define to 1 if using UMPIRE for host memory */
+#undef HYPRE_USING_UMPIRE_HOST
+
+/* Define to 1 if using UMPIRE for pinned memory */
+#undef HYPRE_USING_UMPIRE_PINNED
+
+/* Define to 1 if using UMPIRE for unified memory */
+#undef HYPRE_USING_UMPIRE_UM
 
 /* Define to 1 if using unified memory */
 #undef HYPRE_USING_UNIFIED_MEMORY

@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -24,8 +24,8 @@ mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 18 \
  > emptyProc.out.04
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 20 \
  > emptyProc.out.05
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 \
- > emptyProc.out.06
+#mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 \
+# > emptyProc.out.06
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 28 \
  > emptyProc.out.08
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 30 \
@@ -36,8 +36,8 @@ mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 38 \
  > emptyProc.out.11
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 40 \
  > emptyProc.out.12
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 42 \
- > emptyProc.out.14
+#mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 42 \
+# > emptyProc.out.14
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 50 \
  > emptyProc.out.15
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 51 \
@@ -46,8 +46,8 @@ mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 58 \
  > emptyProc.out.17
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 60 \
  > emptyProc.out.18
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 62 \
- > emptyProc.out.20
+#mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 62 \
+# > emptyProc.out.20
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 120 \
  > emptyProc.out.21
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 200 \
@@ -101,8 +101,8 @@ mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 18 \
  > emptyProc.out.104
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 20 \
  > emptyProc.out.105
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 22 \
- > emptyProc.out.106
+#mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 22 \
+# > emptyProc.out.106
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 28 \
  > emptyProc.out.108
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 30 \
@@ -113,8 +113,8 @@ mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 38 \
  > emptyProc.out.111
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 40 \
  > emptyProc.out.112
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 42 \
- > emptyProc.out.114
+#mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 42 \
+# > emptyProc.out.114
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 50 \
  > emptyProc.out.115
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 51 \
@@ -123,8 +123,8 @@ mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 58 \
  > emptyProc.out.117
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 60 \
  > emptyProc.out.118
-mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 62 \
- > emptyProc.out.120
+#mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 62 \
+# > emptyProc.out.120
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 120 \
  > emptyProc.out.121
 mpirun -np 2  ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 200 \

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -53,6 +53,18 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
+#if 0
+      HYPRE_BOXLOOP (
+         hypre_BoxLoop2Begin, (hypre_StructVectorNDim(x), loop_size,
+                               x_data_box, start, unit_stride, xi,
+                               y_data_box, start, unit_stride, yi),
+      {
+         yp[yi] += alpha * xp[xi];
+      },
+      hypre_BoxLoop2End, (xi, yi) )
+
+#else
+
 #define DEVICE_VAR is_device_ptr(yp,xp)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
@@ -62,7 +74,10 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
       }
       hypre_BoxLoop2End(xi, yi);
 #undef DEVICE_VAR
+
+#endif
    }
 
    return hypre_error_flag;
 }
+

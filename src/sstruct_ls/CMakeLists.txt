@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -29,6 +29,7 @@ set(SRCS
   HYPRE_sstruct_pcg.c
   HYPRE_sstruct_split.c
   HYPRE_sstruct_sys_pfmg.c
+  bsearch.c
   fac.c
   fac_amr_rap.c
   fac_amr_fcoarsen.c
@@ -43,7 +44,6 @@ set(SRCS
   fac_solve3.c
   fac_zero_cdata.c
   fac_zero_stencilcoef.c
-  hypre_bsearch.c
   krylov.c
   krylov_sstruct.c
   eliminate_rowscols.c
@@ -52,11 +52,11 @@ set(SRCS
   maxwell_PNedelec.c
   maxwell_PNedelec_bdy.c
   maxwell_semi_interp.c
+  maxwell_solve.c
+  maxwell_solve2.c
   maxwell_TV.c
   maxwell_TV_setup.c
   maxwell_zeroBC.c
-  hypre_MaxwellSolve.c
-  hypre_MaxwellSolve2.c
   nd1_amge_interpolation.c
   node_relax.c
   sstruct_amr_intercommunication.c
@@ -74,10 +74,23 @@ set(SRCS
   sys_semi_restrict.c
 )
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
+)
+
+if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
+  set(GPU_SRCS
+    fac_amr_fcoarsen.c
+    fac_amr_rap.c
+    fac_restrict2.c
+    fac_setup2.c
+    fac_zero_stencilcoef.c
+    node_relax.c
   )
+  convert_filenames_to_full_paths(GPU_SRCS)
+  set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
+endif ()
 
 convert_filenames_to_full_paths(HDRS)
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HDRS} PARENT_SCOPE)

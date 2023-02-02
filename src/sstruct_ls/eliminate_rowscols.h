@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*
   Function:  hypre_ParCSRMatrixEliminateRowsCols
 
@@ -25,8 +25,8 @@ extern "C" {
                 \ A_bi | A_bb /          \   0  |  I   /
 */
 HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
-                                         HYPRE_Int nrows_to_eliminate,
-                                         HYPRE_Int *rows_to_eliminate);
+                                               HYPRE_Int nrows_to_eliminate,
+                                               HYPRE_Int *rows_to_eliminate);
 
 
 /*
@@ -36,8 +36,8 @@ HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
   given sorted (!) list of rows. Put I on the eliminated diagonal.
 */
 HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
-                                          HYPRE_Int nrows_to_eliminate,
-                                          HYPRE_Int *rows_to_eliminate);
+                                                HYPRE_Int nrows_to_eliminate,
+                                                HYPRE_Int *rows_to_eliminate);
 
 /*
   Function:  hypre_CSRMatrixEliminateRowsOffd
@@ -45,8 +45,8 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
   Eliminate the given list of rows of Aoffd.
 */
 HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
-                                      HYPRE_Int nrows_to_eliminate,
-                                      HYPRE_Int *rows_to_eliminate);
+                                            HYPRE_Int nrows_to_eliminate,
+                                            HYPRE_Int *rows_to_eliminate);
 
 /*
   Function:  hypre_CSRMatrixEliminateColsOffd
@@ -54,8 +54,8 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
   Eliminate the given sorted (!) list of columns of Aoffd.
 */
 HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
-                                      HYPRE_Int ncols_to_eliminate,
-                                      HYPRE_Int *cols_to_eliminate);
+                                            HYPRE_Int ncols_to_eliminate,
+                                            HYPRE_Int *cols_to_eliminate);
 
 #ifdef __cplusplus
 }

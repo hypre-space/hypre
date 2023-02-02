@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -98,9 +98,9 @@ int HYPRE_ParCSR_SuperLUDestroy( HYPRE_Solver solver )
 #ifdef HAVE_SUPERLU
    HYPRE_SuperLU *sluPtr = (HYPRE_SuperLU *) solver;
    hypre_assert ( sluPtr != NULL );
-   if ( sluPtr->permR_ != NULL ) free(sluPtr->permR_);
-   if ( sluPtr->permC_ != NULL ) free(sluPtr->permC_);
-   free(sluPtr);
+   hypre_TFree(sluPtr->permR_, HYPRE_MEMORY_HOST);
+   hypre_TFree(sluPtr->permC_, HYPRE_MEMORY_HOST);
+   hypre_TFree(sluPtr, HYPRE_MEMORY_HOST);
    return 0;
 #else
    printf("HYPRE_ParCSR_SuperLUDestroy ERROR - SuperLU not enabled.\n");
@@ -156,7 +156,7 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    startRow = partition[0];
    endRow   = partition[1] - 1;
    nrows    = endRow - startRow + 1;
-   free( partition );
+   hypre_TFree(partition, HYPRE_MEMORY_HOST);
    if ( startRow != 0 )
    {
       printf("HYPRE_ParCSR_SuperLUSetup ERROR - start row != 0.\n");
@@ -209,7 +209,7 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       nnz += colLengs[jcol-1];
       cscJ[jcol] = nnz;
    }
-   free(colLengs);
+   hypre_TFree(colLengs, HYPRE_MEMORY_HOST);
 
    /* ---------------------------------------------------------------- */
    /* create SuperMatrix                                                */
@@ -239,7 +239,7 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
           &(sluPtr->SLU_Lmat), &(sluPtr->SLU_Umat), &slu_stat, &info);
    Destroy_CompCol_Permuted(&auxAmat);
    Destroy_CompCol_Matrix(&sluAmat);
-   free(etree);
+   hypre_TFree(etree, HYPRE_MEMORY_HOST);
    sluPtr->factorized_ = 1;
    StatFree(&slu_stat);
    return 0;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -29,7 +29,7 @@ hypre_SStructVariableGetOffset( HYPRE_SStructVariable  vartype,
 {
    HYPRE_Int d;
 
-   switch(vartype)
+   switch (vartype)
    {
       case HYPRE_SSTRUCT_VARIABLE_CELL:
          hypre_SetIndex(varoffset, 0);
@@ -89,7 +89,7 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
    hypre_SStructPGridNVars(pgrid)            = 0;
    hypre_SStructPGridCellSGridDone(pgrid)    = 0;
    hypre_SStructPGridVarTypes(pgrid)         = NULL;
-   
+
    for (t = 0; t < 8; t++)
    {
       hypre_SStructPGridVTSGrid(pgrid, t)     = NULL;
@@ -97,7 +97,7 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
    }
    HYPRE_StructGridCreate(comm, ndim, &sgrid);
    hypre_SStructPGridCellSGrid(pgrid) = sgrid;
-   
+
    hypre_SStructPGridPNeighbors(pgrid) = hypre_BoxArrayCreate(0, ndim);
    hypre_SStructPGridPNborOffsets(pgrid) = NULL;
 
@@ -106,7 +106,7 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 
    /* GEC0902 ghost addition to the grid    */
    hypre_SStructPGridGhlocalSize(pgrid)   = 0;
-   
+
    hypre_SetIndex(hypre_SStructPGridPeriodic(pgrid), 0);
 
    *pgrid_ptr = pgrid;
@@ -173,9 +173,10 @@ hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid  *pgrid,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructPGridSetVariables( hypre_SStructPGrid    *pgrid,
-                                          HYPRE_Int              nvars,
-                                          HYPRE_SStructVariable *vartypes )
+HYPRE_Int
+hypre_SStructPGridSetVariables( hypre_SStructPGrid    *pgrid,
+                                HYPRE_Int              nvars,
+                                HYPRE_SStructVariable *vartypes )
 {
    hypre_SStructVariable  *new_vartypes;
    HYPRE_Int               i;
@@ -260,7 +261,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    cell_sgrid = hypre_SStructPGridCellSGrid(pgrid);
    HYPRE_StructGridSetPeriodic(cell_sgrid, periodic);
    if (!hypre_SStructPGridCellSGridDone(pgrid))
+   {
       HYPRE_StructGridAssemble(cell_sgrid);
+   }
 
    /* this is used to truncate boxes when periodicity is on */
    cell_imax = hypre_BoxIMax(hypre_StructGridBoundingBox(cell_sgrid));
@@ -276,7 +279,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    /* Add one since hood_first_local can be -1 */
    nbor_boxes = hypre_BoxArrayCreate(
-      pneighbors_size + hood_first_local + hood_num_local + 1, ndim);
+                   pneighbors_size + hood_first_local + hood_num_local + 1, ndim);
    diff_boxes = hypre_BoxArrayCreate(0, ndim);
    tmp_boxes  = hypre_BoxArrayCreate(0, ndim);
 
@@ -347,11 +350,11 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
          HYPRE_StructGridAssemble(sgrid);
 
          sgrids[t] = sgrid;
-      }            
+      }
    }
 
    hypre_BoxArrayDestroy(hood_boxes);
-   
+
    hypre_BoxArrayDestroy(nbor_boxes);
    hypre_BoxArrayDestroy(diff_boxes);
    hypre_BoxArrayDestroy(tmp_boxes);
@@ -394,6 +397,26 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    }
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPGridGetMaxBoxSize( hypre_SStructPGrid *pgrid )
+{
+   HYPRE_Int         nvars = hypre_SStructPGridNVars(pgrid);
+   HYPRE_Int         var;
+   hypre_StructGrid *sgrid;
+   HYPRE_Int         max_box_size = 0;
+
+   for (var = 0; var < nvars; var++)
+   {
+      sgrid = hypre_SStructPGridSGrid(pgrid, var);
+      max_box_size = hypre_max(max_box_size, hypre_StructGridGetMaxBoxSize(sgrid));
+   }
+
+   return max_box_size;
 }
 
 /*==========================================================================
@@ -461,12 +484,12 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    /*find offset and ghost offsets */
    {
       HYPRE_Int scan_recv;
-      
+
       /* offsets */
 
       hypre_MPI_Scan(
          &local_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-      /* first point in my range */ 
+      /* first point in my range */
       offsets[0] = scan_recv - local_size;
       /* first point in next proc's range */
       offsets[1] = scan_recv;
@@ -476,7 +499,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       /* ghost offsets */
       hypre_MPI_Scan(
          &ghlocal_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-      /* first point in my range */ 
+      /* first point in my range */
       ghoffsets[0] = scan_recv - ghlocal_size;
       /* first point in next proc's range */
       ghoffsets[1] = scan_recv;
@@ -485,7 +508,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    }
 
    /* allocate a box manager for each part and variable -
-      copy the local box info from the underlying sgrid boxmanager*/ 
+      copy the local box info from the underlying sgrid boxmanager*/
 
    managers = hypre_TAlloc(hypre_BoxManager **,  nparts, HYPRE_MEMORY_HOST);
 
@@ -494,7 +517,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    ghbox_offset =  ghoffsets[0];
 
    info_size = sizeof(hypre_SStructBoxManInfo);
- 
+
    /* storage for the entry info is allocated and kept in the box
       manager - so here we just write over the info_obj and then
       it is copied in AddEntry */
@@ -502,7 +525,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
    /* this is the same for all the info objects */
    hypre_SStructBoxManInfoType(entry_info) = hypre_SSTRUCT_BOXMAN_INFO_DEFAULT;
- 
+
    box = hypre_BoxCreate(ndim);
    ghostbox = hypre_BoxCreate(ndim);
 
@@ -521,20 +544,20 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
           * calculate the info and add to the box manager - the rest we will
           * gather (because we cannot calculate the info for them) */
 
-         hypre_BoxManGetAllEntries(hypre_StructGridBoxMan(sgrid), 
+         hypre_BoxManGetAllEntries(hypre_StructGridBoxMan(sgrid),
                                    &num_entries, &all_entries);
 
-         bounding_box = hypre_StructGridBoundingBox(sgrid);     
+         bounding_box = hypre_StructGridBoundingBox(sgrid);
 
          /* need to create a box manager and then later give it the bounding box
             for gather entries call */
-         
+
          hypre_BoxManCreate(
-            hypre_BoxManNumMyEntries(hypre_StructGridBoxMan(sgrid)), 
-            info_size, hypre_StructGridNDim(sgrid), bounding_box,  
+            hypre_BoxManNumMyEntries(hypre_StructGridBoxMan(sgrid)),
+            info_size, hypre_StructGridNDim(sgrid), bounding_box,
             hypre_StructGridComm(sgrid), &managers[part][var]);
 
-	 /* each sgrid has num_ghost */
+         /* each sgrid has num_ghost */
 
          num_ghost = hypre_StructGridNumGhost(sgrid);
          hypre_BoxManSetNumGhost(managers[part][var], num_ghost);
@@ -542,7 +565,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
          /* loop through the all of the entries - for the local boxes
           * populate the info object and add to Box Manager- recall
           * that all of the boxes array belong to the calling proc */
-       
+
          local_ct = 0;
          for (b = 0; b < num_entries; b++)
          {
@@ -567,34 +590,33 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
                /* grow box to compute volume with ghost */
                hypre_CopyBox(box, ghostbox);
-               hypre_BoxGrowByArray(ghostbox, num_ghost);         
-                
+               hypre_BoxGrowByArray(ghostbox, num_ghost);
+
                /* update offset */
-               ghbox_offset += hypre_BoxVolume(ghostbox); 
+               ghbox_offset += hypre_BoxVolume(ghostbox);
 
                local_ct++;
             }
             else /* not a local box */
             {
-               hypre_BoxManGatherEntries(managers[part][var],  
+               hypre_BoxManGatherEntries(managers[part][var],
                                          entry_imin, entry_imax);
             }
          }
-         
+
          /* call the assemble later */
 
       } /* end of variable loop */
    } /* end of part loop */
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    {
       /* need to do a gather entries on neighbor information so that we have
          what we need for the NborBoxManagers function */
-      
+
       /* these neighbor boxes are much larger than the data that we care about,
          so first we need to intersect them with the grid and just pass the
          intersected box into the Box Manager */
-      
+
       hypre_SStructNeighbor    *vneighbor;
       HYPRE_Int                 b, i;
       hypre_Box                *vbox;
@@ -609,7 +631,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       hypre_Box                *nbor_box;
       hypre_BoxManager         *box_man;
       hypre_BoxArray           *local_boxes;
-     
+
       grow_box = hypre_BoxCreate(ndim);
       int_box = hypre_BoxCreate(ndim);
       nbor_box =  hypre_BoxCreate(ndim);
@@ -625,18 +647,18 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
          {
             sgrid = hypre_SStructPGridSGrid(pgrid, var);
             max_distance = hypre_StructGridMaxDistance(sgrid);
-  
+
             /* now loop through my boxes, grow them, and intersect with all of
              * the neighbors */
-           
+
             box_man = hypre_StructGridBoxMan(sgrid);
             hypre_BoxManGetLocalEntriesBoxes(box_man, local_boxes);
-            
+
             hypre_ForBoxI(i, local_boxes)
             {
-               hypre_CopyBox(hypre_BoxArrayBox(local_boxes, i), grow_box); 
+               hypre_CopyBox(hypre_BoxArrayBox(local_boxes, i), grow_box);
                hypre_BoxGrowByIndex(grow_box, max_distance);
-              
+
                /* loop through neighbors */
                for (b = 0; b < nvneighbors[part][var]; b++)
                {
@@ -648,12 +670,12 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
                   hypre_BoxGrowByValue(nbor_box, 1);
 
                   nbor_part = hypre_SStructNeighborPart(vneighbor);
-              
+
                   coord = hypre_SStructNeighborCoord(vneighbor);
                   dir   = hypre_SStructNeighborDir(vneighbor);
-        
+
                   /* find intersection of neighbor and my local box */
-                  hypre_IntersectBoxes(grow_box, nbor_box, int_box); 
+                  hypre_IntersectBoxes(grow_box, nbor_box, int_box);
                   if (hypre_BoxVolume(int_box) > 0)
                   {
                      hypre_CopyIndex(hypre_BoxIMin(vbox), imin0);
@@ -662,9 +684,9 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
                      /* map int_box to neighbor part index space */
                      hypre_SStructBoxToNborBox(int_box, imin0, imin1, coord, dir);
                      hypre_SStructVarToNborVar(grid, part, var, coord, &nbor_var);
-                    
+
                      hypre_BoxManGatherEntries(
-                        managers[nbor_part][nbor_var], 
+                        managers[nbor_part][nbor_var],
                         hypre_BoxIMin(int_box), hypre_BoxIMax(int_box));
                   }
                } /* end neighbor loop */
@@ -676,7 +698,6 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       hypre_BoxDestroy(nbor_box);
       hypre_BoxArrayDestroy(local_boxes);
    }
-#endif
 
    /* now call the assembles */
    for (part = 0; part < nparts; part++)
@@ -734,7 +755,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
    hypre_Box                   *bounding_box;
 
    /*------------------------------------------------------
-    * Create a box manager for the neighbor boxes 
+    * Create a box manager for the neighbor boxes
     *------------------------------------------------------*/
 
    bounding_box = hypre_BoxCreate(ndim);
@@ -761,18 +782,17 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
       for (var = 0; var < nvars; var++)
       {
          sgrid = hypre_SStructPGridSGrid(pgrid, var);
-         hypre_CopyBox( hypre_StructGridBoundingBox(sgrid), bounding_box); 
+         hypre_CopyBox( hypre_StructGridBoundingBox(sgrid), bounding_box);
          /* The bounding_box is only needed if BoxManGatherEntries() is called,
           * but we don't gather anything currently for the neighbor boxman, so
           * the next bit of code is not needed right now. */
 #if 0
-#ifdef HYPRE_NO_GLOBAL_PARTITION
          {
             MPI_Comm     comm        = hypre_SStructGridComm(grid);
             hypre_Box   *vbox;
             hypre_Index  min_index, max_index;
             HYPRE_Int    d;
-            HYPRE_Int    sendbuf6[2*HYPRE_MAXDIM], recvbuf6[2*HYPRE_MAXDIM];
+            HYPRE_Int    sendbuf6[2 * HYPRE_MAXDIM], recvbuf6[2 * HYPRE_MAXDIM];
             hypre_CopyToCleanIndex( hypre_BoxIMin(bounding_box), ndim, min_index);
             hypre_CopyToCleanIndex( hypre_BoxIMax(bounding_box), ndim, max_index);
 
@@ -780,41 +800,40 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
             {
                vneighbor = &vneighbors[part][var][b];
                vbox = hypre_SStructNeighborBox(vneighbor);
-               /* find min and max box extents */  
+               /* find min and max box extents */
                for (d = 0; d < ndim; d++)
                {
                   hypre_IndexD(min_index, d) =
                      hypre_min(hypre_IndexD(min_index, d), hypre_BoxIMinD(vbox, d));
                   hypre_IndexD(max_index, d) =
                      hypre_max(hypre_IndexD(max_index, d), hypre_BoxIMaxD(vbox, d));
-               } 
+               }
             }
             /* this is based on local info - all procs need to have
              * the same bounding box!  */
             hypre_BoxSetExtents( bounding_box, min_index, max_index);
-             
+
             /* communication needed for the bounding box */
             /* pack buffer */
-            for (d = 0; d < ndim; d++) 
+            for (d = 0; d < ndim; d++)
             {
                sendbuf6[d] = hypre_BoxIMinD(bounding_box, d);
-               sendbuf6[d+ndim] = -hypre_BoxIMaxD(bounding_box, d);
+               sendbuf6[d + ndim] = -hypre_BoxIMaxD(bounding_box, d);
             }
             hypre_MPI_Allreduce(
-               sendbuf6, recvbuf6, 2*ndim, HYPRE_MPI_INT, hypre_MPI_MIN, comm);
+               sendbuf6, recvbuf6, 2 * ndim, HYPRE_MPI_INT, hypre_MPI_MIN, comm);
             /* unpack buffer */
             for (d = 0; d < ndim; d++)
             {
                hypre_BoxIMinD(bounding_box, d) = recvbuf6[d];
-               hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d+ndim];
+               hypre_BoxIMaxD(bounding_box, d) = -recvbuf6[d + ndim];
             }
          }
-#endif
 #endif
          /* Here we want to create a new manager for the neighbor information
           * (instead of adding to the current and reassembling).  This uses a
           * lower bound for the actual box manager size. */
-        
+
          hypre_BoxManCreate(nvneighbors[part][var], info_size, ndim,
                             hypre_StructGridBoundingBox(sgrid),
                             hypre_StructGridComm(sgrid),
@@ -883,8 +902,8 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
                ghstride[c[0]] = 1;
                for (d = 1; d < ndim; d++)
                {
-                  stride[c[d]]   = hypre_BoxSizeD(box, d-1)   * stride[c[d-1]];
-                  ghstride[c[d]] = hypre_BoxSizeD(ghbox, d-1) * ghstride[c[d-1]];
+                  stride[c[d]]   = hypre_BoxSizeD(box, d - 1)   * stride[c[d - 1]];
+                  ghstride[c[d]] = hypre_BoxSizeD(ghbox, d - 1) * ghstride[c[d - 1]];
                }
                for (d = 0; d < ndim; d++)
                {
@@ -938,13 +957,13 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
 
             hypre_BoxManGetAllEntries(hypre_SStructGridBoxManager(grid, part, var),
                                       &nentries, &all_entries);
-            
+
             for (b = 0; b < nentries; b++)
             {
                entry = &all_entries[b];
-               
+
                proc = hypre_BoxManEntryProc(entry);
-               
+
                hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
                hypre_SStructBoxManInfoType(peri_info) =
                   hypre_SStructBoxManInfoType(entry_info);
@@ -952,14 +971,14 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
                   hypre_SStructBoxManInfoOffset(entry_info);
                hypre_SStructBoxManInfoGhoffset(peri_info) =
                   hypre_SStructBoxManInfoGhoffset(entry_info);
-                  
+
                for (k = 1; k < num_periods; k++) /* k = 0 is original box */
                {
                   pshift = hypre_StructGridPShift(sgrid, k);
                   hypre_BoxSetExtents(box, hypre_BoxManEntryIMin(entry),
                                       hypre_BoxManEntryIMax(entry));
                   hypre_BoxShiftPos(box, pshift);
-                     
+
                   hypre_IntersectBoxes(box, bounding_box, int_box);
                   if (hypre_BoxVolume(int_box) > 0)
                   {
@@ -976,7 +995,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
       } /* end of variables loop */
 
    } /* end of part loop */
-   
+
    hypre_SStructGridNborBoxManagers(grid) = nbor_managers;
 
    hypre_TFree(nbor_info, HYPRE_MEMORY_HOST);
@@ -1091,7 +1110,7 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
          maxvars = nvars;
       }
    }
-   cinfo_a = hypre_CTAlloc(CInfo *,  nparts*nparts*maxvars*maxvars, HYPRE_MEMORY_HOST);
+   cinfo_a = hypre_CTAlloc(CInfo *,  nparts * nparts * maxvars * maxvars, HYPRE_MEMORY_HOST);
 
    /* loop over local boxes and compute send/recv CommInfo */
 
@@ -1173,16 +1192,16 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                   /* if there is an intersection, compute communication info */
                   if (hypre_BoxVolume(int_box))
                   {
-                     cinfoi = (((pi)*maxvars + vi)*nparts + pj)*maxvars + vj;
-                     cinfoj = (((pj)*maxvars + vj)*nparts + pi)*maxvars + vi;
+                     cinfoi = (((pi) * maxvars + vi) * nparts + pj) * maxvars + vj;
+                     cinfoj = (((pj) * maxvars + vj) * nparts + pi) * maxvars + vi;
 
                      /* allocate CommInfo arguments if needed */
                      if (cinfo_a[cinfoi] == NULL)
                      {
                         HYPRE_Int  i_num_boxes = hypre_StructGridNumBoxes(
-                           hypre_SStructPGridSGrid(pgrids[pi], vi));
+                                                    hypre_SStructPGridSGrid(pgrids[pi], vi));
                         HYPRE_Int  j_num_boxes = hypre_StructGridNumBoxes(
-                           hypre_SStructPGridSGrid(pgrids[pj], vj));
+                                                    hypre_SStructPGridSGrid(pgrids[pj], vj));
 
                         cnum_transforms = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
                         ccoords = hypre_CTAlloc(hypre_Index,  nvneighbors[pi][vi], HYPRE_MEMORY_HOST);
@@ -1245,14 +1264,14 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
 
                      size = hypre_BoxArraySize(cbox_a);
                      /* Allocate in chunks of 10 ('size' grows by 1) */
-                     if (size%10 == 0)
+                     if (size % 10 == 0)
                      {
                         (cinfo->procs[bi]) =
-                           hypre_TReAlloc((cinfo->procs[bi]),  HYPRE_Int,  size+10, HYPRE_MEMORY_HOST);
+                           hypre_TReAlloc((cinfo->procs[bi]),  HYPRE_Int,  size + 10, HYPRE_MEMORY_HOST);
                         (cinfo->rboxnums[bi]) =
-                           hypre_TReAlloc((cinfo->rboxnums[bi]),  HYPRE_Int,  size+10, HYPRE_MEMORY_HOST);
+                           hypre_TReAlloc((cinfo->rboxnums[bi]),  HYPRE_Int,  size + 10, HYPRE_MEMORY_HOST);
                         (cinfo->transforms[bi]) =
-                           hypre_TReAlloc((cinfo->transforms[bi]),  HYPRE_Int,  size+10, HYPRE_MEMORY_HOST);
+                           hypre_TReAlloc((cinfo->transforms[bi]),  HYPRE_Int,  size + 10, HYPRE_MEMORY_HOST);
                      }
                      cproc_a = (cinfo->procs[bi]);
                      crboxnum_a = (cinfo->rboxnums[bi]);
@@ -1264,7 +1283,7 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      /* map intersection box to part pj index space */
                      hypre_CopyBox(int_box, int_rbox);
                      hypre_SStructBoxToNborBox(int_rbox, imin0, imin1, coord, dir);
-                           
+
                      hypre_AppendBox(int_box, cbox_a);
                      hypre_AppendBox(int_rbox, crbox_a);
                      hypre_SStructBoxManEntryGetProcess(pj_entry, &cproc_a[size]);
@@ -1303,20 +1322,20 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
    {
       for (vi = 0; vi < maxvars; vi++)
       {
-         for (pj = (pi+1); pj < nparts; pj++)
+         for (pj = (pi + 1); pj < nparts; pj++)
          {
             for (vj = 0; vj < maxvars; vj++)
             {
-               cinfoi = (((pi)*maxvars + vi)*nparts + pj)*maxvars + vj;
+               cinfoi = (((pi) * maxvars + vi) * nparts + pj) * maxvars + vj;
 
                if (cinfo_a[cinfoi] != NULL)
                {
                   comm_info = hypre_TAlloc(hypre_SStructCommInfo,  1, HYPRE_MEMORY_HOST);
-                  
-                  cinfoj = (((pj)*maxvars + vj)*nparts + pi)*maxvars + vi;
+
+                  cinfoj = (((pj) * maxvars + vj) * nparts + pi) * maxvars + vi;
                   send_cinfo = cinfo_a[cinfoi];
                   recv_cinfo = cinfo_a[cinfoj];
-                  
+
                   /* send/recv boxes may not match (2nd to last argument) */
                   hypre_CommInfoCreate(
                      (send_cinfo->boxes), (recv_cinfo->boxes),
@@ -1330,12 +1349,12 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      (send_cinfo->coords), (send_cinfo->dirs),
                      (send_cinfo->transforms), (recv_cinfo->transforms));
                   hypre_TFree(send_cinfo->num_transforms, HYPRE_MEMORY_HOST);
-                  
+
                   hypre_SStructCommInfoSendPart(comm_info) = pi;
                   hypre_SStructCommInfoRecvPart(comm_info) = pj;
                   hypre_SStructCommInfoSendVar(comm_info) = vi;
                   hypre_SStructCommInfoRecvVar(comm_info) = vj;
-                  
+
                   vnbor_comm_info[vnbor_ncomms] = comm_info;
 #if 0
                   {
@@ -1407,7 +1426,7 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
    hypre_SStructGridVNborCommInfo(grid) = vnbor_comm_info;
    hypre_SStructGridVNborNComms(grid) = vnbor_ncomms;
 
-   size = nparts*nparts*maxvars*maxvars;
+   size = nparts * nparts * maxvars * maxvars;
    for (cinfoi = 0; cinfoi < size; cinfoi++)
    {
       hypre_TFree(cinfo_a[cinfoi], HYPRE_MEMORY_HOST);
@@ -1436,7 +1455,7 @@ hypre_SStructGridFindBoxManEntry( hypre_SStructGrid  *grid,
    HYPRE_Int nentries;
 
    hypre_BoxManEntry **entries;
-   
+
    hypre_BoxManIntersect (  hypre_SStructGridBoxManager(grid, part, var),
                             index, index, &entries, &nentries);
 
@@ -1456,8 +1475,8 @@ hypre_SStructGridFindBoxManEntry( hypre_SStructGrid  *grid,
    }
 
    /* remove the entries array (NULL or allocated in the intersect routine) */
-   hypre_TFree(entries, HYPRE_MEMORY_HOST); 
-   
+   hypre_TFree(entries, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
@@ -1494,8 +1513,8 @@ hypre_SStructGridFindNborBoxManEntry( hypre_SStructGrid  *grid,
    }
 
    /* remove the entries array (NULL or allocated in the intersect routine) */
-   hypre_TFree(entries, HYPRE_MEMORY_HOST); 
-   
+   hypre_TFree(entries, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
@@ -1538,8 +1557,8 @@ hypre_SStructBoxManEntryGetCSRstrides(  hypre_BoxManEntry *entry,
       strides[0] = 1;
       for (d = 1; d < ndim; d++)
       {
-         strides[d] = hypre_IndexD(imax, d-1) - hypre_IndexD(imin, d-1) + 1;
-         strides[d] *= strides[d-1];
+         strides[d] = hypre_IndexD(imax, d - 1) - hypre_IndexD(imin, d - 1) + 1;
+         strides[d] *= strides[d - 1];
       }
    }
    else
@@ -1582,18 +1601,18 @@ hypre_SStructBoxManEntryGetGhstrides( hypre_BoxManEntry *entry,
       numghost = hypre_BoxManEntryNumGhost(entry);
 
       for (d = 0; d < ndim; d++)
-      { 
-         imax[d] += numghost[2*d+1];
-         imin[d] -= numghost[2*d];
-      }  
+      {
+         imax[d] += numghost[2 * d + 1];
+         imin[d] -= numghost[2 * d];
+      }
 
       /* imin, imax modified now and calculation identical.  */
 
       strides[0] = 1;
       for (d = 1; d < ndim; d++)
       {
-         strides[d] = hypre_IndexD(imax, d-1) - hypre_IndexD(imin, d-1) + 1;
-         strides[d] *= strides[d-1];
+         strides[d] = hypre_IndexD(imax, d - 1) - hypre_IndexD(imin, d - 1) + 1;
+         strides[d] *= strides[d - 1];
       }
    }
    else
@@ -1658,7 +1677,7 @@ hypre_SStructBoxManEntryGetGlobalGhrank( hypre_BoxManEntry *entry,
    HYPRE_Int                 *numghost = hypre_BoxManEntryNumGhost(entry);
    HYPRE_Int                 d;
    HYPRE_Int                 info_type;
-   
+
    hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
    hypre_BoxManEntryGetExtents(entry, imin, imax);
    ghoffset = hypre_SStructBoxManInfoGhoffset(entry_info);
@@ -1675,10 +1694,10 @@ hypre_SStructBoxManEntryGetGlobalGhrank( hypre_BoxManEntry *entry,
    {
       for (d = 0; d < ndim; d++)
       {
-         imin[d] -= numghost[2*d];
+         imin[d] -= numghost[2 * d];
       }
    }
-   
+
    *rank_ptr = ghoffset;
    for (d = 0; d < ndim; d++)
    {
@@ -1712,7 +1731,7 @@ hypre_SStructBoxManEntryGetBoxnum( hypre_BoxManEntry *entry,
    hypre_SStructBoxManNborInfo *info;
 
    hypre_BoxManEntryGetInfo(entry, (void **) &info);
-   
+
    if (hypre_SStructBoxManInfoType(info) ==
        hypre_SSTRUCT_BOXMAN_INFO_NEIGHBOR)
       /* get from the info object */
@@ -1738,7 +1757,7 @@ hypre_SStructBoxManEntryGetPart( hypre_BoxManEntry *entry,
    hypre_SStructBoxManNborInfo *info;
 
    hypre_BoxManEntryGetInfo(entry, (void **) &info);
-   
+
    if (hypre_SStructBoxManInfoType(info) == hypre_SSTRUCT_BOXMAN_INFO_NEIGHBOR)
    {
       *part_ptr = hypre_SStructBoxManNborInfoPart(info);
@@ -1784,6 +1803,9 @@ hypre_SStructIndexToNborIndex( hypre_Index  index,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructBoxToNborBox( hypre_Box   *box,
                            hypre_Index  root,
@@ -1813,7 +1835,6 @@ hypre_SStructBoxToNborBox( hypre_Box   *box,
  * See "Mapping Notes" in comment for `hypre_SStructBoxToNborBox'.
  *--------------------------------------------------------------------------*/
 
-
 HYPRE_Int
 hypre_SStructNborIndexToIndex( hypre_Index  nbor_index,
                                hypre_Index  root,
@@ -1833,6 +1854,9 @@ hypre_SStructNborIndexToIndex( hypre_Index  nbor_index,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructNborBoxToBox( hypre_Box   *nbor_box,
@@ -1884,7 +1908,7 @@ hypre_SStructVarToNborVar( hypre_SStructGrid  *grid,
    hypre_SStructPGrid     *pgrid   = hypre_SStructGridPGrid(grid, part);
    HYPRE_SStructVariable   vartype = hypre_SStructPGridVarType(pgrid, var);
 
-   switch(vartype)
+   switch (vartype)
    {
       case HYPRE_SSTRUCT_VARIABLE_XFACE:
       case HYPRE_SSTRUCT_VARIABLE_XEDGE:
@@ -1892,11 +1916,11 @@ hypre_SStructVarToNborVar( hypre_SStructGrid  *grid,
          break;
       case HYPRE_SSTRUCT_VARIABLE_YFACE:
       case HYPRE_SSTRUCT_VARIABLE_YEDGE:
-         *nbor_var_ptr = var + (coord[1]-1);
+         *nbor_var_ptr = var + (coord[1] - 1);
          break;
       case HYPRE_SSTRUCT_VARIABLE_ZFACE:
       case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
-         *nbor_var_ptr = var + (coord[2]-2);
+         *nbor_var_ptr = var + (coord[2] - 2);
          break;
       default:
          *nbor_var_ptr = var;
@@ -1919,7 +1943,7 @@ hypre_SStructGridSetNumGhost( hypre_SStructGrid  *grid, HYPRE_Int *num_ghost )
    hypre_SStructPGrid   *pgrid;
    hypre_StructGrid     *sgrid;
 
-   for (i = 0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       hypre_SStructGridNumGhost(grid)[i] = num_ghost[i];
    }
@@ -1927,7 +1951,7 @@ hypre_SStructGridSetNumGhost( hypre_SStructGrid  *grid, HYPRE_Int *num_ghost )
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
-     
+
       for (t = 0; t < 8; t++)
       {
          sgrid = hypre_SStructPGridVTSGrid(pgrid, t);
@@ -1954,7 +1978,7 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
 {
    if (type == HYPRE_PARCSR)
    {
-      hypre_SStructBoxManEntryGetGlobalCSRank(entry,index, rank_ptr);
+      hypre_SStructBoxManEntryGetGlobalCSRank(entry, index, rank_ptr);
    }
    if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT)
    {
@@ -1962,7 +1986,7 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
    }
 
    return hypre_error_flag;
-}  
+}
 
 /*--------------------------------------------------------------------------
  * GEC1002 a function that will select the right way to calculate the strides
@@ -1984,7 +2008,7 @@ hypre_SStructBoxManEntryGetStrides(hypre_BoxManEntry   *entry,
    }
 
    return hypre_error_flag;
-}  
+}
 
 /*--------------------------------------------------------------------------
  *  A function to determine the local variable box numbers that underlie
@@ -2000,11 +2024,11 @@ hypre_SStructBoxNumMap(hypre_SStructGrid        *grid,
                        HYPRE_Int              ***map_ptr)
 {
    hypre_SStructPGrid    *pgrid   = hypre_SStructGridPGrid(grid, part);
-   hypre_StructGrid      *cellgrid= hypre_SStructPGridCellSGrid(pgrid);
+   hypre_StructGrid      *cellgrid = hypre_SStructPGridCellSGrid(pgrid);
    hypre_StructGrid      *vargrid;
    hypre_BoxArray        *boxes;
    hypre_Box             *cellbox, vbox, *box, intersect_box;
-   HYPRE_SStructVariable *vartypes= hypre_SStructPGridVarTypes(pgrid);
+   HYPRE_SStructVariable *vartypes = hypre_SStructPGridVarTypes(pgrid);
 
    HYPRE_Int              ndim    = hypre_SStructGridNDim(grid);
    HYPRE_Int              nvars   = hypre_SStructPGridNVars(pgrid);
@@ -2018,23 +2042,23 @@ hypre_SStructBoxNumMap(hypre_SStructGrid        *grid,
 
    hypre_BoxInit(&vbox, ndim);
    hypre_BoxInit(&intersect_box, ndim);
-   cellbox= hypre_StructGridBox(cellgrid, boxnum);
+   cellbox = hypre_StructGridBox(cellgrid, boxnum);
 
    /* ptrs to store var_box map info */
    num_boxes  = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
-   var_boxnums= hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
+   var_boxnums = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
 
    /* intersect the cellbox with the var_boxes */
-   for (var= 0; var< nvars; var++)
+   for (var = 0; var < nvars; var++)
    {
-      vargrid= hypre_SStructPGridSGrid(pgrid, var);
+      vargrid = hypre_SStructPGridSGrid(pgrid, var);
       boxes  = hypre_StructGridBoxes(vargrid);
       temp   = hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(boxes), HYPRE_MEMORY_HOST);
 
       /* map cellbox to a variable box */
       hypre_CopyBox(cellbox, &vbox);
 
-      i= vartypes[var];
+      i = vartypes[var];
       hypre_SStructVariableGetOffset((hypre_SStructVariable) i,
                                      ndim, varoffset);
       hypre_SubtractIndexes(hypre_BoxIMin(&vbox), varoffset, ndim,
@@ -2043,7 +2067,7 @@ hypre_SStructBoxNumMap(hypre_SStructGrid        *grid,
       /* loop over boxes to see if they intersect with vbox */
       hypre_ForBoxI(i, boxes)
       {
-         box= hypre_BoxArrayBox(boxes, i);
+         box = hypre_BoxArrayBox(boxes, i);
          hypre_IntersectBoxes(&vbox, box, &intersect_box);
          if (hypre_BoxVolume(&intersect_box))
          {
@@ -2055,20 +2079,20 @@ hypre_SStructBoxNumMap(hypre_SStructGrid        *grid,
       /* record local var box numbers */
       if (num_boxes[var])
       {
-         var_boxnums[var]= hypre_TAlloc(HYPRE_Int,  num_boxes[var], HYPRE_MEMORY_HOST);
+         var_boxnums[var] = hypre_TAlloc(HYPRE_Int,  num_boxes[var], HYPRE_MEMORY_HOST);
       }
       else
       {
-         var_boxnums[var]= NULL;
+         var_boxnums[var] = NULL;
       }
 
-      j= 0;
-      k= hypre_BoxArraySize(boxes);
-      for (i= 0; i< k; i++)
+      j = 0;
+      k = hypre_BoxArraySize(boxes);
+      for (i = 0; i < k; i++)
       {
          if (temp[i])
          {
-            var_boxnums[var][j]= i;
+            var_boxnums[var][j] = i;
             j++;
          }
       }
@@ -2076,8 +2100,8 @@ hypre_SStructBoxNumMap(hypre_SStructGrid        *grid,
 
    }  /* for (var= 0; var< nvars; var++) */
 
-   *num_varboxes_ptr= num_boxes;
-   *map_ptr= var_boxnums;
+   *num_varboxes_ptr = num_boxes;
+   *map_ptr = var_boxnums;
 
    return hypre_error_flag;
 }
@@ -2095,8 +2119,8 @@ hypre_SStructCellGridBoxNumMap(hypre_SStructGrid        *grid,
 {
    hypre_SStructPGrid    *pgrid    = hypre_SStructGridPGrid(grid, part);
    hypre_StructGrid      *cellgrid = hypre_SStructPGridCellSGrid(pgrid);
-   hypre_BoxArray        *cellboxes= hypre_StructGridBoxes(cellgrid);
-   
+   hypre_BoxArray        *cellboxes = hypre_StructGridBoxes(cellgrid);
+
    HYPRE_Int            **num_boxes;
    HYPRE_Int           ***var_boxnums;
 
@@ -2105,7 +2129,7 @@ hypre_SStructCellGridBoxNumMap(hypre_SStructGrid        *grid,
    ncellboxes = hypre_BoxArraySize(cellboxes);
 
    num_boxes  = hypre_TAlloc(HYPRE_Int *,  ncellboxes, HYPRE_MEMORY_HOST);
-   var_boxnums= hypre_TAlloc(HYPRE_Int **,  ncellboxes, HYPRE_MEMORY_HOST);
+   var_boxnums = hypre_TAlloc(HYPRE_Int **,  ncellboxes, HYPRE_MEMORY_HOST);
 
    hypre_ForBoxI(i, cellboxes)
    {
@@ -2116,8 +2140,8 @@ hypre_SStructCellGridBoxNumMap(hypre_SStructGrid        *grid,
                              &var_boxnums[i]);
    }
 
-   *num_varboxes_ptr= num_boxes;
-   *map_ptr= var_boxnums;
+   *num_varboxes_ptr = num_boxes;
+   *map_ptr = var_boxnums;
 
    return hypre_error_flag;
 }
@@ -2175,7 +2199,7 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
                             HYPRE_Int            var,
                             hypre_Box           *box,
                             HYPRE_Int            action,
-                            hypre_BoxManEntry ***entries_ptr, 
+                            hypre_BoxManEntry ***entries_ptr,
                             HYPRE_Int           *nentries_ptr )
 {
    hypre_BoxManEntry **entries, **tentries;
@@ -2190,7 +2214,7 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
       boxman = hypre_SStructGridNborBoxManager(grid, part, var);
       hypre_BoxManIntersect(boxman, hypre_BoxIMin(box), hypre_BoxIMax(box),
                             &tentries, &ntentries);
-      entries = hypre_TReAlloc(entries,  hypre_BoxManEntry *, 
+      entries = hypre_TReAlloc(entries,  hypre_BoxManEntry *,
                                (nentries + ntentries), HYPRE_MEMORY_HOST);
       for (i = 0; i < ntentries; i++)
       {
@@ -2219,3 +2243,299 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridGetMaxBoxSize( hypre_SStructGrid *grid )
+{
+   HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
+   HYPRE_Int            part;
+   hypre_SStructPGrid  *pgrid;
+   HYPRE_Int            max_box_size = 0;
+
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      max_box_size = hypre_max(max_box_size, hypre_SStructPGridGetMaxBoxSize(pgrid));
+   }
+
+   return max_box_size;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridPrint( FILE              *file,
+                        hypre_SStructGrid *grid )
+{
+   /* Grid variables */
+   HYPRE_Int               ndim = hypre_SStructGridNDim(grid);
+   HYPRE_Int               nparts = hypre_SStructGridNParts(grid);
+   HYPRE_Int              *nneighbors = hypre_SStructGridNNeighbors(grid);
+   hypre_SStructNeighbor **neighbors  = hypre_SStructGridNeighbors(grid);
+   hypre_Index           **nbor_offsets = hypre_SStructGridNborOffsets(grid);
+   hypre_IndexRef          nbor_offset;
+   hypre_IndexRef          coord, dir, ilomap;
+   HYPRE_Int               npart;
+   hypre_SStructNeighbor  *neighbor;
+   hypre_SStructPGrid     *pgrid;
+   hypre_StructGrid       *sgrid;
+   hypre_BoxArray         *boxes;
+   hypre_Box              *box;
+   HYPRE_SStructVariable  *vartypes;
+   HYPRE_Int              *num_ghost;
+   hypre_IndexRef          periodic;
+
+   /* Local variables */
+   HYPRE_Int               i;
+   HYPRE_Int               part, var;
+   HYPRE_Int               nvars;
+   HYPRE_Int               nboxes;
+
+   /* Print basic info */
+   hypre_fprintf(file, "\nGridCreate: %d %d\n\n", ndim, nparts);
+
+   /* Print number of boxes per part */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      sgrid = hypre_SStructPGridCellSGrid(pgrid);
+      boxes = hypre_StructGridBoxes(sgrid);
+      nboxes = hypre_BoxArraySize(boxes);
+
+      hypre_fprintf(file, "GridNumBoxes: %d %d\n", part, nboxes);
+   }
+
+   /* Print boxes per part */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      sgrid = hypre_SStructPGridCellSGrid(pgrid);
+      boxes = hypre_StructGridBoxes(sgrid);
+
+      hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         hypre_fprintf(file, "\nGridSetExtents: (%d, %d): ", part, i);
+         hypre_BoxPrint(file, box);
+      }
+   }
+   hypre_fprintf(file, "\n\n");
+
+   /* Print variable info per part */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      vartypes = hypre_SStructPGridVarTypes(pgrid);
+
+      hypre_fprintf(file, "GridSetVariables: %d %d ", part, nvars);
+      hypre_fprintf(file, "[%d", vartypes[0]);
+      for (var = 1; var < nvars; var++)
+      {
+         hypre_fprintf(file, " %d", vartypes[var]);
+      }
+      hypre_fprintf(file, "]\n");
+   }
+   hypre_fprintf(file, "\n");
+
+   /* Print ghost info */
+   num_ghost = hypre_SStructGridNumGhost(grid);
+   hypre_fprintf(file, "GridSetNumGhost:");
+   for (i = 0; i < 2 * ndim; i++)
+   {
+      hypre_fprintf(file, " %d", num_ghost[i]);
+   }
+   hypre_fprintf(file, "\n");
+
+   /* Print periodic data per part */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      periodic = hypre_SStructPGridPeriodic(pgrid);
+
+      hypre_fprintf(file, "\nGridSetPeriodic: %d ", part);
+      hypre_IndexPrint(file, ndim, periodic);
+   }
+   hypre_fprintf(file, "\n\n");
+
+   /* GridSetFEMOrdering */
+
+   /* GridSetSharedPart and GridSetNeighborPart data */
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_fprintf(file, "GridNumNeighbors: %d %d\n", part, nneighbors[part]);
+      for (i = 0; i < nneighbors[part]; i++)
+      {
+         neighbor = &neighbors[part][i];
+         nbor_offset = nbor_offsets[part][i];
+         box = hypre_SStructNeighborBox(neighbor);
+         npart = hypre_SStructNeighborPart(neighbor);
+         coord = hypre_SStructNeighborCoord(neighbor);
+         dir = hypre_SStructNeighborDir(neighbor);
+         ilomap = hypre_SStructNeighborILower(neighbor);
+
+         /* Print SStructNeighbor info */
+         hypre_fprintf(file, "GridNeighborInfo: ");
+         hypre_BoxPrint(file, box);
+         hypre_fprintf(file, " ");
+         hypre_IndexPrint(file, ndim, nbor_offset);
+         hypre_fprintf(file, " %d ", npart);
+         hypre_IndexPrint(file, ndim, coord);
+         hypre_fprintf(file, " ");
+         hypre_IndexPrint(file, ndim, dir);
+         hypre_fprintf(file, " ");
+         hypre_IndexPrint(file, ndim, ilomap);
+         hypre_fprintf(file, "\n");
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructGridRead
+ *
+ * This function reads a semi-structured grid from file. This is used mainly
+ * for debugging purposes.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructGridRead( MPI_Comm            comm,
+                       FILE               *file,
+                       hypre_SStructGrid **grid_ptr )
+{
+   /* Grid variables */
+   HYPRE_SStructGrid       grid;
+   HYPRE_SStructVariable  *vartypes;
+   HYPRE_Int               num_ghost[2 * HYPRE_MAXDIM];
+   hypre_Index           **nbor_offsets;
+   HYPRE_Int              *nneighbors;
+   hypre_SStructNeighbor **neighbors;
+   hypre_SStructNeighbor  *neighbor;
+   hypre_Index             periodic;
+
+   /* Local variables */
+   HYPRE_Int               ndim;
+   HYPRE_Int               b, d, i, j;
+   HYPRE_Int               part;
+   HYPRE_Int               nparts, nvars;
+   HYPRE_Int               nboxes;
+   HYPRE_Int              *nboxes_array;
+   hypre_Box              *box;
+
+   hypre_fscanf(file, "\nGridCreate: %d %d\n\n", &ndim, &nparts);
+   HYPRE_SStructGridCreate(comm, ndim, nparts, &grid);
+
+   /* Allocate memory */
+   nboxes_array = hypre_CTAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
+   box = hypre_BoxCreate(ndim);
+
+   /* Read number of boxes per part */
+   for (i = 0; i < nparts; i++)
+   {
+      hypre_fscanf(file, "GridNumBoxes: %d %d\n", &part, &nboxes);
+      nboxes_array[part] = nboxes;
+   }
+   hypre_fscanf(file, "\n");
+
+   /* Read boxes per part */
+   for (i = 0; i < nparts; i++)
+   {
+      for (j = 0; j < nboxes_array[i]; j++)
+      {
+         hypre_fscanf(file, "\nGridSetExtents: (%d, %d): ", &part, &b);
+         hypre_BoxRead(file, ndim, &box);
+
+         HYPRE_SStructGridSetExtents(grid, part, hypre_BoxIMin(box), hypre_BoxIMax(box));
+      }
+   }
+   hypre_fscanf(file, "\n\n");
+
+   /* Read variable info per part */
+   for (i = 0; i < nparts; i++)
+   {
+      hypre_fscanf(file, "GridSetVariables: %d %d ", &part, &nvars);
+      vartypes = hypre_CTAlloc(hypre_SStructVariable, nvars, HYPRE_MEMORY_HOST);
+
+      hypre_fscanf(file, "[%d", &vartypes[0]);
+      for (j = 1; j < nvars; j++)
+      {
+         hypre_fscanf(file, " %d", &vartypes[j]);
+      }
+      hypre_fscanf(file, "]\n");
+      HYPRE_SStructGridSetVariables(grid, part, nvars, vartypes);
+      hypre_TFree(vartypes, HYPRE_MEMORY_HOST);
+   }
+   hypre_fscanf(file, "\n");
+
+   /* Read ghost info */
+   hypre_fscanf(file, "GridSetNumGhost:");
+   for (i = 0; i < 2 * ndim; i++)
+   {
+      hypre_fscanf(file, " %d", &num_ghost[i]);
+   }
+   hypre_fscanf(file, "\n");
+
+   /* Read periodic data per part */
+   for (i = 0; i < nparts; i++)
+   {
+      hypre_fscanf(file, "\nGridSetPeriodic: %d ", &part);
+      hypre_IndexRead(file, ndim, periodic);
+
+      HYPRE_SStructGridSetPeriodic(grid, part, periodic);
+   }
+   hypre_fscanf(file, "\n\n");
+
+   /* GridSetFEMOrdering */
+
+   /* GridSetSharedPart and GridSetNeighborPart data */
+   nneighbors = hypre_SStructGridNNeighbors(grid);
+   neighbors  = hypre_SStructGridNeighbors(grid);
+   nbor_offsets = hypre_SStructGridNborOffsets(grid);
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_fscanf(file, "GridNumNeighbors: %d %d\n", &part, &nneighbors[part]);
+      neighbors[part] = hypre_TAlloc(hypre_SStructNeighbor, nneighbors[part], HYPRE_MEMORY_HOST);
+      nbor_offsets[part] = hypre_TAlloc(hypre_Index, nneighbors[part], HYPRE_MEMORY_HOST);
+
+      for (i = 0; i < nneighbors[part]; i++)
+      {
+         neighbor = &neighbors[part][i];
+
+         /* Read SStructNeighbor info */
+         hypre_fscanf(file, "GridNeighborInfo: ");
+         hypre_BoxRead(file, ndim, &box);
+         hypre_CopyBox(box, hypre_SStructNeighborBox(neighbor));
+         hypre_fscanf(file, " ");
+         hypre_IndexRead(file, ndim, nbor_offsets[part][i]);
+         hypre_fscanf(file, " %d ", &hypre_SStructNeighborPart(neighbor));
+         hypre_IndexRead(file, ndim, hypre_SStructNeighborCoord(neighbor));
+         hypre_fscanf(file, " ");
+         hypre_IndexRead(file, ndim, hypre_SStructNeighborDir(neighbor));
+         hypre_fscanf(file, " ");
+         hypre_IndexRead(file, ndim, hypre_SStructNeighborILower(neighbor));
+         hypre_fscanf(file, "\n");
+
+         for (d = ndim; d < HYPRE_MAXDIM; d++)
+         {
+            hypre_IndexD(hypre_SStructNeighborCoord(neighbor), d) = d;
+            hypre_IndexD(hypre_SStructNeighborDir(neighbor), d) = 1;
+         }
+      }
+   }
+
+   /* Assemble grid */
+   HYPRE_SStructGridAssemble(grid);
+
+   /* Free memory */
+   hypre_TFree(nboxes_array, HYPRE_MEMORY_HOST);
+   hypre_BoxDestroy(box);
+
+   *grid_ptr = grid;
+
+   return hypre_error_flag;
+}

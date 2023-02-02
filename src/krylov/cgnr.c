@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -38,11 +38,11 @@ hypre_CGNRFunctionsCreate(
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*PrecondT)      ( void *vdata, void *A, void *b, void *x )
-   )
+)
 {
    hypre_CGNRFunctions * cgnr_functions;
    cgnr_functions = (hypre_CGNRFunctions *)
-      hypre_CTAlloc( hypre_CGNRFunctions,  1 , HYPRE_MEMORY_HOST);
+                    hypre_CTAlloc( hypre_CGNRFunctions,  1, HYPRE_MEMORY_HOST);
 
    cgnr_functions->CommInfo = CommInfo;
    cgnr_functions->CreateVector = CreateVector;
@@ -56,7 +56,7 @@ hypre_CGNRFunctionsCreate(
    cgnr_functions->ClearVector = ClearVector;
    cgnr_functions->ScaleVector = ScaleVector;
    cgnr_functions->Axpy = Axpy;
-/* default preconditioner must be set here but can be changed later... */
+   /* default preconditioner must be set here but can be changed later... */
    cgnr_functions->precond_setup = PrecondSetup;
    cgnr_functions->precond       = Precond;
    cgnr_functions->precondT       = Precond;
@@ -127,7 +127,7 @@ hypre_CGNRDestroy( void *cgnr_vdata )
 
    HYPRE_ANNOTATE_FUNC_END;
 
-   return(ierr);
+   return (ierr);
 }
 
 /*--------------------------------------------------------------------------
@@ -218,17 +218,17 @@ hypre_CGNRSolve(void *cgnr_vdata,
    HYPRE_Int             ierr = 0;
    HYPRE_Int             my_id, num_procs;
    HYPRE_Int             x_not_set = 1;
-   /* char		  *log_file_name; */
+   /* char       *log_file_name; */
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-----------------------------------------------------------------------
     * Start cgnr solve
     *-----------------------------------------------------------------------*/
-   (*(cgnr_functions->CommInfo))(A,&my_id,&num_procs);
+   (*(cgnr_functions->CommInfo))(A, &my_id, &num_procs);
    if (logging > 1 && my_id == 0)
    {
-/* not used yet      log_file_name = (cgnr_data -> log_file_name); */
+      /* not used yet      log_file_name = (cgnr_data -> log_file_name); */
       hypre_printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
       hypre_printf("-----    ------------    ---------  ------------ \n");
    }
@@ -239,7 +239,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (bi_prod != 0.) ieee_check = bi_prod/bi_prod; /* INF -> NaN conversion */
+   if (bi_prod != 0.) { ieee_check = bi_prod / bi_prod; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -249,11 +249,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0)
       {
-        hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-        hypre_printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
-        hypre_printf("User probably placed non-numerics in supplied b.\n");
-        hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-        hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+         hypre_printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
+         hypre_printf("User probably placed non-numerics in supplied b.\n");
+         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+         hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       ierr += 101;
       HYPRE_ANNOTATE_FUNC_END;
@@ -262,9 +262,13 @@ hypre_CGNRSolve(void *cgnr_vdata,
    }
 
    if (stop_crit)
-      eps = tol*tol; /* absolute residual norm */
+   {
+      eps = tol * tol; /* absolute residual norm */
+   }
    else
-      eps = (tol*tol)*bi_prod; /* relative residual norm */
+   {
+      eps = (tol * tol) * bi_prod; /* relative residual norm */
+   }
 
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
@@ -288,11 +292,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* Set initial residual norm */
    if (logging > 0)
    {
-      norms[0] = sqrt((*(cgnr_functions->InnerProd))(r,r));
+      norms[0] = sqrt((*(cgnr_functions->InnerProd))(r, r));
 
       /* Since it is does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
-      if (norms[0] != 0.) ieee_check = norms[0]/norms[0]; /* INF -> NaN conversion */
+      if (norms[0] != 0.) { ieee_check = norms[0] / norms[0]; } /* INF -> NaN conversion */
       if (ieee_check != ieee_check)
       {
          /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -302,11 +306,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
             found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
          if (logging > 0)
          {
-           hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-           hypre_printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
-           hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-           hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-           hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+            hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+            hypre_printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
+            hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
+            hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+            hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
          }
          ierr += 101;
          HYPRE_ANNOTATE_FUNC_END;
@@ -324,11 +328,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
    (*(cgnr_functions->CopyVector))(r, p);
 
    /* gamma = <t,t> */
-   gamma = (*(cgnr_functions->InnerProd))(t,t);
+   gamma = (*(cgnr_functions->InnerProd))(t, t);
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
-   if (gamma != 0.) ieee_check = gamma/gamma; /* INF -> NaN conversion */
+   if (gamma != 0.) { ieee_check = gamma / gamma; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
    {
       /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
@@ -338,11 +342,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0)
       {
-        hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-        hypre_printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
-        hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-        hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-        hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+         hypre_printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
+         hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
+         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+         hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       ierr += 101;
       HYPRE_ANNOTATE_FUNC_END;
@@ -350,7 +354,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
       return ierr;
    }
 
-   while ((i+1) <= max_iter)
+   while ((i + 1) <= max_iter)
    {
       i++;
 
@@ -379,7 +383,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
       gamma = (*(cgnr_functions->InnerProd))(t, t);
 
       /* set i_prod for convergence test */
-      i_prod = (*(cgnr_functions->InnerProd))(r,r);
+      i_prod = (*(cgnr_functions->InnerProd))(r, r);
 
       /* log norm info */
       if (logging > 0)
@@ -387,8 +391,8 @@ hypre_CGNRSolve(void *cgnr_vdata,
          norms[i]     = sqrt(i_prod);
          if (logging > 1 && my_id == 0)
          {
-            hypre_printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i]/
-		norms[i-1], norms[i]/bi_prod);
+            hypre_printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i] /
+                         norms[i - 1], norms[i] / bi_prod);
          }
       }
 
@@ -403,12 +407,12 @@ hypre_CGNRSolve(void *cgnr_vdata,
          /* r = b - Aq */
          (*(cgnr_functions->CopyVector))(b, r);
          (*(cgnr_functions->Matvec))(matvec_data, -1.0, A, q, 1.0, r);
-         i_prod = (*(cgnr_functions->InnerProd))(r,r);
+         i_prod = (*(cgnr_functions->InnerProd))(r, r);
          if (i_prod < eps)
          {
-            (*(cgnr_functions->CopyVector))(q,x);
-	    x_not_set = 0;
-	    break;
+            (*(cgnr_functions->CopyVector))(q, x);
+            x_not_set = 0;
+            break;
          }
       }
 
@@ -420,12 +424,12 @@ hypre_CGNRSolve(void *cgnr_vdata,
       (*(cgnr_functions->Axpy))(1.0, t, p);
    }
 
-  /*-----------------------------------------------------------------
-   * Generate solution x = Cx
-   *-----------------------------------------------------------------*/
+   /*-----------------------------------------------------------------
+    * Generate solution x = Cx
+    *-----------------------------------------------------------------*/
    if (x_not_set)
    {
-      (*(cgnr_functions->CopyVector))(x,q);
+      (*(cgnr_functions->CopyVector))(x, q);
       (*(cgnr_functions->ClearVector))(x);
       precond(precond_data, A, q, x);
    }
@@ -442,7 +446,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    }
 
    (cgnr_data -> num_iterations) = i;
-   (cgnr_data -> rel_residual_norm) = norms[i]/bi_prod;
+   (cgnr_data -> rel_residual_norm) = norms[i] / bi_prod;
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -471,7 +475,7 @@ hypre_CGNRSetTol(void   *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRSetMinIter( void *cgnr_vdata,
-                     HYPRE_Int   min_iter  )
+                      HYPRE_Int   min_iter  )
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
@@ -487,7 +491,7 @@ hypre_CGNRSetMinIter( void *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRSetMaxIter( void *cgnr_vdata,
-                     HYPRE_Int   max_iter  )
+                      HYPRE_Int   max_iter  )
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
@@ -503,7 +507,7 @@ hypre_CGNRSetMaxIter( void *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRSetStopCrit( void *cgnr_vdata,
-                     HYPRE_Int   stop_crit  )
+                       HYPRE_Int   stop_crit  )
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
@@ -558,7 +562,7 @@ hypre_CGNRGetPrecond( void         *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRSetLogging( void *cgnr_vdata,
-                     HYPRE_Int   logging)
+                      HYPRE_Int   logging)
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
@@ -574,7 +578,7 @@ hypre_CGNRSetLogging( void *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRGetNumIterations( void *cgnr_vdata,
-                           HYPRE_Int  *num_iterations )
+                            HYPRE_Int  *num_iterations )
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
@@ -591,7 +595,7 @@ hypre_CGNRGetNumIterations( void *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRGetFinalRelativeResidualNorm( void   *cgnr_vdata,
-                                       HYPRE_Real *relative_residual_norm )
+                                        HYPRE_Real *relative_residual_norm )
 {
    hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int ierr = 0;

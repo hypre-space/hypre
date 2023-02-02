@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -17,20 +17,20 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixGlobalNumRows
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)
-   ( hypre_F90_Obj *matrix,
-     hypre_F90_BigInt *num_rows,
-     hypre_F90_Int *ierr      )
+( hypre_F90_Obj *matrix,
+  hypre_F90_BigInt *num_rows,
+  hypre_F90_Int *ierr      )
 {
    *num_rows = (hypre_F90_BigInt)
-      ( hypre_ParCSRMatrixGlobalNumRows(
-           (hypre_ParCSRMatrix *) *matrix ) );
+               ( hypre_ParCSRMatrixGlobalNumRows(
+                    (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }
@@ -39,15 +39,15 @@ hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS
  * hypre_ParCSRMatrixRowStarts
  *--------------------------------------------------------------------------*/
 
-void 
+void
 hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)
-   ( hypre_F90_Obj *matrix,
-     hypre_F90_Obj *row_starts,
-     hypre_F90_Int *ierr      )
+( hypre_F90_Obj *matrix,
+  hypre_F90_Obj *row_starts,
+  hypre_F90_Int *ierr      )
 {
    *row_starts = (hypre_F90_Obj)
-      ( hypre_ParCSRMatrixRowStarts(
-           (hypre_ParCSRMatrix *) *matrix ) );
+                 ( hypre_ParCSRMatrixRowStarts(
+                      (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -50,31 +50,27 @@ typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 
 typedef struct _hypre_ParCSRCommPkg
 {
-   MPI_Comm                     comm;
-
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int                   *send_map_starts;
-   HYPRE_Int                   *send_map_elmts;
-   HYPRE_Int                   *device_send_map_elmts;
-
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
-
+   MPI_Comm                          comm;
+   HYPRE_Int                         num_components;
+   HYPRE_Int                         num_sends;
+   HYPRE_Int                        *send_procs;
+   HYPRE_Int                        *send_map_starts;
+   HYPRE_Int                        *send_map_elmts;
+   HYPRE_Int                        *device_send_map_elmts;
+   HYPRE_Int                         num_recvs;
+   HYPRE_Int                        *recv_procs;
+   HYPRE_Int                        *recv_vec_starts;
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
-
+   hypre_MPI_Datatype               *send_mpi_types;
+   hypre_MPI_Datatype               *recv_mpi_types;
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
-
+#if defined(HYPRE_USING_GPU)
    /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_Complex *tmp_data;
-   HYPRE_Complex *buf_data;
-   char          *work_space;
+   HYPRE_Complex                    *tmp_data;
+   HYPRE_Complex                    *buf_data;
+   hypre_CSRMatrix                  *matrix_E; /* for matvecT */
 #endif
 } hypre_ParCSRCommPkg;
 
@@ -83,6 +79,7 @@ typedef struct _hypre_ParCSRCommPkg
  *--------------------------------------------------------------------------*/
 
 #define hypre_ParCSRCommPkgComm(comm_pkg)                (comm_pkg -> comm)
+#define hypre_ParCSRCommPkgNumComponents(comm_pkg)       (comm_pkg -> num_components)
 #define hypre_ParCSRCommPkgNumSends(comm_pkg)            (comm_pkg -> num_sends)
 #define hypre_ParCSRCommPkgSendProcs(comm_pkg)           (comm_pkg -> send_procs)
 #define hypre_ParCSRCommPkgSendProc(comm_pkg, i)         (comm_pkg -> send_procs[i])
@@ -102,24 +99,31 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)        (comm_pkg -> recv_mpi_types)
 #define hypre_ParCSRCommPkgRecvMPIType(comm_pkg,i)       (comm_pkg -> recv_mpi_types[i])
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
-#define hypre_ParCSRCommPkgWorkSpace(comm_pkg)           ((comm_pkg) -> work_space)
+#define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
 #endif
 
 static inline void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
+   HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
    if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)
    {
       hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) =
-         hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)), HYPRE_MEMORY_DEVICE);
+         hypre_TAlloc(HYPRE_Int,
+                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                      HYPRE_MEMORY_DEVICE);
 
-      hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
-                    HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg)),
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                    hypre_ParCSRCommPkgSendMapElmts(comm_pkg),
+                    HYPRE_Int,
+                    hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                    HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
    }
 #endif
 }
@@ -142,4 +146,3 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
 
 #endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
-

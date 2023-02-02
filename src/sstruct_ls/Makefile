@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -58,6 +58,7 @@ FILES =\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
+ bsearch.c\
  fac.c\
  fac_amr_zero_data.c\
  fac_cf_coarsen.c\
@@ -67,7 +68,6 @@ FILES =\
  fac_relax.c\
  fac_solve3.c\
  fac_zero_cdata.c\
- hypre_bsearch.c\
  krylov.c\
  krylov_sstruct.c\
  eliminate_rowscols.c\
@@ -76,11 +76,11 @@ FILES =\
  maxwell_PNedelec.c\
  maxwell_PNedelec_bdy.c\
  maxwell_semi_interp.c\
+ maxwell_solve.c\
+ maxwell_solve2.c\
  maxwell_TV.c\
  maxwell_TV_setup.c\
  maxwell_zeroBC.c\
- hypre_MaxwellSolve.c\
- hypre_MaxwellSolve2.c\
  nd1_amge_interpolation.c\
  sstruct_amr_intercommunication.c\
  sstruct_owninfo.c\
@@ -125,7 +125,7 @@ install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -142,6 +142,6 @@ libHYPRE_sstruct_ls.a: ${OBJS}
 libHYPRE_sstruct_ls.so libHYPRE_sstruct_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -162,24 +162,84 @@ BoomerAMG also provides an additive V(1,1)-cycle as well as a mult-additive
 V(1,1)-cycle and a simplified versioni [VaYa2014]_. The additive variants can
 only be used with weighted Jacobi or l1-Jacobi smoothing.
 
+
+.. _ch-boomeramg-gpu:
+
 GPU-supported Options
 ------------------------------------------------------------------------------
-In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs,
-so hypre should be configured with ``--enable-unified-memory``.
-``HYPRE_Init()`` must be called and precede all the other hypre functions, and 
-``HYPRE_Finalize()`` must be called before exiting.
-To enable the execution of  AMG setup  on GPUs, one needs to explicitly specify the execution policy
-by
 
-.. code-block:: bash
-
- hypre_HandleDefaultExecPolicy(hypre_handle()) = HYPRE_EXEC_DEVICE
-
+In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs.
+However, hypre can also be built without ``--enable-unified-memory`` if
+all the selected parameters have GPU-support. 
 The currently available  GPU-supported BoomerAMG options include:
 
-* Coarsening: PMIS. No aggressive coarsening is supported,
-* Interpolation: direct interpolation, extended interpolation and extended+i interpolation,
-* Smoother: weighted Jacobi relaxation and l1-Jacobi.
+* Coarsening: PMIS (8)
+* Interpolation:  direct (3), BAMG-direct (15), extended (14), extended+i (6) and extended+e (18)
+* Aggressive coarsening
+* Second-stage interpolation with aggressive coarsening: extended (5) and extended+e (7)
+* Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SRROR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_
+* Relaxation order: must be 0, i.e., lexicographic order
+
+A sample code of setting up IJ matrix :math:`A` and solve :math:`Ax=b` using AMG-preconditioned CG
+on GPUs is shown below.
+
+.. code-block:: c
+
+ cudaSetDevice(device_id); /* GPU binding */
+ ...
+ HYPRE_Init(); /* must be the first HYPRE function call */
+ ...
+ /* AMG in GPU memory (default) */
+ HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
+ /* setup AMG on GPUs */
+ HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE);
+ /* use hypre's SpGEMM instead of vendor implementation */
+ HYPRE_SetSpGemmUseVendor(FALSE);
+ /* use GPU RNG */
+ HYPRE_SetUseGpuRand(TRUE);
+ if (useHypreGpuMemPool)
+ {
+    /* use hypre's GPU memory pool */
+    HYPRE_SetGPUMemoryPoolSize(bin_growth, min_bin, max_bin, max_bytes);
+ }
+ else if (useUmpireGpuMemPool)
+ {
+    /* or use Umpire GPU memory pool */
+    HYPRE_SetUmpireUMPoolName("HYPRE_UM_POOL_TEST");
+    HYPRE_SetUmpireDevicePoolName("HYPRE_DEVICE_POOL_TEST");
+ }
+ ...
+ /* setup IJ matrix A */
+ HYPRE_IJMatrixCreate(comm, first_row, last_row, first_col, last_col, &ij_A);
+ HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+ /* GPU pointers; efficient in large chunks */
+ HYPRE_IJMatrixAddToValues(ij_A, num_rows, num_cols, rows, cols, data);
+ HYPRE_IJMatrixAssemble(ij_A);
+ HYPRE_IJMatrixGetObject(ij_A, (void **) &parcsr_A);
+ ...
+ /* setup AMG */
+ HYPRE_ParCSRPCGCreate(comm, &solver);
+ HYPRE_BoomerAMGCreate(&precon);
+ HYPRE_BoomerAMGSetRelaxType(precon, rlx_type); /* 3, 4, 6, 7, 18, 11, 12 */
+ HYPRE_BoomerAMGSetRelaxOrder(precon, FALSE); /* must be false */
+ HYPRE_BoomerAMGSetCoarsenType(precon, coarsen_type); /* 8 */
+ HYPRE_BoomerAMGSetInterpType(precon, interp_type); /* 3, 15, 6, 14, 18 */
+ HYPRE_BoomerAMGSetAggNumLevels(precon, agg_num_levels);
+ HYPRE_BoomerAMGSetAggInterpType(precon, agg_interp_type); /* 5 or 7 */
+ HYPRE_BoomerAMGSetKeepTranspose(precon, TRUE); /* keep transpose to avoid SpMTV */
+ HYPRE_BoomerAMGSetRAP2(precon, FALSE); /* RAP in two multiplications
+                                           (default: FALSE) */
+ HYPRE_ParCSRPCGSetPrecond(solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup,
+                           precon);
+ HYPRE_PCGSetup(solver, parcsr_A, b, x);
+ ...
+ /* solve */
+ HYPRE_PCGSolve(solver, parcsr_A, b, x);
+ ...
+ HYPRE_Finalize(); /* must be the last HYPRE function call */
+
+``HYPRE_Init()`` must be called and precede all the other ``HYPRE_`` functions, and
+``HYPRE_Finalize()`` must be called before exiting.
 
 Miscellaneous
 ------------------------------------------------------------------------------

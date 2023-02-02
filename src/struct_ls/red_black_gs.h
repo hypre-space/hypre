@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -152,35 +152,35 @@ typedef struct
    hypre_fence();                                                   \
 }
 
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define hypre_RedBlackLoopInit()
-#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,      \
-                                Astart,Ani,Anj,Ai,      \
-                                bstart,bni,bnj,bi,      \
-                                xstart,xni,xnj,xi)      \
-{                                                       \
-   HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);             \
-   BoxLoopforall(hypre_HandleStructExecPolicy(hypre_handle()), hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx) \
-   {                                                    \
-      HYPRE_Int idx_local = idx;                        \
-      HYPRE_Int ii,jj,kk,Ai,bi,xi;                      \
-      HYPRE_Int local_ii;                               \
-      kk = idx_local % nk;                              \
-      idx_local = idx_local / nk;                       \
-      jj = idx_local % nj;                              \
-      idx_local = idx_local / nj;                       \
-      local_ii = (kk + jj + redblack) % 2;              \
-      ii = 2*idx_local + local_ii;                      \
-      if (ii < ni)                                      \
-      {                                                 \
-         Ai = Astart + kk*Anj*Ani + jj*Ani + ii;        \
-         bi = bstart + kk*bnj*bni + jj*bni + ii;        \
-         xi = xstart + kk*xnj*xni + jj*xni + ii;        \
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,        \
+                                Astart,Ani,Anj,Ai,        \
+                                bstart,bni,bnj,bi,        \
+                                xstart,xni,xnj,xi)        \
+{                                                         \
+   HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);               \
+   BoxLoopforall(hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx) \
+   {                                                      \
+      HYPRE_Int idx_local = idx;                          \
+      HYPRE_Int ii,jj,kk,Ai,bi,xi;                        \
+      HYPRE_Int local_ii;                                 \
+      kk = idx_local % nk;                                \
+      idx_local = idx_local / nk;                         \
+      jj = idx_local % nj;                                \
+      idx_local = idx_local / nj;                         \
+      local_ii = (kk + jj + redblack) % 2;                \
+      ii = 2*idx_local + local_ii;                        \
+      if (ii < ni)                                        \
+      {                                                   \
+         Ai = Astart + kk*Anj*Ani + jj*Ani + ii;          \
+         bi = bstart + kk*bnj*bni + jj*bni + ii;          \
+         xi = xstart + kk*xnj*xni + jj*xni + ii;          \
 
-#define hypre_RedBlackLoopEnd()                         \
-      }                                                 \
-   });                                                  \
+#define hypre_RedBlackLoopEnd()                           \
+      }                                                   \
+   });                                                    \
 }
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,      \
@@ -188,8 +188,67 @@ typedef struct
                                             xstart,xni,xnj,xi)      \
 {                                                                   \
    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
-   BoxLoopforall(hypre_HandleStructExecPolicy(hypre_handle()), hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx) \
+   BoxLoopforall(hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx)           \
    {                                                                \
+      HYPRE_Int idx_local = idx;                                    \
+      HYPRE_Int ii,jj,kk,bi,xi;                                     \
+      HYPRE_Int local_ii;                                           \
+      kk = idx_local % nk;                                          \
+      idx_local = idx_local / nk;                                   \
+      jj = idx_local % nj;                                          \
+      idx_local = idx_local / nj;                                   \
+      local_ii = (kk + jj + redblack) % 2;                          \
+      ii = 2*idx_local + local_ii;                                  \
+      if (ii < ni)                                                  \
+      {                                                             \
+         bi = bstart + kk*bnj*bni + jj*bni + ii;                    \
+         xi = xstart + kk*xnj*xni + jj*xni + ii;                    \
+
+#define hypre_RedBlackConstantcoefLoopEnd()                         \
+      }                                                             \
+   });                                                              \
+}
+
+#elif defined(HYPRE_USING_SYCL)
+
+#define hypre_RedBlackLoopInit()
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,                  \
+                                Astart,Ani,Anj,Ai,                  \
+                                bstart,bni,bnj,bi,                  \
+                                xstart,xni,xnj,xi)                  \
+{                                                                   \
+   HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)            \
+   {                                                                \
+      HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();      \
+      HYPRE_Int idx_local = idx;                                    \
+      HYPRE_Int ii,jj,kk,Ai,bi,xi;                                  \
+      HYPRE_Int local_ii;                                           \
+      kk = idx_local % nk;                                          \
+      idx_local = idx_local / nk;                                   \
+      jj = idx_local % nj;                                          \
+      idx_local = idx_local / nj;                                   \
+      local_ii = (kk + jj + redblack) % 2;                          \
+      ii = 2*idx_local + local_ii;                                  \
+      if (ii < ni)                                                  \
+      {                                                             \
+         Ai = Astart + kk*Anj*Ani + jj*Ani + ii;                    \
+         bi = bstart + kk*bnj*bni + jj*bni + ii;                    \
+         xi = xstart + kk*xnj*xni + jj*xni + ii;                    \
+
+#define hypre_RedBlackLoopEnd()                                     \
+      }                                                             \
+   });                                                              \
+}
+
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,      \
+                                            bstart,bni,bnj,bi,      \
+                                            xstart,xni,xnj,xi)      \
+{                                                                   \
+   HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)            \
+   {                                                                \
+      HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();      \
       HYPRE_Int idx_local = idx;                                    \
       HYPRE_Int ii,jj,kk,bi,xi;                                     \
       HYPRE_Int local_ii;                                           \
@@ -298,7 +357,7 @@ typedef struct
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION
-#ifdef WIN32
+#if defined(WIN32) && defined(_MSC_VER)
 #define Pragma(x) __pragma(HYPRE_XSTR(x))
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
@@ -352,4 +411,3 @@ typedef struct
    }\
 }
 #endif
-

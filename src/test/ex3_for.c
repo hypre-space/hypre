@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -74,15 +74,15 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    hypre_F90_Obj x;
    hypre_F90_Obj solver;
    hypre_F90_Obj precond;
-        HYPRE_Int temp_COMM;
-        HYPRE_Int precond_id;
-        HYPRE_Int zero = 0;
-        HYPRE_Int one = 1;
-        HYPRE_Int two = 2;
-        HYPRE_Int five = 5;
-        HYPRE_Int fifty = 50;
-     HYPRE_Real zero_dot = 0.0;
-     HYPRE_Real tol = 1.e-6;
+   HYPRE_Int temp_COMM;
+   HYPRE_Int precond_id;
+   HYPRE_Int zero = 0;
+   HYPRE_Int one = 1;
+   HYPRE_Int two = 2;
+   HYPRE_Int five = 5;
+   HYPRE_Int fifty = 50;
+   HYPRE_Real zero_dot = 0.0;
+   HYPRE_Real tol = 1.e-6;
 #else
    HYPRE_StructGrid     grid;
    HYPRE_StructStencil  stencil;
@@ -174,18 +174,18 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       size for the interior nodes is indicated by n (n x n).
       pi and pj indicate position in the processor grid. */
    N  = sqrt(num_procs);
-   h  = 1.0 / (N*n+1); /* note that when calculating h we must
+   h  = 1.0 / (N * n + 1); /* note that when calculating h we must
                           remember to count the bounday nodes */
-   h2 = h*h;
+   h2 = h * h;
    pj = myid / N;
-   pi = myid - pj*N;
+   pi = myid - pj * N;
 
-  /* Figure out the extents of each processor's piece of the grid. */
-   ilower[0] = pi*n;
-   ilower[1] = pj*n;
+   /* Figure out the extents of each processor's piece of the grid. */
+   ilower[0] = pi * n;
+   ilower[1] = pj * n;
 
-   iupper[0] = ilower[0] + n-1;
-   iupper[1] = ilower[1] + n-1;
+   iupper[0] = ilower[0] + n - 1;
+   iupper[1] = ilower[1] + n - 1;
 
    /* 1. Set up a grid */
    {
@@ -222,10 +222,12 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Define the geometry of the stencil */
       {
          HYPRE_Int entry;
-         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_StructStencilSetElement(&stencil, &entry, offsets[entry]);
+         }
       }
 #else
       /* Create an empty 2D, 5-pt stencil object */
@@ -234,10 +236,12 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Define the geometry of the stencil */
       {
          HYPRE_Int entry;
-         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+         }
       }
 #endif
    }
@@ -245,7 +249,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    /* 3. Set up a Struct Matrix */
    {
       HYPRE_Int nentries = 5;
-      HYPRE_Int nvalues = nentries*n*n;
+      HYPRE_Int nvalues = nentries * n * n;
       HYPRE_Real *values;
       HYPRE_Int stencil_indices[5];
 
@@ -260,7 +264,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
 
       for (j = 0; j < nentries; j++)
+      {
          stencil_indices[j] = j;
+      }
 
       /* Set the standard stencil at each grid point,
          we will fix the boundaries later */
@@ -268,13 +274,15 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       {
          values[i] = 4.0;
          for (j = 1; j < nentries; j++)
-            values[i+j] = -1.0;
+         {
+            values[i + j] = -1.0;
+         }
       }
 
       HYPRE_StructMatrixSetBoxValues(&A, ilower, iupper, &nentries,
                                      stencil_indices, values);
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 #else
       /* Create an empty matrix object */
       HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
@@ -285,7 +293,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
 
       for (j = 0; j < nentries; j++)
+      {
          stencil_indices[j] = j;
+      }
 
       /* Set the standard stencil at each grid point,
          we will fix the boundaries later */
@@ -293,13 +303,15 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       {
          values[i] = 4.0;
          for (j = 1; j < nentries; j++)
-            values[i+j] = -1.0;
+         {
+            values[i + j] = -1.0;
+         }
       }
 
       HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                      stencil_indices, values);
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 #endif
    }
 
@@ -310,23 +322,25 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Int bc_ilower[2];
       HYPRE_Int bc_iupper[2];
       HYPRE_Int nentries = 1;
-      HYPRE_Int nvalues  = nentries*n; /*  number of stencil entries times the length
+      HYPRE_Int nvalues  = nentries * n; /*  number of stencil entries times the length
                                      of one side of my grid box */
       HYPRE_Real *values;
       HYPRE_Int stencil_indices[1];
 
       values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
       for (j = 0; j < nvalues; j++)
-            values[j] = 0.0;
+      {
+         values[j] = 0.0;
+      }
 
       /* Recall: pi and pj describe position in the processor grid */
       if (pj == 0)
       {
          /* bottom row of grid points */
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          stencil_indices[0] = 3;
@@ -340,13 +354,13 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      if (pj == N-1)
+      if (pj == N - 1)
       {
          /* upper row of grid points */
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n + n-1;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n + n - 1;
 
-         bc_iupper[0] = bc_ilower[0] + n-1;
+         bc_iupper[0] = bc_ilower[0] + n - 1;
          bc_iupper[1] = bc_ilower[1];
 
          stencil_indices[0] = 4;
@@ -363,11 +377,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       if (pi == 0)
       {
          /* left row of grid points */
-         bc_ilower[0] = pi*n;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          stencil_indices[0] = 1;
 
@@ -380,14 +394,14 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      if (pi == N-1)
+      if (pi == N - 1)
       {
          /* right row of grid points */
-         bc_ilower[0] = pi*n + n-1;
-         bc_ilower[1] = pj*n;
+         bc_ilower[0] = pi * n + n - 1;
+         bc_ilower[1] = pj * n;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + n-1;
+         bc_iupper[1] = bc_ilower[1] + n - 1;
 
          stencil_indices[0] = 2;
 
@@ -400,7 +414,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
       }
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
    }
 
    /* This is a collective call finalizing the matrix assembly.
@@ -413,7 +427,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    /* 5. Set up Struct Vectors for b and x */
    {
-      HYPRE_Int    nvalues = n*n;
+      HYPRE_Int    nvalues = n * n;
       HYPRE_Real *values;
 
       values = hypre_CTAlloc(HYPRE_Real, nvalues, HYPRE_MEMORY_HOST);
@@ -437,9 +451,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_StructVectorInitialize(x);
 #endif
 
-     /* Set the values */
+      /* Set the values */
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = h2;
+      }
 #ifdef HYPRE_FORTRAN
       HYPRE_StructVectorSetBoxValues(&b, ilower, iupper, values);
 #else
@@ -447,14 +463,16 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = 0.0;
+      }
 #ifdef HYPRE_FORTRAN
       HYPRE_StructVectorSetBoxValues(&x, ilower, iupper, values);
 #else
       HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 #endif
 
-      free(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
 
       /* This is a collective call finalizing the vector assembly.
          The vector is now ``ready to be used'' */
@@ -522,7 +540,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
       /* Set the preconditioner and solve */
       HYPRE_StructPCGSetPrecond(solver, HYPRE_StructSMGSolve,
-                                  HYPRE_StructSMGSetup, precond);
+                                HYPRE_StructSMGSetup, precond);
       HYPRE_StructPCGSetup(solver, A, b, x);
       HYPRE_StructPCGSolve(solver, A, b, x);
 
@@ -586,10 +604,14 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    /* Print the solution and other info */
 #ifdef HYPRE_FORTRAN
    if (print_solution)
+   {
       HYPRE_StructVectorPrint(&x, &zero);
+   }
 #else
    if (print_solution)
+   {
       HYPRE_StructVectorPrint("struct.out.x", x, 0);
+   }
 #endif
 
    if (myid == 0)

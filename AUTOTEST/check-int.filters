@@ -1,9 +1,9 @@
 /f2c.h:
 /HYPRE_config.h:
-/hypre_printf.c:
+/printf.c:
 /_hypre_utilities.h:
 /HYPRE_utilities.h:
-/utilities/hypre_general.h:
+/utilities/general.h:
 /utilities/mpistubs.c
 as long as
 too long
@@ -12,5 +12,5 @@ long-range interpolation
 monstrously long
 get a long msg
 long rows
-utilities/hypre_hopscotch_hash.h:  //return _InterlockedCompareExchange
-utilities/hypre_hopscotch_hash.h:  //return _InterlockedExchangeAdd
+return _InterlockedCompareExchange
+return _InterlockedExchangeAdd

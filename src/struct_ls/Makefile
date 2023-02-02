@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -39,7 +39,6 @@ FILES =\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
  F90_HYPRE_struct_sparse_msg.c\
- general.c\
  hybrid.c\
  HYPRE_struct_bicgstab.c\
  HYPRE_struct_cycred.c\
@@ -117,7 +116,7 @@ install: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -134,6 +133,6 @@ libHYPRE_struct_ls.a: ${OBJS}
 libHYPRE_struct_ls.so libHYPRE_struct_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

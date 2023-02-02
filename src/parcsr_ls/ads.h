@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -82,7 +82,7 @@ typedef struct
    HYPRE_Int B_Pi_Pmax;
 
    /* Temporary vectors */
-   hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2;
+   hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2, *zz;
 
    /* Output log info */
    HYPRE_Int num_iterations;

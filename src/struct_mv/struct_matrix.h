@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -29,6 +29,7 @@ typedef struct hypre_StructMatrix_struct
 
    hypre_BoxArray       *data_space;
 
+   HYPRE_MemoryLocation  memory_location;           /* memory location of data */
    HYPRE_Complex        *data;                      /* Pointer to variable matrix data */
    HYPRE_Complex        *data_const;                /* Pointer to constant matrix data */
    HYPRE_Complex       **stencil_data;              /* Pointer for each stencil */
@@ -47,7 +48,7 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
    HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
 
    HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
 
@@ -67,6 +68,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixStencil(matrix)             ((matrix) -> stencil)
 #define hypre_StructMatrixNumValues(matrix)           ((matrix) -> num_values)
 #define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
+#define hypre_StructMatrixMemoryLocation(matrix)      ((matrix) -> memory_location)
 #define hypre_StructMatrixData(matrix)                ((matrix) -> data)
 #define hypre_StructMatrixDataConst(matrix)           ((matrix) -> data_const)
 #define hypre_StructMatrixStencilData(matrix)         ((matrix) -> stencil_data)

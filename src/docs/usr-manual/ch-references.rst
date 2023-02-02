@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -30,6 +30,12 @@
    interpolation operators for linear elasticity problems.  *Numer. Linear
    Algebra Appl.*, 17:495--517, 2010.  Also available as LLNL technical report
    LLLNL-JRNL-412928.
+
+.. [BKRHSMTY2021] Luc Berger-Vergiat, Brian Kelley, Sivasankaran Rajamanickam,
+   Jonathan Hu, Katarzyna Swirydowicz, Paul Mullowney, Stephen Thomas, Ichitaro
+   Yamazaki. Two-Stage Gauss--Seidel Preconditioners and Smoothers for Krylov
+   Solvers on a GPU cluster.
+   `https://arxiv.org/abs/2104.01196 <https://arxiv.org/abs/2104.01196>`_.
 
 .. [BLOPEWeb] BLOPEX, parallel preconditioned eigenvalue solvers.
    `http://code.google.com/p/blopex/ <http://code.google.com/p/blopex/>`_.
@@ -131,6 +137,15 @@
    issue on Adaptive and Multilevel Methods in Electromagnetics.
    UCRL-JRNL-237306.
 
+.. [KoYe1993] L. Yu. Kolotilina and A. Yu. Yeremin. Factorized Sparse
+   Approximate Inverse Preconditionings I. Theory. *SIAM J. Matrix Anal. A.*, 14(1):45--58, 1993.
+   `https://doi.org/10.1137/0614004 <https://doi.org/10.1137/0614004>`_.
+
+.. [JaFe2015] C. Janna, M. Ferronato, F. Sartoretto and G. Gambolati.
+   FSAIPACK: A Software Package for High-Performance Factored Sparse Approximate Inverse
+   Preconditioning. *ACM T. Math. Software*, 41(2):1–-26, 2015.
+   `https://doi.org/10.1145/2629475 <https://doi.org/10.1145/2629475>`_.
+
 .. [JoLe2006] J. Jones and B. Lee.  A multigrid method for variable coefficient
    maxwell's equations.  *SIAM J. Sci. Comput.*, 27:1689--1708, 2006.
 
@@ -141,6 +156,11 @@
 .. [MoRS1998] J.E. Morel, Randy M. Roberts, and Mikhail J. Shashkov.  A local
    support-operators diffusion discretization scheme for quadrilateral r-z
    meshes.  *J. Comp. Physics*, 144:17--51, 1998.
+
+.. [PaFa2019] V. A. Paludetto Magri, A. Franceschini and C. Janna. A novel algebraic
+   multigrid approach based on adaptive smoothing and prolongation for ill-conditioned
+   systems. *SIAM J. Sci. Comput.*, 41(1):A190--A219, 2019.
+   `https://doi.org/10.1137/17M1161178 <https://doi.org/10.1137/17M1161178>`_.
 
 .. [RuSt1987] J. W. Ruge and K. Stüben.  Algebraic multigrid (AMG).
    In S. F. McCormick, editor, *Multigrid Methods*, volume 3 of *Frontiers in
@@ -153,6 +173,9 @@
 .. [Stue1999] K. Stüben.  Algebraic multigrid (AMG): an introduction with
    applications.  In U. Trottenberg, C. Oosterlee, and A. Schüller, editors,
    *Multigrid*. Academic Press, 2001.
+
+.. [Umpire] Umpire: Managing Heterogeneous Memory Resources.
+   `https://github.com/LLNL/Umpire <https://github.com/LLNL/Umpire>`_.
 
 .. [VaMB1996] P. Vaněk, J. Mandel, and M. Brezina.  Algebraic multigrid based on
    smoothed aggregation for second and fourth order problems.  *Computing*,

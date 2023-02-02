@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -33,7 +33,7 @@ typedef struct
 }
 Mem;
 
-Mem  *MemCreate();
+Mem  *MemCreate(void);
 void  MemDestroy(Mem *m);
 char *MemAlloc(Mem *m, HYPRE_Int size);
 void  MemStat(Mem *m, FILE *stream, char *msg);

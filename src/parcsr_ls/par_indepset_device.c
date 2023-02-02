@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -12,31 +12,32 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 __global__ void
-hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
-                             HYPRE_Int  *graph_diag,
-                             HYPRE_Real *measure_diag,
-                             HYPRE_Real *measure_offd,
-                             HYPRE_Int  *S_diag_i,
-                             HYPRE_Int  *S_diag_j,
-                             HYPRE_Int  *S_offd_i,
-                             HYPRE_Int  *S_offd_j,
-                             HYPRE_Int  *IS_marker_diag,
-                             HYPRE_Int  *IS_marker_offd,
-                             HYPRE_Int   IS_offd_temp_mark)
+hypreGPUKernel_IndepSetMain(hypre_DeviceItem &item,
+                            HYPRE_Int   graph_diag_size,
+                            HYPRE_Int  *graph_diag,
+                            HYPRE_Real *measure_diag,
+                            HYPRE_Real *measure_offd,
+                            HYPRE_Int  *S_diag_i,
+                            HYPRE_Int  *S_diag_j,
+                            HYPRE_Int  *S_offd_i,
+                            HYPRE_Int  *S_offd_j,
+                            HYPRE_Int  *IS_marker_diag,
+                            HYPRE_Int  *IS_marker_offd,
+                            HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int warp_id = hypre_cuda_get_grid_warp_id<1,1>();
+   HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
    if (warp_id >= graph_diag_size)
    {
       return;
    }
 
-   HYPRE_Int lane = hypre_cuda_get_lane_id<1>();
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int row, row_start, row_end;
-   HYPRE_Int i, j;
-   HYPRE_Real t, measure_row;
+   HYPRE_Int i = 0, j;
+   HYPRE_Real t = 0.0, measure_row;
    HYPRE_Int marker_row = 1;
 
    if (lane < 2)
@@ -45,15 +46,15 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
       i   = read_only_load(S_diag_i + row + lane);
    }
 
-   row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+   row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+   row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
    if (lane == 0)
    {
       t = read_only_load(measure_diag + row);
    }
 
-   measure_row = __shfl_sync(HYPRE_WARP_FULL_MASK, t, 0);
+   measure_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, t, 0);
 
    for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
    {
@@ -77,8 +78,8 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
       i = read_only_load(S_offd_i + row + lane);
    }
 
-   row_start = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 0);
-   row_end   = __shfl_sync(HYPRE_WARP_FULL_MASK, i, 1);
+   row_start = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 0);
+   row_end   = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, i, 1);
 
    for (i = row_start + lane; i < row_end; i += HYPRE_WARP_SIZE)
    {
@@ -97,7 +98,7 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
       }
    }
 
-   marker_row = warp_reduce_min(marker_row);
+   marker_row = warp_reduce_min(item, marker_row);
 
    if (lane == 0 && marker_row == 0)
    {
@@ -106,13 +107,14 @@ hypreCUDAKernel_IndepSetMain(HYPRE_Int   graph_diag_size,
 }
 
 __global__ void
-hypreCUDAKernel_IndepSetFixMarker(HYPRE_Int  *IS_marker_diag,
-                                  HYPRE_Int   num_elmts_send,
-                                  HYPRE_Int  *send_map_elmts,
-                                  HYPRE_Int  *int_send_buf,
-                                  HYPRE_Int   IS_offd_temp_mark)
+hypreGPUKernel_IndepSetFixMarker(hypre_DeviceItem &item,
+                                 HYPRE_Int  *IS_marker_diag,
+                                 HYPRE_Int   num_elmts_send,
+                                 HYPRE_Int  *send_map_elmts,
+                                 HYPRE_Int  *int_send_buf,
+                                 HYPRE_Int   IS_offd_temp_mark)
 {
-   HYPRE_Int thread_id = hypre_cuda_get_grid_thread_id<1,1>();
+   HYPRE_Int thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (thread_id >= num_elmts_send)
    {
@@ -156,7 +158,6 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    HYPRE_Int  num_elmts_send = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
    HYPRE_Int *send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
 
-   dim3 bDim, gDim;
    hypre_ParCSRCommHandle *comm_handle;
 
    /*------------------------------------------------------------------
@@ -167,28 +168,33 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set
     *-------------------------------------------------------*/
-   bDim = hypre_GetDefaultCUDABlockDimension();
-   gDim = hypre_GetDefaultCUDAGridDimension(graph_diag_size, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IndepSetMain, gDim, bDim,
-                      graph_diag_size, graph_diag, measure_diag, measure_offd,
-                      S_diag_i, S_diag_j, S_offd_i, S_offd_j,
-                      IS_marker_diag, IS_marker_offd, IS_offd_temp_mark );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IndepSetMain, gDim, bDim,
+                     graph_diag_size, graph_diag, measure_diag, measure_offd,
+                     S_diag_i, S_diag_j, S_offd_i, S_offd_j,
+                     IS_marker_diag, IS_marker_offd, IS_offd_temp_mark );
 
    /*--------------------------------------------------------------------
     * Exchange boundary data for IS_marker: send external IS to internal
     *-------------------------------------------------------------------*/
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   /* RL: make sure IS_marker_offd is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
    comm_handle = hypre_ParCSRCommHandleCreate_v2(12, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, IS_marker_offd,
                                                  HYPRE_MEMORY_DEVICE, int_send_buf);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    /* adjust IS_marker_diag from the received */
-   gDim = hypre_GetDefaultCUDAGridDimension(num_elmts_send, "thread", bDim);
+   gDim = hypre_GetDefaultDeviceGridDimension(num_elmts_send, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IndepSetFixMarker, gDim, bDim,
-                      IS_marker_diag, num_elmts_send, send_map_elmts,
-                      int_send_buf, IS_offd_temp_mark );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IndepSetFixMarker, gDim, bDim,
+                     IS_marker_diag, num_elmts_send, send_map_elmts,
+                     int_send_buf, IS_offd_temp_mark );
 
    /* Note that IS_marker_offd is not sync'ed (communicated) here */
 
@@ -196,7 +202,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
 }
 
 /* Augments measures by some random value between 0 and 1
- * aug_rand: 1: CURAND;   11: SEQ CURAND (TODO)
+ * aug_rand: 1: GPU RAND; 11: GPU SEQ RAND
  *           2: CPU RAND; 12: CPU SEQ RAND
  */
 HYPRE_Int
@@ -222,30 +228,28 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
       hypre_TMemcpy(urand, h_urand, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TFree(h_urand, HYPRE_MEMORY_HOST);
    }
+   else if (aug_rand == 11)
+   {
+      HYPRE_BigInt n_global     = hypre_ParCSRMatrixGlobalNumRows(S);
+      HYPRE_BigInt n_first      = hypre_ParCSRMatrixFirstRowIndex(S);
+      HYPRE_Real  *urand_global = hypre_TAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_DEVICE);
+      // To make sure all rank generate the same sequence
+      hypre_CurandUniform(n_global, urand_global, 0, 0, 1, 0);
+      hypre_TMemcpy(urand, urand_global + n_first, HYPRE_Real, num_rows_diag, HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_DEVICE);
+      hypre_TFree(urand_global, HYPRE_MEMORY_DEVICE);
+   }
    else
    {
-      curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
-
-      HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, 2747 + my_id) );
-
-      if (sizeof(HYPRE_Real) == sizeof(hypre_double))
-      {
-         HYPRE_CURAND_CALL( curandGenerateUniformDouble(gen, (hypre_double *) urand, num_rows_diag) );
-      }
-      else if (sizeof(HYPRE_Real) == sizeof(float))
-      {
-         HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, num_rows_diag) );
-      }
+      hypre_assert(aug_rand == 1);
+      hypre_CurandUniform(num_rows_diag, urand, 0, 0, 0, 0);
    }
 
-   thrust::plus<HYPRE_Real> op;
-   HYPRE_THRUST_CALL(transform, measure_array, measure_array + num_rows_diag,
-                     urand, measure_array, op);
+   hypreDevice_ComplexAxpyn(measure_array, num_rows_diag, urand, measure_array, 1.0);
 
    hypre_TFree(urand, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA)
-
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)

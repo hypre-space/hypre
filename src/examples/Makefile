@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -9,32 +9,66 @@
 CC        = mpicc
 F77       = mpif77
 CXX       = mpicxx
-F90       = mpifort
+F90       = mpif90
+CUF       = mpixlcuf
+LINK_CC   = ${CC}
+LINK_CXX  = ${CXX}
+LINK_FC   = ${F77}
+LINK_CUF  = ${CUF}
+
+XL_DIR=$(dir $(shell which xlc))..
+
 HYPRE_DIR = ../hypre
+
+########################################################################
+# CUDA
+########################################################################
+ifeq ($(use_cuda), 1)
+   CUDA_INCL = -I${CUDA_HOME}/include
+   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+   CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
+   NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
+   COPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
+   FOPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA -qsuppress=cmpmsg
+endif
+
+ifeq ($(use_cuf), 1)
+   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+endif
+
+########################################################################
+# Device OMP
+########################################################################
+ifeq ($(use_domp), 1)
+   DOMP_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
+   COPTS_DOMP = -DHYPRE_EXAMPLE_USING_DEVICE_OMP
+   FOPTS_DOMP = -qoffload -W@,-v -qsmp=omp -qinfo=omperrtrace -DHYPRE_EXAMPLE_USING_DEVICE_OMP
+   LOPTS_DOMP = -qoffload -W@,-v -qsmp=omp
+endif
 
 ########################################################################
 # Compiling and linking options
 ########################################################################
-COPTS     = -g -Wall
-CINCLUDES = -I$(HYPRE_DIR)/include
-#CDEFS     = -DHYPRE_EXVIS
-CDEFS     = 
-CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
-FOPTS     = -g
+CINCLUDES = -I$(HYPRE_DIR)/include $(CUDA_INCL)
+#CDEFS = -DHYPRE_EXVIS
+CDEFS =
+COPTS = -g -Wall $(COPTS_CUDA) $(COPTS_DOMP)
+FOPTS = -g $(FOPTS_CUDA) $(FOPTS_DOMP)
+CFLAGS = $(COPTS) $(CINCLUDES) $(CDEFS)
 FINCLUDES = $(CINCLUDES)
-FFLAGS    = $(FOPTS) $(FINCLUDES)
-CXXOPTS   = $(COPTS) -Wno-deprecated
+FFLAGS = $(FOPTS) $(FINCLUDES)
+CUFFLAGS = -qcuda
+CXXOPTS = $(COPTS) -Wno-deprecated
 CXXINCLUDES = $(CINCLUDES) -I..
-CXXDEFS   = $(CDEFS)
-IFLAGS_BXX = 
+CXXDEFS = $(CDEFS)
+IFLAGS_BXX =
 CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
-IF90FLAGS = 
+IF90FLAGS =
 F90FLAGS = $(FFLAGS) $(IF90FLAGS)
 
-
-LINKOPTS  = $(COPTS)
-LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -lm
-LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
+LINKOPTS = $(LOPTS_CUDA) $(LOPTS_DOMP)
+LIBS = -L$(HYPRE_DIR)/lib -lHYPRE -lm $(CUDA_LIBS) $(DOMP_LIBS)
+LFLAGS = $(LINKOPTS) $(LIBS)
 LFLAGS_B =\
  -L${HYPRE_DIR}/lib\
  -lbHYPREClient-C\
@@ -48,12 +82,16 @@ LFLAGS90 =
 ########################################################################
 # Rules for compiling the source files
 ########################################################################
-.SUFFIXES: .c .f .cxx .f90
+.SUFFIXES: .c .f .cuf .cxx
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:
 	$(F77) $(FFLAGS) -c $<
+.f.mod:
+	$(F77) $(FFLAGS) -c $<
+.cuf.o:
+	$(CUF) $(FFLAGS) $(CUFFLAGS) -c $<
 .cxx.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
@@ -71,6 +109,8 @@ all: $(ALLPROGS)
 
 default: all
 
+gpu: all
+
 bigint: $(BIGINTPROGS)
 
 fortran: $(FORTRANPROGS)
@@ -83,139 +123,163 @@ complex: $(COMPLEXPROGS)
 # Example 1
 ########################################################################
 ex1: ex1.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 2
 ########################################################################
 ex2: ex2.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 3
 ########################################################################
 ex3: ex3.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 4
 ########################################################################
 ex4: ex4.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 5
 ########################################################################
 ex5: ex5.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 5 with 64-bit integers
 ########################################################################
 ex5big: ex5big.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 5 Fortran 77
 ########################################################################
+ifeq ($(use_cuda), 1)
+ex5f_cptr.o : ex5f_cptr.f cudaf.mod
+	$(F77) $(FFLAGS) -c $<
+ex5f: ex5f_cptr.o cudaf.o
+	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+else
+ifeq ($(use_cuf), 1)
+ex5f: ex5cuf.o
+	$(LINK_CUF) -o $@ $^ $(LFLAGS77)
+else
 ex5f: ex5f.o
-	$(F77) -o $@ $^ $(LFLAGS77)
+	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+endif
+endif
 
 ########################################################################
 # Example 6
 ########################################################################
 ex6: ex6.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 7
 ########################################################################
 ex7: ex7.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 8
 ########################################################################
 ex8: ex8.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 9
 ########################################################################
 ex9: ex9.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 10
 ########################################################################
 ex10: ex10.o
-	$(CXX) -o $@ $^ $(LFLAGS)
+	$(LINK_CXX) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 11
 ########################################################################
 ex11: ex11.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 12
 ########################################################################
 ex12: ex12.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 12 Fortran 77
 ########################################################################
+ifeq ($(use_cuda), 1)
+ex12f_cptr.o : ex12f_cptr.f cudaf.mod
+	$(F77) $(FFLAGS) -c $<
+ex12f: ex12f_cptr.o cudaf.o
+	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+else
+ifeq ($(use_cuf), 1)
+ex12f: ex12cuf.o
+	$(LINK_CUF) -o $@ $^ $(LFLAGS77)
+else
 ex12f: ex12f.o
-	$(F77) -o $@ $^ $(LFLAGS77)
+	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+endif
+endif
 
 ########################################################################
 # Example 13
 ########################################################################
 ex13: ex13.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 14
 ########################################################################
 ex14: ex14.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 15
 ########################################################################
 ex15: ex15.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 15 with 64-bit integers
 ########################################################################
 ex15big: ex15big.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 16
 ########################################################################
 ex16: ex16.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 17
 ########################################################################
 ex17: ex17.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 18
 ########################################################################
 ex18: ex18.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Example 18 (complex)
 ########################################################################
 ex18comp: ex18comp.o
-	$(CC) -o $@ $^ $(LFLAGS)
+	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
 # Clean up
@@ -226,6 +290,7 @@ clean:
 	rm -f $(FORTRANPROGS:=.o)
 	rm -f $(MAXDIMPROGS:=.o)
 	rm -f $(COMPLEXPROGS:=.o)
+	rm -f cudaf.o cudaf.mod ex*.o
 	cd vis; make clean
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_struct_ls.h"
+#include "ex.h"
 
 #define NDIM 4
 #define NSTENC (2*NDIM+1)
@@ -54,6 +55,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set defaults */
    n = 10;
@@ -111,7 +115,7 @@ int main (int argc, char *argv[])
    /* Figure out the processor grid (N x N x N x N).  The local problem size for
       the interior nodes is indicated by n (n x n x n x n).  p indicates the
       position in the processor grid. */
-   N  = pow(num_procs, 1.0/NDIM) + 1.0e-6;
+   N  = pow(num_procs, 1.0 / NDIM) + 1.0e-6;
    div = pow(N, NDIM);
    rem = myid;
    if (num_procs != div)
@@ -120,7 +124,7 @@ int main (int argc, char *argv[])
       MPI_Finalize();
       exit(1);
    }
-   for (d = NDIM-1; d >= 0; d--)
+   for (d = NDIM - 1; d >= 0; d--)
    {
       div /= N;
       p[d] = rem / div;
@@ -130,8 +134,8 @@ int main (int argc, char *argv[])
    /* Figure out the extents of each processor's piece of the grid. */
    for (d = 0; d < NDIM; d++)
    {
-      ilower[d] = p[d]*n;
-      iupper[d] = ilower[d] + n-1;
+      ilower[d] = p[d] * n;
+      iupper[d] = ilower[d] + n - 1;
    }
 
    /* 1. Set up a grid */
@@ -177,7 +181,7 @@ int main (int argc, char *argv[])
    /* 3. Set up a Struct Matrix */
    {
       int nentries = NSTENC;
-      int nvalues  = nentries*nvol;
+      int nvalues  = nentries * nvol;
       double *values;
       int stencil_indices[NSTENC];
 
@@ -200,7 +204,7 @@ int main (int argc, char *argv[])
          values[i] = NSTENC; /* Use absolute row sum */
          for (j = 1; j < nentries; j++)
          {
-            values[i+j] = -1.0;
+            values[i + j] = -1.0;
          }
       }
 
@@ -216,7 +220,7 @@ int main (int argc, char *argv[])
       int bc_ilower[NDIM];
       int bc_iupper[NDIM];
       int nentries = 1;
-      int nvalues  = nentries*nvol/n; /* number of stencil entries times the
+      int nvalues  = nentries * nvol / n; /* number of stencil entries times the
                                          length of one side of my grid box */
       double *values;
       int stencil_indices[1];
@@ -246,7 +250,7 @@ int main (int argc, char *argv[])
          stencil_indices[0]++;
 
          /* upper boundary in dimension d */
-         if (p[d] == N-1)
+         if (p[d] == N - 1)
          {
             bc_ilower[d] = iupper[d];
             HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, nentries,
@@ -278,7 +282,7 @@ int main (int argc, char *argv[])
       HYPRE_StructVectorInitialize(b);
       HYPRE_StructVectorInitialize(x);
 
-     /* Set the values */
+      /* Set the values */
       for (i = 0; i < nvalues; i ++)
       {
          values[i] = 1.0;

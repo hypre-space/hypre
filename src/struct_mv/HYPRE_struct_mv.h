@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -27,10 +27,8 @@ typedef struct hypre_StructVector_struct *HYPRE_StructVector;
 /**
  * @defgroup StructSystemInterface Struct System Interface
  *
- * This interface represents a structured-grid conceptual view of a linear
- * system.
- *
- * @memo A structured-grid conceptual interface
+ * A structured-grid conceptual interface. This interface represents a
+ * structured-grid conceptual view of a linear system.
  *
  * @{
  **/
@@ -55,8 +53,8 @@ typedef struct hypre_StructGrid_struct *HYPRE_StructGrid;
  * Create an <em>ndim</em>-dimensional grid object.
  **/
 HYPRE_Int HYPRE_StructGridCreate(MPI_Comm          comm,
-                           HYPRE_Int         ndim,
-                           HYPRE_StructGrid *grid);
+                                 HYPRE_Int         ndim,
+                                 HYPRE_StructGrid *grid);
 
 /**
  * Destroy a grid object.  An object should be explicitly destroyed using this
@@ -346,7 +344,7 @@ HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
                                                 HYPRE_Int         *entries );
 
 /**
- * Set the ghost layer in the matrix 
+ * Set the ghost layer in the matrix
  **/
 HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
                                         HYPRE_Int          *num_ghost);
@@ -358,6 +356,14 @@ HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
 HYPRE_Int HYPRE_StructMatrixPrint(const char         *filename,
                                   HYPRE_StructMatrix  matrix,
                                   HYPRE_Int           all);
+
+/**
+ * Read the matrix from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_StructMatrixRead( MPI_Comm             comm,
+                                  const char          *filename,
+                                  HYPRE_Int           *num_ghost,
+                                  HYPRE_StructMatrix  *matrix );
 
 /**
  * Matvec operator.  This operation is \f$y = \alpha A x + \beta y\f$ .
@@ -520,6 +526,14 @@ HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
                                   HYPRE_StructVector  vector,
                                   HYPRE_Int           all);
 
+/**
+ * Read the vector from file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_StructVectorRead( MPI_Comm             comm,
+                                  const char          *filename,
+                                  HYPRE_Int           *num_ghost,
+                                  HYPRE_StructVector  *vector );
+
 /**@}*/
 /**@}*/
 
@@ -552,7 +566,7 @@ HYPRE_Int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location );
 #endif
@@ -562,4 +576,3 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
 #endif
 
 #endif
-

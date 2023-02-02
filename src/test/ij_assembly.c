@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -16,7 +16,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "_hypre_utilities.hpp"
+//#include "_hypre_utilities.hpp"
 
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
@@ -29,7 +29,8 @@ HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_BigInt **rows2_ptr, HYPRE_BigInt **cols_ptr,
                              HYPRE_Real **coefs_ptr, HYPRE_Int stencil, HYPRE_ParCSRMatrix *parcsr_ptr);
 
-HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int *nrows_ptr, HYPRE_BigInt *num_nonzeros_ptr,
+HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int *nrows_ptr,
+                              HYPRE_BigInt *num_nonzeros_ptr,
                               HYPRE_Int **nnzrow_ptr, HYPRE_BigInt **rows_ptr, HYPRE_BigInt **rows2_ptr,
                               HYPRE_BigInt **cols_ptr, HYPRE_Real **coefs_ptr);
 
@@ -79,7 +80,7 @@ main( hypre_int  argc,
    HYPRE_Int                 time_index;
    HYPRE_Int                 print_usage;
    HYPRE_MemoryLocation      memory_location;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy    default_exec_policy;
 #endif
    char                      memory_location_name[8];
@@ -112,6 +113,12 @@ main( hypre_int  argc,
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
 
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
    /* Initialize Hypre */
    /* Initialize Hypre: must be the first Hypre function to call */
    time_index = hypre_InitializeTiming("Hypre init");
@@ -137,7 +144,7 @@ main( hypre_int  argc,
    cy = 2.0;
    cz = 3.0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
    memory_location     = HYPRE_MEMORY_DEVICE;
@@ -219,7 +226,7 @@ main( hypre_int  argc,
    /*-----------------------------------------------------------
     * Safety checks
     *-----------------------------------------------------------*/
-   if (Px*Py*Pz != num_procs)
+   if (Px * Py * Pz != num_procs)
    {
       hypre_printf("Px x Py x Pz is different than the number of MPI processes");
       return (-1);
@@ -282,7 +289,7 @@ main( hypre_int  argc,
       hypre_printf("\n");
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
 #endif
 
@@ -302,11 +309,16 @@ main( hypre_int  argc,
          d_cols   = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
          d_coefs  = hypre_TAlloc(HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE);
 
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows,   h_rows,   HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_rows2,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows,   h_rows,   HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_rows2,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
 
          nnzrow = d_nnzrow;
          rows   = d_rows;
@@ -424,8 +436,8 @@ main( hypre_int  argc,
    hypre_MPI_Finalize();
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   cudaDeviceReset();
+#if defined(HYPRE_USING_GPU)
+   hypre_ResetCudaDevice(hypre_handle());
 #endif
 
    return (0);
@@ -465,8 +477,8 @@ buildMatrixEntries(MPI_Comm            comm,
    hypre_MPI_Comm_rank(comm, &myid );
 
    HYPRE_Int ip = myid % Px;
-   HYPRE_Int iq = (( myid - ip)/Px) % Py;
-   HYPRE_Int ir = ( myid - ip - Px*iq)/( Px*Py );
+   HYPRE_Int iq = (( myid - ip) / Px) % Py;
+   HYPRE_Int ir = ( myid - ip - Px * iq) / ( Px * Py );
 
    values[0] = 0;
    values[1] = -cx;
@@ -491,7 +503,8 @@ buildMatrixEntries(MPI_Comm            comm,
    }
 
    hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-   getParCSRMatrixData(A, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr, rows_ptr, rows2_ptr, cols_ptr, coefs_ptr);
+   getParCSRMatrixData(A, nrows_ptr, num_nonzeros_ptr, nnzrow_ptr, rows_ptr, rows2_ptr, cols_ptr,
+                       coefs_ptr);
 
    // Set pointers
    *ilower_ptr = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -521,8 +534,8 @@ getParCSRMatrixData(HYPRE_ParCSRMatrix  A,
    HYPRE_Int          *A_offd_j = hypre_CSRMatrixJ(A_offd);
    HYPRE_BigInt       *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
 
-   HYPRE_Int          ilower = hypre_ParCSRMatrixFirstRowIndex(A);
-   HYPRE_Int          jlower = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_BigInt       ilower = hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_BigInt       jlower = hypre_ParCSRMatrixFirstColDiag(A);
 
    HYPRE_Int          nrows;
    HYPRE_BigInt       num_nonzeros;
@@ -545,17 +558,17 @@ getParCSRMatrixData(HYPRE_ParCSRMatrix  A,
 #if 0
    for (i = 0; i < nrows; i++)
    {
-      nnzrow[i] = A_diag_i[i+1] - A_diag_i[i] +
-                  A_offd_i[i+1] - A_offd_i[i];
+      nnzrow[i] = A_diag_i[i + 1] - A_diag_i[i] +
+                  A_offd_i[i + 1] - A_offd_i[i];
       rows[i]   = ilower + i;
 
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          rows2[k]   = ilower + (HYPRE_BigInt) i;
          cols[k]    = jlower + (HYPRE_BigInt) A_diag_j[j];
          coefs[k++] = hypre_CSRMatrixData(A_diag)[j];
       }
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          rows2[k]   = ilower + (HYPRE_BigInt) i;
          cols[k]    = hypre_ParCSRMatrixColMapOffd(A)[A_offd_j[j]];
@@ -563,19 +576,19 @@ getParCSRMatrixData(HYPRE_ParCSRMatrix  A,
       }
    }
 #else
-   for (i = nrows-1; i >= 0; i--)
+   for (i = nrows - 1; i >= 0; i--)
    {
-      nnzrow[nrows-1-i] = A_diag_i[i+1] - A_diag_i[i] +
-                          A_offd_i[i+1] - A_offd_i[i];
-      rows[nrows-1-i]   = ilower + i;
+      nnzrow[nrows - 1 - i] = A_diag_i[i + 1] - A_diag_i[i] +
+                              A_offd_i[i + 1] - A_offd_i[i];
+      rows[nrows - 1 - i]   = ilower + i;
 
-      for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          rows2[k]   = ilower + (HYPRE_BigInt) i;
          cols[k]    = jlower + (HYPRE_BigInt) A_diag_j[j];
          coefs[k++] = hypre_CSRMatrixData(A_diag)[j];
       }
-      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          rows2[k]   = ilower + (HYPRE_BigInt) i;
          cols[k]    = col_map_offd_A[A_offd_j[j]];
@@ -614,7 +627,7 @@ checkMatrix(HYPRE_ParCSRMatrix h_parcsr_ref, HYPRE_IJMatrix ij_A)
    h_parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
 
    // Check norm of (parcsr_ref - parcsr_A)
-   hypre_ParcsrAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
+   hypre_ParCSRMatrixAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
    fnorm = hypre_ParCSRMatrixFnorm(parcsr_error);
 
    if (myid == 0)
@@ -639,7 +652,8 @@ test_Set(MPI_Comm             comm,
          HYPRE_Int            nchunks,
          HYPRE_Int           *h_nnzrow,
          HYPRE_Int           *nnzrow,
-         HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+         HYPRE_BigInt
+         *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
          HYPRE_BigInt        *cols,
          HYPRE_Real          *coefs,
          HYPRE_IJMatrix      *ij_A_ptr)
@@ -654,17 +668,17 @@ test_Set(MPI_Comm             comm,
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
 
-   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
    for (i = 1; i < nrows + 1; i++)
    {
-      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+      h_rowptr[i] = h_rowptr[i - 1] + h_nnzrow[i - 1];
    }
    hypre_assert(h_rowptr[nrows] == num_nonzeros);
 
    chunk_size = nrows / nchunks;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -674,7 +688,7 @@ test_Set(MPI_Comm             comm,
    hypre_BeginTiming(time_index);
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -683,7 +697,7 @@ test_Set(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -692,8 +706,8 @@ test_Set(MPI_Comm             comm,
    // Assemble matrix
    HYPRE_IJMatrixAssemble(ij_A);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif
@@ -755,7 +769,8 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    hypre_ParCSRMatrixTranspose(parcsr_A, &parcsr_AT, 1);
    ilower = hypre_ParCSRMatrixFirstRowIndex(parcsr_AT);
    iupper = hypre_ParCSRMatrixLastRowIndex(parcsr_AT);
-   getParCSRMatrixData(parcsr_AT, &nrows, &num_nonzeros, &h_nnzrow, &h_rows1, &h_rows2, &h_cols, &h_coefs);
+   getParCSRMatrixData(parcsr_AT, &nrows, &num_nonzeros, &h_nnzrow, &h_rows1, &h_rows2, &h_cols,
+                       &h_coefs);
    HYPRE_ParCSRMatrixDestroy(parcsr_AT);
 
    switch (memory_location)
@@ -767,16 +782,21 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
          if (option == 1)
          {
             d_rows  = hypre_TAlloc(HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE);
-            hypre_TMemcpy(d_rows,  h_rows1,  HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(d_rows,  h_rows1,  HYPRE_BigInt, nrows,        HYPRE_MEMORY_DEVICE,
+                          HYPRE_MEMORY_HOST);
          }
          else
          {
             d_rows  = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE);
-            hypre_TMemcpy(d_rows,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(d_rows,  h_rows2,  HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                          HYPRE_MEMORY_HOST);
          }
-         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_nnzrow, h_nnzrow, HYPRE_Int,    nrows,        HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_cols,   h_cols,   HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(d_coefs,  h_coefs,  HYPRE_Real,   num_nonzeros, HYPRE_MEMORY_DEVICE,
+                       HYPRE_MEMORY_HOST);
 
          nnzrow = d_nnzrow;
          rows   = d_rows;
@@ -801,17 +821,17 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    HYPRE_IJMatrixInitialize_v2(ij_AT, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_AT, 1);
 
-   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
    for (i = 1; i < nrows + 1; i++)
    {
-      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+      h_rowptr[i] = h_rowptr[i - 1] + h_nnzrow[i - 1];
    }
    hypre_assert(h_rowptr[nrows] == num_nonzeros);
 
    chunk_size = nrows / nchunks;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #endif
 
    time_index = hypre_InitializeTiming("Test SetValues OffProc");
@@ -821,7 +841,7 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
 
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -830,7 +850,7 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_AT, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_AT, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -841,8 +861,8 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
 
    //cudaProfilerStop();
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #endif
 
    hypre_EndTiming(time_index);
@@ -882,7 +902,8 @@ test_SetSet(MPI_Comm             comm,
             HYPRE_Int            nchunks,
             HYPRE_Int           *h_nnzrow,
             HYPRE_Int           *nnzrow,
-            HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+            HYPRE_BigInt
+            *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
             HYPRE_BigInt        *cols,
             HYPRE_Real          *coefs,
             HYPRE_IJMatrix      *ij_A_ptr)
@@ -898,22 +919,33 @@ test_SetSet(MPI_Comm             comm,
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
 
-   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
    for (i = 1; i < nrows + 1; i++)
    {
-      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+      h_rowptr[i] = h_rowptr[i - 1] + h_nnzrow[i - 1];
    }
    hypre_assert(h_rowptr[nrows] == num_nonzeros);
 
    chunk_size = nrows / nchunks;
    new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
-   for (i = 0; i < num_nonzeros; i++)
-   {
-      new_coefs[i] = 2.0*coefs[i];
-   }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
+   {
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         new_coefs[i] = 2.0 * coefs[i];
+      }
+   }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   else
+   {
+      hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
+      hypreDevice_ComplexScalen(new_coefs, num_nonzeros, new_coefs, 2.0);
+   }
+#endif
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -924,7 +956,7 @@ test_SetSet(MPI_Comm             comm,
    hypre_BeginTiming(time_index);
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -933,7 +965,7 @@ test_SetSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &new_coefs[h_rowptr[chunk]]);
       }
@@ -945,7 +977,7 @@ test_SetSet(MPI_Comm             comm,
    // Second set
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -954,7 +986,7 @@ test_SetSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -963,8 +995,8 @@ test_SetSet(MPI_Comm             comm,
    // Assemble matrix
    HYPRE_IJMatrixAssemble(ij_A);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif
@@ -997,7 +1029,8 @@ test_AddSet(MPI_Comm             comm,
             HYPRE_Int            nchunks,
             HYPRE_Int           *h_nnzrow,
             HYPRE_Int           *nnzrow,
-            HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+            HYPRE_BigInt
+            *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
             HYPRE_BigInt        *cols,
             HYPRE_Real          *coefs,
             HYPRE_IJMatrix      *ij_A_ptr)
@@ -1013,22 +1046,33 @@ test_AddSet(MPI_Comm             comm,
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
 
-   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
    for (i = 1; i < nrows + 1; i++)
    {
-      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+      h_rowptr[i] = h_rowptr[i - 1] + h_nnzrow[i - 1];
    }
    hypre_assert(h_rowptr[nrows] == num_nonzeros);
 
    chunk_size = nrows / nchunks;
    new_coefs = hypre_TAlloc(HYPRE_Real, num_nonzeros, memory_location);
-   for (i = 0; i < num_nonzeros; i++)
-   {
-      new_coefs[i] = 2.0*coefs[i];
-   }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
+   {
+      for (i = 0; i < num_nonzeros; i++)
+      {
+         new_coefs[i] = 2.0 * coefs[i];
+      }
+   }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   else
+   {
+      hypre_TMemcpy(new_coefs, coefs, HYPRE_Real, num_nonzeros, memory_location, memory_location);
+      hypreDevice_ComplexScalen(new_coefs, num_nonzeros, new_coefs, 2.0);
+   }
+#endif
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -1039,7 +1083,7 @@ test_AddSet(MPI_Comm             comm,
    hypre_BeginTiming(time_index);
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -1048,7 +1092,7 @@ test_AddSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                    NULL, &rows[h_rowptr[chunk]],
                                    &cols[h_rowptr[chunk]], &new_coefs[h_rowptr[chunk]]);
       }
@@ -1057,7 +1101,7 @@ test_AddSet(MPI_Comm             comm,
    // Then Set
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -1066,7 +1110,7 @@ test_AddSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -1075,8 +1119,8 @@ test_AddSet(MPI_Comm             comm,
    // Assemble matrix
    HYPRE_IJMatrixAssemble(ij_A);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif
@@ -1109,7 +1153,8 @@ test_SetAddSet(MPI_Comm             comm,
                HYPRE_Int            nchunks,
                HYPRE_Int           *h_nnzrow,
                HYPRE_Int           *nnzrow,
-               HYPRE_BigInt        *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
+               HYPRE_BigInt
+               *rows,             /* option = 1: length of nrows, = 2: length of num_nonzeros */
                HYPRE_BigInt        *cols,
                HYPRE_Real          *coefs,
                HYPRE_IJMatrix      *ij_A_ptr)
@@ -1124,16 +1169,16 @@ test_SetAddSet(MPI_Comm             comm,
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
 
-   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows+1, HYPRE_MEMORY_HOST);
+   h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
    for (i = 1; i < nrows + 1; i++)
    {
-      h_rowptr[i] = h_rowptr[i-1] + h_nnzrow[i-1];
+      h_rowptr[i] = h_rowptr[i - 1] + h_nnzrow[i - 1];
    }
    hypre_assert(h_rowptr[nrows] == num_nonzeros);
    chunk_size = nrows / nchunks;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStart();
 #endif
@@ -1144,7 +1189,7 @@ test_SetAddSet(MPI_Comm             comm,
    hypre_BeginTiming(time_index);
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -1153,7 +1198,7 @@ test_SetAddSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -1162,7 +1207,7 @@ test_SetAddSet(MPI_Comm             comm,
    // Then Add
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -1171,7 +1216,7 @@ test_SetAddSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixAddToValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                    NULL, &rows[h_rowptr[chunk]],
                                    &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -1180,7 +1225,7 @@ test_SetAddSet(MPI_Comm             comm,
    // Then Set
    for (chunk = 0; chunk < nrows; chunk += chunk_size)
    {
-      chunk_size = hypre_min(chunk_size, nrows-chunk);
+      chunk_size = hypre_min(chunk_size, nrows - chunk);
 
       if (1 == option)
       {
@@ -1189,7 +1234,7 @@ test_SetAddSet(MPI_Comm             comm,
       }
       else
       {
-         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk+chunk_size]-h_rowptr[chunk],
+         HYPRE_IJMatrixSetValues(ij_A, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
                                  NULL, &rows[h_rowptr[chunk]],
                                  &cols[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
       }
@@ -1198,8 +1243,8 @@ test_SetAddSet(MPI_Comm             comm,
    // Assemble matrix
    HYPRE_IJMatrixAssemble(ij_A);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncCudaDevice(hypre_handle());
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif

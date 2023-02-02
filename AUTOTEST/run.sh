@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -43,8 +43,7 @@ do
          break
          ;;
       -*)
-         tname=`echo $1 | sed 's/-//'`
-         tests="$tests $tname"
+         tests="$tests $1"
          shift
          ;;
    esac
@@ -52,10 +51,11 @@ done
 
 # If no tests were specified, run all tests
 if [ "$tests" = "" ]; then
-   tests="ams fac ij sstruct struct"
+   tests="-ams -fac -ij -sstruct -struct"
 fi
 
 # Setup
+test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
@@ -65,7 +65,8 @@ cd $src_dir/test
 ./cleantest.sh
 for tname in $tests
 do
-   ./runtest.sh $@ TEST_$tname/*.sh
+   rtests=`cat $test_dir/runtests$tname`
+   ./runtest.sh $@ `echo $rtests`
 done
 
 # Collect all error files from the tests

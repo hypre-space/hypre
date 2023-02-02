@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -40,8 +40,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
 
-#if defined(HYPRE_USING_CUDA)
-   //const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
 
    HYPRE_Real       local_result = 0.0;
@@ -62,11 +62,11 @@ hypre_StructInnerProd( hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
       HYPRE_Real box_sum = 0.0;
 #elif defined(HYPRE_USING_RAJA)
       ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> box_sum(0.0);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       ReduceSum<HYPRE_Real> box_sum(0.0);
 #else
       HYPRE_Real box_sum = 0.0;
@@ -101,7 +101,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
-   hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
+   hypre_IncFLOPCount(2 * hypre_StructVectorGlobalSize(x));
 
    return final_innerprod_result;
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -27,7 +27,7 @@ HYPRE_VectorCreate( HYPRE_Int size )
  * HYPRE_VectorDestroy
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_VectorDestroy( HYPRE_Vector vector )
 {
    return ( hypre_SeqVectorDestroy( (hypre_Vector *) vector ) );
@@ -37,7 +37,7 @@ HYPRE_VectorDestroy( HYPRE_Vector vector )
  * HYPRE_VectorInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
+HYPRE_Int
 HYPRE_VectorInitialize( HYPRE_Vector vector )
 {
    return ( hypre_SeqVectorInitialize( (hypre_Vector *) vector ) );
@@ -52,7 +52,7 @@ HYPRE_VectorPrint( HYPRE_Vector  vector,
                    char         *file_name )
 {
    return ( hypre_SeqVectorPrint( (hypre_Vector *) vector,
-                      file_name ) );
+                                  file_name ) );
 }
 
 /*--------------------------------------------------------------------------

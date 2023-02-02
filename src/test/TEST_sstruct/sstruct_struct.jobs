@@ -1,5 +1,5 @@
 #!/bin/sh 
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -18,6 +18,16 @@ mpirun -np 1  ./struct -n 12 12 12 -solver 0 -istart -3 -3 -3 -relax 1 \
 > sstruct_struct.out.0
 mpirun -np 1  ./sstruct -in sstruct.in.struct -solver 200 -relax 1 -rhsone \
 > sstruct_struct.out.200
+
+# Compare 2D struct run to 3D run with coefficients zeroed out in one dimension
+mpirun -np 1 ./struct -d 2 -n 40 40 1 -solver 1 -istart 10 10 10 \
+> sstruct_struct.out.2D
+mpirun -np 1 ./sstruct -in sstruct.in.7zero-x -r 10 10 10 -solver 201 -rhsone \
+> sstruct_struct.out.3Dx
+mpirun -np 1 ./sstruct -in sstruct.in.7zero-y -r 10 10 10 -solver 201 -rhsone \
+> sstruct_struct.out.3Dy
+mpirun -np 1 ./sstruct -in sstruct.in.7zero-z -r 10 10 10 -solver 201 -rhsone \
+> sstruct_struct.out.3Dz
 
 #=============================================================================
 # Compare 19pt, 7pt, positive, and negative definite

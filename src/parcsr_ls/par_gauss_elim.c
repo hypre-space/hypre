@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -9,7 +9,6 @@
 #include "Common.h"
 #include "_hypre_blas.h"
 #include "_hypre_lapack.h"
-#include "../sstruct_ls/gselim.h"
 
 /*-------------------------------------------------------------------------
  *
@@ -21,6 +20,10 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] -= hypre_MPI_Wtime();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("GaussElimSetup");
 #endif
 
    /* Par Data Structure variables */
@@ -72,9 +75,9 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
 
-      comm_info  = hypre_CTAlloc(HYPRE_Int, 2*new_num_procs+1, HYPRE_MEMORY_HOST);
+      comm_info  = hypre_CTAlloc(HYPRE_Int, 2 * new_num_procs + 1, HYPRE_MEMORY_HOST);
       mat_info   = hypre_CTAlloc(HYPRE_Int, new_num_procs,     HYPRE_MEMORY_HOST);
-      mat_displs = hypre_CTAlloc(HYPRE_Int, new_num_procs+1,   HYPRE_MEMORY_HOST);
+      mat_displs = hypre_CTAlloc(HYPRE_Int, new_num_procs + 1,   HYPRE_MEMORY_HOST);
       info = &comm_info[0];
       displs = &comm_info[new_num_procs];
 
@@ -84,8 +87,8 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       mat_displs[0] = 0;
       for (i = 0; i < new_num_procs; i++)
       {
-         displs[i+1] = displs[i] + info[i];
-         mat_displs[i+1] = global_num_rows * displs[i+1];
+         displs[i + 1] = displs[i] + info[i];
+         mat_displs[i + 1] = global_num_rows * displs[i + 1];
          mat_info[i] = global_num_rows * info[i];
       }
 
@@ -93,22 +96,22 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       A_mat_local_size = global_num_rows * num_rows;
       A_mat_local = hypre_CTAlloc(HYPRE_Real, A_mat_local_size,                HYPRE_MEMORY_HOST);
-      A_mat       = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
+      A_mat       = hypre_CTAlloc(HYPRE_Real, global_num_rows * global_num_rows, HYPRE_MEMORY_HOST);
 
       /* load local matrix into A_mat_local */
       for (i = 0; i < num_rows; i++)
       {
-         for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+         for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
          {
-             /* need col major */
-             column = A_diag_j[jj]+first_row_index;
-             A_mat_local[i*global_num_rows + column] = A_diag_data[jj];
+            /* need col major */
+            column = A_diag_j[jj] + first_row_index;
+            A_mat_local[i * global_num_rows + column] = A_diag_data[jj];
          }
-         for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+         for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
          {
-             /* need col major */
-             column = col_map_offd[A_offd_j[jj]];
-             A_mat_local[i*global_num_rows + column] = A_offd_data[jj];
+            /* need col major */
+            column = col_map_offd[A_offd_j[jj]];
+            A_mat_local[i * global_num_rows + column] = A_offd_data[jj];
          }
       }
 
@@ -117,12 +120,13 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       if (relax_type == 99)
       {
-         HYPRE_Real *AT_mat = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
+         HYPRE_Real *AT_mat = hypre_CTAlloc(HYPRE_Real, global_num_rows * global_num_rows,
+                                            HYPRE_MEMORY_HOST);
          for (i = 0; i < global_num_rows; i++)
          {
             for (jj = 0; jj < global_num_rows; jj++)
             {
-               AT_mat[i*global_num_rows + jj] = A_mat[i + jj*global_num_rows];
+               AT_mat[i * global_num_rows + jj] = A_mat[i + jj * global_num_rows];
             }
          }
          hypre_ParAMGDataAMat(amg_data) = AT_mat;
@@ -134,13 +138,13 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       }
       else if (relax_type == 199)
       {
-         HYPRE_Real *AT_mat = hypre_TAlloc(HYPRE_Real, global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
-         HYPRE_Real *Ainv   = hypre_TAlloc(HYPRE_Real, num_rows*global_num_rows,        HYPRE_MEMORY_HOST);
+         HYPRE_Real *AT_mat = hypre_TAlloc(HYPRE_Real, global_num_rows * global_num_rows, HYPRE_MEMORY_HOST);
+         HYPRE_Real *Ainv   = hypre_TAlloc(HYPRE_Real, num_rows * global_num_rows,        HYPRE_MEMORY_HOST);
          for (i = 0; i < global_num_rows; i++)
          {
             for (jj = 0; jj < global_num_rows; jj++)
             {
-               AT_mat[i*global_num_rows + jj] = A_mat[i + jj*global_num_rows];
+               AT_mat[i * global_num_rows + jj] = A_mat[i + jj * global_num_rows];
             }
          }
          HYPRE_Int *ipiv, info, query = -1, lwork;
@@ -159,7 +163,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          {
             for (jj = 0; jj < num_rows; jj++)
             {
-               Ainv[i*num_rows+jj] = AT_mat[i*global_num_rows+jj+first_row_index];
+               Ainv[i * num_rows + jj] = AT_mat[i * global_num_rows + jj + first_row_index];
             }
          }
 
@@ -191,6 +195,10 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
    hypre_ParAMGDataGSSetup(amg_data) = 1;
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
+#endif
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] += hypre_MPI_Wtime();
 #endif
@@ -203,6 +211,10 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("GaussElimSolve");
 #endif
 
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
@@ -240,7 +252,8 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       {
          f_data_host = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
-         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST, hypre_ParVectorMemoryLocation(f));
+         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, n, HYPRE_MEMORY_HOST,
+                       hypre_ParVectorMemoryLocation(f));
       }
       else
       {
@@ -270,8 +283,8 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          HYPRE_Real *A_tmp;
          HYPRE_Int   i, my_info;
 
-         A_tmp = hypre_CTAlloc(HYPRE_Real, n_global*n_global, HYPRE_MEMORY_HOST);
-         for (i = 0; i < n_global*n_global; i++)
+         A_tmp = hypre_CTAlloc(HYPRE_Real, n_global * n_global, HYPRE_MEMORY_HOST);
+         for (i = 0; i < n_global * n_global; i++)
          {
             A_tmp[i] = A_mat[i];
          }
@@ -295,7 +308,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
          for (i = 0; i < n; i++)
          {
-            u_data_host[i] = b_vec[first_row_index+i];
+            u_data_host[i] = b_vec[first_row_index + i];
          }
 
          hypre_TFree(A_tmp, HYPRE_MEMORY_HOST);
@@ -311,7 +324,8 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       if (u_data_host != u_data)
       {
-         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, n, hypre_ParVectorMemoryLocation(u),
+                       HYPRE_MEMORY_HOST);
          hypre_TFree(u_data_host, HYPRE_MEMORY_HOST);
       }
    }
@@ -323,6 +337,10 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] += hypre_MPI_Wtime();
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -366,22 +384,23 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 #include "_hypre_utilities.h"
 #include "_hypre_blas.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define BLOCK_SIZE 512
 
 __global__ void
-hypreCUDAKernel_dgemv(HYPRE_Int   m,
-                      HYPRE_Int   n,
-                      HYPRE_Int   lda,
-                      HYPRE_Real *a,
-                      HYPRE_Real *x,
-                      HYPRE_Real *y)
+hypreGPUKernel_dgemv(hypre_DeviceItem &item,
+                     HYPRE_Int   m,
+                     HYPRE_Int   n,
+                     HYPRE_Int   lda,
+                     HYPRE_Real *a,
+                     HYPRE_Real *x,
+                     HYPRE_Real *y)
 {
    __shared__ HYPRE_Real sh_x[BLOCK_SIZE];
 
-   HYPRE_Int row = hypre_cuda_get_grid_thread_id<1,1>();
-   HYPRE_Int tid = hypre_cuda_get_thread_id<1>();
+   HYPRE_Int row = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   HYPRE_Int tid = hypre_gpu_get_thread_id<1>(item);
 
    HYPRE_Real y_row = 0.0;
 
@@ -389,7 +408,7 @@ hypreCUDAKernel_dgemv(HYPRE_Int   m,
    {
       if (k + tid < n)
       {
-         sh_x[tid] = read_only_load(&x[k+tid]);
+         sh_x[tid] = read_only_load(&x[k + tid]);
       }
 
       __syncthreads();
@@ -402,7 +421,7 @@ hypreCUDAKernel_dgemv(HYPRE_Int   m,
             const HYPRE_Int col = k + j;
             if (col < n)
             {
-               y_row += a[row + col*lda] * sh_x[j];
+               y_row += a[row + col * lda] * sh_x[j];
             }
          }
       }
@@ -416,15 +435,16 @@ hypreCUDAKernel_dgemv(HYPRE_Int   m,
    }
 }
 
-HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x, HYPRE_Real *y)
+HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real *a, HYPRE_Real *x,
+                             HYPRE_Real *y)
 {
    dim3 bDim(BLOCK_SIZE, 1, 1);
-   dim3 gDim = hypre_GetDefaultCUDAGridDimension(m, "thread", bDim);
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(m, "thread", bDim);
 
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
 
    return hypre_error_flag;
 }
 
-#endif
+#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #endif

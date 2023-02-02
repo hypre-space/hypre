@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -29,7 +29,9 @@ void Vec_dhCreate(Vec_dh *v)
 void Vec_dhDestroy(Vec_dh v)
 {
   START_FUNC_DH
-  if (v->vals != NULL) FREE_DH(v->vals); CHECK_V_ERROR;
+  if (v->vals != NULL) {
+    FREE_DH(v->vals); CHECK_V_ERROR;
+  }
   FREE_DH(v); CHECK_V_ERROR;
   END_FUNC_DH
 }

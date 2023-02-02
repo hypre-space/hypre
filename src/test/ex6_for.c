@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -89,14 +89,14 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid ==0) hypre_printf("Must run with 2 processors!\n");
+      if (myid == 0) { hypre_printf("Must run with 2 processors!\n"); }
       hypre_MPI_Finalize();
 
-      return(0);
+      return (0);
    }
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
-      long_temp_COMM = (hypre_F90_Obj) hypre_MPI_COMM_WORLD;
+   temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
+   long_temp_COMM = (hypre_F90_Obj) hypre_MPI_COMM_WORLD;
 #endif
 
    /* 1. Set up the 2D grid.  This gives the index space in each part.
@@ -175,7 +175,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
 #endif
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructGridSetVariables(&grid, &i, &nvars, &vartypes[0]);
@@ -207,7 +207,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          relative offset (in the index space). */
       {
          HYPRE_Int entry;
-         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
          HYPRE_Int var = 0;
 
          /* Assign numerical values to the offsets so that we can
@@ -262,7 +262,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      HYPRE_Int i,j;
+      HYPRE_Int i, j;
       HYPRE_Int part = 0;
       HYPRE_Int var = 0;
 
@@ -318,13 +318,17 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             for (j = 0; j < nentries; j++) /* label the stencil indices -
                                               these correspond to the offsets
                                               defined above */
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
-                  values[i+j] = -1.0;
+               {
+                  values[i + j] = -1.0;
+               }
             }
 
 
@@ -351,13 +355,17 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
             HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
-                  values[i+j] = -1.0;
+               {
+                  values[i + j] = -1.0;
+               }
             }
 
 
@@ -386,13 +394,17 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
             HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++)
+            {
                stencil_indices[j] = j;
+            }
 
             for (i = 0; i < nvalues; i += nentries)
             {
                values[i] = 4.0;
                for (j = 1; j < nentries; j++)
-                  values[i+j] = -1.0;
+               {
+                  values[i + j] = -1.0;
+               }
             }
 
 
@@ -416,7 +428,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_Real values[6];
 
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          {
             /* Values below our first AND second box */
@@ -519,7 +533,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_Int maxnvalues = 4;
          HYPRE_Real values[4];
          for (i = 0; i < maxnvalues; i++)
+         {
             values[i] = 0.0;
+         }
 
          {
             /* Values below our box */
@@ -641,7 +657,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             HYPRE_Real values[6];
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructVectorSetBoxValues(&b, &part, &ilower[0], &iupper[0], &var, &values[0]);
@@ -650,7 +668,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructVectorSetBoxValues(&x, &part, &ilower[0], &iupper[0], &var, &values[0]);
@@ -668,7 +688,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             HYPRE_Real values[12];
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructVectorSetBoxValues(&b, &part, &ilower[0], &iupper[0], &var, &values[0]);
@@ -677,7 +699,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructVectorSetBoxValues(&x, &part, &ilower[0], &iupper[0], &var, &values[0]);
@@ -697,7 +721,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             HYPRE_Real values[16];
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 1.0;
+            }
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructVectorSetBoxValues(&b, &part, &ilower[0], &iupper[0], &var, &values[0]);
@@ -706,7 +732,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
             for (i = 0; i < nvalues; i ++)
+            {
                values[i] = 0.0;
+            }
 
 #ifdef HYPRE_FORTRAN
             HYPRE_SStructVectorSetBoxValues(&x, &part, &ilower[0], &iupper[0], &var, &values[0]);
@@ -809,7 +837,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_StructPCGSolve(&solver, &sA, &sb, &sx);
 #else
       HYPRE_StructPCGSetPrecond(solver, HYPRE_StructSMGSolve,
-                           HYPRE_StructSMGSetup, precond);
+                                HYPRE_StructSMGSetup, precond);
       HYPRE_StructPCGSetup(solver, sA, sb, sx);
       HYPRE_StructPCGSolve(solver, sA, sb, sx);
 #endif

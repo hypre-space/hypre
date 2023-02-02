@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -63,13 +63,13 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    dim = hypre_StructGridNDim(grid);
    for (j = 0; j < dim; j++)
    {
-      num_ghost[2*j]   = 1;
-      num_ghost[2*j+1] = 1;
+      num_ghost[2 * j]   = 1;
+      num_ghost[2 * j + 1] = 1;
    }
    if (P_stored_as_transpose)
    {
-      num_ghost[2*cdir]   = 2;
-      num_ghost[2*cdir+1] = 2;
+      num_ghost[2 * cdir]   = 2;
+      num_ghost[2 * cdir + 1] = 2;
    }
 
    /* comm_info <-- From fine grid grown by num_ghost */
@@ -83,7 +83,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
 
    for (s = 0; s < 4; s++)
    {
-      switch(s)
+      switch (s)
       {
          case 0:
             box_aa = hypre_CommInfoSendBoxes(comm_info);
@@ -105,17 +105,17 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
       }
 
       hypre_ForBoxArrayI(j, box_aa)
+      {
+         box_a = hypre_BoxArrayArrayBoxArray(box_aa, j);
+         hypre_ForBoxI(i, box_a)
          {
-            box_a = hypre_BoxArrayArrayBoxArray(box_aa, j);
-            hypre_ForBoxI(i, box_a)
-               {
-                  box = hypre_BoxArrayBox(box_a, i);
-                  hypre_StructMapFineToCoarse(hypre_BoxIMin(box), index, stride,
-                                              hypre_BoxIMin(box));
-                  hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,
-                                              hypre_BoxIMax(box));
-               }
+            box = hypre_BoxArrayBox(box_a, i);
+            hypre_StructMapFineToCoarse(hypre_BoxIMin(box), index, stride,
+                                        hypre_BoxIMin(box));
+            hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,
+                                        hypre_BoxIMax(box));
          }
+      }
    }
 
    comm_pkg = hypre_StructMatrixCommPkg(P);
@@ -123,7 +123,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    {
       hypre_CommPkgDestroy(comm_pkg);
    }
-   
+
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(P),
                        hypre_StructMatrixDataSpace(P),
@@ -136,7 +136,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_InitializeCommunication(comm_pkg,
                                  hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
                                  hypre_StructMatrixStencilData(P)[0],//hypre_StructMatrixData(P),
-				 0, 0,
+                                 0, 0,
                                  &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 

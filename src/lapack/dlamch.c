@@ -10,69 +10,69 @@ extern "C" {
 
 doublereal dlamch_(const char *cmach)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLAMCH determines doublereal precision machine parameters.   
+    DLAMCH determines doublereal precision machine parameters.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    CMACH   (input) CHARACTER*1   
-            Specifies the value to be returned by DLAMCH:   
-            = 'E' or 'e',   DLAMCH := eps   
-            = 'S' or 's ,   DLAMCH := sfmin   
-            = 'B' or 'b',   DLAMCH := base   
-            = 'P' or 'p',   DLAMCH := eps*base   
-            = 'N' or 'n',   DLAMCH := t   
-            = 'R' or 'r',   DLAMCH := rnd   
-            = 'M' or 'm',   DLAMCH := emin   
-            = 'U' or 'u',   DLAMCH := rmin   
-            = 'L' or 'l',   DLAMCH := emax   
-            = 'O' or 'o',   DLAMCH := rmax   
+    CMACH   (input) CHARACTER*1
+            Specifies the value to be returned by DLAMCH:
+            = 'E' or 'e',   DLAMCH := eps
+            = 'S' or 's ,   DLAMCH := sfmin
+            = 'B' or 'b',   DLAMCH := base
+            = 'P' or 'p',   DLAMCH := eps*base
+            = 'N' or 'n',   DLAMCH := t
+            = 'R' or 'r',   DLAMCH := rnd
+            = 'M' or 'm',   DLAMCH := emin
+            = 'U' or 'u',   DLAMCH := rmin
+            = 'L' or 'l',   DLAMCH := emax
+            = 'O' or 'o',   DLAMCH := rmax
 
-            where   
+            where
 
-            eps   = relative machine precision   
-            sfmin = safe minimum, such that 1/sfmin does not overflow   
-            base  = base of the machine   
-            prec  = eps*base   
-            t     = number of (base) digits in the mantissa   
-            rnd   = 1.0 when rounding occurs in addition, 0.0 otherwise   
-            emin  = minimum exponent before (gradual) underflow   
-            rmin  = underflow threshold - base**(emin-1)   
-            emax  = largest exponent before overflow   
-            rmax  = overflow threshold  - (base**emax)*(1-eps)   
+            eps   = relative machine precision
+            sfmin = safe minimum, such that 1/sfmin does not overflow
+            base  = base of the machine
+            prec  = eps*base
+            t     = number of (base) digits in the mantissa
+            rnd   = 1.0 when rounding occurs in addition, 0.0 otherwise
+            emin  = minimum exponent before (gradual) underflow
+            rmin  = underflow threshold - base**(emin-1)
+            emax  = largest exponent before overflow
+            rmax  = overflow threshold  - (base**emax)*(1-eps)
 
-   ===================================================================== 
+   =====================================================================
 */
-/* >>Start of File<<   
+/* >>Start of File<<
        Initialized data */
-    static logical first = TRUE_;
+    logical first = TRUE_;
     /* System generated locals */
     integer i__1;
     doublereal ret_val;
     /* Builtin functions */
     doublereal pow_di(doublereal *, integer *);
     /* Local variables */
-    static doublereal base;
-    static integer beta;
-    static doublereal emin, prec, emax;
-    static integer imin, imax;
-    static logical lrnd;
-    static doublereal rmin, rmax, t, rmach;
+    doublereal base;
+    integer beta;
+    doublereal emin, prec, emax;
+    integer imin, imax;
+    logical lrnd;
+    doublereal rmin, rmax, t, rmach = 0.;
     extern logical lsame_(const char *,const char *);
-    static doublereal small, sfmin;
-    extern /* Subroutine */ integer dlamc2_(integer *, integer *, logical *, 
+    doublereal small, sfmin;
+    extern /* Subroutine */ integer dlamc2_(integer *, integer *, logical *,
 	    doublereal *, integer *, doublereal *, integer *, doublereal *);
-    static integer it;
-    static doublereal rnd, eps;
+    integer it;
+    doublereal rnd, eps;
 
 
 
@@ -98,7 +98,7 @@ doublereal dlamch_(const char *cmach)
 	if (small >= sfmin) {
 
 /*           Use SMALL plus a bit, to avoid the possibility of rou
-nding   
+nding
              causing overflow when computing  1/sfmin. */
 
 	    sfmin = small * (eps + 1.);
@@ -134,71 +134,71 @@ nding
 
 } /* dlamch_ */
 
-/* Subroutine */ integer dlamc1_(integer *beta, integer *t, logical *rnd, logical 
+/* Subroutine */ integer dlamc1_(integer *beta, integer *t, logical *rnd, logical
 	*ieee1)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLAMC1 determines the machine parameters given by BETA, T, RND, and   
-    IEEE1.   
+    DLAMC1 determines the machine parameters given by BETA, T, RND, and
+    IEEE1.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    BETA    (output) INTEGER   
-            The base of the machine.   
+    BETA    (output) INTEGER
+            The base of the machine.
 
-    T       (output) INTEGER   
-            The number of ( BETA ) digits in the mantissa.   
+    T       (output) INTEGER
+            The number of ( BETA ) digits in the mantissa.
 
-    RND     (output) LOGICAL   
-            Specifies whether proper rounding  ( RND = .TRUE. )  or   
-            chopping  ( RND = .FALSE. )  occurs in addition. This may not 
-  
-            be a reliable guide to the way in which the machine performs 
-  
-            its arithmetic.   
+    RND     (output) LOGICAL
+            Specifies whether proper rounding  ( RND = .TRUE. )  or
+            chopping  ( RND = .FALSE. )  occurs in addition. This may not
 
-    IEEE1   (output) LOGICAL   
-            Specifies whether rounding appears to be done in the IEEE   
-            'round to nearest' style.   
+            be a reliable guide to the way in which the machine performs
 
-    Further Details   
-    ===============   
+            its arithmetic.
 
-    The routine is based on the routine  ENVRON  by Malcolm and   
-    incorporates suggestions by Gentleman and Marovich. See   
+    IEEE1   (output) LOGICAL
+            Specifies whether rounding appears to be done in the IEEE
+            'round to nearest' style.
 
-       Malcolm M. A. (1972) Algorithms to reveal properties of   
-          floating-point arithmetic. Comms. of the ACM, 15, 949-951.   
+    Further Details
+    ===============
 
-       Gentleman W. M. and Marovich S. B. (1974) More on algorithms   
-          that reveal properties of floating point arithmetic units.   
-          Comms. of the ACM, 17, 276-277.   
+    The routine is based on the routine  ENVRON  by Malcolm and
+    incorporates suggestions by Gentleman and Marovich. See
 
-   ===================================================================== 
+       Malcolm M. A. (1972) Algorithms to reveal properties of
+          floating-point arithmetic. Comms. of the ACM, 15, 949-951.
+
+       Gentleman W. M. and Marovich S. B. (1974) More on algorithms
+          that reveal properties of floating point arithmetic units.
+          Comms. of the ACM, 17, 276-277.
+
+   =====================================================================
 */
     /* Initialized data */
-    static logical first = TRUE_;
+    logical first = TRUE_;
     /* System generated locals */
     doublereal d__1, d__2;
     /* Local variables */
-    static logical lrnd;
-    static doublereal a, b, c, f;
-    static integer lbeta;
-    static doublereal savec;
+    logical lrnd = FALSE_;
+    doublereal a, b, c, f;
+    integer lbeta = 0;
+    doublereal savec;
     extern doublereal dlamc3_(doublereal *, doublereal *);
-    static logical lieee1;
-    static doublereal t1, t2;
-    static integer lt;
-    static doublereal one, qtr;
+    logical lieee1 = FALSE_;
+    doublereal t1, t2;
+    integer lt = 0;
+    doublereal one, qtr;
 
 
 
@@ -207,18 +207,18 @@ nding
 	one = 1.;
 
 /*        LBETA,  LIEEE1,  LT and  LRND  are the  local values  of  BE
-TA,   
-          IEEE1, T and RND.   
+TA,
+          IEEE1, T and RND.
 
           Throughout this routine  we use the function  DLAMC3  to ens
-ure   
-          that relevant values are  stored and not held in registers, 
- or   
-          are not affected by optimizers.   
+ure
+          that relevant values are  stored and not held in registers,
+ or
+          are not affected by optimizers.
 
           Compute  a = 2.0**m  with the  smallest positive integer m s
-uch   
-          that   
+uch
+          that
 
              fl( a + 1.0 ) = a. */
 
@@ -234,11 +234,11 @@ L10:
 	    c = dlamc3_(&c, &d__1);
 	    goto L10;
 	}
-/* +       END WHILE   
+/* +       END WHILE
 
-          Now compute  b = 2.0**m  with the smallest positive integer 
-m   
-          such that   
+          Now compute  b = 2.0**m  with the smallest positive integer
+m
+          such that
 
              fl( a + b ) .gt. a. */
 
@@ -252,14 +252,14 @@ L20:
 	    c = dlamc3_(&a, &b);
 	    goto L20;
 	}
-/* +       END WHILE   
+/* +       END WHILE
 
           Now compute the base.  a and c  are neighbouring floating po
-integer   
+integer
           numbers  in the  interval  ( beta**t, beta**( t + 1 ) )  and
- so   
+ so
           their difference is beta. Adding 0.25 to c is to ensure that
- it   
+ it
           is truncated to beta and not ( beta - 1 ). */
 
 	qtr = one / 4;
@@ -269,8 +269,8 @@ integer
 	lbeta = (integer) (c + qtr);
 
 /*        Now determine whether rounding or chopping occurs,  by addin
-g a   
-          bit  less  than  beta/2  and a  bit  more  than  beta/2  to 
+g a
+          bit  less  than  beta/2  and a  bit  more  than  beta/2  to
  a. */
 
 	b = (doublereal) lbeta;
@@ -292,13 +292,13 @@ g a
 	}
 
 /*        Try and decide whether rounding is done in the  IEEE  'round
- to   
-          nearest' style. B/2 is half a unit in the last place of the 
-two   
-          numbers A and SAVEC. Furthermore, A is even, i.e. has last  
-bit   
+ to
+          nearest' style. B/2 is half a unit in the last place of the
+two
+          numbers A and SAVEC. Furthermore, A is even, i.e. has last
+bit
           zero, and SAVEC is odd. Thus adding B/2 to A should not  cha
-nge   
+nge
           A, but adding B/2 to SAVEC should change SAVEC. */
 
 	d__1 = b / 2;
@@ -308,12 +308,12 @@ nge
 	lieee1 = t1 == a && t2 > savec && lrnd;
 
 /*        Now find  the  mantissa, t.  It should  be the  integer part
- of   
+ of
           log to the base beta of a,  however it is safer to determine
-  t   
-          by powering.  So we find t as the smallest positive integer 
-for   
-          which   
+  t
+          by powering.  So we find t as the smallest positive integer
+for
+          which
 
              fl( beta**t + 1.0 ) = 1.0. */
 
@@ -345,103 +345,103 @@ L30:
 
 } /* dlamc1_ */
 
-/* Subroutine */ integer dlamc2_(integer *beta, integer *t, logical *rnd, 
-	doublereal *eps, integer *emin, doublereal *rmin, integer *emax, 
+/* Subroutine */ integer dlamc2_(integer *beta, integer *t, logical *rnd,
+	doublereal *eps, integer *emin, doublereal *rmin, integer *emax,
 	doublereal *rmax)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLAMC2 determines the machine parameters specified in its argument   
-    list.   
+    DLAMC2 determines the machine parameters specified in its argument
+    list.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    BETA    (output) INTEGER   
-            The base of the machine.   
+    BETA    (output) INTEGER
+            The base of the machine.
 
-    T       (output) INTEGER   
-            The number of ( BETA ) digits in the mantissa.   
+    T       (output) INTEGER
+            The number of ( BETA ) digits in the mantissa.
 
-    RND     (output) LOGICAL   
-            Specifies whether proper rounding  ( RND = .TRUE. )  or   
-            chopping  ( RND = .FALSE. )  occurs in addition. This may not 
-  
-            be a reliable guide to the way in which the machine performs 
-  
-            its arithmetic.   
+    RND     (output) LOGICAL
+            Specifies whether proper rounding  ( RND = .TRUE. )  or
+            chopping  ( RND = .FALSE. )  occurs in addition. This may not
 
-    EPS     (output) DOUBLE PRECISION   
-            The smallest positive number such that   
+            be a reliable guide to the way in which the machine performs
 
-               fl( 1.0 - EPS ) .LT. 1.0,   
+            its arithmetic.
 
-            where fl denotes the computed value.   
+    EPS     (output) DOUBLE PRECISION
+            The smallest positive number such that
 
-    EMIN    (output) INTEGER   
-            The minimum exponent before (gradual) underflow occurs.   
+               fl( 1.0 - EPS ) .LT. 1.0,
 
-    RMIN    (output) DOUBLE PRECISION   
-            The smallest normalized number for the machine, given by   
-            BASE**( EMIN - 1 ), where  BASE  is the floating point value 
-  
-            of BETA.   
+            where fl denotes the computed value.
 
-    EMAX    (output) INTEGER   
-            The maximum exponent before overflow occurs.   
+    EMIN    (output) INTEGER
+            The minimum exponent before (gradual) underflow occurs.
 
-    RMAX    (output) DOUBLE PRECISION   
-            The largest positive number for the machine, given by   
-            BASE**EMAX * ( 1 - EPS ), where  BASE  is the floating point 
-  
-            value of BETA.   
+    RMIN    (output) DOUBLE PRECISION
+            The smallest normalized number for the machine, given by
+            BASE**( EMIN - 1 ), where  BASE  is the floating point value
 
-    Further Details   
-    ===============   
+            of BETA.
 
-    The computation of  EPS  is based on a routine PARANOIA by   
-    W. Kahan of the University of California at Berkeley.   
+    EMAX    (output) INTEGER
+            The maximum exponent before overflow occurs.
 
-   ===================================================================== 
+    RMAX    (output) DOUBLE PRECISION
+            The largest positive number for the machine, given by
+            BASE**EMAX * ( 1 - EPS ), where  BASE  is the floating point
+
+            value of BETA.
+
+    Further Details
+    ===============
+
+    The computation of  EPS  is based on a routine PARANOIA by
+    W. Kahan of the University of California at Berkeley.
+
+   =====================================================================
 */
     /* Table of constant values */
-/***static integer c__1 = 1;***/
-    
+/*** integer c__1 = 1;***/
+
     /* Initialized data */
-    static logical first = TRUE_;
-    static logical iwarn = FALSE_;
+    logical first = TRUE_;
+    logical iwarn = FALSE_;
     /* System generated locals */
     integer i__1;
     doublereal d__1, d__2, d__3, d__4, d__5;
     /* Builtin functions */
     doublereal pow_di(doublereal *, integer *);
     /* Local variables */
-    static logical ieee;
-    static doublereal half;
-    static logical lrnd;
-    static doublereal leps, zero, a, b, c;
-    static integer i, lbeta;
-    static doublereal rbase;
-    static integer lemin, lemax, gnmin;
-    static doublereal small;
-    static integer gpmin;
-    static doublereal third, lrmin, lrmax, sixth;
-    extern /* Subroutine */ integer dlamc1_(integer *, integer *, logical *, 
+    logical ieee;
+    doublereal half;
+    logical lrnd= FALSE_;
+    doublereal leps = 0., zero, a, b, c;
+    integer i, lbeta = 0;
+    doublereal rbase;
+    integer lemin = 0, lemax = 0, gnmin;
+    doublereal small;
+    integer gpmin;
+    doublereal third, lrmin = 0., lrmax = 0., sixth;
+    extern /* Subroutine */ integer dlamc1_(integer *, integer *, logical *,
 	    logical *);
     extern doublereal dlamc3_(doublereal *, doublereal *);
-    static logical lieee1;
-    extern /* Subroutine */ integer dlamc4_(integer *, doublereal *, integer *), 
-	    dlamc5_(integer *, integer *, integer *, logical *, integer *, 
+    logical lieee1;
+    extern /* Subroutine */ integer dlamc4_(integer *, doublereal *, integer *),
+	    dlamc5_(integer *, integer *, integer *, logical *, integer *,
 	    doublereal *);
-    static integer lt, ngnmin, ngpmin;
-    static doublereal one, two;
+    integer lt = 0, ngnmin, ngpmin;
+    doublereal one, two;
 
 
 
@@ -452,16 +452,16 @@ L30:
 	two = 2.;
 
 /*        LBETA, LT, LRND, LEPS, LEMIN and LRMIN  are the local values
- of   
-          BETA, T, RND, EPS, EMIN and RMIN.   
+ of
+          BETA, T, RND, EPS, EMIN and RMIN.
 
           Throughout this routine  we use the function  DLAMC3  to ens
-ure   
-          that relevant values are stored  and not held in registers, 
- or   
-          are not affected by optimizers.   
+ure
+          that relevant values are stored  and not held in registers,
+ or
+          are not affected by optimizers.
 
-          DLAMC1 returns the parameters  LBETA, LT, LRND and LIEEE1. 
+          DLAMC1 returns the parameters  LBETA, LT, LRND and LIEEE1.
 */
 
 	dlamc1_(&lbeta, &lt, &lrnd, &lieee1);
@@ -516,12 +516,12 @@ L10:
 	    leps = a;
 	}
 
-/*        Computation of EPS complete.   
+/*        Computation of EPS complete.
 
           Now find  EMIN.  Let A = + or - 1, and + or - (1 + BASE**(-3
-)).   
+)).
           Keep dividing  A by BETA until (gradual) underflow occurs. T
-his   
+his
           is detected when we cannot recover the previous A. */
 
 	rbase = one / lbeta;
@@ -544,13 +544,13 @@ his
 	    if (ngpmin == gpmin) {
 		lemin = ngpmin;
 /*            ( Non twos-complement machines, no gradual under
-flow;   
+flow;
                 e.g.,  VAX ) */
 	    } else if (gpmin - ngpmin == 3) {
 		lemin = ngpmin - 1 + lt;
 		ieee = TRUE_;
 /*            ( Non twos-complement machines, with gradual und
-erflow;   
+erflow;
                 e.g., IEEE standard followers ) */
 	    } else {
 		lemin = min(ngpmin,gpmin);
@@ -562,7 +562,7 @@ erflow;
 	    if ((i__1 = ngpmin - ngnmin, abs(i__1)) == 1) {
 		lemin = max(ngpmin,ngnmin);
 /*            ( Twos-complement machines, no gradual underflow
-;   
+;
                 e.g., CYBER 205 ) */
 	    } else {
 		lemin = min(ngpmin,ngnmin);
@@ -575,7 +575,7 @@ erflow;
 	    if (gpmin - min(ngpmin,ngnmin) == 3) {
 		lemin = max(ngpmin,ngnmin) - 1 + lt;
 /*            ( Twos-complement machines with gradual underflo
-w;   
+w;
                 no known machine ) */
 	    } else {
 		lemin = min(ngpmin,ngnmin);
@@ -590,33 +590,33 @@ w;
 /*         ( A guess; no known machine ) */
 	    iwarn = TRUE_;
 	}
-/* **   
+/* **
    Comment out this if block if EMIN is ok */
 	if (iwarn) {
 	    first = TRUE_;
 	    hypre_printf("\n\n WARNING. The value EMIN may be incorrect:- ");
 	    hypre_printf("EMIN = %8i\n",(integer)lemin);
 	    hypre_printf("If, after inspection, the value EMIN looks acceptable");
-            hypre_printf("please comment out \n the IF block as marked within the"); 
-            hypre_printf("code of routine DLAMC2, \n otherwise supply EMIN"); 
+            hypre_printf("please comment out \n the IF block as marked within the");
+            hypre_printf("code of routine DLAMC2, \n otherwise supply EMIN");
             hypre_printf("explicitly.\n");
 	}
-/* **   
+/* **
 
           Assume IEEE arithmetic if we found denormalised  numbers abo
-ve,   
+ve,
           or if arithmetic seems to round in the  IEEE style,  determi
-ned   
+ned
           in routine DLAMC1. A true IEEE machine should have both  thi
-ngs   
+ngs
           true; however, faulty machines may have one or the other. */
 
 	ieee = ieee || lieee1;
 
 /*        Compute  RMIN by successive division by  BETA. We could comp
-ute   
+ute
           RMIN as BASE**( EMIN - 1 ),  but some machines underflow dur
-ing   
+ing
           this computation. */
 
 	lrmin = 1.;
@@ -650,30 +650,30 @@ ing
 
 doublereal dlamc3_(doublereal *a, doublereal *b)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLAMC3  is intended to force  A  and  B  to be stored prior to doing 
-  
-    the addition of  A  and  B ,  for use in situations where optimizers 
-  
-    might hold one of these in a register.   
+    DLAMC3  is intended to force  A  and  B  to be stored prior to doing
 
-    Arguments   
-    =========   
+    the addition of  A  and  B ,  for use in situations where optimizers
 
-    A, B    (input) DOUBLE PRECISION   
-            The values A and B.   
+    might hold one of these in a register.
 
-   ===================================================================== 
+    Arguments
+    =========
+
+    A, B    (input) DOUBLE PRECISION
+            The values A and B.
+
+   =====================================================================
 */
-/* >>Start of File<<   
+/* >>Start of File<<
        System generated locals */
     doublereal ret_val;
 
@@ -689,43 +689,43 @@ doublereal dlamc3_(doublereal *a, doublereal *b)
 
 /* Subroutine */ integer dlamc4_(integer *emin, doublereal *start, integer *base)
 {
-/*  -- LAPACK auxiliary routine (version 2.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 2.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLAMC4 is a service routine for DLAMC2.   
+    DLAMC4 is a service routine for DLAMC2.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    EMIN    (output) EMIN   
-            The minimum exponent before (gradual) underflow, computed by 
-  
-            setting A = START and dividing by BASE until the previous A   
-            can not be recovered.   
+    EMIN    (output) EMIN
+            The minimum exponent before (gradual) underflow, computed by
 
-    START   (input) DOUBLE PRECISION   
-            The starting point for determining EMIN.   
+            setting A = START and dividing by BASE until the previous A
+            can not be recovered.
 
-    BASE    (input) INTEGER   
-            The base of the machine.   
+    START   (input) DOUBLE PRECISION
+            The starting point for determining EMIN.
 
-   ===================================================================== 
+    BASE    (input) INTEGER
+            The base of the machine.
+
+   =====================================================================
 */
     /* System generated locals */
 /***integer i__1;***/
     doublereal d__1;
     /* Local variables */
-    static doublereal zero, a;
-    static integer i;
-    static doublereal rbase, b1, b2, c1, c2, d1, d2;
+    doublereal zero, a;
+    integer i;
+    doublereal rbase, b1, b2, c1, c2, d1, d2;
     extern doublereal dlamc3_(doublereal *, doublereal *);
-    static doublereal one;
+    doublereal one;
 
 
 
@@ -740,7 +740,7 @@ doublereal dlamc3_(doublereal *a, doublereal *b)
     c2 = a;
     d1 = a;
     d2 = a;
-/* +    WHILE( ( C1.EQ.A ).AND.( C2.EQ.A ).AND.   
+/* +    WHILE( ( C1.EQ.A ).AND.( C2.EQ.A ).AND.
       $       ( D1.EQ.A ).AND.( D2.EQ.A )      )LOOP */
 L10:
     if (c1 == a && c2 == a && d1 == a && d2 == a) {
@@ -776,72 +776,72 @@ L10:
 
 } /* dlamc4_ */
 
-/* Subroutine */ integer dlamc5_(integer *beta, integer *p, integer *emin, 
+/* Subroutine */ integer dlamc5_(integer *beta, integer *p, integer *emin,
 	logical *ieee, integer *emax, doublereal *rmax)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       October 31, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       October 31, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLAMC5 attempts to compute RMAX, the largest machine floating-point   
-    number, without overflow.  It assumes that EMAX + abs(EMIN) sum   
-    approximately to a power of 2.  It will fail on machines where this   
-    assumption does not hold, for example, the Cyber 205 (EMIN = -28625, 
-  
-    EMAX = 28718).  It will also fail if the value supplied for EMIN is   
-    too large (i.e. too close to zero), probably with overflow.   
+    DLAMC5 attempts to compute RMAX, the largest machine floating-point
+    number, without overflow.  It assumes that EMAX + abs(EMIN) sum
+    approximately to a power of 2.  It will fail on machines where this
+    assumption does not hold, for example, the Cyber 205 (EMIN = -28625,
 
-    Arguments   
-    =========   
+    EMAX = 28718).  It will also fail if the value supplied for EMIN is
+    too large (i.e. too close to zero), probably with overflow.
 
-    BETA    (input) INTEGER   
-            The base of floating-point arithmetic.   
+    Arguments
+    =========
 
-    P       (input) INTEGER   
-            The number of base BETA digits in the mantissa of a   
-            floating-point value.   
+    BETA    (input) INTEGER
+            The base of floating-point arithmetic.
 
-    EMIN    (input) INTEGER   
-            The minimum exponent before (gradual) underflow.   
+    P       (input) INTEGER
+            The number of base BETA digits in the mantissa of a
+            floating-point value.
 
-    IEEE    (input) LOGICAL   
-            A logical flag specifying whether or not the arithmetic   
-            system is thought to comply with the IEEE standard.   
+    EMIN    (input) INTEGER
+            The minimum exponent before (gradual) underflow.
 
-    EMAX    (output) INTEGER   
-            The largest exponent before overflow   
+    IEEE    (input) LOGICAL
+            A logical flag specifying whether or not the arithmetic
+            system is thought to comply with the IEEE standard.
 
-    RMAX    (output) DOUBLE PRECISION   
-            The largest machine floating-point number.   
+    EMAX    (output) INTEGER
+            The largest exponent before overflow
 
-   ===================================================================== 
-  
+    RMAX    (output) DOUBLE PRECISION
+            The largest machine floating-point number.
+
+   =====================================================================
 
 
-       First compute LEXP and UEXP, two powers of 2 that bound   
-       abs(EMIN). We then assume that EMAX + abs(EMIN) will sum   
-       approximately to the bound that is closest to abs(EMIN).   
+
+       First compute LEXP and UEXP, two powers of 2 that bound
+       abs(EMIN). We then assume that EMAX + abs(EMIN) will sum
+       approximately to the bound that is closest to abs(EMIN).
        (EMAX is the exponent of the required number RMAX). */
     /* Table of constant values */
-    static doublereal c_b5 = 0.;
-    
+    doublereal c_b5 = 0.;
+
     /* System generated locals */
 /***integer i__1;***/
     doublereal d__1;
     /* Local variables */
-    static integer lexp;
-    static doublereal oldy;
-    static integer uexp, i;
-    static doublereal y, z;
-    static integer nbits;
+    integer lexp;
+    doublereal oldy;
+    integer uexp, i;
+    doublereal y, z;
+    integer nbits;
     extern doublereal dlamc3_(doublereal *, doublereal *);
-    static doublereal recbas;
-    static integer exbits, expsum, try__;
+    doublereal recbas;
+    integer exbits, expsum, try__;
 
 
 
@@ -861,8 +861,8 @@ L10:
 	++exbits;
     }
 
-/*     Now -LEXP is less than or equal to EMIN, and -UEXP is greater   
-       than or equal to EMIN. EXBITS is the number of bits needed to   
+/*     Now -LEXP is less than or equal to EMIN, and -UEXP is greater
+       than or equal to EMIN. EXBITS is the number of bits needed to
        store the exponent. */
 
     if (uexp + *emin > -lexp - *emin) {
@@ -871,32 +871,32 @@ L10:
 	expsum = uexp << 1;
     }
 
-/*     EXPSUM is the exponent range, approximately equal to   
+/*     EXPSUM is the exponent range, approximately equal to
        EMAX - EMIN + 1 . */
 
     *emax = expsum + *emin - 1;
     nbits = exbits + 1 + *p;
 
-/*     NBITS is the total number of bits needed to store a   
+/*     NBITS is the total number of bits needed to store a
        floating-point number. */
 
     if (nbits % 2 == 1 && *beta == 2) {
 
-/*        Either there are an odd number of bits used to store a   
-          floating-point number, which is unlikely, or some bits are 
-  
+/*        Either there are an odd number of bits used to store a
+          floating-point number, which is unlikely, or some bits are
+
           not used in the representation of numbers, which is possible
-,   
-          (e.g. Cray machines) or the mantissa has an implicit bit,   
+,
+          (e.g. Cray machines) or the mantissa has an implicit bit,
           (e.g. IEEE machines, Dec Vax machines), which is perhaps the
-   
-          most likely. We have to assume the last alternative.   
-          If this is true, then we need to reduce EMAX by one because 
-  
+
+          most likely. We have to assume the last alternative.
+          If this is true, then we need to reduce EMAX by one because
+
           there must be some way of representing zero in an implicit-b
-it   
-          system. On machines like Cray, we are reducing EMAX by one 
-  
+it
+          system. On machines like Cray, we are reducing EMAX by one
+
           unnecessarily. */
 
 	--(*emax);
@@ -905,16 +905,16 @@ it
     if (*ieee) {
 
 /*        Assume we are on an IEEE machine which reserves one exponent
-   
+
           for infinity and NaN. */
 
 	--(*emax);
     }
 
-/*     Now create RMAX, the largest machine number, which should   
-       be equal to (1.0 - BETA**(-P)) * BETA**EMAX .   
+/*     Now create RMAX, the largest machine number, which should
+       be equal to (1.0 - BETA**(-P)) * BETA**EMAX .
 
-       First compute 1.0 - BETA**(-P), being careful that the   
+       First compute 1.0 - BETA**(-P), being careful that the
        result is less than 1.0 . */
 
     recbas = 1. / *beta;

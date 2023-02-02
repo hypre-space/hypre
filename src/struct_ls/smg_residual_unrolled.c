@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -69,7 +69,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
-                       
+
    hypre_BoxArray         *base_points;
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
@@ -109,8 +109,8 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    (residual_data -> flops) =
       (hypre_StructMatrixGlobalSize(A) + hypre_StructVectorGlobalSize(x)) /
       (HYPRE_BigInt)(hypre_IndexX(base_stride) *
-       hypre_IndexY(base_stride) *
-       hypre_IndexZ(base_stride)  );
+                     hypre_IndexY(base_stride) *
+                     hypre_IndexZ(base_stride)  );
 
    return ierr;
 }
@@ -135,29 +135,29 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
    hypre_CommHandle       *comm_handle;
-                       
+
    hypre_BoxArrayArray    *compute_box_aa;
    hypre_BoxArray         *compute_box_a;
    hypre_Box              *compute_box;
-                       
+
    hypre_Box              *A_data_box;
    hypre_Box              *x_data_box;
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
-                       
+
    HYPRE_Int               Ai;
    HYPRE_Int               xi;
    HYPRE_Int               bi;
    HYPRE_Int               ri;
-                         
+
    HYPRE_Real             *Ap0;
    HYPRE_Real             *xp0;
    HYPRE_Real             *bp;
    HYPRE_Real             *rp;
-                       
+
    hypre_Index             loop_size;
    hypre_IndexRef          start;
-                       
+
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
    HYPRE_Int               stencil_size;
@@ -191,7 +191,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
-      switch(compute_i)
+      switch (compute_i)
       {
          case 0:
          {
@@ -265,7 +265,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
 
                break;
 
@@ -276,11 +276,11 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap2 = hypre_StructMatrixBoxData(A, i, 2);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
 
                break;
 
@@ -293,15 +293,15 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap4 = hypre_StructMatrixBoxData(A, i, 4);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
                xp3 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
                xp4 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
 
                break;
 
@@ -316,19 +316,19 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap6 = hypre_StructMatrixBoxData(A, i, 6);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
                xp3 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
                xp4 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
                xp5 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
                xp6 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
 
                break;
 
@@ -345,23 +345,23 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap8 = hypre_StructMatrixBoxData(A, i, 8);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
                xp3 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
                xp4 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
                xp5 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
                xp6 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
                xp7 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
                xp8 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
 
                break;
 
@@ -384,35 +384,35 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap14 = hypre_StructMatrixBoxData(A, i, 14);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
                xp3 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
                xp4 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
                xp5 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
                xp6 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
                xp7 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
                xp8 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
                xp9 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
                xp10 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
                xp11 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
                xp12 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
                xp13 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
                xp14 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
 
                break;
 
@@ -439,43 +439,43 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap18 = hypre_StructMatrixBoxData(A, i, 18);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
                xp3 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
                xp4 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
                xp5 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
                xp6 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
                xp7 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
                xp8 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
                xp9 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
                xp10 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
                xp11 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
                xp12 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
                xp13 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
                xp14 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
                xp15 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
                xp16 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
                xp17 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
                xp18 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
 
                break;
 
@@ -510,59 +510,59 @@ hypre_SMGResidual( void               *residual_vdata,
                Ap26 = hypre_StructMatrixBoxData(A, i, 26);
 
                xp0 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
                xp1 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
                xp2 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
                xp3 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
                xp4 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
                xp5 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
                xp6 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
                xp7 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
                xp8 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
                xp9 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
+                     hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
                xp10 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
                xp11 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
                xp12 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
                xp13 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
                xp14 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
                xp15 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
                xp16 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
                xp17 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
                xp18 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
                xp19 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[19]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[19]);
                xp20 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[20]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[20]);
                xp21 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[21]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[21]);
                xp22 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[22]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[22]);
                xp23 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[23]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[23]);
                xp24 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[24]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[24]);
                xp25 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[25]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[25]);
                xp26 = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[26]);
+                      hypre_BoxOffsetDistance(x_data_box, stencil_shape[26]);
 
                break;
 
@@ -585,7 +585,7 @@ hypre_SMGResidual( void               *residual_vdata,
             {
 
                case 1:
-   
+
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
 #define DEVICE_VAR is_device_ptr(rp,Ap0,xp0)
@@ -596,7 +596,7 @@ hypre_SMGResidual( void               *residual_vdata,
                   {
 
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi];
+                              - Ap0[Ai] * xp0[xi];
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
@@ -614,11 +614,11 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
- 
+
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi];
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi];
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
@@ -636,13 +636,13 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
- 
+
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi]
-                        - Ap3[Ai] * xp3[xi]
-                        - Ap4[Ai] * xp4[xi];
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi];
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
@@ -662,13 +662,13 @@ hypre_SMGResidual( void               *residual_vdata,
                   {
 
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi]
-                        - Ap3[Ai] * xp3[xi]
-                        - Ap4[Ai] * xp4[xi]
-                        - Ap5[Ai] * xp5[xi]
-                        - Ap6[Ai] * xp6[xi];
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi];
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
@@ -686,18 +686,18 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi]
-                        - Ap3[Ai] * xp3[xi]
-                        - Ap4[Ai] * xp4[xi]
-                        - Ap5[Ai] * xp5[xi]
-                        - Ap6[Ai] * xp6[xi]
-                        - Ap7[Ai] * xp7[xi]
-                        - Ap8[Ai] * xp8[xi];
-   
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi];
+
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
@@ -714,23 +714,23 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi]
-                        - Ap3[Ai] * xp3[xi]
-                        - Ap4[Ai] * xp4[xi]
-                        - Ap5[Ai] * xp5[xi]
-                        - Ap6[Ai] * xp6[xi]
-                        - Ap7[Ai] * xp7[xi]
-                        - Ap8[Ai] * xp8[xi]
-                        - Ap9[Ai] * xp9[xi]
-                        - Ap10[Ai] * xp10[xi]
-                        - Ap11[Ai] * xp11[xi]
-                        - Ap12[Ai] * xp12[xi]
-                        - Ap13[Ai] * xp13[xi]
-                        - Ap14[Ai] * xp14[xi];
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi]
+                              - Ap9[Ai] * xp9[xi]
+                              - Ap10[Ai] * xp10[xi]
+                              - Ap11[Ai] * xp11[xi]
+                              - Ap12[Ai] * xp12[xi]
+                              - Ap13[Ai] * xp13[xi]
+                              - Ap14[Ai] * xp14[xi];
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
@@ -748,34 +748,34 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi]
-                        - Ap3[Ai] * xp3[xi]
-                        - Ap4[Ai] * xp4[xi]
-                        - Ap5[Ai] * xp5[xi]
-                        - Ap6[Ai] * xp6[xi]
-                        - Ap7[Ai] * xp7[xi]
-                        - Ap8[Ai] * xp8[xi]
-                        - Ap9[Ai] * xp9[xi]
-                        - Ap10[Ai] * xp10[xi]
-                        - Ap11[Ai] * xp11[xi]
-                        - Ap12[Ai] * xp12[xi]
-                        - Ap13[Ai] * xp13[xi]
-                        - Ap14[Ai] * xp14[xi]
-                        - Ap15[Ai] * xp15[xi]
-                        - Ap16[Ai] * xp16[xi]
-                        - Ap17[Ai] * xp17[xi]
-                        - Ap18[Ai] * xp18[xi];
-   
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi]
+                              - Ap9[Ai] * xp9[xi]
+                              - Ap10[Ai] * xp10[xi]
+                              - Ap11[Ai] * xp11[xi]
+                              - Ap12[Ai] * xp12[xi]
+                              - Ap13[Ai] * xp13[xi]
+                              - Ap14[Ai] * xp14[xi]
+                              - Ap15[Ai] * xp15[xi]
+                              - Ap16[Ai] * xp16[xi]
+                              - Ap17[Ai] * xp17[xi]
+                              - Ap18[Ai] * xp18[xi];
+
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-   
+
                   break;
-   
+
                case 27:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
@@ -786,40 +786,40 @@ hypre_SMGResidual( void               *residual_vdata,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
                   {
-   
+
                      rp[ri] = rp[ri]
-                        - Ap0[Ai] * xp0[xi]
-                        - Ap1[Ai] * xp1[xi]
-                        - Ap2[Ai] * xp2[xi]
-                        - Ap3[Ai] * xp3[xi]
-                        - Ap4[Ai] * xp4[xi]
-                        - Ap5[Ai] * xp5[xi]
-                        - Ap6[Ai] * xp6[xi]
-                        - Ap7[Ai] * xp7[xi]
-                        - Ap8[Ai] * xp8[xi]
-                        - Ap9[Ai] * xp9[xi]
-                        - Ap10[Ai] * xp10[xi]
-                        - Ap11[Ai] * xp11[xi]
-                        - Ap12[Ai] * xp12[xi]
-                        - Ap13[Ai] * xp13[xi]
-                        - Ap14[Ai] * xp14[xi]
-                        - Ap15[Ai] * xp15[xi]
-                        - Ap16[Ai] * xp16[xi]
-                        - Ap17[Ai] * xp17[xi]
-                        - Ap18[Ai] * xp18[xi]
-                        - Ap19[Ai] * xp19[xi]
-                        - Ap20[Ai] * xp20[xi]
-                        - Ap21[Ai] * xp21[xi]
-                        - Ap22[Ai] * xp22[xi]
-                        - Ap23[Ai] * xp23[xi]
-                        - Ap24[Ai] * xp24[xi]
-                        - Ap25[Ai] * xp25[xi]
-                        - Ap26[Ai] * xp26[xi];
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi]
+                              - Ap9[Ai] * xp9[xi]
+                              - Ap10[Ai] * xp10[xi]
+                              - Ap11[Ai] * xp11[xi]
+                              - Ap12[Ai] * xp12[xi]
+                              - Ap13[Ai] * xp13[xi]
+                              - Ap14[Ai] * xp14[xi]
+                              - Ap15[Ai] * xp15[xi]
+                              - Ap16[Ai] * xp16[xi]
+                              - Ap17[Ai] * xp17[xi]
+                              - Ap18[Ai] * xp18[xi]
+                              - Ap19[Ai] * xp19[xi]
+                              - Ap20[Ai] * xp20[xi]
+                              - Ap21[Ai] * xp21[xi]
+                              - Ap22[Ai] * xp22[xi]
+                              - Ap23[Ai] * xp23[xi]
+                              - Ap24[Ai] * xp24[xi]
+                              - Ap25[Ai] * xp25[xi]
+                              - Ap26[Ai] * xp26[xi];
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
 #undef DEVICE_VAR
-   
+
                   break;
 
                default:
@@ -828,7 +828,7 @@ hypre_SMGResidual( void               *residual_vdata,
                   {
                      Ap0 = hypre_StructMatrixBoxData(A, i, si);
                      xp0 = hypre_StructVectorBoxData(x, i) +
-                        hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+                           hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
                      hypre_BoxGetStrideSize(compute_box, base_stride,
                                             loop_size);
@@ -848,7 +848,7 @@ hypre_SMGResidual( void               *residual_vdata,
          }
       }
    }
-   
+
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/
@@ -862,7 +862,7 @@ hypre_SMGResidual( void               *residual_vdata,
 /*--------------------------------------------------------------------------
  * hypre_SMGResidualSetBase
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_index,
@@ -871,7 +871,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
    hypre_SMGResidualData *residual_data = residual_vdata;
    HYPRE_Int              d;
    HYPRE_Int              ierr = 0;
- 
+
    for (d = 0; d < 3; d++)
    {
       hypre_IndexD((residual_data -> base_index),  d)
@@ -879,7 +879,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
       hypre_IndexD((residual_data -> base_stride), d)
          = hypre_IndexD(base_stride, d);
    }
- 
+
    return ierr;
 }
 

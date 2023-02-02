@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -7,65 +7,145 @@
 
 #define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
 #define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
+#define HYPRE_RELEASE_NUMBER  @HYPRE_NUMBER@
 #define HYPRE_RELEASE_DATE    "@HYPRE_DATE@"
 #define HYPRE_RELEASE_TIME    "@HYPRE_TIME@"
 #define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
 
+#cmakedefine HYPRE_DEVELOP_STRING  "@HYPRE_DEVELOP_STRING@"
+#cmakedefine HYPRE_DEVELOP_NUMBER   @HYPRE_DEVELOP_NUMBER@
+#cmakedefine HYPRE_DEVELOP_BRANCH  "@HYPRE_DEVELOP_BRANCH@"
+#cmakedefine HYPRE_BRANCH_NAME     "@HYPRE_BRANCH_NAME@"
+
 /* Use long long int for HYPRE_BigInt */
-#cmakedefine HYPRE_MIXEDINT
+#cmakedefine HYPRE_MIXEDINT 1
 
 /* Use long long int for HYPRE_BigInt and HYPRE_Int*/
-#cmakedefine HYPRE_BIGINT
+#cmakedefine HYPRE_BIGINT 1
 
 /* Use single precision values for HYPRE_Real */
-#cmakedefine HYPRE_SINGLE
+#cmakedefine HYPRE_SINGLE 1
 
 /* Use quad precision values for HYPRE_Real */
-#cmakedefine HYPRE_LONG_DOUBLE
+#cmakedefine HYPRE_LONG_DOUBLE 1
 
 /* Use complex values */
-#cmakedefine HYPRE_COMPLEX
+#cmakedefine HYPRE_COMPLEX 1
+
+/* Use cudaMallocAsync */
+#cmakedefine HYPRE_USING_DEVICE_MALLOC_ASYNC 1
+
+/* Use GPU-aware MPI */
+#cmakedefine HYPRE_WITH_GPU_AWARE_MPI 1
+
+/* Debug mode */
+#cmakedefine HYPRE_DEBUG 1
 
 /* Define to be the max dimension size (must be at least 3) */
 #define HYPRE_MAXDIM 3
 
 /* Use persistent communication */
-#cmakedefine HYPRE_USING_PERSISTENT_COMM
+#cmakedefine HYPRE_USING_PERSISTENT_COMM 1
 
 /* Use hopscotch hashing */
-#cmakedefine HYPRE_HOPSCOTCH
+#cmakedefine HYPRE_HOPSCOTCH 1
 
 /* Compile without MPI */
-#cmakedefine HYPRE_SEQUENTIAL
+#cmakedefine HYPRE_SEQUENTIAL 1
 
 /* Use HYPRE timing routines */
-#cmakedefine HYPRE_TIMING
+#cmakedefine HYPRE_TIMING 1
 
 /* Use internal BLAS library */
-#cmakedefine HYPRE_USING_HYPRE_BLAS
+#cmakedefine HYPRE_USING_HYPRE_BLAS 1
 
 /* Use internal LAPACK library */
-#cmakedefine HYPRE_USING_HYPRE_LAPACK
-
-/* Use assumed partition */
-#cmakedefine HYPRE_NO_GLOBAL_PARTITION
+#cmakedefine HYPRE_USING_HYPRE_LAPACK 1
 
 /* Print HYPRE errors */
-#cmakedefine HYPRE_PRINT_ERRORS
+#cmakedefine HYPRE_PRINT_ERRORS 1
 
 /* Use OpenMP */
-#cmakedefine HYPRE_USING_OPENMP
+#cmakedefine HYPRE_USING_OPENMP 1
 
 /* Use Caliper instrumentation */
-#cmakedefine HYPRE_USING_CALIPER
+#cmakedefine HYPRE_USING_CALIPER 1
+
+/* Use UMPIRE */
+#cmakedefine HYPRE_USING_UMPIRE 1
+
+/* Use UMPIRE for device memory */
+#cmakedefine HYPRE_USING_UMPIRE_DEVICE 1
+
+/* Use UMPIRE for host memory */
+#cmakedefine HYPRE_USING_UMPIRE_HOST 1
+
+/* Use UMPIRE for pinned memory */
+#cmakedefine HYPRE_USING_UMPIRE_PINNED 1
+
+/* Use UMPIRE for unified memory */
+#cmakedefine HYPRE_USING_UMPIRE_UM 1
+
+/* Use if executing on device with CUDA */
+#cmakedefine HYPRE_USING_CUDA 1
+
+/* Use if executing on device with SYCL */
+#cmakedefine HYPRE_USING_SYCL 1
+
+/* Use cuBLAS */
+#cmakedefine HYPRE_USING_CUBLAS 1
+
+/* Use CUDA streams */
+#cmakedefine HYPRE_USING_CUDA_STREAMS 1
+
+/* Use cuRAND */
+#cmakedefine HYPRE_USING_CURAND 1
+
+/* Use cuSPARSE */
+#cmakedefine HYPRE_USING_CUSPARSE 1
+
+/* Use cuSOLVER */
+#cmakedefine HYPRE_USING_CUSOLVER 1
+
+/* Use device memory pool */
+#cmakedefine HYPRE_USING_DEVICE_POOL 1
+
+/* Use unified memory */
+#cmakedefine HYPRE_USING_UNIFIED_MEMORY 1
+
+/* Use device memory without UM */
+#cmakedefine HYPRE_USING_DEVICE_MEMORY 1
+
+/* Use if executing on device with OpenMP */
+#cmakedefine HYPRE_USING_DEVICE_OPENMP 1
+
+/* Use if executing on GPU device */
+#cmakedefine HYPRE_USING_GPU 1
+
+/* Use HIP */
+#cmakedefine HYPRE_USING_HIP 1
+
+/* Use NVTX */
+#cmakedefine HYPRE_USING_NVTX 1
+
+/* Use oneMLK spasre */
+#cmakedefine HYPRE_USING_ONEMKLSPARSE 1
+
+/* Use oneMLK blas */
+#cmakedefine HYPRE_USING_ONEMKLBLAS 1
+
+/* Use oneMLK rand */
+#cmakedefine HYPRE_USING_ONEMKLRAND 1
 
 /* Use SuperLU_Dist */
-#cmakedefine HYPRE_USING_DSUPERLU
+#cmakedefine HYPRE_USING_DSUPERLU 1
 
 /* Use SuperLU */
-#cmakedefine HAVE_SUPERLU
+#cmakedefine HAVE_SUPERLU 1
 
-/* #undef HYPRE_HAVE_MPI */
+/* Use MPI */
+#cmakedefine HYPRE_HAVE_MPI 1
+
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */
 
 /* Define as follows to set the Fortran name mangling scheme:

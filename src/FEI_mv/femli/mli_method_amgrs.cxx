@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -535,7 +535,6 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          hypre_BoomerAMGBuildInterp(hypreAT, CFMarkers, hypreST,
                      coarsePartition, nodeDOF_, dofArray, outputLevel_,
                      truncFactor_, mxelmtsP_, mapStoA, &hypreRT);
-         hypreRT->owns_col_starts = 0;
          hypre_ParCSRMatrixTranspose( hypreRT, &hypreR, one );
          funcPtr = new MLI_Function();
          MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
@@ -567,24 +566,6 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          //hypre_ParCSRMatrixTranspose(hypreP, &hypreR, 1);
          //hypreAP = hypre_ParMatmul(hypreA, hypreP);
          //hypreCA = hypre_ParMatmul(hypreR, hypreAP);
-         //if (hypre_ParCSRMatrixOwnsRowStarts(hypreCA) == 0)
-         //{
-         //   rowColStarts = hypre_ParCSRMatrixRowStarts(hypreR);
-         //   newRowColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
-         //   for (irow = 0; irow <= nprocs; irow++)
-         //      newRowColStarts[irow] = rowColStarts[irow];
-         //   hypre_ParCSRMatrixRowStarts(hypreCA) = newRowColStarts;
-         //   hypre_ParCSRMatrixOwnsRowStarts(hypreCA) = 1;
-         //}
-         //if (hypre_ParCSRMatrixOwnsColStarts(hypreCA) == 0)
-         //{
-         //   rowColStarts = hypre_ParCSRMatrixColStarts(hypreAP);
-         //   newRowColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
-         //   for (irow = 0; irow <= nprocs; irow++)
-         //      newRowColStarts[irow] = rowColStarts[irow];
-         //   hypre_ParCSRMatrixColStarts(hypreCA) = newRowColStarts;
-         //   hypre_ParCSRMatrixOwnsColStarts(hypreCA) = 1;
-         //}
          //funcPtr = new MLI_Function();
          //MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
          //sprintf(paramString, "HYPRE_ParCSR" );
@@ -968,7 +949,7 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
    int    startRow, rowIndex, colIndex, targc, numSweeps=4, rowCount;
    int    one=1, iC, *ADiagI, *ADiagJ, *fList, colInd;
    int    iV, ranSeed, jcol, rowCount2, CStartRow, CNRows;
-   int    *rowStarts, *newRowStarts, *colStarts, *newColStarts, kcol;
+   int    kcol;
    int    numVectors = 1, *SDiagI, *SDiagJ, count;
    int    numNew1, numNew2, numNew3, *sortIndices, stopRefine=1;
    double maxEigen, relaxWts[5], colValue, rnorm0, rnorm1, dOne=1.0;
@@ -1203,18 +1184,6 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       hypreAPFC = hypre_ParMatmul(hypreA, hyprePFC);
       hypre_ParCSRMatrixTranspose(hyprePFF, &hyprePFFT, 1);
       hypreAfc = hypre_ParMatmul(hyprePFFT, hypreAPFC);
-      rowStarts = hypre_ParCSRMatrixRowStarts(hyprePFFT);
-      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
-      for (irow = 0; irow <= nprocs; irow++)
-         newRowStarts[irow] = rowStarts[irow];
-      hypre_ParCSRMatrixRowStarts(hypreAfc) = newRowStarts;
-      colStarts = hypre_ParCSRMatrixColStarts(hypreAPFC);
-      newColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
-      for (irow = 0; irow <= nprocs; irow++)
-         newColStarts[irow] = colStarts[irow];
-      hypre_ParCSRMatrixColStarts(hypreAfc) = newColStarts;
-      hypre_ParCSRMatrixOwnsRowStarts(hypreAfc) = 1;
-      hypre_ParCSRMatrixOwnsColStarts(hypreAfc) = 1;
 
       funcPtr = new MLI_Function();
       MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
@@ -1224,8 +1193,6 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
 
       MLI_Matrix_ComputePtAP(mli_PFFMat, mli_Amat, &mli_AffMat);
       hypreAff  = (hypre_ParCSRMatrix *) mli_AffMat->getMatrix();
-      hypre_ParCSRMatrixOwnsRowStarts(hyprePFF) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(hyprePFF) = 0;
 
       //if (aratio > targetMu || iT == numTrials-1) break;
       //if (((double)FNRows/(double)localNRows) > 0.75) break;
@@ -1474,8 +1441,8 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    int    *rowLengs, ierr, startRow, rowCount, rowIndex, colIndex;
    int    *colInd, rowSize, jcol, one=1, maxRowLeng, nnz, PDegree=PDEGREE;
    int    *tPDiagI, *tPDiagJ, cCount, fCount, ncount, *ADDiagI, *ADDiagJ;
-   int    *AD2DiagI, *AD2DiagJ, *newColInd, newRowSize, *rowStarts;
-   int    *newRowStarts, nprocs, AccStartRow, AccNRows;
+   int    *AD2DiagI, *AD2DiagJ, *newColInd, newRowSize;
+   int    nprocs, AccStartRow, AccNRows;
    double *ADiagA, *colVal, colValue, *newColVal, *DDiagA;
    double *tPDiagA, *ADDiagA, *AD2DiagA, omega=2.0/3.0, dtemp;
    char   paramString[100];
@@ -1609,12 +1576,6 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
             else ADiagA[jcol] = omega * omega * DDiagA[irow] * ADiagA[jcol];
          }
       }
-      hypre_ParCSRMatrixOwnsColStarts(hypreInvD) = 0;
-      rowStarts = hypre_ParCSRMatrixRowStarts(hypreA);
-      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
-      for (irow = 0; irow <= nprocs; irow++)
-         newRowStarts[irow] = rowStarts[irow];
-      hypre_ParCSRMatrixRowStarts(hypreP) = newRowStarts;
 #else
       ierr = HYPRE_IJMatrixCreate(comm,AffStartRow,AffStartRow+AffNRows-1,
                            AffStartRow,AffStartRow+AffNRows-1,&IJP);
@@ -1680,8 +1641,6 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       hypre_assert( !ierr );
       HYPRE_IJMatrixGetObject(IJP, (void **) &hypreAD);
       hypreP = hypre_ParMatmul(hypreAD, hypreInvD);
-      hypre_ParCSRMatrixOwnsRowStarts(hypreP) = 1;
-      hypre_ParCSRMatrixOwnsRowStarts(hypreAD) = 0;
       ierr += HYPRE_IJMatrixDestroy(IJP);
 #endif
    }
@@ -1792,10 +1751,6 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
 
    hypreAfc = (hypre_ParCSRMatrix *) mli_Afcmat->getMatrix();
    hypreTmp = hypre_ParMatmul(hypreP, hypreAfc);
-   hypre_ParCSRMatrixOwnsRowStarts(hypreP) = 0;
-   hypre_ParCSRMatrixOwnsColStarts(hypreAfc) = 0;
-   hypre_ParCSRMatrixOwnsRowStarts(hypreTmp) = 1;
-   hypre_ParCSRMatrixOwnsColStarts(hypreTmp) = 1;
    hypre_ParCSRMatrixDestroy(hypreP);
    hypreP = hypreTmp;
    tPDiag   = hypre_ParCSRMatrixDiag(hypreP);

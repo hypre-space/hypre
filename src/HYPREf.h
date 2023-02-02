@@ -1,4 +1,4 @@
-!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 !     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 !
 !     SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -45,3 +45,12 @@
       integer HYPRE_SMG
       parameter( HYPRE_SMG =     11 )
 
+      integer HYPRE_MEMORY_HOST
+      parameter( HYPRE_MEMORY_HOST =   0 )
+      integer HYPRE_MEMORY_DEVICE
+      parameter( HYPRE_MEMORY_DEVICE = 1 )
+
+      integer HYPRE_EXEC_HOST
+      parameter( HYPRE_EXEC_HOST =   0 )
+      integer HYPRE_EXEC_DEVICE
+      parameter( HYPRE_EXEC_DEVICE = 1 )

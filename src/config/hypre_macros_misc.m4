@@ -1,4 +1,4 @@
-dnl Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+dnl Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 dnl HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 dnl
 dnl SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -98,7 +98,7 @@ AC_DEFUN([AC_HYPRE_OPTIMIZATION_FLAGS],
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case "${CC}" in
+   case `basename "${CC}"` in
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -106,7 +106,7 @@ then
           LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
-      icc|mpiicc)
+      icc|mpiicc|icx|mpiicx)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qopenmp"
@@ -138,14 +138,14 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case "${CXX}" in
+   case `basename "${CXX}"` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
-      icpc|icc|mpiicpc|mpiicc)
+      icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qopenmp"
@@ -174,7 +174,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${FC}" in
+   case `basename "${FC}"` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -218,7 +218,7 @@ AC_DEFUN([AC_HYPRE_DEBUG_FLAGS],
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case "${CC}" in
+   case `basename "${CC}"` in
       gcc|mpigcc|mpicc)
         CFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -226,7 +226,7 @@ then
           LDFLAGS="$LDFLAGS -fopenmp"
         fi
         ;;
-      icc|mpiicc)
+      icc|mpiicc|icx|mpiicx)
         CFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qopenmp"
@@ -258,14 +258,14 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case "${CXX}" in
+   case `basename "${CXX}"` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
         fi
         ;;
-      icpc|icc|mpiicpc|mpiicc)
+      icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qopenmp"
@@ -294,14 +294,14 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${FC}" in
+   case `basename "${FC}"` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -fopenmp"
         fi
         ;;
-      ifort|mpiifort)
+      ifort|mpiifort|ifx|mpiifx)
         FFLAGS="-g"
         if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -qopenmp"

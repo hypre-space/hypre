@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,32 +37,32 @@
             hypre_MPI_Abort(comm_dh, -1); \
           }
 
-  /* What is best to do here?  
-   * What is HYPRE's error checking strategy?  
-   * The shadow knows . . .
-   *
-   * Note: HYPRE_EUCLID_ERRCHKA macro is only used within this file.
-   *
-   * Note: "printErrorMsg(stderr)" is O.K. for debugging and
-   *        development, possibly not for production.  This
-   *        call causes Euclid to print a function call stack
-   *        trace that led to the error.  (Potentially, each
-   *        MPI task could print a trace.)
-   *
-   * Note: the __FUNC__ defines at the beginning of the function
-   *       calls are used in Euclid's internal error-checking scheme.
-   *       The "START_FUNC_DH" and "END_FUNC_VAL" macros are
-   *       used for debugging: when "logFuncsToStderr == true"
-   *       a function call trace is force-written to stderr;
-   *       (useful for debugging over dial-up lines!)  See
-   *       src/distributed_ls/Euclid/macros_dh.h and
-   *       src/distributed_ls/Euclid/src/globalObjects.c
-   *       for further info.
-   */
+/* What is best to do here?
+ * What is HYPRE's error checking strategy?
+ * The shadow knows . . .
+ *
+ * Note: HYPRE_EUCLID_ERRCHKA macro is only used within this file.
+ *
+ * Note: "printErrorMsg(stderr)" is O.K. for debugging and
+ *        development, possibly not for production.  This
+ *        call causes Euclid to print a function call stack
+ *        trace that led to the error.  (Potentially, each
+ *        MPI task could print a trace.)
+ *
+ * Note: the __FUNC__ defines at the beginning of the function
+ *       calls are used in Euclid's internal error-checking scheme.
+ *       The "START_FUNC_DH" and "END_FUNC_VAL" macros are
+ *       used for debugging: when "logFuncsToStderr == true"
+ *       a function call trace is force-written to stderr;
+ *       (useful for debugging over dial-up lines!)  See
+ *       src/distributed_ls/Euclid/macros_dh.h and
+ *       src/distributed_ls/Euclid/src/globalObjects.c
+ *       for further info.
+ */
 
 
 /*--------------------------------------------------------------------------
- * debugging: if ENABLE_EUCLID_LOGGING is defined, each MPI task will open 
+ * debugging: if ENABLE_EUCLID_LOGGING is defined, each MPI task will open
  * "logFile.id" for writing; also, function-call tracing is operational
  * (ie, you can set logFuncsToFile = true, logFuncsToSterr = true).
  *
@@ -80,59 +80,62 @@
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_EuclidCreate - Return a Euclid "solver".  
+ * HYPRE_EuclidCreate - Return a Euclid "solver".
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidCreate"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidCreate( MPI_Comm comm,
                     HYPRE_Solver *solver )
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  START_FUNC_DH
-  Euclid_dh eu; 
+   START_FUNC_DH
+   Euclid_dh eu;
 
-  /*----------------------------------------------------------- 
-   * create a few global objects (yuck!) for Euclid's use;
-   * these  are all pointers, are initially NULL, and are be set 
-   * back to NULL in HYPRE_EuclidDestroy()
-   * Global objects are defined in 
-   * src/distributed_ls/Euclid/src/globalObjects.c
-   *-----------------------------------------------------------*/
+   /*-----------------------------------------------------------
+    * create a few global objects (yuck!) for Euclid's use;
+    * these  are all pointers, are initially NULL, and are be set
+    * back to NULL in HYPRE_EuclidDestroy()
+    * Global objects are defined in
+    * src/distributed_ls/Euclid/src/globalObjects.c
+    *-----------------------------------------------------------*/
 
-  comm_dh = comm;
-  hypre_MPI_Comm_size(comm_dh, &np_dh);    HYPRE_EUCLID_ERRCHKA;
-  hypre_MPI_Comm_rank(comm_dh, &myid_dh);  HYPRE_EUCLID_ERRCHKA;
+   comm_dh = comm;
+   hypre_MPI_Comm_size(comm_dh, &np_dh);    HYPRE_EUCLID_ERRCHKA;
+   hypre_MPI_Comm_rank(comm_dh, &myid_dh);  HYPRE_EUCLID_ERRCHKA;
 
 #ifdef ENABLE_EUCLID_LOGGING
-  openLogfile_dh(0, NULL); HYPRE_EUCLID_ERRCHKA;
+   openLogfile_dh(0, NULL); HYPRE_EUCLID_ERRCHKA;
 #endif
 
-  if (mem_dh == NULL) {
-    Mem_dhCreate(&mem_dh);  HYPRE_EUCLID_ERRCHKA;
-  }
+   if (mem_dh == NULL)
+   {
+      Mem_dhCreate(&mem_dh);  HYPRE_EUCLID_ERRCHKA;
+   }
 
-  if (tlog_dh == NULL) {
-    TimeLog_dhCreate(&tlog_dh); HYPRE_EUCLID_ERRCHKA;
-  }
+   if (tlog_dh == NULL)
+   {
+      TimeLog_dhCreate(&tlog_dh); HYPRE_EUCLID_ERRCHKA;
+   }
 
-  if (parser_dh == NULL) {
-    Parser_dhCreate(&parser_dh); HYPRE_EUCLID_ERRCHKA;
-  }
-  Parser_dhInit(parser_dh, 0, NULL); HYPRE_EUCLID_ERRCHKA;
+   if (parser_dh == NULL)
+   {
+      Parser_dhCreate(&parser_dh); HYPRE_EUCLID_ERRCHKA;
+   }
+   Parser_dhInit(parser_dh, 0, NULL); HYPRE_EUCLID_ERRCHKA;
 
-  /*----------------------------------------------------------- 
-   * create and return a Euclid object
-   *-----------------------------------------------------------*/
-  Euclid_dhCreate(&eu); HYPRE_EUCLID_ERRCHKA;
-  *solver = (HYPRE_Solver) eu;
+   /*-----------------------------------------------------------
+    * create and return a Euclid object
+    *-----------------------------------------------------------*/
+   Euclid_dhCreate(&eu); HYPRE_EUCLID_ERRCHKA;
+   *solver = (HYPRE_Solver) eu;
 
-  END_FUNC_VAL(0)
+   END_FUNC_VAL(0)
 #endif
 }
 
@@ -142,102 +145,113 @@ HYPRE_EuclidCreate( MPI_Comm comm,
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidDestroy"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  START_FUNC_DH
-  Euclid_dh eu = (Euclid_dh)solver;
-  bool printMemReport = false;
-  bool printStats = false;
-  bool logging = eu->logging;
+   START_FUNC_DH
+   Euclid_dh eu = (Euclid_dh)solver;
+   bool printMemReport = false;
+   bool printStats = false;
+   bool logging = eu->logging;
 
-  /*---------------------------------------------------------------- 
-     this block is for printing test data; this is used
-     for diffing in autotests.
-   *---------------------------------------------------------------- */
-  if (Parser_dhHasSwitch(parser_dh, "-printTestData")) {
-    FILE *fp;
+   /*----------------------------------------------------------------
+      this block is for printing test data; this is used
+      for diffing in autotests.
+    *---------------------------------------------------------------- */
+   if (Parser_dhHasSwitch(parser_dh, "-printTestData"))
+   {
+      FILE *fp;
 
-    /* get filename to which to write report */
-    char fname[] = "test_data_dh.temp", *fnamePtr = fname;
-    Parser_dhReadString(parser_dh, "-printTestData", &fnamePtr); HYPRE_EUCLID_ERRCHKA;
-    if (!strcmp(fnamePtr, "1")) {  /* in case usr didn't supply a name! */
-      fnamePtr = fname;
-    }
+      /* get filename to which to write report */
+      char fname[] = "test_data_dh.temp", *fnamePtr = fname;
+      Parser_dhReadString(parser_dh, "-printTestData", &fnamePtr); HYPRE_EUCLID_ERRCHKA;
+      if (!strcmp(fnamePtr, "1"))    /* in case usr didn't supply a name! */
+      {
+         fnamePtr = fname;
+      }
 
-    /* print the report */
-    fp = openFile_dh(fnamePtr, "w"); HYPRE_EUCLID_ERRCHKA;
-    Euclid_dhPrintTestData(eu, fp); HYPRE_EUCLID_ERRCHKA;
-    closeFile_dh(fp); HYPRE_EUCLID_ERRCHKA;
-   
-    printf_dh("\n@@@@@ Euclid test data was printed to file: %s\n\n", fnamePtr);
-  }
+      /* print the report */
+      fp = openFile_dh(fnamePtr, "w"); HYPRE_EUCLID_ERRCHKA;
+      Euclid_dhPrintTestData(eu, fp); HYPRE_EUCLID_ERRCHKA;
+      closeFile_dh(fp); HYPRE_EUCLID_ERRCHKA;
+
+      printf_dh("\n@@@@@ Euclid test data was printed to file: %s\n\n", fnamePtr);
+   }
 
 
-  /*---------------------------------------------------------------- 
-     determine which of Euclid's internal reports to print
-   *----------------------------------------------------------------*/
-  if (logging) {
-    printStats = true;
-    printMemReport = true;
-  }
-  if (parser_dh != NULL) {
-    if (Parser_dhHasSwitch(parser_dh, "-eu_stats")) {
+   /*----------------------------------------------------------------
+      determine which of Euclid's internal reports to print
+    *----------------------------------------------------------------*/
+   if (logging)
+   {
       printStats = true;
-    }
-    if (Parser_dhHasSwitch(parser_dh, "-eu_mem")) {
       printMemReport = true;
-    }
-  }
+   }
+   if (parser_dh != NULL)
+   {
+      if (Parser_dhHasSwitch(parser_dh, "-eu_stats"))
+      {
+         printStats = true;
+      }
+      if (Parser_dhHasSwitch(parser_dh, "-eu_mem"))
+      {
+         printMemReport = true;
+      }
+   }
 
-  /*------------------------------------------------------------------ 
-     print Euclid's internal report, then destroy the Euclid object 
-   *------------------------------------------------------------------ */
-  if (printStats) {
-    Euclid_dhPrintHypreReport(eu, stdout); HYPRE_EUCLID_ERRCHKA;
-  }
-  Euclid_dhDestroy(eu); HYPRE_EUCLID_ERRCHKA;
+   /*------------------------------------------------------------------
+      print Euclid's internal report, then destroy the Euclid object
+    *------------------------------------------------------------------ */
+   if (printStats)
+   {
+      Euclid_dhPrintHypreReport(eu, stdout); HYPRE_EUCLID_ERRCHKA;
+   }
+   Euclid_dhDestroy(eu); HYPRE_EUCLID_ERRCHKA;
 
 
-  /*------------------------------------------------------------------ 
-     destroy all remaining Euclid library objects 
-     (except the memory object)
-   *------------------------------------------------------------------ */
-  /*if (parser_dh != NULL) { dah 3/16/06  */
-  if (parser_dh != NULL && ref_counter == 0) {
-    Parser_dhDestroy(parser_dh); HYPRE_EUCLID_ERRCHKA;
-    parser_dh = NULL;
-  }
+   /*------------------------------------------------------------------
+      destroy all remaining Euclid library objects
+      (except the memory object)
+    *------------------------------------------------------------------ */
+   /*if (parser_dh != NULL) { dah 3/16/06  */
+   if (parser_dh != NULL && ref_counter == 0)
+   {
+      Parser_dhDestroy(parser_dh); HYPRE_EUCLID_ERRCHKA;
+      parser_dh = NULL;
+   }
 
-  /*if (tlog_dh != NULL) {  dah 3/16/06  */
-  if (tlog_dh != NULL && ref_counter == 0) {
-    TimeLog_dhDestroy(tlog_dh); HYPRE_EUCLID_ERRCHKA;
-    tlog_dh = NULL;
-  }
+   /*if (tlog_dh != NULL) {  dah 3/16/06  */
+   if (tlog_dh != NULL && ref_counter == 0)
+   {
+      TimeLog_dhDestroy(tlog_dh); HYPRE_EUCLID_ERRCHKA;
+      tlog_dh = NULL;
+   }
 
-  /*------------------------------------------------------------------ 
-     optionally print Euclid's memory report, 
-     then destroy the memory object.
-   *------------------------------------------------------------------ */
-  /*if (mem_dh != NULL) {  dah 3/16/06  */
-  if (mem_dh != NULL && ref_counter == 0) {
-    if (printMemReport) { 
-      Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA; 
-    }
-    Mem_dhDestroy(mem_dh);  HYPRE_EUCLID_ERRCHKA;
-    mem_dh = NULL;
-  }
+   /*------------------------------------------------------------------
+      optionally print Euclid's memory report,
+      then destroy the memory object.
+    *------------------------------------------------------------------ */
+   /*if (mem_dh != NULL) {  dah 3/16/06  */
+   if (mem_dh != NULL && ref_counter == 0)
+   {
+      if (printMemReport)
+      {
+         Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA;
+      }
+      Mem_dhDestroy(mem_dh);  HYPRE_EUCLID_ERRCHKA;
+      mem_dh = NULL;
+   }
 
 #ifdef ENABLE_EUCLID_LOGGING
-  closeLogfile_dh(); HYPRE_EUCLID_ERRCHKA;
+   closeLogfile_dh(); HYPRE_EUCLID_ERRCHKA;
 #endif
 
-  END_FUNC_VAL(0)
+   END_FUNC_VAL(0)
 #endif
 }
 
@@ -247,49 +261,49 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSetup"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidSetup( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector b,
                    HYPRE_ParVector x   )
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  START_FUNC_DH
-  Euclid_dh eu = (Euclid_dh)solver;
+   START_FUNC_DH
+   Euclid_dh eu = (Euclid_dh)solver;
 
 
 #if 0
 
-for testing!
-  {
-  HYPRE_Int ierr;
-  HYPRE_Int m,n,rs,re,cs,ce;
+   for testing!
+{
+   HYPRE_Int ierr;
+   HYPRE_Int m, n, rs, re, cs, ce;
 
    HYPRE_DistributedMatrix mat;
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
-   if (ierr) exit(-1);
+      if (ierr) { exit(-1); }
 
-    ierr = HYPRE_DistributedMatrixGetDims(mat, &m, &n);
-    ierr = HYPRE_DistributedMatrixGetLocalRange(mat, &rs, &re,
-                                       &cs, &ce);
+      ierr = HYPRE_DistributedMatrixGetDims(mat, &m, &n);
+      ierr = HYPRE_DistributedMatrixGetLocalRange(mat, &rs, &re,
+                                                  &cs, &ce);
 
-    hypre_printf("\n### [%i] m= %i, n= %i, rs= %i, re= %i, cs= %i, ce= %i\n",
-                                            myid_dh, m, n, rs, re, cs, ce);
+      hypre_printf("\n### [%i] m= %i, n= %i, rs= %i, re= %i, cs= %i, ce= %i\n",
+                   myid_dh, m, n, rs, re, cs, ce);
 
-   ierr = HYPRE_DistributedMatrixDestroy(mat);
+      ierr = HYPRE_DistributedMatrixDestroy(mat);
 
-   if (ierr) exit(-1);
-  }
+      if (ierr) { exit(-1); }
+   }
 #endif
 
-  Euclid_dhInputHypreMat(eu, A); HYPRE_EUCLID_ERRCHKA;
-  Euclid_dhSetup(eu); HYPRE_EUCLID_ERRCHKA;
+   Euclid_dhInputHypreMat(eu, A); HYPRE_EUCLID_ERRCHKA;
+   Euclid_dhSetup(eu); HYPRE_EUCLID_ERRCHKA;
 
-  END_FUNC_VAL(0)
+   END_FUNC_VAL(0)
 #endif
 }
 
@@ -299,51 +313,51 @@ for testing!
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSolve"
-HYPRE_Int 
+HYPRE_Int
 HYPRE_EuclidSolve( HYPRE_Solver solver,
                    HYPRE_ParCSRMatrix A,
                    HYPRE_ParVector bb,
                    HYPRE_ParVector xx  )
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  START_FUNC_DH
-  Euclid_dh eu = (Euclid_dh)solver;
-  HYPRE_Real *b, *x;
+   START_FUNC_DH
+   Euclid_dh eu = (Euclid_dh)solver;
+   HYPRE_Real *b, *x;
 
-  x = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) bb));
-  b = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) xx));
+   x = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) bb));
+   b = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) xx));
 
-  Euclid_dhApply(eu, x, b); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   Euclid_dhApply(eu, x, b); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 /*--------------------------------------------------------------------------
- * Insert command line (flag, value) pairs in Euclid's 
+ * Insert command line (flag, value) pairs in Euclid's
  *--------------------------------------------------------------------------*/
 
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSetParams"
 HYPRE_Int
-HYPRE_EuclidSetParams(HYPRE_Solver solver, 
+HYPRE_EuclidSetParams(HYPRE_Solver solver,
                       HYPRE_Int argc,
                       char *argv[] )
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
-  START_FUNC_DH
-  Parser_dhInit(parser_dh, argc, argv); HYPRE_EUCLID_ERRCHKA;
+   START_FUNC_DH
+   Parser_dhInit(parser_dh, argc, argv); HYPRE_EUCLID_ERRCHKA;
 
-  /* maintainers note: even though Parser_dhInit() was called in
-     HYPRE_EuclidCreate(), it's O.K. to call it again.
-   */
-  END_FUNC_VAL(0)
+   /* maintainers note: even though Parser_dhInit() was called in
+      HYPRE_EuclidCreate(), it's O.K. to call it again.
+    */
+   END_FUNC_VAL(0)
 #endif
 }
 
@@ -354,138 +368,138 @@ HYPRE_EuclidSetParams(HYPRE_Solver solver,
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidSetParamsFromFile"
 HYPRE_Int
-HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, 
+HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
                               char *filename )
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  START_FUNC_DH
-  Parser_dhUpdateFromFile(parser_dh, filename); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   START_FUNC_DH
+   Parser_dhUpdateFromFile(parser_dh, filename); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetLevel(HYPRE_Solver solver, 
+HYPRE_EuclidSetLevel(HYPRE_Solver solver,
                      HYPRE_Int level)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_level[8];
-  START_FUNC_DH
-  hypre_sprintf(str_level,"%d",level);
-  Parser_dhInsert(parser_dh, "-level", str_level); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_level[8];
+   START_FUNC_DH
+   hypre_sprintf(str_level, "%d", level);
+   Parser_dhInsert(parser_dh, "-level", str_level); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetBJ(HYPRE_Solver solver, 
+HYPRE_EuclidSetBJ(HYPRE_Solver solver,
                   HYPRE_Int bj)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_bj[8];
-  START_FUNC_DH
-  hypre_sprintf(str_bj,"%d",bj);
-  Parser_dhInsert(parser_dh, "-bj", str_bj); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_bj[8];
+   START_FUNC_DH
+   hypre_sprintf(str_bj, "%d", bj);
+   Parser_dhInsert(parser_dh, "-bj", str_bj); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetStats(HYPRE_Solver solver, 
+HYPRE_EuclidSetStats(HYPRE_Solver solver,
                      HYPRE_Int eu_stats)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_eu_stats[8];
-  START_FUNC_DH
-  hypre_sprintf(str_eu_stats,"%d",eu_stats);
-  Parser_dhInsert(parser_dh, "-eu_stats", str_eu_stats); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_eu_stats[8];
+   START_FUNC_DH
+   hypre_sprintf(str_eu_stats, "%d", eu_stats);
+   Parser_dhInsert(parser_dh, "-eu_stats", str_eu_stats); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetMem(HYPRE_Solver solver, 
+HYPRE_EuclidSetMem(HYPRE_Solver solver,
                    HYPRE_Int eu_mem)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_eu_mem[8];
-  START_FUNC_DH
-  hypre_sprintf(str_eu_mem,"%d",eu_mem);
-  Parser_dhInsert(parser_dh, "-eu_mem", str_eu_mem); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_eu_mem[8];
+   START_FUNC_DH
+   hypre_sprintf(str_eu_mem, "%d", eu_mem);
+   Parser_dhInsert(parser_dh, "-eu_mem", str_eu_mem); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
+HYPRE_EuclidSetSparseA(HYPRE_Solver solver,
                        HYPRE_Real sparse_A)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_sparse_A[256];
-  START_FUNC_DH
-  hypre_sprintf(str_sparse_A,"%f",sparse_A);
-  Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A); 
-  HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_sparse_A[256];
+   START_FUNC_DH
+   hypre_sprintf(str_sparse_A, "%f", sparse_A);
+   Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A);
+   HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetRowScale(HYPRE_Solver solver, 
+HYPRE_EuclidSetRowScale(HYPRE_Solver solver,
                         HYPRE_Int row_scale)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_row_scale[8];
-  START_FUNC_DH
-  hypre_sprintf(str_row_scale,"%d",row_scale);
-  Parser_dhInsert(parser_dh, "-rowScale", str_row_scale); 
-  HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_row_scale[8];
+   START_FUNC_DH
+   hypre_sprintf(str_row_scale, "%d", row_scale);
+   Parser_dhInsert(parser_dh, "-rowScale", str_row_scale);
+   HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 
 HYPRE_Int
-HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
+HYPRE_EuclidSetILUT(HYPRE_Solver solver,
                     HYPRE_Real ilut)
 {
 #ifdef HYPRE_MIXEDINT
-  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Euclid cannot be used in mixedint mode!");
-  return hypre_error_flag;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid cannot be used in mixedint mode!");
+   return hypre_error_flag;
 #else
 
-  char str_ilut[256];
-  START_FUNC_DH
-  hypre_sprintf(str_ilut,"%f",ilut);
-  Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
+   char str_ilut[256];
+   START_FUNC_DH
+   hypre_sprintf(str_ilut, "%f", ilut);
+   Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
+   END_FUNC_VAL(0)
 #endif
 }
 

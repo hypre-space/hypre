@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -46,6 +46,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
+#include "ex.h"
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -61,19 +62,27 @@ double alpha(double x, double y, double z)
       case 0: /* uniform coefficient */
          return 1.0;
       case 1: /* smooth coefficient */
-         return x*x+exp(y)+sin(z);
+         return x * x + exp(y) + sin(z);
       case 2: /* small outside of an interior cube */
-         if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25) && (fabs(z-0.5) < 0.25))
+         if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25) && (fabs(z - 0.5) < 0.25))
+         {
             return 1.0;
+         }
          else
+         {
             return 1.0e-6;
+         }
       case 3: /* small outside of an interior ball */
-         if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)+(z-0.5)*(z-0.5)) < 0.0625)
+         if (((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5) + (z - 0.5) * (z - 0.5)) < 0.0625)
+         {
             return 1.0;
+         }
          else
+         {
             return 1.0e-6;
+         }
       case 4: /* random coefficient */
-         return ((double)rand()/RAND_MAX);
+         return ((double)rand() / RAND_MAX);
       default:
          return 1.0;
    }
@@ -87,19 +96,27 @@ double beta(double x, double y, double z)
       case 0: /* uniform coefficient */
          return 1.0;
       case 1: /* smooth coefficient */
-         return x*x+exp(y)+sin(z);
+         return x * x + exp(y) + sin(z);
       case 2:/* small outside of interior cube */
-         if ((fabs(x-0.5) < 0.25) && (fabs(y-0.5) < 0.25) && (fabs(z-0.5) < 0.25))
+         if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25) && (fabs(z - 0.5) < 0.25))
+         {
             return 1.0;
+         }
          else
+         {
             return 1.0e-6;
+         }
       case 3: /* small outside of an interior ball */
-         if (((x-0.5)*(x-0.5)+(y-0.5)*(y-0.5)+(z-0.5)*(z-0.5)) < 0.0625)
+         if (((x - 0.5) * (x - 0.5) + (y - 0.5) * (y - 0.5) + (z - 0.5) * (z - 0.5)) < 0.0625)
+         {
             return 1.0;
+         }
          else
+         {
             return 1.0e-6;
+         }
       case 4: /* random coefficient */
-         return ((double)rand()/RAND_MAX);
+         return ((double)rand() / RAND_MAX);
       default:
          return 1.0;
    }
@@ -128,15 +145,15 @@ double beta(double x, double y, double z)
 
                         F_j = (1,phi_j) = h^2/4.
 */
-void ComputeFEMND1(double S[12][12], double F[12],
+void ComputeFEMND1(double **S, double F[12],
                    double x, double y, double z, double h)
 {
    int i, j;
 
-   double h2_4 = h*h/4;
+   double h2_4 = h * h / 4;
 
-   double cS1 = alpha(x,y,z)/(6.0*h), cS2 = 2*cS1, cS4 = 2*cS2;
-   double cM1 = beta(x,y,z)*h/36.0,   cM2 = 2*cM1, cM4 = 2*cM2;
+   double cS1 = alpha(x, y, z) / (6.0 * h), cS2 = 2 * cS1, cS4 = 2 * cS2;
+   double cM1 = beta(x, y, z) * h / 36.0,   cM2 = 2 * cM1, cM4 = 2 * cM2;
 
    S[ 0][ 0] =  cS4 + cM4;   S[ 0][ 1] =  cS2;         S[ 0][ 2] = -cS1 + cM2;
    S[ 0][ 3] = -cS2;         S[ 0][ 4] = -cS1 + cM2;   S[ 0][ 5] =  cS1;
@@ -183,10 +200,14 @@ void ComputeFEMND1(double S[12][12], double F[12],
    /* The stiffness matrix is symmetric */
    for (i = 1; i < 12; i++)
       for (j = 0; j < i; j++)
+      {
          S[i][j] = S[j][i];
+      }
 
    for (i = 0; i < 12; i++)
+   {
       F[i] = h2_4;
+   }
 }
 
 
@@ -227,6 +248,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set default parameters */
    n                = 10;
@@ -395,18 +419,18 @@ int main (int argc, char *argv[])
 
    /* Figure out the processor grid (N x N x N).  The local problem size is n^3,
       while pi, pj and pk indicate the position in the processor grid. */
-   N  = pow(num_procs,1.0/3.0) + 0.5;
-   if (num_procs != N*N*N)
+   N  = pow(num_procs, 1.0 / 3.0) + 0.5;
+   if (num_procs != N * N * N)
    {
       if (myid == 0) printf("Can't run on %d processors, try %d.\n",
-                            num_procs, N*N*N);
+                               num_procs, N * N * N);
       MPI_Finalize();
       exit(1);
    }
-   h  = 1.0 / (N*n);
-   pk = myid / (N*N);
-   pj = myid/N - pk*N;
-   pi = myid - pj*N - pk*N*N;
+   h  = 1.0 / (N * n);
+   pk = myid / (N * N);
+   pj = myid / N - pk * N;
+   pi = myid - pj * N - pk * N * N;
 
    /* Start timing */
    mytime -= MPI_Wtime();
@@ -425,8 +449,8 @@ int main (int argc, char *argv[])
       /* Set the extents of the grid - each processor sets its grid boxes. */
       {
          int part = 0;
-         int ilower[3] = {1 + pi*n, 1 + pj*n, 1 + pk*n};
-         int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         int ilower[3] = {1 + pi * n, 1 + pj * n, 1 + pk * n};
+         int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
 
          HYPRE_SStructGridSetExtents(node_grid, part, ilower, iupper);
          HYPRE_SStructGridSetExtents(edge_grid, part, ilower, iupper);
@@ -441,7 +465,8 @@ int main (int argc, char *argv[])
          HYPRE_SStructVariable nodevars[1] = {HYPRE_SSTRUCT_VARIABLE_NODE};
          HYPRE_SStructVariable edgevars[3] = {HYPRE_SSTRUCT_VARIABLE_XEDGE,
                                               HYPRE_SSTRUCT_VARIABLE_YEDGE,
-                                              HYPRE_SSTRUCT_VARIABLE_ZEDGE};
+                                              HYPRE_SSTRUCT_VARIABLE_ZEDGE
+                                             };
          for (i = 0; i < nparts; i++)
          {
             HYPRE_SStructGridSetVariables(node_grid, i, nnodevars, nodevars);
@@ -467,18 +492,21 @@ int main (int argc, char *argv[])
          is done by listing the variable offset directions relative to the
          element's center.  See the Reference Manual for more details. */
       {
-         int ordering[48] =       { 0,  0, -1, -1,    /* x-edge [0]-[1] */
-                                    1, +1,  0, -1,    /* y-edge [1]-[2] */
-         /*     [7]------[6]  */    0,  0, +1, -1,    /* x-edge [3]-[2] */
-         /*     /|       /|   */    1, -1,  0, -1,    /* y-edge [0]-[3] */
-         /*    / |      / |   */    0,  0, -1, +1,    /* x-edge [4]-[5] */
-         /*  [4]------[5] |   */    1, +1,  0, +1,    /* y-edge [5]-[6] */
-         /*   | [3]----|-[2]  */    0,  0, +1, +1,    /* x-edge [7]-[6] */
-         /*   | /      | /    */    1, -1,  0, +1,    /* y-edge [4]-[7] */
-         /*   |/       |/     */    2, -1, -1,  0,    /* z-edge [0]-[4] */
-         /*  [0]------[1]     */    2, +1, -1,  0,    /* z-edge [1]-[5] */
-                                    2, +1, +1,  0,    /* z-edge [2]-[6] */
-                                    2, -1, +1,  0 };  /* z-edge [3]-[7] */
+         int ordering[48] =
+         {
+            0,  0, -1, -1,    /* x-edge [0]-[1]                  */
+            1, +1,  0, -1,    /* y-edge [1]-[2]                  */
+            0,  0, +1, -1,    /* x-edge [3]-[2]     [7]------[6] */
+            1, -1,  0, -1,    /* y-edge [0]-[3]     /|       /|  */
+            0,  0, -1, +1,    /* x-edge [4]-[5]    / |      / |  */
+            1, +1,  0, +1,    /* y-edge [5]-[6]  [4]------[5] |  */
+            0,  0, +1, +1,    /* x-edge [7]-[6]   | [3]----|-[2] */
+            1, -1,  0, +1,    /* y-edge [4]-[7]   | /      | /   */
+            2, -1, -1,  0,    /* z-edge [0]-[4]   |/       |/    */
+            2, +1, -1,  0,    /* z-edge [1]-[5]  [0]------[1]    */
+            2, +1, +1,  0,    /* z-edge [2]-[6]                  */
+            2, -1, +1,  0     /* z-edge [3]-[7]                  */
+         };
 
          HYPRE_SStructGridSetFEMOrdering(edge_grid, part, ordering);
       }
@@ -525,19 +553,33 @@ int main (int argc, char *argv[])
       /* Set the matrix and vector entries by finite element assembly */
       {
          /* local stiffness matrix and load vector */
-         double S[12][12], F[12];
+         /* OK to use constant-length arrays for CPUs */
+         /* double S[12][12], F[12]; */
+         double *F = (double *) malloc(12 * sizeof(double));
+         double *S_flat = (double *) malloc(12 * 12 * sizeof(double));
+         double *S[12];
 
          int i, j, k;
          int index[3];
 
+         for (i = 0; i < 12; i++)
+         {
+            S[i] = &S_flat[i * 12];
+         }
+
          for (i = 1; i <= n; i++)
+         {
             for (j = 1; j <= n; j++)
+            {
                for (k = 1; k <= n; k++)
                {
                   /* Compute the FEM matrix and r.h.s. for cell (i,j,k) with
                      coefficients evaluated at the cell center. */
-                  index[0] = i + pi*n; index[1] = j + pj*n; index[2] = k + pk*n;
-                  ComputeFEMND1(S,F,(pi*n+i)*h-h/2,(pj*n+j)*h-h/2,(pk*n+k)*h-h/2,h);
+                  index[0] = i + pi * n; index[1] = j + pj * n; index[2] = k + pk * n;
+                  ComputeFEMND1(S, F,
+                                (pi * n + i)*h - h / 2,
+                                (pj * n + j)*h - h / 2,
+                                (pk * n + k)*h - h / 2, h);
 
                   /* Eliminate boundary conditions on x = 0 */
                   if (index[0] == 1)
@@ -546,7 +588,9 @@ int main (int argc, char *argv[])
                      for (ii = 0; ii < 4; ii++)
                      {
                         for (jj = 0; jj < 12; jj++)
+                        {
                            S[bc_edges[ii]][jj] = S[jj][bc_edges[ii]] = 0.0;
+                        }
                         S[bc_edges[ii]][bc_edges[ii]] = 1.0;
                         F[bc_edges[ii]] = 0.0;
                      }
@@ -558,7 +602,9 @@ int main (int argc, char *argv[])
                      for (ii = 0; ii < 4; ii++)
                      {
                         for (jj = 0; jj < 12; jj++)
+                        {
                            S[bc_edges[ii]][jj] = S[jj][bc_edges[ii]] = 0.0;
+                        }
                         S[bc_edges[ii]][bc_edges[ii]] = 1.0;
                         F[bc_edges[ii]] = 0.0;
                      }
@@ -570,43 +616,51 @@ int main (int argc, char *argv[])
                      for (ii = 0; ii < 4; ii++)
                      {
                         for (jj = 0; jj < 12; jj++)
+                        {
                            S[bc_edges[ii]][jj] = S[jj][bc_edges[ii]] = 0.0;
+                        }
                         S[bc_edges[ii]][bc_edges[ii]] = 1.0;
                         F[bc_edges[ii]] = 0.0;
                      }
                   }
                   /* Eliminate boundary conditions on x = 1 */
-                  if (index[0] == N*n)
+                  if (index[0] == N * n)
                   {
                      int ii, jj, bc_edges[4] = { 1, 10, 5, 9 };
                      for (ii = 0; ii < 4; ii++)
                      {
                         for (jj = 0; jj < 12; jj++)
+                        {
                            S[bc_edges[ii]][jj] = S[jj][bc_edges[ii]] = 0.0;
+                        }
                         S[bc_edges[ii]][bc_edges[ii]] = 1.0;
                         F[bc_edges[ii]] = 0.0;
                      }
                   }
                   /* Eliminate boundary conditions on y = 1 */
-                  if (index[1] == N*n)
+                  if (index[1] == N * n)
                   {
                      int ii, jj, bc_edges[4] = { 2, 10, 6, 11 };
                      for (ii = 0; ii < 4; ii++)
                      {
                         for (jj = 0; jj < 12; jj++)
+                        {
                            S[bc_edges[ii]][jj] = S[jj][bc_edges[ii]] = 0.0;
+                        }
                         S[bc_edges[ii]][bc_edges[ii]] = 1.0;
                         F[bc_edges[ii]] = 0.0;
                      }
                   }
                   /* Eliminate boundary conditions on z = 1 */
-                  if (index[2] == N*n)
+                  if (index[2] == N * n)
                   {
                      int ii, jj, bc_edges[4] = { 4, 5, 6, 7 };
                      for (ii = 0; ii < 4; ii++)
                      {
                         for (jj = 0; jj < 12; jj++)
+                        {
                            S[bc_edges[ii]][jj] = S[jj][bc_edges[ii]] = 0.0;
+                        }
                         S[bc_edges[ii]][bc_edges[ii]] = 1.0;
                         F[bc_edges[ii]] = 0.0;
                      }
@@ -618,6 +672,10 @@ int main (int argc, char *argv[])
                   /* Assemble the vector */
                   HYPRE_SStructVectorAddFEMValues(b, part, index, F);
                }
+            }
+         }
+         free(F);
+         free(S_flat);
       }
 
       /* Collective calls finalizing the matrix and vector assembly */
@@ -638,9 +696,9 @@ int main (int argc, char *argv[])
          int var = 0; /* the node variable */
 
          /* The discrete gradient stencils connect edge to node variables. */
-         int Gx_offsets[2][3] = {{-1,0,0},{0,0,0}};  /* x-edge [7]-[6] */
-         int Gy_offsets[2][3] = {{0,-1,0},{0,0,0}};  /* y-edge [5]-[6] */
-         int Gz_offsets[2][3] = {{0,0,-1},{0,0,0}};  /* z-edge [2]-[6] */
+         int Gx_offsets[2][3] = {{-1, 0, 0}, {0, 0, 0}}; /* x-edge [7]-[6] */
+         int Gy_offsets[2][3] = {{0, -1, 0}, {0, 0, 0}}; /* y-edge [5]-[6] */
+         int Gz_offsets[2][3] = {{0, 0, -1}, {0, 0, 0}}; /* z-edge [2]-[6] */
 
          HYPRE_SStructStencilCreate(ndim, stencil_size, &G_stencil[0]);
          HYPRE_SStructStencilCreate(ndim, stencil_size, &G_stencil[1]);
@@ -673,7 +731,9 @@ int main (int argc, char *argv[])
          /* Tell the graph which stencil to use for each edge variable on each
             part (we only have one part). */
          for (var = 0; var < nvars; var++)
+         {
             HYPRE_SStructGraphSetStencil(G_graph, part, var, G_stencil[var]);
+         }
 
          /* Assemble the graph */
          HYPRE_SStructGraphAssemble(G_graph);
@@ -693,24 +753,24 @@ int main (int argc, char *argv[])
          the edges (i.e. one in agreement with the coordinate directions). */
       {
          int i;
-         int nedges = n*(n+1)*(n+1);
+         int nedges = n * (n + 1) * (n + 1);
          double *values;
-         int stencil_indices[2] = {0,1}; /* the nodes of each edge */
+         int stencil_indices[2] = {0, 1}; /* the nodes of each edge */
 
-         values = (double*) calloc(2*nedges, sizeof(double));
+         values = (double*) calloc(2 * nedges, sizeof(double));
 
          /* The edge orientation is fixed: from first to second node */
          for (i = 0; i < nedges; i++)
          {
-            values[2*i]   = -1.0;
-            values[2*i+1] =  1.0;
+            values[2 * i]   = -1.0;
+            values[2 * i + 1] =  1.0;
          }
 
          /* Set the values in the discrete gradient x-edges */
          {
             int var = 0;
-            int ilower[3] = {1 + pi*n, 0 + pj*n, 0 + pk*n};
-            int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            int ilower[3] = {1 + pi * n, 0 + pj * n, 0 + pk * n};
+            int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper, var,
                                             stencil_size, stencil_indices,
                                             values);
@@ -718,8 +778,8 @@ int main (int argc, char *argv[])
          /* Set the values in the discrete gradient y-edges */
          {
             int var = 1;
-            int ilower[3] = {0 + pi*n, 1 + pj*n, 0 + pk*n};
-            int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            int ilower[3] = {0 + pi * n, 1 + pj * n, 0 + pk * n};
+            int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper, var,
                                             stencil_size, stencil_indices,
                                             values);
@@ -727,8 +787,8 @@ int main (int argc, char *argv[])
          /* Set the values in the discrete gradient z-edges */
          {
             int var = 2;
-            int ilower[3] = {0 + pi*n, 0 + pj*n, 1 + pk*n};
-            int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            int ilower[3] = {0 + pi * n, 0 + pj * n, 1 + pk * n};
+            int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructMatrixSetBoxValues(G, part, ilower, iupper, var,
                                             stencil_size, stencil_indices,
                                             values);
@@ -748,7 +808,7 @@ int main (int argc, char *argv[])
       int part = 0;
       int var = 0; /* the node variable */
       int index[3];
-      double xval, yval, zval;
+      double *xyzval = (double *) malloc(3 * sizeof(double));
 
       /* Create empty vector objects */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, node_grid, &xcoord);
@@ -768,27 +828,28 @@ int main (int argc, char *argv[])
          for (j = 0; j <= n; j++)
             for (k = 0; k <= n; k++)
             {
-               index[0] = i + pi*n; index[1] = j + pj*n; index[2] = k + pk*n;
+               index[0] = i + pi * n; index[1] = j + pj * n; index[2] = k + pk * n;
 
-               xval = index[0]*h;
-               yval = index[1]*h;
-               zval = index[2]*h;
+               xyzval[0] = index[0] * h;
+               xyzval[1] = index[1] * h;
+               xyzval[2] = index[2] * h;
 
-               HYPRE_SStructVectorSetValues(xcoord, part, index, var, &xval);
-               HYPRE_SStructVectorSetValues(ycoord, part, index, var, &yval);
-               HYPRE_SStructVectorSetValues(zcoord, part, index, var, &zval);
+               HYPRE_SStructVectorSetValues(xcoord, part, index, var, &xyzval[0]);
+               HYPRE_SStructVectorSetValues(ycoord, part, index, var, &xyzval[1]);
+               HYPRE_SStructVectorSetValues(zcoord, part, index, var, &xyzval[2]);
             }
 
       /* Finalize the vector assembly */
       HYPRE_SStructVectorAssemble(xcoord);
       HYPRE_SStructVectorAssemble(ycoord);
       HYPRE_SStructVectorAssemble(zcoord);
+      free(xyzval);
    }
 
    /* 5. Set up a SStruct Vector for the solution vector x */
    {
       int part = 0;
-      int nvalues = n*(n+1)*(n+1);
+      int nvalues = n * (n + 1) * (n + 1);
       double *values;
 
       values = (double*) calloc(nvalues, sizeof(double));
@@ -803,22 +864,22 @@ int main (int argc, char *argv[])
       /* Set the values for the initial guess x-edge */
       {
          int var = 0;
-         int ilower[3] = {1 + pi*n, 0 + pj*n, 0 + pk*n};
-         int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         int ilower[3] = {1 + pi * n, 0 + pj * n, 0 + pk * n};
+         int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
       /* Set the values for the initial guess y-edge */
       {
          int var = 1;
-         int ilower[3] = {0 + pi*n, 1 + pj*n, 0 + pk*n};
-         int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         int ilower[3] = {0 + pi * n, 1 + pj * n, 0 + pk * n};
+         int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
       /* Set the values for the initial guess z-edge */
       {
          int var = 2;
-         int ilower[3] = {0 + pi*n, 0 + pj*n, 1 + pk*n};
-         int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+         int ilower[3] = {0 + pi * n, 0 + pj * n, 1 + pk * n};
+         int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
 
@@ -897,7 +958,9 @@ int main (int argc, char *argv[])
                                     par_xcoord, par_ycoord, par_zcoord);
 
       if (singular_problem)
+      {
          HYPRE_AMSSetBetaPoissonMatrix(precond, NULL);
+      }
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(precond,
@@ -962,7 +1025,7 @@ int main (int argc, char *argv[])
          char  filename[255];
 
          int part = 0;
-         int nvalues = n*(n+1)*(n+1);
+         int nvalues = n * (n + 1) * (n + 1);
          double *xvalues, *yvalues, *zvalues;
 
          xvalues = (double*) calloc(nvalues, sizeof(double));
@@ -972,24 +1035,24 @@ int main (int argc, char *argv[])
          /* Get local solution in the x-edges */
          {
             int var = 0;
-            int ilower[3] = {1 + pi*n, 0 + pj*n, 0 + pk*n};
-            int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            int ilower[3] = {1 + pi * n, 0 + pj * n, 0 + pk * n};
+            int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                             var, xvalues);
          }
          /* Get local solution in the y-edges */
          {
             int var = 1;
-            int ilower[3] = {0 + pi*n, 1 + pj*n, 0 + pk*n};
-            int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            int ilower[3] = {0 + pi * n, 1 + pj * n, 0 + pk * n};
+            int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                             var, yvalues);
          }
          /* Get local solution in the z-edges */
          {
             int var = 2;
-            int ilower[3] = {0 + pi*n, 0 + pj*n, 1 + pk*n};
-            int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
+            int ilower[3] = {0 + pi * n, 0 + pj * n, 1 + pk * n};
+            int iupper[3] = {n + pi * n, n + pj * n, n + pk * n};
             HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                             var, zvalues);
          }
@@ -1014,9 +1077,9 @@ int main (int argc, char *argv[])
             int i, j, k, s;
 
             /* Initial x-, y- and z-edge indices in the values arrays */
-            int oi[4] = { 0, n, n*(n+1), n*(n+1)+n }; /* e_0, e_2,  e_4,  e_6 */
-            int oj[4] = { 0, 1, n*(n+1), n*(n+1)+1 }; /* e_3, e_1,  e_7,  e_5 */
-            int ok[4] = { 0, 1,     n+1,       n+2 }; /* e_8, e_9, e_11, e_10 */
+            int oi[4] = { 0, n, n*(n + 1), n*(n + 1) + n }; /* e_0, e_2,  e_4,  e_6 */
+            int oj[4] = { 0, 1, n*(n + 1), n*(n + 1) + 1 }; /* e_3, e_1,  e_7,  e_5 */
+            int ok[4] = { 0, 1,     n + 1,       n + 2 }; /* e_8, e_9, e_11, e_10 */
             /* Loop over the cells while updating the above offsets */
             for (k = 0; k < n; k++)
             {
@@ -1032,11 +1095,11 @@ int main (int argc, char *argv[])
                              xvalues[oi[2]], yvalues[oj[3]], xvalues[oi[3]], yvalues[oj[2]],
                              zvalues[ok[0]], zvalues[ok[1]], zvalues[ok[3]], zvalues[ok[2]]);
 
-                     for (s=0; s<4; s++) oi[s]++, oj[s]++, ok[s]++;
+                     for (s = 0; s < 4; s++) { oi[s]++, oj[s]++, ok[s]++; }
                   }
-                  for (s=0; s<4; s++) oj[s]++, ok[s]++;
+                  for (s = 0; s < 4; s++) { oj[s]++, ok[s]++; }
                }
-               for (s=0; s<4; s++) oi[s]+=n, ok[s]+=n+1;
+               for (s = 0; s < 4; s++) { oi[s] += n, ok[s] += n + 1; }
             }
          }
 
@@ -1048,7 +1111,7 @@ int main (int argc, char *argv[])
 
          /* Save local finite element mesh */
          GLVis_PrintLocalCubicMesh("vis/ex15.mesh", n, n, n, h,
-                                   pi*h*n, pj*h*n, pk*h*n, myid);
+                                   pi * h * n, pj * h * n, pk * h * n, myid);
 
          /* Additional visualization data */
          GLVis_PrintData("vis/ex15.data", myid, num_procs);

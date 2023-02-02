@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*-------------------------------------------------------
  * Define specific name mangling macros to be used below
  *-------------------------------------------------------*/
@@ -127,7 +127,9 @@ typedef hypre_int      hypre_F90_Comm;
 typedef HYPRE_Int      hypre_F90_Int;
 typedef HYPRE_BigInt   hypre_F90_BigInt;
 typedef HYPRE_Int      hypre_F90_IntArray;
+typedef HYPRE_Int      hypre_F90_IntArrayArray;
 typedef HYPRE_BigInt   hypre_F90_BigIntArray;
+typedef HYPRE_BigInt   hypre_F90_BigIntArrayArray;
 typedef HYPRE_Real     hypre_F90_Real;
 typedef HYPRE_Real     hypre_F90_RealArray;
 typedef HYPRE_Complex  hypre_F90_Complex;
@@ -135,25 +137,26 @@ typedef HYPRE_Complex  hypre_F90_ComplexArray;
 typedef HYPRE_Int     *hypre_F90_Obj;
 typedef HYPRE_Int     *hypre_F90_ObjRef;
 
-#define hypre_F90_PassComm(arg)          (hypre_MPI_Comm_f2c(*arg))
-#define hypre_F90_PassInt(arg)           ((HYPRE_Int) *arg)
-#define hypre_F90_PassIntRef(arg)        ((HYPRE_Int *) arg)
-#define hypre_F90_PassIntArray(arg)      ((HYPRE_Int *) arg)
-#define hypre_F90_PassBigInt(arg)        ((HYPRE_BigInt) *arg)
-#define hypre_F90_PassBigIntRef(arg)     ((HYPRE_BigInt *) arg)
-#define hypre_F90_PassBigIntArray(arg)   ((HYPRE_BigInt *) arg)
-#define hypre_F90_PassReal(arg)          ((HYPRE_Real) *arg)
-#define hypre_F90_PassRealRef(arg)       ((HYPRE_Real *) arg)
-#define hypre_F90_PassRealArray(arg)     ((HYPRE_Real *) arg)
-#define hypre_F90_PassComplex(arg)       ((HYPRE_Complex) *arg)
-#define hypre_F90_PassComplexRef(arg)    ((HYPRE_Complex *) arg)
-#define hypre_F90_PassComplexArray(arg)  ((HYPRE_Complex *) arg)
-#define hypre_F90_PassObj(obj,arg)       ((obj) *arg)
-#define hypre_F90_PassObjRef(obj,arg)    ((obj *) arg)
+#define hypre_F90_PassComm(arg)             (hypre_MPI_Comm_f2c(*arg))
+#define hypre_F90_PassInt(arg)              ((HYPRE_Int) *arg)
+#define hypre_F90_PassIntRef(arg)           ((HYPRE_Int *) arg)
+#define hypre_F90_PassIntArray(arg)         ((HYPRE_Int *) arg)
+#define hypre_F90_PassIntArrayArray(arg)    ((HYPRE_Int **) arg)
+#define hypre_F90_PassBigInt(arg)           ((HYPRE_BigInt) *arg)
+#define hypre_F90_PassBigIntRef(arg)        ((HYPRE_BigInt *) arg)
+#define hypre_F90_PassBigIntArray(arg)      ((HYPRE_BigInt *) arg)
+#define hypre_F90_PassBigIntArrayArray(arg) ((HYPRE_BigInt **) arg)
+#define hypre_F90_PassReal(arg)             ((HYPRE_Real) *arg)
+#define hypre_F90_PassRealRef(arg)          ((HYPRE_Real *) arg)
+#define hypre_F90_PassRealArray(arg)        ((HYPRE_Real *) arg)
+#define hypre_F90_PassComplex(arg)          ((HYPRE_Complex) *arg)
+#define hypre_F90_PassComplexRef(arg)       ((HYPRE_Complex *) arg)
+#define hypre_F90_PassComplexArray(arg)     ((HYPRE_Complex *) arg)
+#define hypre_F90_PassObj(obj,arg)          ((obj) *arg)
+#define hypre_F90_PassObjRef(obj,arg)       ((obj *) arg)
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -70,7 +70,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    MPI_Comm              comm = (pfmg_data -> comm);
 
    HYPRE_Int             relax_type =       (pfmg_data -> relax_type);
-   HYPRE_Int             usr_jacobi_weight= (pfmg_data -> usr_jacobi_weight);
+   HYPRE_Int             usr_jacobi_weight = (pfmg_data -> usr_jacobi_weight);
    HYPRE_Real            jacobi_weight    = (pfmg_data -> jacobi_weight);
    HYPRE_Int             skip_relax =       (pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz       =       (pfmg_data -> dxyz);
@@ -129,18 +129,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_Int             num_level_GPU = 0;
-   HYPRE_MemoryLocation  data_location = HYPRE_MEMORY_DEVICE;
-   HYPRE_Int             max_box_size  = 0;
-   HYPRE_Int             device_level  = (pfmg_data -> devicelevel);
-   HYPRE_Int             myrank;
-   hypre_MPI_Comm_rank(comm, &myrank );
-#endif
-
 #if DEBUG
    char                  filename[255];
 #endif
+
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -175,9 +168,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       for (d = 0; d < ndim; d++)
       {
-         deviation[d] -= mean[d]*mean[d];
-         /* square of coeff. of variation */
-         if (deviation[d]/(mean[d]*mean[d]) > .1)
+         /* Set 'dxyz_flag' if the matrix-coefficient variation is "too large".
+          * This is used later to set relaxation weights for Jacobi.
+          *
+          * Use the "square of the coefficient of variation" = (sigma/mu)^2,
+          * where sigma is the standard deviation and mu is the mean.  This is
+          * equivalent to computing (d - mu^2)/mu^2 where d is the average of
+          * the squares of the coefficients stored in 'deviation'.  Care is
+          * taken to avoid dividing by zero when the mean is zero. */
+
+         deviation[d] -= mean[d] * mean[d];
+         if ( deviation[d] > 0.1 * (mean[d]*mean[d]) )
          {
             dxyz_flag = 1;
             break;
@@ -197,7 +198,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    data_location = hypre_StructGridDataLocation(grid);
    if (data_location != HYPRE_MEMORY_HOST)
    {
@@ -224,7 +225,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             min_dxyz = dxyz[d];
             cdir = d;
          }
-         alpha += 1.0/(dxyz[d]*dxyz[d]);
+         alpha += 1.0 / (dxyz[d] * dxyz[d]);
       }
       relax_weights[l] = 1.0;
 
@@ -234,7 +235,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       {
          if (dxyz_flag)
          {
-            relax_weights[l] = 2.0/3.0;
+            relax_weights[l] = 2.0 / 3.0;
          }
 
          else
@@ -243,7 +244,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             {
                if (d != cdir)
                {
-                  beta += 1.0/(dxyz[d]*dxyz[d]);
+                  beta += 1.0 / (dxyz[d] * dxyz[d]);
                }
             }
             if (beta == alpha)
@@ -252,17 +253,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             }
             else
             {
-               alpha = beta/alpha;
+               alpha = beta / alpha;
             }
 
             /* determine level Jacobi weights */
             if (ndim > 1)
             {
-               relax_weights[l] = 2.0/(3.0 - alpha);
+               relax_weights[l] = 2.0 / (3.0 - alpha);
             }
             else
             {
-               relax_weights[l] = 2.0/3.0; /* always 2/3 for 1-d */
+               relax_weights[l] = 2.0 / 3.0; /* always 2/3 for 1-d */
             }
          }
       }
@@ -325,29 +326,29 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                                   hypre_BoxIMax(cbox));
 
       /* build the interpolation grid */
-      hypre_StructCoarsen(grid_l[l], findex, stride, 0, &P_grid_l[l+1]);
+      hypre_StructCoarsen(grid_l[l], findex, stride, 0, &P_grid_l[l + 1]);
 
       /* build the coarse grid */
-      hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_USING_CUDA)
-      hypre_StructGridDataLocation(P_grid_l[l+1]) = data_location;
+      hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      hypre_StructGridDataLocation(P_grid_l[l + 1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
       {
-         max_box_size = hypre_StructGridGetMaxBoxSize(grid_l[l+1]);
+         max_box_size = hypre_StructGridGetMaxBoxSize(grid_l[l + 1]);
          if (max_box_size < HYPRE_MIN_GPU_SIZE)
          {
-            num_level_GPU = l+1;
+            num_level_GPU = l + 1;
             data_location = HYPRE_MEMORY_HOST;
             device_level  = num_level_GPU;
             //printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
          }
       }
-      else if (l+1 == device_level)
+      else if (l + 1 == device_level)
       {
-         num_level_GPU = l+1;
+         num_level_GPU = l + 1;
          data_location = HYPRE_MEMORY_HOST;
       }
-      hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
+      hypre_StructGridDataLocation(grid_l[l + 1]) = data_location;
 #endif
    }
 
@@ -381,7 +382,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     *-----------------------------------------------------*/
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */
    {
-      (pfmg_data -> rap_type)= 1;
+      (pfmg_data -> rap_type) = 1;
    }
    rap_type = (pfmg_data -> rap_type);
 
@@ -408,7 +409,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    {
       cdir = cdir_l[l];
 
-      P_l[l]  = hypre_PFMGCreateInterpOp(A_l[l], P_grid_l[l+1], cdir, rap_type);
+      P_l[l]  = hypre_PFMGCreateInterpOp(A_l[l], P_grid_l[l + 1], cdir, rap_type);
       hypre_StructMatrixInitializeShell(P_l[l]);
       data_size += hypre_StructMatrixDataSize(P_l[l]);
       data_size_const += hypre_StructMatrixDataConstSize(P_l[l]);
@@ -423,50 +424,51 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if 0
          /* Allow RT != P for non symmetric case */
          /* NOTE: Need to create a non-pruned grid for this to work */
-         RT_l[l]   = hypre_PFMGCreateRestrictOp(A_l[l], grid_l[l+1], cdir);
+         RT_l[l]   = hypre_PFMGCreateRestrictOp(A_l[l], grid_l[l + 1], cdir);
          hypre_StructMatrixInitializeShell(RT_l[l]);
          data_size += hypre_StructMatrixDataSize(RT_l[l]);
          data_size_const += hypre_StructMatrixDataConstSize(RT_l[l]);
 #endif
       }
 
-      A_l[l+1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l],
-                                       grid_l[l+1], cdir, rap_type);
-      hypre_StructMatrixInitializeShell(A_l[l+1]);
-      data_size += hypre_StructMatrixDataSize(A_l[l+1]);
-      data_size_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
+      A_l[l + 1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l],
+                                         grid_l[l + 1], cdir, rap_type);
+      hypre_StructMatrixInitializeShell(A_l[l + 1]);
+      data_size += hypre_StructMatrixDataSize(A_l[l + 1]);
+      data_size_const += hypre_StructMatrixDataConstSize(A_l[l + 1]);
 
-      b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
-      hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
-      hypre_StructVectorInitializeShell(b_l[l+1]);
-      hypre_StructVectorSetDataSize(b_l[l+1], &data_size, &data_size_const);
+      b_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetNumGhost(b_l[l + 1], b_num_ghost);
+      hypre_StructVectorInitializeShell(b_l[l + 1]);
+      hypre_StructVectorSetDataSize(b_l[l + 1], &data_size, &data_size_const);
 
-      x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
-      hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
-      hypre_StructVectorInitializeShell(x_l[l+1]);
-      hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
+      x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);
+      hypre_StructVectorInitializeShell(x_l[l + 1]);
+      hypre_StructVectorSetDataSize(x_l[l + 1], &data_size, &data_size_const);
 
-      tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
-      hypre_StructVectorSetNumGhost(tx_l[l+1], x_num_ghost);
-      hypre_StructVectorInitializeShell(tx_l[l+1]);
-#if defined(HYPRE_USING_CUDA)
-      if (l+1 == num_level_GPU)
+      tx_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetNumGhost(tx_l[l + 1], x_num_ghost);
+      hypre_StructVectorInitializeShell(tx_l[l + 1]);
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (l + 1 == num_level_GPU)
       {
-         hypre_StructVectorSetDataSize(tx_l[l+1], &data_size, &data_size_const);
+         hypre_StructVectorSetDataSize(tx_l[l + 1], &data_size, &data_size_const);
       }
 #endif
    }
 
-   data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
 #endif
 
+   (pfmg_data -> memory_location) = memory_location;
    (pfmg_data -> data) = data;
    (pfmg_data -> data_const) = data_const;
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    data_location = hypre_StructGridDataLocation(grid_l[0]);
    if (data_location != HYPRE_MEMORY_HOST)
    {
@@ -502,61 +504,61 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
 #endif
 
-#if defined(HYPRE_USING_CUDA)
-      if (l+1 == num_level_GPU)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+      if (l + 1 == num_level_GPU)
       {
          data_location = HYPRE_MEMORY_HOST;
       }
 #endif
 
-      hypre_StructMatrixInitializeData(A_l[l+1], data, data_const);
-      data += hypre_StructMatrixDataSize(A_l[l+1]);
-      data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
+      hypre_StructMatrixInitializeData(A_l[l + 1], data, data_const);
+      data += hypre_StructMatrixDataSize(A_l[l + 1]);
+      data_const += hypre_StructMatrixDataConstSize(A_l[l + 1]);
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (data_location != HYPRE_MEMORY_HOST)
       {
-         hypre_StructVectorInitializeData(b_l[l+1], data);
-         hypre_StructVectorAssemble(b_l[l+1]);
-         data += hypre_StructVectorDataSize(b_l[l+1]);
+         hypre_StructVectorInitializeData(b_l[l + 1], data);
+         hypre_StructVectorAssemble(b_l[l + 1]);
+         data += hypre_StructVectorDataSize(b_l[l + 1]);
 
-         hypre_StructVectorInitializeData(x_l[l+1], data);
-         hypre_StructVectorAssemble(x_l[l+1]);
-         data += hypre_StructVectorDataSize(x_l[l+1]);
-         hypre_StructVectorInitializeData(tx_l[l+1],
-               hypre_StructVectorData(tx_l[0]));
-         hypre_StructVectorAssemble(tx_l[l+1]);
+         hypre_StructVectorInitializeData(x_l[l + 1], data);
+         hypre_StructVectorAssemble(x_l[l + 1]);
+         data += hypre_StructVectorDataSize(x_l[l + 1]);
+         hypre_StructVectorInitializeData(tx_l[l + 1],
+                                          hypre_StructVectorData(tx_l[0]));
+         hypre_StructVectorAssemble(tx_l[l + 1]);
       }
       else
       {
-         hypre_StructVectorInitializeData(b_l[l+1], data_const);
-         hypre_StructVectorAssemble(b_l[l+1]);
-         data_const += hypre_StructVectorDataSize(b_l[l+1]);
+         hypre_StructVectorInitializeData(b_l[l + 1], data_const);
+         hypre_StructVectorAssemble(b_l[l + 1]);
+         data_const += hypre_StructVectorDataSize(b_l[l + 1]);
 
-         hypre_StructVectorInitializeData(x_l[l+1], data_const);
-         hypre_StructVectorAssemble(x_l[l+1]);
-         data_const += hypre_StructVectorDataSize(x_l[l+1]);
-         if (l+1 == num_level_GPU)
+         hypre_StructVectorInitializeData(x_l[l + 1], data_const);
+         hypre_StructVectorAssemble(x_l[l + 1]);
+         data_const += hypre_StructVectorDataSize(x_l[l + 1]);
+         if (l + 1 == num_level_GPU)
          {
-            hypre_StructVectorInitializeData(tx_l[l+1], data_const);
-            hypre_StructVectorAssemble(tx_l[l+1]);
-            data_const += hypre_StructVectorDataSize(tx_l[l+1]);
+            hypre_StructVectorInitializeData(tx_l[l + 1], data_const);
+            hypre_StructVectorAssemble(tx_l[l + 1]);
+            data_const += hypre_StructVectorDataSize(tx_l[l + 1]);
          }
-         hypre_StructVectorInitializeData(tx_l[l+1], hypre_StructVectorData(tx_l[num_level_GPU]));
-         hypre_StructVectorAssemble(tx_l[l+1]);
+         hypre_StructVectorInitializeData(tx_l[l + 1], hypre_StructVectorData(tx_l[num_level_GPU]));
+         hypre_StructVectorAssemble(tx_l[l + 1]);
       }
 #else
-      hypre_StructVectorInitializeData(b_l[l+1], data);
-      hypre_StructVectorAssemble(b_l[l+1]);
-      data += hypre_StructVectorDataSize(b_l[l+1]);
+      hypre_StructVectorInitializeData(b_l[l + 1], data);
+      hypre_StructVectorAssemble(b_l[l + 1]);
+      data += hypre_StructVectorDataSize(b_l[l + 1]);
 
-      hypre_StructVectorInitializeData(x_l[l+1], data);
-      hypre_StructVectorAssemble(x_l[l+1]);
-      data += hypre_StructVectorDataSize(x_l[l+1]);
+      hypre_StructVectorInitializeData(x_l[l + 1], data);
+      hypre_StructVectorAssemble(x_l[l + 1]);
+      data += hypre_StructVectorDataSize(x_l[l + 1]);
 
-      hypre_StructVectorInitializeData(tx_l[l+1],
+      hypre_StructVectorInitializeData(tx_l[l + 1],
                                        hypre_StructVectorData(tx_l[0]));
-      hypre_StructVectorAssemble(tx_l[l+1]);
+      hypre_StructVectorAssemble(tx_l[l + 1]);
 #endif
    }
 
@@ -580,7 +582,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (l == num_level_GPU)
       {
          hypre_SetDeviceOff();
@@ -605,20 +607,20 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* set up the coarse grid operator */
       hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
-                           cdir, cindex, stride, rap_type, A_l[l+1]);
+                           cdir, cindex, stride, rap_type, A_l[l + 1]);
 
       /* set up the interpolation routine */
       interp_data_l[l] = hypre_SemiInterpCreate();
-      hypre_SemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l],
+      hypre_SemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l + 1], e_l[l],
                             cindex, findex, stride);
 
       /* set up the restriction routine */
       restrict_data_l[l] = hypre_SemiRestrictCreate();
-      hypre_SemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1],
+      hypre_SemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l + 1],
                               cindex, findex, stride);
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (l == num_level_GPU)
    {
       hypre_SetDeviceOff();
@@ -640,7 +642,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       active_l[l] = 0;
    }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
       hypre_SetDeviceOn();
@@ -690,7 +692,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_PFMGRelaxSetType(relax_data_l[l], 0);
          /* do no more work on the coarsest grid than the cost of a V-cycle
           * (estimating roughly 4 communications per V-cycle level) */
-         maxwork = 4*num_levels;
+         maxwork = 4 * num_levels;
          /* do sweeps proportional to the coarsest grid size */
          maxiter = hypre_min(maxwork, cmaxsize);
 #if 0
@@ -852,7 +854,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
       for (d = 0; d < 3; d++)
       {
-         mean[d]= cxyz[d] / tot_size;
+         mean[d] = cxyz[d] / tot_size;
          deviation[d] = sqcxyz[d] / tot_size;
       }
    }
@@ -864,19 +866,26 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
    if (cxyz_max == 0.0)
    {
+      /* Do isotropic coarsening */
+      for (d = 0; d < 3; d++)
+      {
+         cxyz[d] = 1.0;
+      }
       cxyz_max = 1.0;
    }
 
+   /* Set dxyz values that are scaled appropriately for the coarsening routine */
    for (d = 0; d < 3; d++)
    {
-      if (cxyz[d] > 0)
+      HYPRE_Real  max_anisotropy = HYPRE_REAL_MAX / 1000;
+      if (cxyz[d] > (cxyz_max / max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
          dxyz[d] = sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = HYPRE_REAL_MAX/1000;
+         dxyz[d] = sqrt(max_anisotropy);
       }
    }
 
@@ -887,7 +896,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
+hypre_PFMGComputeDxyz_CS( HYPRE_Int           i,
                           hypre_StructMatrix *A,
                           HYPRE_Real         *cxyz,
                           HYPRE_Real         *sqcxyz)
@@ -898,12 +907,11 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    HYPRE_Int              Ai;
    HYPRE_Real            *Ap;
    HYPRE_Int              constant_coefficient;
-
-   HYPRE_Real            tcx, tcy, tcz;
-   HYPRE_Real            Adiag = 0, diag;
-   HYPRE_Int             Astenc, sdiag = 0;
-
-   HYPRE_Int             si;
+   HYPRE_Real             tcx, tcy, tcz;
+   HYPRE_Real             Adiag = 0, diag;
+   HYPRE_Int              Astenc, sdiag = 0;
+   HYPRE_Int              si;
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -930,13 +938,13 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
 
    /* get sign of diagonal */
    Ap = hypre_StructMatrixBoxData(A, i, sdiag);
-   if (constant_coefficient==1)
+   if (constant_coefficient == 1)
    {
       Adiag = Ap[Ai];
    }
-   else if (constant_coefficient==2)
+   else if (constant_coefficient == 2)
    {
-      hypre_TMemcpy(&Adiag,&Ap[Ai],HYPRE_Real,1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&Adiag, &Ap[Ai], HYPRE_Real, 1, HYPRE_MEMORY_HOST, memory_location);
    }
 
    diag = 1.0;
@@ -953,21 +961,21 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
       Astenc = hypre_IndexD(stencil_shape[si], 0);
       if (Astenc)
       {
-         tcx -= Ap[Ai]*diag;
+         tcx -= Ap[Ai] * diag;
       }
 
       /* y-direction */
       Astenc = hypre_IndexD(stencil_shape[si], 1);
       if (Astenc)
       {
-         tcy -= Ap[Ai]*diag;
+         tcy -= Ap[Ai] * diag;
       }
 
       /* z-direction */
       Astenc = hypre_IndexD(stencil_shape[si], 2);
       if (Astenc)
       {
-         tcz -= Ap[Ai]*diag;
+         tcz -= Ap[Ai] * diag;
       }
    }
 
@@ -999,9 +1007,9 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_Index            stride;
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1036,8 +1044,8 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_SetIndex3(index,  0,  1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+   // FIXME TODO HOW TO DO KOKKOS (WM: and SYCL) IN ONE BOXLOOP ?
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1079,11 +1087,12 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
-#else /* kokkos */
+#else // #if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
-#elif defined(HYPRE_USING_CUDA)
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]), cyb(cxyz[1]), sqcxb(sqcxyz[0]),
+             sqcyb(sqcxyz[1]);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double4 d4(cxyz[0], cxyz[1], sqcxyz[0], sqcxyz[1]);
    ReduceSum<HYPRE_double4> sum4(d4);
 #else
@@ -1114,8 +1123,8 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
       tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
-      HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+      HYPRE_double4 tmp(tcx, tcy, tcx * tcx, tcy * tcy);
       sum4 += tmp;
 #else
       cxb += tcx;
@@ -1129,7 +1138,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double4 tmp = (HYPRE_double4) sum4;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1167,9 +1176,9 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1189,19 +1198,19 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,0,0,0);
+   hypre_SetIndex3(index, 0, 0, 0);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,0,0);
+   hypre_SetIndex3(index, -1, 0, 0);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,1,0,0);
+   hypre_SetIndex3(index, 1, 0, 0);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,-1,0);
+   hypre_SetIndex3(index, 0, -1, 0);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,1,0);
+   hypre_SetIndex3(index, 0, 1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    /*-----------------------------------------------------------------
@@ -1213,20 +1222,20 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
     * a_cne is pointer for northeast coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,-1,-1, 0);
+   hypre_SetIndex3(index, -1, -1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1,-1, 0);
+   hypre_SetIndex3(index, 1, -1, 0);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 1, 0);
+   hypre_SetIndex3(index, -1, 1, 0);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 1, 1, 0);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1254,7 +1263,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      sqcxb += tcx*tcx;
+      sqcxb += tcx * tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1264,15 +1273,16 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      sqcyb += tcy*tcy;
+      sqcyb += tcy * tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]);
-#elif defined(HYPRE_USING_CUDA)
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]), cyb(cxyz[1]), sqcxb(sqcxyz[0]),
+             sqcyb(sqcxyz[1]);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double4 d4(cxyz[0], cxyz[1], sqcxyz[0], sqcxyz[1]);
    ReduceSum<HYPRE_double4> sum4(d4);
 #else
@@ -1298,20 +1308,20 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, sum4)
    {
-       HYPRE_Real tcx, tcy;
-       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
+      HYPRE_Real tcx, tcy;
+      HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
-       tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-       tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
-       HYPRE_double4 tmp(tcx, tcy, tcx*tcx, tcy*tcy);
-       sum4 += tmp;
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+      HYPRE_double4 tmp(tcx, tcy, tcx * tcx, tcy * tcy);
+      sum4 += tmp;
 #else
-       cxb += tcx;
-       cyb += tcy;
-       sqcxb += tcx * tcx;
-       sqcyb += tcy * tcy;
+      cxb += tcx;
+      cyb += tcy;
+      sqcxb += tcx * tcx;
+      sqcyb += tcy * tcy;
 #endif
    }
    hypre_BoxLoop1ReductionEnd(Ai, sum4)
@@ -1319,7 +1329,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double4 tmp = (HYPRE_double4) sum4;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1355,9 +1365,9 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    hypre_Index            stride;
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1379,29 +1389,29 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
     * a_bc is pointer for center coefficient in plane below
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,0,0,0);
+   hypre_SetIndex3(index, 0, 0, 0);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,0,0);
+   hypre_SetIndex3(index, -1, 0, 0);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,1,0,0);
+   hypre_SetIndex3(index, 1, 0, 0);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,-1,0);
+   hypre_SetIndex3(index, 0, -1, 0);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,1,0);
+   hypre_SetIndex3(index, 0, 1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,0,1);
+   hypre_SetIndex3(index, 0, 0, 1);
    a_ac = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,0,-1);
+   hypre_SetIndex3(index, 0, 0, -1);
    a_bc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1439,7 +1449,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
-      sqcxb += tcx*tcx;
+      sqcxb += tcx * tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1449,7 +1459,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
-      sqcyb += tcy*tcy;
+      sqcyb += tcy * tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
@@ -1459,15 +1469,16 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
-      sqczb += tcz*tcz;
+      sqczb += tcz * tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
-#elif defined(HYPRE_USING_CUDA)
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]), cyb(cxyz[1]), czb(cxyz[2]),
+             sqcxb(sqcxyz[0]), sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
 #else
@@ -1501,8 +1512,8 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
       tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
       tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
-      HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+      HYPRE_double6 tmp(tcx, tcy, tcz, tcx * tcx, tcy * tcy, tcz * tcz);
       sum6 += tmp;
 #else
       cxb += tcx;
@@ -1518,7 +1529,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1557,9 +1568,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1581,25 +1592,25 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
     * a_bc is pointer for center coefficient in plane below
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,0,0,0);
+   hypre_SetIndex3(index, 0, 0, 0);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,0,0);
+   hypre_SetIndex3(index, -1, 0, 0);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,1,0,0);
+   hypre_SetIndex3(index, 1, 0, 0);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,-1,0);
+   hypre_SetIndex3(index, 0, -1, 0);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,1,0);
+   hypre_SetIndex3(index, 0, 1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,0,1);
+   hypre_SetIndex3(index, 0, 0, 1);
    a_ac = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,0,-1);
+   hypre_SetIndex3(index, 0, 0, -1);
    a_bc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    /*-----------------------------------------------------------------
@@ -1619,52 +1630,53 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
     * a_cne is pointer for northeast coefficient in same plane
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,-1, 0, 1);
+   hypre_SetIndex3(index, -1, 0, 1);
    a_aw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 1, 0, 1);
    a_ae = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 0,-1, 1);
+   hypre_SetIndex3(index, 0, -1, 1);
    a_as = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 0, 1, 1);
    a_an = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 0,-1);
+   hypre_SetIndex3(index, -1, 0, -1);
    a_bw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1, 0,-1);
+   hypre_SetIndex3(index, 1, 0, -1);
    a_be = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 0,-1,-1);
+   hypre_SetIndex3(index, 0, -1, -1);
    a_bs = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 0, 1,-1);
+   hypre_SetIndex3(index, 0, 1, -1);
    a_bn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,-1, 0);
+   hypre_SetIndex3(index, -1, -1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1,-1, 0);
+   hypre_SetIndex3(index, 1, -1, 0);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 1, 0);
+   hypre_SetIndex3(index, -1, 1, 0);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 1, 1, 0);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, start, stride, Ai, cxb)
    {
-       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-       cxb += tcx;
+      HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
+      HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      cxb += tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
@@ -1673,7 +1685,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       cyb += tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
@@ -1683,7 +1696,8 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, czb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
+      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
+                                a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
       czb += tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
@@ -1693,8 +1707,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      sqcxb += tcx*tcx;
+      HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      sqcxb += tcx * tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -1703,8 +1718,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      sqcyb += tcy*tcy;
+      HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] +
+                                a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      sqcyb += tcy * tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
@@ -1713,16 +1729,18 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
                                 A_dbox, start, stride, Ai, sqczb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
-      sqczb += tcz*tcz;
+      HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +
+                                a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
+      sqczb += tcz * tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
-#elif defined(HYPRE_USING_CUDA)
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]), cyb(cxyz[1]), czb(cxyz[2]),
+             sqcxb(sqcxyz[0]), sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
 #else
@@ -1753,12 +1771,15 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       HYPRE_Real tcx, tcy, tcz;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
-      tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
+      tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  +
+                     a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
 
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
-      HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+      HYPRE_double6 tmp(tcx, tcy, tcz, tcx * tcx, tcy * tcy, tcz * tcz);
       sum6 += tmp;
 #else
       cxb += tcx;
@@ -1774,7 +1795,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -1814,11 +1835,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-   HYPRE_Real            *a_asw, *a_ase, *a_ane, *a_anw,*a_bsw, *a_bse, *a_bne, *a_bnw;
+   HYPRE_Real            *a_asw, *a_ase, *a_ane, *a_anw, *a_bsw, *a_bse, *a_bne, *a_bnw;
 
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(
-   //                                       hypre_StructMatrixGrid(A) );
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(
+                                             hypre_StructMatrixGrid(A) );
 #endif
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -1840,25 +1861,25 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
     * a_bc is pointer for center coefficient in plane below
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,0,0,0);
+   hypre_SetIndex3(index, 0, 0, 0);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,0,0);
+   hypre_SetIndex3(index, -1, 0, 0);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,1,0,0);
+   hypre_SetIndex3(index, 1, 0, 0);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,-1,0);
+   hypre_SetIndex3(index, 0, -1, 0);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,1,0);
+   hypre_SetIndex3(index, 0, 1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,0,1);
+   hypre_SetIndex3(index, 0, 0, 1);
    a_ac = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,0,0,-1);
+   hypre_SetIndex3(index, 0, 0, -1);
    a_bc = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    /*-----------------------------------------------------------------
@@ -1878,37 +1899,37 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
     * a_cne is pointer for northeast coefficient in same plane
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,-1, 0, 1);
+   hypre_SetIndex3(index, -1, 0, 1);
    a_aw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 1, 0, 1);
    a_ae = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 0,-1, 1);
+   hypre_SetIndex3(index, 0, -1, 1);
    a_as = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 0, 1, 1);
    a_an = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 0,-1);
+   hypre_SetIndex3(index, -1, 0, -1);
    a_bw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1, 0,-1);
+   hypre_SetIndex3(index, 1, 0, -1);
    a_be = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 0,-1,-1);
+   hypre_SetIndex3(index, 0, -1, -1);
    a_bs = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 0, 1,-1);
+   hypre_SetIndex3(index, 0, 1, -1);
    a_bn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,-1, 0);
+   hypre_SetIndex3(index, -1, -1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1,-1, 0);
+   hypre_SetIndex3(index, 1, -1, 0);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 1, 0);
+   hypre_SetIndex3(index, -1, 1, 0);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 1, 1, 0);
@@ -1927,32 +1948,32 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
     * a_bne is pointer for northeast coefficient in plane below
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex3(index,-1,-1, 1);
+   hypre_SetIndex3(index, -1, -1, 1);
    a_asw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1,-1, 1);
+   hypre_SetIndex3(index, 1, -1, 1);
    a_ase = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 1, 1);
+   hypre_SetIndex3(index, -1, 1, 1);
    a_anw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    hypre_SetIndex3(index, 1, 1, 1);
    a_ane = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1,-1,-1);
+   hypre_SetIndex3(index, -1, -1, -1);
    a_bsw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1,-1,-1);
+   hypre_SetIndex3(index, 1, -1, -1);
    a_bse = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index,-1, 1,-1);
+   hypre_SetIndex3(index, -1, 1, -1);
    a_bnw = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-   hypre_SetIndex3(index, 1, 1,-1);
+   hypre_SetIndex3(index, 1, 1, -1);
    a_bne = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
 
    HYPRE_Real cxb = cxyz[0];
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
@@ -1960,8 +1981,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcx = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       cxb += tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cxb)
@@ -1972,8 +1995,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcy = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       cyb += tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, cyb)
@@ -1984,8 +2009,10 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
-      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +
+                     a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
+      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
       czb += tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, czb)
@@ -1996,9 +2023,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcx = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
-      sqcxb += tcx*tcx;
+      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
+      sqcxb += tcx * tcx;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
@@ -2008,9 +2037,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcy = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
-      sqcyb += tcy*tcy;
+      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
+      sqcyb += tcy * tcy;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqcyb);
 
@@ -2020,17 +2051,20 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    {
       HYPRE_Real tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
-      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
-      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
-      sqczb += tcz*tcz;
+      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +
+                     a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
+      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
+      sqczb += tcz * tcz;
    }
    hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
 #else /* kokkos */
 
 #if defined(HYPRE_USING_RAJA)
-   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqcxb(sqcxyz[0]),sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
-#elif defined(HYPRE_USING_CUDA)
+   ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> cxb(cxyz[0]), cyb(cxyz[1]), czb(cxyz[2]),
+             sqcxb(sqcxyz[0]), sqcyb(sqcxyz[1]), sqczb(sqcxyz[2]);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_double6 d6(cxyz[0], cxyz[1], cxyz[2], sqcxyz[0], sqcxyz[1], sqcxyz[2]);
    ReduceSum<HYPRE_double6> sum6(d6);
 #else
@@ -2061,16 +2095,22 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       HYPRE_Real tcx = 0.0, tcy = 0.0, tcz = 0.0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
 
-      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcx -= diag * (a_cw[Ai]  + a_ce[Ai]  +  a_aw[Ai] +  a_ae[Ai] +  a_bw[Ai] +  a_be[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
 
-      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
-      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
+      tcy -= diag * (a_cs[Ai]  + a_cn[Ai]  +  a_an[Ai] +  a_as[Ai] +  a_bn[Ai] +  a_bs[Ai] + a_csw[Ai] +
+                     a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
+      tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
 
-      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +  a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
-      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
-#if !defined(HYPRE_USING_RAJA) && defined(HYPRE_USING_CUDA)
-      HYPRE_double6 tmp(tcx, tcy, tcz, tcx*tcx, tcy*tcy, tcz*tcz);
+      tcz -= diag * (a_ac[Ai]  +  a_bc[Ai] +  a_aw[Ai] +  a_ae[Ai] +  a_an[Ai] +  a_as[Ai] +  a_bw[Ai] +
+                     a_be[Ai] + a_bn[Ai] + a_bs[Ai]);
+      tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] +
+                     a_bne[Ai]);
+#if !defined(HYPRE_USING_RAJA) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+      HYPRE_double6 tmp(tcx, tcy, tcz, tcx * tcx, tcy * tcy, tcz * tcz);
       sum6 += tmp;
 #else
       cxb += tcx;
@@ -2086,7 +2126,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
 #endif /* kokkos */
 
-#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
    HYPRE_double6 tmp = (HYPRE_double6) sum6;
    cxyz[0]   = tmp.x;
    cxyz[1]   = tmp.y;
@@ -2132,8 +2172,8 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Int              zero_diag = 0;
 
    HYPRE_Int              constant_coefficient;
-#if defined(HYPRE_USING_CUDA)
-   //HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
    /*----------------------------------------------------------
@@ -2162,11 +2202,11 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-#if defined(HYPRE_USING_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
          HYPRE_Real diag_product_local = diag_product;
 #elif defined(HYPRE_USING_RAJA)
          ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> diag_product_local(diag_product);
-#elif defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          ReduceSum<HYPRE_Real> diag_product_local(diag_product);
 #else
          HYPRE_Real diag_product_local = diag_product;

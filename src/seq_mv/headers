@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,11 +37,11 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat csr_matrix.h          >> $INTERNAL_HEADER
-cat mapped_matrix.h       >> $INTERNAL_HEADER
-cat multiblock_matrix.h   >> $INTERNAL_HEADER
-cat vector.h              >> $INTERNAL_HEADER
-cat protos.h              >> $INTERNAL_HEADER
+cat csr_matrix.h            >> $INTERNAL_HEADER
+cat mapped_matrix.h         >> $INTERNAL_HEADER
+cat multiblock_matrix.h     >> $INTERNAL_HEADER
+cat vector.h                >> $INTERNAL_HEADER
+cat protos.h                >> $INTERNAL_HEADER
 
 #../utilities/protos *.c               >> $INTERNAL_HEADER
 

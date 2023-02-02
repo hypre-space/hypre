@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -221,7 +221,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    {
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -286,10 +286,10 @@ hypre_RedBlackGS( void               *relax_vdata,
 
                hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
-               hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                       Astart,Ani,Anj,Ai,
-                                       bstart,bni,bnj,bi,
-                                       xstart,xni,xnj,xi);
+               hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                       Astart, Ani, Anj, Ai,
+                                       bstart, bni, bnj, bi,
+                                       xstart, xni, xnj, xi);
                {
                   xp[xi] = bp[bi] / Ap[Ai];
                }
@@ -307,11 +307,11 @@ hypre_RedBlackGS( void               *relax_vdata,
     * Do regular iterations
     *----------------------------------------------------------*/
 
-   while (iter < 2*max_iter)
+   while (iter < 2 * max_iter)
    {
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -377,43 +377,43 @@ hypre_RedBlackGS( void               *relax_vdata,
                   }
                }
 
-               switch(stencil_size)
+               switch (stencil_size)
                {
                   case 7:
                      Ap5 = hypre_StructMatrixBoxData(A, i, offd[5]);
                      Ap4 = hypre_StructMatrixBoxData(A, i, offd[4]);
                      xoff5 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[5]]);
+                                x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[4]]);
+                                x_dbox, stencil_shape[offd[4]]);
 
                   case 5:
                      Ap3 = hypre_StructMatrixBoxData(A, i, offd[3]);
                      Ap2 = hypre_StructMatrixBoxData(A, i, offd[2]);
                      xoff3 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[3]]);
+                                x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[2]]);
+                                x_dbox, stencil_shape[offd[2]]);
 
                   case 3:
                      Ap1 = hypre_StructMatrixBoxData(A, i, offd[1]);
                      Ap0 = hypre_StructMatrixBoxData(A, i, offd[0]);
                      xoff1 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[1]]);
+                                x_dbox, stencil_shape[offd[1]]);
                      xoff0 = hypre_BoxOffsetDistance(
-                        x_dbox, stencil_shape[offd[0]]);
+                                x_dbox, stencil_shape[offd[0]]);
                      break;
                }
 
-               switch(stencil_size)
+               switch (stencil_size)
                {
                   case 7:
                      hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap)
-                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                             Astart,Ani,Anj,Ai,
-                                             bstart,bni,bnj,bi,
-                                             xstart,xni,xnj,xi);
+                     hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                             Astart, Ani, Anj, Ai,
+                                             bstart, bni, bnj, bi,
+                                             xstart, xni, xnj, xi);
                      {
                         xp[xi] =
                            (bp[bi] -
@@ -431,10 +431,10 @@ hypre_RedBlackGS( void               *relax_vdata,
                   case 5:
                      hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap2,Ap3,Ap)
-                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                             Astart,Ani,Anj,Ai,
-                                             bstart,bni,bnj,bi,
-                                             xstart,xni,xnj,xi);
+                     hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                             Astart, Ani, Anj, Ai,
+                                             bstart, bni, bnj, bi,
+                                             xstart, xni, xnj, xi);
                      {
                         xp[xi] =
                            (bp[bi] -
@@ -450,10 +450,10 @@ hypre_RedBlackGS( void               *relax_vdata,
                   case 3:
                      hypre_RedBlackLoopInit();
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap0,Ap1,Ap)
-                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-                                             Astart,Ani,Anj,Ai,
-                                             bstart,bni,bnj,bi,
-                                             xstart,xni,xnj,xi);
+                     hypre_RedBlackLoopBegin(ni, nj, nk, redblack,
+                                             Astart, Ani, Anj, Ai,
+                                             bstart, bni, bnj, bi,
+                                             xstart, xni, xnj, xi);
                      {
                         xp[xi] =
                            (bp[bi] -

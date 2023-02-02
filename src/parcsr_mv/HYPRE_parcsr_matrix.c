@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -35,9 +35,9 @@ HYPRE_ParCSRMatrixCreate( MPI_Comm            comm,
    }
 
    *matrix = (HYPRE_ParCSRMatrix)
-      hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
-                               row_starts, col_starts, num_cols_offd,
-                               num_nonzeros_diag, num_nonzeros_offd);
+             hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
+                                      row_starts, col_starts, num_cols_offd,
+                                      num_nonzeros_diag, num_nonzeros_offd);
 
    return hypre_error_flag;
 }
@@ -49,7 +49,7 @@ HYPRE_ParCSRMatrixCreate( MPI_Comm            comm,
 HYPRE_Int
 HYPRE_ParCSRMatrixDestroy( HYPRE_ParCSRMatrix matrix )
 {
-   return( hypre_ParCSRMatrixDestroy( (hypre_ParCSRMatrix *) matrix ) );
+   return ( hypre_ParCSRMatrixDestroy( (hypre_ParCSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -150,10 +150,12 @@ HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix),
                        &num_procs);
    row_starts = hypre_ParCSRMatrixRowStarts((hypre_ParCSRMatrix *) matrix);
-   if (!row_starts) return -1;
-   row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_procs + 1; i++)
+   if (!row_starts) { return -1; }
+   row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);
+   for (i = 0; i < num_procs + 1; i++)
+   {
       row_partitioning[i] = row_starts[i];
+   }
 
    *row_partitioning_ptr = row_partitioning;
    return hypre_error_flag;
@@ -180,14 +182,13 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_Int       num_procs;
    HYPRE_BigInt    row_start;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    if (my_id == 0 || all_procs)
    {
-      row_partitioning = hypre_CTAlloc(HYPRE_BigInt, num_procs+1, HYPRE_MEMORY_HOST);
+      row_partitioning = hypre_CTAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
    }
 
    row_start = hypre_ParCSRMatrixFirstRowIndex((hypre_ParCSRMatrix *) matrix);
@@ -206,12 +207,6 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    {
       row_partitioning[num_procs] = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
    }
-#else
-   if (all_procs || ((!all_procs) && (my_id == 0)))
-   {
-      HYPRE_ParCSRMatrixGetRowPartitioning( matrix, &row_partitioning );
-   }
-#endif
 
    *row_partitioning_ptr = row_partitioning;
 
@@ -238,10 +233,12 @@ HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix   matrix,
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix),
                        &num_procs);
    col_starts = hypre_ParCSRMatrixColStarts((hypre_ParCSRMatrix *) matrix);
-   if (!col_starts) return -1;
-   col_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs+1, HYPRE_MEMORY_HOST);
-   for (i=0; i < num_procs + 1; i++)
+   if (!col_starts) { return -1; }
+   col_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);
+   for (i = 0; i < num_procs + 1; i++)
+   {
       col_partitioning[i] = col_starts[i];
+   }
 
    *col_partitioning_ptr = col_partitioning;
    return hypre_error_flag;
@@ -352,8 +349,8 @@ HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm            comm,
       return hypre_error_flag;
    }
    *matrix = (HYPRE_ParCSRMatrix)
-      hypre_CSRMatrixToParCSRMatrix( comm, (hypre_CSRMatrix *) A_CSR,
-                                     row_partitioning, col_partitioning) ;
+             hypre_CSRMatrixToParCSRMatrix( comm, (hypre_CSRMatrix *) A_CSR,
+                                            row_partitioning, col_partitioning) ;
    return hypre_error_flag;
 }
 
@@ -376,7 +373,7 @@ HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning(
       return hypre_error_flag;
    }
    *matrix = (HYPRE_ParCSRMatrix)
-      hypre_CSRMatrixToParCSRMatrix( comm, (hypre_CSRMatrix *) A_CSR, NULL, NULL ) ;
+             hypre_CSRMatrixToParCSRMatrix( comm, (hypre_CSRMatrix *) A_CSR, NULL, NULL ) ;
    return hypre_error_flag;
 }
 

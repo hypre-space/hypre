@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -17,7 +17,7 @@
 
 #include <signal.h>
 
-extern void sigRegister_dh();
+extern void sigRegister_dh(void);
 extern void sigHandler_dh(hypre_int sig);
 
 /* 
@@ -85,7 +85,7 @@ void sigHandler_dh(hypre_int sig)
 
 #undef __FUNC__
 #define __FUNC__ "sigRegister_dh"
-void sigRegister_dh()
+void sigRegister_dh(void)
 {
   if (Parser_dhHasSwitch(parser_dh, "-sig_dh")) {
     hypre_int i;

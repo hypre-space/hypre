@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -190,10 +190,10 @@ int MLI_Utils_HypreMatrixFormJacobi(void *A, double alpha, void **J)
    hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Jmat);
    (*J) = (void *) Jmat;
 
-   free( newColInd );
-   free( newColVal );
-   free( rowLengths );
-   free( rowPart );
+   hypre_TFree(newColInd , HYPRE_MEMORY_HOST);
+   hypre_TFree(newColVal , HYPRE_MEMORY_HOST);
+   hypre_TFree(rowLengths , HYPRE_MEMORY_HOST);
+   hypre_TFree(rowPart , HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -292,7 +292,7 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *maxEigen)
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)Amat,&partition);
    startRow    = partition[mypid];
    endRow      = partition[mypid+1];
-   free( partition );
+   hypre_TFree(partition, HYPRE_MEMORY_HOST);
 
    /* -----------------------------------------------------------------
     * create two temporary vectors
@@ -567,11 +567,12 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
       hypre_ParVectorDestroy( pVec );
       hypre_ParVectorDestroy( apVec );
    }
-   free(alphaArray);
-   free(rnormArray);
-   for (i = 0; i <= maxIter; i++) if ( Tmat[i] != NULL ) free( Tmat[i] );
-   free(Tmat);
-   free(srdiag);
+   hypre_TFree(alphaArray, HYPRE_MEMORY_HOST);
+   hypre_TFree(rnormArray, HYPRE_MEMORY_HOST);
+   for (i = 0; i <= maxIter; i++) 
+      hypre_TFree(Tmat[i], HYPRE_MEMORY_HOST);
+   hypre_TFree(Tmat, HYPRE_MEMORY_HOST);
+   hypre_TFree(srdiag, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -660,7 +661,7 @@ int MLI_Utils_HypreMatrixPrint(void *in_mat, char *name)
    HYPRE_ParCSRMatrixGetRowPartitioning( hypre_mat, &rowPart);
    localNRows  = rowPart[mypid+1] - rowPart[mypid];
    startRow    = rowPart[mypid];
-   free( rowPart );
+   hypre_TFree(rowPart, HYPRE_MEMORY_HOST);
 
    sprintf(fname, "%s.%d", name, mypid);
    fp = fopen( fname, "w");
@@ -718,7 +719,7 @@ int MLI_Utils_HypreMatrixGetInfo(void *Amat, int *matInfo, double *valInfo)
    localNRows  = partition[mypid+1] - partition[mypid];
    startrow    = partition[mypid];
    globalNRows = partition[nprocs];
-   free( partition );
+   hypre_TFree(partition, HYPRE_MEMORY_HOST);
    maxVal  = -1.0E-30;
    minVal  = +1.0E30;
    maxNnz  = 0;
@@ -788,7 +789,7 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
    startRow    = partition[mypid];
    localNRows  = partition[mypid+1] - startRow;
-   free( partition );
+   hypre_TFree(partition, HYPRE_MEMORY_HOST);
    if ( blksize < 0 ) blksize2 = - blksize;
    else               blksize2 = blksize;
    if ( localNRows % blksize2 != 0 )
@@ -913,9 +914,9 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
       rowNum = newStartRow + irow;
       HYPRE_IJMatrixSetValues(IJAmat2, 1, &newSize,(const int *) &rowNum,
                 (const int *) newInd, (const double *) newVal);
-      free( newInd );
-      free( newVal );
-      free( newVal2 );
+      hypre_TFree(newInd, HYPRE_MEMORY_HOST);
+      hypre_TFree(newVal, HYPRE_MEMORY_HOST);
+      hypre_TFree(newVal2, HYPRE_MEMORY_HOST);
    }
    ierr = HYPRE_IJMatrixAssemble(IJAmat2);
    hypre_assert( !ierr );
@@ -923,7 +924,7 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
    /*hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hypreA2);*/
    HYPRE_IJMatrixSetObjectType( IJAmat2, -1 );
    HYPRE_IJMatrixDestroy( IJAmat2 );
-   if ( rowLengths != NULL ) free( rowLengths );
+   hypre_TFree(rowLengths, HYPRE_MEMORY_HOST);
    (*Amat2) = (void *) hypreA2;
    return 0;
 }
@@ -957,7 +958,7 @@ int MLI_Utils_HypreBoolMatrixDecompress(void *Smat, int blkSize,
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
    startRow    = partition[mypid];
    localNRows  = partition[mypid+1] - startRow;
-   free( partition );
+   hypre_TFree(partition, HYPRE_MEMORY_HOST);
    if ( localNRows % blkSize != 0 )
    {
       printf("MLI_DecompressMatrix ERROR : nrows not divisible by blksize.\n");
@@ -995,7 +996,7 @@ int MLI_Utils_HypreBoolMatrixDecompress(void *Smat, int blkSize,
    ierr =  HYPRE_IJMatrixSetRowSizes(IJSmat2, rowLengths);
    ierr += HYPRE_IJMatrixInitialize(IJSmat2);
    hypre_assert(!ierr);
-   if ( rowLengths != NULL ) free( rowLengths );
+   hypre_TFree(rowLengths, HYPRE_MEMORY_HOST);
 
    /* ----------------------------------------------------------------
     * load the decompressed matrix
@@ -1035,9 +1036,9 @@ int MLI_Utils_HypreBoolMatrixDecompress(void *Smat, int blkSize,
                 (const int *) newInd, (const double *) newVal);
       }
    }
-   if ( newInd != NULL ) free( newInd );
-   if ( newVal != NULL ) free( newVal );
-   if ( sInd   != NULL ) free( sInd );
+   hypre_TFree(newInd, HYPRE_MEMORY_HOST);
+   hypre_TFree(newVal, HYPRE_MEMORY_HOST);
+   hypre_TFree(sInd, HYPRE_MEMORY_HOST);
    ierr = HYPRE_IJMatrixAssemble(IJSmat2);
    hypre_assert( !ierr );
    HYPRE_IJMatrixGetObject(IJSmat2, (void **) &hypreS2);
@@ -1180,8 +1181,8 @@ int MLI_Utils_singular_vectors(int n, double *uArray)
     hypre_dgesvd(&jobu, &jobvt, &n, &n, uArray,
         &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
 
-    free(workArray);
-    free(sArray);
+    hypre_TFree(workArray, HYPRE_MEMORY_HOST);
+    hypre_TFree(sArray, HYPRE_MEMORY_HOST);
 #endif
 
     return info;
@@ -1393,8 +1394,8 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
        }
    }
 
-   free(Umat);
-   free(lanczos);
+   hypre_TFree(Umat, HYPRE_MEMORY_HOST);
+   hypre_TFree(lanczos, HYPRE_MEMORY_HOST);
 
    /* ----------------------------------------------------------------*
     * de-allocate storage for temporary vectors
@@ -1407,10 +1408,11 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
       hypre_ParVectorDestroy( pVec );
       hypre_ParVectorDestroy( apVec );
    }
-   free(alphaArray);
-   free(rnormArray);
-   for (i = 0; i <= maxIter; i++) if ( Tmat[i] != NULL ) free( Tmat[i] );
-   free(Tmat);
+   hypre_TFree(alphaArray, HYPRE_MEMORY_HOST);
+   hypre_TFree(rnormArray, HYPRE_MEMORY_HOST);
+   for (i = 0; i <= maxIter; i++) 
+      hypre_TFree(Tmat[i], HYPRE_MEMORY_HOST);
+   hypre_TFree(Tmat, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -1499,8 +1501,8 @@ int MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm mpiComm,
                      matJA[j] = tempJA[j];
                      matAA[j] = tempAA[j];
                   }
-                  free( tempJA );
-                  free( tempAA );
+                  hypre_TFree(tempJA , HYPRE_MEMORY_HOST);
+                  hypre_TFree(tempAA , HYPRE_MEMORY_HOST);
                }
                fscanf( fp, "%d", &colNum );
             }
@@ -1550,10 +1552,10 @@ int MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm mpiComm,
                 (const int *) inds, (const double *) vals);
       hypre_assert( !ierr );
    }
-   free( rowLengths );
-   free( matIA );
-   free( matJA );
-   free( matAA );
+   hypre_TFree(rowLengths , HYPRE_MEMORY_HOST);
+   hypre_TFree(matIA , HYPRE_MEMORY_HOST);
+   hypre_TFree(matJA , HYPRE_MEMORY_HOST);
+   hypre_TFree(matAA , HYPRE_MEMORY_HOST);
 
    ierr = HYPRE_IJMatrixAssemble(IJmat);
    hypre_assert( !ierr );
@@ -1566,7 +1568,7 @@ int MLI_Utils_HypreMatrixReadTuminFormat(char *filename, MPI_Comm mpiComm,
       diag2 = hypre_TAlloc(double,  localNRows, HYPRE_MEMORY_HOST);
       for ( irow = 0; irow < localNRows; irow++ )
          diag2[irow] = diag[startRow+irow];
-      free( diag );
+      hypre_TFree(diag, HYPRE_MEMORY_HOST);
    }
    (*scaleVec) = diag2;
    return ierr;
@@ -1710,10 +1712,10 @@ int MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
                 (const int *) inds, (const double *) vals);
       hypre_assert( !ierr );
    }
-   free( rowLengths );
-   free( matIA );
-   free( matJA );
-   free( matAA );
+   hypre_TFree(rowLengths , HYPRE_MEMORY_HOST);
+   hypre_TFree(matIA , HYPRE_MEMORY_HOST);
+   hypre_TFree(matJA , HYPRE_MEMORY_HOST);
+   hypre_TFree(matAA , HYPRE_MEMORY_HOST);
 
    ierr = HYPRE_IJMatrixAssemble(IJmat);
    hypre_assert( !ierr );
@@ -1726,7 +1728,7 @@ int MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
       diag2 = hypre_TAlloc(double,  localNRows, HYPRE_MEMORY_HOST);
       for ( irow = 0; irow < localNRows; irow++ )
          diag2[irow] = diag[startRow+irow];
-      free( diag );
+      hypre_TFree(diag, HYPRE_MEMORY_HOST);
    }
    (*scaleVec) = diag2;
 #if 0
@@ -1791,7 +1793,7 @@ int MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
       if ( j == mypid ) startRow = globalNRows;
       globalNRows += rowsArray[j];
    }
-   free( rowsArray );
+   hypre_TFree(rowsArray, HYPRE_MEMORY_HOST);
    matIA = hypre_TAlloc(int, (localNRows+1) , HYPRE_MEMORY_HOST);
    matJA = hypre_TAlloc(int, localNnz , HYPRE_MEMORY_HOST);
    matAA = hypre_TAlloc(double, localNnz , HYPRE_MEMORY_HOST);
@@ -1861,10 +1863,10 @@ int MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
                 (const int *) inds, (const double *) vals);
       hypre_assert( !ierr );
    }
-   free( rowLengths );
-   free( matIA );
-   free( matJA );
-   free( matAA );
+   hypre_TFree(rowLengths, HYPRE_MEMORY_HOST);
+   hypre_TFree(matIA, HYPRE_MEMORY_HOST);
+   hypre_TFree(matJA, HYPRE_MEMORY_HOST);
+   hypre_TFree(matAA, HYPRE_MEMORY_HOST);
 
    ierr = HYPRE_IJMatrixAssemble(IJmat);
    hypre_assert( !ierr );
@@ -1874,11 +1876,11 @@ int MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
    (*Amat) = (void *) hypreA;
    if ( scaleFlag == 1 )
    {
-      free( diag );
+      hypre_TFree(diag, HYPRE_MEMORY_HOST);
       diag = hypre_TAlloc(double,  localNRows, HYPRE_MEMORY_HOST);
       for ( irow = 0; irow < localNRows; irow++ )
          diag[irow] = diag2[startRow+irow];
-      free( diag2 );
+      hypre_TFree(diag2, HYPRE_MEMORY_HOST);
    }
    (*scaleVec) = diag;
 
@@ -1952,10 +1954,10 @@ int MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm mpiComm,
                 (const int *) inds, (const double *) vals);
       hypre_assert( !ierr );
    }
-   free(rowLengths);
-   free(matIA);
-   free(matJA);
-   free(matAA);
+   hypre_TFree(rowLengths, HYPRE_MEMORY_HOST);
+   hypre_TFree(matIA, HYPRE_MEMORY_HOST);
+   hypre_TFree(matJA, HYPRE_MEMORY_HOST);
+   hypre_TFree(matAA, HYPRE_MEMORY_HOST);
 
    ierr = HYPRE_IJMatrixAssemble(IJmat);
    hypre_assert( !ierr );
@@ -2142,7 +2144,7 @@ int MLI_Utils_mJacobiDestroy(HYPRE_Solver solver)
 {
    HYPRE_MLI_mJacobi *jacobiPtr = (HYPRE_MLI_mJacobi *) solver;
    if (jacobiPtr == NULL) return 1;
-   if (jacobiPtr->diagonal_ != NULL) free(jacobiPtr->diagonal_);
+   hypre_TFree(jacobiPtr->diagonal_, HYPRE_MEMORY_HOST);
    if (jacobiPtr->hypreRes_ != NULL)
       HYPRE_ParVectorDestroy(jacobiPtr->hypreRes_);
    jacobiPtr->diagonal_ = NULL;
@@ -2177,7 +2179,7 @@ int MLI_Utils_mJacobiSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    jacobiPtr = (HYPRE_MLI_mJacobi *) solver;
    if (jacobiPtr == NULL) return 1;
-   if (jacobiPtr->diagonal_ != NULL) free(jacobiPtr->diagonal_);
+   hypre_TFree(jacobiPtr->diagonal_, HYPRE_MEMORY_HOST);
    hypreX = (hypre_ParVector *) x;
    nrows = hypre_VectorSize(hypre_ParVectorLocalVector(hypreX));
    jacobiPtr->diagonal_ = hypre_TAlloc(double, nrows , HYPRE_MEMORY_HOST);
@@ -2814,9 +2816,9 @@ int MLI_Utils_IntMergeSort(int nList, int *listLengs, int **lists,
    }
    (*newListOut) = newList;
    (*newNListOut) = newListCnt;
-   free( indices );
-   free( tree );
-   free( treeInd );
+   hypre_TFree(indices, HYPRE_MEMORY_HOST);
+   hypre_TFree(tree, HYPRE_MEMORY_HOST);
+   hypre_TFree(treeInd, HYPRE_MEMORY_HOST);
    return 0;
 }
 

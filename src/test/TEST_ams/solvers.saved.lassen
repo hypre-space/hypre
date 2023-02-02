@@ -1,0 +1,117 @@
+# Output file: solvers.out.0
+    Cycle 14   1.003786e-04    0.443686     7.475630e-06 
+    Cycle 15   4.456165e-05    0.443936     3.318699e-06 
+    Cycle 16   1.978967e-05    0.444096     1.473822e-06 
+    Cycle 17   8.790831e-06    0.444213     6.546912e-07 
+
+
+ Average Convergence Factor = 0.432750
+
+# Output file: solvers.out.1
+    Cycle 14   1.003786e-04    0.443686     7.475630e-06 
+    Cycle 15   4.456165e-05    0.443936     3.318699e-06 
+    Cycle 16   1.978967e-05    0.444096     1.473822e-06 
+    Cycle 17   8.790831e-06    0.444213     6.546912e-07 
+
+
+ Average Convergence Factor = 0.432750
+
+# Output file: solvers.out.2
+    Cycle 38   3.369298e-05    0.713741     2.509262e-06 
+    Cycle 39   2.405014e-05    0.713803     1.791118e-06 
+    Cycle 40   1.716600e-05    0.713759     1.278427e-06 
+    Cycle 41   1.225422e-05    0.713866     9.126247e-07 
+
+
+ Average Convergence Factor = 0.712344
+
+# Output file: solvers.out.3
+    Cycle 38   3.369298e-05    0.713741     2.509262e-06 
+    Cycle 39   2.405014e-05    0.713803     1.791118e-06 
+    Cycle 40   1.716600e-05    0.713759     1.278427e-06 
+    Cycle 41   1.225422e-05    0.713866     9.126247e-07 
+
+
+ Average Convergence Factor = 0.712344
+
+# Output file: solvers.out.4
+
+Iterations = 6
+Final Relative Residual Norm = 6.842741e-07
+
+# Output file: solvers.out.5
+
+Iterations = 6
+Final Relative Residual Norm = 6.842741e-07
+
+# Output file: solvers.out.6
+
+Iterations = 9
+Final Relative Residual Norm = 9.378817e-07
+
+# Output file: solvers.out.7
+
+Iterations = 9
+Final Relative Residual Norm = 9.378817e-07
+
+# Output file: solvers.out.12
+
+Iterations = 18
+Final Relative Residual Norm = 4.628679e-02
+
+# Output file: solvers.out.8
+
+Eigenvalue lambda   3.02357653918666e+01
+Eigenvalue lambda   3.03135374700727e+01
+Eigenvalue lambda   3.85013899425896e+01
+Eigenvalue lambda   5.14395940123159e+01
+Eigenvalue lambda   5.15742481829739e+01
+Residual   5.33482925570638e-05
+Residual   5.22860536689561e-05
+Residual   4.48231220554168e-05
+Residual   1.06938992997023e-04
+Residual   1.08675404499279e-04
+
+17 iterations
+# Output file: solvers.out.9
+
+Eigenvalue lambda   3.02357653918666e+01
+Eigenvalue lambda   3.03135374700727e+01
+Eigenvalue lambda   3.85013899425896e+01
+Eigenvalue lambda   5.14395940123159e+01
+Eigenvalue lambda   5.15742481829739e+01
+Residual   5.33482925570638e-05
+Residual   5.22860536689561e-05
+Residual   4.48231220554168e-05
+Residual   1.06938992997023e-04
+Residual   1.08675404499279e-04
+
+17 iterations
+# Output file: solvers.out.10
+
+Eigenvalue lambda   3.02357653920132e+01
+Eigenvalue lambda   3.03135374702041e+01
+Eigenvalue lambda   3.85013899426644e+01
+Eigenvalue lambda   5.14395940117366e+01
+Eigenvalue lambda   5.15742481837300e+01
+Residual   8.66608457601955e-05
+Residual   7.54689609227350e-05
+Residual   5.61686440272272e-05
+Residual   9.69558816531731e-05
+Residual   1.09642437337488e-04
+
+23 iterations
+# Output file: solvers.out.11
+
+Eigenvalue lambda   3.02357653920132e+01
+Eigenvalue lambda   3.03135374702041e+01
+Eigenvalue lambda   3.85013899426644e+01
+Eigenvalue lambda   5.14395940117366e+01
+Eigenvalue lambda   5.15742481837300e+01
+Residual   8.66608457601955e-05
+Residual   7.54689609227350e-05
+Residual   5.61686440272272e-05
+Residual   9.69558816531731e-05
+Residual   1.09642437337488e-04
+
+23 iterations

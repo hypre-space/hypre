@@ -1,0 +1,12 @@
+# Output file: maxwell.out.0
+Iterations = 10
+Final Relative Residual Norm = 2.480102e-09
+
+# Output file: maxwell.out.1
+Iterations = 10
+Final Relative Residual Norm = 3.782219e-09
+
+# Output file: maxwell.out.2
+Iterations = 10
+Final Relative Residual Norm = 7.164797e-09
+

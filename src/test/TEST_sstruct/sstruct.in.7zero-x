@@ -1,0 +1,67 @@
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 3 1
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (1- 1- 1-) (4+ 4+ 4+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# CELL  = 0
+GridSetVariables: 0 1 [0]
+
+# GridSetPeriodic: part periodic[ndim]
+GridSetPeriodic: 0 [0 0 0]
+
+###########################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [7]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0  0] 0  4.0
+StencilSetEntry: 0  1 [-1  0  0] 0  0.0
+StencilSetEntry: 0  2 [ 1  0  0] 0  0.0
+StencilSetEntry: 0  3 [ 0 -1  0] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1  0] 0 -1.0
+StencilSetEntry: 0  5 [ 0  0 -1] 0 -1.0
+StencilSetEntry: 0  6 [ 0  0  1] 0 -1.0
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+
+###########################################################
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+# west
+MatrixSetValues: 0 (1- 1- 1-) (1- 4+ 4+) [1 1 1] 0 1 0.0
+# east
+MatrixSetValues: 0 (4+ 1- 1-) (4+ 4+ 4+) [1 1 1] 0 2 0.0
+# south
+MatrixSetValues: 0 (1- 1- 1-) (4+ 1- 4+) [1 1 1] 0 3 0.0
+# north
+MatrixSetValues: 0 (1- 4+ 1-) (4+ 4+ 4+) [1 1 1] 0 4 0.0
+# lower
+MatrixSetValues: 0 (1- 1- 1-) (4+ 4+ 1-) [1 1 1] 0 5 0.0
+# upper
+MatrixSetValues: 0 (1- 1- 4+) (4+ 4+ 4+) [1 1 1] 0 6 0.0
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+
+###########################################################
+

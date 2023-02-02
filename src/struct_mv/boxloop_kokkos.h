@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -15,15 +15,18 @@
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_NEWBOXLOOP_HEADER
-#define HYPRE_NEWBOXLOOP_HEADER
+#ifndef HYPRE_BOXLOOP_KOKKOS_HEADER
+#define HYPRE_BOXLOOP_KOKKOS_HEADER
+
+#if defined(HYPRE_USING_KOKKOS)
 
 #ifdef __cplusplus
-extern "C++" {
+extern "C++"
+{
 #endif
 
 #include <Kokkos_Core.hpp>
-using namespace Kokkos;
+   using namespace Kokkos;
 
 #ifdef __cplusplus
 }
@@ -35,10 +38,10 @@ using namespace Kokkos;
 
 typedef struct hypre_Boxloop_struct
 {
-   HYPRE_Int lsize0,lsize1,lsize2;
-   HYPRE_Int strides0,strides1,strides2;
-   HYPRE_Int bstart0,bstart1,bstart2;
-   HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0, lsize1, lsize2;
+   HYPRE_Int strides0, strides1, strides2;
+   HYPRE_Int bstart0, bstart1, bstart2;
+   HYPRE_Int bsize0, bsize1, bsize2;
 } hypre_Boxloop;
 
 
@@ -272,13 +275,13 @@ typedef struct hypre_Boxloop_struct
 
 
 
- #define hypre_BoxLoop1ReductionEnd(i1, HYPRE_BOX_REDUCTION)            \
+#define hypre_BoxLoop1ReductionEnd(i1, HYPRE_BOX_REDUCTION)            \
      }, HYPRE_BOX_REDUCTION);                                           \
      hypre_fence();                                                     \
      HYPRE_BOX_REDUCTION += __hypre_sum_tmp;                            \
  }
 
- #define hypre_BoxLoop2ReductionBegin(ndim, loop_size,                  \
+#define hypre_BoxLoop2ReductionBegin(ndim, loop_size,                  \
                                       dbox1, start1, stride1, i1,       \
                                       dbox2, start2, stride2, i2,       \
                                       HYPRE_BOX_REDUCTION)              \
@@ -295,7 +298,7 @@ typedef struct hypre_Boxloop_struct
          hypre_BoxLoopIncK(1,databox1,i1);                              \
          hypre_BoxLoopIncK(2,databox2,i2);                              \
 
- #define hypre_BoxLoop2ReductionEnd(i1, i2, HYPRE_BOX_REDUCTION)        \
+#define hypre_BoxLoop2ReductionEnd(i1, i2, HYPRE_BOX_REDUCTION)        \
      }, HYPRE_BOX_REDUCTION);                                           \
      hypre_fence();                                                     \
      HYPRE_BOX_REDUCTION += __hypre_sum_tmp;                            \
@@ -348,8 +351,10 @@ struct ColumnSums
 }
 */
 
-#define hypre_newBoxLoopGetIndex(index)\
-  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
+#define hypre_BoxLoopGetIndex(index)     \
+  index[0] = hypre_IndexD(local_idx, 0); \
+  index[1] = hypre_IndexD(local_idx, 1); \
+  index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopBlock()       0
 #define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
@@ -369,4 +374,8 @@ struct ColumnSums
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
 #define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
+
 #endif
+
+#endif /* #ifndef HYPRE_BOXLOOP_KOKKOS_HEADER */
+

@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -23,10 +23,10 @@ set(PILUT_SRCS
   util.c
 )
 
-target_sources(HYPRE
+target_sources(${PROJECT_NAME}
   PRIVATE ${PILUT_SRCS}
           ${PILUT_HDRS}
-  )
+)
 
 convert_filenames_to_full_paths(PILUT_HDRS)
 set(HDRS ${HDRS} ${PILUT_HDRS} PARENT_SCOPE)

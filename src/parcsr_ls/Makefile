@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,6 +37,7 @@ HEADERS =\
  par_amg.h\
  par_amgdd.h\
  par_amgdd_comp_grid.h\
+ par_fsai.h\
  schwarz.h
 
 FILES =\
@@ -58,6 +59,8 @@ FILES =\
  F90_HYPRE_parcsr_pcg.c\
  F90_HYPRE_parcsr_pilut.c\
  F90_HYPRE_parcsr_schwarz.c\
+ F90_HYPRE_parcsr_mgr.c\
+ F90_HYPRE_parcsr_ilu.c\
  F90_HYPRE_ams.c\
  gen_redcs_mat.c\
  HYPRE_parcsr_amg.c\
@@ -74,6 +77,7 @@ FILES =\
  HYPRE_parcsr_int.c\
  HYPRE_parcsr_mgr.c\
  HYPRE_parcsr_ilu.c \
+ HYPRE_parcsr_fsai.c \
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
@@ -89,9 +93,11 @@ FILES =\
  par_amgdd_solve.c\
  par_amgdd_fac_cycle.c\
  par_amgdd_helpers.c\
- par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
+ par_fsai.c\
+ par_fsai_setup.c\
+ par_fsai_solve.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
  par_cgc_coarsen.c\
@@ -110,6 +116,7 @@ FILES =\
  par_krylov_func.c\
  par_mod_lr_interp.c\
  par_multi_interp.c\
+ par_mod_multi_interp.c\
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
@@ -117,9 +124,6 @@ FILES =\
  par_mgr.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
- par_ilu.c\
- par_ilu_setup.c \
- par_ilu_solve.c \
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -139,23 +143,35 @@ FILES =\
  partial.c\
  schwarz.c\
  block_tridiag.c\
- ads.c\
- ame.c\
  par_restr.c\
  par_lr_restr.c\
  dsuperlu.c
 
 CUFILES =\
+ ads.c\
  ams.c\
+ ame.c\
+ par_amg_setup.c\
+ par_ilu.c\
+ par_ilu_setup.c \
+ par_ilu_solve_device.c\
+ par_ilu_solve.c \
+ par_cheby_device.c\
+ par_relax_more_device.c\
  par_coarsen_device.c\
+ par_coarse_parms_device.c\
  par_indepset_device.c\
  par_interp_device.c\
+ par_lr_restr_device.c\
  par_interp_trunc_device.c\
  par_lr_interp_device.c\
  par_strength_device.c\
  par_strength2nd_device.c\
  par_amgdd_fac_cycle_device.c\
- par_2s_interp_device.c
+ par_2s_interp_device.c\
+ par_relax_device.c\
+ par_mod_multi_interp_device.c\
+ par_mgr_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
@@ -178,7 +194,7 @@ install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o* libHYPRE*
+	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -196,6 +212,6 @@ libHYPRE_parcsr_ls.a: ${OBJS}
 libHYPRE_parcsr_ls.so libHYPRE_parcsr_ls.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

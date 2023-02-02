@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -6,6 +6,119 @@
 #=============================================================================
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
+
+Version 2.27.0 released 2022/12/20
+
+- New SStructMatrix and SStructVector AddFEMBoxValues() routines to set finite
+  element stiffness matrices a box at a time for better performance.
+- Added environment variable HYPRE_BRANCH_NAME.
+- Added HIP support to the MGR solver.
+- Added Jacobi iterative solver approach for ILU smoothing/preconditioning.
+- Various optimizations for IJ solvers
+- Various CMake build system updates
+- Various bug fixes
+
+#====================================
+
+Version 2.26.0 released 2022/10/14
+
+- Added a new feature of BoomerAMG (L1-Jacobi and Chebyshev smoothers) and
+  Krylov subspace solvers with multiple right-hand-side vectors;
+- Optimized parallel sparse matrix/multi-component vector multiplication
+  on CPUs and GPUs.
+- Added SYCL support for the IJ interface and various AMG operators;
+- Added a runtime switch feature between CPU and GPU;
+- Added CMAKE support for CUDA;
+- Optimized the performance of AMG interpolation truncation routines with CUDA/HIP;
+- Optimized the performance of hypre's SpGEMM kernels on NVIDIA/AMD GPUs;
+- Various bug fixes
+
+#====================================
+
+Version 2.25.0 released 2022/06/15
+
+- New features in MGR: multilevel assignment of solver options, block Jacobi for
+  smoothers and inter-grid transfer, CPR, non-Galerkin.
+- New factorized sparse approximate inverse (FSAI) solver/preconditioner.  Can
+  also be used as a smoother in BoomerAMG.
+- Added various optimizations for Nvidia and AMD GPUs by removing synchronizations,
+  reducing memory transfers, and adding faster custom kernels.
+- Ported parallel matrix matrix multiplicaton to SYCL.
+- Infrastructure changes to unify GPU implementations across CUDA/HIP/SYCL.
+- Added SStruct I/O routines.
+- Various bug fixes.
+
+#====================================
+
+Version 2.24.0 released 2022/02/11
+
+- Added SYCL support for the structured interface and solvers
+- Added SYCL support for AMG solve phase.
+- Enabled GPU setup for the MGR solver.
+- Enabled new interpolation options for MGR (L1-Jacobi, MM-ext, MM-ext+i,
+  MM-ext+e) for both CPU and GPU.
+- Added GPU examples for Fortran users ('ex5f.f' and 'ex12f.f').
+- Added source file indentation with Artistic Style (astyle).
+- Various bug fixes.
+
+#====================================
+
+Version 2.23.0 released 2021/10/01
+
+- Added GPU support for multipass interpolation.
+- Added new header file variables (HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_NUMBER,
+  HYPRE_DEVELOP_BRANCH) to help users working with the development branch.
+- Added rocsparse triangular solve required for Gauss-Seidel relaxation when
+  using hip and rocsparse on AMD GPUs.
+- Various bug fixes.
+
+#====================================
+
+Version 2.22.1 released 2021/08/20
+
+- Ported Neumann version of AIR to the GPU.
+- Re-implemented ParCSR eigenvalue estimation used in Chebyshev relaxation.
+- Added IJMatrix Add, Norm, and Transpose functions.
+- Simplified the ParCSRMatrix/Vector code by removing ownership info.
+- Added GPU support for Chebyshev relaxation.
+- Various bug fixes.
+
+#====================================
+
+Version 2.22.0 released 2021/06/22
+
+- Added GPU support for AMS, ADS, and AME solvers.
+- Added mixedint support for GPUs.
+- Fixed GPU issues with AMG-DD solver.
+- Various bug fixes.
+
+#====================================
+
+Version 2.21.0 released 2021/05/25
+
+- Changed GPU defaults and changed default CUDA arch to 70.
+- Added new interfaces: HYPRE_SetSpGemmUseCusparse(1) to select cuSPARSE SpGeMM
+  or hypre's MM (if 0); HYPRE_SetUseGpuRand(1) to use cuRand for PMIS or CPU RNG
+  (if 0); HYPRE_SetMemoryLocation to select default memory location;
+  HYPRE_SetExecutionPolicy to select default execution policy.
+- Changed configure option: --enable-cub --> --enable-device-memory-pool;
+  --enable-nvtx --> --enable-gpu-profiling
+- Added new configure options: --with-cuda-home=DIR; --with-gpu-arch=ARG
+- Added GPU build options to CMake.
+- Added a new HYPRE_RELEASE_NUMBER macro.
+- Improved support for ParCSR matrices with many zero rows.
+- Improved BoomerAMG setup efficiency when there are many off-diagonal coefficients.
+- Fixed a bug in the strength matrix generation for nodal AMG.
+- Removed unified virtual memory (UVM) requirement from GPU implementation.
+- Removed --enable-global-partition option.
+- Added UMPIRE support for memory pooling on GPUs.
+- Added HIP/AMD support.
+- New CUDA based triangular smoothers.
+- New parallel ILU solver features and GPU support.
+- Added CUDA 11 support.
+- Various bug fixes.
+
+#====================================
 
 Version 2.20.0 released 2020/09/24
 

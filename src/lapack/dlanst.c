@@ -10,76 +10,77 @@ extern "C" {
 
 doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 {
-/*  -- LAPACK auxiliary routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       February 29, 1992   
+/*  -- LAPACK auxiliary routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       February 29, 1992
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DLANST  returns the value of the one norm,  or the Frobenius norm, or   
-    the  infinity norm,  or the  element of  largest absolute value  of a   
-    real symmetric tridiagonal matrix A.   
+    DLANST  returns the value of the one norm,  or the Frobenius norm, or
+    the  infinity norm,  or the  element of  largest absolute value  of a
+    real symmetric tridiagonal matrix A.
 
-    Description   
-    ===========   
+    Description
+    ===========
 
-    DLANST returns the value   
+    DLANST returns the value
 
-       DLANST = ( max(abs(A(i,j))), NORM = 'M' or 'm'   
-                (   
-                ( norm1(A),         NORM = '1', 'O' or 'o'   
-                (   
-                ( normI(A),         NORM = 'I' or 'i'   
-                (   
-                ( normF(A),         NORM = 'F', 'f', 'E' or 'e'   
+       DLANST = ( max(abs(A(i,j))), NORM = 'M' or 'm'
+                (
+                ( norm1(A),         NORM = '1', 'O' or 'o'
+                (
+                ( normI(A),         NORM = 'I' or 'i'
+                (
+                ( normF(A),         NORM = 'F', 'f', 'E' or 'e'
 
-    where  norm1  denotes the  one norm of a matrix (maximum column sum),   
-    normI  denotes the  infinity norm  of a matrix  (maximum row sum) and   
-    normF  denotes the  Frobenius norm of a matrix (square root of sum of   
-    squares).  Note that  max(abs(A(i,j)))  is not a  matrix norm.   
+    where  norm1  denotes the  one norm of a matrix (maximum column sum),
+    normI  denotes the  infinity norm  of a matrix  (maximum row sum) and
+    normF  denotes the  Frobenius norm of a matrix (square root of sum of
+    squares).  Note that  max(abs(A(i,j)))  is not a  matrix norm.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    NORM    (input) CHARACTER*1   
-            Specifies the value to be returned in DLANST as described   
-            above.   
+    NORM    (input) CHARACTER*1
+            Specifies the value to be returned in DLANST as described
+            above.
 
-    N       (input) INTEGER   
-            The order of the matrix A.  N >= 0.  When N = 0, DLANST is   
-            set to zero.   
+    N       (input) INTEGER
+            The order of the matrix A.  N >= 0.  When N = 0, DLANST is
+            set to zero.
 
-    D       (input) DOUBLE PRECISION array, dimension (N)   
-            The diagonal elements of A.   
+    D       (input) DOUBLE PRECISION array, dimension (N)
+            The diagonal elements of A.
 
-    E       (input) DOUBLE PRECISION array, dimension (N-1)   
-            The (n-1) sub-diagonal or super-diagonal elements of A.   
+    E       (input) DOUBLE PRECISION array, dimension (N-1)
+            The (n-1) sub-diagonal or super-diagonal elements of A.
 
-    =====================================================================   
+    =====================================================================
 
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    
+    integer c__1 = 1;
+
     /* System generated locals */
     integer i__1;
     doublereal ret_val, d__1, d__2, d__3, d__4, d__5;
     /* Local variables */
-    static integer i__;
-    static doublereal scale;
+    integer i__;
+    doublereal scale;
     extern logical lsame_(const char *,const char *);
-    static doublereal anorm;
-    extern /* Subroutine */ integer dlassq_(integer *, doublereal *, integer *, 
+    doublereal anorm;
+    extern /* Subroutine */ integer dlassq_(integer *, doublereal *, integer *,
 	    doublereal *, doublereal *);
-    static doublereal sum;
+    doublereal sum;
 
 
     --e;
     --d__;
+    anorm = 0.;
 
     /* Function Body */
     if (*n <= 0) {

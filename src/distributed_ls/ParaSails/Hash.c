@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -57,10 +57,10 @@ Hash *HashCreate(HYPRE_Int size)
 
 void HashDestroy(Hash *h)
 {
-    free(h->keys);
-    free(h->table);
-    free(h->data);
-    free(h);
+    hypre_TFree(h->keys,HYPRE_MEMORY_HOST);
+    hypre_TFree(h->table,HYPRE_MEMORY_HOST);
+    hypre_TFree(h->data,HYPRE_MEMORY_HOST);
+    hypre_TFree(h,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -55,7 +55,7 @@ int            interior_nrows, *offRowLengths;
 int            **offColInd;
 int            *remap_array;
 double         **offColVal;
-MPI_Comm       parComm;      
+MPI_Comm       parComm;
 HYPRE_Solver   cSolver;
 HYPRE_Solver   cPrecon;
 
@@ -64,7 +64,7 @@ HYPRE_Solver   cPrecon;
 /*       [E_ob] vb                                                         */
 /***************************************************************************/
 
-int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr, 
+int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
                         HYPRE_ParVector y_csr )
 {
    int                i, local_nrows, *temp_list;
@@ -101,14 +101,14 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    temp_list = hypre_TAlloc(int, interior_nrows , HYPRE_MEMORY_HOST);
    temp_vect = hypre_TAlloc(double, interior_nrows , HYPRE_MEMORY_HOST);
    for (i = 0; i < interior_nrows; i++) temp_list[i] = i;
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
       if (remap_array[i] >= 0) temp_vect[remap_array[i]] = x_par_data[i];
    }
    HYPRE_IJVectorSetValues(localb,interior_nrows,(const int *) temp_list,
                            temp_vect);
-   free( temp_list );
-   free( temp_vect );
+   hypre_TFree(temp_list, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_vect, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* perform one cycle of AMG to subdomain (internal nodes)  */
@@ -127,7 +127,7 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    Lx_par   = (hypre_ParVector *) Lx_csr;
    Lx_local = hypre_ParVectorLocalVector(Lx_par);
    Lx_data  = hypre_VectorData(Lx_local);
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
       if (remap_array[i] >= 0) y_par_data[i] = Lx_data[remap_array[i]];
    }
@@ -139,7 +139,7 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
 /*       [E_ob] vb                                                         */
 /***************************************************************************/
 
-int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr, 
+int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
                          HYPRE_ParVector y_csr )
 {
    int                i, j, index, local_nrows, global_nrows, *temp_list;
@@ -180,7 +180,7 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* --------------------------------------------------------*/
 
    index = 0;
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
       if ( remap_array[i] < 0 ) y_par_data[i] = x_par_data[index++];
       else                      y_par_data[i] = 0.0;
@@ -193,21 +193,21 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
    temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i = 0; i < interior_nrows; i++) temp_list[i] = i;
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
-      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
+      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows)
       {
          temp_vect[remap_array[i]] = 0.0;
-         for (j = 0; j < offRowLengths[i]; j++) 
-            temp_vect[remap_array[i]] += 
+         for (j = 0; j < offRowLengths[i]; j++)
+            temp_vect[remap_array[i]] +=
                (offColVal[i][j] * y_par_data[offColInd[i][j]]);
-      } else if ( remap_array[i] >= interior_nrows) 
+      } else if ( remap_array[i] >= interior_nrows)
         printf("WARNING : index out of range.\n");
    }
    HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
                            temp_vect);
-   free( temp_list );
-   free( temp_vect );
+   hypre_TFree(temp_list, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_vect, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* perform one cycle of AMG to subdomain (internal nodes)  */
@@ -225,7 +225,7 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    Lx_par   = (hypre_ParVector *) Lx_csr;
    Lx_local = hypre_ParVectorLocalVector(Lx_par);
    Lx_data  = hypre_VectorData(Lx_local);
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
       if (remap_array[i] >= 0) y_par_data[i] = -Lx_data[remap_array[i]];
    }
@@ -236,7 +236,7 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
 /* Apply [I E_ob^T] v                                                      */
 /***************************************************************************/
 
-int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr, 
+int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
                                   HYPRE_ParVector y_csr )
 {
    int                i, j, index, local_nrows, global_nrows, *temp_list;
@@ -297,15 +297,15 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
    temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i=0; i<interior_nrows; i++) temp_list[i] = i;
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
-      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
+      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows)
          temp_vect[remap_array[i]] = x_par_data[i];
    }
    HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
                            temp_vect);
-   free( temp_list );
-   free( temp_vect );
+   hypre_TFree(temp_list, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_vect, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* perform one cycle of AMG to subdomain (internal nodes)  */
@@ -324,11 +324,11 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    Lx_par   = (hypre_ParVector *) Lx_csr;
    Lx_local = hypre_ParVectorLocalVector(Lx_par);
    Lx_data  = hypre_VectorData(Lx_local);
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
-      if ( remap_array[i] >= 0 ) 
+      if ( remap_array[i] >= 0 )
       {
-         for (j=0; j<offRowLengths[i]; j++) 
+         for (j=0; j<offRowLengths[i]; j++)
          {
             index = offColInd[i][j];
             t_par_data[index] -= (Lx_data[remap_array[i]] * offColVal[i][j]);
@@ -341,9 +341,9 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* --------------------------------------------------------*/
 
    index = 0;
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
-      if (remap_array[i] < 0) 
+      if (remap_array[i] < 0)
          y_par_data[index++] = x_par_data[i] - t_par_data[i];
    }
 
@@ -360,7 +360,7 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
 /* Apply E to an incoming vector                                           */
 /***************************************************************************/
 
-int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr, 
+int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
                   HYPRE_ParVector y_csr )
 {
    int                i, j, local_nrows, *temp_list;
@@ -408,21 +408,21 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
    temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
    temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i = 0; i < interior_nrows; i++) temp_list[i] = i;
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
-      if ( remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
+      if ( remap_array[i] >= 0 && remap_array[i] < interior_nrows)
       {
          temp_vect[remap_array[i]] = 0.0;
-         for (j = 0; j < offRowLengths[i]; j++) 
-            temp_vect[remap_array[i]] += 
+         for (j = 0; j < offRowLengths[i]; j++)
+            temp_vect[remap_array[i]] +=
                (offColVal[i][j] * x_par_data[offColInd[i][j]]);
-      } else if ( remap_array[i] >= interior_nrows) 
+      } else if ( remap_array[i] >= interior_nrows)
         printf("WARNING : index out of range.\n");
    }
    HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
                            temp_vect);
-   free( temp_list );
-   free( temp_vect );
+   hypre_TFree(temp_list, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_vect, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* perform one cycle of AMG to subdomain (internal nodes)  */
@@ -441,7 +441,7 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
    Lx_par   = (hypre_ParVector *) Lx_csr;
    Lx_local = hypre_ParVectorLocalVector(Lx_par);
    Lx_data  = hypre_VectorData(Lx_local);
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
       if (remap_array[i] >= 0) y_par_data[i] -= Lx_data[remap_array[i]];
    }
@@ -452,7 +452,7 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
 /* Apply E^T to an incoming vector                                         */
 /***************************************************************************/
 
-int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr, 
+int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
                                   HYPRE_ParVector y_csr )
 {
    int                i, j, index, local_nrows, *temp_list;
@@ -500,15 +500,15 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
    temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i=0; i<interior_nrows; i++) temp_list[i] = i;
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
-      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows) 
+      if (remap_array[i] >= 0 && remap_array[i] < interior_nrows)
          temp_vect[remap_array[i]] = x_par_data[i];
    }
    HYPRE_IJVectorSetValues(localb,interior_nrows,(const int*) temp_list,
                            temp_vect);
-   free( temp_list );
-   free( temp_vect );
+   hypre_TFree(temp_list, HYPRE_MEMORY_HOST);
+   hypre_TFree(temp_vect, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* perform one cycle of AMG to subdomain (internal nodes)  */
@@ -527,11 +527,11 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    Lx_par   = (hypre_ParVector *) Lx_csr;
    Lx_local = hypre_ParVectorLocalVector(Lx_par);
    Lx_data  = hypre_VectorData(Lx_local);
-   for (i=0; i<local_nrows; i++) 
+   for (i=0; i<local_nrows; i++)
    {
-      if ( remap_array[i] >= 0 ) 
+      if ( remap_array[i] >= 0 )
       {
-         for (j=0; j<offRowLengths[i]; j++) 
+         for (j=0; j<offRowLengths[i]; j++)
          {
             index = offColInd[i][j];
             y_par_data[index] -= (Lx_data[remap_array[i]] * offColVal[i][j]);
@@ -584,8 +584,8 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    myBegin_int = 0;
    for (i = 0; i < myRank; i++) myBegin_int += itemp_vec2[i];
    myEnd_int = myBegin_int + local_intface_nrows - 1;
-   free( itemp_vec );
-   free( itemp_vec2 );
+   hypre_TFree(itemp_vec, HYPRE_MEMORY_HOST);
+   hypre_TFree(itemp_vec2, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* copy input to output vectors                            */
@@ -650,7 +650,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    f_par_data  = hypre_VectorData(f_par_local);
 
    index = 0;
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
       if (remap_array[i] < 0) f_par_data[index++] = b_par_data[i];
    }
@@ -718,7 +718,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
          icnt++;
          its++;
          icnt2 = icnt + 1;
-         for (i = 0; i < local_intface_nrows; i++) 
+         for (i = 0; i < local_intface_nrows; i++)
             t_par_data[i] = ws[icnt-1][i];
          HYPRE_ApplyExtension( solver, t_csr, T_csr );
          HYPRE_ParCSRMatrixMatvec( 1.0, A_csr, T_csr, 0.0, T2_csr );
@@ -731,7 +731,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
             HYPRE_ParVectorInnerProd(t_csr, p_csr, &darray[j-1]);
             t = darray[j-1];
             HH[j][icnt] = t;  t = - t;
-            for (i=0; i<local_intface_nrows; i++) 
+            for (i=0; i<local_intface_nrows; i++)
                ws[icnt2-1][i] += (t*ws[j-1][i]);
          }
          for (i=0; i<local_intface_nrows; i++) t_par_data[i] = ws[icnt2-1][i];
@@ -793,13 +793,13 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
          printf("   Interface GMRES : true res. norm = %e \n", rnorm);
       */
    }
-    
+
    /* --------------------------------------------------------*/
    /* copy from u (short vector) to x (long vector)           */
    /* --------------------------------------------------------*/
 
    index = 0;
-   for (i = 0; i < local_nrows; i++) 
+   for (i = 0; i < local_nrows; i++)
    {
       if (remap_array[i] < 0) x_par_data[i] = u_par_data[index++];
    }
@@ -815,14 +815,16 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    HYPRE_IJVectorDestroy(uvec);
    HYPRE_IJVectorDestroy(fvec);
    HYPRE_IJVectorDestroy(pvec);
-   for (i=0; i<=mlen+2; i++) free(ws[i]);
-   free(ws);
-   free(darray);
-   for (i=1; i<=mlen+1; i++) free( HH[i] );
-   free(HH);
-   free(RS);
-   free(S);
-   free(C);
+   for (i=0; i<=mlen+2; i++)
+      hypre_TFree(ws[i], HYPRE_MEMORY_HOST);
+   hypre_TFree(ws, HYPRE_MEMORY_HOST);
+   hypre_TFree(darray, HYPRE_MEMORY_HOST);
+   for (i=1; i<=mlen+1; i++)
+      hypre_TFree(HH[i], HYPRE_MEMORY_HOST);
+   hypre_TFree(HH, HYPRE_MEMORY_HOST);
+   hypre_TFree(RS, HYPRE_MEMORY_HOST);
+   hypre_TFree(S, HYPRE_MEMORY_HOST);
+   hypre_TFree(C, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -866,7 +868,7 @@ int HYPRE_DDAMGSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* --------------------------------------------------------*/
    /* apply E                                                 */
    /* --------------------------------------------------------*/
-  
+
    HYPRE_ApplyTransform( solver, t_csr, y_csr );
 
    /* --------------------------------------------------------*/
@@ -935,12 +937,12 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    {
       HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
       for ( j = 0; j < rowSize; j++ )
-         if ( colInd[j] < myBegin || colInd[j] > myEnd ) 
+         if ( colInd[j] < myBegin || colInd[j] > myEnd )
             {remap_array[i-myBegin] = -1; break;}
       HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
    }
    interior_nrows = 0;
-   for ( i = 0; i < local_nrows; i++ ) 
+   for ( i = 0; i < local_nrows; i++ )
       if ( remap_array[i] == 0 ) remap_array[i] = interior_nrows++;
 
    /* --------------------------------------------------------*/
@@ -964,14 +966,14 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
          HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
          for ( j = 0; j < rowSize; j++ )
          {
-            if ( colInd[j] >= myBegin && colInd[j] <= myEnd ) 
+            if ( colInd[j] >= myBegin && colInd[j] <= myEnd )
             {
                if (remap_array[colInd[j]-myBegin] >= 0) rowLengths[rowCnt]++;
                else offRowLengths[i-myBegin]++;
             }
          }
          nnz += rowLengths[rowCnt];
-         maxRowSize = (rowLengths[rowCnt] > maxRowSize) ? 
+         maxRowSize = (rowLengths[rowCnt] > maxRowSize) ?
                        rowLengths[rowCnt] : maxRowSize;
          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
          rowCnt++;
@@ -1007,7 +1009,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
          k = 0;
          for ( j = 0; j < rowSize; j++ )
          {
-            if ( colInd[j] >= myBegin && colInd[j] <= myEnd ) 
+            if ( colInd[j] >= myBegin && colInd[j] <= myEnd )
             {
                if ( remap_array[colInd[j]-myBegin] >= 0 )
                {
@@ -1028,8 +1030,8 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
          rowCnt++;
       }
    }
-   free( newColInd );
-   free( newColVal );
+   hypre_TFree(newColInd , HYPRE_MEMORY_HOST);
+   hypre_TFree(newColVal , HYPRE_MEMORY_HOST);
    HYPRE_IJMatrixAssemble(localA);
 
    /* --------------------------------------------------------*/
@@ -1072,7 +1074,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    /* diagnostics                                             */
    /* --------------------------------------------------------*/
 
-/* small code to check symmetry 
+/* small code to check symmetry
 HYPRE_ParVectorSetRandomValues( x_csr, 10345 );
 HYPRE_ParVectorSetRandomValues( b_csr, 24893 );
 HYPRE_DDAMGSolve( SeqPrecon, A_csr, x_csr, r_csr);
@@ -1095,8 +1097,8 @@ printf("CHECK 2 = %e\n", ddata);
    myBegin_int = 0;
    for (i = 0; i < myRank; i++) myBegin_int += itemp_vec2[i];
    myEnd_int = myBegin_int + local_intface_nrows - 1;
-   free( itemp_vec );
-   free( itemp_vec2 );
+   hypre_TFree(itemp_vec, HYPRE_MEMORY_HOST);
+   hypre_TFree(itemp_vec2, HYPRE_MEMORY_HOST);
 
    HYPRE_IJVectorCreate(parComm, myBegin_int, myEnd_int, &tvec);
    HYPRE_IJVectorSetObjectType(tvec, HYPRE_PARCSR);
@@ -1119,7 +1121,7 @@ printf("CHECK 2 = %e\n", ddata);
 
 /*
    for ( i = 0; i < global_intface_nrows; i++ )
-   { 
+   {
       MPI_Barrier(MPI_COMM_WORLD);
       HYPRE_IJVectorZeroLocalComponents(tvec);
       if ( i >= myBegin_int && i <= myEnd_int )
@@ -1139,7 +1141,7 @@ printf("CHECK 2 = %e\n", ddata);
    /* --------------------------------------------------------*/
 
    HYPRE_ParCSRGMRESCreate(parComm, &PSolver);
-   HYPRE_ParCSRGMRESSetPrecond(PSolver,HYPRE_DDAMGSolve,HYPRE_DummySetup, 
+   HYPRE_ParCSRGMRESSetPrecond(PSolver,HYPRE_DDAMGSolve,HYPRE_DummySetup,
                                SeqPrecon);
    HYPRE_ParCSRGMRESSetKDim(PSolver, 100);
    HYPRE_ParCSRGMRESSetMaxIter(PSolver, 100);
@@ -1148,7 +1150,7 @@ printf("CHECK 2 = %e\n", ddata);
    HYPRE_ParCSRGMRESSolve(PSolver, A_csr, b_csr, x_csr);
    HYPRE_ParCSRGMRESGetNumIterations(PSolver, &num_iterations);
    /*HYPRE_ParCSRPCGCreate(parComm, &PSolver);
-     HYPRE_ParCSRPCGSetPrecond(PSolver,HYPRE_DDAMGSolve,HYPRE_DummySetup, 
+     HYPRE_ParCSRPCGSetPrecond(PSolver,HYPRE_DDAMGSolve,HYPRE_DummySetup,
                               SeqPrecon);
      HYPRE_ParCSRPCGSetMaxIter(PSolver, 100);
      HYPRE_ParCSRPCGSetTol(PSolver, 1.0E-8);

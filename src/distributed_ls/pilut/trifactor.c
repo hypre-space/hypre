@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -583,7 +583,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
 	      spes[i], TAG_SetUp_rnum, pilut_comm );
   }
 
-  if (rnum) free(rnum);
+  if (rnum) hypre_TFree(rnum,HYPRE_MEMORY_HOST);
 
   /* recieve data as columns rather than rows */
   hypre_MPI_Type_vector( nlevels, 1, rnbrpes, HYPRE_MPI_INT, &MyColType_rnbr );

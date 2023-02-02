@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -16,8 +16,6 @@
 #endif
 
 #include <HYPRE_config.h>
-
-#include "hypre_general.h"
 
 #include "_hypre_utilities.h"
 #include "HYPRE.h"

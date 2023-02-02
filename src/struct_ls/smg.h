@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,16 +21,16 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Int             memory_use;
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
-                      
+
    HYPRE_Int             num_levels;
-                      
+
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
 
@@ -42,7 +42,8 @@ typedef struct
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
-                    
+
+   HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
    HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
@@ -66,15 +67,12 @@ typedef struct
    HYPRE_Int             num_iterations;
    HYPRE_Int             time_index;
 
-   HYPRE_Int            print_level;
+   HYPRE_Int             print_level;
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_Int             devicelevel;
-#endif
 } hypre_SMGData;
 
 /*--------------------------------------------------------------------------

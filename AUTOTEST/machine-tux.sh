@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -43,15 +43,21 @@ shift
 ./test.sh check-license.sh $src_dir/..
 mv -f check-license.??? $output_dir
 
-# Check for 'int', 'double', and 'MPI_'
+# Check usage of int, double, MPI, memory, headers
 ./test.sh check-int.sh $src_dir
 mv -f check-int.??? $output_dir
 ./test.sh check-double.sh $src_dir
 mv -f check-double.??? $output_dir
 ./test.sh check-mpi.sh $src_dir
 mv -f check-mpi.??? $output_dir
+./test.sh check-mem.sh $src_dir
+mv -f check-mem.??? $output_dir
 ./test.sh check-headers.sh $src_dir
 mv -f check-headers.??? $output_dir
+
+# Check for case-insensitive filename matches
+./test.sh check-case.sh $src_dir/..
+mv -f check-case.??? $output_dir
 
 # Basic build and run tests
 mo="-j test"
@@ -86,15 +92,11 @@ co="--with-strict-checking"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--with-strict-checking
 
-co="--with-strict-checking --enable-global-partition"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic--with-strict-global
-
 co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug"
+co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
 
@@ -109,11 +111,6 @@ rm -fr basic.dir/make.???
 grep -v make.err basic.err > basic.tmp
 mv basic.tmp basic.err
 ./renametest.sh basic $output_dir/basic--enable-complex
-
-co="--enable-debug --enable-global-partition"
-RO="-fac"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
-./renametest.sh basic $output_dir/basic-debug2
 
 co="--with-openmp"
 RO="-ams -ij -sstruct -struct -lobpcg -rt -D HYPRE_NO_SAVED -nthreads 2"
@@ -142,16 +139,13 @@ co="--enable-bigint --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
 co="--enable-mixedint --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind1
-
-co="--enable-debug --enable-global-partition"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind2
+./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests
 mo="-j"
@@ -161,10 +155,6 @@ eo=""
 co=""
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-default
-
-co="-DHYPRE_NO_GLOBAL_PARTITION=OFF"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
-./renametest.sh cmake $output_dir/cmake-global-partition
 
 co="-DHYPRE_SEQUENTIAL=ON"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo

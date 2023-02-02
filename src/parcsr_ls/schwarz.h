@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -18,7 +18,7 @@ typedef struct
    HYPRE_Int      domain_type;
    HYPRE_Int      overlap;
    HYPRE_Int      num_functions;
-   HYPRE_Int      use_nonsymm;  
+   HYPRE_Int      use_nonsymm;
    HYPRE_Real   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
@@ -27,8 +27,8 @@ typedef struct
    HYPRE_Real  *scale;
    HYPRE_Int     *dof_func;
    HYPRE_Int     *pivots;
-   
-   
+
+
 
 } hypre_SchwarzData;
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -71,7 +71,11 @@ if [ -n "$spackdir" ]; then
 fi
 for tname in $tests
 do
-   make $mopt $tname
+   if [ "$tname" = "gpu" ]; then
+      make -j "use_cuda=1" $mopt $tname
+   else
+      make $mopt $tname
+   fi
 done
 
 # Run the examples regression test

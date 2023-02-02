@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -45,7 +45,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *C;
    HYPRE_BigInt    *col_map_offd_C = NULL;
-   HYPRE_Int       *map_B_to_C=NULL;
+   HYPRE_Int       *map_B_to_C = NULL;
 
    hypre_CSRMatrix *C_diag = NULL;
 
@@ -91,7 +91,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   last_col_diag_B = first_col_diag_B + num_cols_diag_B -1;
+   last_col_diag_B = first_col_diag_B + num_cols_diag_B - 1;
 
    if (num_procs > 1)
    {
@@ -110,12 +110,12 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(Bs_ext);
 
       /* These are local and could be overlapped with communication */
-      AB_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
-      AB_offd = hypre_CSRMatrixMultiply(A_diag, B_offd);
+      AB_diag = hypre_CSRMatrixMultiplyHost(A_diag, B_diag);
+      AB_offd = hypre_CSRMatrixMultiplyHost(A_diag, B_offd);
 
       /* These require data from other processes */
-      ABext_diag = hypre_CSRMatrixMultiply(A_offd, Bext_diag);
-      ABext_offd = hypre_CSRMatrixMultiply(A_offd, Bext_offd);
+      ABext_diag = hypre_CSRMatrixMultiplyHost(A_offd, Bext_diag);
+      ABext_offd = hypre_CSRMatrixMultiplyHost(A_offd, Bext_offd);
 
       hypre_CSRMatrixDestroy(Bext_diag);
       hypre_CSRMatrixDestroy(Bext_offd);
@@ -126,7 +126,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
          map_B_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_HOST);
 
          cnt = 0;
-         for (i=0; i < num_cols_offd_C; i++)
+         for (i = 0; i < num_cols_offd_C; i++)
          {
             if (col_map_offd_C[i] == col_map_offd_B[cnt])
             {
@@ -140,7 +140,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
       }
       AB_offd_num_nonzeros = hypre_CSRMatrixNumNonzeros(AB_offd);
       AB_offd_j = hypre_CSRMatrixJ(AB_offd);
-      for (i=0; i < AB_offd_num_nonzeros; i++)
+      for (i = 0; i < AB_offd_num_nonzeros; i++)
       {
          AB_offd_j[i] = map_B_to_C[AB_offd_j[i]];
       }
@@ -154,8 +154,8 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixNumCols(ABext_diag) = num_cols_diag_B;
       hypre_CSRMatrixNumCols(AB_offd) = num_cols_offd_C;
       hypre_CSRMatrixNumCols(ABext_offd) = num_cols_offd_C;
-      C_diag = hypre_CSRMatrixAdd(AB_diag, ABext_diag);
-      C_offd = hypre_CSRMatrixAdd(AB_offd, ABext_offd);
+      C_diag = hypre_CSRMatrixAdd(1.0, AB_diag, 1.0, ABext_diag);
+      C_offd = hypre_CSRMatrixAdd(1.0, AB_offd, 1.0, ABext_offd);
 
       hypre_CSRMatrixDestroy(AB_diag);
       hypre_CSRMatrixDestroy(ABext_diag);
@@ -164,7 +164,7 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
    }
    else
    {
-      C_diag = hypre_CSRMatrixMultiply(A_diag, B_diag);
+      C_diag = hypre_CSRMatrixMultiplyHost(A_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_rows_diag_A, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
    }
@@ -174,14 +174,9 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
     *  Allocate C_offd_data and C_offd_j arrays.
     *-----------------------------------------------------------------------*/
 
-
    C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_B, row_starts_A,
                                 col_starts_B, num_cols_offd_C,
                                 C_diag->num_nonzeros, C_offd->num_nonzeros);
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C, 0);
-   hypre_ParCSRMatrixSetColStartsOwner(C, 0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
@@ -194,10 +189,6 @@ hypre_ParCSRMatMatHost( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
    }
 
-   /*-----------------------------------------------------------------------
-    *  Free various arrays
-    *-----------------------------------------------------------------------*/
-
    return C;
 }
 
@@ -205,28 +196,28 @@ hypre_ParCSRMatrix*
 hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
                     hypre_ParCSRMatrix  *B )
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("Mat-Mat");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Mat-Mat");
 #endif
 
    hypre_ParCSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
-                                                       hypre_ParCSRMatrixMemoryLocation(B) );
+                                                      hypre_ParCSRMatrixMemoryLocation(B) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      C = hypre_ParCSRMatMatDevice(A,B);
+      C = hypre_ParCSRMatMatDevice(A, B);
    }
    else
 #endif
    {
-      C = hypre_ParCSRMatMatHost(A,B);
+      C = hypre_ParCSRMatMatHost(A, B);
    }
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return C;
@@ -285,12 +276,12 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
    n_rows_B = hypre_ParCSRMatrixGlobalNumRows(B);
    n_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    if (n_rows_A != n_rows_B || num_rows_diag_A != num_rows_diag_B)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
 
@@ -300,9 +291,10 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
 
    if (num_procs == 1)
    {
-      C_diag = hypre_CSRMatrixMultiply(AT_diag, B_diag);
+      C_diag = hypre_CSRMatrixMultiplyHost(AT_diag, B_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_A, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
+      hypre_CSRMatrixNumRownnz(C_offd) = 0;
       if (keep_transpose)
       {
          A->diagT = AT_diag;
@@ -332,8 +324,8 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
 
       hypre_CSRMatrixTranspose(A_offd, &AT_offd, 1);
 
-      C_int_diag = hypre_CSRMatrixMultiply(AT_offd, B_diag);
-      C_int_offd = hypre_CSRMatrixMultiply(AT_offd, B_offd);
+      C_int_diag = hypre_CSRMatrixMultiplyHost(AT_offd, B_diag);
+      C_int_offd = hypre_CSRMatrixMultiplyHost(AT_offd, B_offd);
 
       hypre_ParCSRMatrixDiag(B) = C_int_diag;
       hypre_ParCSRMatrixOffd(B) = C_int_offd;
@@ -357,25 +349,25 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(C_int_diag);
       hypre_CSRMatrixDestroy(C_int_offd);
 
-      C_tmp_diag = hypre_CSRMatrixMultiply(AT_diag, B_diag);
-      C_tmp_offd = hypre_CSRMatrixMultiply(AT_diag, B_offd);
+      C_tmp_diag = hypre_CSRMatrixMultiplyHost(AT_diag, B_diag);
+      C_tmp_offd = hypre_CSRMatrixMultiplyHost(AT_diag, B_offd);
 
       if (keep_transpose)
       {
-        A->diagT = AT_diag;
+         A->diagT = AT_diag;
       }
       else
       {
-        hypre_CSRMatrixDestroy(AT_diag);
+         hypre_CSRMatrixDestroy(AT_diag);
       }
 
       if (keep_transpose)
       {
-        A->offdT = AT_offd;
+         A->offdT = AT_offd;
       }
       else
       {
-        hypre_CSRMatrixDestroy(AT_offd);
+         hypre_CSRMatrixDestroy(AT_offd);
       }
 
       /*-----------------------------------------------------------------------
@@ -406,7 +398,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
          map_B_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_HOST);
 
          cnt = 0;
-         for (i=0; i < num_cols_offd_C; i++)
+         for (i = 0; i < num_cols_offd_C; i++)
          {
             if (col_map_offd_C[i] == col_map_offd_B[cnt])
             {
@@ -417,7 +409,7 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
                }
             }
          }
-         for (i=0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
+         for (i = 0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
          {
             j_indx = C_tmp_offd_j[i];
             C_tmp_offd_j[i] = map_B_to_C[j_indx];
@@ -443,10 +435,6 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
    C = hypre_ParCSRMatrixCreate(comm, n_cols_A, n_cols_B, col_starts_A, col_starts_B,
                                 num_cols_offd_C, C_diag->num_nonzeros, C_offd->num_nonzeros);
 
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
-   hypre_ParCSRMatrixSetColStartsOwner(C,0);
-
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_ParCSRMatrixDiag(C) = C_diag;
 
@@ -456,7 +444,6 @@ hypre_ParCSRTMatMatKTHost( hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 
    return C;
-
 }
 
 hypre_ParCSRMatrix*
@@ -464,15 +451,15 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix  *B,
                        HYPRE_Int            keep_transpose)
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("Mat-T-Mat");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("Mat-T-Mat");
 #endif
 
    hypre_ParCSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
-                                                       hypre_ParCSRMatrixMemoryLocation(B) );
+                                                      hypre_ParCSRMatrixMemoryLocation(B) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -484,8 +471,8 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
       C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
    }
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return C;
@@ -528,7 +515,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
    hypre_ParCSRMatrix *Q;
    HYPRE_BigInt       *col_map_offd_Q = NULL;
-   HYPRE_Int          *map_P_to_Q=NULL;
+   HYPRE_Int          *map_P_to_Q = NULL;
 
    hypre_CSRMatrix *Q_diag = NULL;
 
@@ -590,14 +577,14 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    n_rows_P = hypre_ParCSRMatrixGlobalNumRows(P);
    n_cols_P = hypre_ParCSRMatrixGlobalNumCols(P);
 
-   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   if (n_rows_R != n_rows_A || num_rows_diag_R != num_rows_diag_A
-         || n_cols_A != n_rows_P || num_cols_diag_A != num_rows_diag_P)
+   if ( n_rows_R != n_rows_A || num_rows_diag_R != num_rows_diag_A ||
+        n_cols_A != n_rows_P || num_cols_diag_A != num_rows_diag_P )
    {
-        hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
-        return NULL;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Error! Incompatible matrix dimensions!\n");
+      return NULL;
    }
 
 
@@ -630,12 +617,12 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
                                                           which should be explicitly included to allow for overlap */
       if (num_cols_offd_A)
       {
-         last_col_diag_P = first_col_diag_P + num_cols_diag_P -1;
+         last_col_diag_P = first_col_diag_P + num_cols_diag_P - 1;
          hypre_CSRMatrixSplit(Ps_ext, first_col_diag_P, last_col_diag_P, num_cols_offd_P, col_map_offd_P,
                               &num_cols_offd_Q, &col_map_offd_Q, &Pext_diag, &Pext_offd);
          /* These require data from other processes */
-         APext_diag = hypre_CSRMatrixMultiply(A_offd, Pext_diag);
-         APext_offd = hypre_CSRMatrixMultiply(A_offd, Pext_offd);
+         APext_diag = hypre_CSRMatrixMultiplyHost(A_offd, Pext_diag);
+         APext_offd = hypre_CSRMatrixMultiplyHost(A_offd, Pext_offd);
 
          hypre_CSRMatrixDestroy(Pext_diag);
          hypre_CSRMatrixDestroy(Pext_offd);
@@ -644,25 +631,25 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       {
          num_cols_offd_Q = num_cols_offd_P;
          col_map_offd_Q = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_Q, HYPRE_MEMORY_HOST);
-         for (i=0; i < num_cols_offd_P; i++)
+         for (i = 0; i < num_cols_offd_P; i++)
          {
             col_map_offd_Q[i] = col_map_offd_P[i];
          }
       }
       hypre_CSRMatrixDestroy(Ps_ext);
       /* These are local and could be overlapped with communication */
-      AP_diag = hypre_CSRMatrixMultiply(A_diag, P_diag);
+      AP_diag = hypre_CSRMatrixMultiplyHost(A_diag, P_diag);
 
       if (num_cols_offd_P)
       {
          HYPRE_Int i;
-         AP_offd = hypre_CSRMatrixMultiply(A_diag, P_offd);
+         AP_offd = hypre_CSRMatrixMultiplyHost(A_diag, P_offd);
          if (num_cols_offd_Q > num_cols_offd_P)
          {
-            map_P_to_Q = hypre_CTAlloc(HYPRE_Int,num_cols_offd_P, HYPRE_MEMORY_HOST);
+            map_P_to_Q = hypre_CTAlloc(HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST);
 
             cnt = 0;
-            for (i=0; i < num_cols_offd_Q; i++)
+            for (i = 0; i < num_cols_offd_Q; i++)
             {
                if (col_map_offd_Q[i] == col_map_offd_P[cnt])
                {
@@ -675,7 +662,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
             }
             AP_offd_num_nonzeros = hypre_CSRMatrixNumNonzeros(AP_offd);
             AP_offd_j = hypre_CSRMatrixJ(AP_offd);
-            for (i=0; i < AP_offd_num_nonzeros; i++)
+            for (i = 0; i < AP_offd_num_nonzeros; i++)
             {
                AP_offd_j[i] = map_P_to_Q[AP_offd_j[i]];
             }
@@ -687,7 +674,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
       if (num_cols_offd_A) /* number of rows for Pext_diag */
       {
-         Q_diag = hypre_CSRMatrixAdd(AP_diag, APext_diag);
+         Q_diag = hypre_CSRMatrixAdd(1.0, AP_diag, 1.0, APext_diag);
          hypre_CSRMatrixDestroy(AP_diag);
          hypre_CSRMatrixDestroy(APext_diag);
       }
@@ -698,7 +685,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
       if (num_cols_offd_P && num_cols_offd_A)
       {
-         Q_offd = hypre_CSRMatrixAdd(AP_offd, APext_offd);
+         Q_offd = hypre_CSRMatrixAdd(1.0, AP_offd, 1.0, APext_offd);
          hypre_CSRMatrixDestroy(APext_offd);
          hypre_CSRMatrixDestroy(AP_offd);
       }
@@ -719,9 +706,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
                                    col_starts_P, num_cols_offd_Q,
                                    Q_diag->num_nonzeros, Q_offd->num_nonzeros);
 
-      /* Note that C does not own the partitionings */
-      hypre_ParCSRMatrixSetRowStartsOwner(Q,0);
-      hypre_ParCSRMatrixSetColStartsOwner(Q,0);
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(Q));
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(Q));
       hypre_ParCSRMatrixDiag(Q) = Q_diag;
@@ -729,16 +713,10 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       hypre_ParCSRMatrixColMapOffd(Q) = col_map_offd_Q;
 
       hypre_CSRMatrixTranspose(R_diag, &RT_diag, 1);
-      C_tmp_diag = hypre_CSRMatrixMultiply(RT_diag, Q_diag);
+      C_tmp_diag = hypre_CSRMatrixMultiplyHost(RT_diag, Q_diag);
       if (num_cols_offd_Q)
       {
-         C_tmp_offd = hypre_CSRMatrixMultiply(RT_diag, Q_offd);
-         /* RL: WHY NEED THIS?
-         if (C_tmp_offd->num_nonzeros == 0)
-         {
-            C_tmp_offd->num_cols = 0;
-         }
-         */
+         C_tmp_offd = hypre_CSRMatrixMultiplyHost(RT_diag, Q_offd);
       }
       else
       {
@@ -758,8 +736,8 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       if (num_cols_offd_R)
       {
          hypre_CSRMatrixTranspose(R_offd, &RT_offd, 1);
-         C_int_diag = hypre_CSRMatrixMultiply(RT_offd, Q_diag);
-         C_int_offd = hypre_CSRMatrixMultiply(RT_offd, Q_offd);
+         C_int_diag = hypre_CSRMatrixMultiplyHost(RT_offd, Q_diag);
+         C_int_offd = hypre_CSRMatrixMultiplyHost(RT_offd, Q_offd);
 
          hypre_ParCSRMatrixDiag(Q) = C_int_diag;
          hypre_ParCSRMatrixOffd(Q) = C_int_offd;
@@ -769,7 +747,7 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
       }
       else
       {
-         C_int = hypre_CSRMatrixCreate(0,0,0);
+         C_int = hypre_CSRMatrixCreate(0, 0, 0);
          hypre_CSRMatrixInitialize(C_int);
       }
 
@@ -819,10 +797,10 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
          C_tmp_offd_i = hypre_CSRMatrixI(C_tmp_offd);
          C_tmp_offd_j = hypre_CSRMatrixJ(C_tmp_offd);
 
-         map_Q_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_Q, HYPRE_MEMORY_HOST);
+         map_Q_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Q, HYPRE_MEMORY_HOST);
 
          cnt = 0;
-         for (i=0; i < num_cols_offd_C; i++)
+         for (i = 0; i < num_cols_offd_C; i++)
          {
             if (col_map_offd_C[i] == col_map_offd_Q[cnt])
             {
@@ -833,14 +811,14 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
                }
             }
          }
-         for (i=0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
+         for (i = 0; i < C_tmp_offd_i[hypre_CSRMatrixNumRows(C_tmp_offd)]; i++)
          {
             j_indx = C_tmp_offd_j[i];
             C_tmp_offd_j[i] = map_Q_to_C[j_indx];
          }
          hypre_TFree(map_Q_to_C, HYPRE_MEMORY_HOST);
-         hypre_CSRMatrixNumCols(C_tmp_offd) = num_cols_offd_C;
       }
+      hypre_CSRMatrixNumCols(C_tmp_offd) = num_cols_offd_C;
       hypre_ParCSRMatrixDestroy(Q);
 
       /*-----------------------------------------------------------------------
@@ -871,9 +849,9 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    }
    else
    {
-      Q_diag = hypre_CSRMatrixMultiply(A_diag, P_diag);
+      Q_diag = hypre_CSRMatrixMultiplyHost(A_diag, P_diag);
       hypre_CSRMatrixTranspose(R_diag, &RT_diag, 1);
-      C_diag = hypre_CSRMatrixMultiply(RT_diag, Q_diag);
+      C_diag = hypre_CSRMatrixMultiplyHost(RT_diag, Q_diag);
       C_offd = hypre_CSRMatrixCreate(num_cols_diag_R, 0, 0);
       hypre_CSRMatrixInitialize_v2(C_offd, 0, hypre_CSRMatrixMemoryLocation(C_diag));
       if (keep_transpose)
@@ -889,10 +867,6 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
 
    C = hypre_ParCSRMatrixCreate(comm, n_cols_R, n_cols_P, col_starts_R,
                                 col_starts_P, num_cols_offd_C, 0, 0);
-
-   /* Note that C does not own the partitionings */
-   hypre_ParCSRMatrixSetColStartsOwner(P,0);
-   hypre_ParCSRMatrixSetColStartsOwner(R,0);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(C));
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
@@ -926,13 +900,13 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
                          hypre_ParCSRMatrix  *P,
                          HYPRE_Int            keep_transpose)
 {
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPushRange("TripleMat-RAP");
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("TripleMat-RAP");
 #endif
 
    hypre_ParCSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(R),
                                                       hypre_ParCSRMatrixMemoryLocation(A) );
 
@@ -946,18 +920,19 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
       C = hypre_ParCSRMatrixRAPKTHost(R, A, P, keep_transpose);
    }
 
-#if defined(HYPRE_USING_CUDA)
-   hypre_NvtxPopRange();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPopRange();
 #endif
 
    return C;
 }
 
-hypre_ParCSRMatrix *hypre_ParCSRMatrixRAP( hypre_ParCSRMatrix *R,
-           hypre_ParCSRMatrix  *A,
-           hypre_ParCSRMatrix  *P )
+hypre_ParCSRMatrix*
+hypre_ParCSRMatrixRAP( hypre_ParCSRMatrix *R,
+                       hypre_ParCSRMatrix *A,
+                       hypre_ParCSRMatrix *P )
 {
-   return hypre_ParCSRMatrixRAPKT( R, A, P, 0);
+   return hypre_ParCSRMatrixRAPKT(R, A, P, 0);
 }
 
 /*--------------------------------------------------------------------------
@@ -1001,4 +976,3 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixRAP( hypre_ParCSRMatrix *R,
  *               even want to store a copy of it in this form
  *               temporarily?
  *--------------------------------------------------------------------------*/
-

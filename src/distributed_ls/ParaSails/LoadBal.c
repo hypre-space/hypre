@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -117,7 +117,7 @@ void LoadBalInit(MPI_Comm comm, HYPRE_Real local_cost, HYPRE_Real beta,
         }
     }
 
-    free(cost);
+    hypre_TFree(cost,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -231,7 +231,7 @@ void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
             bufferp += len;
         }
 
-	free(buffer);
+	hypre_TFree(buffer,HYPRE_MEMORY_HOST);
     }
 }
 
@@ -325,7 +325,7 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
             bufferp += len;
         }
 
-	free(buffer);
+	hypre_TFree(buffer,HYPRE_MEMORY_HOST);
     }
 }
 
@@ -369,19 +369,19 @@ LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
     LoadBalDonorSend(comm, mat, numb, p->num_given,
         donor_data_pe, donor_data_cost, p->donor_data, &p->beg_row, requests);
 
-    free(donor_data_pe);
-    free(donor_data_cost);
+    hypre_TFree(donor_data_pe,HYPRE_MEMORY_HOST);
+    hypre_TFree(donor_data_cost,HYPRE_MEMORY_HOST);
 
     LoadBalRecipRecv(comm, numb, p->num_taken, p->recip_data);
 
     hypre_MPI_Waitall(p->num_given, requests, statuses);
 
-    free(requests);
-    free(statuses);
+    hypre_TFree(requests,HYPRE_MEMORY_HOST);
+    hypre_TFree(statuses,HYPRE_MEMORY_HOST);
 
     /* Free the send buffers which were allocated by LoadBalDonorSend */
     for (i=0; i<p->num_given; i++)
-	free(p->donor_data[i].buffer);
+	hypre_TFree(p->donor_data[i].buffer,HYPRE_MEMORY_HOST);
 
     return p;
 }
@@ -409,16 +409,16 @@ void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat)
 
     hypre_MPI_Waitall(p->num_taken, requests, statuses);
 
-    free(requests);
-    free(statuses);
+    hypre_TFree(requests,HYPRE_MEMORY_HOST);
+    hypre_TFree(statuses,HYPRE_MEMORY_HOST);
 
     /* Free the send buffers which were allocated by LoadBalRecipSend */
     for (i=0; i<p->num_taken; i++)
-	free(p->recip_data[i].buffer);
+	hypre_TFree(p->recip_data[i].buffer,HYPRE_MEMORY_HOST);
 
-    free(p->donor_data);
-    free(p->recip_data);
+    hypre_TFree(p->donor_data,HYPRE_MEMORY_HOST);
+    hypre_TFree(p->recip_data,HYPRE_MEMORY_HOST);
 
-    free(p);
+    hypre_TFree(p,HYPRE_MEMORY_HOST);
 }
 

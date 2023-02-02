@@ -1,0 +1,26 @@
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+# Formatting options for Artistic Style
+
+--style=allman
+--indent=spaces=3
+--keep-one-line-statements
+--keep-one-line-blocks
+--pad-header
+--max-code-length=100
+--max-continuation-indent=100
+--min-conditional-indent=0
+--indent-col1-comments
+--indent-labels
+--break-after-logical
+--add-braces
+--indent-switches
+--convert-tabs
+--lineend=linux
+--suffix=none
+--preserve-date
+--formatted
+--pad-oper

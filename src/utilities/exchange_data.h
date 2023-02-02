@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -31,9 +31,9 @@ typedef struct
 typedef struct
 {
    HYPRE_Int    (*fill_response)(void* recv_buf, HYPRE_Int contact_size,
-                           HYPRE_Int contact_proc, void* response_obj,
-                           MPI_Comm comm, void** response_buf,
-                           HYPRE_Int* response_message_size);
+                                 HYPRE_Int contact_proc, void* response_obj,
+                                 MPI_Comm comm, void** response_buf,
+                                 HYPRE_Int* response_message_size);
    HYPRE_Int     send_response_overhead; /*set by exchange data */
    HYPRE_Int     send_response_storage;  /*storage allocated for send_response_buf*/
    void    *data1;                 /*data fields user may want to access in fill_response */
@@ -43,7 +43,10 @@ typedef struct
 
 HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree*);
 HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree*);
-HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list, void *contact_send_buf, HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size, HYPRE_Int response_obj_size, hypre_DataExchangeResponse *response_obj, HYPRE_Int max_response_size, HYPRE_Int rnum, MPI_Comm comm, void **p_response_recv_buf, HYPRE_Int **p_response_recv_buf_starts);
+HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list,
+                                 void *contact_send_buf, HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size,
+                                 HYPRE_Int response_obj_size, hypre_DataExchangeResponse *response_obj, HYPRE_Int max_response_size,
+                                 HYPRE_Int rnum, MPI_Comm comm, void **p_response_recv_buf, HYPRE_Int **p_response_recv_buf_starts);
 
 #endif /* end of header */
 

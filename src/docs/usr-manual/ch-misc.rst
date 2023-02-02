@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -163,7 +163,7 @@ include:
 GPU build
 ------------------------------------------------------------------------------
 
-Hypre can support GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The related ``configure`` options are
+Hypre can support NVIDIA GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The related ``configure`` options are
 
 .. code-block:: none
 
@@ -177,15 +177,24 @@ The related environment variables
 
 .. code-block:: none
 
-   HYPRE_CUDA_SM          (default 60)
+   HYPRE_CUDA_SM          (default 70)
 
    CUDA_HOME              the CUDA home directory
 
-need to be set properly.
+need to be set properly, which can be also set by
+
+.. code-block:: none
+
+   --with-gpu-arch=ARG    (e.g., --with-gpu-arch='60 70')
+
+   --with-cuda-home=DIR
 
 When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
-Hypre's Struct solvers can work fine with only  device memory,
-whereas BoomerAMG and the SStruct solvers require  unified (CUDA managed) memory, for which
+Hypre's structured solvers can work fine with device memory,
+whereas only selected unstructured solvers can run with device memory. See 
+Chapter :ref:`ch-boomeramg-gpu` for details.
+In general, BoomerAMG and the SStruct
+require  unified (CUDA managed) memory, for which
 the following option should be added
 
 .. code-block:: none
@@ -207,13 +216,46 @@ The ``configure`` options are
 To run on the GPUs with RAJA and Kokkos, the options ``--with-cuda`` and ``--with-device-openmp`` are also needed,
 and the RAJA and Kokkos libraries should be built with CUDA or OpenMP 4.5 correspondingly.
 
-The other GPU related options include:
+The other NVIDIA GPU related options include:
 
-* ``--enable-nvtx``: enable NVTX annotations for CUDA profilers
-* ``--enable-cub`` : enable the caching GPU memory allocator in hypre
-* ``--enable-cusparse`` : choose cuSPARSE for GPU sparse kernels
-* ``--enable-cublas`` : choose cuBLAS for GPU dense kernels
-* ``--enable-curand`` : generating random numbers on GPUs
+* ``--enable-gpu-profiling``  Use NVTX on CUDA, rocTX on HIP (default is NO)
+* ``--enable-cusparse``       Use cuSPARSE for GPU sparse kernels (default is YES)
+* ``--enable-cublas``         Use cuBLAS for GPU dense kernels (default is NO)
+* ``--enable-curand``         Use random numbers generators on GPUs (default is YES)
+
+Allocations and deallocations of GPU memory are expensive. Memory pooling is a common approach to reduce such overhead and improve performance.
+hypre provides caching allocators for GPU device memory and unified memory, 
+enabled by
+
+.. code-block:: none
+
+  --enable-device-memory-pool  Enable the caching GPU memory allocator in hypre
+                               (default is NO)
+
+
+hypre also supports Umpire [Umpire]_. To enable Umpire pool, include the following options:
+
+.. code-block:: none
+
+  --with-umpire                Use Umpire Allocator for device and unified memory
+                               (default is NO)
+  --with-umpire-include=/path-of-umpire-install/include
+  --with-umpire-lib-dirs=/path-of-umpire-install/lib
+  --with-umpire-libs=umpire
+
+For running on AMD GPUs, configure with
+
+.. code-block:: none
+
+  --with-hip              Use HIP for AMD GPUs. (default is NO)
+  --with-gpu-arch=ARG     Use appropriate AMD GPU architecture
+
+Currently, only BoomerAMG is supported with HIP. The other AMD GPU related options include:
+
+* ``--enable-gpu-profiling``  Use NVTX on CUDA, rocTX on HIP (default is NO)
+* ``--enable-rocsparse``      Use rocSPARSE (default is YES)
+* ``--enable-rocblas``        Use rocBLAS (default is NO)
+* ``--enable-rocrand``        Use rocRAND (default is YES)
 
 Testing the Library
 ==============================================================================
@@ -245,7 +287,7 @@ Error Flags
 
 Every hypre function returns an integer, which is used to indicate errors
 during execution.  Note that the error flag returned by a given function
-reflects the errors from {\em all} previous calls to hypre functions.  In
+reflects the errors from *all* previous calls to hypre functions.  In
 particular, a value of zero means that all hypre functions up to (and
 including) the current one have completed successfully.  This new error flag
 system is being implemented throughout the library, but currently there are

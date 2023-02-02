@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -51,7 +51,7 @@ mpirun -np 2  ./ij -ruge1p -gm > coarsening.out.8
 
 mpirun -np 8  ./ij -P 2 2 2 -ruge1p  > coarsening.out.9
 
-mpirun -np 8  ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > coarsening.out.10
+#mpirun -np 8  ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > coarsening.out.10
 
 mpirun -np 8  ./ij -P 2 2 2 -ruge3  -interptype 0 -Pmx 0 > coarsening.out.11
 

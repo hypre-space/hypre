@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -104,7 +104,8 @@ HashData * Hash_dhLookup(Hash_dh h, HYPRE_Int key)
   for (i=0; i<size; ++i) {
     HYPRE_Int tmp, idx;
     HASH_2(key, size, &tmp)
-    idx = (start + i*tmp) % size;
+    /* idx = (start + i*tmp) % size; */
+    idx = (start + hypre_multmod(i, tmp, size)) % size;
     if (data[idx].mark != curMark) {
       break;  /* key wasn't found */
     } else {
@@ -145,7 +146,8 @@ void Hash_dhInsert(Hash_dh h, HYPRE_Int key, HashData *dataIN)
     HYPRE_Int tmp, idx;
     HASH_2(key, size, &tmp)
 
-    idx = (start + i*tmp) % size;
+    /* idx = (start + i*tmp) % size; */
+    idx = (start + hypre_multmod(i, tmp, size)) % size;
     if (data[idx].mark < curMark) {
       data[idx].key = key;
       data[idx].mark = curMark;

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -105,13 +105,13 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
     *-----------------------------------------------------------------------*/
    for (Rloop = -1; Rloop < 2; Rloop++)
    {
-      hypre_IndexD(indexR,cdir) = Rloop;
+      hypre_IndexD(indexR, cdir) = Rloop;
       for (Aloop = 0; Aloop < A_stencil_size; Aloop++)
       {
          for (d = 0; d < dim; d++)
          {
             hypre_IndexD(indexRA, d) = hypre_IndexD(indexR, d) +
-               hypre_IndexD(A_stencil_shape[Aloop], d);
+                                       hypre_IndexD(A_stencil_shape[Aloop], d);
          }
 
          /*-----------------------------------------------------------------
@@ -121,8 +121,8 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
          if ((hypre_IndexD(indexRA, cdir) % 2) == 0)
          {
             hypre_CopyIndex(indexRA, indexRAP);
-            hypre_IndexD(indexRAP,cdir) /= 2;
-            hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
+            hypre_IndexD(indexRAP, cdir) /= 2;
+            hypre_MapRAPMarker(indexRAP, RAP_marker_rank);
             RAP_marker[RAP_marker_rank]++;
          }
          /*-----------------------------------------------------------------
@@ -132,15 +132,15 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
          else
          {
             hypre_CopyIndex(indexRA, indexRAP);
-            hypre_IndexD(indexRAP,cdir) += 1;
-            hypre_IndexD(indexRAP,cdir) /= 2;
-            hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
+            hypre_IndexD(indexRAP, cdir) += 1;
+            hypre_IndexD(indexRAP, cdir) /= 2;
+            hypre_MapRAPMarker(indexRAP, RAP_marker_rank);
             RAP_marker[RAP_marker_rank]++;
 
             hypre_CopyIndex(indexRA, indexRAP);
-            hypre_IndexD(indexRAP,cdir) -= 1;
-            hypre_IndexD(indexRAP,cdir) /= 2;
-            hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
+            hypre_IndexD(indexRAP, cdir) -= 1;
+            hypre_IndexD(indexRAP, cdir) /= 2;
+            hypre_MapRAPMarker(indexRAP, RAP_marker_rank);
             RAP_marker[RAP_marker_rank]++;
          }
       }
@@ -178,27 +178,27 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    {
       if (dim > 1)
       {
-         not_cdirs = hypre_CTAlloc(HYPRE_Int,  dim-1, HYPRE_MEMORY_HOST);
+         not_cdirs = hypre_CTAlloc(HYPRE_Int,  dim - 1, HYPRE_MEMORY_HOST);
       }
 
       for (d = 1; d < dim; d++)
       {
-         not_cdirs[d-1] = (dim+cdir-d) % dim;
+         not_cdirs[d - 1] = (dim + cdir - d) % dim;
       }
 
       hypre_SetIndex(indexRAP, 0);
       hypre_IndexD(indexRAP, cdir) = 1;
-      hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
+      hypre_MapRAPMarker(indexRAP, RAP_marker_rank);
       RAP_marker[RAP_marker_rank] = 0;
 
       if (dim > 1)
       {
          hypre_SetIndex(indexRAP, 0);
-         hypre_IndexD(indexRAP,not_cdirs[0]) = 1;
+         hypre_IndexD(indexRAP, not_cdirs[0]) = 1;
          for (i = -1; i < 2; i++)
          {
-            hypre_IndexD(indexRAP,cdir) = i;
-            hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
+            hypre_IndexD(indexRAP, cdir) = i;
+            hypre_MapRAPMarker(indexRAP, RAP_marker_rank);
             RAP_marker[RAP_marker_rank] = 0;
          }
       }
@@ -206,14 +206,14 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       if (dim > 2)
       {
          hypre_SetIndex(indexRAP, 0);
-         hypre_IndexD(indexRAP,not_cdirs[1]) = 1;
+         hypre_IndexD(indexRAP, not_cdirs[1]) = 1;
          for (i = -1; i < 2; i++)
          {
-            hypre_IndexD(indexRAP,not_cdirs[0]) = i;
+            hypre_IndexD(indexRAP, not_cdirs[0]) = i;
             for (j = -1; j < 2; j++)
             {
-               hypre_IndexD(indexRAP,cdir) = j;
-               hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
+               hypre_IndexD(indexRAP, cdir) = j;
+               hypre_MapRAPMarker(indexRAP, RAP_marker_rank);
                RAP_marker[RAP_marker_rank] = 0;
 
             }
@@ -226,7 +226,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil_size= 0;
+   RAP_stencil_size = 0;
 
    for (i = 0; i < RAP_marker_size; i++)
    {
@@ -238,12 +238,12 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
 
    RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
 
-   stencil_rank= 0;
+   stencil_rank = 0;
    for (i = 0; i < RAP_marker_size; i++)
    {
       if ( RAP_marker[i] != 0 )
       {
-         hypre_InverseMapRAPMarker(i,RAP_stencil_shape[stencil_rank]);
+         hypre_InverseMapRAPMarker(i, RAP_stencil_shape[stencil_rank]);
          stencil_rank++;
       }
    }
@@ -463,8 +463,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
       hypre_SetIndex(index, 0);
       hypre_IndexD(index, cdir) = 1;
-      COffsetA = hypre_BoxOffsetDistance(A_dbox,index);
-      COffsetP = hypre_BoxOffsetDistance(P_dbox,index);
+      COffsetA = hypre_BoxOffsetDistance(A_dbox, index);
+      COffsetP = hypre_BoxOffsetDistance(P_dbox, index);
 
       /*-----------------------------------------------------------------
        * Entries in RAP are calculated by accumulation, must first
@@ -521,20 +521,20 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                   case 0:
 
-                     hypre_IndexD(index,cdir) = 1;
+                     hypre_IndexD(index, cdir) = 1;
                      rap_ptrU = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
-                     hypre_IndexD(index,cdir) = -1;
+                     hypre_IndexD(index, cdir) = -1;
                      rap_ptrD = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
-                     hypre_IndexD(index,cdir) = 0;
+                     hypre_IndexD(index, cdir) = 0;
                      AOffsetP = hypre_BoxOffsetDistance(P_dbox, index);
                      rap_ptrS = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
                      diag = 0;
                      for (d = 0; d < dim; d++)
                      {
-                        diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
+                        diag += hypre_IndexD(index, d) * hypre_IndexD(index, d);
                      }
 
                      if (diag == 0 && hypre_StructMatrixSymmetric(RAP))
@@ -554,7 +554,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
                         {
-                           HYPRE_Int iAp,iPp;
+                           HYPRE_Int iAp, iPp;
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
 
@@ -567,11 +567,11 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                            /* path 4 : (down,up) */
                            iAp = iA - COffsetA;
-                           rap_ptrS[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pb[iPp+pb_offset];
+                           rap_ptrS[iAc] += rb[iR + rb_offset] * a_ptr[iAp] * pb[iPp + pb_offset];
 
                            /* path 5 : (down,down) */
                            iPp = iP - COffsetP + AOffsetP;
-                           rap_ptrD[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pa[iPp];
+                           rap_ptrD[iAc] += rb[iR + rb_offset] * a_ptr[iAp] * pa[iPp];
                         }
                         hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
@@ -589,14 +589,14 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
                         {
-                           HYPRE_Int iAp,iPp;
+                           HYPRE_Int iAp, iPp;
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
 
                            /* path 2 : (up,up) */
                            iAp = iA + COffsetA;
                            iPp = iP + COffsetP + AOffsetP;
-                           rap_ptrU[iAc] += ra[iR] * a_ptr[iAp] * pb[iPp+pb_offset];
+                           rap_ptrU[iAc] += ra[iR] * a_ptr[iAp] * pb[iPp + pb_offset];
 
                            /* path 3 : (up,down) */
                            iPp = iP + AOffsetP;
@@ -604,11 +604,11 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                            /* path 4 : (down,up) */
                            iAp = iA - COffsetA;
-                           rap_ptrS[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pb[iPp+pb_offset];
+                           rap_ptrS[iAc] += rb[iR + rb_offset] * a_ptr[iAp] * pb[iPp + pb_offset];
 
                            /* path 5 : (down,down) */
                            iPp = iP - COffsetP + AOffsetP;
-                           rap_ptrD[iAc] += rb[iR+rb_offset] * a_ptr[iAp] * pa[iPp];
+                           rap_ptrD[iAc] += rb[iR + rb_offset] * a_ptr[iAp] * pa[iPp];
                         }
                         hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
@@ -616,20 +616,20 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                      break;
 
-                     /*-----------------------------------------------------
-                      * If A stencil index is -1 in coarsened direction, need
-                      * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
-                      * and (down,stay). Paths 2 & 4 {(s,d),(d,s)} contribute
-                      * to RAP with same stencil index as A. Paths 1 & 3
-                      * {(s,u),(u,s)} contribute to RAP with index 0 in
-                      * coarsened direction.
-                      *-----------------------------------------------------*/
+                  /*-----------------------------------------------------
+                   * If A stencil index is -1 in coarsened direction, need
+                   * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
+                   * and (down,stay). Paths 2 & 4 {(s,d),(d,s)} contribute
+                   * to RAP with same stencil index as A. Paths 1 & 3
+                   * {(s,u),(u,s)} contribute to RAP with index 0 in
+                   * coarsened direction.
+                   *-----------------------------------------------------*/
 
                   case -1:
 
                      rap_ptrD = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
-                     hypre_IndexD(index,cdir) = 0;
+                     hypre_IndexD(index, cdir) = 0;
                      AOffsetP = hypre_BoxOffsetDistance(P_dbox, index);
                      rap_ptrS = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
@@ -647,7 +647,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      diag = 0;
                      for (d = 0; d < dim; d++)
                      {
-                        diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
+                        diag += hypre_IndexD(index, d) * hypre_IndexD(index, d);
                      }
                      if (diag == 0 && hypre_StructMatrixSymmetric(RAP))
                      {
@@ -661,11 +661,11 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
                      {
-                        HYPRE_Int iAp,iPp;
+                        HYPRE_Int iAp, iPp;
                         /* Path 1 : (stay,up) & symmetric path  */
                         iPp = iP + AOffsetP;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (a_ptr[iA]  * pb[iPp+pb_offset]);
+                                         (a_ptr[iA]  * pb[iPp + pb_offset]);
 
                         /* Path 2 : (stay,down) */
                         iPp = iP - COffsetP + AOffsetP;
@@ -674,31 +674,31 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 3 : (up,stay) */
                         iAp = iA + COffsetA;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (ra[iR] * a_ptr[iAp]          );
+                                         (ra[iR] * a_ptr[iAp]          );
 
                         /* Path 4 : (down,stay) */
                         iAp = iA - COffsetA;
-                        rap_ptrD[iAc] += rb[iR+rb_offset] * a_ptr[iAp]          ;
+                        rap_ptrD[iAc] += rb[iR + rb_offset] * a_ptr[iAp]          ;
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
 
                      break;
 
-                     /*-----------------------------------------------------
-                      * If A stencil index is +1 in coarsened direction, need
-                      * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
-                      * and (down,stay). Paths 1 & 3 {(s,u),(u,s)} contribute
-                      * to RAP with same stencil index as A. Paths 2 & 4
-                      * {(s,d),(d,s)} contribute to RAP with index 0 in
-                      * coarsened direction.
-                      *-----------------------------------------------------*/
+                  /*-----------------------------------------------------
+                   * If A stencil index is +1 in coarsened direction, need
+                   * to calculate (r,p) pairs (stay,up) (stay,down) (up,stay)
+                   * and (down,stay). Paths 1 & 3 {(s,u),(u,s)} contribute
+                   * to RAP with same stencil index as A. Paths 2 & 4
+                   * {(s,d),(d,s)} contribute to RAP with index 0 in
+                   * coarsened direction.
+                   *-----------------------------------------------------*/
 
                   case 1:
 
                      rap_ptrU = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
-                     hypre_IndexD(index,cdir) = 0;
+                     hypre_IndexD(index, cdir) = 0;
                      AOffsetP = hypre_BoxOffsetDistance(P_dbox, index);
                      rap_ptrS = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
@@ -715,7 +715,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      diag = 0;
                      for (d = 0; d < dim; d++)
                      {
-                        diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
+                        diag += hypre_IndexD(index, d) * hypre_IndexD(index, d);
                      }
                      if (diag == 0 && hypre_StructMatrixSymmetric(RAP))
                      {
@@ -729,15 +729,15 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
                      {
-                        HYPRE_Int iAp,iPp;
+                        HYPRE_Int iAp, iPp;
                         /* Path 1 : (stay,up) */
                         iPp = iP + COffsetP + AOffsetP;
-                        rap_ptrU[iAc] +=          a_ptr[iA]  * pb[iPp+pb_offset];
+                        rap_ptrU[iAc] +=          a_ptr[iA]  * pb[iPp + pb_offset];
 
                         /* Path 2 : (stay,down) */
                         iPp = iP + AOffsetP;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (a_ptr[iA]  * pa[iPp]);
+                                         (a_ptr[iA]  * pa[iPp]);
 
                         /* Path 3 : (up,stay) */
                         iAp = iA + COffsetA;
@@ -746,7 +746,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         /* Path 4 : (down,stay) */
                         iAp = iA - COffsetA;
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (rb[iR+rb_offset] * a_ptr[iAp]          );
+                                         (rb[iR + rb_offset] * a_ptr[iAp]          );
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
@@ -767,7 +767,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
     *  the coarsened direction.
     *-----------------------------------------------------------------*/
 
-   if (hypre_IndexD(hypre_StructGridPeriodic(cgrid),cdir) == 1)
+   if (hypre_IndexD(hypre_StructGridPeriodic(cgrid), cdir) == 1)
    {
       hypre_ForBoxI(ci, cgrid_boxes)
       {
@@ -797,11 +797,11 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                      break;
 
-                     /*-----------------------------------------------------
-                      * If RAP stencil index is +/-1 in coarsened direction,
-                      * to add entry to cooresponding entry with 0 in the
-                      * coarsened direction. Also zero out current index.
-                      *-----------------------------------------------------*/
+                  /*-----------------------------------------------------
+                   * If RAP stencil index is +/-1 in coarsened direction,
+                   * to add entry to cooresponding entry with 0 in the
+                   * coarsened direction. Also zero out current index.
+                   *-----------------------------------------------------*/
 
                   default:
 
@@ -812,7 +812,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                       *---------------------------------------------------------*/
                      rap_ptrD = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
-                     hypre_IndexD(index,cdir) = 0;
+                     hypre_IndexD(index, cdir) = 0;
                      rap_ptrS = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
 
@@ -825,7 +825,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      diag = 0;
                      for (d = 0; d < dim; d++)
                      {
-                        diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
+                        diag += hypre_IndexD(index, d) * hypre_IndexD(index, d);
                      }
                      if (diag == 0 && hypre_StructMatrixSymmetric(RAP))
                      {
@@ -836,7 +836,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          RAP_dbox, cstart, stridec, iAc);
                      {
                         rap_ptrS[iAc] += symm_path_multiplier *
-                           (rap_ptrD[iAc]);
+                                         (rap_ptrD[iAc]);
 
                         rap_ptrD[iAc] = zero;
                      }

@@ -1,4 +1,4 @@
-.. Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+.. Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
    HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -34,7 +34,7 @@ blocks of rows as follows:
    \end{array}
    \right]
 
-In the above example, the matrix is distributed accross the :math:`P` processes,
+In the above example, the matrix is distributed across the :math:`P` processes,
 :math:`0, 1, ..., P-1` by blocks of rows.  Each submatrix :math:`A_p` is "owned"
 by a single process and its first and last row numbers are given by the global
 indices ``ilower`` and ``iupper`` in the ``Create()`` call below.
@@ -77,7 +77,7 @@ contiguous, i.e., ``iupper`` for process ``i`` must equal ``ilower``:math:`-1`
 for process ``i``:math:`+1`.  Note that this allows matrices to have 0- or
 1-based indexing.  The parameters ``jlower`` and ``jupper`` define a column
 partitioning, and should match ``ilower`` and ``iupper`` when solving square
-linear systems.  See the Reference Manual for more information.
+linear systems.  See Chapter :ref:`ch-API` for more information.
 
 The ``SetObjectType()`` routine sets the underlying matrix object type to
 ``HYPRE_PARCSR`` (this is the only object type currently supported).  The
@@ -85,7 +85,7 @@ The ``SetObjectType()`` routine sets the underlying matrix object type to
 ready to be set.  This routine may or may not involve the allocation of memory
 for the coefficient data, depending on the implementation.  The optional
 ``SetRowSizes()`` and ``SetDiagOffdSizes()`` routines mentioned later in this
-chapter and in the Reference Manual, should be called before this step.
+chapter and in Chapter :ref:`ch-API`, should be called before this step.
 
 The ``SetValues()`` routine sets matrix values for some number of rows
 (``nrows``) and some number of columns in each row (``ncols``).  The actual row
@@ -208,8 +208,5 @@ The straightforward approach to determining neighbors involves constructing a
 global partition of the data.  This approach, however, requires :math:`O(P)`
 storage and computations and is not scalable for machines with tens of thousands
 of processors.  The *assumed partition* algorithm was developed to address this
-problem [BaFY2006]_.  It is used by default in hypre and is recommended in
-general.  For modest numbers of processors (less than a hundred or so), a global
-partition may produce slightly faster results and can be turned on by compiling
-the library as detailed in Section :ref:`config_options`.
+problem [BaFY2006]_.  It is the approach used in hypre.
 

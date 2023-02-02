@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,7 +21,7 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
@@ -37,14 +37,15 @@ typedef struct
    HYPRE_Int             num_fine_relax; /* number of fine relaxation sweeps */
 
    HYPRE_Int             num_grids[3];   /* number of grids in each dim */
-   HYPRE_Int    		 num_all_grids;
-   HYPRE_Int    		 num_levels;
-                      
+   HYPRE_Int          num_all_grids;
+   HYPRE_Int          num_levels;
+
    hypre_StructGrid    **grid_array;
    hypre_StructGrid    **Px_grid_array;
    hypre_StructGrid    **Py_grid_array;
    hypre_StructGrid    **Pz_grid_array;
 
+   HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
    hypre_StructMatrix  **A_array;
    hypre_StructMatrix  **Px_array;

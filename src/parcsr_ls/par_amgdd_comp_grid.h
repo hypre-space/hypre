@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -29,7 +29,8 @@ typedef struct
    HYPRE_Int        ***num_recv_nodes; // number of nodes to recv on each composite level
 
    HYPRE_Int       ****send_flag; // flags which nodes to send after composite grid is built
-   HYPRE_Int       ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
+   HYPRE_Int
+   ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
    HYPRE_Int       ****recv_red_marker; // marker indicating a redundant recv
 
 } hypre_AMGDDCommPkg;
@@ -59,7 +60,8 @@ typedef struct
 {
    hypre_CSRMatrix      *owned_diag; // Domain: owned domain of mat. Range: owned range of mat.
    hypre_CSRMatrix      *owned_offd; // Domain: nonowned domain of mat. Range: owned range of mat.
-   hypre_CSRMatrix      *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
+   hypre_CSRMatrix
+   *nonowned_diag; // Domain: nonowned domain of mat. Range: nonowned range of mat.
    hypre_CSRMatrix      *nonowned_offd; // Domain: owned domain of mat. Range: nonowned range of mat.
 
    hypre_CSRMatrix      *real_real;  // Domain: nonowned real. Range: nonowned real.
@@ -120,8 +122,6 @@ typedef struct
    HYPRE_Int             num_owned_nodes;
    HYPRE_Int             num_nonowned_nodes;
    HYPRE_Int             num_nonowned_real_nodes;
-   HYPRE_Int             num_owned_c_points;
-   HYPRE_Int             num_nonowned_real_c_points;
    HYPRE_Int             num_missing_col_indices;
 
    HYPRE_Int            *nonowned_global_indices;
@@ -148,10 +148,6 @@ typedef struct
 
    HYPRE_Real       *l1_norms;
    HYPRE_Int        *cf_marker_array;
-   HYPRE_Int        *owned_c_mask;
-   HYPRE_Int        *owned_f_mask;
-   HYPRE_Int        *nonowned_c_mask;
-   HYPRE_Int        *nonowned_f_mask;
    HYPRE_Int        *owned_relax_ordering;
    HYPRE_Int        *nonowned_relax_ordering;
 
@@ -168,8 +164,6 @@ typedef struct
 #define hypre_AMGDDCompGridNumOwnedNodes(compGrid)          ((compGrid) -> num_owned_nodes)
 #define hypre_AMGDDCompGridNumNonOwnedNodes(compGrid)       ((compGrid) -> num_nonowned_nodes)
 #define hypre_AMGDDCompGridNumNonOwnedRealNodes(compGrid)   ((compGrid) -> num_nonowned_real_nodes)
-#define hypre_AMGDDCompGridNumOwnedCPoints(compGrid)        ((compGrid) -> num_owned_c_points)
-#define hypre_AMGDDCompGridNumNonOwnedRealCPoints(compGrid) ((compGrid) -> num_nonowned_real_c_points)
 #define hypre_AMGDDCompGridNumMissingColIndices(compGrid)   ((compGrid) -> num_missing_col_indices)
 #define hypre_AMGDDCompGridNonOwnedGlobalIndices(compGrid)  ((compGrid) -> nonowned_global_indices)
 #define hypre_AMGDDCompGridNonOwnedCoarseIndices(compGrid)  ((compGrid) -> nonowned_coarse_indices)
@@ -194,10 +188,6 @@ typedef struct
 
 #define hypre_AMGDDCompGridL1Norms(compGrid)               ((compGrid) -> l1_norms)
 #define hypre_AMGDDCompGridCFMarkerArray(compGrid)         ((compGrid) -> cf_marker_array)
-#define hypre_AMGDDCompGridOwnedCMask(compGrid)            ((compGrid) -> owned_c_mask)
-#define hypre_AMGDDCompGridOwnedFMask(compGrid)            ((compGrid) -> owned_f_mask)
-#define hypre_AMGDDCompGridNonOwnedCMask(compGrid)         ((compGrid) -> nonowned_c_mask)
-#define hypre_AMGDDCompGridNonOwnedFMask(compGrid)         ((compGrid) -> nonowned_f_mask)
 #define hypre_AMGDDCompGridOwnedRelaxOrdering(compGrid)    ((compGrid) -> owned_relax_ordering)
 #define hypre_AMGDDCompGridNonOwnedRelaxOrdering(compGrid) ((compGrid) -> nonowned_relax_ordering)
 

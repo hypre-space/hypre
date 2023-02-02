@@ -1,28 +1,28 @@
-!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 !     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 !
 !     SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-!     
+!
 !     Example 12
-!     
+!
 !     Interface:    Semi-Structured interface (SStruct)
-!     
+!
 !     Compile with: make ex12f (may need to edit HYPRE_DIR in Makefile)
-!  
+!
 !     Sample runs:  mpirun -np 2 ex12f
-!  
+!
 !     Description: The grid layout is the same as ex1, but with nodal
 !     unknowns. The solver is PCG preconditioned with either PFMG or
 !     BoomerAMG, set with 'precond_id' below.
-!  
+!
 !     We recommend viewing the Struct examples before viewing this and
 !     the other SStruct examples.  This is one of the simplest SStruct
 !     examples, used primarily to demonstrate how to set up
 !     non-cell-centered problems, and to demonstrate how easy it is to
 !     switch between structured solvers (PFMG) and solvers designed for
 !     more general settings (AMG).
-!  
+!
 
       program ex12f
 
@@ -54,7 +54,9 @@
       integer    ent
       integer    nentries, nvalues, stencil_indices(5)
 
-      double precision  values(100), tol
+      double precision tol
+
+      double precision values(100)
 
 !     This comes from 'sstruct_mv/HYPRE_sstruct_mv.h'
       integer    HYPRE_SSTRUCT_VARIABLE_NODE
@@ -104,6 +106,8 @@
             stop
          endif
       endif
+
+      !$omp target enter data map(alloc:values)
 
 !-----------------------------------------------------------------------
 !     1. Set up the grid.  Here we use only one part.  Each processor
@@ -227,14 +231,14 @@
          iupper(1) = -1
          iupper(2) =  2
 !        12 grid points, each with 5 stencil entries
-         nvalues = 60 
+         nvalues = 60
       else if (myid .eq. 1) then
          ilower(1) = -1
          ilower(2) =  0
          iupper(1) =  2
          iupper(2) =  4
 !        12 grid points, each with 5 stencil entries
-         nvalues = 100 
+         nvalues = 100
       endif
 
       do i = 1, nvalues, nentries
@@ -244,8 +248,11 @@
          enddo
       enddo
 
+      !$omp target update to(values)
+      !$omp target data use_device_ptr(values)
       call HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
      +     var, nentries, stencil_indices, values, ierr)
+      !$omp end target data
 
 !     Set the coefficients reaching outside of the boundary to 0.  Note
 !     that both ilower *and* iupper may be different from those in ex1.
@@ -253,6 +260,9 @@
       do i = 1, 5
          values(i) = 0.0
       enddo
+
+      !$omp target update to(values)
+      !$omp target data use_device_ptr(values)
 
       if (myid .eq. 0) then
 
@@ -319,6 +329,8 @@
 
       endif
 
+      !$omp end target data
+
 !     This is a collective call finalizing the matrix assembly
       call HYPRE_SStructMatrixAssemble(A, ierr)
 
@@ -352,13 +364,19 @@
          do i = 1, 12
             values(i) = 1.0
          enddo
+         !$omp target update to(values)
+         !$omp target data use_device_ptr(values)
          call HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
      +        var, values, ierr)
+         !$omp end target data
          do i = 1, 12
             values(i) = 0.0
          enddo
+         !$omp target update to(values)
+         !$omp target data use_device_ptr(values)
          call HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
      +        var, values, ierr)
+         !$omp end target data
 
       else if (myid .eq. 1) then
 
@@ -370,13 +388,19 @@
          do i = 1, 20
             values(i) = 1.0
          enddo
+         !$omp target update to(values)
+         !$omp target data use_device_ptr(values)
          call HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
      +        var, values, ierr)
+         !$omp end target data
          do i = 1, 20
             values(i) = 0.0
          enddo
+         !$omp target update to(values)
+         !$omp target data use_device_ptr(values)
          call HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
      +        var, values, ierr)
+         !$omp end target data
 
       endif
 

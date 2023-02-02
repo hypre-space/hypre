@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -43,7 +43,7 @@ typedef struct
 
    /* defines sends and recieves for each struct_vector */
    hypre_ComputePkg     ***svec_compute_pkgs;
-   hypre_CommHandle     **comm_handle;
+   hypre_CommHandle      **comm_handle;
 
    /* defines independent and dependent boxes for computations */
    hypre_ComputePkg      **compute_pkgs;
@@ -55,11 +55,11 @@ typedef struct
    */
 
    /* pointers for vector and matrix data */
-   HYPRE_Real          **Ap;
-   HYPRE_Real          **bp;
-   HYPRE_Real          **xp;
-   HYPRE_Real          **tp;
-
+   HYPRE_MemoryLocation    memory_location;
+   HYPRE_Real            **Ap;
+   HYPRE_Real            **bp;
+   HYPRE_Real            **xp;
+   HYPRE_Real            **tp;
 
    /* log info (always logged) */
    HYPRE_Int               num_iterations;
@@ -76,8 +76,8 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
 {
    hypre_NodeRelaxData *relax_data;
 
-   hypre_Index           stride;
-   hypre_Index           indices[1];
+   hypre_Index          stride;
+   hypre_Index          indices[1];
 
    relax_data = hypre_CTAlloc(hypre_NodeRelaxData,  1, HYPRE_MEMORY_HOST);
 
@@ -106,7 +106,7 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
    (relax_data -> xp)               = NULL;
    (relax_data -> tp)               = NULL;
    (relax_data -> comm_handle)      = NULL;
-   (relax_data -> svec_compute_pkgs)= NULL;
+   (relax_data -> svec_compute_pkgs) = NULL;
    (relax_data -> compute_pkgs)     = NULL;
 
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -124,12 +124,15 @@ HYPRE_Int
 hypre_NodeRelaxDestroy( void *relax_vdata )
 {
    hypre_NodeRelaxData  *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
-   HYPRE_Int             i,vi;
+   HYPRE_Int             i, vi;
    HYPRE_Int             nvars;
 
    if (relax_data)
    {
+      HYPRE_MemoryLocation memory_location = relax_data -> memory_location;
+
       nvars = hypre_SStructPMatrixNVars(relax_data -> A);
+
       for (i = 0; i < (relax_data -> num_nodesets); i++)
       {
          hypre_TFree(relax_data -> nodeset_indices[i], HYPRE_MEMORY_HOST);
@@ -152,13 +155,13 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs, HYPRE_MEMORY_HOST);
       hypre_SStructPVectorDestroy(relax_data -> t);
       /*
-      hypre_TFree(relax_data -> x_loc, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(relax_data -> A_loc, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(relax_data -> x_loc, memory_location);
+      hypre_TFree(relax_data -> A_loc, memory_location);
       */
-      hypre_TFree(relax_data -> bp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(relax_data -> xp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(relax_data -> tp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(relax_data -> Ap, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(relax_data -> bp, memory_location);
+      hypre_TFree(relax_data -> xp, memory_location);
+      hypre_TFree(relax_data -> tp, memory_location);
+      hypre_TFree(relax_data -> Ap, memory_location);
       for (vi = 0; vi < nvars; vi++)
       {
          hypre_TFree((relax_data -> diag_rank)[vi], HYPRE_MEMORY_HOST);
@@ -239,6 +242,8 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    HYPRE_Int              nvars;
    HYPRE_Int              dim;
 
+   HYPRE_MemoryLocation   memory_location;
+
    /*----------------------------------------------------------
     * Set up the temp vector
     *----------------------------------------------------------*/
@@ -261,7 +266,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
    hypre_assert(nvars <= HYPRE_MAXVARS);
 
-   diag_rank = hypre_CTAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
+   diag_rank = hypre_CTAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
       diag_rank[vi] = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
@@ -280,20 +285,22 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
       }
    }
 
+   memory_location = hypre_StructMatrixMemoryLocation(hypre_SStructPMatrixSMatrix(A, 0, 0));
+
    /*----------------------------------------------------------
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
    /*
    i = hypre_NumThreads();
-   x_loc = hypre_TAlloc(HYPRE_Real  , i*nvars,       HYPRE_MEMORY_DEVICE);
-   A_loc = hypre_TAlloc(HYPRE_Real  , i*nvars*nvars, HYPRE_MEMORY_DEVICE);
+   x_loc = hypre_TAlloc(HYPRE_Real  , i*nvars,       memory_location);
+   A_loc = hypre_TAlloc(HYPRE_Real  , i*nvars*nvars, memory_location);
    */
 
    /* Allocate pointers for vector and matrix */
-   bp = hypre_TAlloc(HYPRE_Real *, nvars,       HYPRE_MEMORY_DEVICE);
-   xp = hypre_TAlloc(HYPRE_Real *, nvars,       HYPRE_MEMORY_DEVICE);
-   tp = hypre_TAlloc(HYPRE_Real *, nvars,       HYPRE_MEMORY_DEVICE);
-   Ap = hypre_TAlloc(HYPRE_Real *, nvars*nvars, HYPRE_MEMORY_DEVICE);
+   bp = hypre_TAlloc(HYPRE_Real *, nvars, memory_location);
+   xp = hypre_TAlloc(HYPRE_Real *, nvars, memory_location);
+   tp = hypre_TAlloc(HYPRE_Real *, nvars, memory_location);
+   Ap = hypre_TAlloc(HYPRE_Real *, nvars * nvars, memory_location);
 
    /*----------------------------------------------------------
     * Set up the compute packages for each nodeset
@@ -341,7 +348,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
             {
                for (vj = 0; vj < nvars; vj++)
                {
-                  if (hypre_SStructPMatrixSMatrix(A,vj,i) != NULL)
+                  if (hypre_SStructPMatrixSMatrix(A, vj, i) != NULL)
                   {
                      sstencil = hypre_SStructPMatrixSStencil(A, vj, i);
                      sstencil_union_count += hypre_StructStencilSize(sstencil);
@@ -353,7 +360,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          {
             for (vj = 0; vj < nvars; vj++)
             {
-               if (hypre_SStructPMatrixSMatrix(A,vj,vi) != NULL)
+               if (hypre_SStructPMatrixSMatrix(A, vj, vi) != NULL)
                {
                   sstencil = hypre_SStructPMatrixSStencil(A, vj, vi);
                   sstencil_union_count += hypre_StructStencilSize(sstencil);
@@ -369,7 +376,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
             {
                for (vj = 0; vj < nvars; vj++)
                {
-                  if (hypre_SStructPMatrixSMatrix(A,vj,i) != NULL)
+                  if (hypre_SStructPMatrixSMatrix(A, vj, i) != NULL)
                   {
                      sstencil = hypre_SStructPMatrixSStencil(A, vj, i);
                      sstencil_size = hypre_StructStencilSize(sstencil);
@@ -388,7 +395,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          {
             for (vj = 0; vj < nvars; vj++)
             {
-               if (hypre_SStructPMatrixSMatrix(A,vj,vi) != NULL)
+               if (hypre_SStructPMatrixSMatrix(A, vj, vi) != NULL)
                {
                   sstencil = hypre_SStructPMatrixSStencil(A, vj, vi);
                   sstencil_size = hypre_StructStencilSize(sstencil);
@@ -415,7 +422,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
          for (compute_i = 0; compute_i < 2; compute_i++)
          {
-            switch(compute_i)
+            switch (compute_i)
             {
                case 0:
                   box_aa = orig_indt_boxes;
@@ -454,7 +461,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                }
             }
 
-            switch(compute_i)
+            switch (compute_i)
             {
                case 0:
                   hypre_ComputeInfoIndtBoxes(compute_info) = new_box_aa;
@@ -472,14 +479,14 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          {
             hypre_ComputePkgCreate(compute_info,
                                    hypre_StructVectorDataSpace(
-                                   hypre_SStructPVectorSVector(x, 0)),
+                                      hypre_SStructPVectorSVector(x, 0)),
                                    1, sgrid, &compute_pkgs[p]);
          }
          else
          {
             hypre_ComputePkgCreate(compute_info,
                                    hypre_StructVectorDataSpace(
-                                   hypre_SStructPVectorSVector(x, vi)),
+                                      hypre_SStructPVectorSVector(x, vi)),
                                    1, sgrid, &svec_compute_pkgs[p][vi]);
          }
 
@@ -507,6 +514,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    (relax_data -> bp)    = bp;
    (relax_data -> tp)    = tp;
    (relax_data -> xp)    = xp;
+   (relax_data -> memory_location) = memory_location;
    (relax_data -> compute_pkgs) = compute_pkgs;
    (relax_data -> svec_compute_pkgs) = svec_compute_pkgs;
    (relax_data -> comm_handle) = comm_handle;
@@ -527,7 +535,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    /* REALLY Rough Estimate = num_nodes * nvar^3 */
    (relax_data -> flops) = scale * nvars * nvars * nvars *
                            hypre_StructVectorGlobalSize(
-                                 hypre_SStructPVectorSVector(x,0) );
+                              hypre_SStructPVectorSVector(x, 0) );
 
    return hypre_error_flag;
 }
@@ -541,55 +549,52 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   hypre_SStructPVector *b,
                   hypre_SStructPVector *x           )
 {
-   hypre_NodeRelaxData   *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
+   hypre_NodeRelaxData  *relax_data        = (hypre_NodeRelaxData  *)relax_vdata;
 
-   HYPRE_Int              max_iter         = (relax_data -> max_iter);
-   HYPRE_Int              zero_guess       = (relax_data -> zero_guess);
-   HYPRE_Real             weight           = (relax_data -> weight);
-   HYPRE_Int              num_nodesets     = (relax_data -> num_nodesets);
-   HYPRE_Int             *nodeset_ranks    = (relax_data -> nodeset_ranks);
-   hypre_Index           *nodeset_strides  = (relax_data -> nodeset_strides);
-   hypre_SStructPVector  *t                = (relax_data -> t);
-   HYPRE_Int            **diag_rank        = (relax_data -> diag_rank);
-   hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
-   hypre_ComputePkg    ***svec_compute_pkgs= (relax_data ->
-                                              svec_compute_pkgs);
-   hypre_CommHandle     **comm_handle      = (relax_data -> comm_handle);
+   HYPRE_Int             max_iter          = (relax_data -> max_iter);
+   HYPRE_Int             zero_guess        = (relax_data -> zero_guess);
+   HYPRE_Real            weight            = (relax_data -> weight);
+   HYPRE_Int             num_nodesets      = (relax_data -> num_nodesets);
+   HYPRE_Int            *nodeset_ranks     = (relax_data -> nodeset_ranks);
+   hypre_Index          *nodeset_strides   = (relax_data -> nodeset_strides);
+   hypre_SStructPVector *t                 = (relax_data -> t);
+   HYPRE_Int           **diag_rank         = (relax_data -> diag_rank);
+   hypre_ComputePkg    **compute_pkgs      = (relax_data -> compute_pkgs);
+   hypre_ComputePkg   ***svec_compute_pkgs = (relax_data ->svec_compute_pkgs);
+   hypre_CommHandle    **comm_handle       = (relax_data -> comm_handle);
 
-   hypre_ComputePkg      *compute_pkg;
-   hypre_ComputePkg      *svec_compute_pkg;
+   hypre_ComputePkg     *compute_pkg;
+   hypre_ComputePkg     *svec_compute_pkg;
 
-   hypre_BoxArrayArray   *compute_box_aa;
-   hypre_BoxArray        *compute_box_a;
-   hypre_Box             *compute_box;
-
-   hypre_Box             *A_data_box;
-   hypre_Box             *b_data_box;
-   hypre_Box             *x_data_box;
-   hypre_Box             *t_data_box;
+   hypre_BoxArrayArray  *compute_box_aa;
+   hypre_BoxArray       *compute_box_a;
+   hypre_Box            *compute_box;
+   hypre_Box            *A_data_box;
+   hypre_Box            *b_data_box;
+   hypre_Box            *x_data_box;
+   hypre_Box            *t_data_box;
 
    /*
-   HYPRE_Real            *tA_loc = (relax_data -> A_loc);
-   HYPRE_Real            *tx_loc = (relax_data -> x_loc);
+   HYPRE_Real           *tA_loc = (relax_data -> A_loc);
+   HYPRE_Real           *tx_loc = (relax_data -> x_loc);
    */
+   HYPRE_Real          **Ap = (relax_data -> Ap);
+   HYPRE_Real          **bp = (relax_data -> bp);
+   HYPRE_Real          **xp = (relax_data -> xp);
+   HYPRE_Real          **tp = (relax_data -> tp);
+   HYPRE_Real           *_h_Ap[HYPRE_MAXVARS * HYPRE_MAXVARS];
+   HYPRE_Real           *_h_bp[HYPRE_MAXVARS];
+   HYPRE_Real           *_h_xp[HYPRE_MAXVARS];
+   HYPRE_Real           *_h_tp[HYPRE_MAXVARS];
+   HYPRE_Real          **h_Ap;
+   HYPRE_Real          **h_bp;
+   HYPRE_Real          **h_xp;
+   HYPRE_Real          **h_tp;
 
-   HYPRE_Real           **Ap = (relax_data -> Ap);
-   HYPRE_Real           **bp = (relax_data -> bp);
-   HYPRE_Real           **xp = (relax_data -> xp);
-   HYPRE_Real           **tp = (relax_data -> tp);
-
-   HYPRE_Real            *_h_Ap[HYPRE_MAXVARS * HYPRE_MAXVARS];
-   HYPRE_Real            *_h_bp[HYPRE_MAXVARS];
-   HYPRE_Real            *_h_xp[HYPRE_MAXVARS];
-   HYPRE_Real            *_h_tp[HYPRE_MAXVARS];
-
-   HYPRE_Real           **h_Ap;
-   HYPRE_Real           **h_bp;
-   HYPRE_Real           **h_xp;
-   HYPRE_Real           **h_tp;
+   HYPRE_MemoryLocation  memory_location = relax_data -> memory_location;
 
    /* Ap, bp, xp, tp are device pointers */
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
       h_Ap = _h_Ap;
       h_bp = _h_bp;
@@ -671,7 +676,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
@@ -691,42 +696,42 @@ hypre_NodeRelax(  void                 *relax_vdata,
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
             A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(
-                                           hypre_SStructPMatrixSMatrix(A,0,0)), i);
+                                              hypre_SStructPMatrixSMatrix(A, 0, 0)), i);
             b_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                           hypre_SStructPVectorSVector(b,0)), i);
+                                              hypre_SStructPVectorSVector(b, 0)), i);
             x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(
-                                           hypre_SStructPVectorSVector(x,0)), i);
+                                              hypre_SStructPVectorSVector(x, 0)), i);
 
             for (vi = 0; vi < nvars; vi++)
             {
                for (vj = 0; vj < nvars; vj++)
                {
-                  if (hypre_SStructPMatrixSMatrix(A,vi,vj) != NULL)
+                  if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
                   {
-                     h_Ap[vi*nvars+vj] = hypre_StructMatrixBoxData( hypre_SStructPMatrixSMatrix(A,vi,vj),
-                                                                    i, diag_rank[vi][vj] );
+                     h_Ap[vi * nvars + vj] = hypre_StructMatrixBoxData( hypre_SStructPMatrixSMatrix(A, vi, vj),
+                                                                        i, diag_rank[vi][vj] );
                   }
                   else
                   {
-                     h_Ap[vi*nvars+vj] = NULL;
+                     h_Ap[vi * nvars + vj] = NULL;
                   }
                }
-               h_bp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(b,vi), i );
-               h_xp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(x,vi), i );
+               h_bp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(b, vi), i );
+               h_xp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(x, vi), i );
             }
 
-            if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+            if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
             {
-               hypre_Memcpy(Ap, h_Ap, nvars*nvars*sizeof(HYPRE_Real*), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-               hypre_Memcpy(bp, h_bp,       nvars*sizeof(HYPRE_Real*), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-               hypre_Memcpy(xp, h_xp,       nvars*sizeof(HYPRE_Real*), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(Ap, h_Ap, HYPRE_Real *, nvars * nvars, memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(bp, h_bp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(xp, h_xp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
             }
 
             hypre_ForBoxI(j, compute_box_a)
             {
                compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-               start  = hypre_BoxIMin(compute_box);
+               start = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
 #define DEVICE_VAR is_device_ptr(bp,Ap,xp)
@@ -750,8 +755,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
                      x_loc[vi] = bpi[bi];
                      for (vj = 0; vj < nvars; vj++)
                      {
-                        HYPRE_Real *Apij = Ap[vi*nvars+vj];
-                        A_loc[vi*nvars+vj] = Apij ? Apij[Ai] : 0.0;
+                        HYPRE_Real *Apij = Ap[vi * nvars + vj];
+                        A_loc[vi * nvars + vj] = Apij ? Apij[Ai] : 0.0;
                      }
                   }
 
@@ -797,13 +802,13 @@ hypre_NodeRelax(  void                 *relax_vdata,
 
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
-         switch(compute_i)
+         switch (compute_i)
          {
             case 0:
             {
                for (vi = 0; vi < nvars; vi++)
                {
-                  x_block = hypre_SStructPVectorSVector(x,vi);
+                  x_block = hypre_SStructPVectorSVector(x, vi);
                   h_xp[vi] = hypre_StructVectorData(x_block);
                   svec_compute_pkg = svec_compute_pkgs[nodeset][vi];
                   hypre_InitializeIndtComputations(svec_compute_pkg,
@@ -829,24 +834,24 @@ hypre_NodeRelax(  void                 *relax_vdata,
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
             A_data_box = hypre_BoxArrayBox( hypre_StructMatrixDataSpace(
-                                            hypre_SStructPMatrixSMatrix(A,0,0)), i );
+                                               hypre_SStructPMatrixSMatrix(A, 0, 0)), i );
             b_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                            hypre_SStructPVectorSVector(b,0)), i );
+                                               hypre_SStructPVectorSVector(b, 0)), i );
             x_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                            hypre_SStructPVectorSVector(x,0)), i );
+                                               hypre_SStructPVectorSVector(x, 0)), i );
             t_data_box = hypre_BoxArrayBox( hypre_StructVectorDataSpace(
-                                            hypre_SStructPVectorSVector(t,0)), i );
+                                               hypre_SStructPVectorSVector(t, 0)), i );
 
             for (vi = 0; vi < nvars; vi++)
             {
-               h_bp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(b,vi), i );
-               h_tp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(t,vi), i );
+               h_bp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(b, vi), i );
+               h_tp[vi] = hypre_StructVectorBoxData( hypre_SStructPVectorSVector(t, vi), i );
             }
 
-            if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+            if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
             {
-               hypre_Memcpy(bp, h_bp, nvars*sizeof(HYPRE_Real*), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-               hypre_Memcpy(tp, h_tp, nvars*sizeof(HYPRE_Real*), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(bp, h_bp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(tp, h_tp, HYPRE_Real *, nvars, memory_location, HYPRE_MEMORY_HOST);
             }
 
             hypre_ForBoxI(j, compute_box_a)
@@ -877,10 +882,10 @@ hypre_NodeRelax(  void                 *relax_vdata,
                {
                   for (vj = 0; vj < nvars; vj++)
                   {
-                     if (hypre_SStructPMatrixSMatrix(A,vi,vj) != NULL)
+                     if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
                      {
-                        A_block = hypre_SStructPMatrixSMatrix(A,vi,vj);
-                        x_block = hypre_SStructPVectorSVector(x,vj);
+                        A_block = hypre_SStructPMatrixSMatrix(A, vi, vj);
+                        x_block = hypre_SStructPVectorSVector(x, vj);
                         stencil = hypre_StructMatrixStencil(A_block);
                         stencil_shape = hypre_StructStencilShape(stencil);
                         stencil_size  = hypre_StructStencilSize(stencil);
@@ -913,21 +918,21 @@ hypre_NodeRelax(  void                 *relax_vdata,
                {
                   for (vj = 0; vj < nvars; vj++)
                   {
-                     if (hypre_SStructPMatrixSMatrix(A,vi,vj) != NULL)
+                     if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
                      {
-                        h_Ap[vi*nvars+vj] = hypre_StructMatrixBoxData( hypre_SStructPMatrixSMatrix(A,vi,vj),
-                                                                       i, diag_rank[vi][vj]);
+                        h_Ap[vi * nvars + vj] = hypre_StructMatrixBoxData( hypre_SStructPMatrixSMatrix(A, vi, vj),
+                                                                           i, diag_rank[vi][vj]);
                      }
                      else
                      {
-                        h_Ap[vi*nvars+vj] = NULL;
+                        h_Ap[vi * nvars + vj] = NULL;
                      }
                   }
                }
 
-               if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+               if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
                {
-                  hypre_Memcpy(Ap, h_Ap, nvars*nvars*sizeof(HYPRE_Real*), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                  hypre_TMemcpy(Ap, h_Ap, HYPRE_Real *, nvars * nvars, memory_location, HYPRE_MEMORY_HOST);
                }
 
 #define DEVICE_VAR is_device_ptr(tp,Ap)
@@ -953,8 +958,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
                      x_loc[vi] = tpi[ti];
                      for (vj = 0; vj < nvars; vj++)
                      {
-                        HYPRE_Real *Apij = Ap[vi*nvars+vj];
-                        A_loc[vi*nvars+vj] = Apij ? Apij[Ai] : 0.0;
+                        HYPRE_Real *Apij = Ap[vi * nvars + vj];
+                        A_loc[vi * nvars + vj] = Apij ? Apij[Ai] : 0.0;
                      }
                   }
 

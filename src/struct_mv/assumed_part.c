@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -50,7 +50,7 @@ hypre_IndexFromRank( HYPRE_Int    rank,
    HYPRE_Int  d, r, s;
 
    r = rank;
-   for (d = ndim-1; d >= 0; d--)
+   for (d = ndim - 1; d >= 0; d--)
    {
       s = hypre_IndexProd(bsize, d);
       hypre_IndexD(index, d) = r / s;
@@ -112,18 +112,18 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    {
       dv = 1;
       sz = hypre_IndexD(isize, i);
-      for (j = 0; j< level; j++)
+      for (j = 0; j < level; j++)
       {
-         if (sz >= 2*dv*min_gridpts)  /* Cut each dim in half */
+         if (sz >= 2 * dv * min_gridpts) /* Cut each dim in half */
          {
             dv *= 2;
          }
       }
 
       /* Space for each partition */
-      partition[i] = hypre_TAlloc(HYPRE_Int,  dv+1, HYPRE_MEMORY_HOST);
+      partition[i] = hypre_TAlloc(HYPRE_Int,  dv + 1, HYPRE_MEMORY_HOST);
       /* Total number of regions to create */
-      total = total*dv;
+      total = total * dv;
 
       hypre_IndexD(div, i) = dv;
    }
@@ -143,7 +143,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
       extra =  points % dv;
       for (j = 1; j < dv; j++)
       {
-         partition[i][j] = partition[i][j-1] + width;
+         partition[i][j] = partition[i][j - 1] + width;
          if (j <= extra)
          {
             partition[i][j]++;
@@ -156,12 +156,12 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    hypre_SerialBoxLoop0Begin(ndim, div);
    {
       box = hypre_BoxArrayBox(box_array, count);
-      hypre_BoxLoopGetIndex(index);
+      zypre_BoxLoopGetIndex(index);
       for (i = 0; i < ndim; i++)
       {
          j = hypre_IndexD(index, i);
          hypre_BoxIMinD(box, i) = partition[i][j];
-         hypre_BoxIMaxD(box, i) = partition[i][j+1]-1;
+         hypre_BoxIMaxD(box, i) = partition[i][j + 1] - 1;
       }
       count++;
    }
@@ -216,20 +216,20 @@ hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
 
       region = hypre_BoxArrayBox(region_array, i);
 
-      for (j = 0; j< num_boxes; j++)
+      for (j = 0; j < num_boxes; j++)
       {
          my_box = hypre_BoxArrayBox(my_box_array, j);
          /* Check if its a zero volume box.  If so, it still need to be counted,
             so expand until volume is non-zero, then intersect. */
-	 if (hypre_BoxVolume(my_box) == 0)
-	 {
+         if (hypre_BoxVolume(my_box) == 0)
+         {
             hypre_CopyBox(my_box, grow_box);
             for (d = 0; d < ndim; d++)
             {
-               if(!hypre_BoxSizeD(my_box, d))
+               if (!hypre_BoxSizeD(my_box, d))
                {
                   hypre_IndexD(grow_index, d) =
-                     (hypre_BoxIMinD(my_box, d) - hypre_BoxIMaxD(my_box, d) + 1)/2;
+                     (hypre_BoxIMinD(my_box, d) - hypre_BoxIMaxD(my_box, d) + 1) / 2;
                }
                else
                {
@@ -240,12 +240,12 @@ hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array,
             hypre_BoxGrowByIndex(grow_box, grow_index);
             /* Do they intersect? */
             hypre_IntersectBoxes(grow_box, region, result_box);
-	 }
-	 else
-	 {
+         }
+         else
+         {
             /* Do they intersect? */
             hypre_IntersectBoxes(my_box, region, result_box);
-	 }
+         }
          if (hypre_BoxVolume(result_box) > 0)
          {
             count_array[i]++;
@@ -292,9 +292,11 @@ hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    num_regions = hypre_BoxArraySize(region_array);
 
    send_buf_count = hypre_CTAlloc(HYPRE_Int,  num_regions, HYPRE_MEMORY_HOST);
-   send_buf_vol = hypre_CTAlloc(HYPRE_Real,  num_regions*2, HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
+   send_buf_vol = hypre_CTAlloc(HYPRE_Real,  num_regions * 2,
+                                HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
 
-   dbl_vol_and_count =  hypre_CTAlloc(HYPRE_Real,  num_regions*2, HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
+   dbl_vol_and_count =  hypre_CTAlloc(HYPRE_Real,  num_regions * 2,
+                                      HYPRE_MEMORY_HOST); /* allocate HYPRE_Real */
 
    hypre_APFindMyBoxesInRegions( region_array, my_box_array, &send_buf_count,
                                  &send_buf_vol);
@@ -303,17 +305,17 @@ hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    /* Copy ints to doubles so we can do one Allreduce */
    for (i = 0; i < num_regions; i++)
    {
-      send_buf_vol[num_regions+i] = (HYPRE_Real) send_buf_count[i];
+      send_buf_vol[num_regions + i] = (HYPRE_Real) send_buf_count[i];
    }
 
-   hypre_MPI_Allreduce(send_buf_vol, dbl_vol_and_count, num_regions*2,
+   hypre_MPI_Allreduce(send_buf_vol, dbl_vol_and_count, num_regions * 2,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
    /* Unpack */
    for (i = 0; i < num_regions; i++)
    {
       vol_array[i] = dbl_vol_and_count[i];
-      count_array[i] = (HYPRE_Int) dbl_vol_and_count[num_regions+i];
+      count_array[i] = (HYPRE_Int) dbl_vol_and_count[num_regions + i];
    }
 
    /* Clean up */
@@ -348,13 +350,13 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
    hypre_Index   grow_index, imin, imax;
 
    ndim  = hypre_BoxArrayNDim(my_box_array);
-   ndim2 = 2*ndim;
+   ndim2 = 2 * ndim;
 
    num_boxes   = hypre_BoxArraySize(my_box_array);
    num_regions = hypre_BoxArraySize(region_array);
 
-   indices = hypre_CTAlloc(HYPRE_Int,  num_regions*ndim2, HYPRE_MEMORY_HOST);
-   recvbuf = hypre_CTAlloc(HYPRE_Int,  num_regions*ndim2, HYPRE_MEMORY_HOST);
+   indices = hypre_CTAlloc(HYPRE_Int,  num_regions * ndim2, HYPRE_MEMORY_HOST);
+   recvbuf = hypre_CTAlloc(HYPRE_Int,  num_regions * ndim2, HYPRE_MEMORY_HOST);
 
    result_box = hypre_BoxCreate(ndim);
 
@@ -377,15 +379,15 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
          /* Check if its a zero volume box.  If so, it still needs to be
             checked, so expand until volume is nonzero, then intersect. */
-	 if (hypre_BoxVolume(my_box) == 0)
-	 {
+         if (hypre_BoxVolume(my_box) == 0)
+         {
             hypre_CopyBox(my_box, grow_box);
             for (d = 0; d < ndim; d++)
             {
-               if(!hypre_BoxSizeD(my_box, d))
+               if (!hypre_BoxSizeD(my_box, d))
                {
                   hypre_IndexD(grow_index, d) =
-                     (hypre_BoxIMinD(my_box, d) - hypre_BoxIMaxD(my_box, d) + 1)/2;
+                     (hypre_BoxIMinD(my_box, d) - hypre_BoxIMaxD(my_box, d) + 1) / 2;
                }
                else
                {
@@ -396,9 +398,9 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
             hypre_BoxGrowByIndex(grow_box, grow_index);
             /* Do they intersect? */
             hypre_IntersectBoxes(grow_box, region, result_box);
-	 }
-	 else
-	 {
+         }
+         else
+         {
             /* Do they intersect? */
             hypre_IntersectBoxes( my_box, region, result_box);
          }
@@ -407,11 +409,11 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
          {
             if (!count) /* Set min and max for first box */
             {
-               ii = i*ndim2;
+               ii = i * ndim2;
                for (d = 0; d < ndim; d++)
                {
                   indices[ii + d] = hypre_BoxIMinD(result_box, d);
-                  indices[ii + ndim +d] = hypre_BoxIMaxD(result_box, d);
+                  indices[ii + ndim + d] = hypre_BoxIMaxD(result_box, d);
                }
             }
 
@@ -419,7 +421,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
             /* Boxes intersect, so get max and min extents of the result box
                (this keeps the bounds inside the region) */
-            ii = i*ndim2;
+            ii = i * ndim2;
             for (d = 0; d < ndim; d++)
             {
                indices[ii + d] = hypre_min(indices[ii + d],
@@ -434,7 +436,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
          the region and the max to the min! */
       if (!count)
       {
-         ii = i*ndim2;
+         ii = i * ndim2;
          for (d = 0; d < ndim; d++)
          {
             indices[ii + d] = hypre_BoxIMaxD(region, d);
@@ -444,7 +446,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
       /* Negate max indices for the Allreduce */
       /* Note: min(x)= -max(-x) */
-      ii = i*ndim2;
+      ii = i * ndim2;
       for (d = 0; d < ndim; d++)
       {
          indices[ii + ndim + d] = -indices[ii + ndim + d];
@@ -452,7 +454,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
    }
 
    /* Do an Allreduce on size and volume to get the global information */
-   hypre_MPI_Allreduce(indices, recvbuf, num_regions*ndim2, HYPRE_MPI_INT,
+   hypre_MPI_Allreduce(indices, recvbuf, num_regions * ndim2, HYPRE_MPI_INT,
                        hypre_MPI_MIN, comm);
 
    /* Unpack the "shrunk" regions */
@@ -463,7 +465,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
       region = hypre_BoxArrayBox(region_array, i);
 
       /* Resize the box */
-      ii = i*ndim2;
+      ii = i * ndim2;
       for (d = 0; d < ndim; d++)
       {
          hypre_IndexD(imin, d) =  recvbuf[ii + d];
@@ -530,14 +532,14 @@ hypre_APPruneRegions( hypre_BoxArray *region_array,
       {
          if (j < count)
          {
-            while ((i+j) == delete_indices[j])
+            while ((i + j) == delete_indices[j])
             {
                j++; /* Increase the shift */
-               if (j == count) break;
+               if (j == count) { break; }
             }
          }
-         vol_array[i] = vol_array[i+j];
-         count_array[i] = count_array[i+j];
+         vol_array[i] = vol_array[i + j];
+         count_array[i] = count_array[i + j];
       }
    }
 
@@ -602,7 +604,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
 
    /* Want to refine the regions starting with those that are the least full */
    /* Sort the fraction AND the index */
-   hypre_qsort2(order, fraction_full, 0, num_regions-1);
+   hypre_qsort2(order, fraction_full, 0, num_regions - 1);
 
    /* Now we can subdivide any that are not full enough */
    /* When this is called, we know that size < max_regions */
@@ -626,7 +628,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
       est_size = num_regions + hypre_pow2(ndim) - 1;
       if (est_size > num_procs)
       {
-         if (loop==0)
+         if (loop == 0)
          {
             /* Some are less than gamma full, but we cannot further subdivide
                due to max processors limit (no subdividing occured) */
@@ -658,7 +660,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
       }
 
       /* If we are on the last region */
-      if  ((loop+1) == init_num_regions)
+      if  ((loop + 1) == init_num_regions)
       {
          break;
       }
@@ -670,7 +672,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
       if (num_regions >= max_regions)
       {
          /* See if next regions satifies gamma */
-         if (fraction_full[order[loop+1]] > gamma)
+         if (fraction_full[order[loop + 1]] > gamma)
          {
             /* All regions less than gamma full have been subdivided (and we
                have reached max) */
@@ -687,7 +689,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
       loop++; /* Increment to repeat loop */
    }
 
-   if (count ==0 )
+   if (count == 0 )
    {
       /* No refining occured so don't do any more */
       *return_code = 1;
@@ -696,7 +698,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
    {
       /* We subdivided count regions */
       /* Delete the old regions */
-      hypre_qsort0(delete_indices, 0, count-1); /* Put deleted indices in asc order */
+      hypre_qsort0(delete_indices, 0, count - 1); /* Put deleted indices in asc order */
       hypre_DeleteMultipleBoxes( region_array, delete_indices, count );
    }
 
@@ -745,12 +747,12 @@ hypre_StructAssumedPartitionCreate(
    HYPRE_Int          myid, num_procs;
    HYPRE_Int          num_proc_partitions;
    HYPRE_Int          count_array_size;
-   HYPRE_Int         *count_array=NULL;
-   HYPRE_Real        *vol_array=NULL, one_volume, dbl_vol;
+   HYPRE_Int         *count_array = NULL;
+   HYPRE_Real        *vol_array = NULL, one_volume, dbl_vol;
    HYPRE_Int          return_code;
    HYPRE_Int          num_refine;
    HYPRE_Int          total_boxes, proc_count, max_position;
-   HYPRE_Int         *proc_array=NULL;
+   HYPRE_Int         *proc_array = NULL;
    HYPRE_Int          initial_level;
    HYPRE_Int          dmax;
    HYPRE_Real         width, wmin, wmax;
@@ -764,9 +766,9 @@ hypre_StructAssumedPartitionCreate(
 
    HYPRE_Int   proc_alloc, count, box_count;
    HYPRE_Int   max_response_size;
-   HYPRE_Int  *response_buf = NULL, *response_buf_starts=NULL;
+   HYPRE_Int  *response_buf = NULL, *response_buf_starts = NULL;
    HYPRE_Int  *tmp_proc_ids = NULL, *tmp_box_nums = NULL, *tmp_box_inds = NULL;
-   HYPRE_Int  *proc_array_starts=NULL;
+   HYPRE_Int  *proc_array_starts = NULL;
 
    hypre_BoxArray              *my_partition;
    hypre_DataExchangeResponse  response_obj;
@@ -822,7 +824,7 @@ hypre_StructAssumedPartitionCreate(
    max_regions = hypre_min(num_procs, max_regions);
 
    /* Don't want more regions than boxes either */
-   if (global_num_boxes) max_regions = hypre_min(global_num_boxes, max_regions);
+   if (global_num_boxes) { max_regions = hypre_min(global_num_boxes, max_regions); }
 
    /* Start with a region array of size 0 */
    region_array = hypre_BoxArrayCreate(0, ndim);
@@ -832,8 +834,8 @@ hypre_StructAssumedPartitionCreate(
 
    one_volume = hypre_doubleBoxVolume(bounding_box);
 
-   if( ((global_boxes_size/one_volume) > gamma) ||
-       (global_num_boxes > one_volume) || (global_num_boxes == 0) )
+   if ( ((global_boxes_size / one_volume) > gamma) ||
+        (global_num_boxes > one_volume) || (global_num_boxes == 0) )
    {
       /* Don't bother with any refinements.  We are full enough, or we have a
          small bounding box and we are not full because of empty boxes */
@@ -849,10 +851,10 @@ hypre_StructAssumedPartitionCreate(
          we have a smaller number of procs */
       for (i = 0; i < initial_level; i++)
       {
-         if ( hypre_pow2(initial_level*ndim) > num_procs) initial_level --;
+         if ( hypre_pow2(initial_level * ndim) > num_procs) { initial_level --; }
 
          /* Not be able to do any refinements due to the number of processors */
-         if (!initial_level) max_refinements = 0;
+         if (!initial_level) { max_refinements = 0; }
       }
    }
 
@@ -862,7 +864,7 @@ hypre_StructAssumedPartitionCreate(
 #endif
 
 #if REFINE_INFO
-   if (myid ==0)
+   if (myid == 0)
    {
       hypre_printf("gamma =  %g\n", gamma);
       hypre_printf("max_regions =  %d\n", max_regions);
@@ -874,7 +876,7 @@ hypre_StructAssumedPartitionCreate(
    /* Divide the bounding box */
    hypre_APSubdivideRegion(bounding_box, ndim, initial_level, region_array, &size);
    /* If no subdividing occured (because too small) then don't try to refine */
-   if (initial_level > 0 && size ==1) max_refinements = 0;
+   if (initial_level > 0 && size == 1) { max_refinements = 0; }
 
    /* Need space for count and volume */
    size = hypre_BoxArraySize(region_array);
@@ -889,7 +891,7 @@ hypre_StructAssumedPartitionCreate(
    /* Don't do any initial prune and shrink if we have only one region and we
       can't do any refinements */
 
-   if ( !(size ==1 && max_refinements == 0))
+   if ( !(size == 1 && max_refinements == 0))
    {
       /* Get rid of regions with no boxes (and adjust count and vol arrays) */
       hypre_APPruneRegions( region_array, &count_array, &vol_array);
@@ -934,7 +936,7 @@ hypre_StructAssumedPartitionCreate(
       {
          count_array = hypre_TReAlloc(count_array,  HYPRE_Int,   size, HYPRE_MEMORY_HOST);
          vol_array =  hypre_TReAlloc(vol_array,  HYPRE_Real,   size, HYPRE_MEMORY_HOST);
-         count_array_size =size;
+         count_array_size = size;
       }
 
       /* FUTURE MOD: Just count and prune and shrink in the modified regions
@@ -954,7 +956,7 @@ hypre_StructAssumedPartitionCreate(
       /* 5 = all regions < gamma full were subdivided and max reached */
       /* 3 = some regions were divided (not all that needed) and max reached */
       if ( (return_code == 3 || return_code == 5)
-           && size ==hypre_BoxArraySize(region_array) )
+           && size == hypre_BoxArraySize(region_array) )
       {
          break;
       }
@@ -978,7 +980,7 @@ hypre_StructAssumedPartitionCreate(
    }
 
 #if REGION_STAT
-   if (myid ==0)
+   if (myid == 0)
    {
       hypre_printf("myid = %d, %d REGIONS (after refining %d times\n",
                    myid, hypre_BoxArraySize(region_array), num_refine);
@@ -1044,15 +1046,15 @@ hypre_StructAssumedPartitionCreate(
       else
       {
          proc_array[i] = (HYPRE_Int)
-            hypre_round( ((HYPRE_Real)count_array[i]/(HYPRE_Real)total_boxes) *
-                         (HYPRE_Real) num_proc_partitions );
+                         hypre_round( ((HYPRE_Real)count_array[i] / (HYPRE_Real)total_boxes) *
+                                      (HYPRE_Real) num_proc_partitions );
       }
 
       box =  hypre_BoxArrayBox(region_array, i);
       dbl_vol = hypre_doubleBoxVolume(box);
 
       /* Can't have any zeros! */
-      if (!proc_array[i]) proc_array[i] = 1;
+      if (!proc_array[i]) { proc_array[i] = 1; }
 
       if (dbl_vol < (HYPRE_Real) proc_array[i])
       {
@@ -1102,7 +1104,7 @@ hypre_StructAssumedPartitionCreate(
       }
       else
       {
-         while (i < size && proc_array[i] <=1) /* size is the number of regions */
+         while (i < size && proc_array[i] <= 1) /* size is the number of regions */
          {
             i++;
          }
@@ -1117,11 +1119,11 @@ hypre_StructAssumedPartitionCreate(
       processor partition */
    /* size = # of regions */
    hypre_StructAssumedPartProcPartitions(assumed_part) =
-      hypre_CTAlloc(HYPRE_Int,  size+ 1, HYPRE_MEMORY_HOST);
+      hypre_CTAlloc(HYPRE_Int,  size + 1, HYPRE_MEMORY_HOST);
    hypre_StructAssumedPartProcPartition(assumed_part, 0) = 0;
    for (i = 0; i < size; i++)
    {
-      hypre_StructAssumedPartProcPartition(assumed_part, i+1) =
+      hypre_StructAssumedPartProcPartition(assumed_part, i + 1) =
          hypre_StructAssumedPartProcPartition(assumed_part, i) + proc_array[i];
    }
 
@@ -1162,12 +1164,12 @@ hypre_StructAssumedPartitionCreate(
 
       rn_cubes = hypre_doubleBoxVolume(box) / pow(wmin, ndim);
       rn_cube_procs = proc_count / rn_cubes;
-      rn_cube_divs = pow(rn_cube_procs, (1.0/(HYPRE_Real)ndim));
+      rn_cube_divs = pow(rn_cube_procs, (1.0 / (HYPRE_Real)ndim));
 
       for (d = 0; d < ndim; d++)
       {
          width = hypre_BoxSizeD(box, d);
-         rdiv = rn_cube_divs*(width/wmin);
+         rdiv = rn_cube_divs * (width / wmin);
          /* Add a small number to compensate for roundoff issues */
          hypre_IndexD(div_index, d) = (HYPRE_Int) floor(rdiv + 1.0e-6);
          /* Make sure div_index[d] is at least 1 */
@@ -1176,7 +1178,7 @@ hypre_StructAssumedPartitionCreate(
 
       /* Decrease div_index to ensure no more than 2 partitions per processor.
        * This is only needed when div_index[d] is adjusted to 1 above. */
-      while (hypre_IndexProd(div_index, ndim) >= 2*proc_count)
+      while (hypre_IndexProd(div_index, ndim) >= 2 * proc_count)
       {
          /* Decrease the max dimension by a factor of 2 without going below 1 */
          hypre_IndexD(div_index, dmax) = (hypre_IndexD(div_index, dmax) + 1) / 2;
@@ -1266,7 +1268,7 @@ hypre_StructAssumedPartitionCreate(
       /* Do we need more storage? */
       if ((count + proc_count) > size)
       {
-         size = size + proc_count + 1.2*(hypre_BoxArraySize(local_boxes)-i);
+         size = size + proc_count + 1.2 * (hypre_BoxArraySize(local_boxes) - i);
          /* hypre_printf("myid = %d, *adjust* alloc size = %d\n", myid, size);*/
          tmp_proc_ids = hypre_TReAlloc(tmp_proc_ids,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
          tmp_box_nums = hypre_TReAlloc(tmp_box_nums,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
@@ -1288,16 +1290,16 @@ hypre_StructAssumedPartitionCreate(
       and then create a new buffer to send to the exchange data function. */
 
    /* Sort the proc_ids */
-   hypre_qsort3i(tmp_proc_ids, tmp_box_nums, tmp_box_inds, 0, count-1);
+   hypre_qsort3i(tmp_proc_ids, tmp_box_nums, tmp_box_inds, 0, count - 1);
 
    /* Use proc_array for the processor ids to contact.  Use box array to get our
       boxes and then pass the array only (not the structure) to exchange data. */
    box_count = count;
 
-   contact_boxinfo = hypre_CTAlloc(HYPRE_Int,  box_count*(1+2*ndim), HYPRE_MEMORY_HOST);
+   contact_boxinfo = hypre_CTAlloc(HYPRE_Int,  box_count * (1 + 2 * ndim), HYPRE_MEMORY_HOST);
 
    proc_array = hypre_TReAlloc(proc_array,  HYPRE_Int,  box_count, HYPRE_MEMORY_HOST);
-   proc_array_starts = hypre_CTAlloc(HYPRE_Int,  box_count+1, HYPRE_MEMORY_HOST);
+   proc_array_starts = hypre_CTAlloc(HYPRE_Int,  box_count + 1, HYPRE_MEMORY_HOST);
    proc_array_starts[0] = 0;
 
    proc_count = 0;
@@ -1319,7 +1321,7 @@ hypre_StructAssumedPartitionCreate(
 
    for (i = 1; i < box_count; i++)
    {
-      if (tmp_proc_ids[i]  != proc_array[proc_count-1])
+      if (tmp_proc_ids[i]  != proc_array[proc_count - 1])
       {
          proc_array[proc_count] = tmp_proc_ids[i];
          proc_array_starts[proc_count] = i;
@@ -1371,7 +1373,7 @@ hypre_StructAssumedPartitionCreate(
 
    hypre_DataExchangeList(proc_count, proc_array,
                           contact_boxinfo, proc_array_starts,
-                          (1+2*ndim)*sizeof(HYPRE_Int),
+                          (1 + 2 * ndim)*sizeof(HYPRE_Int),
                           sizeof(HYPRE_Int), &response_obj, max_response_size, 1,
                           comm, (void**) &response_buf, &response_buf_starts);
 
@@ -1466,8 +1468,8 @@ hypre_APFillResponseStructAssumedPart(
    index = 0;
    for (i = 0; i < contact_size; i++)
    {
-      ids[size+i] = contact_proc; /* Set the proc id */
-      boxnums[size+i] = recv_contact_buf[index++];
+      ids[size + i] = contact_proc; /* Set the proc id */
+      boxnums[size + i] = recv_contact_buf[index++];
       for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(box, d) = recv_contact_buf[index++];
@@ -1533,7 +1535,7 @@ hypre_StructAssumedPartitionGetRegionsFromProc(
       in_region = 0;
       if (num_regions > 1)
       {
-         while (proc_id >= proc_partitions[in_region+1])
+         while (proc_id >= proc_partitions[in_region + 1])
          {
             in_region++;
          }
@@ -1542,7 +1544,7 @@ hypre_StructAssumedPartitionGetRegionsFromProc(
       /* First processor in the range */
       proc_start = proc_partitions[in_region];
       /* How many processors in that region? */
-      proc_count = proc_partitions[in_region+1] - proc_partitions[in_region];
+      proc_count = proc_partitions[in_region + 1] - proc_partitions[in_region];
       /* Get the region */
       region = hypre_BoxArrayBox(hypre_StructAssumedPartRegions(assumed_part),
                                  in_region);
@@ -1570,7 +1572,7 @@ hypre_StructAssumedPartitionGetRegionsFromProc(
       /* Get my partition number */
       if (adj_proc_id < extra)
       {
-         part_num = adj_proc_id*2;
+         part_num = adj_proc_id * 2;
          num_assumed = 2;
       }
       else
@@ -1587,15 +1589,15 @@ hypre_StructAssumedPartitionGetRegionsFromProc(
    {
       hypre_IndexFromRank(part_num + i, div, divindex, ndim);
 
-      for (d = ndim-1; d >= 0; d--)
+      for (d = ndim - 1; d >= 0; d--)
       {
          width = hypre_IndexD(rsize, d) / hypre_IndexD(div, d);
          extra = hypre_IndexD(rsize, d) % hypre_IndexD(div, d);
 
          divi = hypre_IndexD(divindex, d);
-         hypre_IndexD(imin, d) = divi*width + hypre_min(divi, extra);
+         hypre_IndexD(imin, d) = divi * width + hypre_min(divi, extra);
          divi = hypre_IndexD(divindex, d) + 1;
-         hypre_IndexD(imax, d) = divi*width + hypre_min(divi, extra) - 1;
+         hypre_IndexD(imax, d) = divi * width + hypre_min(divi, extra) - 1;
 
          /* Change relative coordinates to absolute */
          hypre_IndexD(imin, d) +=  hypre_BoxIMinD(region, d);
@@ -1711,7 +1713,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       /* First processor in the range */
       proc_start = proc_partitions[this_region];
       /* How many processors in that region? */
-      proc_count = proc_partitions[this_region+1] - proc_start;
+      proc_count = proc_partitions[this_region + 1] - proc_start;
       /* Size of the regions */
       hypre_BoxGetSize(region, rsize);
       /* Get the divisons in each dimension */
@@ -1730,27 +1732,27 @@ hypre_StructAssumedPartitionGetProcsFromBox(
 
          /* imin component, shifted by region imin */
          i = hypre_BoxIMinD(result_box, d) - hypre_BoxIMinD(region, d);
-         p = i/(width+1);
+         p = i / (width + 1);
          if (p < extra)
          {
             hypre_BoxIMinD(part_box, d) = p + 1;
          }
          else
          {
-            q = (i - extra*(width+1))/width;
+            q = (i - extra * (width + 1)) / width;
             hypre_BoxIMinD(part_box, d) = extra + q + 1;
          }
 
          /* imax component, shifted by region imin  */
          i = hypre_BoxIMaxD(result_box, d) - hypre_BoxIMinD(region, d);
-         p = i/(width+1);
+         p = i / (width + 1);
          if (p < extra)
          {
             hypre_BoxIMaxD(part_box, d) = p + 1;
          }
          else
          {
-            q = (i - extra*(width+1))/width;
+            q = (i - extra * (width + 1)) / width;
             hypre_BoxIMaxD(part_box, d) = extra + q + 1;
          }
       }
@@ -1768,13 +1770,13 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       hypre_SerialBoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
       {
          /*convert the partition number to a processor number*/
-         if (part_num < (2*extra))
+         if (part_num < (2 * extra))
          {
-            adj_proc_id = part_num/2 ;
+            adj_proc_id = part_num / 2 ;
          }
          else
          {
-            adj_proc_id =  extra + (part_num - 2*extra);
+            adj_proc_id =  extra + (part_num - 2 * extra);
          }
 
          if (num_proc_ids == size_proc_ids)
@@ -1794,7 +1796,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
    {
       /* Determine unique proc_ids (could be duplicates due to a processor
          owning more than one partiton in a region).  Sort the array. */
-      hypre_qsort0(proc_ids, 0, num_proc_ids-1);
+      hypre_qsort0(proc_ids, 0, num_proc_ids - 1);
 
       /* Make sure we have enough space from proc_array */
       if (*size_alloc_proc_array < num_proc_ids)
@@ -1808,7 +1810,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       proc_array_count = 1;
       for (i = 1; i < num_proc_ids; i++)
       {
-         if  (proc_ids[i] != proc_array[proc_array_count-1])
+         if  (proc_ids[i] != proc_array[proc_array_count - 1])
          {
             proc_array[proc_array_count] = proc_ids[i];
             proc_array_count++;
@@ -1869,7 +1871,7 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
    hypre_StructAssumedPartRegions(new_ap) = regions_array;
    hypre_StructAssumedPartNumRegions(new_ap) = num_regions;
    hypre_StructAssumedPartProcPartitions(new_ap) =
-      hypre_CTAlloc(HYPRE_Int,  num_regions+1, HYPRE_MEMORY_HOST);
+      hypre_CTAlloc(HYPRE_Int,  num_regions + 1, HYPRE_MEMORY_HOST);
    hypre_StructAssumedPartDivisions(new_ap) =
       hypre_CTAlloc(HYPRE_Int,  num_regions, HYPRE_MEMORY_HOST);
 
@@ -1884,8 +1886,8 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
       hypre_StructAssumedPartDivision(new_ap, i) =
          hypre_StructAssumedPartDivision(new_ap, i);
 
-      hypre_StructAssumedPartProcPartition(new_ap, i+1)=
-         hypre_StructAssumedPartProcPartition(ap, i+1);
+      hypre_StructAssumedPartProcPartition(new_ap, i + 1) =
+         hypre_StructAssumedPartProcPartition(ap, i + 1);
    }
 
    /* Copy my partition (at most 2 boxes)*/
@@ -1919,7 +1921,7 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
 
    hypre_ForBoxI(i, fine_boxes)
    {
-      box =  hypre_BoxArrayBox(fine_boxes,i);
+      box =  hypre_BoxArrayBox(fine_boxes, i);
       hypre_CopyBox(box, new_box);
       hypre_StructCoarsenBox(new_box, index, stride);
    }

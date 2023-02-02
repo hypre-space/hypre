@@ -1,16 +1,16 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
 #include "_hypre_parcsr_mv.h"
- 
+
 /*--------------------------------------------------------------------------
  * Test driver for PAR multivectors (under construction)
  *--------------------------------------------------------------------------*/
- 
+
 HYPRE_Int
 main( HYPRE_Int   argc,
       char *argv[] )
@@ -28,10 +28,10 @@ main( HYPRE_Int   argc,
    HYPRE_BigInt         *partitioning;
    HYPRE_Real           prod;
    HYPRE_Complex        *data, *data2;
-   hypre_Vector *vector; 
-   hypre_Vector *local_vector; 
+   hypre_Vector *vector;
+   hypre_Vector *local_vector;
    hypre_Vector *local_vector2;
- 
+
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -39,11 +39,11 @@ main( HYPRE_Int   argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id );
 
    hypre_printf(" my_id: %d num_procs: %d\n", my_id, num_procs);
- 
+
    partitioning = NULL;
    num_vectors = 3;
    vector1 = hypre_ParMultiVectorCreate
-      ( hypre_MPI_COMM_WORLD, global_size, partitioning, num_vectors );
+             ( hypre_MPI_COMM_WORLD, global_size, partitioning, num_vectors );
    partitioning = hypre_ParVectorPartitioning(vector1);
 
    hypre_ParVectorInitialize(vector1);
@@ -55,10 +55,12 @@ main( HYPRE_Int   argc,
    first_index = partitioning[my_id];
 
    hypre_printf("vecstride=%i idxstride=%i local_size=%i num_vectors=%i",
-          vecstride, idxstride, local_size, num_vectors );
-   for (j=0; j<num_vectors; ++j )
-      for (i=0; i < local_size; i++)
-         data[ j*vecstride + i*idxstride ] = (HYPRE_Int)first_index+i + 100*j;
+                vecstride, idxstride, local_size, num_vectors );
+   for (j = 0; j < num_vectors; ++j )
+      for (i = 0; i < local_size; i++)
+      {
+         data[ j * vecstride + i * idxstride ] = (HYPRE_Int)first_index + i + 100 * j;
+      }
 
    hypre_ParVectorPrint(vector1, "Vector");
 
@@ -67,21 +69,22 @@ main( HYPRE_Int   argc,
    data2 = hypre_VectorData(local_vector2);
    vecstride = hypre_VectorVectorStride(local_vector2);
    idxstride = hypre_VectorIndexStride(local_vector2);
-   for (j=0; j<num_vectors; ++j )
-      for (i=0; i < global_size; i++)
-         data2[ j*vecstride + i*idxstride ] = i + 100*j;
+   for (j = 0; j < num_vectors; ++j )
+      for (i = 0; i < global_size; i++)
+      {
+         data2[ j * vecstride + i * idxstride ] = i + 100 * j;
+      }
 
-/*   partitioning = hypre_CTAlloc(HYPRE_Int,4);
-   partitioning[0] = 0;
-   partitioning[1] = 10;
-   partitioning[2] = 10;
-   partitioning[3] = 20;
-*/
-   partitioning = hypre_CTAlloc(HYPRE_BigInt, 1+num_procs, HYPRE_MEMORY_HOST);
+   /*   partitioning = hypre_CTAlloc(HYPRE_Int,4);
+      partitioning[0] = 0;
+      partitioning[1] = 10;
+      partitioning[2] = 10;
+      partitioning[3] = 20;
+   */
+   partitioning = hypre_CTAlloc(HYPRE_BigInt, 1 + num_procs, HYPRE_MEMORY_HOST);
    hypre_GeneratePartitioning( global_size, num_procs, &partitioning );
 
-   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);
-   hypre_ParVectorSetPartitioningOwner(vector2,0);
+   vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD, local_vector2, partitioning);
 
    hypre_ParVectorPrint(vector2, "Convert");
 
@@ -91,33 +94,32 @@ main( HYPRE_Int   argc,
     * Copy the vector into tmp_vector
     *-----------------------------------------------------------*/
 
-/* Read doesn't work for multivectors yet...
-   tmp_vector = hypre_ParVectorRead(hypre_MPI_COMM_WORLD, "Convert");*/
+   /* Read doesn't work for multivectors yet...
+      tmp_vector = hypre_ParVectorRead(hypre_MPI_COMM_WORLD, "Convert");*/
    tmp_vector = hypre_ParMultiVectorCreate
-      ( hypre_MPI_COMM_WORLD, global_size, partitioning, num_vectors );
+                ( hypre_MPI_COMM_WORLD, global_size, partitioning, num_vectors );
    hypre_ParVectorInitialize( tmp_vector );
    hypre_ParVectorCopy( vector2, tmp_vector );
-/*
-   tmp_vector = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
-   hypre_ParVectorSetPartitioningOwner(tmp_vector,0);
-   hypre_ParVectorInitialize(tmp_vector);
-   hypre_ParVectorCopy(vector1, tmp_vector);
+   /*
+      tmp_vector = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD,global_size,partitioning);
+      hypre_ParVectorInitialize(tmp_vector);
+      hypre_ParVectorCopy(vector1, tmp_vector);
 
-   hypre_ParVectorPrint(tmp_vector,"Copy");
-*/
+      hypre_ParVectorPrint(tmp_vector,"Copy");
+   */
    /*-----------------------------------------------------------
     * Scale tmp_vector
     *-----------------------------------------------------------*/
 
    hypre_ParVectorScale(2.0, tmp_vector);
-   hypre_ParVectorPrint(tmp_vector,"Scale");
+   hypre_ParVectorPrint(tmp_vector, "Scale");
 
    /*-----------------------------------------------------------
     * Do an Axpy (2*vector - vector) = vector
     *-----------------------------------------------------------*/
 
    hypre_ParVectorAxpy(-1.0, vector1, tmp_vector);
-   hypre_ParVectorPrint(tmp_vector,"Axpy");
+   hypre_ParVectorPrint(tmp_vector, "Axpy");
 
    /*-----------------------------------------------------------
     * Do an inner product vector* tmp_vector
@@ -132,14 +134,13 @@ main( HYPRE_Int   argc,
     *-----------------------------------------------------------*/
 
    hypre_ParVectorDestroy(vector1);
-   hypre_ParVectorDestroy(vector2); 
+   hypre_ParVectorDestroy(vector2);
    hypre_ParVectorDestroy(tmp_vector);
-   hypre_SeqVectorDestroy(local_vector2); 
-   if (vector) hypre_SeqVectorDestroy(vector); 
+   hypre_SeqVectorDestroy(local_vector2);
+   if (vector) { hypre_SeqVectorDestroy(vector); }
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return 0;
 }
-

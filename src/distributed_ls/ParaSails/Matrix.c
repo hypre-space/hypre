@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -19,7 +19,7 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <memory.h>
+//#include <memory.h>
 #include "Common.h"
 #include "Matrix.h"
 #include "Numbering.h"
@@ -147,22 +147,22 @@ void MatrixDestroy(Matrix *mat)
    for (i=0; i<mat->num_recv; i++)
       hypre_MPI_Request_free(&mat->send_req2[i]);
 
-   free(mat->recv_req);
-   free(mat->send_req);
-   free(mat->recv_req2);
-   free(mat->send_req2);
-   free(mat->statuses);
+   hypre_TFree(mat->recv_req,HYPRE_MEMORY_HOST);
+   hypre_TFree(mat->send_req,HYPRE_MEMORY_HOST);
+   hypre_TFree(mat->recv_req2,HYPRE_MEMORY_HOST);
+   hypre_TFree(mat->send_req2,HYPRE_MEMORY_HOST);
+   hypre_TFree(mat->statuses,HYPRE_MEMORY_HOST);
 
-   free(mat->sendind);
-   free(mat->sendbuf);
-   free(mat->recvbuf);
+   hypre_TFree(mat->sendind,HYPRE_MEMORY_HOST);
+   hypre_TFree(mat->sendbuf,HYPRE_MEMORY_HOST);
+   hypre_TFree(mat->recvbuf,HYPRE_MEMORY_HOST);
 
    MemDestroy(mat->mem);
 
    if (mat->numb)
       NumberingDestroy(mat->numb);
 
-   free(mat);
+   hypre_TFree(mat,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -181,10 +181,16 @@ void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYP
    mat->vals[row] = (HYPRE_Real *) MemAlloc(mat->mem, len*sizeof(HYPRE_Real));
 
    if (ind != NULL)
-      hypre_TMemcpy(mat->inds[row],  ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   {
+      //hypre_TMemcpy(mat->inds[row], ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      memcpy(mat->inds[row], ind, sizeof(HYPRE_Int) * len);
+   }
 
    if (val != NULL)
-      hypre_TMemcpy(mat->vals[row],  val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   {
+      //hypre_TMemcpy(mat->vals[row], val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      memcpy(mat->vals[row], val, sizeof(HYPRE_Real) * len);
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -560,7 +566,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
 
       if (buflen < num_local)
       {
-         free(buffer);
+         hypre_TFree(buffer,HYPRE_MEMORY_HOST);
          buflen = num_local;
          buffer = hypre_TAlloc(HYPRE_Real, buflen , HYPRE_MEMORY_HOST);
       }
@@ -574,7 +580,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
       hypre_MPI_Send(buffer, num_local, hypre_MPI_REAL, pe, 0, mat->comm);
    }
 
-   free(buffer);
+   hypre_TFree(buffer,HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -683,8 +689,8 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
    }
 
    hypre_MPI_Waitall(mat->num_send, requests, statuses);
-   free(requests);
-   free(statuses);
+   hypre_TFree(requests,HYPRE_MEMORY_HOST);
+   hypre_TFree(statuses,HYPRE_MEMORY_HOST);
 
    /* convert global indices to local indices */
    /* these are all indices on this processor */
@@ -725,8 +731,8 @@ void MatrixComplete(Matrix *mat)
 
    SetupSends(mat, inlist);
 
-   free(outlist);
-   free(inlist);
+   hypre_TFree(outlist,HYPRE_MEMORY_HOST);
+   hypre_TFree(inlist,HYPRE_MEMORY_HOST);
 
    /* Convert to local indices */
    for (row=0; row<=mat->end_row - mat->beg_row; row++)

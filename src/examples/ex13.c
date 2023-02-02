@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -84,6 +84,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
+#include "ex.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979
@@ -118,33 +119,37 @@
 
                   F_j = (1,phi_j)_R = h^2/4 * sin(gamma)
 */
-void ComputeFEMRhombus (double S[4][4], double F[4], double gamma, double h)
+void ComputeFEMRhombus (double **S, double F[4], double gamma, double h)
 {
    int i, j;
 
-   double h2_4 = h*h/4;
+   double h2_4 = h * h / 4;
    double sing = sin(gamma);
-   double alpha = 1/(6*sing);
-   double k = 3*cos(gamma);
+   double alpha = 1 / (6 * sing);
+   double k = 3 * cos(gamma);
 
-   S[0][0] = alpha * (4-k);
+   S[0][0] = alpha * (4 - k);
    S[0][1] = alpha * (-1);
-   S[0][2] = alpha * (-2+k);
+   S[0][2] = alpha * (-2 + k);
    S[0][3] = alpha * (-1);
-   S[1][1] = alpha * (4+k);
+   S[1][1] = alpha * (4 + k);
    S[1][2] = alpha * (-1);
-   S[1][3] = alpha * (-2-k);
-   S[2][2] = alpha * (4-k);
+   S[1][3] = alpha * (-2 - k);
+   S[2][2] = alpha * (4 - k);
    S[2][3] = alpha * (-1);
-   S[3][3] = alpha * (4+k);
+   S[3][3] = alpha * (4 + k);
 
    /* The stiffness matrix is symmetric */
    for (i = 1; i < 4; i++)
       for (j = 0; j < i; j++)
+      {
          S[i][j] = S[j][i];
+      }
 
    for (i = 0; i < 4; i++)
-      F[i] = h2_4*sing;
+   {
+      F[i] = h2_4 * sing;
+   }
 }
 
 
@@ -171,6 +176,9 @@ int main (int argc, char *argv[])
 
    /* Initialize HYPRE */
    HYPRE_Init();
+
+   /* Print GPU info */
+   /* HYPRE_PrintDeviceInfo(); */
 
    /* Set default parameters */
    n = 10;
@@ -225,12 +233,12 @@ int main (int argc, char *argv[])
       number of processors np and the given n */
    if (num_procs < 3)
    {
-      if (myid ==0) printf("Must run with at least 3 processors!\n");
+      if (myid == 0) { printf("Must run with at least 3 processors!\n"); }
       MPI_Finalize();
       exit(1);
    }
-   gamma = 2*M_PI/num_procs;
-   h = 1.0/n;
+   gamma = 2 * M_PI / num_procs;
+   h = 1.0 / n;
 
    /* 1. Set up the grid.  We will set up the grid so that processor X owns
          part X.  Note that each part has its own index space numbering. Later
@@ -246,8 +254,8 @@ int main (int argc, char *argv[])
          part has its own relative index space numbering */
       {
          int part = myid;
-         int ilower[2] = {1,1}; /* lower-left cell touching the origin */
-         int iupper[2] = {n,n}; /* upper-right cell */
+         int ilower[2] = {1, 1}; /* lower-left cell touching the origin */
+         int iupper[2] = {n, n}; /* upper-right cell */
 
          HYPRE_SStructGridSetExtents(grid, part, ilower, iupper);
       }
@@ -261,7 +269,9 @@ int main (int argc, char *argv[])
 
          HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_NODE};
          for (i = 0; i < nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* Now we need to set the spatial relation between each of the parts.
@@ -274,19 +284,19 @@ int main (int argc, char *argv[])
          {
             int part = myid;
             /* the box of cells intersecting the boundary in the current part */
-            int ilower[2] = {1,1}, iupper[2] = {1,n};
+            int ilower[2] = {1, 1}, iupper[2] = {1, n};
             /* share all data on the left side of the box */
-            int offset[2] = {-1,0};
+            int offset[2] = {-1, 0};
 
-            int shared_part = (myid+1) % num_procs;
+            int shared_part = (myid + 1) % num_procs;
             /* the box of cells intersecting the boundary in the neighbor */
-            int shared_ilower[2] = {1,1}, shared_iupper[2] = {n,1};
+            int shared_ilower[2] = {1, 1}, shared_iupper[2] = {n, 1};
             /* share all data on the bottom of the box */
-            int shared_offset[2] = {0,-1};
+            int shared_offset[2] = {0, -1};
 
             /* x/y-direction on the current part is -y/x on the neighbor */
-            int index_map[2] = {1,0};
-            int index_dir[2] = {-1,1};
+            int index_map[2] = {1, 0};
+            int index_dir[2] = {-1, 1};
 
             HYPRE_SStructGridSetSharedPart(grid, part, ilower, iupper, offset,
                                            shared_part, shared_ilower,
@@ -300,19 +310,19 @@ int main (int argc, char *argv[])
          {
             int part = myid;
             /* the box of cells intersecting the boundary in the current part */
-            int ilower[2] = {1,1}, iupper[2] = {n,1};
+            int ilower[2] = {1, 1}, iupper[2] = {n, 1};
             /* share all data on the bottom of the box */
-            int offset[2] = {0,-1};
+            int offset[2] = {0, -1};
 
-            int shared_part = (myid+num_procs-1) % num_procs;
+            int shared_part = (myid + num_procs - 1) % num_procs;
             /* the box of cells intersecting the boundary in the neighbor */
-            int shared_ilower[2] = {1,1}, shared_iupper[2] = {1,n};
+            int shared_ilower[2] = {1, 1}, shared_iupper[2] = {1, n};
             /* share all data on the left side of the box */
-            int shared_offset[2] = {-1,0};
+            int shared_offset[2] = {-1, 0};
 
             /* x/y-direction on the current part is y/-x on the neighbor */
-            int index_map[2] = {1,0};
-            int index_dir[2] = {1,-1};
+            int index_map[2] = {1, 0};
+            int index_dir[2] = {1, -1};
 
             HYPRE_SStructGridSetSharedPart(grid, part, ilower, iupper, offset,
                                            shared_part, shared_ilower,
@@ -325,29 +335,29 @@ int main (int argc, char *argv[])
          {
             int part = myid;
             /* the (one cell) box that touches the origin */
-            int ilower[2] = {1,1}, iupper[2] = {1,1};
+            int ilower[2] = {1, 1}, iupper[2] = {1, 1};
             /* share all data in the bottom left corner (i.e. the origin) */
-            int offset[2] = {-1,-1};
+            int offset[2] = {-1, -1};
 
             int shared_part;
             /* the box of one cell that touches the origin */
-            int shared_ilower[2] = {1,1}, shared_iupper[2] = {1,1};
+            int shared_ilower[2] = {1, 1}, shared_iupper[2] = {1, 1};
             /* share all data in the bottom left corner (i.e. the origin) */
-            int shared_offset[2] = {-1,-1};
+            int shared_offset[2] = {-1, -1};
 
             /* x/y-direction on the current part is -x/-y on the neighbor, but
                in this case the arguments are not really important since we are
                only sharing a point */
-            int index_map[2] = {0,1};
-            int index_dir[2] = {-1,-1};
+            int index_map[2] = {0, 1};
+            int index_dir[2] = {-1, -1};
 
-            for (shared_part = 0; shared_part < myid-1; shared_part++)
+            for (shared_part = 0; shared_part < myid - 1; shared_part++)
                HYPRE_SStructGridSetSharedPart(grid, part, ilower, iupper, offset,
                                               shared_part, shared_ilower,
                                               shared_iupper, shared_offset,
                                               index_map, index_dir);
 
-            for (shared_part = myid+2; shared_part < num_procs; shared_part++)
+            for (shared_part = myid + 2; shared_part < num_procs; shared_part++)
                HYPRE_SStructGridSetSharedPart(grid, part, ilower, iupper, offset,
                                               shared_part, shared_ilower,
                                               shared_iupper, shared_offset,
@@ -369,16 +379,21 @@ int main (int argc, char *argv[])
 
       /* Define the geometry of the 9-point stencil */
       int stencil_size = 9;
-      int offsets[9][2] = {{0,0},           /*  [8] [4] [7]  */
-                           {-1,0}, {1,0},   /*     \ | /     */
-                           {0,-1}, {0,1},   /*  [1]-[0]-[2]  */
-                           {-1,-1}, {1,-1}, /*     / | \     */
-                           {1,1}, {-1,1}};  /*  [5] [3] [6]  */
+      int offsets[9][2] =
+      {
+         { 0,  0},           /*  [8] [4] [7]  */
+         {-1,  0}, { 1,  0}, /*     \ | /     */
+         { 0, -1}, { 0,  1}, /*  [1]-[0]-[2]  */
+         {-1, -1}, { 1, -1}, /*     / | \     */
+         { 1,  1}, {-1,  1}  /*  [5] [3] [6]  */
+      };
 
       HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil);
 
       for (entry = 0; entry < stencil_size; entry++)
+      {
          HYPRE_SStructStencilSetEntry(stencil, entry, offsets[entry], var);
+      }
    }
 
    /* 3. Set up the Graph - this determines the non-zero structure of the
@@ -396,7 +411,9 @@ int main (int argc, char *argv[])
       /* Now we need to tell the graph which stencil to use for each
          variable on each part (we only have one variable) */
       for (part = 0; part < num_procs; part++)
+      {
          HYPRE_SStructGraphSetStencil(graph, part, var, stencil);
+      }
 
       /* Assemble the graph */
       HYPRE_SStructGraphAssemble(graph);
@@ -424,12 +441,17 @@ int main (int argc, char *argv[])
       /* Set the matrix and vector entries by finite element assembly */
       {
          /* local stifness matrix and load vector */
-         double S[4][4], F[4];
+         /* double F[4]; OK to use constant-length arrays for CPUs */
+         double *F = (double *) malloc(4 * sizeof(double));
+         /*double S[4][4]; OK to use constant-length arrays for CPUs */
+         double *S_flat = (double *) malloc(16 * sizeof(double));
+         double *S[4];
+         S[0] = S_flat; S[1] = S[0] + 4; S[2] = S[1] + 4; S[3] = S[2] + 4;
 
          /* The index of the local nodes 0-3 relative to the cell index,
             i.e. node k in cell (i,j) is in the upper-right corner of the
             cell (i,j) + node_index_offset[k]. */
-         int node_index_offset[4][2] = {{-1,-1},{0,-1},{0,0},{-1,0}};
+         int node_index_offset[4][2] = {{-1, -1}, {0, -1}, {0, 0}, {-1, 0}};
 
          /* The cell sub-stencils of nodes 0-3 indexed from the full stencil,
             i.e. we take the full stencil in each node of a fixed cell, and
@@ -443,7 +465,7 @@ int main (int argc, char *argv[])
             therefore the above sub-stencil at node k corresponds to the kth row
             of the local stiffness matrix and the kth entry of the local load
             vector. */
-         int node_stencil[4][4] = {{0,2,7,4},{1,0,4,8},{5,3,0,1},{3,6,2,0}};
+         int node_stencil[4][4] = {{0, 2, 7, 4}, {1, 0, 4, 8}, {5, 3, 0, 1}, {3, 6, 2, 0}};
 
          int i, j, k;
          int index[2];
@@ -552,6 +574,8 @@ int main (int argc, char *argv[])
                      HYPRE_SStructVectorAddToValues(b, part, index, var, &F[k]);
                   }
          }
+         free(F);
+         free(S_flat);
       }
    }
 
@@ -563,14 +587,14 @@ int main (int argc, char *argv[])
    {
       int part = myid;
       int var = 0;
-      int nvalues = (n+1)*(n+1);
+      int nvalues = (n + 1) * (n + 1);
       double *values;
 
       /* Since the SetBoxValues() calls below set the values of the nodes in
          the upper-right corners of the cells, the nodal box should start
          from (0,0) instead of (1,1). */
-      int ilower[2] = {0,0};
-      int iupper[2] = {n,n};
+      int ilower[2] = {0, 0};
+      int iupper[2] = {n, n};
 
       values = (double*) calloc(nvalues, sizeof(double));
 
@@ -637,10 +661,10 @@ int main (int argc, char *argv[])
          char filename[255];
 
          int i, part = myid, var = 0;
-         int nvalues = (n+1)*(n+1);
+         int nvalues = (n + 1) * (n + 1);
          double *values = (double*) calloc(nvalues, sizeof(double));
-         int ilower[2] = {0,0};
-         int iupper[2] = {n,n};
+         int ilower[2] = {0, 0};
+         int iupper[2] = {n, n};
 
          /* get all local data (including a local copy of the shared values) */
          HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
@@ -662,7 +686,9 @@ int main (int argc, char *argv[])
 
          /* save solution */
          for (i = 0; i < nvalues; i++)
+         {
             fprintf(file, "%.14e\n", values[i]);
+         }
 
          fflush(file);
          fclose(file);

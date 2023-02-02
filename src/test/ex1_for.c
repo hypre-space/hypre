@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -45,11 +45,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    hypre_F90_Obj b;
    hypre_F90_Obj x;
    hypre_F90_Obj solver;
-        HYPRE_Int temp_COMM;
-        HYPRE_Int one = 1;
-        HYPRE_Int two = 2;
-        HYPRE_Int five = 5;
-     HYPRE_Real tol = 1.e-6;
+   HYPRE_Int temp_COMM;
+   HYPRE_Int one = 1;
+   HYPRE_Int two = 2;
+   HYPRE_Int five = 5;
+   HYPRE_Real tol = 1.e-6;
 #else
    HYPRE_StructGrid     grid;
    HYPRE_StructStencil  stencil;
@@ -77,7 +77,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Add boxes to the grid */
       if (myid == 0)
       {
-         HYPRE_Int ilower[2]={-3,1}, iupper[2]={-1,2};
+         HYPRE_Int ilower[2] = {-3, 1}, iupper[2] = {-1, 2};
 #ifdef HYPRE_FORTRAN
          HYPRE_StructGridSetExtents(&grid, &ilower[0], &iupper[0]);
 #else
@@ -86,7 +86,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
       else if (myid == 1)
       {
-         HYPRE_Int ilower[2]={0,1}, iupper[2]={2,4};
+         HYPRE_Int ilower[2] = {0, 1}, iupper[2] = {2, 4};
 #ifdef HYPRE_FORTRAN
          HYPRE_StructGridSetExtents(&grid, &ilower[0], &iupper[0]);
 #else
@@ -116,15 +116,19 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          relative offset (in the index space). */
       {
          HYPRE_Int entry;
-         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
          /* Assign each of the 5 stencil entries */
 #ifdef HYPRE_FORTRAN
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_StructStencilSetElement(&stencil, &entry, offsets[entry]);
+         }
 #else
          for (entry = 0; entry < 5; entry++)
+         {
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+         }
 #endif
       }
    }
@@ -153,8 +157,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          the boundary. */
       if (myid == 0)
       {
-         HYPRE_Int ilower[2]={-3,1}, iupper[2]={-1,2};
-         HYPRE_Int stencil_indices[5] = {0,1,2,3,4}; /* labels for the stencil entries -
+         HYPRE_Int ilower[2] = {-3, 1}, iupper[2] = {-1, 2};
+         HYPRE_Int stencil_indices[5] = {0, 1, 2, 3, 4}; /* labels for the stencil entries -
                                                   these correspond to the offsets
                                                   defined above */
          HYPRE_Int nentries = 5;
@@ -166,7 +170,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          {
             values[i] = 4.0;
             for (j = 1; j < nentries; j++)
-               values[i+j] = -1.0;
+            {
+               values[i + j] = -1.0;
+            }
          }
 
 #ifdef HYPRE_FORTRAN
@@ -179,8 +185,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
       else if (myid == 1)
       {
-         HYPRE_Int ilower[2]={0,1}, iupper[2]={2,4};
-         HYPRE_Int stencil_indices[5] = {0,1,2,3,4};
+         HYPRE_Int ilower[2] = {0, 1}, iupper[2] = {2, 4};
+         HYPRE_Int stencil_indices[5] = {0, 1, 2, 3, 4};
          HYPRE_Int nentries = 5;
          HYPRE_Int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
          HYPRE_Real values[60];
@@ -189,7 +195,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          {
             values[i] = 4.0;
             for (j = 1; j < nentries; j++)
-               values[i+j] = -1.0;
+            {
+               values[i + j] = -1.0;
+            }
          }
 
 #ifdef HYPRE_FORTRAN
@@ -206,14 +214,16 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       {
          HYPRE_Real values[3];
          for (i = 0; i < 3; i++)
+         {
             values[i] = 0.0;
+         }
          {
             /* values below our box */
-            HYPRE_Int ilower[2]={-3,1}, iupper[2]={-1,1};
+            HYPRE_Int ilower[2] = {-3, 1}, iupper[2] = {-1, 1};
             HYPRE_Int stencil_indices[1] = {3};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -221,11 +231,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          }
          {
             /* values to the left of our box */
-            HYPRE_Int ilower[2]={-3,1}, iupper[2]={-3,2};
+            HYPRE_Int ilower[2] = {-3, 1}, iupper[2] = {-3, 2};
             HYPRE_Int stencil_indices[1] = {1};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -233,11 +243,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          }
          {
             /* values above our box */
-            HYPRE_Int ilower[2]={-3,2}, iupper[2]={-1,2};
+            HYPRE_Int ilower[2] = {-3, 2}, iupper[2] = {-1, 2};
             HYPRE_Int stencil_indices[1] = {4};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -248,14 +258,16 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       {
          HYPRE_Real values[4];
          for (i = 0; i < 4; i++)
+         {
             values[i] = 0.0;
+         }
          {
             /* values below our box */
-            HYPRE_Int ilower[2]={0,1}, iupper[2]={2,1};
+            HYPRE_Int ilower[2] = {0, 1}, iupper[2] = {2, 1};
             HYPRE_Int stencil_indices[1] = {3};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -264,11 +276,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          {
             /* values to the right of our box
                (that do not border the other box on proc. 0) */
-            HYPRE_Int ilower[2]={2,1}, iupper[2]={2,4};
+            HYPRE_Int ilower[2] = {2, 1}, iupper[2] = {2, 4};
             HYPRE_Int stencil_indices[1] = {2};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -276,11 +288,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          }
          {
             /* values above our box */
-            HYPRE_Int ilower[2]={0,4}, iupper[2]={2,4};
+            HYPRE_Int ilower[2] = {0, 4}, iupper[2] = {2, 4};
             HYPRE_Int stencil_indices[1] = {4};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -288,11 +300,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          }
          {
             /* values to the left of our box */
-            HYPRE_Int ilower[2]={0,3}, iupper[2]={0,4};
+            HYPRE_Int ilower[2] = {0, 3}, iupper[2] = {0, 4};
             HYPRE_Int stencil_indices[1] = {1};
 #ifdef HYPRE_FORTRAN
             HYPRE_StructMatrixSetBoxValues(&A, &ilower[0], &iupper[0], &one,
-                                        &stencil_indices[0], &values[0]);
+                                           &stencil_indices[0], &values[0]);
 #else
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
@@ -333,11 +345,13 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Set the vector coefficients */
       if (myid == 0)
       {
-         HYPRE_Int ilower[2]={-3,1}, iupper[2]={-1,2};
+         HYPRE_Int ilower[2] = {-3, 1}, iupper[2] = {-1, 2};
          HYPRE_Real values[6]; /* 6 grid points */
 
          for (i = 0; i < 6; i ++)
+         {
             values[i] = 1.0;
+         }
 #ifdef HYPRE_FORTRAN
          HYPRE_StructVectorSetBoxValues(&b, &ilower[0], &iupper[0], &values[0]);
 #else
@@ -345,7 +359,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
          for (i = 0; i < 6; i ++)
+         {
             values[i] = 0.0;
+         }
 #ifdef HYPRE_FORTRAN
          HYPRE_StructVectorSetBoxValues(&x, &ilower[0], &iupper[0], &values[0]);
 #else
@@ -354,11 +370,13 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
       else if (myid == 1)
       {
-         HYPRE_Int ilower[2]={0,1}, iupper[2]={2,4};
+         HYPRE_Int ilower[2] = {0, 1}, iupper[2] = {2, 4};
          HYPRE_Real values[12]; /* 12 grid points */
 
          for (i = 0; i < 12; i ++)
+         {
             values[i] = 1.0;
+         }
 #ifdef HYPRE_FORTRAN
          HYPRE_StructVectorSetBoxValues(&b, &ilower[0], &iupper[0], &values[0]);
 #else
@@ -366,7 +384,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 #endif
 
          for (i = 0; i < 12; i ++)
+         {
             values[i] = 0.0;
+         }
 #ifdef HYPRE_FORTRAN
          HYPRE_StructVectorSetBoxValues(&x, &ilower[0], &iupper[0], &values[0]);
 #else

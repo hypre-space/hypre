@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -33,11 +33,6 @@
 
 #include "_hypre_utilities.h"
 
-/*
-#if defined(HYPRE_USING_CUDA)
-__managed__ __device__
-#endif
-*/
 static HYPRE_Int Seed = 13579;
 
 /*-------------------------------------------------------------------------------
@@ -55,17 +50,16 @@ static HYPRE_Int Seed = 13579;
  *
  * @param seed an HYPRE_Int containing the seed for the RNG.
  *--------------------------------------------------------------------------*/
-/* HYPRE_CUDA_GLOBAL */
 void hypre_SeedRand( HYPRE_Int seed )
 {
    /* RL: seed must be between 1 and 2^31-2 */
-   if (seed < 1) 
+   if (seed < 1)
    {
       seed = 1;
    }
    else if (seed >= m)
    {
-     seed = m - 1;
+      seed = m - 1;
    }
 
    Seed = seed;
@@ -77,14 +71,13 @@ void hypre_SeedRand( HYPRE_Int seed )
  *
  * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
-/* HYPRE_CUDA_GLOBAL */
-HYPRE_Int hypre_RandI()
+HYPRE_Int hypre_RandI( void )
 {
    HYPRE_Int  low, high, test;
    high = Seed / q;
    low = Seed % q;
    test = a * low - r * high;
-   if(test > 0)
+   if (test > 0)
    {
       Seed = test;
    }
@@ -103,9 +96,8 @@ HYPRE_Int hypre_RandI()
  * @return a HYPRE_Real containing the next number in the sequence divided by
  * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
-/* HYPRE_CUDA_GLOBAL */
-HYPRE_Real hypre_Rand()
+HYPRE_Real hypre_Rand( void )
 {
-  return ((HYPRE_Real)(hypre_RandI()) / m);
+   return ((HYPRE_Real)(hypre_RandI()) / (HYPRE_Real)m);
 }
 

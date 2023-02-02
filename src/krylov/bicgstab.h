@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -70,20 +70,20 @@ HYPRE_Int hypre_ParKrylovMatvecT( void *matvec_data , HYPRE_Real alpha , void *A
 
 typedef struct
 {
-  void *     (*CreateVector)  ( void *vvector );
-  HYPRE_Int  (*DestroyVector) ( void *vvector );
-  void *     (*MatvecCreate)  ( void *A , void *x );
-  HYPRE_Int  (*Matvec)        ( void *matvec_data , HYPRE_Complex alpha , void *A ,
-                                void *x , HYPRE_Complex beta , void *y );
-  HYPRE_Int  (*MatvecDestroy) ( void *matvec_data );
-  HYPRE_Real (*InnerProd)     ( void *x , void *y );
-  HYPRE_Int  (*CopyVector)    ( void *x , void *y );
-  HYPRE_Int  (*ClearVector)   ( void *x );
-  HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha , void *x );
-  HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha , void *x , void *y );
-  HYPRE_Int  (*CommInfo)      ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
-	HYPRE_Int  (*precond_setup) (void *vdata , void *A , void *b , void *x);
-	HYPRE_Int  (*precond)       (void *vdata , void *A , void *b , void *x);
+   void *     (*CreateVector)  ( void *vvector );
+   HYPRE_Int  (*DestroyVector) ( void *vvector );
+   void *     (*MatvecCreate)  ( void *A, void *x );
+   HYPRE_Int  (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                 void *x, HYPRE_Complex beta, void *y );
+   HYPRE_Int  (*MatvecDestroy) ( void *matvec_data );
+   HYPRE_Real (*InnerProd)     ( void *x, void *y );
+   HYPRE_Int  (*CopyVector)    ( void *x, void *y );
+   HYPRE_Int  (*ClearVector)   ( void *x );
+   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
+   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
+   HYPRE_Int  (*CommInfo)      ( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs );
+   HYPRE_Int  (*precond_setup) (void *vdata, void *A, void *b, void *x);
+   HYPRE_Int  (*precond)       (void *vdata, void *A, void *b, void *x);
 
 } hypre_BiCGSTABFunctions;
 
@@ -102,7 +102,7 @@ typedef struct
    HYPRE_Real   cf_tol;
    HYPRE_Real   rel_residual_norm;
    HYPRE_Real   a_tol;
-   
+
 
    void  *A;
    void  *r;
@@ -119,7 +119,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int      num_iterations;
- 
+
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int      logging;
    HYPRE_Int      print_level;
@@ -149,20 +149,20 @@ hypre_BiCGSTABFunctions *
 hypre_BiCGSTABFunctionsCreate(
    void *     (*CreateVector)  ( void *vvector ),
    HYPRE_Int  (*DestroyVector) ( void *vvector ),
-   void *     (*MatvecCreate)  ( void *A , void *x ),
-   HYPRE_Int  (*Matvec)        ( void *matvec_data , HYPRE_Complex alpha , void *A ,
-                                 void *x , HYPRE_Complex beta , void *y ),
+   void *     (*MatvecCreate)  ( void *A, void *x ),
+   HYPRE_Int  (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                 void *x, HYPRE_Complex beta, void *y ),
    HYPRE_Int  (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real (*InnerProd)     ( void *x , void *y ),
-   HYPRE_Int  (*CopyVector)    ( void *x , void *y ),
+   HYPRE_Real (*InnerProd)     ( void *x, void *y ),
+   HYPRE_Int  (*CopyVector)    ( void *x, void *y ),
    HYPRE_Int  (*ClearVector)   ( void *x ),
-   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha , void *x ),
-   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha , void *x , void *y ),
-   HYPRE_Int  (*CommInfo)      ( void *A , HYPRE_Int *my_id ,
+   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
+   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
+   HYPRE_Int  (*CommInfo)      ( void *A, HYPRE_Int *my_id,
                                  HYPRE_Int *num_procs ),
    HYPRE_Int  (*PrecondSetup)  (void *vdata, void *A, void *b, void *x ),
    HYPRE_Int  (*Precond)       ( void *vdata, void *A, void *b, void *x )
-   );
+);
 
 /**
  * Description...

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -17,7 +17,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 {
    hypre_SMGData *smg_data;
 
-   smg_data = hypre_CTAlloc(hypre_SMGData,  1, HYPRE_MEMORY_HOST);
+   smg_data = hypre_CTAlloc(hypre_SMGData, 1, HYPRE_MEMORY_HOST);
 
    (smg_data -> comm)        = comm;
    (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
@@ -37,11 +37,11 @@ hypre_SMGCreate( MPI_Comm  comm )
    (smg_data -> logging) = 0;
    (smg_data -> print_level) = 0;
 
+   (smg_data -> memory_location) = hypre_HandleMemoryLocation(hypre_handle());
+
    /* initialize */
    (smg_data -> num_levels) = -1;
-#if defined(HYPRE_USING_CUDA)
-   (smg_data -> devicelevel) = 200;
-#endif
+
    return (void *) smg_data;
 }
 
@@ -64,6 +64,8 @@ hypre_SMGDestroy( void *smg_vdata )
          hypre_TFree(smg_data -> norms, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
+
+      HYPRE_MemoryLocation memory_location = smg_data -> memory_location;
 
       if ((smg_data -> num_levels) > -1)
       {
@@ -92,9 +94,9 @@ hypre_SMGDestroy( void *smg_vdata )
          hypre_StructVectorDestroy(smg_data -> x_l[0]);
          for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
-            hypre_StructGridDestroy(smg_data -> grid_l[l+1]);
-            hypre_StructGridDestroy(smg_data -> PT_grid_l[l+1]);
-            hypre_StructMatrixDestroy(smg_data -> A_l[l+1]);
+            hypre_StructGridDestroy(smg_data -> grid_l[l + 1]);
+            hypre_StructGridDestroy(smg_data -> PT_grid_l[l + 1]);
+            hypre_StructMatrixDestroy(smg_data -> A_l[l + 1]);
             if (smg_data -> PT_l[l] == smg_data -> R_l[l])
             {
                hypre_StructMatrixDestroy(smg_data -> PT_l[l]);
@@ -104,12 +106,12 @@ hypre_SMGDestroy( void *smg_vdata )
                hypre_StructMatrixDestroy(smg_data -> PT_l[l]);
                hypre_StructMatrixDestroy(smg_data -> R_l[l]);
             }
-            hypre_StructVectorDestroy(smg_data -> b_l[l+1]);
-            hypre_StructVectorDestroy(smg_data -> x_l[l+1]);
-            hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
-            hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
+            hypre_StructVectorDestroy(smg_data -> b_l[l + 1]);
+            hypre_StructVectorDestroy(smg_data -> x_l[l + 1]);
+            hypre_StructVectorDestroy(smg_data -> tb_l[l + 1]);
+            hypre_StructVectorDestroy(smg_data -> tx_l[l + 1]);
          }
-          hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(smg_data -> data, memory_location);
          hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> PT_grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> A_l, HYPRE_MEMORY_HOST);
@@ -265,7 +267,7 @@ hypre_SMGSetNumPreRelax( void *smg_vdata,
 {
    hypre_SMGData *smg_data = (hypre_SMGData *)smg_vdata;
 
-   (smg_data -> num_pre_relax) = hypre_max(num_pre_relax,1);
+   (smg_data -> num_pre_relax) = hypre_max(num_pre_relax, 1);
 
    return hypre_error_flag;
 }
@@ -416,8 +418,8 @@ hypre_SMGPrintLogging( void *smg_vdata,
          {
             for (i = 0; i < num_iterations; i++)
             {
-               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+               hypre_printf("Residual norm[%d] = %e   ", i, norms[i]);
+               hypre_printf("Relative residual norm[%d] = %e\n", i, rel_norms[i]);
             }
          }
       }
@@ -444,7 +446,7 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
    {
       if (num_iterations == max_iter)
       {
-         *relative_residual_norm = rel_norms[num_iterations-1];
+         *relative_residual_norm = rel_norms[num_iterations - 1];
       }
       else
       {
@@ -516,7 +518,7 @@ hypre_StructSMGSetMaxLevel( void   *smg_vdata,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA)
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 HYPRE_Int
 hypre_StructSMGSetDeviceLevel( void   *smg_vdata,
                                HYPRE_Int   device_level  )

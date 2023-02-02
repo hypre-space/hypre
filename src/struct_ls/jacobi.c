@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -30,7 +30,7 @@ hypre_JacobiCreate( MPI_Comm  comm )
    hypre_SetIndex3(stride, 1, 1, 1);
    hypre_SetIndex3(indices[0], 0, 0, 0);
    hypre_PointRelaxSetPointset(relax_data, 0, 1, stride, indices);
-   hypre_PointRelaxSetTol(relax_data,1.0e-6);
+   hypre_PointRelaxSetTol(relax_data, 1.0e-6);
    (jacobi_data -> relax_data) = relax_data;
 
    return (void *) jacobi_data;
@@ -42,7 +42,7 @@ hypre_JacobiCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_JacobiDestroy( void *jacobi_vdata )
 {
-	hypre_JacobiData *jacobi_data = (hypre_JacobiData *)jacobi_vdata;
+   hypre_JacobiData *jacobi_data = (hypre_JacobiData *)jacobi_vdata;
 
    if (jacobi_data)
    {

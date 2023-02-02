@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -21,7 +21,7 @@
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_sstruct_ls.h"
- 
+
 #define HYPRE_BICGSTAB   99100
 #define HYPRE_BOOMERAMG  99110
 #define HYPRE_CGNR       99120
@@ -46,8 +46,8 @@
 /****************************************************************************
  * Prototypes for testing routines
  ***************************************************************************/
-HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int precond_id, 
-                      void *solver, void *precond);
+HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int precond_id,
+                            void *solver, void *precond);
 
 HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond);
 
@@ -73,12 +73,12 @@ HYPRE_Int      overlap = 1;
 HYPRE_Int      domain_type = 2;
 HYPRE_Int      nonzeros_to_keep = -1;
 
-HYPRE_Int      interp_type; 
+HYPRE_Int      interp_type;
 HYPRE_Int      cycle_type;
 HYPRE_Int      relax_default;
 HYPRE_Int     *dof_func;
-HYPRE_Int     *num_grid_sweeps;  
-HYPRE_Int     *grid_relax_type;   
+HYPRE_Int     *num_grid_sweeps;
+HYPRE_Int     *grid_relax_type;
 HYPRE_Int    **grid_relax_points;
 
 HYPRE_Real   tol = 1.e-8;
@@ -91,7 +91,7 @@ HYPRE_Real   sai_filter = 0.1;
 
 HYPRE_Real   strong_threshold;
 HYPRE_Real   trunc_factor;
-HYPRE_Real  *relax_weight; 
+HYPRE_Real  *relax_weight;
 HYPRE_Real  *omega;
 
 #endif

@@ -13,7 +13,7 @@ extern "C" {
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ integer dscal_(integer *n, doublereal *da, doublereal *dx, 
+/* Subroutine */ integer dscal_(integer *n, doublereal *da, doublereal *dx,
 	integer *incx)
 {
 
@@ -21,18 +21,18 @@ extern "C" {
     /* System generated locals */
 
     /* Local variables */
-    static integer i, m, nincx, mp1;
+    integer i, m, nincx, mp1;
 
 
-/*     scales a vector by a constant.   
-       uses unrolled loops for increment equal to one.   
-       jack dongarra, linpack, 3/11/78.   
-       modified 3/93 to return if incx .le. 0.   
-       modified 12/3/93, array(1) declarations changed to array(*)   
+/*     scales a vector by a constant.
+       uses unrolled loops for increment equal to one.
+       jack dongarra, linpack, 3/11/78.
+       modified 3/93 to return if incx .le. 0.
+       modified 12/3/93, array(1) declarations changed to array(*)
 
 
-    
-   Parameter adjustments   
+
+   Parameter adjustments
        Function Body */
 #define DX(I) dx[(I)-1]
 
@@ -53,7 +53,7 @@ extern "C" {
     }
     return 0;
 
-/*        code for increment equal to 1   
+/*        code for increment equal to 1
 
 
           clean-up loop */

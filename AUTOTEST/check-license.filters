@@ -2,6 +2,7 @@
 ./AUTOTEST/.*.fil
 ./AUTOTEST/.*.err
 ./AUTOTEST/.*.log
+./AUTOTEST/runtests-.*
 ./src/test/struct_migrate
 ./src/test/maxwell_unscaled
 ./src/test/sstruct_fac
@@ -14,4 +15,5 @@
 ./src/zerr
 ./src/config.log
 ./src/config.status
+.gitignore
 TVD.v3breakpoints

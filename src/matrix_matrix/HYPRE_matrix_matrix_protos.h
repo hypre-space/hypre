@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -9,9 +9,11 @@
 
 #ifdef PETSC_AVAILABLE
 /* HYPRE_ConvertPETScMatrixToDistributedMatrix.c */
-HYPRE_Int HYPRE_ConvertPETScMatrixToDistributedMatrix (Mat PETSc_matrix , HYPRE_DistributedMatrix *DistributedMatrix );
+HYPRE_Int HYPRE_ConvertPETScMatrixToDistributedMatrix (Mat PETSc_matrix,
+                                                       HYPRE_DistributedMatrix *DistributedMatrix );
 #endif
 
 /* HYPRE_ConvertParCSRMatrixToDistributedMatrix.c */
-HYPRE_Int HYPRE_ConvertParCSRMatrixToDistributedMatrix (HYPRE_ParCSRMatrix parcsr_matrix , HYPRE_DistributedMatrix *DistributedMatrix );
+HYPRE_Int HYPRE_ConvertParCSRMatrixToDistributedMatrix (HYPRE_ParCSRMatrix parcsr_matrix,
+                                                        HYPRE_DistributedMatrix *DistributedMatrix );
 

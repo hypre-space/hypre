@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -56,7 +56,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    stencil_size  = hypre_StructStencilSize(stencil);
    stencil_data  = hypre_StructMatrixStencilData(matrix);
 
-   mask = hypre_CTAlloc(hypre_StructMatrix,  1, HYPRE_MEMORY_HOST);
+   mask = hypre_CTAlloc(hypre_StructMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_StructMatrixComm(mask) = hypre_StructMatrixComm(matrix);
 
@@ -67,7 +67,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
       hypre_StructStencilRef(hypre_StructMatrixUserStencil(matrix));
 
    mask_stencil_size  = num_stencil_indices;
-   mask_stencil_shape = hypre_CTAlloc(hypre_Index,  num_stencil_indices, HYPRE_MEMORY_HOST);
+   mask_stencil_shape = hypre_CTAlloc(hypre_Index, num_stencil_indices, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_stencil_indices; i++)
    {
       hypre_CopyIndex(stencil_shape[stencil_indices[i]],
@@ -83,9 +83,11 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    hypre_StructMatrixDataSpace(mask) =
       hypre_BoxArrayDuplicate(hypre_StructMatrixDataSpace(matrix));
 
+   hypre_StructMatrixMemoryLocation(mask) = hypre_StructMatrixMemoryLocation(matrix);
+
    hypre_StructMatrixData(mask) = hypre_StructMatrixData(matrix);
    hypre_StructMatrixDataConst(mask) = hypre_StructMatrixDataConst(matrix);
-   
+
    hypre_StructMatrixDataAlloced(mask) = 0;
    hypre_StructMatrixDataSize(mask) = hypre_StructMatrixDataSize(matrix);
    hypre_StructMatrixDataConstSize(mask) = hypre_StructMatrixDataConstSize(matrix);
@@ -94,11 +96,15 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    mask_data_indices = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
    mask_stencil_data  = hypre_TAlloc(HYPRE_Complex*, mask_stencil_size, HYPRE_MEMORY_HOST);
    if (hypre_BoxArraySize(data_space) > 0)
-	   mask_data_indices[0] = hypre_TAlloc(HYPRE_Int,  num_stencil_indices*hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
-   
+   {
+      mask_data_indices[0] = hypre_TAlloc(HYPRE_Int,
+                                          num_stencil_indices * hypre_BoxArraySize(data_space),
+                                          HYPRE_MEMORY_HOST);
+   }
+
    hypre_ForBoxI(i, data_space)
    {
-      mask_data_indices[i] = mask_data_indices[0] + num_stencil_indices*i;
+      mask_data_indices[i] = mask_data_indices[0] + num_stencil_indices * i;
       for (j = 0; j < num_stencil_indices; j++)
       {
          mask_data_indices[i][j] = data_indices[i][stencil_indices[j]];
@@ -121,7 +127,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
          hypre_StructMatrixSymmElements(matrix)[i];
    }
 
-   for (i = 0; i < 2*ndim; i++)
+   for (i = 0; i < 2 * ndim; i++)
    {
       hypre_StructMatrixNumGhost(mask)[i] =
          hypre_StructMatrixNumGhost(matrix)[i];

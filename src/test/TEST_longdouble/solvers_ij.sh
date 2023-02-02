@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -44,7 +44,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
-done > ${TNAME}.out
+done > ${TNAME}.out.a
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out.a | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.8\
@@ -57,7 +64,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -5 $i
-done >> ${TNAME}.out
+done > ${TNAME}.out.b
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Relative" ${TNAME}.out.b | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.sysh\
@@ -69,7 +83,14 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -21 $i | head -6
-done >> ${TNAME}.out
+done > ${TNAME}.out.c
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Complexity" ${TNAME}.out.c | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
 
 FILES="\
  ${TNAME}.out.101\
@@ -95,19 +116,17 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -3 $i
-done >> ${TNAME}.out
+done > ${TNAME}.out.d
 
-# Make sure that the output files are reasonable
-CHECK_LINE="Complexity"
-OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
-SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
-if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
-   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "Iterations" ${TNAME}.out.d | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
-if [ -z $HYPRE_NO_SAVED ]; then
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
-fi
+# put all of the output files together
+cat ${TNAME}.out.[a-z] > ${TNAME}.out
 
 #=============================================================================
 # remove temporary files

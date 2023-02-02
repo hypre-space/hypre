@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -30,7 +30,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
    matrix_i[0] = 0;
    for (i = 0; i < num_rows; i++)
    {
-      matrix_i[i+1] = matrix_i[i] + row_sizes[i];
+      matrix_i[i + 1] = matrix_i[i] + row_sizes[i];
    }
 
    matrix = hypre_CSRMatrixCreate(num_rows, num_cols, matrix_i[num_rows]);
@@ -46,7 +46,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
 HYPRE_Int
 HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
 {
-   return( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
+   return ( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------

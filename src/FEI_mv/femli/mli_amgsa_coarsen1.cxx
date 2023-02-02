@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -733,8 +733,6 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       delete [] colInd;
       delete [] colVal;
       Pmat = hypre_ParMatmul( Jmat, Pmat2);
-      hypre_ParCSRMatrixOwnsRowStarts(Jmat) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(Pmat2) = 0;
       hypre_ParCSRMatrixDestroy(Pmat2);
       delete mli_Jmat;
    }

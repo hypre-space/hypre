@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -63,7 +63,7 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *f, *u, *vTemp;
    hypre_ParVector    *zTemp = NULL;
-   
+
    //int              mypid;
    //double           rnorm;
    //MPI_Comm         comm;
@@ -84,10 +84,7 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                                     hypre_ParCSRMatrixGlobalNumRows(A),
                                     hypre_ParCSRMatrixRowStarts(A));
       hypre_ParVectorInitialize(zTemp);
-      hypre_ParVectorSetPartitioningOwner(zTemp,0);
    }
-
-
 
    //comm  = hypre_ParCSRMatrixComm(A);
    //MPI_Comm_rank(comm, &mypid);
@@ -99,7 +96,7 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
       //hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, vTemp );
       //rnorm = sqrt(hypre_ParVectorInnerProd( vTemp, vTemp ));
       //if ( mypid == 0 )
-      //   printf("\tMLI_Solver_HSGS iter = %4d, rnorm = %e (omega=%e)\n", 
+      //   printf("\tMLI_Solver_HSGS iter = %4d, rnorm = %e (omega=%e)\n",
       //             iS, rnorm, relaxWeights_);
    }
 
@@ -121,7 +118,7 @@ int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
    sscanf(paramString, "%s", param1);
    if (!strcmp(param1, "numSweeps"))
    {
-      if ( argc != 1 ) 
+      if ( argc != 1 )
       {
          printf("MLI_Solver_HSGS::setParams ERROR : needs 1 arg.\n");
          return 1;
@@ -132,7 +129,7 @@ int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
    }
    else if ( !strcmp(param1, "relaxWeight") )
    {
-      if ( argc != 2 && argc != 1 ) 
+      if ( argc != 2 && argc != 1 )
       {
          printf("MLI_Solver_HSGS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
@@ -140,7 +137,7 @@ int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
       if ( argc >= 1 ) nSweeps_ = *(int*)  argv[0];
       if ( argc == 2 ) weights = (double*) argv[1];
       if ( nSweeps_ < 1 ) nSweeps_ = 1;
-      if ( weights != NULL ) relaxWeights_ = weights[0]; 
+      if ( weights != NULL ) relaxWeights_ = weights[0];
    }
    else if ( !strcmp(param1, "calcOmega") )
    {
@@ -181,4 +178,3 @@ int MLI_Solver_HSGS::calcOmega()
    hypre_TFree(amgData, HYPRE_MEMORY_HOST);
    return 0;
 }
-

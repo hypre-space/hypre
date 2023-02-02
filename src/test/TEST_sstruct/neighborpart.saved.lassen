@@ -1,0 +1,76 @@
+# Output file: neighborpart.out.0
+Iterations = 96
+Final Relative Residual Norm = 9.348679e-07
+
+# Output file: neighborpart.out.1
+Iterations = 96
+Final Relative Residual Norm = 9.348679e-07
+
+# Output file: neighborpart.out.2
+Iterations = 96
+Final Relative Residual Norm = 9.348679e-07
+
+# Output file: neighborpart.out.3
+Iterations = 96
+Final Relative Residual Norm = 9.348679e-07
+
+# Output file: neighborpart.out.10
+Iterations = 16
+Final Relative Residual Norm = 4.551724e-07
+
+# Output file: neighborpart.out.11
+Iterations = 16
+Final Relative Residual Norm = 4.551724e-07
+
+# Output file: neighborpart.out.20
+Iterations = 48
+Final Relative Residual Norm = 8.933706e-07
+
+# Output file: neighborpart.out.21
+Iterations = 48
+Final Relative Residual Norm = 8.933706e-07
+
+# Output file: neighborpart.out.30
+Iterations = 16
+Final Relative Residual Norm = 4.498034e-07
+
+# Output file: neighborpart.out.31
+Iterations = 16
+Final Relative Residual Norm = 4.498034e-07
+
+# Output file: neighborpart.out.32
+Iterations = 16
+Final Relative Residual Norm = 4.498034e-07
+
+# Output file: neighborpart.out.40
+Iterations = 48
+Final Relative Residual Norm = 8.804864e-07
+
+# Output file: neighborpart.out.41
+Iterations = 48
+Final Relative Residual Norm = 8.804864e-07
+
+# Output file: neighborpart.out.50
+Iterations = 48
+Final Relative Residual Norm = 8.604821e-07
+
+# Output file: neighborpart.out.51
+Iterations = 48
+Final Relative Residual Norm = 8.604821e-07
+
+# Output file: neighborpart.out.52
+Iterations = 48
+Final Relative Residual Norm = 8.604821e-07
+
+# Output file: neighborpart.out.60
+Iterations = 5
+Final Relative Residual Norm = 3.281199e-18
+
+# Output file: neighborpart.out.61
+Iterations = 5
+Final Relative Residual Norm = 3.281199e-18
+
+# Output file: neighborpart.out.62
+Iterations = 5
+Final Relative Residual Norm = 3.281199e-18
+

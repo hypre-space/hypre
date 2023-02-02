@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -236,8 +236,8 @@ int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
              }
           } else nz++;
        }
-       free( colInd2 );
-       free( colVal2 );
+       hypre_TFree(colInd2, HYPRE_MEMORY_HOST);
+       hypre_TFree(colVal2, HYPRE_MEMORY_HOST);
        ia_ptr[i+1] = nz_ptr;
        ierr = HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
        hypre_assert(!ierr);
@@ -351,8 +351,8 @@ int HYPRE_LSI_SplitDSort2(double *dlist, int nlist, int *ilist, int limit)
       dlist[count1+1+i] = darray2[i];
       ilist[count1+1+i] = iarray2[i];
    }
-   free( darray1 );
-   free( iarray1 );
+   hypre_TFree(darray1, HYPRE_MEMORY_HOST);
+   hypre_TFree(iarray1, HYPRE_MEMORY_HOST);
    if ( count1+1 == limit ) return 0;
    else if ( count1+1 < limit )
       HYPRE_LSI_SplitDSort2(&(dlist[count1+1]),count2,&(ilist[count1+1]),
@@ -508,12 +508,12 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
    for ( i = 0; i < nnz; i++ ) ja[i] = reorder_array[ja2[i]];
    for ( i = 0; i < nnz; i++ ) aa[i] = aa2[i];
    for ( i = 0; i <= n; i++ )  ia[i] = ia2[i];
-   free( ia2 );
-   free( ja2 );
-   free( aa2 );
-   free( nz_array );
-   free( tag_array );
-   free( queue );
+   hypre_TFree(ia2, HYPRE_MEMORY_HOST);
+   hypre_TFree(ja2, HYPRE_MEMORY_HOST);
+   hypre_TFree(aa2, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(tag_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(queue, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -690,7 +690,7 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
    {
       printf("HYPRE_LSI_PartitionMatrix : number of labels %d too large.\n",
              labelNum+1);
-      free( localLabels );
+      hypre_TFree(localLabels, HYPRE_MEMORY_HOST);
       (*nLabels) = 0;
       (*labels)  = NULL;
    }
@@ -700,7 +700,7 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
              labelNum);
       (*labels)  = localLabels;
    }
-   free( indSet );
+   hypre_TFree(indSet, HYPRE_MEMORY_HOST);
    return 0;
 }
 

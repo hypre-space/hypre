@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -12,13 +12,13 @@
 
 typedef struct
 {
-  HYPRE_Int    numVectors;
-  HYPRE_Int*   mask;
-  void**       vector;
-  HYPRE_Int    ownsVectors;
-  HYPRE_Int    ownsMask;
+   HYPRE_Int    numVectors;
+   HYPRE_Int*   mask;
+   void**       vector;
+   HYPRE_Int    ownsVectors;
+   HYPRE_Int    ownsMask;
 
-  mv_InterfaceInterpreter* interpreter;
+   mv_InterfaceInterpreter* interpreter;
 
 } mv_TempMultiVector;
 
@@ -109,29 +109,29 @@ mv_TempMultiVectorAxpy( HYPRE_Complex, void*, void* );
 
 void
 mv_TempMultiVectorByMultiVector( void*, void*,
-                                    HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v );
+                                 HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v );
 
 void
 mv_TempMultiVectorByMultiVectorDiag( void* x, void* y,
-                                        HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag );
+                                     HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag );
 
 void
 mv_TempMultiVectorByMatrix( void*,
-                               HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
-                               void* );
+                            HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
+                            void* );
 
 void
 mv_TempMultiVectorXapy( void* x,
-                           HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
-                           void* y );
+                        HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
+                        void* y );
 
 void mv_TempMultiVectorByDiagonal( void* x,
-                                      HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag,
-                                      void* y );
+                                   HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag,
+                                   void* y );
 
 void
 mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
-                           void* x, void* y );
+                        void* x, void* y );
 
 #ifdef __cplusplus
 }

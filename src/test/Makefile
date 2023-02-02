@@ -1,4 +1,4 @@
-# Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -14,7 +14,6 @@ CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
@@ -23,7 +22,6 @@ C_COMPILE_FLAGS = \
 
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
  $(SUPERLU_INCLUDE)\
@@ -33,7 +31,6 @@ CXX_COMPILE_FLAGS = \
 
 F77_COMPILE_FLAGS = \
  -I$(srcdir)\
- -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
 
@@ -42,14 +39,25 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
 
-ifeq (${LINK_CC}, nvcc)
+# WM: currently have to add the absolute path to libHYPRE.a when building sycl code; RL: reorg
+ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicx)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicpx)
+   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
+else
+   LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
+endif
+
+ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
 else
    XLINK = -Wl,-rpath,${HYPRE_BUILD_DIR}/lib
 endif
 
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib -lHYPRE\
+ $(LIBHYPRE)\
  ${XLINK}\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
@@ -84,6 +92,7 @@ HYPRE_DRIVERS =\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
+ ij_mm.c\
  zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
@@ -117,7 +126,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o*
+	rm -f *.o *.obj *.csv
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -143,30 +152,24 @@ distclean: clean
 # Rules
 ##################################################################
 
-ifeq ($(CUCC), )
-   OBJ_SUFFIX=o
-else
-   OBJ_SUFFIX=obj
-endif
-
 # C
 hypre_drive: ${HYPRE_DRIVE_OBJS}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ ${HYPRE_DRIVE_OBJS} ${LFLAGS}
 
-ij: ij.${OBJ_SUFFIX}
+ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_assembly: ij_assembly.${OBJ_SUFFIX}
+ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct: sstruct.${OBJ_SUFFIX}
+sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.${OBJ_SUFFIX}
+struct: struct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -174,15 +177,15 @@ ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-maxwell_unscaled: maxwell_unscaled.${OBJ_SUFFIX}
+maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.${OBJ_SUFFIX}
+struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct_fac: sstruct_fac.${OBJ_SUFFIX}
+sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -190,15 +193,15 @@ ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_device: ij_device.${OBJ_SUFFIX}
+ij_device: ij_device.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_mm: ij_mm.${OBJ_SUFFIX}
+ij_mm: ij_mm.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-zboxloop: zboxloop.${OBJ_SUFFIX}
+zboxloop: zboxloop.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -207,6 +210,10 @@ struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 test_mgr: test_mgr.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mgr_gpu: test_mgr_gpu.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

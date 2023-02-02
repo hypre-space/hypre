@@ -9,127 +9,127 @@ extern "C" {
 #include "hypre_lapack.h"
 
 /* Subroutine */ integer dsyev_(const char *jobz,const char *uplo, integer *n, doublereal *a,
-	 integer *lda, doublereal *w, doublereal *work, integer *lwork, 
+	 integer *lda, doublereal *w, doublereal *work, integer *lwork,
 	integer *info)
 {
-/*  -- LAPACK driver routine (version 3.0) --   
-       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
-       Courant Institute, Argonne National Lab, and Rice University   
-       June 30, 1999   
+/*  -- LAPACK driver routine (version 3.0) --
+       Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
+       Courant Institute, Argonne National Lab, and Rice University
+       June 30, 1999
 
 
-    Purpose   
-    =======   
+    Purpose
+    =======
 
-    DSYEV computes all eigenvalues and, optionally, eigenvectors of a   
-    real symmetric matrix A.   
+    DSYEV computes all eigenvalues and, optionally, eigenvectors of a
+    real symmetric matrix A.
 
-    Arguments   
-    =========   
+    Arguments
+    =========
 
-    JOBZ    (input) CHARACTER*1   
-            = 'N':  Compute eigenvalues only;   
-            = 'V':  Compute eigenvalues and eigenvectors.   
+    JOBZ    (input) CHARACTER*1
+            = 'N':  Compute eigenvalues only;
+            = 'V':  Compute eigenvalues and eigenvectors.
 
-    UPLO    (input) CHARACTER*1   
-            = 'U':  Upper triangle of A is stored;   
-            = 'L':  Lower triangle of A is stored.   
+    UPLO    (input) CHARACTER*1
+            = 'U':  Upper triangle of A is stored;
+            = 'L':  Lower triangle of A is stored.
 
-    N       (input) INTEGER   
-            The order of the matrix A.  N >= 0.   
+    N       (input) INTEGER
+            The order of the matrix A.  N >= 0.
 
-    A       (input/output) DOUBLE PRECISION array, dimension (LDA, N)   
-            On entry, the symmetric matrix A.  If UPLO = 'U', the   
-            leading N-by-N upper triangular part of A contains the   
-            upper triangular part of the matrix A.  If UPLO = 'L',   
-            the leading N-by-N lower triangular part of A contains   
-            the lower triangular part of the matrix A.   
-            On exit, if JOBZ = 'V', then if INFO = 0, A contains the   
-            orthonormal eigenvectors of the matrix A.   
-            If JOBZ = 'N', then on exit the lower triangle (if UPLO='L')   
-            or the upper triangle (if UPLO='U') of A, including the   
-            diagonal, is destroyed.   
+    A       (input/output) DOUBLE PRECISION array, dimension (LDA, N)
+            On entry, the symmetric matrix A.  If UPLO = 'U', the
+            leading N-by-N upper triangular part of A contains the
+            upper triangular part of the matrix A.  If UPLO = 'L',
+            the leading N-by-N lower triangular part of A contains
+            the lower triangular part of the matrix A.
+            On exit, if JOBZ = 'V', then if INFO = 0, A contains the
+            orthonormal eigenvectors of the matrix A.
+            If JOBZ = 'N', then on exit the lower triangle (if UPLO='L')
+            or the upper triangle (if UPLO='U') of A, including the
+            diagonal, is destroyed.
 
-    LDA     (input) INTEGER   
-            The leading dimension of the array A.  LDA >= max(1,N).   
+    LDA     (input) INTEGER
+            The leading dimension of the array A.  LDA >= max(1,N).
 
-    W       (output) DOUBLE PRECISION array, dimension (N)   
-            If INFO = 0, the eigenvalues in ascending order.   
+    W       (output) DOUBLE PRECISION array, dimension (N)
+            If INFO = 0, the eigenvalues in ascending order.
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
-            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
+    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)
+            On exit, if INFO = 0, WORK(1) returns the optimal LWORK.
 
-    LWORK   (input) INTEGER   
-            The length of the array WORK.  LWORK >= max(1,3*N-1).   
-            For optimal efficiency, LWORK >= (NB+2)*N,   
-            where NB is the blocksize for DSYTRD returned by ILAENV.   
+    LWORK   (input) INTEGER
+            The length of the array WORK.  LWORK >= max(1,3*N-1).
+            For optimal efficiency, LWORK >= (NB+2)*N,
+            where NB is the blocksize for DSYTRD returned by ILAENV.
 
-            If LWORK = -1, then a workspace query is assumed; the routine   
-            only calculates the optimal size of the WORK array, returns   
-            this value as the first entry of the WORK array, and no error   
-            message related to LWORK is issued by XERBLA.   
+            If LWORK = -1, then a workspace query is assumed; the routine
+            only calculates the optimal size of the WORK array, returns
+            this value as the first entry of the WORK array, and no error
+            message related to LWORK is issued by XERBLA.
 
-    INFO    (output) INTEGER   
-            = 0:  successful exit   
-            < 0:  if INFO = -i, the i-th argument had an illegal value   
-            > 0:  if INFO = i, the algorithm failed to converge; i   
-                  off-diagonal elements of an intermediate tridiagonal   
-                  form did not converge to zero.   
+    INFO    (output) INTEGER
+            = 0:  successful exit
+            < 0:  if INFO = -i, the i-th argument had an illegal value
+            > 0:  if INFO = i, the algorithm failed to converge; i
+                  off-diagonal elements of an intermediate tridiagonal
+                  form did not converge to zero.
 
-    =====================================================================   
+    =====================================================================
 
 
-       Test the input parameters.   
+       Test the input parameters.
 
        Parameter adjustments */
     /* Table of constant values */
-    static integer c__1 = 1;
-    static integer c_n1 = -1;
-    static integer c__0 = 0;
-    static doublereal c_b17 = 1.;
-    
+    integer c__1 = 1;
+    integer c_n1 = -1;
+    integer c__0 = 0;
+    doublereal c_b17 = 1.;
+
     /* System generated locals */
     integer a_dim1, a_offset, i__1, i__2;
     doublereal d__1;
     /* Local variables */
-    static integer inde;
-    static doublereal anrm;
-    static integer imax;
-    static doublereal rmin, rmax;
-/***static integer lopt;***/
-    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
+    integer inde;
+    doublereal anrm;
+    integer imax;
+    doublereal rmin, rmax;
+/*** integer lopt;***/
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *,
 	    integer *);
-    static doublereal sigma;
+    doublereal sigma;
     extern logical lsame_(const char *,const char *);
-    static integer iinfo;
-    static logical lower, wantz;
-    static integer nb;
+    integer iinfo;
+    logical lower, wantz;
+    integer nb;
     extern doublereal dlamch_(const char *);
-    static integer iscale;
-    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *, 
-	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
+    integer iscale;
+    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *,
+	    doublereal *, doublereal *, integer *, integer *, doublereal *,
 	    integer *, integer *);
-    static doublereal safmin;
-    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
+    doublereal safmin;
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *,
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
-    static doublereal bignum;
-    static integer indtau;
+    doublereal bignum;
+    integer indtau;
     extern /* Subroutine */ integer dsterf_(integer *, doublereal *, doublereal *,
 	     integer *);
-    extern doublereal dlansy_(const char *,const char *, integer *, doublereal *, 
+    extern doublereal dlansy_(const char *,const char *, integer *, doublereal *,
 	    integer *, doublereal *);
-    static integer indwrk;
-    extern /* Subroutine */ integer dorgtr_(const char *, integer *, doublereal *, 
-	    integer *, doublereal *, doublereal *, integer *, integer *), dsteqr_(const char *, integer *, doublereal *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *), 
-	    dsytrd_(const char *, integer *, doublereal *, integer *, doublereal *, 
+    integer indwrk;
+    extern /* Subroutine */ integer dorgtr_(const char *, integer *, doublereal *,
+	    integer *, doublereal *, doublereal *, integer *, integer *), dsteqr_(const char *, integer *, doublereal *, doublereal *,
+	    doublereal *, integer *, doublereal *, integer *),
+	    dsytrd_(const char *, integer *, doublereal *, integer *, doublereal *,
 	    doublereal *, doublereal *, doublereal *, integer *, integer *);
-    static integer llwork;
-    static doublereal smlnum;
-    static integer lwkopt;
-    static logical lquery;
-    static doublereal eps;
+    integer llwork;
+    doublereal smlnum;
+    integer lwkopt;
+    logical lquery;
+    doublereal eps;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 
@@ -215,7 +215,7 @@ extern "C" {
 	sigma = rmax / anrm;
     }
     if (iscale == 1) {
-	dlascl_(uplo, &c__0, &c__0, &c_b17, &sigma, n, n, &a[a_offset], lda, 
+	dlascl_(uplo, &c__0, &c__0, &c_b17, &sigma, n, n, &a[a_offset], lda,
 		info);
     }
 
@@ -229,7 +229,7 @@ extern "C" {
 	    work[indwrk], &llwork, &iinfo);
 /***lopt = (integer) ((*n << 1) + work[indwrk]);***/
 
-/*     For eigenvalues only, call DSTERF.  For eigenvectors, first call   
+/*     For eigenvalues only, call DSTERF.  For eigenvectors, first call
        DORGTR to generate the orthogonal matrix, then call DSTEQR. */
 
     if (! wantz) {

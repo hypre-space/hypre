@@ -1,4 +1,4 @@
-!     Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+!     Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 !     HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 !
 !     SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,14 +37,10 @@
       implicit none
 
       include 'mpif.h'
+      include 'HYPREf.h'
 
       integer    MAX_LOCAL_SIZE
-      integer    HYPRE_PARCSR
-
       parameter  (MAX_LOCAL_SIZE=123000)
-
-!     the following is from HYPRE.c
-      parameter  (HYPRE_PARCSR=5555)
 
       integer    ierr
       integer    num_procs, myid
@@ -57,7 +53,9 @@
       double precision x_values(MAX_LOCAL_SIZE)
       integer    rows(MAX_LOCAL_SIZE)
       integer    cols(5)
+      integer    tmp(2)
       double precision values(5)
+
       integer    num_iterations
       double precision final_res_norm, tol
 
@@ -82,6 +80,20 @@
       mpi_comm = MPI_COMM_WORLD
 
       call HYPRE_Init(ierr)
+
+      call HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE, ierr)
+      call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)
+
+      call HYPRE_SetSpGemmUseVendor(0, ierr)
+
+!   Call omp target after HYPRE_Init()
+
+      !$omp target enter data map(alloc:rhs_values)
+      !$omp target enter data map(alloc:x_values)
+      !$omp target enter data map(alloc:rows)
+      !$omp target enter data map(alloc:cols)
+      !$omp target enter data map(alloc:values)
+      !$omp target enter data map(alloc:tmp)
 
 !   Default problem parameters
       n = 33
@@ -178,9 +190,13 @@
          endif
 
 !        Set the values for row i
+         tmp(1) = nnz - 1
+         tmp(2) = i
+         !$omp target update to(cols, values, tmp)
+         !$omp target data use_device_ptr(cols, values, tmp)
          call HYPRE_IJMatrixSetValues(
-     1        A, 1, nnz-1, i, cols, values, ierr)
-
+     1        A, 1, tmp(1), tmp(2), cols, values, ierr)
+         !$omp end target data
       enddo
 
 
@@ -209,10 +225,14 @@
          x_values(i) = 0.0
          rows(i) = ilower + i -1
       enddo
+
+      !$omp target update to(rhs_values, x_values, rows)
+      !$omp target data use_device_ptr(rows, rhs_values, x_values)
       call HYPRE_IJVectorSetValues(
      1     b, local_size, rows, rhs_values, ierr)
       call HYPRE_IJVectorSetValues(
      1     x, local_size, rows, x_values, ierr)
+      !$omp end target data
 
 
       call HYPRE_IJVectorAssemble(b, ierr)
@@ -249,6 +269,8 @@
          call HYPRE_BoomerAMGSetMaxLevels(solver, 20, ierr)
 !        conv. tolerance
          call HYPRE_BoomerAMGSetTol(solver, 1.0d-7, ierr)
+!        Keep local transposes
+         call HYPRE_BoomerAMGSetKeepTransp(solver, 1, ierr)
 
 !        Now setup and solve!
          call HYPRE_BoomerAMGSetup(
@@ -464,6 +486,13 @@
 
 !     Finalize MPI
       call MPI_Finalize(ierr)
+
+      !$omp target exit data map(release:rhs_values)
+      !$omp target exit data map(release:x_values)
+      !$omp target exit data map(release:rows)
+      !$omp target exit data map(release:cols)
+      !$omp target exit data map(release:values)
+      !$omp target exit data map(release:tmp)
 
       stop
       end

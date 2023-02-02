@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -17,19 +17,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 /*--------------------------------------------------------------------------
  * HYPRE_SchwarzCreate
  *--------------------------------------------------------------------------*/
 
 void
 hypre_F90_IFACE(hypre_schwarzcreate, HYPRE_SCHWARZCREATE)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzCreate(
-           hypre_F90_PassObjRef (HYPRE_Solver, solver)));
+           ( HYPRE_SchwarzCreate(
+                hypre_F90_PassObjRef (HYPRE_Solver, solver)));
 }
 
 /*--------------------------------------------------------------------------
@@ -38,12 +38,12 @@ hypre_F90_IFACE(hypre_schwarzcreate, HYPRE_SCHWARZCREATE)
 
 void
 hypre_F90_IFACE(hypre_schwarzdestroy, HYPRE_SCHWARZDESTROY)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzDestroy(
-           hypre_F90_PassObj (HYPRE_Solver, solver) ));
+           ( HYPRE_SchwarzDestroy(
+                hypre_F90_PassObj (HYPRE_Solver, solver) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -52,18 +52,18 @@ hypre_F90_IFACE(hypre_schwarzdestroy, HYPRE_SCHWARZDESTROY)
 
 void
 hypre_F90_IFACE(hypre_schwarzsetup, HYPRE_SCHWARZSETUP)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Obj *A,
-    hypre_F90_Obj *b,
-    hypre_F90_Obj *x,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Obj *A,
+ hypre_F90_Obj *b,
+ hypre_F90_Obj *x,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzSetup(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
-           hypre_F90_PassObj (HYPRE_ParVector, b),
-           hypre_F90_PassObj (HYPRE_ParVector, x) ));
+           ( HYPRE_SchwarzSetup(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+                hypre_F90_PassObj (HYPRE_ParVector, b),
+                hypre_F90_PassObj (HYPRE_ParVector, x) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -72,18 +72,18 @@ hypre_F90_IFACE(hypre_schwarzsetup, HYPRE_SCHWARZSETUP)
 
 void
 hypre_F90_IFACE(hypre_schwarzsolve, HYPRE_SCHWARZSOLVE)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Obj *A,
-    hypre_F90_Obj *b,
-    hypre_F90_Obj *x,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Obj *A,
+ hypre_F90_Obj *b,
+ hypre_F90_Obj *x,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzSolve(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
-           hypre_F90_PassObj (HYPRE_ParVector, b),
-           hypre_F90_PassObj (HYPRE_ParVector, x) ));
+           ( HYPRE_SchwarzSolve(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+                hypre_F90_PassObj (HYPRE_ParVector, b),
+                hypre_F90_PassObj (HYPRE_ParVector, x) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -91,14 +91,14 @@ hypre_F90_IFACE(hypre_schwarzsolve, HYPRE_SCHWARZSOLVE)
  *--------------------------------------------------------------------------*/
 void
 hypre_F90_IFACE(hypre_schwarzsetvariant, HYPRE_SCHWARZSETVARIANT)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *variant,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *variant,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzSetVariant(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassInt (variant) ));
+           ( HYPRE_SchwarzSetVariant(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (variant) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -107,14 +107,14 @@ hypre_F90_IFACE(hypre_schwarzsetvariant, HYPRE_SCHWARZSETVARIANT)
 
 void
 hypre_F90_IFACE(hypre_schwarzsetoverlap, HYPRE_SCHWARZSETOVERLAP)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *overlap,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *overlap,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzSetOverlap(
-           hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassInt (overlap)));
+           ( HYPRE_SchwarzSetOverlap(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (overlap)));
 }
 
 /*--------------------------------------------------------------------------
@@ -123,14 +123,14 @@ hypre_F90_IFACE(hypre_schwarzsetoverlap, HYPRE_SCHWARZSETOVERLAP)
 
 void
 hypre_F90_IFACE(hypre_schwarzsetdomaintype, HYPRE_SCHWARZSETDOMAINTYPE)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *domain_type,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *domain_type,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzSetDomainType(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassInt (domain_type) ));
+           ( HYPRE_SchwarzSetDomainType(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassInt (domain_type) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -139,14 +139,14 @@ hypre_F90_IFACE(hypre_schwarzsetdomaintype, HYPRE_SCHWARZSETDOMAINTYPE)
 
 void
 hypre_F90_IFACE(hypre_schwarzsetdomainstructure, HYPRE_SCHWARZSETDOMAINSTRUCTURE)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Obj *domain_structure,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Obj *domain_structure,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      ( HYPRE_SchwarzSetDomainStructure(
-           hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassObj (HYPRE_CSRMatrix, domain_structure)));
+           ( HYPRE_SchwarzSetDomainStructure(
+                hypre_F90_PassObj (HYPRE_Solver, solver),
+                hypre_F90_PassObj (HYPRE_CSRMatrix, domain_structure)));
 }
 
 /*--------------------------------------------------------------------------
@@ -155,14 +155,14 @@ hypre_F90_IFACE(hypre_schwarzsetdomainstructure, HYPRE_SCHWARZSETDOMAINSTRUCTURE
 
 void
 hypre_F90_IFACE(hypre_schwarzsetnumfunctions, HYPRE_SCHWARZSETNUMFUNCTIONS)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *num_functions,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Int *num_functions,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      (HYPRE_SchwarzSetNumFunctions(
-          hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassInt (num_functions) ));
+           (HYPRE_SchwarzSetNumFunctions(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassInt (num_functions) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -171,14 +171,14 @@ hypre_F90_IFACE(hypre_schwarzsetnumfunctions, HYPRE_SCHWARZSETNUMFUNCTIONS)
 
 void
 hypre_F90_IFACE(hypre_schwarzsetrelaxweight, HYPRE_SCHWARZSETRELAXWEIGHT)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Real *relax_weight,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_Real *relax_weight,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      (HYPRE_SchwarzSetRelaxWeight(
-          hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassReal (relax_weight)));
+           (HYPRE_SchwarzSetRelaxWeight(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassReal (relax_weight)));
 }
 
 /*--------------------------------------------------------------------------
@@ -187,14 +187,14 @@ hypre_F90_IFACE(hypre_schwarzsetrelaxweight, HYPRE_SCHWARZSETRELAXWEIGHT)
 
 void
 hypre_F90_IFACE(hypre_schwarzsetdoffunc, HYPRE_SCHWARZSETDOFFUNC)
-   (hypre_F90_Obj *solver,
-    hypre_F90_IntArray *dof_func,
-    hypre_F90_Int *ierr)
+(hypre_F90_Obj *solver,
+ hypre_F90_IntArray *dof_func,
+ hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
-      (HYPRE_SchwarzSetDofFunc(
-          hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassIntArray (dof_func)  ));
+           (HYPRE_SchwarzSetDofFunc(
+               hypre_F90_PassObj (HYPRE_Solver, solver),
+               hypre_F90_PassIntArray (dof_func)  ));
 }
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -26,10 +26,8 @@ extern "C" {
 /**
  * @defgroup SStructSolvers SStruct Solvers
  *
- * These solvers use matrix/vector storage schemes that are taylored
- * to semi-structured grid problems.
- *
- * @memo Linear solvers for semi-structured grids
+ * Linear solvers for semi-structured grids. These solvers use matrix/vector
+ * storage schemes that are taylored to semi-structured grid problems.
  *
  * @{
  **/
@@ -58,11 +56,11 @@ typedef HYPRE_Int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
 #define HYPRE_MODIFYPC
 /* if pc not defined, then may need HYPRE_SOLVER also */
 
- #ifndef HYPRE_SOLVER_STRUCT
- #define HYPRE_SOLVER_STRUCT
- struct hypre_Solver_struct;
- typedef struct hypre_Solver_struct *HYPRE_Solver;
- #endif
+#ifndef HYPRE_SOLVER_STRUCT
+#define HYPRE_SOLVER_STRUCT
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+#endif
 
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
@@ -458,7 +456,7 @@ HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
  * (Optional) Set maximum number of FAC levels.
  **/
 HYPRE_Int
-HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver , 
+HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver,
                               HYPRE_Int           max_levels );
 /**
  * (Optional) Set the convergence tolerance.
@@ -735,7 +733,7 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
 
 /**
  * @name SStruct PCG Solver
- * 
+ *
  * These routines should be used in conjunction with the generic interface in
  * \ref KrylovSolvers.
  *
@@ -1074,7 +1072,7 @@ HYPRE_SStructLGMRESSetup(HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x);
-   
+
 HYPRE_Int
 HYPRE_SStructLGMRESSolve(HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
