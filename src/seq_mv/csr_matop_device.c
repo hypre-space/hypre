@@ -1825,6 +1825,10 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRDiagScale
+ *--------------------------------------------------------------------------*/
+
 __global__ void
 hypreGPUKernel_CSRDiagScale( hypre_DeviceItem    &item,
                              HYPRE_Int      nrows,
@@ -1879,6 +1883,10 @@ hypreGPUKernel_CSRDiagScale( hypre_DeviceItem    &item,
       }
    }
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScaleDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
@@ -2447,4 +2455,3 @@ void hypre_CSRMatrixGpuSpMVAnalysis(hypre_CSRMatrix *matrix)
    }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 }
-
