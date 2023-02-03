@@ -1870,6 +1870,8 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
    *nLU = num_rows;
    *perm_ptr = perm;
 
+   hypre_GpuProfilingPopRange();
+
    return hypre_error_flag;
 }
 

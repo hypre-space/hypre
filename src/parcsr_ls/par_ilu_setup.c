@@ -119,6 +119,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("hypre_ILUSetup");
 
    //num_threads = hypre_NumThreads();
 
