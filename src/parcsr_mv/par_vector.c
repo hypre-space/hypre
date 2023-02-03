@@ -368,6 +368,7 @@ hypre_ParVectorCopy( hypre_ParVector *x,
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+
    return hypre_SeqVectorCopy(x_local, y_local);
 }
 
@@ -468,6 +469,24 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
    return hypre_SeqVectorAxpy(alpha, x_local, y_local);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorAxpyz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorAxpyz( HYPRE_Complex    alpha,
+                      hypre_ParVector *x,
+                      HYPRE_Complex    beta,
+                      hypre_ParVector *y,
+                      hypre_ParVector *z )
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+   hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+   hypre_Vector *z_local = hypre_ParVectorLocalVector(z);
+
+   return hypre_SeqVectorAxpyz(alpha, x_local, beta, y_local, z_local);
 }
 
 /*--------------------------------------------------------------------------
