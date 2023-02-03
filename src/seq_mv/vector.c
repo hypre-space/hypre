@@ -162,7 +162,7 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
  * hypre_SeqVectorResize
  *
  * Resize a sequential vector by either changing its number of components
- * or size.
+ * or size (per component).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
