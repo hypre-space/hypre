@@ -146,7 +146,7 @@ lobpcg_MultiVectorImplicitQR(
 }
 
 static void
-lobpcg_hypre_sqrtVector( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Real* v )
+lobpcg_sqrtVector( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Real* v )
 {
 
    HYPRE_Int i;
@@ -653,7 +653,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
                                           NULL, sizeX,
                                           utilities_FortranMatrixValues( residualNorms ) );
 
-         lobpcg_hypre_sqrtVector( sizeX, NULL,
+         lobpcg_sqrtVector( sizeX, NULL,
                             utilities_FortranMatrixValues( residualNorms ) );
 
          if ( lambdaHistory != NULL )
@@ -961,7 +961,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
       mv_MultiVectorByMultiVectorDiag(   blockVectorR, blockVectorR,
                                          activeMask, sizeX,
                                          utilities_FortranMatrixValues( residualNorms ) );
-      lobpcg_hypre_sqrtVector(  sizeX, activeMask,
+      lobpcg_sqrtVector(  sizeX, activeMask,
                           utilities_FortranMatrixValues( residualNorms ) );
 
       i = *iterationNumber + 1;
