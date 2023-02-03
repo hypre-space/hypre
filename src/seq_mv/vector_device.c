@@ -152,6 +152,43 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorAxpyzDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
+                            hypre_Vector  *x,
+                            HYPRE_Complex  beta,
+                            hypre_Vector  *y,
+                            hypre_Vector  *z )
+{
+   HYPRE_Complex  *x_data      = hypre_VectorData(x);
+   HYPRE_Complex  *y_data      = hypre_VectorData(y);
+   HYPRE_Complex  *z_data      = hypre_VectorData(z);
+
+   HYPRE_Int       num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int       size        = hypre_VectorSize(x);
+   HYPRE_Int       total_size  = size * num_vectors;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   hypreDevice_ComplexAxpyzn(total_size, x_data, y_data, z_data, alpha, beta);
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int i;
+
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(z_data, y_data, x_data)
+   for (i = 0; i < total_size; i++)
+   {
+      z_data[i] = alpha * x_data[i] + beta * z_data[i];
+   }
+#endif
+
+   hypre_SyncComputeStream(hypre_handle());
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorElmdivpyDevice
  *--------------------------------------------------------------------------*/
 
