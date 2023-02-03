@@ -219,7 +219,6 @@ typedef void (*GPUMfreeFunc)(void *);
 
 #ifdef __cplusplus
 }
-
 #endif
 
-#endif
+#endif /* hypre_MEMORY_HEADER */

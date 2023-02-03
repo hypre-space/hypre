@@ -16,7 +16,7 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
-//#define CSRMATRIX_PERMUTE_THRUST
+#define CSRMATRIX_PERMUTE_THRUST
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData*
@@ -1827,6 +1827,10 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRDiagScale
+ *--------------------------------------------------------------------------*/
+
 __global__ void
 hypreGPUKernel_CSRDiagScale( hypre_DeviceItem    &item,
                              HYPRE_Int      nrows,
@@ -1881,6 +1885,10 @@ hypreGPUKernel_CSRDiagScale( hypre_DeviceItem    &item,
       }
    }
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScaleDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
@@ -2096,7 +2104,7 @@ struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
       ia_ = ia;
    }
 
-   __global__ HYPRE_Int operator()(HYPRE_Int i) const
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
    {
       return ia_[i + 1] - ia_[i];
    }
@@ -2118,7 +2126,7 @@ struct bii_functor
       rb_ = rb;
    }
 
-   __global__ void operator()(HYPRE_Int i)
+   __host__ __device__ void operator()(HYPRE_Int i)
    {
       const HYPRE_Int r = rb_[i];
       rb_[i] = ia_[p_[r]] + i - ib_[r];
