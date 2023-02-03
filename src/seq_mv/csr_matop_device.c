@@ -2096,7 +2096,7 @@ struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
       ia_ = ia;
    }
 
-   __global__ HYPRE_Int operator()(HYPRE_Int i) const
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
    {
       return ia_[i + 1] - ia_[i];
    }
@@ -2118,7 +2118,7 @@ struct bii_functor
       rb_ = rb;
    }
 
-   __global__ void operator()(HYPRE_Int i)
+   __host__ __device__ void operator()(HYPRE_Int i)
    {
       const HYPRE_Int r = rb_[i];
       rb_[i] = ia_[p_[r]] + i - ib_[r];
