@@ -23,10 +23,8 @@ extern "C" {
 /**
  * @defgroup SStructSystemInterface SStruct System Interface
  *
- * This interface represents a semi-structured-grid conceptual view of a linear
- * system.
- *
- * @memo A semi-structured-grid conceptual interface
+ * A semi-structured-grid conceptual interface. This interface represents a
+ * semi-structured-grid conceptual view of a linear system.
  *
  * @{
  **/

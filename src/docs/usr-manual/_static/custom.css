@@ -1,6 +1,14 @@
-/* This file intentionally left blank. */
 
-/* Move Georgia first to get better rendering on Windows platforms */
+/* Classic theme customizations: left justify text alignment */
+/*
+div.body p, div.body dd, div.body li, div.body blockquote {
+    text-align: left;
+}
+*/
+
+/* Alabaster theme customizations: move Georgia first to get better rendering on
+   Windows platforms */
+/*
 body {
     font-family: Georgia, 'goudy old style', 'minion pro', 'bell mt', 'Hiragino Mincho Pro', serif;
     font-size: 17px;
@@ -9,3 +17,4 @@ body {
     margin: 0;
     padding: 0;
 }
+*/

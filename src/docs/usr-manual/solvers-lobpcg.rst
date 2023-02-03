@@ -31,3 +31,21 @@ The LOBPCG code is available for system interfaces: Struct, SStruct, and IJ.  It
 is also used in the Auxiliary-space Maxwell Eigensolver (AME).  The LOBPCG setup
 is similar to the setup for PCG.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|

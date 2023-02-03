@@ -27,10 +27,8 @@ typedef struct hypre_StructVector_struct *HYPRE_StructVector;
 /**
  * @defgroup StructSystemInterface Struct System Interface
  *
- * This interface represents a structured-grid conceptual view of a linear
- * system.
- *
- * @memo A structured-grid conceptual interface
+ * A structured-grid conceptual interface. This interface represents a
+ * structured-grid conceptual view of a linear system.
  *
  * @{
  **/
