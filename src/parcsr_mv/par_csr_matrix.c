@@ -500,7 +500,9 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    HYPRE_BigInt         global_num_rows, global_num_cols;
 
    FILE                *fp;
-   char                 new_file_d[256], new_file_o[256], new_file_info[256];
+   char                 new_file_d[HYPRE_MAX_FILE_NAME_LEN];
+   char                 new_file_o[HYPRE_MAX_FILE_NAME_LEN];
+   char                 new_file_info[HYPRE_MAX_FILE_NAME_LEN];
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -582,15 +584,19 @@ HYPRE_Int
 hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
                          const char         *file_name )
 {
-   MPI_Comm comm;
-   HYPRE_BigInt global_num_rows;
-   HYPRE_BigInt global_num_cols;
+   MPI_Comm      comm;
+   HYPRE_BigInt  global_num_rows;
+   HYPRE_BigInt  global_num_cols;
    HYPRE_BigInt *col_map_offd;
-   HYPRE_Int  my_id, i, num_procs;
-   char   new_file_d[256], new_file_o[256], new_file_info[256];
-   FILE *fp;
-   HYPRE_Int num_cols_offd = 0;
-   HYPRE_BigInt row_s, row_e, col_s, col_e;
+   HYPRE_Int     my_id, i, num_procs;
+
+   char          new_file_d[HYPRE_MAX_FILE_NAME_LEN];
+   char          new_file_o[HYPRE_MAX_FILE_NAME_LEN];
+   char          new_file_info[HYPRE_MAX_FILE_NAME_LEN];
+   FILE         *fp;
+   HYPRE_Int     num_cols_offd = 0;
+   HYPRE_BigInt  row_s, row_e, col_s, col_e;
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
@@ -625,6 +631,7 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
    row_e = hypre_ParCSRMatrixLastRowIndex(matrix);
    col_s =  hypre_ParCSRMatrixFirstColDiag(matrix);
    col_e =  hypre_ParCSRMatrixLastColDiag(matrix);
+
    /* add 1 to the ends because this is a starts partition */
    hypre_fprintf(fp, "%b %b %b %b\n", row_s, row_e + 1, col_s, col_e + 1);
    for (i = 0; i < num_cols_offd; i++)
@@ -665,7 +672,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int           *offd_j;
    HYPRE_Int            myid, num_procs, i, j;
    HYPRE_BigInt         I, J;
-   char                 new_filename[255];
+   char                 new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                *file;
    HYPRE_Int            num_nonzeros_offd;
    HYPRE_BigInt         ilower, iupper, jlower, jupper;
@@ -821,7 +828,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    hypre_double         *f64buffer = NULL;
 
    /* Local variables */
-   char                  new_filename[255];
+   char                  new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                 *fp;
    hypre_uint64          header[8];
    size_t                count;
@@ -1125,7 +1132,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
    HYPRE_BigInt       *aux_offd_j;
    HYPRE_BigInt        I, J;
    HYPRE_Int           myid, num_procs, i, i2, j;
-   char                new_filename[255];
+   char                new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE               *file;
    HYPRE_Int           num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
    HYPRE_Int           i_col, num_cols;
