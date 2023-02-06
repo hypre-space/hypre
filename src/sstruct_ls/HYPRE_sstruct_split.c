@@ -383,7 +383,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          hypre_SStructCopy(b, y);
          hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, y);
          hypre_SStructInnerProd(y, y, &r_dot_r);
-         (solver -> rel_norm) = sqrt(r_dot_r / b_dot_b);
+         (solver -> rel_norm) = hypre_sqrt(r_dot_r / b_dot_b);
 
          if ((solver -> rel_norm) < tol)
          {

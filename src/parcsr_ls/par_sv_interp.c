@@ -685,7 +685,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
 
             num_elements = num_diag_elements + num_offd_elements;
 
-            if (num_elements && fabs(row_sum) < 1e-15)
+            if (num_elements && hypre_abs(row_sum) < 1e-15)
             {
                row_sum = 1.0;
             }
@@ -763,7 +763,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                   } /* end of var 2 */
 
                   /* add the new entry to to P */
-                  if (fabs(value) > 0.0)
+                  if (hypre_abs(value) > 0.0)
                   {
                      if (q_max > 0 || abs_trunc > 0.0)
                      {
@@ -881,7 +881,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                   } /* end of var 2 */
 
                   /* add the new entry to to P */
-                  if (fabs(value) > 0.0)
+                  if (hypre_abs(value) > 0.0)
                   {
                      if (q_max > 0 || abs_trunc > 0.0)
                      {
@@ -1028,11 +1028,11 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
 
                   if (!use_trunc_data)
                   {
-                     value = fabs(P_diag_data_new[j]);
+                     value = hypre_abs(P_diag_data_new[j]);
                   }
                   else
                   {
-                     value = fabs(q_trunc_data[j_counter]);
+                     value = hypre_abs(q_trunc_data[j_counter]);
                   }
 
                   if (value < abs_trunc )
@@ -1053,11 +1053,11 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
 
                   if (!use_trunc_data)
                   {
-                     value = fabs(P_offd_data_new[j]);
+                     value = hypre_abs(P_offd_data_new[j]);
                   }
                   else
                   {
-                     value = fabs(q_trunc_data[j_counter]);
+                     value = hypre_abs(q_trunc_data[j_counter]);
                   }
 
                   if (value < abs_trunc )
@@ -1101,11 +1101,11 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                {
                   if (!use_trunc_data)
                   {
-                     value = fabs(P_diag_data_new[j]);
+                     value = hypre_abs(P_diag_data_new[j]);
                   }
                   else
                   {
-                     value = fabs(q_trunc_data[j_counter]);
+                     value = hypre_abs(q_trunc_data[j_counter]);
                   }
 
                   if ( is_q[j_counter] && (value < abs_trunc) )
@@ -1141,11 +1141,11 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                {
                   if (!use_trunc_data)
                   {
-                     value = fabs(P_offd_data_new[j]);
+                     value = hypre_abs(P_offd_data_new[j]);
                   }
                   else
                   {
-                     value = fabs(q_trunc_data[j_counter]);
+                     value = hypre_abs(q_trunc_data[j_counter]);
                   }
 
 
@@ -2015,7 +2015,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
                } /* end loop pp over row j_point */
 
-               if (fabs(sum) < 1e-12)
+               if (hypre_abs(sum) < 1e-12)
                {
                   sum = 1.0;
                   use_alt_w = 1;
@@ -2229,7 +2229,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
                   }/* end diag or offd */
                }/* end loop over row P for j_point */
 
-               if (fabs(sum) < 1e-12)
+               if (hypre_abs(sum) < 1e-12)
                {
                   sum = 1.0;
                   use_alt_w = 1;
@@ -2350,7 +2350,7 @@ hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
          }/* end loop j over row i of A_offd */
 
          /* now divide by the diagonal and we are finished with this row!*/
-         if (fabs(diagonal) > 0.0)
+         if (hypre_abs(diagonal) > 0.0)
          {
             for (k = P_diag_i[i] ; k < P_diag_i[i + 1]; k++)
             {
