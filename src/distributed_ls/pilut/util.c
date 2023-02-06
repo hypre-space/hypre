@@ -79,7 +79,7 @@ void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
   for (i=0; i<n; i++) {
     max = i;
     for (j=i+1; j<n; j++) {
-      if (fabs(val[j]) > fabs(val[max]))
+      if (hypre_abs(val[j]) > hypre_abs(val[max]))
         max = j;
     }
 

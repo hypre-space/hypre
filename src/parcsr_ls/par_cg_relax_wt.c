@@ -283,19 +283,19 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          }
       }
       hypre_ParCSRMatrixMatvec(1.0, A, Ptemp, 0.0, Vtemp);
-      alpha = gamma / (hypre_ParVectorInnerProd(Ptemp, Vtemp) + 1.e-80);
-      alphinv = 1.0 / (alpha + 1.e-80);
+      alpha = gamma / (hypre_ParVectorInnerProd(Ptemp, Vtemp) + HYPRE_REAL_MIN);
+      alphinv = 1.0 / (alpha + HYPRE_REAL_MIN);
       tridiag[jj + 1] = alphinv;
       tridiag[jj] *= beta;
       tridiag[jj] += alphinv;
-      trioffd[jj] *= sqrt(beta);
+      trioffd[jj] *= hypre_sqrt(beta);
       trioffd[jj + 1] = -alphinv;
-      row_sum = fabs(tridiag[jj]) + fabs(trioffd[jj]);
+      row_sum = hypre_abs(tridiag[jj]) + hypre_abs(trioffd[jj]);
       if (row_sum > max_row_sum) { max_row_sum = row_sum; }
       if (jj > 0)
       {
-         row_sum = fabs(tridiag[jj - 1]) + fabs(trioffd[jj - 1])
-                   + fabs(trioffd[jj]);
+         row_sum = hypre_abs(tridiag[jj - 1]) + hypre_abs(trioffd[jj - 1])
+                   + hypre_abs(trioffd[jj]);
          if (row_sum > max_row_sum) { max_row_sum = row_sum; }
          /* lambda_min_old = lambda_min; */
          lambda_max_old = lambda_max;
@@ -306,7 +306,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          /* hypre_Bisection(jj+1, tridiag, trioffd, 0.0, lambda_min_old,
             1.e-3, 1, &lambda_min);
          rlx_wt = 2.0/(lambda_min+lambda_max); */
-         if (fabs(rlx_wt - rlx_wt_old) < 1.e-3 )
+         if (hypre_abs(rlx_wt - rlx_wt_old) < 1.e-3 )
          {
             /* if (my_id == 0) hypre_printf (" cg sweeps : %d\n", (jj+1)); */
             break;
@@ -323,14 +323,14 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    /*if (my_id == 0)
      hypre_printf (" lambda-min: %f  lambda-max: %f\n", lambda_min, lambda_max);
 
-   rlx_wt = fabs(tridiag[0])+fabs(trioffd[1]);
+   rlx_wt = hypre_abs(tridiag[0])+hypre_abs(trioffd[1]);
 
    for (i=1; i < num_cg_sweeps-1; i++)
    {
-      row_sum = fabs(tridiag[i]) + fabs(trioffd[i]) + fabs(trioffd[i+1]);
+      row_sum = hypre_abs(tridiag[i]) + hypre_abs(trioffd[i]) + hypre_abs(trioffd[i+1]);
       if (row_sum > rlx_wt) rlx_wt = row_sum;
    }
-   row_sum = fabs(tridiag[num_cg_sweeps-1]) + fabs(trioffd[num_cg_sweeps-1]);
+   row_sum = hypre_abs(tridiag[num_cg_sweeps-1]) + hypre_abs(trioffd[num_cg_sweeps-1]);
    if (row_sum > rlx_wt) rlx_wt = row_sum;
 
    hypre_Bisection(num_cg_sweeps, tridiag, trioffd, 0.0, rlx_wt, 1.e-3, 1,
@@ -380,7 +380,7 @@ hypre_Bisection(HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd,
    HYPRE_Int i;
    HYPRE_Real p0, p1, p2;
 
-   while (fabs(y - z) > tol * (fabs(y) + fabs(z)))
+   while (hypre_abs(y - z) > tol * (hypre_abs(y) + hypre_abs(z)))
    {
       x = (y + z) / 2;
 

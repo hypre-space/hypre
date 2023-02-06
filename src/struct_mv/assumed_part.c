@@ -1162,16 +1162,16 @@ hypre_StructAssumedPartitionCreate(
          rn_cube_divs, then div_index[dmax] is incremented until we have more
          partitions than processors. */
 
-      rn_cubes = hypre_doubleBoxVolume(box) / pow(wmin, ndim);
+      rn_cubes = hypre_doubleBoxVolume(box) / hypre_pow(wmin, ndim);
       rn_cube_procs = proc_count / rn_cubes;
-      rn_cube_divs = pow(rn_cube_procs, (1.0 / (HYPRE_Real)ndim));
+      rn_cube_divs = hypre_pow(rn_cube_procs, (1.0 / (HYPRE_Real)ndim));
 
       for (d = 0; d < ndim; d++)
       {
          width = hypre_BoxSizeD(box, d);
          rdiv = rn_cube_divs * (width / wmin);
          /* Add a small number to compensate for roundoff issues */
-         hypre_IndexD(div_index, d) = (HYPRE_Int) floor(rdiv + 1.0e-6);
+         hypre_IndexD(div_index, d) = (HYPRE_Int) hypre_floor(rdiv + 1.0e-6);
          /* Make sure div_index[d] is at least 1 */
          hypre_IndexD(div_index, d) = hypre_max(hypre_IndexD(div_index, d), 1);
       }
@@ -1248,7 +1248,7 @@ hypre_StructAssumedPartitionCreate(
 
    /* Probably there will mostly be one proc per box */
    /* Don't want to allocate too much memory here */
-   size = 1.2 * hypre_BoxArraySize(local_boxes);
+   size = (HYPRE_Int)(1.2 * hypre_BoxArraySize(local_boxes));
 
    /* Each local box may live on multiple procs in the assumed partition */
    tmp_proc_ids = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST); /* local box proc ids */
@@ -1268,7 +1268,7 @@ hypre_StructAssumedPartitionCreate(
       /* Do we need more storage? */
       if ((count + proc_count) > size)
       {
-         size = size + proc_count + 1.2 * (hypre_BoxArraySize(local_boxes) - i);
+         size = (HYPRE_Int)(size + proc_count + 1.2 * (hypre_BoxArraySize(local_boxes) - i));
          /* hypre_printf("myid = %d, *adjust* alloc size = %d\n", myid, size);*/
          tmp_proc_ids = hypre_TReAlloc(tmp_proc_ids,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
          tmp_box_nums = hypre_TReAlloc(tmp_box_nums,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);

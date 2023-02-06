@@ -61,7 +61,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    /* generate dinvsqrt */
    for (i = 0; i < num_rows; i++)
    {
-      dis_data[i] = 1.0 / sqrt(fabs(diag_data[diag_i[i]]));
+      dis_data[i] = 1.0 / hypre_sqrt(hypre_abs(diag_data[diag_i[i]]));
    }
 
    /*---------------------------------------------------------------------
@@ -94,7 +94,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    {
       for (j = diag_i[i]; j < diag_i[i + 1]; j++)
       {
-         sum_data[i] += fabs(diag_data[j]) * dis_data[i] * dis_data[diag_j[j]];
+         sum_data[i] += hypre_abs(diag_data[j]) * dis_data[i] * dis_data[diag_j[j]];
       }
    }
    hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -103,7 +103,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    {
       for (j = offd_i[i]; j < offd_i[i + 1]; j++)
       {
-         sum_data[i] += fabs(offd_data[j]) * dis_data[i] * dis_ext_data[offd_j[j]];
+         sum_data[i] += hypre_abs(offd_data[j]) * dis_data[i] * dis_ext_data[offd_j[j]];
       }
    }
 

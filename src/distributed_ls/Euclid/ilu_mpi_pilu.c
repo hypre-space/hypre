@@ -251,7 +251,7 @@ void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVA
   for (j=0; j<len; ++j) {
     sr.col = CVAL[j];
     sr.val = scale * AVAL[j];
-/*    if (fabs(sr.val) > thresh) { */
+/*    if (hypre_abs(sr.val) > thresh) { */
       wasInserted = SortedList_dhPermuteAndInsert(slist, &sr, thresh); CHECK_V_ERROR;
       if (wasInserted) ++count;
 /*    } */

@@ -49,7 +49,7 @@ hypre_DeviceDataCreate()
 
    /* hypre SpGEMM parameters */
    const HYPRE_Int  Nsamples   = 64;
-   const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real sigma      = 1.0 / hypre_sqrt((HYPRE_Real)(Nsamples - 2.0));
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
