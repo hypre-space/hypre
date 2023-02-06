@@ -161,20 +161,18 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorResize
  *
- * Resize a sequential vector by either changing its number of components
- * or size (per component).
+ * Resize a sequential vector when changing its number of components.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SeqVectorResize( hypre_Vector *vector,
-                       HYPRE_Int     num_vectors_in,
-                       HYPRE_Int     size_in )
+                       HYPRE_Int     num_vectors_in )
 {
    HYPRE_Int  method        = hypre_VectorMultiVecStorageMethod(vector);
    HYPRE_Int  size          = hypre_VectorSize(vector);
    HYPRE_Int  num_vectors   = hypre_VectorNumVectors(vector);
    HYPRE_Int  total_size    = num_vectors * size;
-   HYPRE_Int  total_size_in = num_vectors_in * size_in;
+   HYPRE_Int  total_size_in = num_vectors_in * size;
 
    /* Reallocate data array */
    if (total_size_in > total_size)
@@ -188,7 +186,6 @@ hypre_SeqVectorResize( hypre_Vector *vector,
    }
 
    /* Update vector info */
-   hypre_VectorSize(vector) = size_in;
    hypre_VectorNumVectors(vector) = num_vectors_in;
    if (method == 0)
    {

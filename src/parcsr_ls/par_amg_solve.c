@@ -51,7 +51,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int           j;
    HYPRE_Int           Solve_err_flag;
    HYPRE_Int           num_procs, my_id;
-   HYPRE_Int           size, num_vectors;
+   HYPRE_Int           num_vectors;
    HYPRE_Real          alpha = 1.0;
    HYPRE_Real          beta = -1.0;
    HYPRE_Real          cycle_op_count;
@@ -105,34 +105,32 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    Ptemp            = hypre_ParAMGDataPtemp(amg_data);
    Ztemp            = hypre_ParAMGDataZtemp(amg_data);
    num_vectors      = hypre_ParVectorNumVectors(f);
-   size             = hypre_VectorSize(hypre_ParVectorLocalVector(f));
 
    A_array[0] = A;
    F_array[0] = f;
    U_array[0] = u;
 
    /* Verify that the number of vectors held by f and u match */
-   if (hypre_ParVectorNumVectors(f) != hypre_ParVectorNumVectors(u))
+   if (hypre_ParVectorNumVectors(f) !=
+       hypre_ParVectorNumVectors(u))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: num_vectors for RHS and LHS do not match!\n");
       return hypre_error_flag;
    }
 
-   /* Update work vectors when solving for multicomponent vectors */
-   hypre_ParVectorResize(Vtemp, num_vectors, size);
-   hypre_ParVectorResize(Rtemp, num_vectors, size);
-   hypre_ParVectorResize(Ptemp, num_vectors, size);
-   hypre_ParVectorResize(Ztemp, num_vectors, size);
+   /* Update work vectors */
+   hypre_ParVectorResize(Vtemp, num_vectors);
+   hypre_ParVectorResize(Rtemp, num_vectors);
+   hypre_ParVectorResize(Ptemp, num_vectors);
+   hypre_ParVectorResize(Ztemp, num_vectors);
    if (amg_logging > 1)
    {
-      hypre_ParVectorResize(Residual, num_vectors, size);
+      hypre_ParVectorResize(Residual, num_vectors);
    }
    for (j = 1; j < num_levels; j++)
    {
-      size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[j]));
-
-      hypre_ParVectorResize(F_array[j], num_vectors, size);
-      hypre_ParVectorResize(U_array[j], num_vectors, size);
+      hypre_ParVectorResize(F_array[j], num_vectors);
+      hypre_ParVectorResize(U_array[j], num_vectors);
    }
 
    /*-----------------------------------------------------------------------

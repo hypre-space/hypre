@@ -218,12 +218,12 @@ hypre_ParVectorSetNumVectors( hypre_ParVector *vector,
 
 HYPRE_Int
 hypre_ParVectorResize( hypre_ParVector *vector,
-                       HYPRE_Int        num_vectors,
-                       HYPRE_Int        size )
+                       HYPRE_Int        num_vectors )
 {
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
-
-   hypre_SeqVectorResize(local_vector, num_vectors, size);
+   if (vector)
+   {
+      hypre_SeqVectorResize(hypre_ParVectorLocalVector(vector), num_vectors);
+   }
 
    return hypre_error_flag;
 }
