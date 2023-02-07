@@ -129,9 +129,6 @@ function MpirunString
       tioga*)
          shift
          RunString="srun -n$1"
-         if [ "$mpibind" = "mpibind" ] ; then
-            mpibind="--mpibind=on"
-         fi
          ;;
       node*)
          shift
