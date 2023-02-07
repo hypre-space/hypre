@@ -374,7 +374,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
    /* compute initial residual */
    (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
-   b_norm = sqrt((*(fgmres_functions->InnerProd))(b, b));
+   b_norm = hypre_sqrt((*(fgmres_functions->InnerProd))(b, b));
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -400,7 +400,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
       return hypre_error_flag;
    }
 
-   r_norm = sqrt((*(fgmres_functions->InnerProd))(p[0], p[0]));
+   r_norm = hypre_sqrt((*(fgmres_functions->InnerProd))(p[0], p[0]));
    r_norm_0 = r_norm;
 
    /* Since it is does not diminish performance, attempt to return an error flag
@@ -516,7 +516,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
 
          (*(fgmres_functions->CopyVector))(b, r);
          (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = sqrt((*(fgmres_functions->InnerProd))(r, r));
+         r_norm = hypre_sqrt((*(fgmres_functions->InnerProd))(r, r));
          if (r_norm <= epsilon)
          {
             if ( print_level > 1 && my_id == 0)
@@ -564,7 +564,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
             hh[j][i - 1] = (*(fgmres_functions->InnerProd))(p[j], p[i]);
             (*(fgmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
          }
-         t = sqrt((*(fgmres_functions->InnerProd))(p[i], p[i]));
+         t = hypre_sqrt((*(fgmres_functions->InnerProd))(p[i], p[i]));
          hh[i][i - 1] = t;
          if (t != 0.0)
          {
@@ -583,7 +583,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          }
          t = hh[i][i - 1] * hh[i][i - 1];
          t += hh[i - 1][i - 1] * hh[i - 1][i - 1];
-         gamma = sqrt(t);
+         gamma = hypre_sqrt(t);
          if (gamma == 0.0) { gamma = epsmac; }
          c[i - 1] = hh[i - 1][i - 1] / gamma;
          s[i - 1] = hh[i][i - 1] / gamma;
@@ -592,7 +592,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          rs[i - 1] = c[i - 1] * rs[i - 1];
          /* determine residual norm */
          hh[i - 1][i - 1] = s[i - 1] * hh[i][i - 1] + c[i - 1] * hh[i - 1][i - 1];
-         r_norm = fabs(rs[i]);
+         r_norm = hypre_abs(rs[i]);
 
          /* print ? */
          if ( print_level > 0 )
@@ -613,9 +613,9 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          if (cf_tol > 0.0)
          {
             cf_ave_0 = cf_ave_1;
-            cf_ave_1 = pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
+            cf_ave_1 = hypre_pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
 
-            weight   = fabs(cf_ave_1 - cf_ave_0);
+            weight   = hypre_abs(cf_ave_1 - cf_ave_0);
             weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
             weight   = 1.0 - weight;
 #if 0
@@ -679,7 +679,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          /* calculate actual residual norm*/
          (*(fgmres_functions->CopyVector))(b, r);
          (*(fgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = sqrt( (*(fgmres_functions->InnerProd))(r, r) );
+         r_norm = hypre_sqrt( (*(fgmres_functions->InnerProd))(r, r) );
 
          if (r_norm <= epsilon)
          {

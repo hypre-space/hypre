@@ -173,7 +173,7 @@ bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, HYPRE_Real 
   START_FUNC_DH
   bool wasInserted = false;
   HYPRE_Int col = sr->col;
-  HYPRE_Real testVal = fabs(sr->val);
+  HYPRE_Real testVal = hypre_abs(sr->val);
   HYPRE_Int beg_row = sList->beg_row, end_row = beg_row + sList->m;
   HYPRE_Int beg_rowP = sList->beg_rowP;
 

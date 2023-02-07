@@ -22,11 +22,7 @@
 #include "_hypre_utilities.h"
 #include "math.h"
 
-#if defined(HYPRE_SINGLE)
-#define sqrt sqrtf
-#elif defined(HYPRE_LONG_DOUBLE)
-#define sqrt sqrtl
-#endif
+#define sqrt hypre_sqrt
 
 #ifdef HYPRE_BIGINT
 typedef long long int HYPRE_LongInt;

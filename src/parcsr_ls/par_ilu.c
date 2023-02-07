@@ -1109,32 +1109,6 @@ hypre_ILUMinHeapAddIRIi(HYPRE_Int *heap, HYPRE_Real *I1, HYPRE_Int *Ii1, HYPRE_I
 
 /* see hypre_ILUMinHeapAddI for detail instructions */
 HYPRE_Int
-hypre_ILUMaxHeapAddRabsIIi(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int *Ii1, HYPRE_Int len)
-{
-   /* parent, left, right */
-   HYPRE_Int p;
-   len--;/* now len is the current index */
-   while (len > 0)
-   {
-      /* get the parent index */
-      p = (len - 1) / 2;
-      if (hypre_abs(heap[p]) < hypre_abs(heap[len]))
-      {
-         /* this is smaller */
-         hypre_swap(Ii1, heap[p], heap[len]);
-         hypre_swap2(I1, heap, p, len);
-         len = p;
-      }
-      else
-      {
-         break;
-      }
-   }
-   return hypre_error_flag;
-}
-
-/* see hypre_ILUMinHeapAddI for detail instructions */
-HYPRE_Int
 hypre_ILUMaxrHeapAddRabsI(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int len)
 {
    /* parent, left, right */
@@ -1268,39 +1242,6 @@ hypre_ILUMinHeapRemoveIRIi(HYPRE_Int *heap, HYPRE_Real *I1, HYPRE_Int *Ii1, HYPR
 
 /* see hypre_ILUMinHeapRemoveI for detail instructions */
 HYPRE_Int
-hypre_ILUMaxHeapRemoveRabsIIi(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int *Ii1, HYPRE_Int len)
-{
-   /* parent, left, right */
-   HYPRE_Int p, l, r;
-   len--;/* now len is the max index */
-   /* swap the first element to last */
-   hypre_swap(Ii1, heap[0], heap[len]);
-   hypre_swap2(I1, heap, 0, len);
-   p = 0;
-   l = 1;
-   /* while I'm still in the heap */
-   while (l < len)
-   {
-      r = 2 * p + 2;
-      /* two childs, pick the smaller one */
-      l = r >= len || hypre_abs(heap[l]) > hypre_abs(heap[r]) ? l : r;
-      if (hypre_abs(heap[l]) > hypre_abs(heap[p]))
-      {
-         hypre_swap(Ii1, heap[p], heap[l]);
-         hypre_swap2(I1, heap, l, p);
-         p = l;
-         l = 2 * p + 1;
-      }
-      else
-      {
-         break;
-      }
-   }
-   return hypre_error_flag;
-}
-
-/* see hypre_ILUMinHeapRemoveI for detail instructions */
-HYPRE_Int
 hypre_ILUMaxrHeapRemoveRabsI(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int len)
 {
    /* parent, left, right */
@@ -1382,8 +1323,8 @@ hypre_ILUMaxRabs(HYPRE_Real *array_data, HYPRE_Int *array_j, HYPRE_Int start, HY
                  HYPRE_Int nLU, HYPRE_Int *rperm, HYPRE_Real *value, HYPRE_Int *index, HYPRE_Real *l1_norm,
                  HYPRE_Int *nnz)
 {
-   HYPRE_Int i, idx, col;
-   HYPRE_Real val, max_value, norm, nz;
+   HYPRE_Int i, idx, col, nz;
+   HYPRE_Real val, max_value, norm;
 
    nz = 0;
    norm = 0.0;
@@ -2313,7 +2254,7 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
          {
             HYPRE_Int tmp;
             tmp = E_init_alloc;
-            E_init_alloc   = E_init_alloc * EXPAND_FACT + 1;
+            E_init_alloc   = (HYPRE_Int)(E_init_alloc * EXPAND_FACT + 1);
             E_ext_j        = hypre_TReAlloc_v2(E_ext_j, HYPRE_Int, tmp, HYPRE_Int, E_init_alloc,
                                                HYPRE_MEMORY_HOST);
             E_ext_data     = hypre_TReAlloc_v2(E_ext_data, HYPRE_Real, tmp, HYPRE_Real, E_init_alloc,
@@ -2560,7 +2501,7 @@ hypre_ILULocalRCM(hypre_CSRMatrix *A,
             if (G_nnz >= G_capacity)
             {
                HYPRE_Int tmp = G_capacity;
-               G_capacity = G_capacity * EXPAND_FACT + 1;
+               G_capacity = (HYPRE_Int) (G_capacity * EXPAND_FACT + 1);
                G_j = hypre_TReAlloc_v2(G_j, HYPRE_Int, tmp, HYPRE_Int,
                                        G_capacity, HYPRE_MEMORY_HOST);
             }
@@ -4146,7 +4087,7 @@ hypre_CSRMatrixNormFro(hypre_CSRMatrix *A, HYPRE_Real *norm_io)
    {
       norm += data[i] * data[i];
    }
-   *norm_io = sqrt(norm);
+   *norm_io = hypre_sqrt(norm);
    return hypre_error_flag;
 
 }
@@ -4197,7 +4138,7 @@ hypre_CSRMatrixResNormFro(hypre_CSRMatrix *A, HYPRE_Real *norm_io)
          norm += data[j] * data[j];
       }
    }
-   *norm_io = sqrt(norm);
+   *norm_io = hypre_sqrt(norm);
    return hypre_error_flag;
 }
 
@@ -4225,7 +4166,7 @@ hypre_ParCSRMatrixNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
    /* do communication to get global total sum */
    hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
-   *norm_io = sqrt(global_norm);
+   *norm_io = hypre_sqrt(global_norm);
    return hypre_error_flag;
 
 }
@@ -4256,7 +4197,7 @@ hypre_ParCSRMatrixResNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
    /* do communication to get global total sum */
    hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
-   *norm_io = sqrt(global_norm);
+   *norm_io = hypre_sqrt(global_norm);
    return hypre_error_flag;
 
 }
@@ -4322,7 +4263,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
    HYPRE_Int      ctrA;
 
    /* setup */
-   capacity = nnzA * 0.3 + 1;
+   capacity = (HYPRE_Int)(nnzA * 0.3 + 1);
    ctrA = 0;
    new_i = hypre_TAlloc(HYPRE_Int, n + 1, memory_location);
    new_j = hypre_TAlloc(HYPRE_Int, capacity, memory_location);
@@ -4382,12 +4323,14 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          while (ctrA + drop_len > capacity)
          {
             HYPRE_Int tmp = capacity;
-            capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, memory_location);
-            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, memory_location);
+            capacity = (HYPRE_Int)(capacity * EXPAND_FACT + 1);
+            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp,
+                                      HYPRE_Int, capacity, memory_location);
+            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp,
+                                         HYPRE_Real, capacity, memory_location);
          }
-         hypre_TMemcpy( new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
-         hypre_TMemcpy( new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
+         hypre_TMemcpy(new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
+         hypre_TMemcpy(new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
                         memory_location);
          ctrA += drop_len;
          new_i[i + 1] = ctrA;
@@ -4423,12 +4366,14 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          while (ctrA + drop_len > capacity)
          {
             HYPRE_Int tmp = capacity;
-            capacity = capacity * EXPAND_FACT + 1;
-            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp, HYPRE_Int, capacity, memory_location);
-            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp, HYPRE_Real, capacity, memory_location);
+            capacity = (HYPRE_Int)(capacity * EXPAND_FACT + 1);
+            new_j = hypre_TReAlloc_v2(new_j, HYPRE_Int, tmp,
+                                      HYPRE_Int, capacity, memory_location);
+            new_data = hypre_TReAlloc_v2(new_data, HYPRE_Real, tmp,
+                                         HYPRE_Real, capacity, memory_location);
          }
-         hypre_TMemcpy( new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
-         hypre_TMemcpy( new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
+         hypre_TMemcpy(new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
+         hypre_TMemcpy(new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
                         memory_location);
          ctrA += drop_len;
          new_i[i + 1] = ctrA;

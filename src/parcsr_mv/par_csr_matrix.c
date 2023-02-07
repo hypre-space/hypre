@@ -2413,7 +2413,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
                   HYPRE_Complex v = A_offd_data[j];
                   row_nrm += v * v;
                }
-               row_nrm  = sqrt(row_nrm);
+               row_nrm  = hypre_sqrt(row_nrm);
             }
             drop_coeff = tol * row_nrm;
 

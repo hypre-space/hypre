@@ -477,7 +477,7 @@ HYPRE_Real dfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    HYPRE_Real value;
    if (rs_example == 1)
    {
-      value = sin(rs_l * M_PI / 8.0);
+      value = hypre_sin(rs_l * M_PI / 8.0);
    }
    else if (rs_example == 2)
    {
@@ -495,7 +495,7 @@ HYPRE_Real efun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    HYPRE_Real value;
    if (rs_example == 1)
    {
-      value = cos(rs_l * M_PI / 8.0);
+      value = hypre_cos(rs_l * M_PI / 8.0);
    }
    else if (rs_example == 2)
    {
