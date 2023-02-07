@@ -1806,7 +1806,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
       /* Copy diagonal matrix into a new place with permutation
        * That is, A_diag = A_diag(perm,qperm);
        */
-      hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm, rqperm, &A_diag);
+      hypre_ParILUCusparseExtractDiagonalCSR(A, perm, rqperm, &A_diag);
 
       /* Apply ILU factorization to the entile A_diag */
       HYPRE_ILUSetupCusparseCSRILU0(A_diag, ilu_solve_policy);
