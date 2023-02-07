@@ -1820,7 +1820,7 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
       sum += v * v;
    }
 
-   return sqrt(sum);
+   return hypre_sqrt(sum);
 }
 
 /*--------------------------------------------------------------------------
@@ -1947,11 +1947,11 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 3)
             {
-               d_i = 1.0 / (sqrt(A_data[j]));
+               d_i = 1.0 / (hypre_sqrt(A_data[j]));
             }
             else if (type == 4)
             {
-               d_i = 1.0 / (sqrt(hypre_cabs(A_data[j])));
+               d_i = 1.0 / (hypre_sqrt(hypre_cabs(A_data[j])));
             }
             break;
          }

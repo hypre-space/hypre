@@ -176,7 +176,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual);
          }
-         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
       }
       else
       {
@@ -185,7 +185,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
          }
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
       /* Since it is does not diminish performance, attempt to return an error flag
@@ -220,7 +220,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       if (0 == converge_type)
       {
-         rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+         rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
          if (rhs_norm)
          {
             relative_resid = resid_nrm_init / rhs_norm;
@@ -283,12 +283,12 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          if ( amg_logging > 1 )
          {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
-            resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
          }
          else
          {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
-            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
          if (old_resid)
@@ -345,7 +345,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (cycle_count > 0 && resid_nrm_init)
    {
-      conv_factor = pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
+      conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
    }
    else
    {

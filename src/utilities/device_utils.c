@@ -49,7 +49,7 @@ hypre_DeviceDataCreate()
 
    /* hypre SpGEMM parameters */
    const HYPRE_Int  Nsamples   = 64;
-   const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real sigma      = 1.0 / hypre_sqrt((HYPRE_Real)(Nsamples - 2.0));
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
@@ -1466,7 +1466,7 @@ hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
                           HYPRE_Complex  *d_z,
                           HYPRE_Complex   a )
 {
-   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, 1.0);
+  return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Complex) 1.0);
 }
 
 /*--------------------------------------------------------------------
@@ -1480,7 +1480,7 @@ hypreDevice_IntAxpyn( HYPRE_Int *d_x,
                       HYPRE_Int *d_z,
                       HYPRE_Int  a )
 {
-   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, 1);
+  return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Int) 1);
 }
 
 /*--------------------------------------------------------------------
@@ -1494,7 +1494,7 @@ hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
                          HYPRE_BigInt *d_z,
                          HYPRE_BigInt  a )
 {
-   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, 1);
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_BigInt) 1);
 }
 
 /*--------------------------------------------------------------------

@@ -199,7 +199,7 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int 
     if (col >= beg_row && col < end_row) {
         col -= beg_row;        /* adjust column to local zero-based */
         col = o2n_col[col];    /* permute column */
-      if (fabs(scale*val) > thresh || col == localRow) {  /* sparsification */
+      if (hypre_abs(scale*val) > thresh || col == localRow) {  /* sparsification */
         ++count;
         while (col > list[tmp]) tmp = list[tmp];
         list[col]   = list[tmp];
@@ -319,7 +319,7 @@ HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int e
 
   /* check for zero or too small of a pivot */
 #if 0
-  if (fabs(work[i]) <= pivotTol) {
+  if (hypre_abs(work[i]) <= pivotTol) {
     /* yuck! assume row scaling, and just stick in a value */
     aval[diag[i]] = pivotFix;
   }

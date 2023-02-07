@@ -905,7 +905,7 @@ void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
   Factor_dh F;
 
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
-  alloc = rho*m;
+  alloc = (HYPRE_Int)(rho*m);
   Factor_dhCreate(&F); CHECK_V_ERROR;  
 
   *Fout = F;
@@ -937,7 +937,7 @@ void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional)
 
   if (used+additional > F->alloc) {
     HYPRE_Int *tmpI;
-    while (alloc < used+additional) alloc *= 2.0;
+    while (alloc < used+additional) alloc *= 2;
     F->alloc = alloc;
     tmpI = F->cval;
     F->cval = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -1119,7 +1119,7 @@ HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat)
   HYPRE_Real minGlobal = 0.0, min = aval[diags[0]];
   HYPRE_Real retval;
 
-  for (i=0; i<m; ++i) min = MIN(min, fabs(aval[diags[i]]));
+  for (i=0; i<m; ++i) min = MIN(min, hypre_abs(aval[diags[i]]));
   if (np_dh == 1) {
     minGlobal = min;
   } else {
@@ -1144,7 +1144,7 @@ HYPRE_Real Factor_dhMaxValue(Factor_dh mat)
   REAL_DH *aval = mat->aval;
 
   for (i=0; i<nz; ++i) {
-    max = MAX(max, fabs(aval[i]));
+    max = MAX(max, hypre_abs(aval[i]));
   }
   
   if (np_dh == 1) {
@@ -1174,7 +1174,7 @@ HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
 
   x = lhs->vals;
   for (i=0; i<m; ++i) {
-    max = MAX(max, fabs(x[i]));
+    max = MAX(max, hypre_abs(x[i]));
   }
 
   if (np_dh == 1) {

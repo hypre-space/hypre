@@ -269,16 +269,16 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-convect") == 0 )
       {
          arg_index++;
-         conx = atof(argv[arg_index++]);
-         cony = atof(argv[arg_index++]);
-         conz = atof(argv[arg_index++]);
+         conx = (HYPRE_Real)atof(argv[arg_index++]);
+         cony = (HYPRE_Real)atof(argv[arg_index++]);
+         conz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-d") == 0 )
       {
