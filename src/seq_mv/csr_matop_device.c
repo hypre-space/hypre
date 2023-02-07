@@ -2178,7 +2178,7 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                      B_ii,
                      B_ii + num_nonzeros,
                      thrust::make_zip_iterator(thrust::make_tuple(
-                       thrust::make_permutation_iterator(rqperm, A_j), A_a)),
+                                                  thrust::make_permutation_iterator(rqperm, A_j), A_a)),
                      thrust::make_zip_iterator(thrust::make_tuple(B_j, B_a)));
 
    /* Free memory */

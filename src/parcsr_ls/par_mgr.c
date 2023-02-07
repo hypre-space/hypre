@@ -487,7 +487,7 @@ hypre_MGRDestroyGSElimData( void *data )
    {
       hypre_MPI_Comm_free (&new_comm);
    }
-   
+
    hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
@@ -4368,7 +4368,8 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                jj = A_diag_j[ii];
                if (CF_marker[jj] == point_type)
                {
-                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 &&
+                      hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                   {
                      didx = bidx * bs2 + ridx * blk_size + jj - bidxm1 - row_offset;
                      diag[didx] = A_diag_data[ii];
@@ -4396,7 +4397,8 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                jj = A_diag_j[ii];
                if (CF_marker[jj] == point_type)
                {
-                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 &&
+                      hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                   {
                      didx = bstart + ridx * left_size + jj - bidxm1 - row_offset;
                      diag[didx] = A_diag_data[ii];

@@ -1389,10 +1389,10 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre
       hypre_CSRMatrixInitialize(F);
 
       /* Estimate # of nonzeros */
-      capacity_B                       = (HYPRE_Int)(nLU + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * nLU / n));
-      capacity_C                       = (HYPRE_Int)(m + hypre_ceil(nnz_A_diag * 1.0 * m / n * m / n));
-      capacity_E                       = (HYPRE_Int)(hypre_min(m, nLU) + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * m / n));
-      capacity_F                       = capacity_E;
+      capacity_B = (HYPRE_Int) (nLU + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * nLU / n));
+      capacity_C = (HYPRE_Int) (m + hypre_ceil(nnz_A_diag * 1.0 * m / n * m / n));
+      capacity_E = (HYPRE_Int) (hypre_min(m, nLU) + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * m / n));
+      capacity_F = capacity_E;
 
       /* Allocate memory */
       B_i                              = hypre_CSRMatrixI(B);
