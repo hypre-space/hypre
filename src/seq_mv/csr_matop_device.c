@@ -996,7 +996,7 @@ hypreGPUKernel_CSRRowSum( hypre_DeviceItem    &item,
       }
       else if (type == 1)
       {
-         row_sum_i += fabs(aii);
+         row_sum_i += hypre_abs(aii);
       }
       else if (type == 2)
       {
@@ -1232,7 +1232,7 @@ hypreGPUKernel_CSRExtractDiag( hypre_DeviceItem    &item,
          }
          else if (type == 1)
          {
-            d[row] = fabs(aa[j]);
+            d[row] = hypre_abs(aa[j]);
          }
          else if (type == 2)
          {
@@ -1240,11 +1240,11 @@ hypreGPUKernel_CSRExtractDiag( hypre_DeviceItem    &item,
          }
          else if (type == 3)
          {
-            d[row] = 1.0 / sqrt(aa[j]);
+            d[row] = 1.0 / hypre_sqrt(aa[j]);
          }
          else if (type == 4)
          {
-            d[row] = 1.0 / sqrt(fabs(aa[j]));
+            d[row] = 1.0 / hypre_sqrt(hypre_abs(aa[j]));
          }
       }
 
@@ -1370,7 +1370,7 @@ hypreGPUKernel_CSRMatrixFixZeroDiagDevice( hypre_DeviceItem    &item,
 
       if (find_diag)
       {
-         if (fabs(data[j]) <= tol)
+         if (hypre_abs(data[j]) <= tol)
          {
             data[j] = v;
          }
@@ -1470,7 +1470,7 @@ hypreGPUKernel_CSRMatrixReplaceDiagDevice( hypre_DeviceItem    &item,
       if (find_diag)
       {
          HYPRE_Complex d = read_only_load(&new_diag[row]);
-         if (fabs(d) <= tol)
+         if (hypre_abs(d) <= tol)
          {
             d = v;
          }
@@ -1827,6 +1827,10 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRDiagScale
+ *--------------------------------------------------------------------------*/
+
 __global__ void
 hypreGPUKernel_CSRDiagScale( hypre_DeviceItem    &item,
                              HYPRE_Int      nrows,
@@ -1881,6 +1885,10 @@ hypreGPUKernel_CSRDiagScale( hypre_DeviceItem    &item,
       }
    }
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScaleDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,

@@ -3893,7 +3893,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  relax_weight[level], omega[level], l1_norms[level],
                                  u_vec, Vtemp, Ztemp);
             rho1 = hypre_ParVectorInnerProd(u_vec, u_vec);
-            rho = sqrt(rho1 / rho0);
+            rho = hypre_sqrt(rho1 / rho0);
             if (rho < 0.01)
             {
                break;

@@ -198,14 +198,14 @@ void hypre_memcpy_idx( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 
 /*************************************************************************
 * The following function copies a floating point (HYPRE_Real) array.
-* Note this assumes BLAS 1 routine SCOPY. An alternative would be memcpy.
+* Note this assumes BLAS 1 routine hypre_dcopy. An alternative would be memcpy.
 * There is a noticeable difference between this and just a for loop.
 **************************************************************************/
 void hypre_memcpy_fp( HYPRE_Real *dest, const HYPRE_Real *src, size_t n )
 {
   HYPRE_Int i, ni = (HYPRE_Int) n;
 
-  /*SCOPY(&n, src, &inc, dest, &inc);*/
+  /*hypre_dcopy(&n, src, &inc, dest, &inc);*/
   for (i=0; i<ni; i++) dest[i] = src[i];
 }
 

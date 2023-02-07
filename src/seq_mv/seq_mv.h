@@ -537,6 +537,12 @@ HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyHost ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorAxpyz ( HYPRE_Complex alpha, hypre_Vector *x,
+                                 HYPRE_Complex beta, hypre_Vector *y,
+                                 hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
+                                       HYPRE_Complex beta, hypre_Vector *y,
+                                       hypre_Vector *z );
 HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdHost ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );

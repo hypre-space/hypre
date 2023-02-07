@@ -587,7 +587,7 @@ void fix_diags_private(Mat_dh A)
   for (i=0; i<m; ++i) {
     HYPRE_Real sum = 0;
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      sum = MAX(sum, fabs(aval[j]));
+      sum = MAX(sum, hypre_abs(aval[j]));
     }
     for (j=rp[i]; j<rp[i+1]; ++j) {
       if (cval[j] == i) {

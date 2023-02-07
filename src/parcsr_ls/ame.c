@@ -411,12 +411,12 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                for (j = AdI[i]; j < AdI[i + 1]; j++)
                   if (AdJ[j] != i)
                   {
-                     l1_norm += fabs(AdA[j]);
+                     l1_norm += hypre_abs(AdA[j]);
                   }
                if (AoI)
                   for (j = AoI[i]; j < AoI[i + 1]; j++)
                   {
-                     l1_norm += fabs(AoA[j]);
+                     l1_norm += hypre_abs(AoA[j]);
                   }
                if (l1_norm < eps)
                {
