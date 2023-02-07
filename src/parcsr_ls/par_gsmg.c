@@ -35,7 +35,7 @@ static HYPRE_Real mydnrm2(HYPRE_Int n, HYPRE_Real *x)
    {
       temp = temp + x[i] * x[i];
    }
-   return sqrt(temp);
+   return hypre_sqrt(temp);
 }
 
 static void mydscal(HYPRE_Int n, HYPRE_Real a, HYPRE_Real *x)

@@ -54,14 +54,14 @@ hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
    {
       HYPRE_Real v = P_diag_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
       HYPRE_Real v = P_offd_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    row_max = warp_allreduce_max(item, row_max) * trunc_factor;
@@ -80,7 +80,7 @@ hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       {
          v = P_diag_a[i];
 
-         if (fabs(v) >= row_max)
+         if (hypre_abs(v) >= row_max)
          {
             j = P_diag_j[i];
             row_scal += v;
@@ -109,7 +109,7 @@ hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       {
          v = P_offd_a[i];
 
-         if (fabs(v) >= row_max)
+         if (hypre_abs(v) >= row_max)
          {
             j = P_offd_j[i];
             row_scal += v;
@@ -163,12 +163,12 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
                              HYPRE_Real &min_v,
                              HYPRE_Int  &min_j )
 {
-   min_v = fabs(v[0]);
+   min_v = hypre_abs(v[0]);
    min_j = 0;
 
    for (HYPRE_Int j = 1; j < n; j++)
    {
-      const HYPRE_Real vj = fabs(v[j]);
+      const HYPRE_Real vj = hypre_abs(v[j]);
       if (vj < min_v)
       {
          min_v = vj;
@@ -214,14 +214,14 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    {
       HYPRE_Real v = P_diag_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    for (HYPRE_Int i = p_offd; i < q_offd; i++)
    {
       HYPRE_Real v = P_offd_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    row_max *= trunc_factor;
@@ -242,7 +242,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    {
       const HYPRE_Real v = P_diag_a[i];
 
-      if (fabs(v) < row_max) { continue; }
+      if (hypre_abs(v) < row_max) { continue; }
 
       if (cnt < max_elmts)
       {
@@ -256,7 +256,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
 
          hypre_smallest_abs_val(max_elmts, sh_val, min_v, min_j);
 
-         if (fabs(v) > min_v)
+         if (hypre_abs(v) > min_v)
          {
             sh_val[min_j] = v;
             sh_pos[min_j] = i;
@@ -268,7 +268,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    {
       const HYPRE_Real v = P_offd_a[i];
 
-      if (fabs(v) < row_max) { continue; }
+      if (hypre_abs(v) < row_max) { continue; }
 
       if (cnt < max_elmts)
       {
@@ -282,7 +282,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
 
          hypre_smallest_abs_val(max_elmts, sh_val, min_v, min_j);
 
-         if (fabs(v) > min_v)
+         if (hypre_abs(v) > min_v)
          {
             sh_val[min_j] = v;
             sh_pos[min_j] = i + q_diag;
@@ -530,7 +530,7 @@ hypreGPUKernel_InterpTruncation_v2( hypre_DeviceItem &item,
    for (HYPRE_Int i = p + lane; i < q; i += HYPRE_WARP_SIZE)
    {
       HYPRE_Real v = read_only_load(&P_a[i]);
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
       row_sum += v;
    }
 
@@ -553,7 +553,7 @@ hypreGPUKernel_InterpTruncation_v2( hypre_DeviceItem &item,
          {
             v = read_only_load(&P_a[i]);
          }
-         cond = cond && fabs(v) >= row_max;
+         cond = cond && hypre_abs(v) >= row_max;
 
          if (cond)
          {

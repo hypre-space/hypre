@@ -159,10 +159,10 @@ void hypre_ComputeAdd2Nrms(HYPRE_Int num_rows, HYPRE_Int *rowptr, HYPRE_Real *va
 
   for (i=0; i<num_rows; i++) {
     n = rowptr[i+1]-rowptr[i];
-    /* sum = SNRM2(&n, values+rowptr[i], &incx);*/
+    /* sum = hypre_dnrm2(&n, values+rowptr[i], &incx);*/
     sum = 0.0;
     for (j=0; j<n; j++) sum += (values[rowptr[i]+j] * values[rowptr[i]+j]);
-    sum = sqrt( sum );
+    sum = hypre_sqrt( sum );
     nrm2s[i] += sum;
   }
 }
