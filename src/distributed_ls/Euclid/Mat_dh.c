@@ -1151,7 +1151,7 @@ void Mat_dhFixDiags(Mat_dh A)
   for (i=0; i<m; ++i) {
     HYPRE_Real sum = 0.0;
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      sum += fabs(aval[j]);
+      sum += hypre_abs(aval[j]);
     }
     for (j=rp[i]; j<rp[i+1]; ++j) {
       if (cval[j] == i) {
