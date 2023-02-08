@@ -627,6 +627,7 @@ ac_includes_default="\
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 AR
+MP_BUILD
 DSUPERLU_LIBS
 DSUPERLU_INCLUDE
 SUPERLU_LIBS
@@ -777,6 +778,7 @@ enable_bigint
 enable_single
 enable_longdouble
 enable_complex
+enable_mixed_precision
 enable_maxdim
 enable_persistent
 enable_hopscotch
@@ -1511,6 +1513,8 @@ Optional Features:
   --enable-single         Use single precision values (default is NO).
   --enable-longdouble     Use long double precision values (default is NO).
   --enable-complex        Use complex values (default is NO).
+  --enable-mixed-precision
+                          Enable mixed-precision build (default is NO).
   --enable-maxdim=MAXDIM  Change max dimension size to MAXDIM (default is 3).
                           Currently must be at least 3.
   --enable-persistent     Uses persistent communication (default is NO).
@@ -3065,6 +3069,28 @@ then
 
 $as_echo "#define HYPRE_COMPLEX 1" >>confdefs.h
 
+fi
+
+# Check whether --enable-mixed-precision was given.
+if test "${enable_mixed_precision+set}" = set; then :
+  enableval=$enable_mixed_precision; case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_mixed_precision=yes ;;
+    no)  hypre_using_mixed_precision=no ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-mixed-precision" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_mixed_precision=no
+
+fi
+
+MP_BUILD=0
+if test "$hypre_using_mixed_precision" = "yes"
+then
+
+$as_echo "#define HYPRE_MIXED_PRECISION 1" >>confdefs.h
+
+   MP_BUILD=1
 fi
 
 # Check whether --enable-maxdim was given.
@@ -10057,6 +10083,8 @@ $as_echo "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
+
 
 
 
