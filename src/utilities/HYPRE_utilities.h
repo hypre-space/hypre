@@ -83,9 +83,17 @@ typedef double HYPRE_Real;
 #endif
 
 #if defined(HYPRE_COMPLEX)
+/* support for float double and long double complex types */
+#if defined(HYPRE_SINGLE)
+typedef float _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_FLOAT_COMPLEX
+#elif defined(HYPRE_LONG_DOUBLE)
+typedef long double _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_LONG_DOUBLE_COMPLEX
+#else /* default */
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-
+#endif
 #else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
