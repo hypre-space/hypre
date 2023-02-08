@@ -16,8 +16,6 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
-#define CSRMATRIX_PERMUTE_THRUST
-
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 hypre_CsrsvData*
 hypre_CsrsvDataCreate()
@@ -1914,185 +1912,8 @@ hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-#if !defined(CSRMATRIX_PERMUTE_THRUST)
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixRowPtrReorder
- *--------------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_CSRMatrixRowPtrReorder( hypre_DeviceItem  &item,
-                                       HYPRE_Int          num_rows,
-                                       HYPRE_Int         *perm,
-                                       HYPRE_Int         *A_i,
-                                       HYPRE_Int         *B_i )
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-   HYPRE_Int k, A_ik, A_ikp1;
-
-   if (i < num_rows)
-   {
-      k      = perm[i];
-      A_ik   = A_i[k];
-      A_ikp1 = A_i[k + 1];
-
-      B_i[i] = A_ikp1 - A_ik;
-   }
-}
-
-/*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixColsValsReorder
- *--------------------------------------------------------------------------*/
-
-template <HYPRE_Int K>
-__global__ void
-hypreGPUKernel_CSRMatrixColsValsReorder( hypre_DeviceItem  &item,
-                                         HYPRE_Int          num_rows,
-                                         HYPRE_Int         *perm,
-                                         HYPRE_Int         *rqperm,
-                                         HYPRE_Int         *A_i,
-                                         HYPRE_Int         *A_j,
-                                         HYPRE_Complex     *A_a,
-                                         HYPRE_Int         *B_i,
-                                         HYPRE_Int         *B_j,
-                                         HYPRE_Complex     *B_a )
-{
-#if defined (HYPRE_USING_SYCL)
-   HYPRE_Int  item_local_id = item.get_local_id(2);
-   HYPRE_Int  grid_ngroups  = item.get_group_range(2) * (HYPRE_1D_BLOCK_SIZE / K);
-   HYPRE_Int  grid_group_id = (item.get_group(2) * HYPRE_1D_BLOCK_SIZE + item_local_id) / K;
-   HYPRE_Int  group_lane    = item_local_id & (K - 1);
-#else
-   HYPRE_Int  grid_ngroups  = gridDim.x * HYPRE_1D_BLOCK_SIZE / K;
-   HYPRE_Int  grid_group_id = (blockIdx.x * HYPRE_1D_BLOCK_SIZE + threadIdx.x) / K;
-   HYPRE_Int  group_lane    = threadIdx.x & (K - 1);
-#endif
-
-   HYPRE_Int  perm_row = 0;
-   HYPRE_Int  pA = 0, qA = 0;
-   HYPRE_Int  pB = 0, j = 0;
-
-   /* Grid-stride loop */
-   for (; warp_any_sync(item, HYPRE_WARP_FULL_MASK, grid_group_id < num_rows);
-        grid_group_id += grid_ngroups)
-   {
-      /* Load data to sub-warps */
-      if (group_lane == 0)
-      {
-         if (grid_group_id < num_rows)
-         {
-            perm_row = read_only_load(&perm[grid_group_id]);
-            pB = read_only_load(&B_i[grid_group_id]);
-         }
-         else
-         {
-            perm_row = pB = 0;
-         }
-      }
-      perm_row = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, perm_row, 0, K);
-      pB = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pB, 0, K);
-
-      if (group_lane < 2)
-      {
-         pA = read_only_load(&A_i[perm_row + group_lane]);
-      }
-      qA = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pA, 1, K);
-      pA = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pA, 0, K);
-
-      /* Build B_j and B_a */
-      if (grid_group_id < num_rows)
-      {
-         for (j = group_lane; j < qA - pA; j += K)
-         {
-            B_j[pB + j] = read_only_load(&rqperm[read_only_load(&A_j[pA + j])]);
-            B_a[pB + j] = read_only_load(&A_a[pA + j]);
-         }
-      }
-   }
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixPermuteDevice
- *
- * See hypre_CSRMatrixPermute.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
-                              HYPRE_Int        *perm,
-                              HYPRE_Int        *rqperm,
-                              hypre_CSRMatrix  *B )
-{
-   /* Input matrix */
-   HYPRE_Int         num_rows     = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int         num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int        *A_i          = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j          = hypre_CSRMatrixJ(A);
-   HYPRE_Complex    *A_a          = hypre_CSRMatrixData(A);
-   HYPRE_Int        *B_i          = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j          = hypre_CSRMatrixJ(B);
-   HYPRE_Complex    *B_a          = hypre_CSRMatrixData(B);
-
-   /* Build B_i */
-   {
-      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixRowPtrReorder, gDim, bDim,
-                        num_rows, perm, A_i, B_i);
-   }
-   hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
-
-   /* Build B_j and B_a */
-   {
-      HYPRE_Int avg_rownnz = (num_nonzeros + num_rows - 1) / num_rows;
-      static constexpr HYPRE_Int group_sizes[5] = {32, 16, 8, 4, 4};
-      static HYPRE_Int lower_bounds[5] = {64, 32, 16, 8, 0};
-      static HYPRE_Int num_groups_per_block[5] = { HYPRE_1D_BLOCK_SIZE / group_sizes[0],
-                                                   HYPRE_1D_BLOCK_SIZE / group_sizes[1],
-                                                   HYPRE_1D_BLOCK_SIZE / group_sizes[2],
-                                                   HYPRE_1D_BLOCK_SIZE / group_sizes[3],
-                                                   HYPRE_1D_BLOCK_SIZE / group_sizes[4]
-                                                 };
-      const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-
-      if (avg_rownnz >= lower_bounds[0])
-      {
-         const dim3 gDim((num_rows + num_groups_per_block[0] - 1) / num_groups_per_block[0]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[0]>, gDim, bDim,
-                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
-      }
-      else if (avg_rownnz >= lower_bounds[1])
-      {
-         const dim3 gDim((num_rows + num_groups_per_block[1] - 1) / num_groups_per_block[1]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[1]>, gDim, bDim,
-                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
-      }
-      else if (avg_rownnz >= lower_bounds[2])
-      {
-         const dim3 gDim((num_rows + num_groups_per_block[2] - 1) / num_groups_per_block[2]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[2]>, gDim, bDim,
-                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
-      }
-      else if (avg_rownnz >= lower_bounds[3])
-      {
-         const dim3 gDim((num_rows + num_groups_per_block[3] - 1) / num_groups_per_block[3]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[3]>, gDim, bDim,
-                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
-      }
-      else
-      {
-         const dim3 gDim((num_rows + num_groups_per_block[4] - 1) / num_groups_per_block[4]);
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixColsValsReorder<group_sizes[4]>, gDim, bDim,
-                           num_rows, perm, rqperm, A_i, A_j, A_a, B_i, B_j, B_a );
-      }
-   }
-
-   return hypre_error_flag;
-}
-#else
-
-/*--------------------------------------------------------------------------
- * adj_functor
+ * adj_functor (Used in hypre_CSRMatrixPermuteDevice)
  *--------------------------------------------------------------------------*/
 
 struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
@@ -2111,7 +1932,7 @@ struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 };
 
 /*--------------------------------------------------------------------------
- * bii_functor
+ * bii_functor (Used in hypre_CSRMatrixPermuteDevice)
  *--------------------------------------------------------------------------*/
 
 struct bii_functor
@@ -2186,7 +2007,6 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
 
    return hypre_error_flag;
 }
-#endif
 
 #endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
 
